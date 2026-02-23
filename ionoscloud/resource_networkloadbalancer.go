@@ -110,21 +110,21 @@ func resourceNetworkLoadBalancerCreate(ctx context.Context, d *schema.ResourceDa
 		name := name.(string)
 		networkLoadBalancer.Properties.Name = &name
 	} else {
-		return diagutil.ToDiags(d, "name must be provided for network loadbalancer", nil)
+		return diagutil.ToDiags(d, fmt.Errorf("name must be provided for network loadbalancer"), nil)
 	}
 
 	if listenerLan, listenerLanOk := d.GetOk("listener_lan"); listenerLanOk {
 		listenerLan := int32(listenerLan.(int))
 		networkLoadBalancer.Properties.ListenerLan = &listenerLan
 	} else {
-		return diagutil.ToDiags(d, "listener lan must be provided for network loadbalancer", nil)
+		return diagutil.ToDiags(d, fmt.Errorf("listener lan must be provided for network loadbalancer"), nil)
 	}
 
 	if targetLan, targetLanOk := d.GetOk("target_lan"); targetLanOk {
 		targetLan := int32(targetLan.(int))
 		networkLoadBalancer.Properties.TargetLan = &targetLan
 	} else {
-		return diagutil.ToDiags(d, "target lan must be provided for network loadbalancer", nil)
+		return diagutil.ToDiags(d, fmt.Errorf("target lan must be provided for network loadbalancer"), nil)
 	}
 
 	if centralLogging, centralLoggingOk := d.GetOk("central_logging"); centralLoggingOk {
@@ -181,7 +181,7 @@ func resourceNetworkLoadBalancerCreate(ctx context.Context, d *schema.ResourceDa
 	if err != nil {
 		d.SetId("")
 		requestLocation, _ := apiResponse.Location()
-		return diagutil.ToDiags(d, fmt.Sprintf("error creating network loadbalancer: %s, %s", err, responseBody(apiResponse)), &diagutil.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error creating network loadbalancer: %w, %s", err, responseBody(apiResponse)), &diagutil.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 	}
 
 	d.SetId(*networkLoadBalancerResp.Id)
@@ -190,7 +190,7 @@ func resourceNetworkLoadBalancerCreate(ctx context.Context, d *schema.ResourceDa
 		if bundleclient.IsRequestFailed(errState) {
 			d.SetId("")
 		}
-		return diagutil.ToDiags(d, errState.Error(), &diagutil.DiagsOpts{Timeout: schema.TimeoutCreate})
+		return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutCreate})
 	}
 
 	return resourceNetworkLoadBalancerRead(ctx, d, meta)
@@ -215,7 +215,7 @@ func resourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceData
 	log.Printf("[INFO] Successfully retrieved network load balancer %s: %+v", d.Id(), networkLoadBalancer)
 
 	if err := setNetworkLoadBalancerData(d, &networkLoadBalancer); err != nil {
-		return diagutil.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	return nil
@@ -272,7 +272,7 @@ func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceDa
 		if len(ips) > 0 {
 			request.Properties.Ips = &ips
 		} else {
-			return diagutil.ToDiags(d, "you can not empty the ips field for networkloadbalancer", nil)
+			return diagutil.ToDiags(d, fmt.Errorf("you can not empty the ips field for networkloadbalancer"), nil)
 		}
 	}
 
@@ -287,7 +287,7 @@ func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceDa
 			}
 		}
 		if len(lbPrivateIps) == 0 {
-			return diagutil.ToDiags(d, "you can not empty the lbPrivateIps field for networkloadbalancer", nil)
+			return diagutil.ToDiags(d, fmt.Errorf("you can not empty the lbPrivateIps field for networkloadbalancer"), nil)
 		}
 		request.Properties.LbPrivateIps = &lbPrivateIps
 	}
@@ -314,7 +314,7 @@ func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceDa
 						if firstFlowLogId == "" {
 							_ = d.Set("flowlog", nil)
 						}
-						return diagutil.ToDiags(d, err.Error(), nil)
+						return diagutil.ToDiags(d, err, nil)
 					}
 				}
 			}
@@ -326,11 +326,11 @@ func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceDa
 
 	if err != nil {
 		requestLocation, _ := apiResponse.Location()
-		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while updating a network loadbalancer: %s \n ApiError: %s", err, responseBody(apiResponse)), &diagutil.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating a network loadbalancer: %w \n ApiError: %s", err, responseBody(apiResponse)), &diagutil.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		return diagutil.ToDiags(d, errState.Error(), &diagutil.DiagsOpts{Timeout: schema.TimeoutUpdate})
+		return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutUpdate})
 	}
 
 	return resourceNetworkLoadBalancerRead(ctx, d, meta)
@@ -346,11 +346,11 @@ func resourceNetworkLoadBalancerDelete(ctx context.Context, d *schema.ResourceDa
 
 	if err != nil {
 		requestLocation, _ := apiResponse.Location()
-		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while deleting a network loadbalancer: %s", err), &diagutil.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while deleting a network loadbalancer: %w", err), &diagutil.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		return diagutil.ToDiags(d, errState.Error(), &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete})
+		return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete})
 	}
 
 	d.SetId("")
@@ -363,7 +363,7 @@ func resourceNetworkLoadBalancerImport(ctx context.Context, d *schema.ResourceDa
 
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
-		return nil, diagutil.ToError(d, "invalid import. Expecting {datacenter}/{networkloadbalancer}", nil)
+		return nil, diagutil.ToError(d, fmt.Errorf("invalid import. Expecting {datacenter}/{networkloadbalancer}"), nil)
 	}
 
 	dcId := parts[0]
@@ -376,17 +376,17 @@ func resourceNetworkLoadBalancerImport(ctx context.Context, d *schema.ResourceDa
 		log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Sprintf("unable to find network load balancer %q", networkLoadBalancerId), nil)
+			return nil, diagutil.ToError(d, fmt.Errorf("unable to find network load balancer %q", networkLoadBalancerId), nil)
 		}
-		return nil, diagutil.ToError(d, fmt.Sprintf("an error occurred while retrieving network load balancer  %q: %q ", networkLoadBalancerId, err), nil)
+		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while retrieving network load balancer  %q: %w ", networkLoadBalancerId, err), nil)
 	}
 
 	if err := d.Set("datacenter_id", dcId); err != nil {
-		return nil, diagutil.ToError(d, err.Error(), nil)
+		return nil, diagutil.ToError(d, err, nil)
 	}
 
 	if err := setNetworkLoadBalancerData(d, &networkLoadBalancer); err != nil {
-		return nil, diagutil.ToError(d, err.Error(), nil)
+		return nil, diagutil.ToError(d, err, nil)
 	}
 
 	return []*schema.ResourceData{d}, nil

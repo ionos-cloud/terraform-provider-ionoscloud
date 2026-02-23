@@ -181,35 +181,35 @@ func resourceNetworkLoadBalancerForwardingRuleCreate(ctx context.Context, d *sch
 		name := name.(string)
 		networkLoadBalancerForwardingRule.Properties.Name = &name
 	} else {
-		return diagutil.ToDiags(d, "name must be provided for network loadbalancer forwarding rule", nil)
+		return diagutil.ToDiags(d, fmt.Errorf("name must be provided for network loadbalancer forwarding rule"), nil)
 	}
 
 	if algorithm, algorithmOk := d.GetOk("algorithm"); algorithmOk {
 		algorithm := algorithm.(string)
 		networkLoadBalancerForwardingRule.Properties.Algorithm = &algorithm
 	} else {
-		return diagutil.ToDiags(d, "algorithm must be provided for network loadbalancer forwarding rule", nil)
+		return diagutil.ToDiags(d, fmt.Errorf("algorithm must be provided for network loadbalancer forwarding rule"), nil)
 	}
 
 	if protocol, protocolOk := d.GetOk("protocol"); protocolOk {
 		protocol := protocol.(string)
 		networkLoadBalancerForwardingRule.Properties.Protocol = &protocol
 	} else {
-		return diagutil.ToDiags(d, "protocol must be provided for network loadbalancer forwarding rule", nil)
+		return diagutil.ToDiags(d, fmt.Errorf("protocol must be provided for network loadbalancer forwarding rule"), nil)
 	}
 
 	if listenerIp, listenerIpOk := d.GetOk("listener_ip"); listenerIpOk {
 		listenerIp := listenerIp.(string)
 		networkLoadBalancerForwardingRule.Properties.ListenerIp = &listenerIp
 	} else {
-		return diagutil.ToDiags(d, "listner ip must be provided for network loadbalancer forwarding rule", nil)
+		return diagutil.ToDiags(d, fmt.Errorf("listner ip must be provided for network loadbalancer forwarding rule"), nil)
 	}
 
 	if listenerPort, listenerPortOk := d.GetOk("listener_port"); listenerPortOk {
 		listenerPort := int32(listenerPort.(int))
 		networkLoadBalancerForwardingRule.Properties.ListenerPort = &listenerPort
 	} else {
-		return diagutil.ToDiags(d, "listner port must be provided for network loadbalancer forwarding rule", nil)
+		return diagutil.ToDiags(d, fmt.Errorf("listner port must be provided for network loadbalancer forwarding rule"), nil)
 	}
 
 	if _, healthCheckOk := d.GetOk("health_check.0"); healthCheckOk {
@@ -257,7 +257,7 @@ func resourceNetworkLoadBalancerForwardingRuleCreate(ctx context.Context, d *sch
 	if err != nil {
 		d.SetId("")
 		requestLocation, _ := apiResponse.Location()
-		return diagutil.ToDiags(d, fmt.Sprintf("error creating network loadbalancer: %s \n ApiError: %s", err, responseBody(apiResponse)), &diagutil.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error creating network loadbalancer: %w \n ApiError: %s", err, responseBody(apiResponse)), &diagutil.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 	}
 
 	d.SetId(*networkLoadBalancerForwardingRuleResp.Id)
@@ -266,7 +266,7 @@ func resourceNetworkLoadBalancerForwardingRuleCreate(ctx context.Context, d *sch
 		if bundleclient.IsRequestFailed(errState) {
 			d.SetId("")
 		}
-		return diagutil.ToDiags(d, errState.Error(), &diagutil.DiagsOpts{Timeout: schema.TimeoutCreate})
+		return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutCreate})
 	}
 
 	return resourceNetworkLoadBalancerForwardingRuleRead(ctx, d, meta)
@@ -362,7 +362,7 @@ func resourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *schem
 	log.Printf("[INFO] Successfully retrieved network load balancer forwarding rule %s: %+v", d.Id(), networkLoadBalancerForwardingRule)
 
 	if err := setNetworkLoadBalancerForwardingRuleData(d, &networkLoadBalancerForwardingRule); err != nil {
-		return diagutil.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	return nil
@@ -464,12 +464,12 @@ func resourceNetworkLoadBalancerForwardingRuleUpdate(ctx context.Context, d *sch
 
 	if err != nil {
 		requestLocation, _ := apiResponse.Location()
-		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while updating a network loadbalancer forwarding rule ID %s %s \n ApiError: %s",
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating a network loadbalancer forwarding rule ID %s %w \n ApiError: %s",
 			d.Id(), err, responseBody(apiResponse)), &diagutil.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		return diagutil.ToDiags(d, errState.Error(), &diagutil.DiagsOpts{Timeout: schema.TimeoutUpdate})
+		return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutUpdate})
 	}
 
 	return resourceNetworkLoadBalancerForwardingRuleRead(ctx, d, meta)
@@ -486,11 +486,11 @@ func resourceNetworkLoadBalancerForwardingRuleDelete(ctx context.Context, d *sch
 
 	if err != nil {
 		requestLocation, _ := apiResponse.Location()
-		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while deleting a network loadbalancer forwarding rule: %s", err), &diagutil.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while deleting a network loadbalancer forwarding rule: %w", err), &diagutil.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		return diagutil.ToDiags(d, errState.Error(), &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete})
+		return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete})
 	}
 
 	d.SetId("")
@@ -503,7 +503,7 @@ func resourceNetworLoadBalancerForwardingRuleImport(ctx context.Context, d *sche
 
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 3 || parts[0] == "" || parts[1] == "" || parts[2] == "" {
-		return nil, diagutil.ToError(d, "invalid import. Expecting {datacenter}/{natgateway}/{natgateway_rule}", nil)
+		return nil, diagutil.ToError(d, fmt.Errorf("invalid import. Expecting {datacenter}/{natgateway}/{natgateway_rule}"), nil)
 	}
 
 	dcId := parts[0]
@@ -517,20 +517,20 @@ func resourceNetworLoadBalancerForwardingRuleImport(ctx context.Context, d *sche
 		log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Sprintf("unable to find network load balancer rule %q", networkLoadBalancerRuleId), nil)
+			return nil, diagutil.ToError(d, fmt.Errorf("unable to find network load balancer rule %q", networkLoadBalancerRuleId), nil)
 		}
-		return nil, diagutil.ToError(d, fmt.Sprintf("an error occurred while retrieving network load balancer rule  %q: %q ", networkLoadBalancerRuleId, err), nil)
+		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while retrieving network load balancer rule  %q: %w ", networkLoadBalancerRuleId, err), nil)
 	}
 
 	if err := d.Set("datacenter_id", dcId); err != nil {
-		return nil, diagutil.ToError(d, err.Error(), nil)
+		return nil, diagutil.ToError(d, err, nil)
 	}
 	if err := d.Set("networkloadbalancer_id", networkLoadBalancerId); err != nil {
-		return nil, diagutil.ToError(d, err.Error(), nil)
+		return nil, diagutil.ToError(d, err, nil)
 	}
 
 	if err := setNetworkLoadBalancerForwardingRuleData(d, &networkLoadBalancerForwardingRule); err != nil {
-		return nil, diagutil.ToError(d, err.Error(), nil)
+		return nil, diagutil.ToError(d, err, nil)
 	}
 
 	return []*schema.ResourceData{d}, nil

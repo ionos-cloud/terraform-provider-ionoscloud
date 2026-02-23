@@ -149,12 +149,12 @@ func resourceVpnWireguardGatewayCreate(ctx context.Context, d *schema.ResourceDa
 
 	gateway, apiResponse, err := client.CreateWireguardGateway(ctx, d)
 	if err != nil {
-		return diagutil.ToDiags(d, err.Error(), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, err, &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 	d.SetId(gateway.Id)
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsWireguardGatewayReady)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Sprintf("creating %s ", err), nil)
+		return diagutil.ToDiags(d, fmt.Errorf("creating %w ", err), nil)
 	}
 	return resourceVpnWireguardGatewayRead(ctx, d, meta)
 }
@@ -164,23 +164,23 @@ func resourceVpnWireguardGatewayRead(ctx context.Context, d *schema.ResourceData
 	location := d.Get("location").(string)
 	wireguard, apiResponse, err := client.GetWireguardGatewayByID(ctx, d.Id(), location)
 	if err != nil {
-		return diagutil.ToDiags(d, err.Error(), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, err, &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
-	return diagutil.ToDiags(d, vpn.SetWireguardGWData(d, wireguard).Error(), nil)
+	return diagutil.ToDiags(d, vpn.SetWireguardGWData(d, wireguard), nil)
 }
 func resourceVpnWireguardGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).VPNClient
 
 	wireguard, apiResponse, err := client.UpdateWireguardGateway(ctx, d.Id(), d)
 	if err != nil {
-		return diagutil.ToDiags(d, err.Error(), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, err, &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsWireguardGatewayReady)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Sprintf("creating %s ", err), nil)
+		return diagutil.ToDiags(d, fmt.Errorf("creating %w ", err), nil)
 	}
 
-	return diagutil.ToDiags(d, vpn.SetWireguardGWData(d, wireguard).Error(), nil)
+	return diagutil.ToDiags(d, vpn.SetWireguardGWData(d, wireguard), nil)
 }
 
 func resourceVpnWireguardGatewayDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -192,14 +192,14 @@ func resourceVpnWireguardGatewayDelete(ctx context.Context, d *schema.ResourceDa
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Sprintf("error while deleting WireGuard Gateway: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while deleting WireGuard Gateway: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 	//todo: for now we need to keep this because otherwise we get an internal server error on the first find after the delete
 	// remove when no longer necessary
 	time.Sleep(5 * time.Second)
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsWireguardGatewayDeleted)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Sprintf("while waiting for the WireGuard Gateway to be deleted: %s", err), &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete})
+		return diagutil.ToDiags(d, fmt.Errorf("while waiting for the WireGuard Gateway to be deleted: %w", err), &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete})
 	}
 
 	log.Printf("[INFO] Successfully deleted Wireguard Gateway %s", d.Id())
@@ -212,19 +212,19 @@ func resourceVpnWireguardGatewayImport(ctx context.Context, d *schema.ResourceDa
 	client := m.(bundleclient.SdkBundle).VPNClient
 	parts := strings.Split(d.Id(), ":")
 	if len(parts) != 2 {
-		return nil, diagutil.ToError(d, "invalid import format:, expecting the following format: location:id", nil)
+		return nil, diagutil.ToError(d, fmt.Errorf("invalid import format:, expecting the following format: location:id"), nil)
 	}
 	location := parts[0]
 	ID := parts[1]
 	gateway, apiResponse, err := client.GetWireguardGatewayByID(ctx, ID, location)
 	if err != nil {
-		return nil, diagutil.ToError(d, err.Error(), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return nil, diagutil.ToError(d, err, &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 	if err := d.Set("location", location); err != nil {
-		return nil, diagutil.ToError(d, err.Error(), nil)
+		return nil, diagutil.ToError(d, err, nil)
 	}
 	if err := vpn.SetWireguardGWData(d, gateway); err != nil {
-		return nil, diagutil.ToError(d, err.Error(), nil)
+		return nil, diagutil.ToError(d, err, nil)
 	}
 	return []*schema.ResourceData{d}, nil
 }

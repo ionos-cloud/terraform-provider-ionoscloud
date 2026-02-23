@@ -87,14 +87,14 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interf
 	email := emailValue.(string)
 
 	if idOk && emailOk {
-		return diagutil.ToDiags(d, "id and email cannot be both specified in the same time", nil)
+		return diagutil.ToDiags(d, fmt.Errorf("id and email cannot be both specified in the same time"), nil)
 	}
 
 	if !idOk && !emailOk {
 		config := client.GetConfig()
 		email = config.Username
 		if email == "" {
-			return diagutil.ToDiags(d, "please provide either the user id or email", nil)
+			return diagutil.ToDiags(d, fmt.Errorf("please provide either the user id or email"), nil)
 		}
 		log.Printf("[INFO] email got from provider configuration since none was provided")
 	}
@@ -107,28 +107,28 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interf
 		user, apiResponse, err = client.UserManagementApi.UmUsersFindById(ctx, id).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching user with ID %s: %s", id, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching user with ID %s: %w", id, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 	} else {
 		/* search by email */
 		users, apiResponse, err := client.UserManagementApi.UmUsersGet(ctx).Depth(1).Filter("email", email).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching users: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching users: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 		if users.Items == nil || len(*users.Items) == 0 {
-			return diagutil.ToDiags(d, fmt.Sprintf("no user found with the specified criteria: email = %s", email), nil)
+			return diagutil.ToDiags(d, fmt.Errorf("no user found with the specified criteria: email = %s", email), nil)
 		} else if len(*users.Items) > 1 {
-			return diagutil.ToDiags(d, fmt.Sprintf("multiple users found with the specified criteria: email = %s", email), nil)
+			return diagutil.ToDiags(d, fmt.Errorf("multiple users found with the specified criteria: email = %s", email), nil)
 		}
 		user = (*users.Items)[0]
 	}
 	if err = setUsersForGroup(ctx, d, &user, *client); err != nil {
-		return diagutil.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	if err = setUserData(d, &user); err != nil {
-		return diagutil.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	return nil

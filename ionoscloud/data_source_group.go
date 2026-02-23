@@ -218,10 +218,10 @@ func dataSourceGroupRead(ctx context.Context, d *schema.ResourceData, meta inter
 	name, nameOk := d.GetOk("name")
 
 	if idOk && nameOk {
-		return diagutil.ToDiags(d, "id and name cannot be both specified in the same time", nil)
+		return diagutil.ToDiags(d, fmt.Errorf("id and name cannot be both specified in the same time"), nil)
 	}
 	if !idOk && !nameOk {
-		return diagutil.ToDiags(d, "please provide either the group id or name", nil)
+		return diagutil.ToDiags(d, fmt.Errorf("please provide either the group id or name"), nil)
 	}
 	var group ionoscloud.Group
 	var err error
@@ -232,7 +232,7 @@ func dataSourceGroupRead(ctx context.Context, d *schema.ResourceData, meta inter
 		group, apiResponse, err = client.UserManagementApi.UmGroupsFindById(ctx, id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching group with ID %s: %s", id.(string), err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching group with ID %s: %w", id.(string), err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 	} else {
 		/* search by name */
@@ -241,7 +241,7 @@ func dataSourceGroupRead(ctx context.Context, d *schema.ResourceData, meta inter
 		groups, apiResponse, err := client.UserManagementApi.UmGroupsGet(ctx).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching groups: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching groups: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 
 		var results []ionoscloud.Group
@@ -253,7 +253,7 @@ func dataSourceGroupRead(ctx context.Context, d *schema.ResourceData, meta inter
 					group, apiResponse, err = client.UserManagementApi.UmGroupsFindById(ctx, *g.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {
-						return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching group %s: %s", *g.Id, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+						return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching group %s: %w", *g.Id, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 					}
 					results = append(results, g)
 				}
@@ -261,9 +261,9 @@ func dataSourceGroupRead(ctx context.Context, d *schema.ResourceData, meta inter
 		}
 
 		if results == nil || len(results) == 0 {
-			return diagutil.ToDiags(d, fmt.Sprintf("no group found with the specified name = %s", name), nil)
+			return diagutil.ToDiags(d, fmt.Errorf("no group found with the specified name = %s", name), nil)
 		} else if len(results) > 1 {
-			return diagutil.ToDiags(d, fmt.Sprintf("more than one group found with the specified criteria name = %s", name), nil)
+			return diagutil.ToDiags(d, fmt.Errorf("more than one group found with the specified criteria name = %s", name), nil)
 		} else {
 			group = results[0]
 		}
@@ -271,7 +271,7 @@ func dataSourceGroupRead(ctx context.Context, d *schema.ResourceData, meta inter
 	}
 
 	if err = setGroupData(ctx, client, d, &group); err != nil {
-		return diagutil.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	return nil

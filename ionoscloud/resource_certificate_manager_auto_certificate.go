@@ -80,14 +80,14 @@ func autoCertificateCreate(ctx context.Context, d *schema.ResourceData, meta int
 	autoCertificateCreateData := cert.GetAutoCertificateDataCreate(d)
 	response, apiResponse, err := client.CreateAutoCertificate(ctx, location, *autoCertificateCreateData)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while creating an auto-certificate: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating an auto-certificate: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 	autoCertificateID := response.Id
 	d.SetId(autoCertificateID)
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsAutoCertificateReady)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while checking the creation status for the auto-certificate with ID: %v, error: %s", autoCertificateID, err), nil)
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while checking the creation status for the auto-certificate with ID: %v, error: %w", autoCertificateID, err), nil)
 	}
 	// Return with another read call because 'last_issued_certificate_id' is not provided in the
 	// creation response.
@@ -104,11 +104,11 @@ func autoCertificateRead(ctx context.Context, d *schema.ResourceData, meta inter
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Sprintf("error while fetching auto-certificate: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while fetching auto-certificate: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 	log.Printf("[INFO] Successfully retrieved auto-certificate with ID: %v, auto-certificate info: %+v", autoCertificateID, autoCertificate)
 	if err := cert.SetAutoCertificateData(d, autoCertificate); err != nil {
-		return diagutil.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err, nil)
 	}
 	return nil
 }
@@ -121,13 +121,13 @@ func autoCertificateUpdate(ctx context.Context, d *schema.ResourceData, meta int
 	autoCertificateUpdateData := cert.GetAutoCertificateDataUpdate(d)
 	autoCertificate, apiResponse, err := client.UpdateAutoCertificate(ctx, autoCertificateID, location, *autoCertificateUpdateData)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while updating auto-certificate: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating auto-certificate: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 	if err = utils.WaitForResourceToBeReady(ctx, d, client.IsAutoCertificateReady); err != nil {
-		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while checking the update status for the auto-certificate: %s", err), nil)
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while checking the update status for the auto-certificate: %w", err), nil)
 	}
 	if err = cert.SetAutoCertificateData(d, autoCertificate); err != nil {
-		return diagutil.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err, nil)
 	}
 	return nil
 }
@@ -142,11 +142,11 @@ func autoCertificateDelete(ctx context.Context, d *schema.ResourceData, meta int
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Sprintf("error while deleting auto-certificate: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while deleting auto-certificate: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsAutoCertificateDeleted)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Sprintf("deletion check failed for auto-certificate: %s", err), &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete})
+		return diagutil.ToDiags(d, fmt.Errorf("deletion check failed for auto-certificate: %w", err), &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete})
 	}
 	return nil
 }
@@ -155,7 +155,7 @@ func autoCertificateImport(ctx context.Context, d *schema.ResourceData, meta int
 	client := meta.(bundleclient.SdkBundle).CertManagerClient
 	parts := strings.Split(d.Id(), ":")
 	if len(parts) != 2 {
-		return nil, diagutil.ToError(d, "invalid import, expected ID in the format: '<location>:<auto_certificate_ID>", nil)
+		return nil, diagutil.ToError(d, fmt.Errorf("invalid import, expected ID in the format: '<location>:<auto_certificate_ID>"), nil)
 	}
 	location := parts[0]
 	autoCertificateID := parts[1]
@@ -163,16 +163,16 @@ func autoCertificateImport(ctx context.Context, d *schema.ResourceData, meta int
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Sprintf("auto-certificate with ID: %v does not exist", autoCertificateID), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return nil, diagutil.ToError(d, fmt.Errorf("auto-certificate with ID: %v does not exist", autoCertificateID), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
-		return nil, diagutil.ToError(d, fmt.Sprintf("an error occurred while trying to import auto-certificate with ID: %v, error: %s", autoCertificateID, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to import auto-certificate with ID: %v, error: %w", autoCertificateID, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 	log.Printf("[INFO] auto-certificate found: %+v", autoCertificate)
 	if err := d.Set("location", location); err != nil {
 		return nil, utils.GenerateSetError("Auto-certificate", "location", err)
 	}
 	if err := cert.SetAutoCertificateData(d, autoCertificate); err != nil {
-		return nil, diagutil.ToError(d, err.Error(), nil)
+		return nil, diagutil.ToError(d, err, nil)
 	}
 	return []*schema.ResourceData{d}, nil
 }

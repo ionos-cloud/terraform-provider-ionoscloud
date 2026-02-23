@@ -83,7 +83,7 @@ func dataSourceTemplateRead(ctx context.Context, d *schema.ResourceData, meta in
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching IonosCloud templates %s ", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching IonosCloud templates %w ", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	name, nameOk := d.GetOk("name")
@@ -145,15 +145,15 @@ func dataSourceTemplateRead(ctx context.Context, d *schema.ResourceData, meta in
 	var template ionoscloud.Template
 
 	if results == nil || len(results) == 0 {
-		return diagutil.ToDiags(d, fmt.Sprintf("no template found with the specified criteria: name = %s, cores = %v, ram = %v, storage_size = %v", name.(string), cores.(float64), ram.(float64), storageSize.(float64)), nil)
+		return diagutil.ToDiags(d, fmt.Errorf("no template found with the specified criteria: name = %s, cores = %v, ram = %v, storage_size = %v", name.(string), cores.(float64), ram.(float64), storageSize.(float64)), nil)
 	} else if len(results) > 1 {
-		return diagutil.ToDiags(d, fmt.Sprintf("more than one template found with the specified criteria: name = %s, cores = %v, ram = %v, storage_size = %v", name.(string), cores.(float64), ram.(float64), storageSize.(float64)), nil)
+		return diagutil.ToDiags(d, fmt.Errorf("more than one template found with the specified criteria: name = %s, cores = %v, ram = %v, storage_size = %v", name.(string), cores.(float64), ram.(float64), storageSize.(float64)), nil)
 	} else {
 		template = results[0]
 	}
 
 	if err = setTemplateData(d, &template); err != nil {
-		return diagutil.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	return nil

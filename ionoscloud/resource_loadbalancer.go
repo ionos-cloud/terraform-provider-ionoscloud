@@ -89,7 +89,7 @@ func resourceLoadbalancerCreate(ctx context.Context, d *schema.ResourceData, met
 
 	if err != nil {
 		requestLocation, _ := apiResponse.Location()
-		return diagutil.ToDiags(d, fmt.Sprintf("error occurred while creating a loadbalancer %s", err), &diagutil.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error occurred while creating a loadbalancer %w", err), &diagutil.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 	}
 
 	d.SetId(*resp.Id)
@@ -98,7 +98,7 @@ func resourceLoadbalancerCreate(ctx context.Context, d *schema.ResourceData, met
 		if bundleclient.IsRequestFailed(errState) {
 			d.SetId("")
 		}
-		return diagutil.ToDiags(d, errState.Error(), &diagutil.DiagsOpts{Timeout: schema.TimeoutCreate})
+		return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutCreate})
 	}
 
 	return resourceLoadbalancerRead(ctx, d, meta)
@@ -114,24 +114,24 @@ func resourceLoadbalancerRead(ctx context.Context, d *schema.ResourceData, meta 
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching a lan: %s", err), nil)
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching a lan: %w", err), nil)
 	}
 
 	if lb.Properties.Name != nil {
 		if err := d.Set("name", *lb.Properties.Name); err != nil {
-			return diagutil.ToDiags(d, "", nil)
+			return diagutil.ToDiags(d, fmt.Errorf(""), nil)
 		}
 	}
 
 	if lb.Properties.Ip != nil {
 		if err := d.Set("ip", *lb.Properties.Ip); err != nil {
-			return diagutil.ToDiags(d, "", nil)
+			return diagutil.ToDiags(d, fmt.Errorf(""), nil)
 		}
 	}
 
 	if lb.Properties.Dhcp != nil {
 		if err := d.Set("dhcp", *lb.Properties.Dhcp); err != nil {
-			return diagutil.ToDiags(d, "", nil)
+			return diagutil.ToDiags(d, fmt.Errorf(""), nil)
 		}
 	}
 
@@ -168,7 +168,7 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 		logApiRequestTime(apiResponse)
 		if err != nil {
 			requestLocation, _ := apiResponse.Location()
-			return diagutil.ToDiags(d, fmt.Sprintf("error while updating loadbalancer: %s", err), &diagutil.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("error while updating loadbalancer: %w", err), &diagutil.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 		}
 	}
 
@@ -187,11 +187,11 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 					that contain it, behind the scenes - therefore our call will yield 404 */
 					log.Printf("[WARN] nic ID %s already removed from load balancer %s\n", o.(string), d.Id())
 				} else {
-					return diagutil.ToDiags(d, fmt.Sprintf("[load balancer update] an error occurred while deleting a balanced nic: %s", err), nil)
+					return diagutil.ToDiags(d, fmt.Errorf("[load balancer update] an error occurred while deleting a balanced nic: %w", err), nil)
 				}
 			} else {
 				if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-					return diagutil.ToDiags(d, errState.Error(), &diagutil.DiagsOpts{Timeout: schema.TimeoutUpdate})
+					return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutUpdate})
 				}
 			}
 		}
@@ -205,10 +205,10 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 			logApiRequestTime(apiResponse)
 			if err != nil {
 				requestLocation, _ := apiResponse.Location()
-				return diagutil.ToDiags(d, fmt.Sprintf("[load balancer update] an error occurred while creating a balanced nic: %s", err), &diagutil.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
+				return diagutil.ToDiags(d, fmt.Errorf("[load balancer update] an error occurred while creating a balanced nic: %w", err), &diagutil.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 			}
 			if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-				return diagutil.ToDiags(d, errState.Error(), &diagutil.DiagsOpts{Timeout: schema.TimeoutUpdate})
+				return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutUpdate})
 			}
 		}
 
@@ -226,11 +226,11 @@ func resourceLoadbalancerDelete(ctx context.Context, d *schema.ResourceData, met
 
 	if err != nil {
 		requestLocation, _ := apiResponse.Location()
-		return diagutil.ToDiags(d, fmt.Sprintf("[load balancer delete] an error occurred while deleting a loadbalancer: %s", err), &diagutil.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("[load balancer delete] an error occurred while deleting a loadbalancer: %w", err), &diagutil.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		return diagutil.ToDiags(d, errState.Error(), &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete})
+		return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete})
 	}
 
 	d.SetId("")
@@ -240,7 +240,7 @@ func resourceLoadbalancerDelete(ctx context.Context, d *schema.ResourceData, met
 func resourceLoadbalancerImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
-		return nil, diagutil.ToError(d, "invalid import. Expecting {datacenter}/{loadbalancer}", nil)
+		return nil, diagutil.ToError(d, fmt.Errorf("invalid import. Expecting {datacenter}/{loadbalancer}"), nil)
 	}
 
 	dcId := parts[0]
@@ -254,9 +254,9 @@ func resourceLoadbalancerImporter(ctx context.Context, d *schema.ResourceData, m
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Sprintf("loadbalancer does not exist %q", lbId), nil)
+			return nil, diagutil.ToError(d, fmt.Errorf("loadbalancer does not exist %q", lbId), nil)
 		}
-		return nil, diagutil.ToError(d, fmt.Sprintf("an error occurred while trying to fetch the loadbalancer %q, error:%s", lbId, err), nil)
+		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the loadbalancer %q, error:%w", lbId, err), nil)
 	}
 
 	log.Printf("[INFO] loadbalancer found: %+v", loadbalancer)
@@ -264,24 +264,24 @@ func resourceLoadbalancerImporter(ctx context.Context, d *schema.ResourceData, m
 	d.SetId(*loadbalancer.Id)
 
 	if err := d.Set("datacenter_id", dcId); err != nil {
-		return nil, diagutil.ToError(d, err.Error(), nil)
+		return nil, diagutil.ToError(d, err, nil)
 	}
 
 	if loadbalancer.Properties.Name != nil {
 		if err := d.Set("name", *loadbalancer.Properties.Name); err != nil {
-			return nil, diagutil.ToError(d, err.Error(), nil)
+			return nil, diagutil.ToError(d, err, nil)
 		}
 	}
 
 	if loadbalancer.Properties.Ip != nil {
 		if err := d.Set("ip", *loadbalancer.Properties.Ip); err != nil {
-			return nil, diagutil.ToError(d, err.Error(), nil)
+			return nil, diagutil.ToError(d, err, nil)
 		}
 	}
 
 	if loadbalancer.Properties.Dhcp != nil {
 		if err := d.Set("dhcp", *loadbalancer.Properties.Dhcp); err != nil {
-			return nil, diagutil.ToError(d, err.Error(), nil)
+			return nil, diagutil.ToError(d, err, nil)
 		}
 	}
 
@@ -295,7 +295,7 @@ func resourceLoadbalancerImporter(ctx context.Context, d *schema.ResourceData, m
 			}
 		}
 		if err := d.Set("nic_ids", lans); err != nil {
-			return nil, diagutil.ToError(d, err.Error(), nil)
+			return nil, diagutil.ToError(d, err, nil)
 		}
 	}
 

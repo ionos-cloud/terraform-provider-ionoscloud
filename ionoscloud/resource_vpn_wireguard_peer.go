@@ -102,11 +102,11 @@ func resourceVpnWireguardPeerCreate(ctx context.Context, d *schema.ResourceData,
 	peer, apiResponse, err := client.CreateWireguardGatewayPeers(ctx, d, gatewayID)
 	if err != nil {
 		d.SetId("")
-		return diagutil.ToDiags(d, fmt.Sprintf("error creating WireGuard Peer: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error creating WireGuard Peer: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 	if err := vpn.SetWireguardPeerData(d, peer); err != nil {
 		d.SetId("")
-		return diagutil.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err, nil)
 	}
 	return nil
 }
@@ -124,7 +124,7 @@ func resourceVpnWireguardPeerRead(ctx context.Context, d *schema.ResourceData, m
 		}
 	}
 	if err := vpn.SetWireguardPeerData(d, peer); err != nil {
-		return diagutil.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	return nil
@@ -135,7 +135,7 @@ func resourceVpnWireguardPeerUpdate(ctx context.Context, d *schema.ResourceData,
 	gatewayID := d.Get("gateway_id").(string)
 	_, apiResponse, err := client.UpdateWireguardPeer(ctx, gatewayID, d.Id(), d)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Sprintf("error updating WireGuard Peer: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error updating WireGuard Peer: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 	return nil
 }
@@ -149,12 +149,12 @@ func resourceVpnWireguardPeerDelete(ctx context.Context, d *schema.ResourceData,
 		if apiResponse.HttpNotFound() {
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Sprintf("error deleting WireGuard Peer: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error deleting WireGuard Peer: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsWireguardPeerDeleted)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Sprintf("deleting %s", err), &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete})
+		return diagutil.ToDiags(d, fmt.Errorf("deleting %w", err), &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete})
 	}
 
 	log.Printf("[INFO] Successfully deleted WireGuard Peer: %s", d.Id())
@@ -167,23 +167,23 @@ func resourceVpnWireguardPeerImport(ctx context.Context, d *schema.ResourceData,
 	client := m.(bundleclient.SdkBundle).VPNClient
 	parts := strings.Split(d.Id(), ":")
 	if len(parts) != 3 {
-		return nil, diagutil.ToError(d, "invalid import format:, expecting the following format: location:gateway_id:id", nil)
+		return nil, diagutil.ToError(d, fmt.Errorf("invalid import format:, expecting the following format: location:gateway_id:id"), nil)
 	}
 	location := parts[0]
 	gatewayID := parts[1]
 	peerID := parts[2]
 	peer, apiResponse, err := client.GetWireguardPeerByID(ctx, gatewayID, peerID, location)
 	if err != nil {
-		return nil, diagutil.ToError(d, err.Error(), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return nil, diagutil.ToError(d, err, &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 	if err := d.Set("gateway_id", gatewayID); err != nil {
-		return nil, diagutil.ToError(d, err.Error(), nil)
+		return nil, diagutil.ToError(d, err, nil)
 	}
 	if err := d.Set("location", location); err != nil {
-		return nil, diagutil.ToError(d, err.Error(), nil)
+		return nil, diagutil.ToError(d, err, nil)
 	}
 	if err := vpn.SetWireguardPeerData(d, peer); err != nil {
-		return nil, diagutil.ToError(d, err.Error(), nil)
+		return nil, diagutil.ToError(d, err, nil)
 	}
 	return []*schema.ResourceData{d}, nil
 }

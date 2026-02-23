@@ -2,6 +2,7 @@ package ionoscloud
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -89,7 +90,7 @@ func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, meta 
 	createdTopic, apiResponse, err := client.CreateTopic(ctx, d)
 	if err != nil {
 		d.SetId("")
-		return diagutil.ToDiags(d, fmt.Sprintf("error creating Kafka Cluster Topic: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error creating Kafka Cluster Topic: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	d.SetId(createdTopic.Id)
@@ -100,7 +101,7 @@ func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsTopicAvailable)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred  while Kafka Cluster Topic waiting to be ready: %s", err), nil)
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred  while Kafka Cluster Topic waiting to be ready: %w", err), nil)
 	}
 
 	return resourceKafkaTopicRead(ctx, d, meta)
@@ -118,13 +119,13 @@ func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, meta in
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Sprintf("error while fetching Kafka Cluster Topic: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while fetching Kafka Cluster Topic: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	log.Printf("[INFO] Successfully retreived Kafka Cluster Topic %s: %+v", d.Id(), topic)
 
 	if err := client.SetKafkaTopicData(d, &topic); err != nil {
-		return diagutil.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	return nil
@@ -142,12 +143,12 @@ func resourceKafkaTopicDelete(ctx context.Context, d *schema.ResourceData, meta 
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Sprintf("error while deleting Kafka Cluster Topic: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while deleting Kafka Cluster Topic: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsTopicDeleted)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Sprintf("the check for Kafka Cluster Topic deletion failed with the following error: %s", err), &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete})
+		return diagutil.ToDiags(d, fmt.Errorf("the check for Kafka Cluster Topic deletion failed with the following error: %w", err), &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete})
 	}
 
 	d.SetId("")
@@ -160,20 +161,20 @@ func resourceKafkaTopicImport(ctx context.Context, d *schema.ResourceData, meta 
 ) {
 	parts := strings.Split(d.Id(), ":")
 	if len(parts) != 3 {
-		return nil, diagutil.ToError(d, "expected ID in the format location:cluster_id:topic_id", nil)
+		return nil, diagutil.ToError(d, fmt.Errorf("expected ID in the format location:cluster_id:topic_id"), nil)
 	}
 
 	if err := d.Set("location", parts[0]); err != nil {
-		return nil, diagutil.ToError(d, fmt.Sprintf("failed to set location for Kafka Cluster Topic import: %s", err), nil)
+		return nil, diagutil.ToError(d, fmt.Errorf("failed to set location for Kafka Cluster Topic import: %w", err), nil)
 	}
 	if err := d.Set("cluster_id", parts[1]); err != nil {
-		return nil, diagutil.ToError(d, fmt.Sprintf("failed to set cluster_id for Kafka Cluster Topic import: %s", err), nil)
+		return nil, diagutil.ToError(d, fmt.Errorf("failed to set cluster_id for Kafka Cluster Topic import: %w", err), nil)
 	}
 	d.SetId(parts[2])
 
 	diags := resourceKafkaTopicRead(ctx, d, meta)
 	if diags != nil && diags.HasError() {
-		return nil, diagutil.ToError(d, diags[0].Summary, nil)
+		return nil, diagutil.ToError(d, errors.New(diags[0].Summary), nil)
 	}
 
 	return []*schema.ResourceData{d}, nil

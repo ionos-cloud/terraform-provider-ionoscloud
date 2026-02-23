@@ -175,10 +175,10 @@ func dataSourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d 
 	name := nameValue.(string)
 
 	if idOk && nameOk {
-		return diagutil.ToDiags(d, "id and name cannot be both specified in the same time", nil)
+		return diagutil.ToDiags(d, fmt.Errorf("id and name cannot be both specified in the same time"), nil)
 	}
 	if !idOk && !nameOk {
-		return diagutil.ToDiags(d, "please provide either the application load balancer forwarding rule id or name", nil)
+		return diagutil.ToDiags(d, fmt.Errorf("please provide either the application load balancer forwarding rule id or name"), nil)
 	}
 
 	var applicationLoadBalancerForwardingRule ionoscloud.ApplicationLoadBalancerForwardingRule
@@ -191,7 +191,7 @@ func dataSourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d 
 		applicationLoadBalancerForwardingRule, apiResponse, err = client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterId, albId, id).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching the application load balancer forwarding rule while searching by ID %s: %s", id, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the application load balancer forwarding rule while searching by ID %s: %w", id, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 	} else {
 		/* search by name */
@@ -206,7 +206,7 @@ func dataSourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d 
 			logApiRequestTime(apiResponse)
 
 			if err != nil {
-				return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching application loadbalancer forwarding rules: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+				return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching application loadbalancer forwarding rules: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 			}
 
 			results = *applicationLoadBalancersForwardingRules.Items
@@ -215,7 +215,7 @@ func dataSourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d 
 			logApiRequestTime(apiResponse)
 
 			if err != nil {
-				return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching application loadbalancer forwarding rules: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+				return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching application loadbalancer forwarding rules: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 			}
 
 			if applicationLoadBalancersForwardingRules.Items != nil {
@@ -224,7 +224,7 @@ func dataSourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d 
 						tmpAlbFr, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterId, albId, *albFr.Id).Execute()
 						logApiRequestTime(apiResponse)
 						if err != nil {
-							return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching application load balancer forwarding rule with ID %s: %s", *albFr.Id, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+							return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching application load balancer forwarding rule with ID %s: %w", *albFr.Id, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 						}
 						results = append(results, tmpAlbFr)
 					}
@@ -233,16 +233,16 @@ func dataSourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d 
 		}
 
 		if results == nil || len(results) == 0 {
-			return diagutil.ToDiags(d, fmt.Sprintf("no application load balanacer forwarding rule found with the specified criteria: name = %s", name), nil)
+			return diagutil.ToDiags(d, fmt.Errorf("no application load balanacer forwarding rule found with the specified criteria: name = %s", name), nil)
 		} else if len(results) > 1 {
-			return diagutil.ToDiags(d, fmt.Sprintf("more than one application load balanacer forwarding rule found with the specified criteria: name = %s", name), nil)
+			return diagutil.ToDiags(d, fmt.Errorf("more than one application load balanacer forwarding rule found with the specified criteria: name = %s", name), nil)
 		}
 
 		applicationLoadBalancerForwardingRule = results[0]
 	}
 
 	if err = setApplicationLoadBalancerForwardingRuleData(d, &applicationLoadBalancerForwardingRule); err != nil {
-		return diagutil.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	return nil

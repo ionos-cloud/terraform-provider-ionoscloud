@@ -336,24 +336,24 @@ func resourceDbaasMongoClusterCreate(ctx context.Context, d *schema.ResourceData
 	client := meta.(bundleclient.SdkBundle).MongoClient
 
 	if err := dbaas.MongoClusterCheckRequiredFieldsSet(d); err != nil {
-		return diagutil.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	cluster, err := dbaas.SetMongoClusterCreateProperties(d)
 	if err != nil {
-		return diagutil.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err, nil)
 	}
 	createdCluster, apiResponse, err := client.CreateCluster(ctx, *cluster)
 
 	if err != nil {
 		d.SetId("")
-		return diagutil.ToDiags(d, fmt.Sprintf("create error for dbaas mongo cluster: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("create error for dbaas mongo cluster: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 	d.SetId(*createdCluster.Id)
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsClusterReady)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Sprintf("creating %s ", err), nil)
+		return diagutil.ToDiags(d, fmt.Errorf("creating %w ", err), nil)
 	}
 
 	return resourceDbaasMongoClusterRead(ctx, d, meta)
@@ -370,12 +370,12 @@ func resourceDbaasMongoClusterUpdate(ctx context.Context, d *schema.ResourceData
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Sprintf("update error while fetching dbaas mongo cluster: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("update error while fetching dbaas mongo cluster: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsClusterReady)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Sprintf("failed checking if ready %s", err), nil)
+		return diagutil.ToDiags(d, fmt.Errorf("failed checking if ready %w", err), nil)
 	}
 
 	return resourceDbaasMongoClusterRead(ctx, d, meta)
@@ -391,13 +391,13 @@ func resourceDbaasMongoClusterRead(ctx context.Context, d *schema.ResourceData, 
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Sprintf("read error while fetching dbaas mongo cluster: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("read error while fetching dbaas mongo cluster: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	log.Printf("[INFO] Successfully retrieved cluster %s: %+v", d.Id(), cluster)
 
 	if err := dbaas.SetMongoDBClusterData(d, cluster); err != nil {
-		return diagutil.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	return nil
@@ -413,12 +413,12 @@ func resourceDbaasMongoClusterDelete(ctx context.Context, d *schema.ResourceData
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Sprintf("error while deleting mongo dbaas cluster: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while deleting mongo dbaas cluster: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsClusterDeleted)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Sprintf("the check for cluster deletion failed with the following error: %s", err), &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete})
+		return diagutil.ToDiags(d, fmt.Errorf("the check for cluster deletion failed with the following error: %w", err), &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete})
 	}
 	// wait 15 seconds after the deletion of the cluster, for the lan to be freed
 	time.Sleep(constant.SleepInterval * 3)
@@ -436,15 +436,15 @@ func resourceDbaasMongoClusterImport(ctx context.Context, d *schema.ResourceData
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Sprintf("dbaas cluster does not exist %q", clusterId), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return nil, diagutil.ToError(d, fmt.Errorf("dbaas cluster does not exist %q", clusterId), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
-		return nil, diagutil.ToError(d, fmt.Sprintf("an error occurred while trying to fetch the import of dbaas cluster %q, error:%s", clusterId, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the import of dbaas cluster %q, error:%w", clusterId, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	log.Printf("[INFO] dbaas cluster found: %+v", dbaasCluster)
 
 	if err := dbaas.SetMongoDBClusterData(d, dbaasCluster); err != nil {
-		return nil, diagutil.ToError(d, err.Error(), nil)
+		return nil, diagutil.ToError(d, err, nil)
 	}
 
 	return []*schema.ResourceData{d}, nil

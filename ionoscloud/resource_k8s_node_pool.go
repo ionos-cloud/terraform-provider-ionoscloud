@@ -465,14 +465,14 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	if autoscaling, err := getAutoscalingData(d); err != nil {
-		return diagutil.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err, nil)
 	} else {
 		k8sNodepool.Properties.AutoScaling = autoscaling
 	}
 
 	if k8sNodepool.Properties.AutoScaling != nil && k8sNodepool.Properties.AutoScaling.MinNodeCount != nil && *k8sNodepool.Properties.NodeCount < *k8sNodepool.Properties.AutoScaling.MinNodeCount {
 		d.SetId("")
-		return diagutil.ToDiags(d, "error creating k8s node pool: node_count cannot be lower than min_node_count", nil)
+		return diagutil.ToDiags(d, fmt.Errorf("error creating k8s node pool: node_count cannot be lower than min_node_count"), nil)
 	}
 
 	if lansVal, lansOK := d.GetOk("lans"); lansOK {
@@ -487,7 +487,7 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 
 		/* number of public IPs needs to be at least NodeCount + 1 */
 		if len(publicIps) > 0 && int32(len(publicIps)) < *k8sNodepool.Properties.NodeCount+1 {
-			return diagutil.ToDiags(d, fmt.Sprintf("the number of public IPs must be at least %d", *k8sNodepool.Properties.NodeCount+1), nil)
+			return diagutil.ToDiags(d, fmt.Errorf("the number of public IPs must be at least %d", *k8sNodepool.Properties.NodeCount+1), nil)
 		}
 
 		var requestPublicIps []string
@@ -527,7 +527,7 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		d.SetId("")
-		return diagutil.ToDiags(d, fmt.Sprintf("error creating k8s node pool: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error creating k8s node pool: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	d.SetId(*createdNodepool.Id)
@@ -539,7 +539,7 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 
 		nodepoolReady, rsErr := k8sNodepoolReady(ctx, client, d)
 		if rsErr != nil {
-			return diagutil.ToDiags(d, fmt.Sprintf("error while checking readiness status of k8s node pool: %s", rsErr), nil)
+			return diagutil.ToDiags(d, fmt.Errorf("error while checking readiness status of k8s node pool: %w", rsErr), nil)
 		}
 
 		if nodepoolReady {
@@ -552,7 +552,7 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			log.Printf("[INFO] timed out")
-			return diagutil.ToDiags(d, "k8s creation timed out", nil)
+			return diagutil.ToDiags(d, fmt.Errorf("k8s creation timed out"), nil)
 		}
 	}
 
@@ -571,13 +571,13 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta i
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, err.Error(), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, err, &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	log.Printf("[INFO] Successfully retrieved k8s node pool %s: %+v", d.Id(), k8sNodepool)
 
 	if err := setK8sNodePoolData(d, &k8sNodepool); err != nil {
-		return diagutil.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	return nil
@@ -607,14 +607,14 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	if autoscaling, err := getAutoscalingData(d); err != nil {
-		return diagutil.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err, nil)
 	} else {
 		request.Properties.AutoScaling = autoscaling
 	}
 
 	if request.Properties.AutoScaling != nil && request.Properties.AutoScaling.MinNodeCount != nil && *request.Properties.NodeCount < *request.Properties.AutoScaling.MinNodeCount {
 		d.SetId("")
-		return diagutil.ToDiags(d, "error creating k8s node pool: node_count cannot be lower than min_node_count", nil)
+		return diagutil.ToDiags(d, fmt.Errorf("error creating k8s node pool: node_count cannot be lower than min_node_count"), nil)
 	}
 
 	if d.HasChange("auto_scaling.0.min_node_count") {
@@ -695,7 +695,7 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 
 			/* number of public IPs needs to be at least NodeCount + 1 */
 			if len(publicIps) > 0 && int32(len(publicIps)) < *request.Properties.NodeCount+1 {
-				return diagutil.ToDiags(d, fmt.Sprintf("the number of public IPs must be at least %d", *request.Properties.NodeCount+1), nil)
+				return diagutil.ToDiags(d, fmt.Errorf("the number of public IPs must be at least %d", *request.Properties.NodeCount+1), nil)
 			}
 
 			for _, ip := range publicIps {
@@ -708,7 +708,7 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	if d.HasChange("gateway_ip") {
-		return diagutil.ToDiags(d, "gateway_ip attribute is immutable, therefore not allowed in update requests", nil)
+		return diagutil.ToDiags(d, fmt.Errorf("gateway_ip attribute is immutable, therefore not allowed in update requests"), nil)
 	}
 
 	if d.HasChange("labels") {
@@ -749,7 +749,7 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Sprintf("error while updating k8s node pool: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while updating k8s node pool: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	for {
@@ -758,7 +758,7 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 		nodepoolReady, rsErr := k8sNodepoolReady(ctx, client, d)
 
 		if rsErr != nil {
-			return diagutil.ToDiags(d, fmt.Sprintf("error while checking readiness status of k8s node pool: %s", rsErr), nil)
+			return diagutil.ToDiags(d, fmt.Errorf("error while checking readiness status of k8s node pool: %w", rsErr), nil)
 		}
 
 		if nodepoolReady {
@@ -770,7 +770,7 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 		case <-time.After(constant.SleepInterval):
 			log.Printf("[DEBUG] retrying ...")
 		case <-ctx.Done():
-			return diagutil.ToDiags(d, "k8s node pool update timed out! WARNING: your k8s node pool will still probably be updated after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates", nil)
+			return diagutil.ToDiags(d, fmt.Errorf("k8s node pool update timed out! WARNING: your k8s node pool will still probably be updated after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"), nil)
 		}
 	}
 
@@ -788,7 +788,7 @@ func resourcek8sNodePoolDelete(ctx context.Context, d *schema.ResourceData, meta
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Sprintf("error while deleting k8s node pool: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while deleting k8s node pool: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	for {
@@ -796,7 +796,7 @@ func resourcek8sNodePoolDelete(ctx context.Context, d *schema.ResourceData, meta
 
 		nodepoolDeleted, dsErr := k8sNodepoolDeleted(ctx, client, d)
 		if dsErr != nil {
-			return diagutil.ToDiags(d, fmt.Sprintf("error while checking deletion status of k8s node pool: %s", dsErr), nil)
+			return diagutil.ToDiags(d, fmt.Errorf("error while checking deletion status of k8s node pool: %w", dsErr), nil)
 		}
 
 		if nodepoolDeleted {
@@ -808,7 +808,7 @@ func resourcek8sNodePoolDelete(ctx context.Context, d *schema.ResourceData, meta
 		case <-time.After(constant.SleepInterval):
 			log.Printf("[DEBUG] retrying ...")
 		case <-ctx.Done():
-			return diagutil.ToDiags(d, "k8s node pool deletion timed out! WARNING: your k8s node pool will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates", nil)
+			return diagutil.ToDiags(d, fmt.Errorf("k8s node pool deletion timed out! WARNING: your k8s node pool will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"), nil)
 		}
 	}
 
@@ -821,7 +821,7 @@ func resourceK8sNodepoolImport(ctx context.Context, d *schema.ResourceData, meta
 	parts := strings.Split(d.Id(), "/")
 
 	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
-		return nil, diagutil.ToError(d, "invalid import. Expecting {k8sClusterId}/{k8sNodePoolId}", nil)
+		return nil, diagutil.ToError(d, fmt.Errorf("invalid import. Expecting {k8sClusterId}/{k8sNodePoolId}"), nil)
 	}
 
 	clusterId := parts[0]
@@ -835,20 +835,20 @@ func resourceK8sNodepoolImport(ctx context.Context, d *schema.ResourceData, meta
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
 			if httpNotFound(apiResponse) {
 				d.SetId("")
-				return nil, diagutil.ToError(d, fmt.Sprintf("unable to find k8s node pool %q", npId), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+				return nil, diagutil.ToError(d, fmt.Errorf("unable to find k8s node pool %q", npId), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 			}
 		}
-		return nil, diagutil.ToError(d, fmt.Sprintf("unable to retrieve k8s node pool %q, error:%s", npId, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return nil, diagutil.ToError(d, fmt.Errorf("unable to retrieve k8s node pool %q, error:%w", npId, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	log.Printf("[INFO] K8s node pool found: %+v", k8sNodepool)
 
 	if err := d.Set("k8s_cluster_id", clusterId); err != nil {
-		return nil, diagutil.ToError(d, fmt.Sprintf("error while setting k8s_cluster_id property for k8s node pool %q: %q", npId, err), nil)
+		return nil, diagutil.ToError(d, fmt.Errorf("error while setting k8s_cluster_id property for k8s node pool %q: %w", npId, err), nil)
 	}
 
 	if err := setK8sNodePoolData(d, &k8sNodepool); err != nil {
-		return nil, diagutil.ToError(d, err.Error(), nil)
+		return nil, diagutil.ToError(d, err, nil)
 	}
 	log.Printf("[INFO] Importing k8s node pool %q...", d.Id())
 

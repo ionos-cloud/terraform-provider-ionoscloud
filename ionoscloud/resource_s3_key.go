@@ -60,16 +60,16 @@ func resourceS3KeyCreate(ctx context.Context, d *schema.ResourceData, meta inter
 	rsp, apiResponse, err := createS3KeyWithRetry(ctx, d, meta)
 	if err != nil {
 		d.SetId("")
-		return diagutil.ToDiags(d, fmt.Sprintf("error creating Object Storage key: %s", err), nil)
+		return diagutil.ToDiags(d, fmt.Errorf("error creating Object Storage key: %w", err), nil)
 	}
 
 	if rsp.Id == nil {
-		return diagutil.ToDiags(d, "the API didn't return an Object Storage key ID", nil)
+		return diagutil.ToDiags(d, fmt.Errorf("the API didn't return an Object Storage key ID"), nil)
 	}
 	keyId := *rsp.Id
 	d.SetId(keyId)
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
-		return diagutil.ToDiags(d, errState.Error(), &diagutil.DiagsOpts{Timeout: schema.TimeoutCreate})
+		return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutCreate})
 	}
 
 	log.Printf("[INFO] Created Object Storage key: %s", d.Id())
@@ -85,11 +85,11 @@ func resourceS3KeyCreate(ctx context.Context, d *schema.ResourceData, meta inter
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		requestLocation, _ := apiResponse.Location()
-		return diagutil.ToDiags(d, fmt.Sprintf("error saving key data %s: %s", keyId, err), &diagutil.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error saving key data %s: %w", keyId, err), &diagutil.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		return diagutil.ToDiags(d, errState.Error(), &diagutil.DiagsOpts{Timeout: schema.TimeoutUpdate})
+		return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutUpdate})
 	}
 
 	return resourceS3KeyRead(ctx, d, meta)
@@ -143,7 +143,7 @@ func resourceS3KeyRead(ctx context.Context, d *schema.ResourceData, meta interfa
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Sprintf("error while reading Object Storage key: %s, %+v", err, s3Key), nil)
+		return diagutil.ToDiags(d, fmt.Errorf("error while reading Object Storage key: %w, %+v", err, s3Key), nil)
 	}
 
 	log.Printf("[INFO] Successfully retrieved Object Storage key %+v \n", *s3Key.Id)
@@ -153,7 +153,7 @@ func resourceS3KeyRead(ctx context.Context, d *schema.ResourceData, meta interfa
 	}
 
 	if err := setS3KeyIdAndProperties(&s3Key, d); err != nil {
-		return diagutil.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	return nil
@@ -181,11 +181,11 @@ func resourceS3KeyUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Sprintf("error while updating Object Storage key: %s", err), nil)
+		return diagutil.ToDiags(d, fmt.Errorf("error while updating Object Storage key: %w", err), nil)
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		return diagutil.ToDiags(d, errState.Error(), &diagutil.DiagsOpts{Timeout: schema.TimeoutUpdate})
+		return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutUpdate})
 	}
 
 	return resourceS3KeyRead(ctx, d, meta)
@@ -203,7 +203,7 @@ func resourceS3KeyDelete(ctx context.Context, d *schema.ResourceData, meta inter
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Sprintf("error while deleting Object Storage key: %s", err), nil)
+		return diagutil.ToDiags(d, fmt.Errorf("error while deleting Object Storage key: %w", err), nil)
 	}
 
 	for {
@@ -216,7 +216,7 @@ func resourceS3KeyDelete(ctx context.Context, d *schema.ResourceData, meta inter
 				log.Printf("[INFO] Successfully deleted Object Storage key: %s", d.Id())
 				return nil
 			}
-			return diagutil.ToDiags(d, fmt.Sprintf("error while checking deletion status of Object Storage key: %s", dsErr), nil)
+			return diagutil.ToDiags(d, fmt.Errorf("error while checking deletion status of Object Storage key: %w", dsErr), nil)
 		}
 
 		if s3KeyDeleted {
@@ -229,7 +229,7 @@ func resourceS3KeyDelete(ctx context.Context, d *schema.ResourceData, meta inter
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			log.Printf("[INFO] delete timed out")
-			return diagutil.ToDiags(d, "Object Storage key delete timed out! WARNING: your Object Storage key will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates", nil)
+			return diagutil.ToDiags(d, fmt.Errorf("Object Storage key delete timed out! WARNING: your Object Storage key will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"), nil)
 		}
 	}
 
@@ -298,7 +298,7 @@ func resourceS3KeyImport(ctx context.Context, d *schema.ResourceData, meta inter
 	parts := strings.Split(d.Id(), "/")
 
 	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
-		return nil, diagutil.ToError(d, "invalid import. Expecting {userId}/{s3KeyId}", nil)
+		return nil, diagutil.ToError(d, fmt.Errorf("invalid import. Expecting {userId}/{s3KeyId}"), nil)
 	}
 
 	userId := parts[0]
@@ -312,17 +312,17 @@ func resourceS3KeyImport(ctx context.Context, d *schema.ResourceData, meta inter
 	if err != nil {
 		if httpNotFound(apiResponse) || isS3KeyNotFound(err) {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Sprintf("unable to find Object Storage key %q", keyId), nil)
+			return nil, diagutil.ToError(d, fmt.Errorf("unable to find Object Storage key %q", keyId), nil)
 		}
-		return nil, diagutil.ToError(d, fmt.Sprintf("unable to retrieve Object Storage key %q, error:%s", keyId, err), nil)
+		return nil, diagutil.ToError(d, fmt.Errorf("unable to retrieve Object Storage key %q, error:%w", keyId, err), nil)
 	}
 
 	if err := setS3KeyIdAndProperties(&s3Key, d); err != nil {
-		return nil, diagutil.ToError(d, err.Error(), nil)
+		return nil, diagutil.ToError(d, err, nil)
 	}
 
 	if err := d.Set("user_id", userId); err != nil {
-		return nil, diagutil.ToError(d, err.Error(), nil)
+		return nil, diagutil.ToError(d, err, nil)
 	}
 
 	return []*schema.ResourceData{d}, nil

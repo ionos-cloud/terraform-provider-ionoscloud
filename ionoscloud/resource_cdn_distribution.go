@@ -157,17 +157,17 @@ func resourceCDNDistributionCreate(ctx context.Context, d *schema.ResourceData, 
 	if routingRules, err := cdnService.GetRoutingRulesData(d); err == nil {
 		distribution.Properties.RoutingRules = *routingRules
 	} else {
-		return diagutil.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	createdDistribution, apiResponse, err := client.SdkClient.DistributionsApi.DistributionsPost(ctx).DistributionCreate(distribution).Execute()
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Sprintf("error creating CDN distribution: (%s)", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error creating CDN distribution: (%w)", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 	d.SetId(createdDistribution.Id)
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsDistributionReady)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Sprintf("error occurred while checking the status for the CDN Distribution: %s", err), nil)
+		return diagutil.ToDiags(d, fmt.Errorf("error occurred while checking the status for the CDN Distribution: %w", err), nil)
 	}
 
 	log.Printf("[INFO] CDN Distribution Id: %s", d.Id())
@@ -185,13 +185,13 @@ func resourceCDNDistributionRead(ctx context.Context, d *schema.ResourceData, me
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Sprintf("error while fetching CDN distribution: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while fetching CDN distribution: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	log.Printf("[INFO] Successfully retrieved CDN distribution %s: %+v", d.Id(), distribution)
 
 	if err := cdnService.SetDistributionData(d, distribution); err != nil {
-		return diagutil.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	return nil
@@ -217,18 +217,18 @@ func resourceCDNDistributionUpdate(ctx context.Context, d *schema.ResourceData, 
 	if routingRules, err := cdnService.GetRoutingRulesData(d); err == nil {
 		request.Properties.RoutingRules = *routingRules
 	} else {
-		return diagutil.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	_, apiResponse, err := client.SdkClient.DistributionsApi.DistributionsPut(ctx, d.Id()).DistributionUpdate(request).Execute()
 
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while updating a CDN distribution ID %s %s",
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating a CDN distribution ID %s %w",
 			d.Id(), err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsDistributionReady)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Sprintf("error occurred while checking the status for the CDN Distribution: %s", err), nil)
+		return diagutil.ToDiags(d, fmt.Errorf("error occurred while checking the status for the CDN Distribution: %w", err), nil)
 	}
 
 	return resourceCDNDistributionRead(ctx, d, meta)
@@ -240,7 +240,7 @@ func resourceCDNDistributionDelete(ctx context.Context, d *schema.ResourceData, 
 	apiResponse, err := client.SdkClient.DistributionsApi.DistributionsDelete(ctx, d.Id()).Execute()
 
 	if err != nil {
-		return diagutil.ToDiags(d, err.Error(), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, err, &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	d.SetId("")
@@ -257,15 +257,15 @@ func resourceCDNDistributionImport(ctx context.Context, d *schema.ResourceData, 
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Sprintf("registry does not exist %q", distributionID), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return nil, diagutil.ToError(d, fmt.Errorf("registry does not exist %q", distributionID), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
-		return nil, diagutil.ToError(d, fmt.Sprintf("an error occurred while trying to fetch the import of CDN distribution %q, error:%s", distributionID, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the import of CDN distribution %q, error:%w", distributionID, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	log.Printf("[INFO] CDN distribution found: %+v", distribution)
 
 	if err := cdnService.SetDistributionData(d, distribution); err != nil {
-		return nil, diagutil.ToError(d, err.Error(), nil)
+		return nil, diagutil.ToError(d, err, nil)
 	}
 
 	return []*schema.ResourceData{d}, nil

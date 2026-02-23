@@ -200,17 +200,17 @@ func dataSourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta 
 
 	datacenterId, dcIdOk := d.GetOk("datacenter_id")
 	if !dcIdOk {
-		return diagutil.ToDiags(d, "no datacenter_id was specified", nil)
+		return diagutil.ToDiags(d, fmt.Errorf("no datacenter_id was specified"), nil)
 	}
 
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")
 
 	if idOk && nameOk {
-		return diagutil.ToDiags(d, "ID and name cannot be both specified in the same time", nil)
+		return diagutil.ToDiags(d, fmt.Errorf("ID and name cannot be both specified in the same time"), nil)
 	}
 	if !idOk && !nameOk {
-		return diagutil.ToDiags(d, "please provide either the server id or name", nil)
+		return diagutil.ToDiags(d, fmt.Errorf("please provide either the server id or name"), nil)
 	}
 	var server ionoscloud.Server
 	var err error
@@ -221,14 +221,14 @@ func dataSourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta 
 		server, apiResponse, err = client.ServersApi.DatacentersServersFindById(ctx, datacenterId.(string), id.(string)).Depth(5).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching the server with ID %s: %s", id.(string), err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the server with ID %s: %w", id.(string), err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 	} else {
 		/* search by name */
 		servers, apiResponse, err := client.ServersApi.DatacentersServersGet(ctx, datacenterId.(string)).Depth(5).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching servers: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching servers: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 
 		var results []ionoscloud.Server
@@ -240,7 +240,7 @@ func dataSourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta 
 					server, apiResponse, err = client.ServersApi.DatacentersServersFindById(ctx, datacenterId.(string), *s.Id).Depth(4).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {
-						return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching the server with ID %s: %s", *s.Id, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+						return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the server with ID %s: %w", *s.Id, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 					}
 					results = append(results, server)
 				}
@@ -248,9 +248,9 @@ func dataSourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta 
 		}
 
 		if results == nil || len(results) == 0 {
-			return diagutil.ToDiags(d, fmt.Sprintf("no server found with the specified criteria: name = %s", name.(string)), nil)
+			return diagutil.ToDiags(d, fmt.Errorf("no server found with the specified criteria: name = %s", name.(string)), nil)
 		} else if len(results) > 1 {
-			return diagutil.ToDiags(d, fmt.Sprintf("more than one server found with the specified criteria: name = %s", name.(string)), nil)
+			return diagutil.ToDiags(d, fmt.Errorf("more than one server found with the specified criteria: name = %s", name.(string)), nil)
 		} else {
 			server = results[0]
 		}
@@ -264,12 +264,12 @@ func dataSourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta 
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching the server token %s: %s", *server.Id, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the server token %s: %w", *server.Id, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 	}
 
 	if err = setCubeServerData(d, &server, &token); err != nil {
-		return diagutil.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	return nil

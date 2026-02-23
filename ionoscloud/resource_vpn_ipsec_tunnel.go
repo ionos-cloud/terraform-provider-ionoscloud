@@ -2,6 +2,7 @@ package ionoscloud
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -185,11 +186,11 @@ func resourceVpnIPSecTunnelCreate(ctx context.Context, d *schema.ResourceData, m
 	pskKey := ""
 
 	if d.Get("auth.0.method").(string) == "PSK" && d.Get("auth.0.psk_key").(string) == "" {
-		return diagutil.ToDiags(d, "psk_key is required when auth method is PSK", nil)
+		return diagutil.ToDiags(d, fmt.Errorf("psk_key is required when auth method is PSK"), nil)
 	}
 
 	if d.Get("auth.0.method").(string) != "PSK" && d.Get("auth.0.psk_key").(string) != "" {
-		return diagutil.ToDiags(d, "psk_key is only required when auth method is PSK", nil)
+		return diagutil.ToDiags(d, fmt.Errorf("psk_key is only required when auth method is PSK"), nil)
 	}
 
 	if v, ok := d.GetOk("auth.0.psk_key"); ok {
@@ -198,19 +199,19 @@ func resourceVpnIPSecTunnelCreate(ctx context.Context, d *schema.ResourceData, m
 
 	tunnel, apiResponse, err := client.CreateIPSecTunnel(ctx, d)
 	if err != nil {
-		return diagutil.ToDiags(d, err.Error(), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, err, &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	d.SetId(tunnel.Id)
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsIPSecTunnelReady)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Sprintf("creating %s ", err), nil)
+		return diagutil.ToDiags(d, fmt.Errorf("creating %w ", err), nil)
 	}
 
 	auth := d.Get("auth").([]interface{})
 	auth[0].(map[string]interface{})["psk_key"] = pskKey
 	if err = d.Set("auth", auth); err != nil {
-		return diagutil.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	diags := resourceVpnIPSecTunnelRead(ctx, d, meta)
@@ -235,18 +236,18 @@ func resourceVpnIPSecTunnelRead(ctx context.Context, d *schema.ResourceData, met
 			return nil
 		}
 
-		return diagutil.ToDiags(d, fmt.Sprintf("error while fetching IPSec Gateway Tunnel: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while fetching IPSec Gateway Tunnel: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	err = vpn.SetIPSecTunnelData(d, tunnel)
 	if err != nil {
-		return diagutil.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	auth := d.Get("auth").([]interface{})
 	auth[0].(map[string]interface{})["psk_key"] = pskKey
 	if err = d.Set("auth", auth); err != nil {
-		return diagutil.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	return nil
@@ -256,11 +257,11 @@ func resourceVpnIPSecTunnelUpdate(ctx context.Context, d *schema.ResourceData, m
 	pskKey := ""
 
 	if d.Get("auth.0.method").(string) == "PSK" && d.Get("auth.0.psk_key").(string) == "" {
-		return diagutil.ToDiags(d, "psk_key is required when auth method is PSK", nil)
+		return diagutil.ToDiags(d, fmt.Errorf("psk_key is required when auth method is PSK"), nil)
 	}
 
 	if d.Get("auth.0.method").(string) != "PSK" && d.Get("auth.0.psk_key").(string) != "" {
-		return diagutil.ToDiags(d, "psk_key is only required when auth method is PSK", nil)
+		return diagutil.ToDiags(d, fmt.Errorf("psk_key is only required when auth method is PSK"), nil)
 	}
 
 	if v, ok := d.GetOk("auth.0.psk_key"); ok {
@@ -269,23 +270,23 @@ func resourceVpnIPSecTunnelUpdate(ctx context.Context, d *schema.ResourceData, m
 
 	tunnel, apiResponse, err := client.UpdateIPSecTunnel(ctx, d)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Sprintf("error updating IPSec Gateway Tunnel: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error updating IPSec Gateway Tunnel: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsIPSecTunnelReady)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Sprintf("while waiting for IPSec Gateway Tunnel to be ready: %s", err), nil)
+		return diagutil.ToDiags(d, fmt.Errorf("while waiting for IPSec Gateway Tunnel to be ready: %w", err), nil)
 	}
 
 	err = vpn.SetIPSecTunnelData(d, tunnel)
 	if err != nil {
-		return diagutil.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	auth := d.Get("auth").([]interface{})
 	auth[0].(map[string]interface{})["psk_key"] = pskKey
 	if err = d.Set("auth", auth); err != nil {
-		return diagutil.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	return nil
@@ -304,13 +305,13 @@ func resourceVpnIPSecTunnelDelete(ctx context.Context, d *schema.ResourceData, m
 			return nil
 		}
 
-		return diagutil.ToDiags(d, fmt.Sprintf("error while deleting IPSec Gateway Tunnel: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while deleting IPSec Gateway Tunnel: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	time.Sleep(5 * time.Second)
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsIPSecTunnelDeleted)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Sprintf("while deleting IPSec Gateway Tunnel: %s", err), &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete})
+		return diagutil.ToDiags(d, fmt.Errorf("while deleting IPSec Gateway Tunnel: %w", err), &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete})
 	}
 
 	return nil
@@ -323,16 +324,16 @@ func resourceVpnIPSecTunnelImport(ctx context.Context, d *schema.ResourceData, m
 	id := parts[2]
 
 	if err := d.Set("location", location); err != nil {
-		return nil, diagutil.ToError(d, err.Error(), nil)
+		return nil, diagutil.ToError(d, err, nil)
 	}
 	if err := d.Set("gateway_id", gatewayID); err != nil {
-		return nil, diagutil.ToError(d, err.Error(), nil)
+		return nil, diagutil.ToError(d, err, nil)
 	}
 	d.SetId(id)
 
 	diags := resourceVpnIPSecTunnelRead(ctx, d, meta)
 	if diags != nil && diags.HasError() {
-		return nil, diagutil.ToError(d, diags[0].Summary, nil)
+		return nil, diagutil.ToError(d, errors.New(diags[0].Summary), nil)
 	}
 	return []*schema.ResourceData{d}, nil
 }

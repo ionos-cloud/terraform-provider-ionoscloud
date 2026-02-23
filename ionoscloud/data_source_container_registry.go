@@ -134,10 +134,10 @@ func dataSourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData
 	location := locationValue.(string)
 
 	if idOk && (nameOk || locationOk) {
-		return diagutil.ToDiags(d, "id and name or location cannot be both specified in the same time", nil)
+		return diagutil.ToDiags(d, fmt.Errorf("id and name or location cannot be both specified in the same time"), nil)
 	}
 	if !idOk && !nameOk && !locationOk {
-		return diagutil.ToDiags(d, "please provide the registry id, name or location", nil)
+		return diagutil.ToDiags(d, fmt.Errorf("please provide the registry id, name or location"), nil)
 	}
 
 	var registry cr.RegistryResponse
@@ -148,14 +148,14 @@ func dataSourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData
 		/* search by ID */
 		registry, apiResponse, err = client.GetRegistry(ctx, id)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching the registry with ID %s: %s", id, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the registry with ID %s: %w", id, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 	} else {
 		var results []cr.RegistryResponse
 
 		registries, apiResponse, err := client.ListRegistries(ctx)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching container registries: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching container registries: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 
 		results = registries.Items
@@ -175,7 +175,7 @@ func dataSourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData
 				if len(registriesByName) > 0 {
 					results = registriesByName
 				} else {
-					return diagutil.ToDiags(d, fmt.Sprintf("no registry found with the specified criteria: name = %v", name), nil)
+					return diagutil.ToDiags(d, fmt.Errorf("no registry found with the specified criteria: name = %v", name), nil)
 				}
 			}
 		}
@@ -190,22 +190,22 @@ func dataSourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData
 			if len(registriesByLocation) > 0 {
 				results = registriesByLocation
 			} else {
-				return diagutil.ToDiags(d, fmt.Sprintf("no registry found with the specified criteria: location = %v", location), nil)
+				return diagutil.ToDiags(d, fmt.Errorf("no registry found with the specified criteria: location = %v", location), nil)
 			}
 		}
 
 		switch {
 		case len(results) == 0:
-			return diagutil.ToDiags(d, fmt.Sprintf("no registry found with the specified criteria: name = %s location = %s", name, location), nil)
+			return diagutil.ToDiags(d, fmt.Errorf("no registry found with the specified criteria: name = %s location = %s", name, location), nil)
 		case len(results) > 1:
-			return diagutil.ToDiags(d, fmt.Sprintf("more than one registry found with the specified criteria: name = %s location = %s", name, location), nil)
+			return diagutil.ToDiags(d, fmt.Errorf("more than one registry found with the specified criteria: name = %s location = %s", name, location), nil)
 		default:
 			registry = results[0]
 		}
 	}
 
 	if err := crService.SetRegistryData(d, registry); err != nil {
-		return diagutil.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	return nil

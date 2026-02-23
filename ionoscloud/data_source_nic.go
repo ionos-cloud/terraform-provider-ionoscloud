@@ -110,7 +110,7 @@ func dataSourceNicRead(ctx context.Context, data *schema.ResourceData, meta inte
 	t, dIdOk := data.GetOk("datacenter_id")
 	st, sIdOk := data.GetOk("server_id")
 	if !dIdOk || !sIdOk {
-		return diagutil.ToDiags(data, "datacenter id and server id must be set", nil)
+		return diagutil.ToDiags(data, fmt.Errorf("datacenter id and server id must be set"), nil)
 	}
 	var datacenterId, serverId string
 
@@ -130,16 +130,16 @@ func dataSourceNicRead(ctx context.Context, data *schema.ResourceData, meta inte
 	var nic ionoscloud.Nic
 	ns := cloudapinic.Service{Client: client, Meta: meta, D: data}
 	if !idOk && !nameOk {
-		return diagutil.ToDiags(data, "either id, or name must be set", nil)
+		return diagutil.ToDiags(data, fmt.Errorf("either id, or name must be set"), nil)
 	}
 	if idOk {
 		foundNic, _, err := ns.Get(ctx, datacenterId, serverId, id.(string), 3)
 		if err != nil {
-			return diagutil.ToDiags(data, fmt.Sprintf("error getting nic with id %s %s", id.(string), err), nil)
+			return diagutil.ToDiags(data, fmt.Errorf("error getting nic with id %s %w", id.(string), err), nil)
 		}
 		if nameOk {
 			if foundNic.Properties != nil && *foundNic.Properties.Name != name {
-				return diagutil.ToDiags(data, fmt.Sprintf("name of nic (UUID=%s, name=%s) does not match expected name: %s",
+				return diagutil.ToDiags(data, fmt.Errorf("name of nic (UUID=%s, name=%s) does not match expected name: %s",
 					*foundNic.Id, *foundNic.Properties.Name, name), nil)
 			}
 		}
@@ -147,7 +147,7 @@ func dataSourceNicRead(ctx context.Context, data *schema.ResourceData, meta inte
 	} else {
 		nics, err := ns.List(ctx, datacenterId, serverId, 3)
 		if err != nil {
-			return diagutil.ToDiags(data, fmt.Sprintf("an error occurred while fetching nics: %s ", err), nil)
+			return diagutil.ToDiags(data, fmt.Errorf("an error occurred while fetching nics: %w ", err), nil)
 		}
 
 		var results []ionoscloud.Nic
@@ -161,16 +161,16 @@ func dataSourceNicRead(ctx context.Context, data *schema.ResourceData, meta inte
 		}
 
 		if results == nil || len(results) == 0 {
-			return diagutil.ToDiags(data, fmt.Sprintf("no nic found with the specified criteria: name = %s", name), nil)
+			return diagutil.ToDiags(data, fmt.Errorf("no nic found with the specified criteria: name = %s", name), nil)
 		} else if len(results) > 1 {
-			return diagutil.ToDiags(data, fmt.Sprintf("more than one nic found with the specified criteria: name = %s", name), nil)
+			return diagutil.ToDiags(data, fmt.Errorf("more than one nic found with the specified criteria: name = %s", name), nil)
 		} else {
 			nic = results[0]
 		}
 	}
 
 	if err := cloudapinic.NicSetData(data, &nic); err != nil {
-		return diagutil.ToDiags(data, err.Error(), nil)
+		return diagutil.ToDiags(data, err, nil)
 	}
 
 	return nil

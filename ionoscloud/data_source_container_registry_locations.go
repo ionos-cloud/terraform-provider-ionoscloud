@@ -34,7 +34,7 @@ func dataSourceContainerRegistryLocationsRead(ctx context.Context, d *schema.Res
 
 	locations, apiResponse, err := client.GetAllLocations(ctx)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching container registry locations: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching container registry locations: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	crService.SetCRLocationsData(d, locations)

@@ -127,10 +127,10 @@ func dataSourceVpnWireguardGatewayRead(ctx context.Context, d *schema.ResourceDa
 	name := nameValue.(string)
 
 	if idOk && nameOk {
-		return diagutil.ToDiags(d, "ID and name cannot be both specified at the same time", nil)
+		return diagutil.ToDiags(d, fmt.Errorf("ID and name cannot be both specified at the same time"), nil)
 	}
 	if !idOk && !nameOk {
-		return diagutil.ToDiags(d, "please provide either the WireGuard Gateway ID or name", nil)
+		return diagutil.ToDiags(d, fmt.Errorf("please provide either the WireGuard Gateway ID or name"), nil)
 	}
 
 	var wireguardGw vpnSdk.WireguardGatewayRead
@@ -139,13 +139,13 @@ func dataSourceVpnWireguardGatewayRead(ctx context.Context, d *schema.ResourceDa
 	if idOk {
 		wireguardGw, apiResponse, err = client.GetWireguardGatewayByID(ctx, id, location)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching the WireGuard Gateway with ID: %s, error: %s", id, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the WireGuard Gateway with ID: %s, error: %w", id, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 	} else {
 		var results []vpnSdk.WireguardGatewayRead
 		gateways, apiResponse, err := client.ListWireguardGateways(ctx, location)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching WireGuard Gateways: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching WireGuard Gateways: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 		for _, recordItem := range gateways.Items {
 			if len(results) == 1 {
@@ -157,19 +157,19 @@ func dataSourceVpnWireguardGatewayRead(ctx context.Context, d *schema.ResourceDa
 		}
 		switch {
 		case len(results) == 0:
-			return diagutil.ToDiags(d, fmt.Sprintf("no VPN WireGuard Gateway found with the specified name = %s", name), nil)
+			return diagutil.ToDiags(d, fmt.Errorf("no VPN WireGuard Gateway found with the specified name = %s", name), nil)
 		case len(results) > 1:
-			return diagutil.ToDiags(d, fmt.Sprintf("more than one VPN WireGuard Gateway found with the specified name = %s", name), nil)
+			return diagutil.ToDiags(d, fmt.Errorf("more than one VPN WireGuard Gateway found with the specified name = %s", name), nil)
 		default:
 			wireguardGw = results[0]
 		}
 	}
 	if err := d.Set("id", wireguardGw.Id); err != nil {
-		return diagutil.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	if err := vpn.SetWireguardGWData(d, wireguardGw); err != nil {
-		return diagutil.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err, nil)
 	}
 	return nil
 }

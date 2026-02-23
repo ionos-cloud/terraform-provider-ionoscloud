@@ -2,6 +2,7 @@ package ionoscloud
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -124,18 +125,18 @@ func pipelineCreate(ctx context.Context, d *schema.ResourceData, meta interface{
 	client := meta.(bundleclient.SdkBundle).LoggingClient
 	pipelineResponse, apiResponse, err := client.CreatePipeline(ctx, d)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while creating a Logging pipeline: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating a Logging pipeline: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 	d.SetId(pipelineResponse.Id)
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsPipelineAvailable)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while waiting for the pipeline with ID: %s to become available: %s", pipelineResponse.Id, err), nil)
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while waiting for the pipeline with ID: %s to become available: %w", pipelineResponse.Id, err), nil)
 	}
 	// only received in the create response
 	if pipelineResponse.Properties.Key != nil {
 		err = d.Set("key", pipelineResponse.Properties.Key)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while setting the key for the Logging pipeline with ID: %s, error: %s", pipelineResponse.Id, err), nil)
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while setting the key for the Logging pipeline with ID: %s, error: %w", pipelineResponse.Id, err), nil)
 		}
 	}
 	// Make another read and set the data in the state because 'grafanaAddress` is not returned in the create response
@@ -156,12 +157,12 @@ func pipelineRead(ctx context.Context, d *schema.ResourceData, meta interface{})
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Sprintf("error while fetching Logging pipeline: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while fetching Logging pipeline: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	log.Printf("[INFO] Successfully retrieved Logging pipeline with ID: %s: %+v", pipelineID, pipeline)
 	if err := client.SetPipelineData(d, pipeline); err != nil {
-		return diagutil.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	return nil
@@ -177,12 +178,12 @@ func pipelineDelete(ctx context.Context, d *schema.ResourceData, meta interface{
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Sprintf("error while deleting Logging pipeline, location %s, error: %s", location, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while deleting Logging pipeline, location %s, error: %w", location, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsPipelineDeleted)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while waiting for Logging pipeline to be deleted: %s", err), &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while waiting for Logging pipeline to be deleted: %w", err), &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete})
 	}
 	return nil
 }
@@ -193,14 +194,14 @@ func pipelineUpdate(ctx context.Context, d *schema.ResourceData, meta interface{
 
 	pipelineResponse, apiResponse, err := client.UpdatePipeline(ctx, pipelineID, d)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while updating the Logging pipeline: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating the Logging pipeline: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsPipelineAvailable)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while waiting for the Logging pipeline to become available: %s", err), nil)
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while waiting for the Logging pipeline to become available: %w", err), nil)
 	}
 	if err := client.SetPipelineData(d, pipelineResponse); err != nil {
-		return diagutil.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err, nil)
 	}
 	return nil
 }
@@ -208,18 +209,18 @@ func pipelineUpdate(ctx context.Context, d *schema.ResourceData, meta interface{
 func pipelineImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), ":")
 	if len(parts) != 2 {
-		return nil, diagutil.ToError(d, "expected ID in the format location:id", nil)
+		return nil, diagutil.ToError(d, fmt.Errorf("expected ID in the format location:id"), nil)
 	}
 
 	location := parts[0]
 	if err := d.Set("location", location); err != nil {
-		return nil, diagutil.ToError(d, fmt.Sprintf("failed to set location for Logging Pipeline import: %s", err), nil)
+		return nil, diagutil.ToError(d, fmt.Errorf("failed to set location for Logging Pipeline import: %w", err), nil)
 	}
 	d.SetId(parts[1])
 
 	diags := pipelineRead(ctx, d, meta)
 	if diags != nil && diags.HasError() {
-		return nil, diagutil.ToError(d, diags[0].Summary, nil)
+		return nil, diagutil.ToError(d, errors.New(diags[0].Summary), nil)
 	}
 	return []*schema.ResourceData{d}, nil
 }

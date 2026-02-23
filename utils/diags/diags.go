@@ -1,7 +1,6 @@
 package diags
 
 import (
-	"errors"
 	"fmt"
 	"net/url"
 	"regexp"
@@ -21,17 +20,14 @@ type DiagsOpts struct {
 	StatusCode         int // HTTP status code from API response; 0 means not available
 }
 
-// buildErrorMessage constructs an enriched error message with resource context.
-func buildErrorMessage(d *schema.ResourceData, err string, opts *DiagsOpts) string {
+// buildContext constructs context information to append after an error message.
+func buildContext(d *schema.ResourceData, opts *DiagsOpts) string {
 	targetField := "name"
 	if opts != nil && opts.ResourceNameString != "" {
 		targetField = opts.ResourceNameString
 	}
 
 	var sb strings.Builder
-
-	sb.WriteString("Error: ")
-	sb.WriteString(err)
 
 	if opts != nil && opts.StatusCode >= 500 {
 		sb.WriteString("\nThis is an API Error. Please contact API support.")
@@ -63,14 +59,24 @@ func buildErrorMessage(d *schema.ResourceData, err string, opts *DiagsOpts) stri
 }
 
 // ToDiags wraps an error into a Terraform diagnostic with additional context.
-func ToDiags(d *schema.ResourceData, err string, opts *DiagsOpts) diag.Diagnostics {
-	return diag.FromErr(errors.New(buildErrorMessage(d, err, opts)))
+func ToDiags(d *schema.ResourceData, err error, opts *DiagsOpts) diag.Diagnostics {
+	if err == nil {
+		return nil
+	}
+	return diag.FromErr(ToError(d, err, opts))
 }
 
-// ToError wraps an error message with resource context, similar to ToDiags but returns an error.
+// ToError wraps an error with resource context, similar to ToDiags but returns an error.
 // This is used in import functions and helper functions that return (T, error) instead of diag.Diagnostics.
-func ToError(d *schema.ResourceData, err string, opts *DiagsOpts) error {
-	return errors.New(buildErrorMessage(d, err, opts))
+func ToError(d *schema.ResourceData, err error, opts *DiagsOpts) error {
+	if err == nil {
+		return nil
+	}
+	context := buildContext(d, opts)
+	if context != "" {
+		return fmt.Errorf("%w%s", err, context)
+	}
+	return err
 }
 
 // extractRequestId parses the HTTP header string to find the UUID request ID.

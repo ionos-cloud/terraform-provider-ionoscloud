@@ -145,10 +145,10 @@ func dataSourceCDNDistributionRead(ctx context.Context, d *schema.ResourceData, 
 	domain := domainValue.(string)
 
 	if idOk && domainOk {
-		return diagutil.ToDiags(d, "id and domain cannot be both specified in the same time", nil)
+		return diagutil.ToDiags(d, fmt.Errorf("id and domain cannot be both specified in the same time"), nil)
 	}
 	if !idOk && !domainOk {
-		return diagutil.ToDiags(d, "please provide the distribution id or domain", nil)
+		return diagutil.ToDiags(d, fmt.Errorf("please provide the distribution id or domain"), nil)
 	}
 
 	var distribution cdn.Distribution
@@ -159,14 +159,14 @@ func dataSourceCDNDistributionRead(ctx context.Context, d *schema.ResourceData, 
 		/* search by ID */
 		distribution, apiResponse, err = client.SdkClient.DistributionsApi.DistributionsFindById(ctx, id).Execute()
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching the distribution with ID %s: %s", id, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the distribution with ID %s: %w", id, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 	} else {
 		var results []cdn.Distribution
 
 		distributions, apiResponse, err := client.SdkClient.DistributionsApi.DistributionsGet(ctx).Execute()
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching container distributions: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching container distributions: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 
 		results = distributions.Items
@@ -186,23 +186,23 @@ func dataSourceCDNDistributionRead(ctx context.Context, d *schema.ResourceData, 
 				if len(distributionsByDomain) > 0 {
 					results = distributionsByDomain
 				} else {
-					return diagutil.ToDiags(d, fmt.Sprintf("no distribution found with the specified criteria: domain = %v", domain), nil)
+					return diagutil.ToDiags(d, fmt.Errorf("no distribution found with the specified criteria: domain = %v", domain), nil)
 				}
 			}
 		}
 
 		switch {
 		case len(results) == 0:
-			return diagutil.ToDiags(d, fmt.Sprintf("no CDN distribution found with the specified criteria: domain = %s", domain), nil)
+			return diagutil.ToDiags(d, fmt.Errorf("no CDN distribution found with the specified criteria: domain = %s", domain), nil)
 		case len(results) > 1:
-			return diagutil.ToDiags(d, fmt.Sprintf("more than one CDN distribution found with the specified criteria: domain = %s", domain), nil)
+			return diagutil.ToDiags(d, fmt.Errorf("more than one CDN distribution found with the specified criteria: domain = %s", domain), nil)
 		default:
 			distribution = results[0]
 		}
 	}
 
 	if err := cdnService.SetDistributionData(d, distribution); err != nil {
-		return diagutil.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	return nil

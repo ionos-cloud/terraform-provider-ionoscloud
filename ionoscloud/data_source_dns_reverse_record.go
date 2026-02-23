@@ -76,15 +76,15 @@ func dataSourceReverseRecordRead(ctx context.Context, d *schema.ResourceData, me
 	}
 
 	if count > 1 {
-		return diagutil.ToDiags(d, "only one of [Id, name, ip] can be specified at the same time", nil)
+		return diagutil.ToDiags(d, fmt.Errorf("only one of [Id, name, ip] can be specified at the same time"), nil)
 	}
 
 	if count == 0 {
-		return diagutil.ToDiags(d, "please provide either the DNS Record Id, name or IP", nil)
+		return diagutil.ToDiags(d, fmt.Errorf("please provide either the DNS Record Id, name or IP"), nil)
 	}
 
 	if partialMatch && !nameOk {
-		return diagutil.ToDiags(d, "partial_match can only be used together with the name attribute", nil)
+		return diagutil.ToDiags(d, fmt.Errorf("partial_match can only be used together with the name attribute"), nil)
 	}
 
 	var record dns.ReverseRecordRead
@@ -94,7 +94,7 @@ func dataSourceReverseRecordRead(ctx context.Context, d *schema.ResourceData, me
 	if idOk {
 		record, apiResponse, err = client.GetReverseRecordById(ctx, recordId)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching the DNS Reverse Record with ID: %s, error: %s", recordId, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the DNS Reverse Record with ID: %s, error: %w", recordId, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 	} else {
 
@@ -106,7 +106,7 @@ func dataSourceReverseRecordRead(ctx context.Context, d *schema.ResourceData, me
 				// build a list of partial matches based on the response
 				records, apiResponse, err := client.ListReverseRecords(ctx, nil)
 				if err != nil {
-					return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching DNS Reverse Records: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+					return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching DNS Reverse Records: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 				}
 				for _, recordItem := range records.Items {
 					if strings.Contains(recordItem.Properties.Name, recordName) {
@@ -118,7 +118,7 @@ func dataSourceReverseRecordRead(ctx context.Context, d *schema.ResourceData, me
 				// build a list of exact matches based on the response
 				records, apiResponse, err := client.ListReverseRecords(ctx, nil)
 				if err != nil {
-					return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching DNS Reverse Records: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+					return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching DNS Reverse Records: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 				}
 				for _, recordItem := range records.Items {
 					if strings.EqualFold(recordItem.Properties.Name, recordName) {
@@ -129,7 +129,7 @@ func dataSourceReverseRecordRead(ctx context.Context, d *schema.ResourceData, me
 		} else {
 			records, apiResponse, err := client.ListReverseRecords(ctx, []string{recordIp})
 			if err != nil {
-				return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching DNS Reverse Records: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+				return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching DNS Reverse Records: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 			}
 			results = records.Items
 
@@ -143,16 +143,16 @@ func dataSourceReverseRecordRead(ctx context.Context, d *schema.ResourceData, me
 
 		switch {
 		case len(results) == 0:
-			return diagutil.ToDiags(d, fmt.Sprintf("no DNS Reverse Record found with the specified filter = %s", usedFilter), nil)
+			return diagutil.ToDiags(d, fmt.Errorf("no DNS Reverse Record found with the specified filter = %s", usedFilter), nil)
 		case len(results) > 1:
-			return diagutil.ToDiags(d, fmt.Sprintf("more than one DNS Reverse Record found with the specified name = %s", usedFilter), nil)
+			return diagutil.ToDiags(d, fmt.Errorf("more than one DNS Reverse Record found with the specified name = %s", usedFilter), nil)
 		default:
 			record = results[0]
 		}
 	}
 
 	if err := client.SetReverseRecordData(d, record); err != nil {
-		return diagutil.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	return nil

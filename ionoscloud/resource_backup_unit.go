@@ -79,7 +79,7 @@ func resourceBackupUnitCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 	if err != nil {
 		d.SetId("")
-		return diagutil.ToDiags(d, fmt.Sprintf("error creating backup unit: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error creating backup unit: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	d.SetId(*createdBackupUnit.Id)
@@ -104,20 +104,20 @@ func resourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta in
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Sprintf("error while fetching backup unit: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while fetching backup unit: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	contractResources, contractApiResponse, cErr := client.ContractResourcesApi.ContractsGet(ctx).Execute()
 	logApiRequestTime(contractApiResponse)
 
 	if cErr != nil {
-		return diagutil.ToDiags(d, fmt.Sprintf("error while fetching contract resources for backup unit: %s", cErr), &diagutil.DiagsOpts{StatusCode: contractApiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while fetching contract resources for backup unit: %w", cErr), &diagutil.DiagsOpts{StatusCode: contractApiResponse.StatusCode})
 	}
 
 	log.Printf("[INFO] Successfully retrieved contract resource for backup unit unit %s: %+v", d.Id(), contractResources)
 
 	if err := setBackupUnitData(d, &backupUnit, &contractResources); err != nil {
-		return diagutil.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	log.Printf("[INFO] Successfully retrieved backup unit %s: %+v", d.Id(), backupUnit)
@@ -162,7 +162,7 @@ func resourceBackupUnitUpdate(ctx context.Context, d *schema.ResourceData, meta 
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Sprintf("error while updating backup unit: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while updating backup unit: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	if diags := waitForUnitToBeReady(ctx, d, client); diags != nil {
@@ -179,7 +179,7 @@ func waitForUnitToBeReady(ctx context.Context, d *schema.ResourceData, client *i
 		backupUnitReady, rsErr := backupUnitReady(client, d, ctx)
 
 		if rsErr != nil {
-			return diagutil.ToDiags(d, fmt.Sprintf("error while checking readiness status of backup unit: %s", rsErr), nil)
+			return diagutil.ToDiags(d, fmt.Errorf("error while checking readiness status of backup unit: %w", rsErr), nil)
 		}
 
 		if backupUnitReady {
@@ -191,7 +191,7 @@ func waitForUnitToBeReady(ctx context.Context, d *schema.ResourceData, client *i
 		case <-time.After(constant.SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
-			return diagutil.ToDiags(d, fmt.Sprintf("backup unit readiness check timed out! WARNING: your backup unit will still probably be created/updated "+
+			return diagutil.ToDiags(d, fmt.Errorf("backup unit readiness check timed out! WARNING: your backup unit will still probably be created/updated "+
 				"after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"), nil)
 		}
 	}
@@ -209,7 +209,7 @@ func resourceBackupUnitDelete(ctx context.Context, d *schema.ResourceData, meta 
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Sprintf("error while deleting backup unit: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while deleting backup unit: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	for {
@@ -218,7 +218,7 @@ func resourceBackupUnitDelete(ctx context.Context, d *schema.ResourceData, meta 
 		backupUnitDeleted, dsErr := backupUnitDeleted(client, d, ctx)
 
 		if dsErr != nil {
-			return diagutil.ToDiags(d, fmt.Sprintf("error while checking deletion status of backup unit: %s", dsErr), nil)
+			return diagutil.ToDiags(d, fmt.Errorf("error while checking deletion status of backup unit: %w", dsErr), nil)
 		}
 
 		if backupUnitDeleted {
@@ -230,7 +230,7 @@ func resourceBackupUnitDelete(ctx context.Context, d *schema.ResourceData, meta 
 		case <-time.After(constant.SleepInterval):
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
-			return diagutil.ToDiags(d, fmt.Sprintf("backup unit deletion timed out! WARNING: your backup unit will still probably be deleted "+
+			return diagutil.ToDiags(d, fmt.Errorf("backup unit deletion timed out! WARNING: your backup unit will still probably be deleted "+
 				"after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"), nil)
 		}
 	}
@@ -249,9 +249,9 @@ func resourceBackupUnitImport(ctx context.Context, d *schema.ResourceData, meta 
 	if err != nil {
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Sprintf("unable to find Backup Unit %q", buId), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return nil, diagutil.ToError(d, fmt.Errorf("unable to find Backup Unit %q", buId), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
-		return nil, diagutil.ToError(d, fmt.Sprintf("unable to retrieve Backup Unit: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return nil, diagutil.ToError(d, fmt.Errorf("unable to retrieve Backup Unit: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	log.Printf("[INFO] Backup Unit found: %+v", backupUnit)
@@ -260,11 +260,11 @@ func resourceBackupUnitImport(ctx context.Context, d *schema.ResourceData, meta 
 	logApiRequestTime(apiResponse)
 
 	if cErr != nil {
-		return nil, diagutil.ToError(d, fmt.Sprintf("error while fetching contract resources for backup unit: %s", cErr), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return nil, diagutil.ToError(d, fmt.Errorf("error while fetching contract resources for backup unit: %w", cErr), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	if err := setBackupUnitData(d, &backupUnit, &contractResources); err != nil {
-		return nil, diagutil.ToError(d, err.Error(), nil)
+		return nil, diagutil.ToError(d, err, nil)
 	}
 
 	return []*schema.ResourceData{d}, nil

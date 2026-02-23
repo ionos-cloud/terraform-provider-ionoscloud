@@ -103,7 +103,7 @@ func resourceDbaasMongoUserCreate(ctx context.Context, d *schema.ResourceData, m
 
 	user, _, err := client.CreateUser(ctx, clusterId, request)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while adding a user to mongoDB: %s", err), nil)
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while adding a user to mongoDB: %w", err), nil)
 	}
 
 	if user.Properties != nil {
@@ -112,10 +112,10 @@ func resourceDbaasMongoUserCreate(ctx context.Context, d *schema.ResourceData, m
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsUserReady)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while waiting for the Mongo user to become available, user ID: %v, error: %s", clusterId+user.Properties.Username, err), nil)
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while waiting for the Mongo user to become available, user ID: %v, error: %w", clusterId+user.Properties.Username, err), nil)
 	}
 
-	return diagutil.ToDiags(d, dbaas.SetUserMongoData(d, &user).Error(), nil)
+	return diagutil.ToDiags(d, dbaas.SetUserMongoData(d, &user), nil)
 }
 
 func resourceDbaasMongoUserUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -154,15 +154,15 @@ func resourceDbaasMongoUserUpdate(ctx context.Context, d *schema.ResourceData, m
 
 	user, apiResponse, err := client.UpdateUser(ctx, clusterId, username, request)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while updating a Mongo user, username: %v, cluster ID: %v, error: %s", username, clusterId, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating a Mongo user, username: %v, cluster ID: %v, error: %w", username, clusterId, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsUserReady)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while waiting for a Mongo user to become available after an update, username: %v, cluster ID: %v, error: %s", username, clusterId, err), nil)
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while waiting for a Mongo user to become available after an update, username: %v, cluster ID: %v, error: %w", username, clusterId, err), nil)
 	}
 
-	return diagutil.ToDiags(d, dbaas.SetUserMongoData(d, &user).Error(), nil)
+	return diagutil.ToDiags(d, dbaas.SetUserMongoData(d, &user), nil)
 }
 
 func resourceDbaasMongoUserRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -178,11 +178,11 @@ func resourceDbaasMongoUserRead(ctx context.Context, d *schema.ResourceData, met
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching a User: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching a User: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	if err := dbaas.SetUserMongoData(d, &user); err != nil {
-		return diagutil.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	return nil
@@ -195,13 +195,13 @@ func resourceDbaasMongoUserDelete(ctx context.Context, d *schema.ResourceData, m
 	username := d.Get("username").(string)
 	apiResponse, err := client.DeleteUser(ctx, clusterId, username)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while deleting the Mongo user: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while deleting the Mongo user: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	// Wait, catching any errors
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsUserDeleted)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while waiting for the Mongo user: to be deleted, error: %s", err), &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while waiting for the Mongo user: to be deleted, error: %w", err), &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete})
 	}
 
 	d.SetId("")
@@ -214,7 +214,7 @@ func resourceDbaasMongoUserImporter(ctx context.Context, d *schema.ResourceData,
 
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 2 {
-		return nil, diagutil.ToError(d, "invalid import format:, expecting the following format: {clusterID}/{username}", nil)
+		return nil, diagutil.ToError(d, fmt.Errorf("invalid import format:, expecting the following format: {clusterID}/{username}"), nil)
 	}
 	clusterID := parts[0]
 	username := parts[1]
@@ -223,12 +223,12 @@ func resourceDbaasMongoUserImporter(ctx context.Context, d *schema.ResourceData,
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Sprintf("unable to find MongoDB user: %s, cluster ID: %s", username, clusterID), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return nil, diagutil.ToError(d, fmt.Errorf("unable to find MongoDB user: %s, cluster ID: %s", username, clusterID), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
-		return nil, diagutil.ToError(d, fmt.Sprintf("error occurred while fetching MongoDB user: %s, cluster ID: %s, error: %s", username, clusterID, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return nil, diagutil.ToError(d, fmt.Errorf("error occurred while fetching MongoDB user: %s, cluster ID: %s, error: %w", username, clusterID, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 	if err := dbaas.SetUserMongoData(d, &user); err != nil {
-		return nil, diagutil.ToError(d, err.Error(), nil)
+		return nil, diagutil.ToError(d, err, nil)
 	}
 	if err := d.Set("cluster_id", clusterID); err != nil {
 		return nil, utils.GenerateSetError("MongoDB user", "cluster_id", err)
