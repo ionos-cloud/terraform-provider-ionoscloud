@@ -13,7 +13,7 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	bundleclient "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 func resourceNSG() *schema.Resource {
@@ -68,14 +68,14 @@ func resourceNSGCreate(ctx context.Context, d *schema.ResourceData, meta any) di
 	apiResponse.LogInfo()
 	if err != nil {
 		requestLocation, _ := apiResponse.Location()
-		return utils.ToDiags(d, fmt.Sprintf("an error occurred while creating a Network Security Group for datacenter dcID: %s, %s", datacenterID, err), &utils.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while creating a Network Security Group for datacenter dcID: %s, %s", datacenterID, err), &diagutil.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 	}
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
-		return utils.ToDiags(d, fmt.Sprintf("an error occurred while waiting for Network Security Group to be created for datacenter dcID: %s,  %s", datacenterID, errState), &utils.DiagsOpts{Timeout: schema.TimeoutCreate})
+		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while waiting for Network Security Group to be created for datacenter dcID: %s,  %s", datacenterID, errState), &diagutil.DiagsOpts{Timeout: schema.TimeoutCreate})
 	}
 	d.SetId(*securityGroup.Id)
 
-	return utils.ToDiags(d, setNSGData(d, &securityGroup).Error(), nil)
+	return diagutil.ToDiags(d, setNSGData(d, &securityGroup).Error(), nil)
 }
 
 func resourceNSGRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -85,11 +85,11 @@ func resourceNSGRead(ctx context.Context, d *schema.ResourceData, meta interface
 	securityGroup, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsFindById(ctx, datacenterID, d.Id()).Depth(2).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
-		return utils.ToDiags(d, fmt.Sprintf("an error occurred while retrieving a network security group: %s", err), nil)
+		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while retrieving a network security group: %s", err), nil)
 	}
 
 	if err := setNSGData(d, &securityGroup); err != nil {
-		return utils.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err.Error(), nil)
 	}
 	return nil
 }
@@ -112,11 +112,11 @@ func resourceNSGUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 	apiResponse.LogInfo()
 	if err != nil {
 		requestLocation, _ := apiResponse.Location()
-		return utils.ToDiags(d, fmt.Sprintf("an error occurred while updating network security group: dcID: %s", err), &utils.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while updating network security group: dcID: %s", err), &diagutil.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		return utils.ToDiags(d, fmt.Sprintf("an error occurred while waiting for Network Security Group to be updated for datacenter dcID: %s,  %s", datacenterID, errState), &utils.DiagsOpts{Timeout: schema.TimeoutUpdate})
+		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while waiting for Network Security Group to be updated for datacenter dcID: %s,  %s", datacenterID, errState), &diagutil.DiagsOpts{Timeout: schema.TimeoutUpdate})
 	}
 
 	return resourceNSGRead(ctx, d, meta)
@@ -131,11 +131,11 @@ func resourceNSGDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 	apiResponse.LogInfo()
 	if err != nil {
 		requestLocation, _ := apiResponse.Location()
-		return utils.ToDiags(d, fmt.Sprintf("an error occurred while deleting a network security group: %s", err), &utils.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while deleting a network security group: %s", err), &diagutil.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		return utils.ToDiags(d, fmt.Sprintf("an error occurred while waiting for Network Security Group to be deleted for datacenter dcID: %s,  %s", datacenterID, errState), &utils.DiagsOpts{Timeout: schema.TimeoutDelete})
+		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while waiting for Network Security Group to be deleted for datacenter dcID: %s,  %s", datacenterID, errState), &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete})
 	}
 
 	return nil
@@ -147,7 +147,7 @@ func resourceNSGImport(ctx context.Context, d *schema.ResourceData, meta interfa
 	parts := strings.Split(d.Id(), "/")
 
 	if len(parts) < 2 || parts[0] == "" || parts[1] == "" {
-		return nil, utils.ToError(d, "invalid import. Expecting {datacenter UUID}/{nsg UUID}", nil)
+		return nil, diagutil.ToError(d, "invalid import. Expecting {datacenter UUID}/{nsg UUID}", nil)
 	}
 
 	datacenterID := parts[0]
@@ -159,17 +159,17 @@ func resourceNSGImport(ctx context.Context, d *schema.ResourceData, meta interfa
 	if err != nil {
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, utils.ToError(d, fmt.Sprintf("unable to find Network Security Group %q", nsgID), nil)
+			return nil, diagutil.ToError(d, fmt.Sprintf("unable to find Network Security Group %q", nsgID), nil)
 		}
-		return nil, utils.ToError(d, fmt.Sprintf("an error occurred while retrieving the Network Security Group, %s", err), nil)
+		return nil, diagutil.ToError(d, fmt.Sprintf("an error occurred while retrieving the Network Security Group, %s", err), nil)
 	}
 
 	log.Printf("[INFO] Datacenter found: %+v", nsg)
 	if err = d.Set("datacenter_id", datacenterID); err != nil {
-		return nil, utils.ToError(d, err.Error(), nil)
+		return nil, diagutil.ToError(d, err.Error(), nil)
 	}
 	if err = setNSGData(d, &nsg); err != nil {
-		return nil, utils.ToError(d, err.Error(), nil)
+		return nil, diagutil.ToError(d, err.Error(), nil)
 	}
 
 	return []*schema.ResourceData{d}, nil

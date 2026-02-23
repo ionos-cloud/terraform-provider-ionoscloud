@@ -9,7 +9,7 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 func dataSourceSnapshot() *schema.Resource {
@@ -113,10 +113,10 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta in
 	size, sizeOk := d.GetOk("size")
 
 	if idOk && nameOk {
-		return utils.ToDiags(d, "id and name cannot be both specified in the same time", nil)
+		return diagutil.ToDiags(d, "id and name cannot be both specified in the same time", nil)
 	}
 	if !idOk && !nameOk {
-		return utils.ToDiags(d, "please provide either the server id or name", nil)
+		return diagutil.ToDiags(d, "please provide either the server id or name", nil)
 	}
 
 	var snapshot ionoscloud.Snapshot
@@ -128,7 +128,7 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta in
 		snapshot, apiResponse, err = client.SnapshotsApi.SnapshotsFindById(ctx, id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching the snapshot with ID %s: %s", id.(string), err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching the snapshot with ID %s: %s", id.(string), err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 	} else {
 		var results []ionoscloud.Snapshot
@@ -137,7 +137,7 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta in
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching IonosCloud locations %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching IonosCloud locations %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 
 		if snapshots.Items != nil {
@@ -171,16 +171,16 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta in
 		}
 
 		if results == nil || len(results) == 0 {
-			return utils.ToDiags(d, fmt.Sprintf("no snapshot found with the specified criteria: name = %s, location = %s, size = %v", name.(string), location.(string), size.(int)), nil)
+			return diagutil.ToDiags(d, fmt.Sprintf("no snapshot found with the specified criteria: name = %s, location = %s, size = %v", name.(string), location.(string), size.(int)), nil)
 		} else if len(results) > 1 {
-			return utils.ToDiags(d, fmt.Sprintf("more than one snapshot found with the specified criteria: name = %s, location = %s, size = %v", name.(string), location.(string), size.(int)), nil)
+			return diagutil.ToDiags(d, fmt.Sprintf("more than one snapshot found with the specified criteria: name = %s, location = %s, size = %v", name.(string), location.(string), size.(int)), nil)
 		} else {
 			snapshot = results[0]
 		}
 	}
 
 	if err = setSnapshotData(d, &snapshot); err != nil {
-		return utils.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err.Error(), nil)
 	}
 
 	return nil

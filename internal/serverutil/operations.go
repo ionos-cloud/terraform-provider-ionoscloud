@@ -11,6 +11,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 func SetServerVolumeProperties(volume ionoscloud.Volume) map[string]interface{} {
@@ -52,12 +53,12 @@ func ResourceCommonServerDelete(ctx context.Context, d *schema.ResourceData, met
 	}
 	if err != nil {
 		requestLocation, _ := apiResponse.Location()
-		return utils.ToDiags(d, fmt.Sprintf("an error occurred while deleting a server: %s", err), &utils.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while deleting a server: %s", err), &diagutil.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		return utils.ToDiags(d, fmt.Sprintf("error getting state change for server delete %s", errState), &utils.DiagsOpts{Timeout: schema.TimeoutDelete})
+		return diagutil.ToDiags(d, fmt.Sprintf("error getting state change for server delete %s", errState), &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete})
 	}
 
 	d.SetId("")

@@ -13,7 +13,7 @@ import (
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 func dataSourceDNSZone() *schema.Resource {
@@ -69,13 +69,13 @@ func dataSourceZoneRead(ctx context.Context, d *schema.ResourceData, meta interf
 	name := nameValue.(string)
 
 	if idOk && nameOk {
-		return utils.ToDiags(d, "ID and name cannot be both specified at the same time", nil)
+		return diagutil.ToDiags(d, "ID and name cannot be both specified at the same time", nil)
 	}
 	if !idOk && !nameOk {
-		return utils.ToDiags(d, "please provide either the DNS Zone ID or name", nil)
+		return diagutil.ToDiags(d, "please provide either the DNS Zone ID or name", nil)
 	}
 	if partialMatch && !nameOk {
-		return utils.ToDiags(d, "partial_match can only be used together with the name attribute", nil)
+		return diagutil.ToDiags(d, "partial_match can only be used together with the name attribute", nil)
 	}
 
 	var zone dns.ZoneRead
@@ -85,7 +85,7 @@ func dataSourceZoneRead(ctx context.Context, d *schema.ResourceData, meta interf
 	if idOk {
 		zone, apiResponse, err = client.GetZoneById(ctx, id)
 		if err != nil {
-			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching the DNS Zone with ID: %s, error: %s", id, err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching the DNS Zone with ID: %s, error: %s", id, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 	} else {
 		var results []dns.ZoneRead
@@ -96,7 +96,7 @@ func dataSourceZoneRead(ctx context.Context, d *schema.ResourceData, meta interf
 			// is true.
 			zones, apiResponse, err := client.ListZones(ctx, name)
 			if err != nil {
-				return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching DNS Zones: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+				return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching DNS Zones: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 			}
 			results = zones.Items
 		} else {
@@ -105,7 +105,7 @@ func dataSourceZoneRead(ctx context.Context, d *schema.ResourceData, meta interf
 			// filter.zoneName only does a partial match.
 			zones, apiResponse, err := client.ListZones(ctx, "")
 			if err != nil {
-				return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching DNS Zones: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+				return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching DNS Zones: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 			}
 			for _, zoneItem := range zones.Items {
 				// Since each zone has a unique name, there is no need to keep on searching if
@@ -119,16 +119,16 @@ func dataSourceZoneRead(ctx context.Context, d *schema.ResourceData, meta interf
 			}
 		}
 		if results == nil || len(results) == 0 {
-			return utils.ToDiags(d, fmt.Sprintf("no DNS Zone found with the specified name = %s", name), nil)
+			return diagutil.ToDiags(d, fmt.Sprintf("no DNS Zone found with the specified name = %s", name), nil)
 		} else if len(results) > 1 {
-			return utils.ToDiags(d, fmt.Sprintf("more than one DNS Zone found with the specified name = %s", name), nil)
+			return diagutil.ToDiags(d, fmt.Sprintf("more than one DNS Zone found with the specified name = %s", name), nil)
 		} else {
 			zone = results[0]
 		}
 	}
 
 	if err := client.SetZoneData(d, zone); err != nil {
-		return utils.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err.Error(), nil)
 	}
 
 	return nil

@@ -13,7 +13,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	certService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 func dataSourceCertificateManagerAutoCertificate() *schema.Resource {
@@ -78,10 +78,10 @@ func dataSourceAutoCertificateRead(ctx context.Context, d *schema.ResourceData, 
 	name, nameOk := d.GetOk("name")
 
 	if idOk && nameOk {
-		return utils.ToDiags(d, "ID and name cannot be provided at the same time", nil)
+		return diagutil.ToDiags(d, "ID and name cannot be provided at the same time", nil)
 	}
 	if !idOk && !nameOk {
-		return utils.ToDiags(d, "please provide either the auto-certificate ID or name", nil)
+		return diagutil.ToDiags(d, "please provide either the auto-certificate ID or name", nil)
 	}
 
 	var autoCertificate certsdk.AutoCertificateRead
@@ -92,12 +92,12 @@ func dataSourceAutoCertificateRead(ctx context.Context, d *schema.ResourceData, 
 		id := id.(string)
 		autoCertificate, apiResponse, err = client.GetAutoCertificate(ctx, id, location)
 		if err != nil {
-			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching the auto-certificate with ID: %v, error: %s", id, err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching the auto-certificate with ID: %v, error: %s", id, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 	} else {
 		autoCertificates, apiResponse, err := client.ListAutoCertificates(ctx, location)
 		if err != nil {
-			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching auto-certificates: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching auto-certificates: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 		var results []certsdk.AutoCertificateRead
 		if autoCertificates.Items != nil {
@@ -109,16 +109,16 @@ func dataSourceAutoCertificateRead(ctx context.Context, d *schema.ResourceData, 
 		}
 
 		if len(results) == 0 {
-			return utils.ToDiags(d, fmt.Sprintf("no auto-certificate found with the specified name: %v", name), nil)
+			return diagutil.ToDiags(d, fmt.Sprintf("no auto-certificate found with the specified name: %v", name), nil)
 		}
 		if len(results) > 1 {
-			return utils.ToDiags(d, fmt.Sprintf("more than one auto-certificate found with the specified name: %v", name), nil)
+			return diagutil.ToDiags(d, fmt.Sprintf("more than one auto-certificate found with the specified name: %v", name), nil)
 		}
 		autoCertificate = results[0]
 	}
 
 	if err := certService.SetAutoCertificateData(d, autoCertificate); err != nil {
-		return utils.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err.Error(), nil)
 	}
 	return nil
 }

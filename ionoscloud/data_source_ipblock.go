@@ -6,8 +6,8 @@ import (
 	"log"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -115,23 +115,23 @@ func datasourceIpBlockRead(ctx context.Context, data *schema.ResourceData, meta 
 	var apiResponse *ionoscloud.APIResponse
 
 	if !idOk && !nameOk && !locationOk {
-		return utils.ToDiags(data, "either id, location or name must be set", nil)
+		return diagutil.ToDiags(data, "either id, location or name must be set", nil)
 	}
 	if idOk {
 		ipBlock, apiResponse, err = client.IPBlocksApi.IpblocksFindById(ctx, id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return utils.ToDiags(data, fmt.Sprintf("error getting ip block with id %s %s", id.(string), err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(data, fmt.Sprintf("error getting ip block with id %s %s", id.(string), err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 		if nameOk {
 			if ipBlock.Properties != nil && *ipBlock.Properties.Name != name {
-				return utils.ToDiags(data, fmt.Sprintf("name of ip block (UUID=%s, name=%s) does not match expected name: %s",
+				return diagutil.ToDiags(data, fmt.Sprintf("name of ip block (UUID=%s, name=%s) does not match expected name: %s",
 					*ipBlock.Id, *ipBlock.Properties.Name, name), nil)
 			}
 		}
 		if locationOk {
 			if ipBlock.Properties != nil && *ipBlock.Properties.Location != location {
-				return utils.ToDiags(data, fmt.Sprintf("location of ip block (UUID=%s, location=%s) does not match expected location: %s",
+				return diagutil.ToDiags(data, fmt.Sprintf("location of ip block (UUID=%s, location=%s) does not match expected location: %s",
 					*ipBlock.Id, *ipBlock.Properties.Location, location), nil)
 			}
 		}
@@ -142,7 +142,7 @@ func datasourceIpBlockRead(ctx context.Context, data *schema.ResourceData, meta 
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return utils.ToDiags(data, fmt.Sprintf("an error occurred while fetching ipBlocks: %s ", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(data, fmt.Sprintf("an error occurred while fetching ipBlocks: %s ", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 
 		var results []ionoscloud.IpBlock
@@ -155,7 +155,7 @@ func datasourceIpBlockRead(ctx context.Context, data *schema.ResourceData, meta 
 			}
 
 			if results == nil {
-				return utils.ToDiags(data, fmt.Sprintf("no ip block found with the specified criteria name %s", name), nil)
+				return diagutil.ToDiags(data, fmt.Sprintf("no ip block found with the specified criteria name %s", name), nil)
 			}
 		}
 
@@ -179,9 +179,9 @@ func datasourceIpBlockRead(ctx context.Context, data *schema.ResourceData, meta 
 		}
 
 		if results == nil || len(results) == 0 {
-			return utils.ToDiags(data, fmt.Sprintf("no ip block found with the specified criteria name = %s, location = %s", name, location), nil)
+			return diagutil.ToDiags(data, fmt.Sprintf("no ip block found with the specified criteria name = %s, location = %s", name, location), nil)
 		} else if len(results) > 1 {
-			return utils.ToDiags(data, fmt.Sprintf("more than one ip block found with the specified criteria name = %s, location = %s", name, location), nil)
+			return diagutil.ToDiags(data, fmt.Sprintf("more than one ip block found with the specified criteria name = %s, location = %s", name, location), nil)
 		} else {
 			ipBlock = results[0]
 		}
@@ -189,7 +189,7 @@ func datasourceIpBlockRead(ctx context.Context, data *schema.ResourceData, meta 
 	}
 
 	if err := IpBlockSetData(data, &ipBlock); err != nil {
-		return utils.ToDiags(data, err.Error(), nil)
+		return diagutil.ToDiags(data, err.Error(), nil)
 	}
 
 	return nil

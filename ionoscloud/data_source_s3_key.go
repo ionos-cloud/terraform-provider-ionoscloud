@@ -3,6 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -10,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 func dataSourceObjectStorageKey() *schema.Resource {
@@ -48,7 +49,7 @@ func dataSourceObjectStorageKeyRead(ctx context.Context, d *schema.ResourceData,
 
 	userIDItf, idOk := d.GetOk("user_id")
 	if !idOk {
-		return utils.ToDiags(d, "please provide the userID", nil)
+		return diagutil.ToDiags(d, "please provide the userID", nil)
 	}
 	userID := userIDItf.(string)
 	client := meta.(bundleclient.SdkBundle).CloudApiClient
@@ -62,30 +63,30 @@ func dataSourceObjectStorageKeyRead(ctx context.Context, d *schema.ResourceData,
 		apiResponse.LogInfo()
 		if err != nil {
 			if apiResponse.HttpNotFound() || isS3KeyNotFound(err) {
-				return utils.ToDiags(d, fmt.Sprintf("no storage key found with the specified criteria: userID = %s id = %s", userID, id), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+				return diagutil.ToDiags(d, fmt.Sprintf("no storage key found with the specified criteria: userID = %s id = %s", userID, id), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 			}
-			return utils.ToDiags(d, fmt.Sprintf("error while reading Object Storage key: %s, %s", err, userID), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Sprintf("error while reading Object Storage key: %s, %s", err, userID), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 	} else {
 		s3Keys, apiResponse, err = client.UserS3KeysApi.UmUsersS3keysGet(ctx, userID).Depth(2).Execute()
 		apiResponse.LogInfo()
 		if apiResponse.HttpNotFound() || isS3KeyNotFound(err) {
-			return utils.ToDiags(d, fmt.Sprintf("no storage key found with the specified criteria: userID = %s", userID), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Sprintf("no storage key found with the specified criteria: userID = %s", userID), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 		if err != nil {
-			return utils.ToDiags(d, fmt.Sprintf("error while reading Object Storage key: %s, %s", err, userID), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Sprintf("error while reading Object Storage key: %s, %s", err, userID), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 		if s3Keys.Items == nil || len(*s3Keys.Items) == 0 {
-			return utils.ToDiags(d, fmt.Sprintf("no storage key found with the specified criteria: userID = %s", userID), nil)
+			return diagutil.ToDiags(d, fmt.Sprintf("no storage key found with the specified criteria: userID = %s", userID), nil)
 		} else if len(*s3Keys.Items) > 1 {
-			return utils.ToDiags(d, fmt.Sprintf("more than one storage key found with the specified criteria: userID = %s", userID), nil)
+			return diagutil.ToDiags(d, fmt.Sprintf("more than one storage key found with the specified criteria: userID = %s", userID), nil)
 		}
 
 		s3Key = (*s3Keys.Items)[0]
 	}
 
 	if err := setS3KeyIdAndProperties(&s3Key, d); err != nil {
-		return utils.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err.Error(), nil)
 	}
 
 	return nil

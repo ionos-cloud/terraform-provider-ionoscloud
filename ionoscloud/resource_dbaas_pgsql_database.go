@@ -13,6 +13,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 func resourceDbaasPgSqlDatabase() *schema.Resource {
@@ -60,9 +61,9 @@ func resourceDbaasPgSqlDatabaseCreate(ctx context.Context, d *schema.ResourceDat
 
 	database, apiResponse, err := client.CreateDatabase(ctx, clusterId, request)
 	if err != nil {
-		return utils.ToDiags(d, fmt.Sprintf("an error occurred while creating the PgSql database named: %s inside the cluster with ID: %s, error: %s", name, clusterId, err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while creating the PgSql database named: %s inside the cluster with ID: %s, error: %s", name, clusterId, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
-	return utils.ToDiags(d, dbaas.SetDatabasePgSqlData(d, &database).Error(), nil)
+	return diagutil.ToDiags(d, dbaas.SetDatabasePgSqlData(d, &database).Error(), nil)
 }
 
 func resourceDbaasPgSqlDatabaseRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -76,10 +77,10 @@ func resourceDbaasPgSqlDatabaseRead(ctx context.Context, d *schema.ResourceData,
 			d.SetId("")
 			return nil
 		}
-		return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching the PgSql database: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching the PgSql database: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 	if err := dbaas.SetDatabasePgSqlData(d, &database); err != nil {
-		return utils.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err.Error(), nil)
 	}
 	return nil
 }
@@ -91,7 +92,7 @@ func resourceDbaasPgSqlDatabaseDelete(ctx context.Context, d *schema.ResourceDat
 	name := d.Get("name").(string)
 	apiResponse, err := client.DeleteDatabase(ctx, clusterId, name)
 	if err != nil {
-		return utils.ToDiags(d, err.Error(), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, err.Error(), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 	return nil
 }
@@ -99,7 +100,7 @@ func resourceDbaasPgSqlDatabaseDelete(ctx context.Context, d *schema.ResourceDat
 func resourceDbaasPgSqlDatabaseImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 2 {
-		return nil, utils.ToError(d, "invalid import format:, expecting the following format: {clusterID}/{databaseName}", nil)
+		return nil, diagutil.ToError(d, "invalid import format:, expecting the following format: {clusterID}/{databaseName}", nil)
 	}
 	clusterId := parts[0]
 	name := parts[1]
@@ -108,12 +109,12 @@ func resourceDbaasPgSqlDatabaseImporter(ctx context.Context, d *schema.ResourceD
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, utils.ToError(d, fmt.Sprintf("unable to find PgSql database: %s, cluster ID: %s", name, clusterId), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return nil, diagutil.ToError(d, fmt.Sprintf("unable to find PgSql database: %s, cluster ID: %s", name, clusterId), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
-		return nil, utils.ToError(d, fmt.Sprintf("error occurred while fetching PgSql database: %s, cluster ID: %s, error: %s", name, clusterId, err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return nil, diagutil.ToError(d, fmt.Sprintf("error occurred while fetching PgSql database: %s, cluster ID: %s, error: %s", name, clusterId, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 	if err := dbaas.SetDatabasePgSqlData(d, &database); err != nil {
-		return nil, utils.ToError(d, err.Error(), nil)
+		return nil, diagutil.ToError(d, err.Error(), nil)
 	}
 	if err := d.Set("cluster_id", clusterId); err != nil {
 		return nil, utils.GenerateSetError("PgSQL database", "cluster_id", err)

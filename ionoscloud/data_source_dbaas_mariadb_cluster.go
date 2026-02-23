@@ -12,7 +12,7 @@ import (
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 func dataSourceDBaaSMariaDBCluster() *schema.Resource {
@@ -135,10 +135,10 @@ func dataSourceMariaDBClusterRead(ctx context.Context, d *schema.ResourceData, m
 	location := d.Get("location").(string)
 
 	if idOk && nameOk {
-		return utils.ToDiags(d, "ID and display_name cannot be both specified at the same time", nil)
+		return diagutil.ToDiags(d, "ID and display_name cannot be both specified at the same time", nil)
 	}
 	if !idOk && !nameOk {
-		return utils.ToDiags(d, "please provide either the MariaDB cluster ID or display_name", nil)
+		return diagutil.ToDiags(d, "please provide either the MariaDB cluster ID or display_name", nil)
 	}
 
 	var cluster dbaas.ClusterResponse
@@ -149,12 +149,12 @@ func dataSourceMariaDBClusterRead(ctx context.Context, d *schema.ResourceData, m
 		/* search by ID */
 		cluster, apiResponse, err = client.GetCluster(ctx, id.(string), location)
 		if err != nil {
-			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching the MariaDB cluster with ID %v: %s", id.(string), err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching the MariaDB cluster with ID %v: %s", id.(string), err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 	} else {
 		clusters, apiResponse, err := client.ListClusters(ctx, "", location)
 		if err != nil {
-			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching MariaDB clusters: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching MariaDB clusters: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 
 		var results []dbaas.ClusterResponse
@@ -168,9 +168,9 @@ func dataSourceMariaDBClusterRead(ctx context.Context, d *schema.ResourceData, m
 		}
 
 		if results == nil || len(results) == 0 {
-			return utils.ToDiags(d, fmt.Sprintf("no MariaDB cluster found with the specified display name: %v", name), nil)
+			return diagutil.ToDiags(d, fmt.Sprintf("no MariaDB cluster found with the specified display name: %v", name), nil)
 		} else if len(results) > 1 {
-			return utils.ToDiags(d, fmt.Sprintf("more than one MariaDB cluster found with the specified criteria name: %v", name), nil)
+			return diagutil.ToDiags(d, fmt.Sprintf("more than one MariaDB cluster found with the specified criteria name: %v", name), nil)
 		} else {
 			cluster = results[0]
 		}
@@ -178,7 +178,7 @@ func dataSourceMariaDBClusterRead(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	if err := client.SetMariaDBClusterData(d, cluster); err != nil {
-		return utils.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err.Error(), nil)
 	}
 	return nil
 }

@@ -3,12 +3,14 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 func dataSourceDbaasPgSqlDatabases() *schema.Resource {
@@ -59,10 +61,10 @@ func dataSourceDbaasPgSqlReadDatabases(ctx context.Context, d *schema.ResourceDa
 
 	retrievedDatabases, _, err := client.GetDatabases(ctx, clusterId)
 	if err != nil {
-		return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching PgSql databases for the cluster with ID: %s, error: %s", clusterId, err), nil)
+		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching PgSql databases for the cluster with ID: %s, error: %s", clusterId, err), nil)
 	}
 	if retrievedDatabases.Items == nil {
-		return utils.ToDiags(d, fmt.Sprintf("expected a list of PgSql databases, but received 'nil' instead, cluster ID: %s", clusterId), nil)
+		return diagutil.ToDiags(d, fmt.Sprintf("expected a list of PgSql databases, but received 'nil' instead, cluster ID: %s", clusterId), nil)
 	}
 	var databases []interface{}
 	for _, retrievedDatabase := range retrievedDatabases.Items {
@@ -83,7 +85,7 @@ func dataSourceDbaasPgSqlReadDatabases(ctx context.Context, d *schema.ResourceDa
 		d.SetId(clusterId)
 	}
 	if err := d.Set("databases", databases); err != nil {
-		return utils.ToDiags(d, utils.GenerateSetError(resourceName, "databases", err).Error(), nil)
+		return diagutil.ToDiags(d, utils.GenerateSetError(resourceName, "databases", err).Error(), nil)
 	}
 	return nil
 }

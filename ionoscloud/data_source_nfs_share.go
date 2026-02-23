@@ -12,6 +12,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	nfs2 "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/nfs"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
@@ -136,10 +137,10 @@ func dataSourceNFSShareRead(ctx context.Context, d *schema.ResourceData, meta in
 	clusterID := d.Get("cluster_id").(string)
 
 	if idOk && nameOk {
-		return utils.ToDiags(d, "ID and name cannot be both specified at the same time", nil)
+		return diagutil.ToDiags(d, "ID and name cannot be both specified at the same time", nil)
 	}
 	if !idOk && !nameOk {
-		return utils.ToDiags(d, "please provide either the NFS Share ID or name", nil)
+		return diagutil.ToDiags(d, "please provide either the NFS Share ID or name", nil)
 	}
 
 	var share nfs.ShareRead
@@ -148,12 +149,12 @@ func dataSourceNFSShareRead(ctx context.Context, d *schema.ResourceData, meta in
 	if idOk {
 		share, apiResponse, err = client.GetNFSShareByID(ctx, clusterID, id, location)
 		if err != nil {
-			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching the NFS Share with ID: %s, error: %s", idValue, err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching the NFS Share with ID: %s, error: %s", idValue, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 	} else {
 		shares, apiResponse, err := client.ListNFSShares(ctx, d)
 		if err != nil {
-			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching NFS Shares: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching NFS Shares: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 
 		var results []nfs.ShareRead
@@ -165,16 +166,16 @@ func dataSourceNFSShareRead(ctx context.Context, d *schema.ResourceData, meta in
 
 		switch {
 		case len(results) == 0:
-			return utils.ToDiags(d, fmt.Sprintf("no NFS Share found with the specified name: %s", name), nil)
+			return diagutil.ToDiags(d, fmt.Sprintf("no NFS Share found with the specified name: %s", name), nil)
 		case len(results) > 1:
-			return utils.ToDiags(d, fmt.Sprintf("more than one NFS Share found with the specified name: %s", name), nil)
+			return diagutil.ToDiags(d, fmt.Sprintf("more than one NFS Share found with the specified name: %s", name), nil)
 		default:
 			share = results[0]
 		}
 	}
 
 	if err = client.SetNFSShareData(d, share); err != nil {
-		return utils.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err.Error(), nil)
 	}
 
 	return nil

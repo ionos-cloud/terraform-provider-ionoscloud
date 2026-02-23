@@ -17,7 +17,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapinic"
 	cloudapiflowlog "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/flowlog"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/nsg"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 func resourceNic() *schema.Resource {
@@ -186,14 +186,14 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	nic, err := cloudapinic.GetNicFromSchemaCreate(d, "")
 	if err != nil {
-		return utils.ToDiags(d, fmt.Sprintf("error occurred while getting nic from schema: %s", err), nil)
+		return diagutil.ToDiags(d, fmt.Sprintf("error occurred while getting nic from schema: %s", err), nil)
 	}
 
 	dcid := d.Get("datacenter_id").(string)
 	srvid := d.Get("server_id").(string)
 	createdNic, apiResponse, err := ns.Create(ctx, dcid, srvid, nic)
 	if err != nil {
-		return utils.ToDiags(d, fmt.Sprintf("error occurred while creating a nic: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Sprintf("error occurred while creating a nic: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	if createdNic.Id != nil {
@@ -229,11 +229,11 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 	})
 
 	if err != nil {
-		return utils.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err.Error(), nil)
 	}
 
 	if foundNic == nil || *foundNic.Id == "" {
-		return utils.ToDiags(d, fmt.Sprintf("could not find nic with id %s after creation ", *nic.Id), nil)
+		return diagutil.ToDiags(d, fmt.Sprintf("could not find nic with id %s after creation ", *nic.Id), nil)
 	}
 
 	return resourceNicRead(ctx, d, meta)
@@ -252,11 +252,11 @@ func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface
 			d.SetId("")
 			return nil
 		}
-		return utils.ToDiags(d, fmt.Sprintf("error occurred while fetching a nic: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Sprintf("error occurred while fetching a nic: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	if err := cloudapinic.NicSetData(d, nic); err != nil {
-		return utils.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err.Error(), nil)
 	}
 
 	return nil
@@ -291,7 +291,7 @@ func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 						if firstFlowLogId == "" {
 							_ = d.Set("flowlog", nil)
 						}
-						return utils.ToDiags(d, err.Error(), nil)
+						return diagutil.ToDiags(d, err.Error(), nil)
 					}
 				}
 			}
@@ -300,12 +300,12 @@ func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	nic, err := cloudapinic.GetNicFromSchema(d, "")
 	if err != nil {
-		return utils.ToDiags(d, fmt.Sprintf("update error occurred while getting nic from schema: %s", err), nil)
+		return diagutil.ToDiags(d, fmt.Sprintf("update error occurred while getting nic from schema: %s", err), nil)
 	}
 
 	_, apiResponse, err := ns.Update(ctx, dcID, srvID, nicID, *nic.Properties)
 	if err != nil {
-		return utils.ToDiags(d, fmt.Sprintf("error occurred while updating a nic: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Sprintf("error occurred while updating a nic: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 	if d.HasChange("security_groups_ids") {
 		if v, ok := d.GetOk("security_groups_ids"); ok {
@@ -328,7 +328,7 @@ func resourceNicDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 	nicid := d.Id()
 	apiResponse, err := ns.Delete(ctx, dcid, srvid, nicid)
 	if err != nil {
-		return utils.ToDiags(d, fmt.Sprintf("an error occurred while deleting a nic dcId %s %s", d.Get("datacenter_id").(string), err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while deleting a nic dcId %s %s", d.Get("datacenter_id").(string), err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 	d.SetId("")
 	return nil
@@ -337,7 +337,7 @@ func resourceNicDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 func resourceNicImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 3 || parts[0] == "" || parts[1] == "" {
-		return nil, utils.ToError(d, "invalid import. Expecting {datacenter}/{server}/{nic}", nil)
+		return nil, diagutil.ToError(d, "invalid import. Expecting {datacenter}/{server}/{nic}", nil)
 	}
 	dcId := parts[0]
 	sId := parts[1]
@@ -351,24 +351,24 @@ func resourceNicImport(ctx context.Context, d *schema.ResourceData, meta interfa
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, utils.ToError(d, fmt.Sprintf("lan does not exist%q", nicId), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return nil, diagutil.ToError(d, fmt.Sprintf("lan does not exist%q", nicId), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 
-		return nil, utils.ToError(d, fmt.Sprintf("an error occurred while trying to fetch the nic %q, error:%s", nicId, err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return nil, diagutil.ToError(d, fmt.Sprintf("an error occurred while trying to fetch the nic %q, error:%s", nicId, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 
 	}
 
 	err = d.Set("datacenter_id", dcId)
 	if err != nil {
-		return nil, utils.ToError(d, err.Error(), nil)
+		return nil, diagutil.ToError(d, err.Error(), nil)
 	}
 	err = d.Set("server_id", sId)
 	if err != nil {
-		return nil, utils.ToError(d, err.Error(), nil)
+		return nil, diagutil.ToError(d, err.Error(), nil)
 	}
 
 	if err := cloudapinic.NicSetData(d, &nic); err != nil {
-		return nil, utils.ToError(d, err.Error(), nil)
+		return nil, diagutil.ToError(d, err.Error(), nil)
 	}
 
 	log.Printf("[INFO] nic found: %+v", nic)

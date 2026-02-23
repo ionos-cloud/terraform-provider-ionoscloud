@@ -13,6 +13,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 func resourceCertificateManager() *schema.Resource {
@@ -99,18 +100,18 @@ func resourceCertificateManagerCreate(ctx context.Context, d *schema.ResourceDat
 
 	certPostDto, err := cert.GetCertPostDto(d)
 	if err != nil {
-		return utils.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err.Error(), nil)
 	}
 	certificateDto, apiResponse, err := client.CreateCertificate(ctx, *certPostDto)
 	if err != nil {
 		d.SetId("")
-		return utils.ToDiags(d, fmt.Sprintf("error creating certificate: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Sprintf("error creating certificate: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	d.SetId(certificateDto.Id)
 
 	if err = utils.WaitForResourceToBeReady(ctx, d, client.IsCertReady); err != nil {
-		return utils.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err.Error(), nil)
 	}
 
 	return resourceCertificateManagerRead(ctx, d, meta)
@@ -126,13 +127,13 @@ func resourceCertificateManagerRead(ctx context.Context, d *schema.ResourceData,
 			d.SetId("")
 			return nil
 		}
-		return utils.ToDiags(d, err.Error(), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, err.Error(), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	log.Printf("[INFO] Successfully retrieved certificate %s: %+v", d.Id(), certDto)
 
 	if err := cert.SetCertificateData(d, &certDto); err != nil {
-		return utils.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err.Error(), nil)
 	}
 	return nil
 }
@@ -144,11 +145,11 @@ func resourceCertificateManagerUpdate(ctx context.Context, d *schema.ResourceDat
 
 	_, apiResponse, err := client.UpdateCertificate(ctx, d.Id(), *certPatchDto)
 	if err != nil {
-		return utils.ToDiags(d, fmt.Sprintf("an error occurred while updating certificate with, %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while updating certificate with, %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	if err = utils.WaitForResourceToBeReady(ctx, d, client.IsCertReady); err != nil {
-		return utils.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err.Error(), nil)
 	}
 
 	return resourceCertificateManagerRead(ctx, d, meta)
@@ -159,12 +160,12 @@ func resourceCertificateManagerDelete(ctx context.Context, d *schema.ResourceDat
 
 	apiResponse, err := client.DeleteCertificate(ctx, d.Id())
 	if err != nil {
-		return utils.ToDiags(d, fmt.Sprintf("an error occurred while deleting the certificate: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while deleting the certificate: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsCertDeleted)
 	if err != nil {
-		return utils.ToDiags(d, fmt.Sprintf("deleting %s", err), &utils.DiagsOpts{Timeout: schema.TimeoutDelete})
+		return diagutil.ToDiags(d, fmt.Sprintf("deleting %s", err), &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete})
 	}
 
 	log.Printf("[INFO] Successfully deleted certificate: %s", d.Id())
@@ -182,13 +183,13 @@ func resourceCertificateManagerImport(ctx context.Context, d *schema.ResourceDat
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, utils.ToError(d, fmt.Sprintf("unable to find cert %q", certId), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return nil, diagutil.ToError(d, fmt.Sprintf("unable to find cert %q", certId), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
-		return nil, utils.ToError(d, fmt.Sprintf("an error occurred while retrieving the cert %q, %s", certId, err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return nil, diagutil.ToError(d, fmt.Sprintf("an error occurred while retrieving the cert %q, %s", certId, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	if err := cert.SetCertificateData(d, &certDto); err != nil {
-		return nil, utils.ToError(d, err.Error(), nil)
+		return nil, diagutil.ToError(d, err.Error(), nil)
 	}
 	return []*schema.ResourceData{d}, nil
 }

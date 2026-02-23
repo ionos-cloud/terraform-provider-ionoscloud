@@ -12,7 +12,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/vpn"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 func dataSourceVpnIPSecTunnel() *schema.Resource {
@@ -153,10 +153,10 @@ func dataSourceVpnIPSecTunnelRead(ctx context.Context, d *schema.ResourceData, m
 	location := d.Get("location").(string)
 
 	if idOk && nameOk {
-		return utils.ToDiags(d, "ID and name cannot be both specified at the same time", nil)
+		return diagutil.ToDiags(d, "ID and name cannot be both specified at the same time", nil)
 	}
 	if !idOk && !nameOk {
-		return utils.ToDiags(d, "please provide either the IPSec Gateway Tunnel ID or name", nil)
+		return diagutil.ToDiags(d, "please provide either the IPSec Gateway Tunnel ID or name", nil)
 	}
 
 	var tunnel vpnSdk.IPSecTunnelRead
@@ -165,13 +165,13 @@ func dataSourceVpnIPSecTunnelRead(ctx context.Context, d *schema.ResourceData, m
 	if idOk {
 		tunnel, apiResponse, err = client.GetIPSecTunnelByID(ctx, id, gatewayID, location)
 		if err != nil {
-			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching the IPSec Gateway Tunnel with ID: %s, error: %s", id, err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching the IPSec Gateway Tunnel with ID: %s, error: %s", id, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 	} else {
 		var results []vpnSdk.IPSecTunnelRead
 		gateways, apiResponse, err := client.ListIPSecTunnel(ctx, gatewayID, location)
 		if err != nil {
-			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching IPSec Gateway Tunnels: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching IPSec Gateway Tunnels: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 
 		for _, recordItem := range gateways.Items {
@@ -186,19 +186,19 @@ func dataSourceVpnIPSecTunnelRead(ctx context.Context, d *schema.ResourceData, m
 
 		switch {
 		case len(results) == 0:
-			return utils.ToDiags(d, fmt.Sprintf("no VPN IPSec Gateway Tunnel found with the specified name = %s", name), nil)
+			return diagutil.ToDiags(d, fmt.Sprintf("no VPN IPSec Gateway Tunnel found with the specified name = %s", name), nil)
 		case len(results) > 1:
-			return utils.ToDiags(d, fmt.Sprintf("more than one VPN IPSec Gateway Tunnel found with the specified name = %s", name), nil)
+			return diagutil.ToDiags(d, fmt.Sprintf("more than one VPN IPSec Gateway Tunnel found with the specified name = %s", name), nil)
 		default:
 			tunnel = results[0]
 		}
 	}
 	if err := d.Set("id", tunnel.Id); err != nil {
-		return utils.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err.Error(), nil)
 	}
 
 	if err := vpn.SetIPSecTunnelData(d, tunnel); err != nil {
-		return utils.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err.Error(), nil)
 	}
 	return nil
 }

@@ -13,7 +13,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 func dataSourceDbassMongoTemplate() *schema.Resource {
@@ -71,14 +71,14 @@ func dataSourceDbassMongoTemplateRead(ctx context.Context, d *schema.ResourceDat
 
 	// Initial checks.
 	if idOk && nameOk {
-		return utils.ToDiags(d, "name and ID cannot be both specified at the same time", nil)
+		return diagutil.ToDiags(d, "name and ID cannot be both specified at the same time", nil)
 	}
 	if !idOk && !nameOk {
-		return utils.ToDiags(d, "please provide a template ID or name", nil)
+		return diagutil.ToDiags(d, "please provide a template ID or name", nil)
 	}
 	retrievedTemplates, apiResponse, err := client.GetTemplates(ctx)
 	if err != nil {
-		return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching dbaas mongo templates: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching dbaas mongo templates: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	var templates []mongo.TemplateResponse
@@ -93,16 +93,16 @@ func dataSourceDbassMongoTemplateRead(ctx context.Context, d *schema.ResourceDat
 		}
 	}
 	if templates == nil {
-		return utils.ToDiags(d, "no DBaaS Mongo Template found with the specified criteria", nil)
+		return diagutil.ToDiags(d, "no DBaaS Mongo Template found with the specified criteria", nil)
 	} else if len(templates) > 1 {
-		return utils.ToDiags(d, "more than one DBaaS Mongo Template found for the specified search criteria", nil)
+		return diagutil.ToDiags(d, "more than one DBaaS Mongo Template found for the specified search criteria", nil)
 	}
 
 	if err := d.Set("id", *templates[0].Id); err != nil {
-		return utils.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err.Error(), nil)
 	}
 	if err := dbaasService.SetMongoDBTemplateData(d, templates[0]); err != nil {
-		return utils.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err.Error(), nil)
 	}
 	return nil
 }

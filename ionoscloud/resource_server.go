@@ -17,6 +17,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/slice"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
@@ -463,7 +464,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 
 	serverReq, err := initializeCreateRequests(d)
 	if err != nil {
-		return utils.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err.Error(), nil)
 	}
 
 	serverType := d.Get("type").(string)
@@ -473,13 +474,13 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	// create volume object with data to be used for image
 	volume, err := getVolumeData(d, "volume.0.", serverType)
 	if err != nil {
-		return utils.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err.Error(), nil)
 	}
 	if volume.Type != nil && *volume.Type != "" {
 		// get image and imageAlias
 		image, imageAlias, err := getImage(ctx, client, d, *volume)
 		if err != nil {
-			return utils.ToDiags(d, err.Error(), nil)
+			return diagutil.ToDiags(d, err.Error(), nil)
 		}
 
 		// add remaining properties in volume (dependent in image and imageAlias)
@@ -496,7 +497,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		if backupUnitID, ok := d.GetOk("volume.0.backup_unit_id"); ok {
 			if utils.IsValidUUID(backupUnitID.(string)) {
 				if image == "" && imageAlias == "" {
-					return utils.ToDiags(d, "it is mandatory to provide either public image or imageAlias in conjunction with backup unit id property", nil)
+					return diagutil.ToDiags(d, "it is mandatory to provide either public image or imageAlias in conjunction with backup unit id property", nil)
 				}
 				backupUnitID := backupUnitID.(string)
 				volume.BackupunitId = &backupUnitID
@@ -505,7 +506,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 
 		if userData, ok := d.GetOk("volume.0.user_data"); ok {
 			if image == "" && imageAlias == "" {
-				return utils.ToDiags(d, "it is mandatory to provide either public image or imageAlias that has cloud-init compatibility in conjunction with backup unit id property ", nil)
+				return diagutil.ToDiags(d, "it is mandatory to provide either public image or imageAlias that has cloud-init compatibility in conjunction with backup unit id property ", nil)
 			}
 			userData := userData.(string)
 			volume.UserData = &userData
@@ -534,7 +535,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 				nicPath := fmt.Sprintf("nic.%d.", nicIndex)
 				nic, err := cloudapinic.GetNicFromSchemaCreate(d, nicPath)
 				if err != nil {
-					return utils.ToDiags(d, fmt.Sprintf("create error occurred while getting nic from schema: %s", err), nil)
+					return diagutil.ToDiags(d, fmt.Sprintf("create error occurred while getting nic from schema: %s", err), nil)
 				}
 				*serverReq.Entities.Nics.Items = append(*serverReq.Entities.Nics.Items, nic)
 				fwRulesPath := nicPath + "firewall"
@@ -552,7 +553,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 						fwRulesProperties := make([]ionoscloud.FirewallruleProperties, len(fwRulesIntf))
 						err = utils.DecodeInterfaceToStruct(fwRulesIntf, fwRulesProperties)
 						if err != nil {
-							return utils.ToDiags(d, fmt.Sprintf("could not decode from %+v to slice of firewall rules %s", fwRulesIntf, err), nil)
+							return diagutil.ToDiags(d, fmt.Sprintf("could not decode from %+v to slice of firewall rules %s", fwRulesIntf, err), nil)
 						}
 						for idx := range fwRulesProperties {
 							cloudapifirewall.PropUnsetSetFieldIfNotSetInSchema(&fwRulesProperties[idx], fwRulesPath, d)
@@ -572,7 +573,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		requestLocation, _ := apiResponse.Location()
-		return utils.ToDiags(d, fmt.Sprintf("error creating server: (%s)", err), &utils.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Sprintf("error creating server: (%s)", err), &diagutil.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 	}
 
 	if postServer.Id != nil {
@@ -584,7 +585,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 			log.Printf("[DEBUG] failed to create server resource")
 			d.SetId("")
 		}
-		return utils.ToDiags(d, fmt.Sprintf("error waiting for state change for server creation %s", errState), &utils.DiagsOpts{Timeout: schema.TimeoutCreate})
+		return diagutil.ToDiags(d, fmt.Sprintf("error waiting for state change for server creation %s", errState), &diagutil.DiagsOpts{Timeout: schema.TimeoutCreate})
 	}
 	if v, ok := d.GetOk("security_groups_ids"); ok {
 		raw := v.(*schema.Set).List()
@@ -597,7 +598,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	// Logic for labels creation
 	ls := LabelsService{ctx: ctx, client: client}
 	if err := ls.datacentersServersLabelsCreate(datacenterId, *postServer.Id, d.Get("label")); err != nil {
-		return utils.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err.Error(), nil)
 	}
 
 	// get additional data for schema
@@ -606,7 +607,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 
 	if err != nil {
 		requestLocation, _ := apiResponse.Location()
-		return utils.ToDiags(d, fmt.Sprintf("error fetching server: %s", err), &utils.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Sprintf("error fetching server: %s", err), &diagutil.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 	}
 	if foundServer.Entities.Nics.Items != nil {
 		if len(*foundServer.Entities.Nics.Items) > 0 {
@@ -626,13 +627,13 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 						orderedRuleIds = cloudapifirewall.ExtractOrderedFirewallIds(foundRules, sentRules)
 						if len(orderedRuleIds) > 0 {
 							if err := d.Set("firewallrule_id", orderedRuleIds[0]); err != nil {
-								return utils.ToDiags(d, err.Error(), nil)
+								return diagutil.ToDiags(d, err.Error(), nil)
 							}
 						}
 					}
 					if len(orderedRuleIds) > 0 {
 						if err := cloudapifirewall.SetIdsInSchema(d, orderedRuleIds); err != nil {
-							return utils.ToDiags(d, err.Error(), nil)
+							return diagutil.ToDiags(d, err.Error(), nil)
 						}
 					}
 				}
@@ -641,7 +642,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 			if foundFirstNic.Id != nil {
 				err := d.Set("primary_nic", *foundFirstNic.Id)
 				if err != nil {
-					return utils.ToDiags(d, fmt.Sprintf("error while setting primary nic: %s", err), nil)
+					return diagutil.ToDiags(d, fmt.Sprintf("error while setting primary nic: %s", err), nil)
 				}
 
 				if v, ok := d.GetOk("nic.0.security_groups_ids"); ok {
@@ -660,7 +661,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 					len(*firstNicIps) > 0 {
 					log.Printf("[DEBUG] set primary_ip to %s", (*firstNicIps)[0])
 					if err := d.Set("primary_ip", (*firstNicIps)[0]); err != nil {
-						return utils.ToDiags(d, utils.GenerateSetError("ionoscloud_server", "primary_ip", err).Error(), nil)
+						return diagutil.ToDiags(d, utils.GenerateSetError("ionoscloud_server", "primary_ip", err).Error(), nil)
 					}
 				}
 				var volumeItems *[]ionoscloud.Volume
@@ -698,7 +699,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 
 		if err := d.Set("inline_volume_ids", inlineVolumeIds); err != nil {
-			return utils.ToDiags(d, utils.GenerateSetError("server", "inline_volume_ids", err).Error(), nil)
+			return diagutil.ToDiags(d, utils.GenerateSetError("server", "inline_volume_ids", err).Error(), nil)
 		}
 	}
 
@@ -709,7 +710,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		if !strings.EqualFold(initialState, constant.VMStateStart) {
 			err := ss.Stop(ctx, datacenterId, d.Id(), serverType)
 			if err != nil {
-				return utils.ToDiags(d, err.Error(), nil)
+				return diagutil.ToDiags(d, err.Error(), nil)
 			}
 		}
 	}
@@ -731,10 +732,10 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 			d.SetId("")
 			return nil
 		}
-		return utils.ToDiags(d, fmt.Sprintf("error occurred while fetching a server: %s", err), nil)
+		return diagutil.ToDiags(d, fmt.Sprintf("error occurred while fetching a server: %s", err), nil)
 	}
 	if err := setResourceServerData(ctx, client, d, &server); err != nil {
-		return utils.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err.Error(), nil)
 	}
 
 	return nil
@@ -785,17 +786,17 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 
 	currentVmState, err := ss.GetVmState(ctx, dcId, d.Id())
 	if err != nil {
-		return utils.ToDiags(d, fmt.Sprintf("could not retrieve server vmState: %s", err), nil)
+		return diagutil.ToDiags(d, fmt.Sprintf("could not retrieve server vmState: %s", err), nil)
 	}
 	if strings.EqualFold(currentVmState, constant.CubeVMStateStop) && !d.HasChange("vm_state") {
-		return utils.ToDiags(d, "cannot update a suspended Cube Server, must change the state to RUNNING first", nil)
+		return diagutil.ToDiags(d, "cannot update a suspended Cube Server, must change the state to RUNNING first", nil)
 	}
 
 	if d.HasChange("vm_state") {
 		_, newState := d.GetChange("vm_state")
 		err := ss.UpdateVmState(ctx, dcId, d.Id(), newState.(string))
 		if err != nil && !errors.Is(err, cloudapiserver.ErrSuspendCubeLast) {
-			return utils.ToDiags(d, err.Error(), nil)
+			return diagutil.ToDiags(d, err.Error(), nil)
 		}
 	}
 
@@ -852,11 +853,11 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 
 	if err != nil {
 		requestLocation, _ := apiResponse.Location()
-		return utils.ToDiags(d, fmt.Sprintf("error occurred while updating server: %s", err), &utils.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Sprintf("error occurred while updating server: %s", err), &diagutil.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		return utils.ToDiags(d, errState.Error(), &utils.DiagsOpts{Timeout: schema.TimeoutUpdate})
+		return diagutil.ToDiags(d, errState.Error(), &diagutil.DiagsOpts{Timeout: schema.TimeoutUpdate})
 	}
 
 	if d.HasChange("security_groups_ids") {
@@ -882,7 +883,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 				logApiRequestTime(apiResponse)
 				if err != nil {
 					requestLocation, _ := apiResponse.Location()
-					return utils.ToDiags(d, fmt.Sprintf("an error occurred while getting a volume dcId: %s ID: %s Response: %s", dcId, volumeId, err), &utils.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
+					return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while getting a volume dcId: %s ID: %s Response: %s", dcId, volumeId, err), &diagutil.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 				}
 				if v, ok := d.GetOk(volumePath + "name"); ok {
 					vStr := v.(string)
@@ -912,11 +913,11 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 
 				if err != nil {
 					requestLocation, _ := apiResponse.Location()
-					return utils.ToDiags(d, fmt.Sprintf("error patching volume: (%s)", err), &utils.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
+					return diagutil.ToDiags(d, fmt.Sprintf("error patching volume: (%s)", err), &diagutil.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 				}
 
 				if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-					return utils.ToDiags(d, errState.Error(), &utils.DiagsOpts{Timeout: schema.TimeoutUpdate})
+					return diagutil.ToDiags(d, errState.Error(), &diagutil.DiagsOpts{Timeout: schema.TimeoutUpdate})
 				}
 			}
 		}
@@ -938,14 +939,14 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		if deleteNic {
 			apiResponse, err = ns.Delete(ctx, d.Get("datacenter_id").(string), *server.Id, d.Get("primary_nic").(string))
 			if err != nil {
-				return utils.ToDiags(d, fmt.Sprintf("error deleting nic (%s)", err), nil)
+				return diagutil.ToDiags(d, fmt.Sprintf("error deleting nic (%s)", err), nil)
 			}
 			err = d.Set("nic", nil)
 			if err := d.Set("primary_nic", ""); err != nil {
-				return utils.ToDiags(d, err.Error(), nil)
+				return diagutil.ToDiags(d, err.Error(), nil)
 			}
 			if err := d.Set("primary_ip", ""); err != nil {
-				return utils.ToDiags(d, err.Error(), nil)
+				return diagutil.ToDiags(d, err.Error(), nil)
 			}
 		} else {
 			primaryNic := d.Get("primary_nic").(string)
@@ -974,7 +975,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 
 			ips, err := cloudapinic.GetNicIPsFromSchema(d, "nic.0.ips")
 			if err != nil {
-				return utils.ToDiags(d, err.Error(), nil)
+				return diagutil.ToDiags(d, err.Error(), nil)
 			}
 			if ips != nil {
 				nicProperties.Ips = &ips
@@ -982,7 +983,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 
 			ipv6IPs, err := cloudapinic.GetNicIPsFromSchema(d, "nic.0.ipv6_ips")
 			if err != nil {
-				return utils.ToDiags(d, err.Error(), nil)
+				return diagutil.ToDiags(d, err.Error(), nil)
 			}
 			if ipv6IPs != nil {
 				nicProperties.Ipv6Ips = &ipv6IPs
@@ -1034,7 +1035,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			logApiRequestTime(apiResponse)
 			if err != nil {
 				requestLocation, _ := apiResponse.Location()
-				return utils.ToDiags(d, fmt.Sprintf("error nic (%s)", err), &utils.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
+				return diagutil.ToDiags(d, fmt.Sprintf("error nic (%s)", err), &diagutil.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 			}
 
 			if d.HasChange("nic.0.security_groups_ids") {
@@ -1054,17 +1055,17 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 				fs := cloudapifirewall.Service{Client: client, Meta: meta, D: d}
 				foundRules, err := fs.Get(ctx, d.Get("datacenter_id").(string), *server.Id, *createdNic.Id, 1)
 				if err != nil {
-					return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching firewall rules: %s", err), nil)
+					return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching firewall rules: %s", err), nil)
 				}
 				fwRuleIds = cloudapifirewall.ExtractOrderedFirewallIds(foundRules, firewallRules)
 			}
 			if err := cloudapifirewall.SetIdsInSchema(d, fwRuleIds); err != nil {
-				return utils.ToDiags(d, err.Error(), nil)
+				return diagutil.ToDiags(d, err.Error(), nil)
 			}
 
 			if createNic && createdNic.Id != nil {
 				if err := d.Set("primary_nic", *createdNic.Id); err != nil {
-					return utils.ToDiags(d, err.Error(), nil)
+					return diagutil.ToDiags(d, err.Error(), nil)
 				}
 			}
 		}
@@ -1081,11 +1082,11 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		labelsToBeDeleted := oldLabelsData.(*schema.Set).Difference(newLabelsData.(*schema.Set))
 
 		if err := ls.datacentersServersLabelsDelete(dcId, d.Id(), labelsToBeDeleted); err != nil {
-			return utils.ToDiags(d, err.Error(), nil)
+			return diagutil.ToDiags(d, err.Error(), nil)
 		}
 
 		if err := ls.datacentersServersLabelsCreate(dcId, d.Id(), labelsToBeCreated); err != nil {
-			return utils.ToDiags(d, err.Error(), nil)
+			return diagutil.ToDiags(d, err.Error(), nil)
 		}
 	}
 
@@ -1093,14 +1094,14 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	if d.HasChange("vm_state") {
 		serverType, err := ss.GetServerType(ctx, dcId, d.Id())
 		if err != nil {
-			return utils.ToDiags(d, err.Error(), nil)
+			return diagutil.ToDiags(d, err.Error(), nil)
 		}
 
 		_, newVmState := d.GetChange("vm_state")
 		if strings.EqualFold(serverType, constant.CubeType) && strings.EqualFold(newVmState.(string), constant.CubeVMStateStop) {
 			err := ss.Stop(ctx, dcId, d.Id(), constant.CubeType)
 			if err != nil {
-				return utils.ToDiags(d, err.Error(), nil)
+				return diagutil.ToDiags(d, err.Error(), nil)
 			}
 		}
 
@@ -1121,11 +1122,11 @@ func deleteInlineVolumes(ctx context.Context, d *schema.ResourceData, meta inter
 				continue
 			}
 			requestLocation, _ := apiResponse.Location()
-			return utils.ToDiags(d, fmt.Sprintf("error occurred while deleting volume with ID: %s %s", volumeId.(string), err), &utils.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Sprintf("error occurred while deleting volume with ID: %s %s", volumeId.(string), err), &diagutil.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 		}
 
 		if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-			return utils.ToDiags(d, errState.Error(), &utils.DiagsOpts{Timeout: schema.TimeoutDelete})
+			return diagutil.ToDiags(d, errState.Error(), &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete})
 		}
 
 	}
@@ -1141,7 +1142,7 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta inte
 
 	if err != nil {
 		requestLocation, _ := apiResponse.Location()
-		return utils.ToDiags(d, fmt.Sprintf("error occurred while fetching a server: %s", err), &utils.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Sprintf("error occurred while fetching a server: %s", err), &diagutil.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 	}
 
 	if !strings.EqualFold(*server.Properties.Type, "cube") {
@@ -1155,12 +1156,12 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta inte
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		requestLocation, _ := apiResponse.Location()
-		return utils.ToDiags(d, fmt.Sprintf("an error occurred while deleting a server: %s", err), &utils.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while deleting a server: %s", err), &diagutil.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		return utils.ToDiags(d, fmt.Sprintf("error getting state change for datacenter delete %s", errState), &utils.DiagsOpts{Timeout: schema.TimeoutDelete})
+		return diagutil.ToDiags(d, fmt.Sprintf("error getting state change for datacenter delete %s", errState), &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete})
 	}
 
 	d.SetId("")
@@ -1172,7 +1173,7 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 	parts := strings.Split(d.Id(), "/")
 
 	if len(parts) < 2 || parts[0] == "" || parts[1] == "" {
-		return nil, utils.ToError(d, "invalid import. Expecting {datacenter UUID}/{server UUID}", nil)
+		return nil, diagutil.ToError(d, "invalid import. Expecting {datacenter UUID}/{server UUID}", nil)
 	}
 
 	datacenterId := parts[0]
@@ -1186,9 +1187,9 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 	if err != nil {
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, utils.ToError(d, fmt.Sprintf("unable to find server %q", serverId), nil)
+			return nil, diagutil.ToError(d, fmt.Sprintf("unable to find server %q", serverId), nil)
 		}
-		return nil, utils.ToError(d, fmt.Sprintf("error occurred while fetching a server: %s", err), nil)
+		return nil, diagutil.ToError(d, fmt.Sprintf("error occurred while fetching a server: %s", err), nil)
 	}
 	var primaryNic ionoscloud.Nic
 	d.SetId(*server.Id)
@@ -1197,7 +1198,7 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 	if len(parts) > 2 {
 		primaryNicId = parts[2]
 		if err := d.Set("primary_nic", primaryNicId); err != nil {
-			return nil, utils.ToError(d, fmt.Sprintf("error setting primary_nic id %s", err), nil)
+			return nil, diagutil.ToError(d, fmt.Sprintf("error setting primary_nic id %s", err), nil)
 		}
 	} else {
 		if server.Entities != nil && server.Entities.Nics != nil && len(*server.Entities.Nics.Items) > 0 {
@@ -1212,7 +1213,7 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 					if primaryNic.Properties != nil && *nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
 						log.Printf("[DEBUG] set primary_ip to %s", (*primaryNic.Properties.Ips)[0])
 						if err := d.Set("primary_ip", (*primaryNic.Properties.Ips)[0]); err != nil {
-							return nil, utils.ToError(d, fmt.Sprintf("error while setting primary ip: %s", err), nil)
+							return nil, diagutil.ToError(d, fmt.Sprintf("error while setting primary ip: %s", err), nil)
 						}
 					}
 					break
@@ -1222,20 +1223,20 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	if err := d.Set("datacenter_id", datacenterId); err != nil {
-		return nil, utils.ToError(d, err.Error(), nil)
+		return nil, diagutil.ToError(d, err.Error(), nil)
 	}
 
 	if len(parts) > 3 {
 		var rules []string
 		rules = append(rules, parts[3])
 		if err = cloudapifirewall.SetIdsInSchema(d, rules); err != nil {
-			return nil, utils.ToError(d, err.Error(), nil)
+			return nil, diagutil.ToError(d, err.Error(), nil)
 		}
 
 	}
 
 	if err := setResourceServerData(ctx, client, d, &server); err != nil {
-		return nil, utils.ToError(d, err.Error(), nil)
+		return nil, diagutil.ToError(d, err.Error(), nil)
 	}
 
 	return []*schema.ResourceData{d}, nil
@@ -1361,7 +1362,7 @@ func getServerData(d *schema.ResourceData) (*ionoscloud.Server, error) {
 			}
 
 		} else {
-			return nil, utils.ToError(d, fmt.Sprintf("boot_cdrom has to be a valid UUID, got: %s", bootCdrom), nil)
+			return nil, diagutil.ToError(d, fmt.Sprintf("boot_cdrom has to be a valid UUID, got: %s", bootCdrom), nil)
 		}
 	}
 

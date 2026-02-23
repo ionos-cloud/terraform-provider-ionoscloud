@@ -3,12 +3,14 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 func dataSourceShare() *schema.Resource {
@@ -50,19 +52,19 @@ func dataSourceShareRead(ctx context.Context, d *schema.ResourceData, meta inter
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		if httpNotFound(apiResponse) {
-			return utils.ToDiags(d, fmt.Sprintf("group_id %s resource_id %s not found", groupID, resourceID), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Sprintf("group_id %s resource_id %s not found", groupID, resourceID), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
-		return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching a share with group_id %s resource_id %s %s", groupID, resourceID, err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching a share with group_id %s resource_id %s %s", groupID, resourceID, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 	if rsp.Properties == nil {
-		return utils.ToDiags(d, "no properties found in the response", nil)
+		return diagutil.ToDiags(d, "no properties found in the response", nil)
 	}
 	d.SetId(*rsp.Id)
 	if err := d.Set("edit_privilege", *rsp.Properties.EditPrivilege); err != nil {
-		return utils.ToDiags(d, utils.GenerateSetError("share", "edit_privilege", err).Error(), nil)
+		return diagutil.ToDiags(d, utils.GenerateSetError("share", "edit_privilege", err).Error(), nil)
 	}
 	if err := d.Set("share_privilege", *rsp.Properties.SharePrivilege); err != nil {
-		return utils.ToDiags(d, utils.GenerateSetError("share", "share_privilege", err).Error(), nil)
+		return diagutil.ToDiags(d, utils.GenerateSetError("share", "share_privilege", err).Error(), nil)
 	}
 	return nil
 }

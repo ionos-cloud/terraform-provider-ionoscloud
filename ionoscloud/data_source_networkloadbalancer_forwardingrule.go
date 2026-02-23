@@ -11,7 +11,7 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 func dataSourceNetworkLoadBalancerForwardingRule() *schema.Resource {
@@ -158,22 +158,22 @@ func dataSourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *sch
 
 	datacenterId, dcIdOk := d.GetOk("datacenter_id")
 	if !dcIdOk {
-		return utils.ToDiags(d, "no datacenter_id was specified", nil)
+		return diagutil.ToDiags(d, "no datacenter_id was specified", nil)
 	}
 
 	networkloadbalancerId, nlbIdOk := d.GetOk("networkloadbalancer_id")
 	if !nlbIdOk {
-		return utils.ToDiags(d, "no networkloadbalancer_id was specified", nil)
+		return diagutil.ToDiags(d, "no networkloadbalancer_id was specified", nil)
 	}
 
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")
 
 	if idOk && nameOk {
-		return utils.ToDiags(d, "id and name cannot be both specified in the same time", nil)
+		return diagutil.ToDiags(d, "id and name cannot be both specified in the same time", nil)
 	}
 	if !idOk && !nameOk {
-		return utils.ToDiags(d, "please provide either the lan id or name", nil)
+		return diagutil.ToDiags(d, "please provide either the lan id or name", nil)
 	}
 	var networkLoadBalancerForwardingRule ionoscloud.NetworkLoadBalancerForwardingRule
 	var err error
@@ -184,7 +184,7 @@ func dataSourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *sch
 		networkLoadBalancerForwardingRule, apiResponse, err = client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterId.(string), networkloadbalancerId.(string), id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching the network loadbalancer forwarding rule %s: %s", id.(string), err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching the network loadbalancer forwarding rule %s: %s", id.(string), err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 	} else {
 		/* search by name */
@@ -193,7 +193,7 @@ func dataSourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *sch
 		networkLoadBalancerForwardingRules, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesGet(ctx, datacenterId.(string), networkloadbalancerId.(string)).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching network loadbalancers forwarding rules: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching network loadbalancers forwarding rules: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 
 		var results []ionoscloud.NetworkLoadBalancerForwardingRule
@@ -203,7 +203,7 @@ func dataSourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *sch
 					tmpNetworkLoadBalancerForwardingRule, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterId.(string), networkloadbalancerId.(string), *nlbfr.Id).Depth(1).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {
-						return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching network loadbalancer forwarding rule with ID %s: %s", *nlbfr.Id, err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+						return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching network loadbalancer forwarding rule with ID %s: %s", *nlbfr.Id, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 					}
 					results = append(results, tmpNetworkLoadBalancerForwardingRule)
 				}
@@ -211,16 +211,16 @@ func dataSourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *sch
 		}
 
 		if results == nil || len(results) == 0 {
-			return utils.ToDiags(d, fmt.Sprintf("no network load balancer forwarding rule found with the specified criteria: name = %s", name.(string)), nil)
+			return diagutil.ToDiags(d, fmt.Sprintf("no network load balancer forwarding rule found with the specified criteria: name = %s", name.(string)), nil)
 		} else if len(results) > 1 {
-			return utils.ToDiags(d, fmt.Sprintf("more than one network load balancer forwarding rule found with the specified criteria: name = %s", name.(string)), nil)
+			return diagutil.ToDiags(d, fmt.Sprintf("more than one network load balancer forwarding rule found with the specified criteria: name = %s", name.(string)), nil)
 		} else {
 			networkLoadBalancerForwardingRule = results[0]
 		}
 	}
 
 	if err = setNetworkLoadBalancerForwardingRuleData(d, &networkLoadBalancerForwardingRule); err != nil {
-		return utils.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err.Error(), nil)
 	}
 
 	return nil

@@ -8,6 +8,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	cloudapiflowlog "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/flowlog"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -374,7 +375,7 @@ func dataSourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData,
 	name, nameOk := d.GetOk("name")
 
 	if err := validateIDAndName(idOk, nameOk); err != nil {
-		return utils.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err.Error(), nil)
 	}
 
 	var (
@@ -389,12 +390,12 @@ func dataSourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData,
 	}
 
 	if err != nil {
-		return utils.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err.Error(), nil)
 	}
 
 	d.SetId(group.Id)
 	if err = setAutoscalingGroupData(d, &group.Properties); err != nil {
-		return utils.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err.Error(), nil)
 	}
 
 	return nil

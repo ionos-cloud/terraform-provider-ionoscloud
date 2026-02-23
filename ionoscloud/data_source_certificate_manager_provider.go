@@ -14,6 +14,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	certService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 func dataSourceCertificateManagerProvider() *schema.Resource {
@@ -73,10 +74,10 @@ func dataSourceProviderRead(ctx context.Context, d *schema.ResourceData, meta in
 	location := d.Get("location").(string)
 
 	if idOk && nameOk {
-		return utils.ToDiags(d, "ID and name cannot be provided at the same time", nil)
+		return diagutil.ToDiags(d, "ID and name cannot be provided at the same time", nil)
 	}
 	if !idOk && !nameOk {
-		return utils.ToDiags(d, "please provide either the auto-certificate provider ID or name", nil)
+		return diagutil.ToDiags(d, "please provide either the auto-certificate provider ID or name", nil)
 	}
 
 	var provider certSDK.ProviderRead
@@ -87,12 +88,12 @@ func dataSourceProviderRead(ctx context.Context, d *schema.ResourceData, meta in
 		id := id.(string)
 		provider, apiResponse, err = client.GetProvider(ctx, id, location)
 		if err != nil {
-			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching the auto-certificate provider with ID: %v, error: %s", id, err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching the auto-certificate provider with ID: %v, error: %s", id, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 	} else {
 		providers, apiResponse, err := client.ListProviders(ctx, location)
 		if err != nil {
-			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching auto-certificate providers: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching auto-certificate providers: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 		var results []certSDK.ProviderRead
 		if providers.Items != nil {
@@ -104,16 +105,16 @@ func dataSourceProviderRead(ctx context.Context, d *schema.ResourceData, meta in
 		}
 
 		if len(results) == 0 {
-			return utils.ToDiags(d, fmt.Sprintf("no auto-certificate provider found with the specified name: %v", name), nil)
+			return diagutil.ToDiags(d, fmt.Sprintf("no auto-certificate provider found with the specified name: %v", name), nil)
 		}
 		if len(results) > 1 {
-			return utils.ToDiags(d, fmt.Sprintf("more than one auto-certificate provider found with the specified name: %v", name), nil)
+			return diagutil.ToDiags(d, fmt.Sprintf("more than one auto-certificate provider found with the specified name: %v", name), nil)
 		}
 		provider = results[0]
 	}
 
 	if err := certService.SetProviderData(d, provider); err != nil {
-		return utils.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err.Error(), nil)
 	}
 
 	if provider.Properties.ExternalAccountBinding != nil {
@@ -122,7 +123,7 @@ func dataSourceProviderRead(ctx context.Context, d *schema.ResourceData, meta in
 		utils.SetPropWithNilCheck(externalAccountBindingEntry, "key_id", *provider.Properties.ExternalAccountBinding.KeyId)
 		externalAccountBinding = append(externalAccountBinding, externalAccountBindingEntry)
 		if err := d.Set("external_account_binding", externalAccountBinding); err != nil {
-			return utils.ToDiags(d, utils.GenerateSetError("Auto-certificate provider", "external_account_binding", err).Error(), nil)
+			return diagutil.ToDiags(d, utils.GenerateSetError("Auto-certificate provider", "external_account_binding", err).Error(), nil)
 		}
 	}
 	return nil

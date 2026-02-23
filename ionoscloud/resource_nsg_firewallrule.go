@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	bundleclient "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -101,14 +101,14 @@ func resourceNSGFirewallCreate(ctx context.Context, d *schema.ResourceData, meta
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		requestLocation, _ := apiResponse.Location()
-		return utils.ToDiags(d, fmt.Sprintf("an error occurred while creating a nsg firewall rule nsg id %s dcid %s : %s", nsgID, dcID, err), &utils.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while creating a nsg firewall rule nsg id %s dcid %s : %s", nsgID, dcID, err), &diagutil.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 	}
 	d.SetId(*fw.Id)
 
 	// Wait, catching any errors
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
 		d.SetId("")
-		return utils.ToDiags(d, fmt.Sprintf("an error occurred while creating a nsg firewall rule dcId: %s nsg_id: %s %s", d.Get("datacenter_id").(string), d.Get("nsg_id").(string), errState), &utils.DiagsOpts{Timeout: schema.TimeoutCreate})
+		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while creating a nsg firewall rule dcId: %s nsg_id: %s %s", d.Get("datacenter_id").(string), d.Get("nsg_id").(string), errState), &diagutil.DiagsOpts{Timeout: schema.TimeoutCreate})
 	}
 
 	return resourceNSGFirewallRead(ctx, d, meta)
@@ -127,12 +127,12 @@ func resourceNSGFirewallRead(ctx context.Context, d *schema.ResourceData, meta i
 			d.SetId("")
 			return nil
 		}
-		return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching a nsg firewall rule dcId: %s nsg_id: %s ID: %s %s",
+		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching a nsg firewall rule dcId: %s nsg_id: %s ID: %s %s",
 			d.Get("datacenter_id").(string), d.Get("nsg_id").(string), d.Id(), err), nil)
 	}
 
 	if err := setFirewallData(d, &fw); err != nil {
-		return utils.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err.Error(), nil)
 	}
 
 	return nil
@@ -152,11 +152,11 @@ func resourceNSGFirewallUpdate(ctx context.Context, d *schema.ResourceData, meta
 
 	if err != nil {
 		requestLocation, _ := apiResponse.Location()
-		return utils.ToDiags(d, fmt.Sprintf("an error occurred while updating a nsg firewall rule: dcID %s nsgID %s %s", dcID, nsgID, err), &utils.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while updating a nsg firewall rule: dcID %s nsgID %s %s", dcID, nsgID, err), &diagutil.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		return utils.ToDiags(d, fmt.Sprintf("error getting state change for nsg firewall patch %s", errState), &utils.DiagsOpts{Timeout: schema.TimeoutUpdate})
+		return diagutil.ToDiags(d, fmt.Sprintf("error getting state change for nsg firewall patch %s", errState), &diagutil.DiagsOpts{Timeout: schema.TimeoutUpdate})
 	}
 
 	return resourceNSGFirewallRead(ctx, d, meta)
@@ -174,11 +174,11 @@ func resourceNSGFirewallDelete(ctx context.Context, d *schema.ResourceData, meta
 
 	if err != nil {
 		requestLocation, _ := apiResponse.Location()
-		return utils.ToDiags(d, fmt.Sprintf("an error occurred while deleting a nsg firewall rule ID %s nsgID %s %s", nsgID, dcID, err), &utils.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while deleting a nsg firewall rule ID %s nsgID %s %s", nsgID, dcID, err), &diagutil.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		return utils.ToDiags(d, fmt.Sprintf("error getting state change for firewall delete %s", errState), &utils.DiagsOpts{Timeout: schema.TimeoutDelete})
+		return diagutil.ToDiags(d, fmt.Sprintf("error getting state change for firewall delete %s", errState), &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete})
 	}
 
 	d.SetId("")
@@ -192,7 +192,7 @@ func resourceNSGFirewallImport(ctx context.Context, d *schema.ResourceData, meta
 
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 3 || parts[0] == "" || parts[1] == "" || parts[2] == "" {
-		return nil, utils.ToError(d, "invalid import. Expecting {datacenter}/{nsg}/{firewall}", nil)
+		return nil, diagutil.ToError(d, "invalid import. Expecting {datacenter}/{nsg}/{firewall}", nil)
 	}
 
 	dcID := parts[0]
@@ -206,20 +206,20 @@ func resourceNSGFirewallImport(ctx context.Context, d *schema.ResourceData, meta
 	if err != nil {
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, utils.ToError(d, fmt.Sprintf("unable to find nsg firewall rule %q", firewallID), nil)
+			return nil, diagutil.ToError(d, fmt.Sprintf("unable to find nsg firewall rule %q", firewallID), nil)
 		}
-		return nil, utils.ToError(d, fmt.Sprintf("an error occurred while nsg retrieving firewall rule %q: %s ", firewallID, err), nil)
+		return nil, diagutil.ToError(d, fmt.Sprintf("an error occurred while nsg retrieving firewall rule %q: %s ", firewallID, err), nil)
 	}
 
 	if err := d.Set("datacenter_id", dcID); err != nil {
-		return nil, utils.ToError(d, err.Error(), nil)
+		return nil, diagutil.ToError(d, err.Error(), nil)
 	}
 	if err := d.Set("nsg_id", nsgID); err != nil {
-		return nil, utils.ToError(d, err.Error(), nil)
+		return nil, diagutil.ToError(d, err.Error(), nil)
 	}
 
 	if err := setFirewallData(d, &fw); err != nil {
-		return nil, utils.ToError(d, err.Error(), nil)
+		return nil, diagutil.ToError(d, err.Error(), nil)
 	}
 
 	return []*schema.ResourceData{d}, nil

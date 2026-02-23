@@ -8,6 +8,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -275,19 +276,19 @@ func resourceDbaasPgSqlClusterCreate(ctx context.Context, d *schema.ResourceData
 	dbaasCluster, err := dbaasService.GetPgSqlClusterDataCreate(d)
 
 	if err != nil {
-		return utils.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err.Error(), nil)
 	}
 	dbaasClusterResponse, apiResponse, err := client.CreateCluster(ctx, *dbaasCluster)
 
 	if err != nil {
-		return utils.ToDiags(d, fmt.Sprintf("an error occurred while creating a DBaaS psql cluster: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while creating a DBaaS psql cluster: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	d.SetId(*dbaasClusterResponse.Id)
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsClusterReady)
 	if err != nil {
-		return utils.ToDiags(d, fmt.Sprintf("creating psql %s ", err), nil)
+		return diagutil.ToDiags(d, fmt.Sprintf("creating psql %s ", err), nil)
 	}
 
 	return resourceDbaasPgSqlClusterRead(ctx, d, meta)
@@ -304,13 +305,13 @@ func resourceDbaasPgSqlClusterRead(ctx context.Context, d *schema.ResourceData, 
 			d.SetId("")
 			return nil
 		}
-		return utils.ToDiags(d, fmt.Sprintf("error while fetching dbaas cluster: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Sprintf("error while fetching dbaas cluster: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	log.Printf("[INFO] Successfully retrieved cluster %s: %+v", d.Id(), cluster)
 
 	if err := dbaasService.SetPgSqlClusterData(d, cluster, false); err != nil {
-		return utils.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err.Error(), nil)
 	}
 
 	return nil
@@ -327,7 +328,7 @@ func resourceDbaasPgSqlClusterUpdate(ctx context.Context, d *schema.ResourceData
 	dbaasClusterResponse, apiResponse, err := client.UpdateCluster(ctx, d.Id(), *cluster)
 
 	if err != nil {
-		return utils.ToDiags(d, fmt.Sprintf("an error occurred while updating a dbaas cluster: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while updating a dbaas cluster: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	d.SetId(*dbaasClusterResponse.Id)
@@ -336,7 +337,7 @@ func resourceDbaasPgSqlClusterUpdate(ctx context.Context, d *schema.ResourceData
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsClusterReady)
 	if err != nil {
-		return utils.ToDiags(d, fmt.Sprintf("creating psql %s ", err), nil)
+		return diagutil.ToDiags(d, fmt.Sprintf("creating psql %s ", err), nil)
 	}
 
 	return resourceDbaasPgSqlClusterRead(ctx, d, meta)
@@ -352,12 +353,12 @@ func resourceDbaasPgSqlClusterDelete(ctx context.Context, d *schema.ResourceData
 			d.SetId("")
 			return nil
 		}
-		return utils.ToDiags(d, fmt.Sprintf("error while deleting dbaas cluster: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Sprintf("error while deleting dbaas cluster: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsClusterDeleted)
 	if err != nil {
-		return utils.ToDiags(d, fmt.Sprintf("the check for cluster deletion failed with the following error: %s", err), &utils.DiagsOpts{Timeout: schema.TimeoutDelete})
+		return diagutil.ToDiags(d, fmt.Sprintf("the check for cluster deletion failed with the following error: %s", err), &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete})
 	}
 
 	// wait 15 seconds after the deletion of the cluster, for the lan to be freed
@@ -376,15 +377,15 @@ func resourceDbaasPgSqlClusterImport(ctx context.Context, d *schema.ResourceData
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, utils.ToError(d, fmt.Sprintf("dbaas cluster does not exist %q", clusterId), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return nil, diagutil.ToError(d, fmt.Sprintf("dbaas cluster does not exist %q", clusterId), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
-		return nil, utils.ToError(d, fmt.Sprintf("an error occurred while trying to fetch the import of dbaas cluster %q, error:%s", clusterId, err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return nil, diagutil.ToError(d, fmt.Sprintf("an error occurred while trying to fetch the import of dbaas cluster %q, error:%s", clusterId, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	log.Printf("[INFO] dbaas cluster found: %+v", dbaasCluster)
 
 	if err := dbaasService.SetPgSqlClusterData(d, dbaasCluster, false); err != nil {
-		return nil, utils.ToError(d, err.Error(), nil)
+		return nil, diagutil.ToError(d, err.Error(), nil)
 	}
 
 	return []*schema.ResourceData{d}, nil

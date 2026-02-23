@@ -11,7 +11,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/nsg"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/uuidgen"
 )
 
@@ -66,11 +66,11 @@ func resourceDatacenterNSGSelectionRead(ctx context.Context, d *schema.ResourceD
 			d.SetId("")
 			return nil
 		}
-		return utils.ToDiags(d, err.Error(), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, err.Error(), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	if err = setDatacenterDefaultNSGSelectionData(d, &datacenter); err != nil {
-		return utils.ToDiags(d, fmt.Sprintf("error reading default NSG for datacenter, dcId: %s, sId: %s, (%s)", dcID, nsgID, err), nil)
+		return diagutil.ToDiags(d, fmt.Sprintf("error reading default NSG for datacenter, dcId: %s, sId: %s, (%s)", dcID, nsgID, err), nil)
 	}
 	return nil
 }

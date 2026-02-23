@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 func dataSourceGpus() *schema.Resource {
@@ -68,7 +68,7 @@ func dataSourceGpusRead(ctx context.Context, d *schema.ResourceData, meta interf
 	gpus, apiResponse, err := client.GraphicsProcessingUnitCardsApi.DatacentersServersGPUsGet(ctx, datacenterID, serverID).Depth(1).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching GPUs for server %s in datacenter %s: %s", serverID, datacenterID, err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching GPUs for server %s in datacenter %s: %s", serverID, datacenterID, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 
 	d.SetId(fmt.Sprintf("%s/gpus", serverID))
@@ -99,7 +99,7 @@ func dataSourceGpusRead(ctx context.Context, d *schema.ResourceData, meta interf
 	}
 
 	if err := d.Set("gpus", gpuList); err != nil {
-		return utils.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err.Error(), nil)
 	}
 
 	return nil

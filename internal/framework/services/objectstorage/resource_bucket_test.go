@@ -6,10 +6,11 @@ package objectstorage_test
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"log"
 	"os"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 

@@ -10,6 +10,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	nfs2 "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/nfs"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 
@@ -103,10 +104,10 @@ func dataSourceNFSClusterRead(ctx context.Context, d *schema.ResourceData, meta 
 	location := d.Get("location").(string)
 
 	if idOk && nameOk {
-		return utils.ToDiags(d, "ID and name cannot be both specified at the same time", nil)
+		return diagutil.ToDiags(d, "ID and name cannot be both specified at the same time", nil)
 	}
 	if !idOk && !nameOk {
-		return utils.ToDiags(d, "please provide either the NFS Cluster ID or name", nil)
+		return diagutil.ToDiags(d, "please provide either the NFS Cluster ID or name", nil)
 	}
 
 	var cluster nfs.ClusterRead
@@ -115,12 +116,12 @@ func dataSourceNFSClusterRead(ctx context.Context, d *schema.ResourceData, meta 
 	if idOk {
 		cluster, apiResponse, err = client.GetNFSClusterByID(ctx, id, location)
 		if err != nil {
-			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching the NFS Cluster with ID: %s, error: %s", idValue, err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching the NFS Cluster with ID: %s, error: %s", idValue, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 	} else {
 		clusters, apiResponse, err := client.ListNFSClusters(ctx, d)
 		if err != nil {
-			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching NFS Clusters: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching NFS Clusters: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 
 		var results []nfs.ClusterRead
@@ -132,16 +133,16 @@ func dataSourceNFSClusterRead(ctx context.Context, d *schema.ResourceData, meta 
 
 		switch {
 		case len(results) == 0:
-			return utils.ToDiags(d, fmt.Sprintf("no NFS Cluster found with the specified name: %s", name), nil)
+			return diagutil.ToDiags(d, fmt.Sprintf("no NFS Cluster found with the specified name: %s", name), nil)
 		case len(results) > 1:
-			return utils.ToDiags(d, fmt.Sprintf("more than one NFS Cluster found with the specified name: %s", name), nil)
+			return diagutil.ToDiags(d, fmt.Sprintf("more than one NFS Cluster found with the specified name: %s", name), nil)
 		default:
 			cluster = results[0]
 		}
 	}
 
 	if err = client.SetNFSClusterData(d, cluster); err != nil {
-		return utils.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err.Error(), nil)
 	}
 
 	return nil

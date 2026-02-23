@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 func dataSourceDBaaSInMemoryDBSnapshot() *schema.Resource {
@@ -71,10 +71,10 @@ func dataSourceInMemoryDBSnapshotRead(ctx context.Context, d *schema.ResourceDat
 
 	snapshot, apiResponse, err := client.GetSnapshot(ctx, id, location)
 	if err != nil {
-		return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching the InMemoryDB snapshot with ID: %v, error: %s", id, err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching the InMemoryDB snapshot with ID: %v, error: %s", id, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 	if err := client.SetSnapshotData(d, snapshot); err != nil {
-		return utils.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err.Error(), nil)
 	}
 	return nil
 }

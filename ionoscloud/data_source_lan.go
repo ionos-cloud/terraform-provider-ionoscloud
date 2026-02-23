@@ -10,7 +10,7 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 func dataSourceLan() *schema.Resource {
@@ -93,17 +93,17 @@ func dataSourceLanRead(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	datacenterId, dcIdOk := d.GetOk("datacenter_id")
 	if !dcIdOk {
-		return utils.ToDiags(d, "no datacenter_id was specified", nil)
+		return diagutil.ToDiags(d, "no datacenter_id was specified", nil)
 	}
 
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")
 
 	if idOk && nameOk {
-		return utils.ToDiags(d, "id and name cannot be both specified in the same time", nil)
+		return diagutil.ToDiags(d, "id and name cannot be both specified in the same time", nil)
 	}
 	if !idOk && !nameOk {
-		return utils.ToDiags(d, "please provide either the lan id or name", nil)
+		return diagutil.ToDiags(d, "please provide either the lan id or name", nil)
 	}
 	var lan ionoscloud.Lan
 	var err error
@@ -114,7 +114,7 @@ func dataSourceLanRead(ctx context.Context, d *schema.ResourceData, meta interfa
 		lan, apiResponse, err = client.LANsApi.DatacentersLansFindById(ctx, datacenterId.(string), id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching lan with ID %s: %s", id.(string), err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching lan with ID %s: %s", id.(string), err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 	} else {
 		/* search by name */
@@ -123,7 +123,7 @@ func dataSourceLanRead(ctx context.Context, d *schema.ResourceData, meta interfa
 		lans, apiResponse, err := client.LANsApi.DatacentersLansGet(ctx, datacenterId.(string)).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching lans: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching lans: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 
 		var results []ionoscloud.Lan
@@ -135,7 +135,7 @@ func dataSourceLanRead(ctx context.Context, d *schema.ResourceData, meta interfa
 					lan, apiResponse, err = client.LANsApi.DatacentersLansFindById(ctx, datacenterId.(string), *l.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {
-						return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching lan %s: %s", *l.Id, err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+						return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching lan %s: %s", *l.Id, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 					}
 					results = append(results, l)
 				}
@@ -143,16 +143,16 @@ func dataSourceLanRead(ctx context.Context, d *schema.ResourceData, meta interfa
 		}
 
 		if results == nil || len(results) == 0 {
-			return utils.ToDiags(d, fmt.Sprintf("no lan found with the specified name: %s", name), nil)
+			return diagutil.ToDiags(d, fmt.Sprintf("no lan found with the specified name: %s", name), nil)
 		} else if len(results) > 1 {
-			return utils.ToDiags(d, fmt.Sprintf("more than one lan found with the specified criteria name: %s", name), nil)
+			return diagutil.ToDiags(d, fmt.Sprintf("more than one lan found with the specified criteria name: %s", name), nil)
 		} else {
 			lan = results[0]
 		}
 	}
 
 	if err = setLanData(d, &lan); err != nil {
-		return utils.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err.Error(), nil)
 	}
 
 	return nil

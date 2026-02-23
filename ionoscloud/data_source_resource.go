@@ -9,7 +9,7 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 func dataSourceResource() *schema.Resource {
@@ -46,30 +46,30 @@ func dataSourceResourceRead(ctx context.Context, d *schema.ResourceData, meta in
 		result, apiResponse, err := client.UserManagementApi.UmResourcesFindByTypeAndId(ctx, resourceType, resourceId).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching resource by type %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching resource by type %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 		results = append(results, result)
 
 		err = d.Set("resource_type", result.Type)
 		if err != nil {
-			return utils.ToDiags(d, err.Error(), nil)
+			return diagutil.ToDiags(d, err.Error(), nil)
 		}
 		err = d.Set("resource_id", result.Id)
 		if err != nil {
-			return utils.ToDiags(d, err.Error(), nil)
+			return diagutil.ToDiags(d, err.Error(), nil)
 		}
 	} else if resourceType != "" {
 		// items, err := client.ListResourcesByType(resource_type)
 		items, apiResponse, err := client.UserManagementApi.UmResourcesFindByType(ctx, resourceType).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching resources by type %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching resources by type %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 		results = *items.Items
 		if len(results) > 0 && results[0].Type != nil {
 			err = d.Set("resource_type", results[0].Type)
 			if err != nil {
-				return utils.ToDiags(d, err.Error(), nil)
+				return diagutil.ToDiags(d, err.Error(), nil)
 			}
 		}
 
@@ -78,13 +78,13 @@ func dataSourceResourceRead(ctx context.Context, d *schema.ResourceData, meta in
 		items, apiResponse, err := client.UserManagementApi.UmResourcesGet(ctx).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching resources %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching resources %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 		results = *items.Items
 	}
 
 	if len(results) == 0 {
-		return utils.ToDiags(d, "there are no resources that match the search criteria", nil)
+		return diagutil.ToDiags(d, "there are no resources that match the search criteria", nil)
 	}
 
 	d.SetId(*results[0].Id)

@@ -13,7 +13,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 func dataSourceDbaasPgSqlCluster() *schema.Resource {
@@ -173,10 +173,10 @@ func dataSourceDbaasPgSqlReadCluster(ctx context.Context, d *schema.ResourceData
 	name, nameOk := d.GetOk("display_name")
 
 	if idOk && nameOk {
-		return utils.ToDiags(d, "id and display_name cannot be both specified in the same time", nil)
+		return diagutil.ToDiags(d, "id and display_name cannot be both specified in the same time", nil)
 	}
 	if !idOk && !nameOk {
-		return utils.ToDiags(d, "please provide either the dbaas cluster id or display_name", nil)
+		return diagutil.ToDiags(d, "please provide either the dbaas cluster id or display_name", nil)
 	}
 
 	var cluster dbaas.ClusterResponse
@@ -187,13 +187,13 @@ func dataSourceDbaasPgSqlReadCluster(ctx context.Context, d *schema.ResourceData
 		/* search by ID */
 		cluster, apiResponse, err = client.GetCluster(ctx, id.(string))
 		if err != nil {
-			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching the dbaas cluster with ID %s: %s", id.(string), err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching the dbaas cluster with ID %s: %s", id.(string), err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 	} else {
 		clusters, apiResponse, err := client.ListClusters(ctx, "")
 
 		if err != nil {
-			return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching dbaas clusters: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching dbaas clusters: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 		}
 
 		var results []dbaas.ClusterResponse
@@ -205,9 +205,9 @@ func dataSourceDbaasPgSqlReadCluster(ctx context.Context, d *schema.ResourceData
 		}
 
 		if results == nil || len(results) == 0 {
-			return utils.ToDiags(d, fmt.Sprintf("no DBaaS cluster found with the specified name = %s", name), nil)
+			return diagutil.ToDiags(d, fmt.Sprintf("no DBaaS cluster found with the specified name = %s", name), nil)
 		} else if len(results) > 1 {
-			return utils.ToDiags(d, fmt.Sprintf("more than one DBaaS cluster found with the specified criteria name = %s", name), nil)
+			return diagutil.ToDiags(d, fmt.Sprintf("more than one DBaaS cluster found with the specified criteria name = %s", name), nil)
 		} else {
 			cluster = results[0]
 		}
@@ -215,7 +215,7 @@ func dataSourceDbaasPgSqlReadCluster(ctx context.Context, d *schema.ResourceData
 	}
 
 	if err := dbaasService.SetPgSqlClusterData(d, cluster, true); err != nil {
-		return utils.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err.Error(), nil)
 	}
 
 	return nil

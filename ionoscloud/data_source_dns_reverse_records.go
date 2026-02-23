@@ -12,7 +12,7 @@ import (
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 func dataSourceDNSReverseRecords() *schema.Resource {
@@ -91,7 +91,7 @@ func dataSourceReverseRecordReads(ctx context.Context, d *schema.ResourceData, m
 
 	records, apiResponse, err := client.ListReverseRecords(ctx, filterIps)
 	if err != nil {
-		return utils.ToDiags(d, fmt.Sprintf("an error occurred while fetching DNS Reverse Records: %s", err), &utils.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Sprintf("an error occurred while fetching DNS Reverse Records: %s", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
 	}
 	if nameOk {
 		log.Printf("[INFO] Filtering Reverse Records in data source for DNS Reverse Records using name: %s and partial_match: %t", recordName, partialMatch)
@@ -113,7 +113,7 @@ func dataSourceReverseRecordReads(ctx context.Context, d *schema.ResourceData, m
 
 	d.SetId("dns_reverse_records")
 	if err := d.Set("reverse_records", reverseRecordsObjToIntf(records.Items)); err != nil {
-		return utils.ToDiags(d, err.Error(), nil)
+		return diagutil.ToDiags(d, err.Error(), nil)
 	}
 
 	return nil

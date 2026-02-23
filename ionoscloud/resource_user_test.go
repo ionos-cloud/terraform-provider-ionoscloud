@@ -5,10 +5,11 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/go-version"
-	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 	"regexp"
 	"testing"
+
+	"github.com/hashicorp/go-version"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
