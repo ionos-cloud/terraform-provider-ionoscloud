@@ -9,6 +9,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	cr "github.com/ionos-cloud/sdk-go-bundle/products/containerregistry/v2"
+	objectstoragemanagement "github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
@@ -47,9 +48,8 @@ func New(clientOptions clientoptions.TerraformClientOptions, fileConfig *filecon
 		KafkaClient:                   kafkaService.NewClient(clientOptions, fileConfig),
 		VPNClient:                     vpn.NewClient(clientOptions, fileConfig),
 		InMemoryDBClient:              inmemorydb.NewClient(clientOptions, fileConfig),
-		S3Client:                      objectStorageService.NewClient(clientOptions, fileConfig),
-		ObjectStorageManagementClient: objectStorageManagementService.NewClient(clientOptions, fileConfig),
-		MonitoringClient:              monitoringService.NewClient(clientOptions, fileConfig),
+		S3Client:         objectStorageService.NewClient(clientOptions, fileConfig),
+		MonitoringClient: monitoringService.NewClient(clientOptions, fileConfig),
 
 		clientOptions: clientOptions,
 		fileConfig:    fileConfig,
@@ -70,9 +70,8 @@ type SdkBundle struct {
 	KafkaClient                   *kafkaService.Client
 	CDNClient                     *cdnService.Client
 	VPNClient                     *vpn.Client
-	S3Client                      *objectStorageService.Client
-	ObjectStorageManagementClient *objectStorageManagementService.Client
-	MonitoringClient              *monitoringService.Client
+	S3Client         *objectStorageService.Client
+	MonitoringClient *monitoringService.Client
 
 	clientOptions clientoptions.TerraformClientOptions
 	fileConfig    *fileconfiguration.FileConfig
@@ -118,6 +117,45 @@ func (c SdkBundle) NewContainerRegistryClient(location string) *crService.Client
 	config.HTTPClient = &http.Client{}
 	config.HTTPClient.Transport = shared.CreateTransport(endpoint.SkipTLSVerify, endpoint.CertificateAuthData)
 	return crService.NewClientFromConfig(config)
+}
+
+// NewObjectStorageManagementClient creates a new Object Storage Management client for a specific location
+func (c SdkBundle) NewObjectStorageManagementClient(location string) *objectStorageManagementService.Client {
+	config := c.newBundleClientConfig(fmt.Sprintf(
+		"terraform-provider/%s_ionos-cloud-sdk-go-object-storage-management/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
+		c.clientOptions.Version, objectstoragemanagement.Version, c.clientOptions.TerraformVersion,
+		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
+	))
+
+	if url := os.Getenv("IONOS_API_URL_OBJECT_STORAGE_MANAGEMENT"); url != "" {
+		log.Printf("[DEBUG] Using custom endpoint from IONOS_API_URL_OBJECT_STORAGE_MANAGEMENT env variable")
+		config.Servers = shared.ServerConfigurations{{URL: url}}
+		return objectStorageManagementService.NewClientFromConfig(config)
+	}
+
+	if os.Getenv(shared.IonosApiUrlEnvVar) != "" {
+		log.Printf("[DEBUG] Using custom endpoint from IONOS_API_URL env variable")
+		return objectStorageManagementService.NewClientFromConfig(config)
+	}
+
+	if c.fileConfig == nil {
+		return objectStorageManagementService.NewClientFromConfig(config)
+	}
+
+	endpoint := c.fileConfig.GetLocationOverridesWithGlobalFallback(fileconfiguration.ObjectStorageManagement, location)
+	if endpoint == nil {
+		log.Printf("[WARN] Missing endpoint for %s product in location %s and no global endpoints defined", fileconfiguration.ObjectStorageManagement, location)
+		return objectStorageManagementService.NewClientFromConfig(config)
+	}
+	config.Servers = shared.ServerConfigurations{
+		{
+			URL:         endpoint.Name,
+			Description: shared.EndpointOverridden + location,
+		},
+	}
+	config.HTTPClient = &http.Client{}
+	config.HTTPClient.Transport = shared.CreateTransport(endpoint.SkipTLSVerify, endpoint.CertificateAuthData)
+	return objectStorageManagementService.NewClientFromConfig(config)
 }
 
 // newCloudAPIClientConfig creates a new *ionoscloud.Configuration using the client options defined in the SdkBundle struct.

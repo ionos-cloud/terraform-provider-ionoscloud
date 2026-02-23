@@ -28,7 +28,7 @@ func NewAccesskeyResource() resource.Resource {
 }
 
 type accesskeyResource struct {
-	client *objectStorageManagementService.Client
+	clientBundle *bundleclient.SdkBundle
 }
 
 // Metadata returns the metadata for the accesskey resource.
@@ -92,12 +92,12 @@ func (r *accesskeyResource) Configure(_ context.Context, req resource.ConfigureR
 		return
 	}
 
-	r.client = clientBundle.ObjectStorageManagementClient
+	r.clientBundle = clientBundle
 }
 
 // Create creates the accesskey.
 func (r *accesskeyResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	if r.client == nil {
+	if r.clientBundle == nil {
 		resp.Diagnostics.AddError("object storage management api client not configured", "The provider client is not configured")
 		return
 	}
@@ -113,12 +113,14 @@ func (r *accesskeyResource) Create(ctx context.Context, req resource.CreateReque
 	ctx, cancel := context.WithTimeout(ctx, createTimeout)
 	defer cancel()
 
+	client := r.clientBundle.NewObjectStorageManagementClient("")
+
 	var accessKey = objectStorageManagement.AccessKeyCreate{
 		Properties: objectStorageManagement.AccessKey{
 			Description: data.Description.ValueString(),
 		},
 	}
-	accessKeyResponse, _, err := r.client.CreateAccessKey(ctx, accessKey, createTimeout)
+	accessKeyResponse, _, err := client.CreateAccessKey(ctx, accessKey, createTimeout)
 	if err != nil {
 		resp.Diagnostics.AddError("failed to create accessKey", err.Error())
 		return
@@ -126,7 +128,7 @@ func (r *accesskeyResource) Create(ctx context.Context, req resource.CreateReque
 	// we need this because secretkey is only available on create response
 	objectStorageManagementService.SetAccessKeyPropertiesToPlan(data, accessKeyResponse)
 
-	accessKeyRead, _, err := r.client.GetAccessKey(ctx, data.ID.ValueString())
+	accessKeyRead, _, err := client.GetAccessKey(ctx, data.ID.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("access Key API error", err.Error())
 		return
@@ -139,7 +141,7 @@ func (r *accesskeyResource) Create(ctx context.Context, req resource.CreateReque
 
 // Read reads the accesskey.
 func (r *accesskeyResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	if r.client == nil {
+	if r.clientBundle == nil {
 		resp.Diagnostics.AddError("object storage management api client not configured", "The provider client is not configured")
 		return
 	}
@@ -150,7 +152,8 @@ func (r *accesskeyResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	accessKey, apiResponse, err := r.client.GetAccessKey(ctx, data.ID.ValueString())
+	client := r.clientBundle.NewObjectStorageManagementClient("")
+	accessKey, apiResponse, err := client.GetAccessKey(ctx, data.ID.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("read Access Key API error", err.Error())
 		return
@@ -185,13 +188,15 @@ func (r *accesskeyResource) Update(ctx context.Context, req resource.UpdateReque
 	ctx, cancel := context.WithTimeout(ctx, updateTimeout)
 	defer cancel()
 
+	client := r.clientBundle.NewObjectStorageManagementClient("")
+
 	var accessKey = objectStorageManagement.AccessKeyEnsure{
 		Properties: objectStorageManagement.AccessKey{
 			Description: plan.Description.ValueString(),
 		},
 	}
 
-	accessKeyResponse, _, err := r.client.UpdateAccessKey(ctx, state.ID.ValueString(), accessKey, updateTimeout)
+	accessKeyResponse, _, err := client.UpdateAccessKey(ctx, state.ID.ValueString(), accessKey, updateTimeout)
 	if err != nil {
 		resp.Diagnostics.AddError("failed to update accessKey", err.Error())
 		return
@@ -199,7 +204,7 @@ func (r *accesskeyResource) Update(ctx context.Context, req resource.UpdateReque
 
 	plan.ID = basetypes.NewStringValue(accessKeyResponse.Id)
 
-	accessKeyRead, _, err := r.client.GetAccessKey(ctx, accessKeyResponse.Id)
+	accessKeyRead, _, err := client.GetAccessKey(ctx, accessKeyResponse.Id)
 	if err != nil {
 		resp.Diagnostics.AddError("on update, read access Key API error", err.Error())
 		return
@@ -211,7 +216,7 @@ func (r *accesskeyResource) Update(ctx context.Context, req resource.UpdateReque
 
 // Delete deletes the accessKey.
 func (r *accesskeyResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	if r.client == nil {
+	if r.clientBundle == nil {
 		resp.Diagnostics.AddError("object storage management api client not configured", "The provider client is not configured")
 		return
 	}
@@ -230,7 +235,8 @@ func (r *accesskeyResource) Delete(ctx context.Context, req resource.DeleteReque
 	ctx, cancel := context.WithTimeout(ctx, deleteTimeout)
 	defer cancel()
 
-	if _, err := r.client.DeleteAccessKey(ctx, data.ID.ValueString(), deleteTimeout); err != nil {
+	client := r.clientBundle.NewObjectStorageManagementClient("")
+	if _, err := client.DeleteAccessKey(ctx, data.ID.ValueString(), deleteTimeout); err != nil {
 		resp.Diagnostics.AddError("failed to delete accesskey", err.Error())
 		return
 	}

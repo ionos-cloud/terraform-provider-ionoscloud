@@ -20,7 +20,7 @@ func NewRegionDataSource() datasource.DataSource {
 }
 
 type regionDataSource struct {
-	client *objectStorageManagementService.Client
+	clientBundle *bundleclient.SdkBundle
 }
 
 // Metadata returns the metadata for the data source.
@@ -46,7 +46,7 @@ func (d *regionDataSource) Configure(ctx context.Context, req datasource.Configu
 		return
 	}
 
-	d.client = clientbundle.ObjectStorageManagementClient
+	d.clientBundle = clientbundle
 }
 
 // Schema returns the schema for the data source.
@@ -98,7 +98,7 @@ func (d *regionDataSource) Schema(ctx context.Context, req datasource.SchemaRequ
 
 // Read reads the data source.
 func (d *regionDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	if d.client == nil {
+	if d.clientBundle == nil {
 		resp.Diagnostics.AddError("api client not configured", "The provider client is not configured")
 		return
 	}
@@ -109,7 +109,8 @@ func (d *regionDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		return
 	}
 
-	region, apiResponse, err := d.client.GetRegion(ctx, data.ID.ValueString(), 1)
+	client := d.clientBundle.NewObjectStorageManagementClient("")
+	region, apiResponse, err := client.GetRegion(ctx, data.ID.ValueString(), 1)
 
 	if apiResponse.HttpNotFound() {
 		resp.Diagnostics.AddError("region not found", "The region was not found")

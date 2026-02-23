@@ -22,7 +22,7 @@ func NewAccesskeyDataSource() datasource.DataSource {
 }
 
 type accessKeyDataSource struct {
-	client *objectStorageManagementService.Client
+	clientBundle *bundleclient.SdkBundle
 }
 
 // Metadata returns the metadata for the data source.
@@ -48,7 +48,7 @@ func (d *accessKeyDataSource) Configure(ctx context.Context, req datasource.Conf
 		return
 	}
 
-	d.client = clientBundle.ObjectStorageManagementClient
+	d.clientBundle = clientBundle
 }
 
 // Schema returns the schema for the data source.
@@ -84,7 +84,7 @@ func (d *accessKeyDataSource) Schema(ctx context.Context, req datasource.SchemaR
 
 // Read reads the data source.
 func (d *accessKeyDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	if d.client == nil {
+	if d.clientBundle == nil {
 		resp.Diagnostics.AddError("object storage management api client not configured", "The provider client is not configured")
 		return
 	}
@@ -94,6 +94,8 @@ func (d *accessKeyDataSource) Read(ctx context.Context, req datasource.ReadReque
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	client := d.clientBundle.NewObjectStorageManagementClient("")
 
 	id := data.ID.ValueString()
 	accessKeyID := data.AccessKey.ValueString()
@@ -105,7 +107,7 @@ func (d *accessKeyDataSource) Read(ctx context.Context, req datasource.ReadReque
 	var err error
 	switch {
 	case !data.ID.IsNull():
-		accessKey, apiResponse, err = d.client.GetAccessKey(ctx, id)
+		accessKey, apiResponse, err = client.GetAccessKey(ctx, id)
 
 		if apiResponse.HttpNotFound() {
 			resp.Diagnostics.AddError("accesskey not found", "The accesskey was not found")
@@ -136,7 +138,7 @@ func (d *accessKeyDataSource) Read(ctx context.Context, req datasource.ReadReque
 			return
 		}
 	case !data.AccessKey.IsNull():
-		accessKeys, _, err = d.client.ListAccessKeysFilter(ctx, accessKeyID)
+		accessKeys, _, err = client.ListAccessKeysFilter(ctx, accessKeyID)
 		if err != nil {
 			resp.Diagnostics.AddError("an error occurred while fetching the accesskeys", err.Error())
 			return
@@ -158,7 +160,7 @@ func (d *accessKeyDataSource) Read(ctx context.Context, req datasource.ReadReque
 			return
 		}
 	case !data.Description.IsNull():
-		accessKeys, _, err = d.client.ListAccessKeys(ctx)
+		accessKeys, _, err = client.ListAccessKeys(ctx)
 		if err != nil {
 			resp.Diagnostics.AddError("an error occurred while fetching the accesskeys", err.Error())
 			return
