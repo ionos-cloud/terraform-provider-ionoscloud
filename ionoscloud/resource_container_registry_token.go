@@ -109,7 +109,10 @@ func resourceContainerRegistryToken() *schema.Resource {
 
 func resourceContainerRegistryTokenCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	registryId := d.Get("registry_id").(string)
 	fileStr := d.Get("save_password_to_file").(string)
@@ -146,7 +149,10 @@ func resourceContainerRegistryTokenCreate(ctx context.Context, d *schema.Resourc
 
 func resourceContainerRegistryTokenRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	registryId := d.Get("registry_id").(string)
 	registryTokenId := d.Id()
@@ -172,7 +178,10 @@ func resourceContainerRegistryTokenRead(ctx context.Context, d *schema.ResourceD
 
 func resourceContainerRegistryTokenUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	registryId := d.Get("registry_id").(string)
 	registryTokenId := d.Id()
@@ -192,7 +201,10 @@ func resourceContainerRegistryTokenUpdate(ctx context.Context, d *schema.Resourc
 
 func resourceContainerRegistryTokenDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	registryId := d.Get("registry_id").(string)
 	registryTokenId := d.Id()
@@ -213,7 +225,10 @@ func resourceContainerRegistryTokenDelete(ctx context.Context, d *schema.Resourc
 
 func resourceContainerRegistryTokenImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	location := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(location)
+	if err != nil {
+		return nil, err
+	}
 
 	registryId := d.Get("registry_id").(string)
 	registryTokenId := d.Id()

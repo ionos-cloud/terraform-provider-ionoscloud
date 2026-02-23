@@ -88,7 +88,7 @@ func (c SdkBundle) newBundleClientConfig(userAgent string) *shared.Configuration
 }
 
 // NewContainerRegistryClient creates a new Container Registry client for a specific location
-func (c SdkBundle) NewContainerRegistryClient(location string) *crService.Client {
+func (c SdkBundle) NewContainerRegistryClient(location string) (*crService.Client, error) {
 	config := c.newBundleClientConfig(fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go-container-cr/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		c.clientOptions.Version, cr.Version, c.clientOptions.TerraformVersion,
@@ -97,17 +97,32 @@ func (c SdkBundle) NewContainerRegistryClient(location string) *crService.Client
 
 	if os.Getenv(shared.IonosApiUrlEnvVar) != "" {
 		log.Printf("[DEBUG] Using custom endpoint from IONOS_API_URL env variable")
-		return crService.NewClientFromConfig(config)
+		return crService.NewClientFromConfig(config), nil
 	}
 
 	if c.fileConfig == nil {
-		return crService.NewClientFromConfig(config)
+		return crService.NewClientFromConfig(config), nil
+	}
+
+	if c.fileConfig.GetProductOverrides(fileconfiguration.ContainerRegistry) == nil {
+		log.Printf("[DEBUG] Missing config for %s product in file config, using SDK defaults", fileconfiguration.ContainerRegistry)
+		return crService.NewClientFromConfig(config), nil
 	}
 
 	endpoint := c.fileConfig.GetLocationOverridesWithGlobalFallback(fileconfiguration.ContainerRegistry, location)
 	if endpoint == nil {
-		log.Printf("[WARN] Missing endpoint for %s product in location %s and no global endpoints defined", fileconfiguration.ContainerRegistry, location)
-		return crService.NewClientFromConfig(config)
+		if location == "" {
+			return nil, fmt.Errorf(
+				"could not instantiate Container Registry client: invalid config found for %q product in file config: "+
+					"no global endpoints defined", fileconfiguration.ContainerRegistry,
+			)
+		}
+
+		return nil, fmt.Errorf(
+			"could not instantiate Container Registry client: invalid config found for %q product in file config: "+
+				"missing endpoint in location %q and no global endpoints defined for fallback",
+			fileconfiguration.ContainerRegistry, location,
+		)
 	}
 	config.Servers = shared.ServerConfigurations{
 		{
@@ -117,7 +132,7 @@ func (c SdkBundle) NewContainerRegistryClient(location string) *crService.Client
 	}
 	config.HTTPClient = &http.Client{}
 	config.HTTPClient.Transport = shared.CreateTransport(endpoint.SkipTLSVerify, endpoint.CertificateAuthData)
-	return crService.NewClientFromConfig(config)
+	return crService.NewClientFromConfig(config), nil
 }
 
 // newCloudAPIClientConfig creates a new *ionoscloud.Configuration using the client options defined in the SdkBundle struct.
