@@ -8,11 +8,11 @@ import (
 	"runtime"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
+	cr "github.com/ionos-cloud/sdk-go-bundle/products/containerregistry/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
-	cr "github.com/ionos-cloud/sdk-go-bundle/products/containerregistry/v2"
 	autoscalingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/autoscaling"
 	cdnService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cdn"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
@@ -98,7 +98,7 @@ func (c SdkBundle) NewContainerRegistryClient(location string) *crService.Client
 	))
 
 	if os.Getenv(shared.IonosApiUrlEnvVar) != "" {
-		log.Printf("[DEBUG] Using custom endpoint %s from IONOS_API_URL env variable\n", os.Getenv(shared.IonosApiUrlEnvVar))
+		log.Printf("[DEBUG] Using custom endpoint %q from IONOS_API_URL env variable\n", os.Getenv(shared.IonosApiUrlEnvVar))
 		return crService.NewClientFromConfig(config)
 	}
 
@@ -147,7 +147,7 @@ func (c SdkBundle) NewCloudAPIClient(location string) *ionoscloud.APIClient {
 	config := c.newCloudAPIClientConfig()
 
 	if os.Getenv(shared.IonosApiUrlEnvVar) != "" {
-		log.Printf("[DEBUG] Using custom endpoint %s from IONOS_API_URL env variable\n", os.Getenv(shared.IonosApiUrlEnvVar))
+		log.Printf("[DEBUG] Using custom endpoint %q from IONOS_API_URL env variable\n", os.Getenv(shared.IonosApiUrlEnvVar))
 		return ionoscloud.NewAPIClient(config)
 	}
 
