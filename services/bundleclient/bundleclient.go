@@ -120,7 +120,7 @@ func (c SdkBundle) NewContainerRegistryClient(location string) *crService.Client
 }
 
 // NewObjectStorageManagementClient creates a new Object Storage Management client for a specific location
-func (c SdkBundle) NewObjectStorageManagementClient(location string) *objectStorageManagementService.Client {
+func (c SdkBundle) NewObjectStorageManagementClient(location string) (*objectStorageManagementService.Client, error) {
 	config := c.newBundleClientConfig(fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go-object-storage-management/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		c.clientOptions.Version, objectstoragemanagement.Version, c.clientOptions.TerraformVersion,
@@ -130,22 +130,37 @@ func (c SdkBundle) NewObjectStorageManagementClient(location string) *objectStor
 	if url := os.Getenv("IONOS_API_URL_OBJECT_STORAGE_MANAGEMENT"); url != "" {
 		log.Printf("[DEBUG] Using custom endpoint from IONOS_API_URL_OBJECT_STORAGE_MANAGEMENT env variable")
 		config.Servers = shared.ServerConfigurations{{URL: url}}
-		return objectStorageManagementService.NewClientFromConfig(config)
+		return objectStorageManagementService.NewClientFromConfig(config), nil
 	}
 
 	if os.Getenv(shared.IonosApiUrlEnvVar) != "" {
 		log.Printf("[DEBUG] Using custom endpoint from IONOS_API_URL env variable")
-		return objectStorageManagementService.NewClientFromConfig(config)
+		return objectStorageManagementService.NewClientFromConfig(config), nil
 	}
 
 	if c.fileConfig == nil {
-		return objectStorageManagementService.NewClientFromConfig(config)
+		return objectStorageManagementService.NewClientFromConfig(config), nil
+	}
+
+	if c.fileConfig.GetProductOverrides(fileconfiguration.ObjectStorageManagement) == nil {
+		log.Printf("[DEBUG] Missing config for %s product in file config, using SDK defaults", fileconfiguration.ObjectStorageManagement)
+		return objectStorageManagementService.NewClientFromConfig(config), nil
 	}
 
 	endpoint := c.fileConfig.GetLocationOverridesWithGlobalFallback(fileconfiguration.ObjectStorageManagement, location)
 	if endpoint == nil {
-		log.Printf("[WARN] Missing endpoint for %s product in location %s and no global endpoints defined", fileconfiguration.ObjectStorageManagement, location)
-		return objectStorageManagementService.NewClientFromConfig(config)
+		if location == "" {
+			return nil, fmt.Errorf(
+				"could not instantiate Object Storage Management client: invalid config found for %q product in file config: "+
+					"no global endpoints defined", fileconfiguration.ObjectStorageManagement,
+			)
+		}
+
+		return nil, fmt.Errorf(
+			"could not instantiate Object Storage Management client: invalid config found for %q product in file config: "+
+				"missing endpoint in location %q and no global endpoints defined for fallback",
+			fileconfiguration.ObjectStorageManagement, location,
+		)
 	}
 	config.Servers = shared.ServerConfigurations{
 		{
@@ -155,7 +170,7 @@ func (c SdkBundle) NewObjectStorageManagementClient(location string) *objectStor
 	}
 	config.HTTPClient = &http.Client{}
 	config.HTTPClient.Transport = shared.CreateTransport(endpoint.SkipTLSVerify, endpoint.CertificateAuthData)
-	return objectStorageManagementService.NewClientFromConfig(config)
+	return objectStorageManagementService.NewClientFromConfig(config), nil
 }
 
 // newCloudAPIClientConfig creates a new *ionoscloud.Configuration using the client options defined in the SdkBundle struct.

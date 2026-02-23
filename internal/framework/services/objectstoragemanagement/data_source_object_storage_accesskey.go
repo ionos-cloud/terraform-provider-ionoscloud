@@ -95,7 +95,11 @@ func (d *accessKeyDataSource) Read(ctx context.Context, req datasource.ReadReque
 		return
 	}
 
-	client := d.clientBundle.NewObjectStorageManagementClient("")
+	client, err := d.clientBundle.NewObjectStorageManagementClient("")
+	if err != nil {
+		resp.Diagnostics.AddError("failed to create Object Storage Management client", err.Error())
+		return
+	}
 
 	id := data.ID.ValueString()
 	accessKeyID := data.AccessKey.ValueString()
@@ -104,7 +108,6 @@ func (d *accessKeyDataSource) Read(ctx context.Context, req datasource.ReadReque
 	var accessKey objectstoragemanagementApi.AccessKeyRead
 	var accessKeys objectstoragemanagementApi.AccessKeyReadList
 	var apiResponse *shared.APIResponse
-	var err error
 	switch {
 	case !data.ID.IsNull():
 		accessKey, apiResponse, err = client.GetAccessKey(ctx, id)

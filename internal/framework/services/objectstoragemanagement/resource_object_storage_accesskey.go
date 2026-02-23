@@ -113,7 +113,11 @@ func (r *accesskeyResource) Create(ctx context.Context, req resource.CreateReque
 	ctx, cancel := context.WithTimeout(ctx, createTimeout)
 	defer cancel()
 
-	client := r.clientBundle.NewObjectStorageManagementClient("")
+	client, err := r.clientBundle.NewObjectStorageManagementClient("")
+	if err != nil {
+		resp.Diagnostics.AddError("failed to create Object Storage Management client", err.Error())
+		return
+	}
 
 	var accessKey = objectStorageManagement.AccessKeyCreate{
 		Properties: objectStorageManagement.AccessKey{
@@ -152,7 +156,11 @@ func (r *accesskeyResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	client := r.clientBundle.NewObjectStorageManagementClient("")
+	client, err := r.clientBundle.NewObjectStorageManagementClient("")
+	if err != nil {
+		resp.Diagnostics.AddError("failed to create Object Storage Management client", err.Error())
+		return
+	}
 	accessKey, apiResponse, err := client.GetAccessKey(ctx, data.ID.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("read Access Key API error", err.Error())
@@ -188,7 +196,11 @@ func (r *accesskeyResource) Update(ctx context.Context, req resource.UpdateReque
 	ctx, cancel := context.WithTimeout(ctx, updateTimeout)
 	defer cancel()
 
-	client := r.clientBundle.NewObjectStorageManagementClient("")
+	client, err := r.clientBundle.NewObjectStorageManagementClient("")
+	if err != nil {
+		resp.Diagnostics.AddError("failed to create Object Storage Management client", err.Error())
+		return
+	}
 
 	var accessKey = objectStorageManagement.AccessKeyEnsure{
 		Properties: objectStorageManagement.AccessKey{
@@ -235,7 +247,11 @@ func (r *accesskeyResource) Delete(ctx context.Context, req resource.DeleteReque
 	ctx, cancel := context.WithTimeout(ctx, deleteTimeout)
 	defer cancel()
 
-	client := r.clientBundle.NewObjectStorageManagementClient("")
+	client, err := r.clientBundle.NewObjectStorageManagementClient("")
+	if err != nil {
+		resp.Diagnostics.AddError("failed to create Object Storage Management client", err.Error())
+		return
+	}
 	if _, err := client.DeleteAccessKey(ctx, data.ID.ValueString(), deleteTimeout); err != nil {
 		resp.Diagnostics.AddError("failed to delete accesskey", err.Error())
 		return

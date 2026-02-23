@@ -109,7 +109,11 @@ func (d *regionDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		return
 	}
 
-	client := d.clientBundle.NewObjectStorageManagementClient("")
+	client, err := d.clientBundle.NewObjectStorageManagementClient("")
+	if err != nil {
+		resp.Diagnostics.AddError("failed to create Object Storage Management client", err.Error())
+		return
+	}
 	region, apiResponse, err := client.GetRegion(ctx, data.ID.ValueString(), 1)
 
 	if apiResponse.HttpNotFound() {
