@@ -44,7 +44,10 @@ func dataSourceDbaasPgSqlUser() *schema.Resource {
 }
 
 func dataSourceDbaasPgSqlReadUser(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
+	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	clusterId := d.Get("cluster_id").(string)
 	username := d.Get("username").(string)
 

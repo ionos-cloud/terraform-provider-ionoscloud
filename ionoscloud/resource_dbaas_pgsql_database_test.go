@@ -75,7 +75,10 @@ func pgSqlDatabaseExistsCheck(path string, database *pgsql.DatabaseResource) res
 		if rs.Primary.ID == "" {
 			return fmt.Errorf("no ID is set for the PgSql database")
 		}
-		client := testAccProvider.Meta().(bundleclient.SdkBundle).NewPsqlClient(rs.Primary.Attributes["location"])
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewPsqlClient(rs.Primary.Attributes["location"])
+		if err != nil {
+			return err
+		}
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 		defer cancel()
 		clusterId := rs.Primary.Attributes["cluster_id"]
@@ -98,7 +101,10 @@ func pgSqlDatabaseDestroyCheck(s *terraform.State) error {
 		if rs.Type != constant.PsqlDatabaseResource {
 			continue
 		}
-		client := testAccProvider.Meta().(bundleclient.SdkBundle).NewPsqlClient(rs.Primary.Attributes["location"])
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewPsqlClient(rs.Primary.Attributes["location"])
+		if err != nil {
+			return err
+		}
 		clusterId := rs.Primary.Attributes["cluster_id"]
 		name := rs.Primary.Attributes["name"]
 		_, apiResponse, err := client.FindDatabaseByName(ctx, clusterId, name)

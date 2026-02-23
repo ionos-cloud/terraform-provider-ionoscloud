@@ -57,7 +57,10 @@ func dataSourceDbaasPgSqlDatabases() *schema.Resource {
 }
 
 func dataSourceDbaasPgSqlReadDatabases(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
+	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	clusterId := d.Get("cluster_id").(string)
 	owner, ownerOk := d.GetOk("owner")
 	resourceName := "PgSQL databases"

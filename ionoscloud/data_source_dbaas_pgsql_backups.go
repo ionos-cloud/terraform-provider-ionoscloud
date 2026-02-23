@@ -93,7 +93,10 @@ func dataSourceDbaasPgSqlBackups() *schema.Resource {
 }
 
 func dataSourceDbaasPgSqlReadBackups(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
+	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	id, idOk := d.GetOk("cluster_id")
 	idStr := id.(string)

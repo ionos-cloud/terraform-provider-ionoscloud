@@ -60,7 +60,10 @@ func pgSqlUserExistsCheck(path string, user *pgsql.UserResource) resource.TestCh
 		if rs.Primary.ID == "" {
 			return fmt.Errorf("no ID is set for the PgSql user")
 		}
-		client := testAccProvider.Meta().(bundleclient.SdkBundle).NewPsqlClient(rs.Primary.Attributes["location"])
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewPsqlClient(rs.Primary.Attributes["location"])
+		if err != nil {
+			return err
+		}
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 		defer cancel()
 		clusterId := rs.Primary.Attributes["cluster_id"]
@@ -83,7 +86,10 @@ func pgSqlUserDestroyCheck(s *terraform.State) error {
 		if rs.Type != constant.PsqlUserResource {
 			continue
 		}
-		client := testAccProvider.Meta().(bundleclient.SdkBundle).NewPsqlClient(rs.Primary.Attributes["location"])
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewPsqlClient(rs.Primary.Attributes["location"])
+		if err != nil {
+			return err
+		}
 		clusterId := rs.Primary.Attributes["cluster_id"]
 		username := rs.Primary.Attributes["username"]
 		_, apiResponse, err := client.FindUserByUsername(ctx, clusterId, username)

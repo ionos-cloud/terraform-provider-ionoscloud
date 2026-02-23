@@ -243,7 +243,10 @@ func testAccCheckDbaasPgSqlClusterDestroyCheck(s *terraform.State) error {
 			continue
 		}
 
-		client := testAccProvider.Meta().(bundleclient.SdkBundle).NewPsqlClient(rs.Primary.Attributes["location"])
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewPsqlClient(rs.Primary.Attributes["location"])
+		if err != nil {
+			return err
+		}
 		_, apiResponse, err := client.GetCluster(ctx, rs.Primary.ID)
 		if err != nil {
 			if apiResponse == nil || apiResponse.StatusCode != 404 {
@@ -270,7 +273,10 @@ func testAccCheckDbaasPgSqlClusterExists(n string, cluster *psql.ClusterResponse
 			return fmt.Errorf("no Record ID is set")
 		}
 
-		client := testAccProvider.Meta().(bundleclient.SdkBundle).NewPsqlClient(rs.Primary.Attributes["location"])
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewPsqlClient(rs.Primary.Attributes["location"])
+		if err != nil {
+			return err
+		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 

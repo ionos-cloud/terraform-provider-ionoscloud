@@ -167,7 +167,10 @@ func dataSourceDbaasPgSqlCluster() *schema.Resource {
 }
 
 func dataSourceDbaasPgSqlReadCluster(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
+	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("display_name")
@@ -182,7 +185,6 @@ func dataSourceDbaasPgSqlReadCluster(ctx context.Context, d *schema.ResourceData
 	}
 
 	var cluster dbaas.ClusterResponse
-	var err error
 
 	if idOk {
 		/* search by ID */
