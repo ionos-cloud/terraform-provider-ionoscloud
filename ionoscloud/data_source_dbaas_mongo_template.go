@@ -64,7 +64,7 @@ func dataSourceDbassMongoTemplate() *schema.Resource {
 }
 
 func dataSourceDbassMongoTemplateRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).MongoClient
+	client := meta.(bundleclient.SdkBundle).NewMongoClient("")
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")
 

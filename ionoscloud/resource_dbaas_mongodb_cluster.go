@@ -332,7 +332,7 @@ func errorOnMongoVersionDowngrade(_ context.Context, diff *schema.ResourceDiff, 
 }
 
 func resourceDbaasMongoClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).MongoClient
+	client := meta.(bundleclient.SdkBundle).NewMongoClient(d.Get("location").(string))
 
 	if err := dbaas.MongoClusterCheckRequiredFieldsSet(d); err != nil {
 		return diag.FromErr(err)
@@ -359,7 +359,7 @@ func resourceDbaasMongoClusterCreate(ctx context.Context, d *schema.ResourceData
 }
 
 func resourceDbaasMongoClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).MongoClient
+	client := meta.(bundleclient.SdkBundle).NewMongoClient(d.Get("location").(string))
 	clusterId := d.Id()
 	patchRequest := dbaas.SetMongoClusterPatchProperties(d)
 
@@ -382,7 +382,7 @@ func resourceDbaasMongoClusterUpdate(ctx context.Context, d *schema.ResourceData
 }
 
 func resourceDbaasMongoClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).MongoClient
+	client := meta.(bundleclient.SdkBundle).NewMongoClient(d.Get("location").(string))
 
 	cluster, apiResponse, err := client.GetCluster(ctx, d.Id())
 
@@ -405,7 +405,7 @@ func resourceDbaasMongoClusterRead(ctx context.Context, d *schema.ResourceData, 
 }
 
 func resourceDbaasMongoClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).MongoClient
+	client := meta.(bundleclient.SdkBundle).NewMongoClient(d.Get("location").(string))
 
 	_, apiResponse, err := client.DeleteCluster(ctx, d.Id())
 
@@ -429,7 +429,7 @@ func resourceDbaasMongoClusterDelete(ctx context.Context, d *schema.ResourceData
 }
 
 func resourceDbaasMongoClusterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(bundleclient.SdkBundle).MongoClient
+	client := meta.(bundleclient.SdkBundle).NewMongoClient(d.Get("location").(string))
 
 	clusterId := d.Id()
 

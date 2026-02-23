@@ -71,8 +71,6 @@ func TestAccUserMongoBasic(t *testing.T) {
 }
 
 func testAccCheckMongoUserDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(bundleclient.SdkBundle).MongoClient
-
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 	if cancel != nil {
 		defer cancel()
@@ -82,6 +80,7 @@ func testAccCheckMongoUserDestroyCheck(s *terraform.State) error {
 		if rs.Type != constant.DBaasMongoUserResource {
 			continue
 		}
+		client := testAccProvider.Meta().(bundleclient.SdkBundle).NewMongoClient(rs.Primary.Attributes["location"])
 		clusterId := rs.Primary.Attributes["cluster_id"]
 		username := rs.Primary.Attributes["username"]
 		_, apiResponse, err := client.FindUserByUsername(ctx, clusterId, username)
@@ -100,7 +99,6 @@ func testAccCheckMongoUserDestroyCheck(s *terraform.State) error {
 
 func testAccCheckMongoUserExists(n string, user *mongo.User) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(bundleclient.SdkBundle).MongoClient
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
@@ -110,6 +108,8 @@ func testAccCheckMongoUserExists(n string, user *mongo.User) resource.TestCheckF
 		if rs.Primary.ID == "" {
 			return fmt.Errorf("no Record ID is set")
 		}
+
+		client := testAccProvider.Meta().(bundleclient.SdkBundle).NewMongoClient(rs.Primary.Attributes["location"])
 
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 

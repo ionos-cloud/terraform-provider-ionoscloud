@@ -9,6 +9,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	cr "github.com/ionos-cloud/sdk-go-bundle/products/containerregistry/v2"
+	mongo "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
@@ -41,7 +42,6 @@ func New(clientOptions clientoptions.TerraformClientOptions, fileConfig *filecon
 		DNSClient:                     dnsService.NewClient(clientOptions, fileConfig),
 		LoggingClient:                 loggingService.NewClient(clientOptions, fileConfig),
 		MariaDBClient:                 mariadb.NewClient(clientOptions, fileConfig),
-		MongoClient:                   dbaasService.NewMongoClient(clientOptions, fileConfig),
 		NFSClient:                     nfsService.NewClient(clientOptions, fileConfig),
 		PsqlClient:                    dbaasService.NewPSQLClient(clientOptions, fileConfig),
 		KafkaClient:                   kafkaService.NewClient(clientOptions, fileConfig),
@@ -60,7 +60,6 @@ func New(clientOptions clientoptions.TerraformClientOptions, fileConfig *filecon
 type SdkBundle struct {
 	InMemoryDBClient              *inmemorydb.Client
 	PsqlClient                    *dbaasService.PsqlClient
-	MongoClient                   *dbaasService.MongoClient
 	MariaDBClient                 *mariadb.Client
 	NFSClient                     *nfsService.Client
 	CertManagerClient             *cert.Client
@@ -118,6 +117,39 @@ func (c SdkBundle) NewContainerRegistryClient(location string) *crService.Client
 	config.HTTPClient = &http.Client{}
 	config.HTTPClient.Transport = shared.CreateTransport(endpoint.SkipTLSVerify, endpoint.CertificateAuthData)
 	return crService.NewClientFromConfig(config)
+}
+
+// NewMongoClient creates a new MongoDB client for a specific location
+func (c SdkBundle) NewMongoClient(location string) *dbaasService.MongoClient {
+	config := c.newBundleClientConfig(fmt.Sprintf(
+		"terraform-provider/%s_ionos-cloud-sdk-go-dbaas-mongo/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
+		c.clientOptions.Version, mongo.Version, c.clientOptions.TerraformVersion,
+		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
+	))
+
+	if os.Getenv(shared.IonosApiUrlEnvVar) != "" {
+		log.Printf("[DEBUG] Using custom endpoint from IONOS_API_URL env variable")
+		return dbaasService.NewMongoClientFromConfig(config)
+	}
+
+	if c.fileConfig == nil {
+		return dbaasService.NewMongoClientFromConfig(config)
+	}
+
+	endpoint := c.fileConfig.GetLocationOverridesWithGlobalFallback(fileconfiguration.Mongo, location)
+	if endpoint == nil {
+		log.Printf("[WARN] Missing endpoint for %s product in location %s and no global endpoints defined", fileconfiguration.Mongo, location)
+		return dbaasService.NewMongoClientFromConfig(config)
+	}
+	config.Servers = shared.ServerConfigurations{
+		{
+			URL:         endpoint.Name,
+			Description: shared.EndpointOverridden + location,
+		},
+	}
+	config.HTTPClient = &http.Client{}
+	config.HTTPClient.Transport = shared.CreateTransport(endpoint.SkipTLSVerify, endpoint.CertificateAuthData)
+	return dbaasService.NewMongoClientFromConfig(config)
 }
 
 // newCloudAPIClientConfig creates a new *ionoscloud.Configuration using the client options defined in the SdkBundle struct.
