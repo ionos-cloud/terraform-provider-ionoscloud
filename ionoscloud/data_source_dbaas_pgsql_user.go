@@ -33,13 +33,18 @@ func dataSourceDbaasPgSqlUser() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"location": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The location of the cluster this user belongs to.",
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
 }
 
 func dataSourceDbaasPgSqlReadUser(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).PsqlClient
+	client := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
 	clusterId := d.Get("cluster_id").(string)
 	username := d.Get("username").(string)
 

@@ -34,7 +34,7 @@ func dataSourceDbaasPgSqlVersions() *schema.Resource {
 }
 
 func dataSourceDbaasPgSqlReadVersions(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).PsqlClient
+	client := meta.(bundleclient.SdkBundle).NewPsqlClient("")
 
 	id, idOk := d.GetOk("cluster_id")
 

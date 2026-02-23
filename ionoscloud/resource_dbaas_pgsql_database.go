@@ -42,13 +42,19 @@ func resourceDbaasPgSqlDatabase() *schema.Resource {
 				Required:    true,
 				ForceNew:    true,
 			},
+			"location": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "The location of the cluster this database belongs to.",
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
 }
 
 func resourceDbaasPgSqlDatabaseCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).PsqlClient
+	client := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
 	clusterId := d.Get("cluster_id").(string)
 	name := d.Get("name").(string)
 	owner := d.Get("owner").(string)
@@ -66,7 +72,7 @@ func resourceDbaasPgSqlDatabaseCreate(ctx context.Context, d *schema.ResourceDat
 }
 
 func resourceDbaasPgSqlDatabaseRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).PsqlClient
+	client := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
 	clusterId := d.Get("cluster_id").(string)
 	name := d.Get("name").(string)
 
@@ -85,7 +91,7 @@ func resourceDbaasPgSqlDatabaseRead(ctx context.Context, d *schema.ResourceData,
 }
 
 func resourceDbaasPgSqlDatabaseDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).PsqlClient
+	client := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
 
 	clusterId := d.Get("cluster_id").(string)
 	name := d.Get("name").(string)
@@ -103,7 +109,7 @@ func resourceDbaasPgSqlDatabaseImporter(ctx context.Context, d *schema.ResourceD
 	}
 	clusterId := parts[0]
 	name := parts[1]
-	client := meta.(bundleclient.SdkBundle).PsqlClient
+	client := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
 	database, apiResponse, err := client.FindDatabaseByName(ctx, clusterId, name)
 	if err != nil {
 		if apiResponse.HttpNotFound() {

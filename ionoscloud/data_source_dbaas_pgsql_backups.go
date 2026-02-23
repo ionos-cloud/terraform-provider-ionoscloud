@@ -20,6 +20,11 @@ func dataSourceDbaasPgSqlBackups() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"location": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The location of the cluster the backups belong to.",
+			},
 			"cluster_backups": {
 				Type:        schema.TypeList,
 				Description: "list of backups",
@@ -88,7 +93,7 @@ func dataSourceDbaasPgSqlBackups() *schema.Resource {
 }
 
 func dataSourceDbaasPgSqlReadBackups(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).PsqlClient
+	client := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
 
 	id, idOk := d.GetOk("cluster_id")
 	idStr := id.(string)

@@ -9,6 +9,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	cr "github.com/ionos-cloud/sdk-go-bundle/products/containerregistry/v2"
+	psql "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
@@ -43,7 +44,6 @@ func New(clientOptions clientoptions.TerraformClientOptions, fileConfig *filecon
 		MariaDBClient:                 mariadb.NewClient(clientOptions, fileConfig),
 		MongoClient:                   dbaasService.NewMongoClient(clientOptions, fileConfig),
 		NFSClient:                     nfsService.NewClient(clientOptions, fileConfig),
-		PsqlClient:                    dbaasService.NewPSQLClient(clientOptions, fileConfig),
 		KafkaClient:                   kafkaService.NewClient(clientOptions, fileConfig),
 		VPNClient:                     vpn.NewClient(clientOptions, fileConfig),
 		InMemoryDBClient:              inmemorydb.NewClient(clientOptions, fileConfig),
@@ -59,7 +59,6 @@ func New(clientOptions clientoptions.TerraformClientOptions, fileConfig *filecon
 // SdkBundle is a struct that defines the bundle client. It is used for both sdkv2 and plugin framework
 type SdkBundle struct {
 	InMemoryDBClient              *inmemorydb.Client
-	PsqlClient                    *dbaasService.PsqlClient
 	MongoClient                   *dbaasService.MongoClient
 	MariaDBClient                 *mariadb.Client
 	NFSClient                     *nfsService.Client
@@ -118,6 +117,39 @@ func (c SdkBundle) NewContainerRegistryClient(location string) *crService.Client
 	config.HTTPClient = &http.Client{}
 	config.HTTPClient.Transport = shared.CreateTransport(endpoint.SkipTLSVerify, endpoint.CertificateAuthData)
 	return crService.NewClientFromConfig(config)
+}
+
+// NewPsqlClient creates a new PostgreSQL client for a specific location
+func (c SdkBundle) NewPsqlClient(location string) *dbaasService.PsqlClient {
+	config := c.newBundleClientConfig(fmt.Sprintf(
+		"terraform-provider/%s_ionos-cloud-sdk-go-dbaas-postgres/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
+		c.clientOptions.Version, psql.Version, c.clientOptions.TerraformVersion,
+		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
+	))
+
+	if os.Getenv(shared.IonosApiUrlEnvVar) != "" {
+		log.Printf("[DEBUG] Using custom endpoint from IONOS_API_URL env variable")
+		return dbaasService.NewPsqlClientFromConfig(config)
+	}
+
+	if c.fileConfig == nil {
+		return dbaasService.NewPsqlClientFromConfig(config)
+	}
+
+	endpoint := c.fileConfig.GetLocationOverridesWithGlobalFallback(fileconfiguration.PSQL, location)
+	if endpoint == nil {
+		log.Printf("[WARN] Missing endpoint for %s product in location %s and no global endpoints defined", fileconfiguration.PSQL, location)
+		return dbaasService.NewPsqlClientFromConfig(config)
+	}
+	config.Servers = shared.ServerConfigurations{
+		{
+			URL:         endpoint.Name,
+			Description: shared.EndpointOverridden + location,
+		},
+	}
+	config.HTTPClient = &http.Client{}
+	config.HTTPClient.Transport = shared.CreateTransport(endpoint.SkipTLSVerify, endpoint.CertificateAuthData)
+	return dbaasService.NewPsqlClientFromConfig(config)
 }
 
 // newCloudAPIClientConfig creates a new *ionoscloud.Configuration using the client options defined in the SdkBundle struct.

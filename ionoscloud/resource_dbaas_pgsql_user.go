@@ -46,13 +46,19 @@ func resourceDbaasPgSqlUser() *schema.Resource {
 				Description: "Describes whether this user is a system user or not. A system user cannot be updated or deleted.",
 				Computed:    true,
 			},
+			"location": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "The location of the cluster this user belongs to.",
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
 }
 
 func resourceDbaasPgSqlUserCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).PsqlClient
+	client := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
 
 	clusterId := d.Get("cluster_id").(string)
 	username := d.Get("username").(string)
@@ -79,7 +85,7 @@ func resourceDbaasPgSqlUserCreate(ctx context.Context, d *schema.ResourceData, m
 }
 
 func resourceDbaasPgSqlUserUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).PsqlClient
+	client := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
 
 	request := pgsql.UsersPatchRequest{
 		Properties: *pgsql.NewPatchUserProperties(),
@@ -108,7 +114,7 @@ func resourceDbaasPgSqlUserUpdate(ctx context.Context, d *schema.ResourceData, m
 }
 
 func resourceDbaasPgSqlUserRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).PsqlClient
+	client := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
 	clusterId := d.Get("cluster_id").(string)
 	username := d.Get("username").(string)
 
@@ -129,7 +135,7 @@ func resourceDbaasPgSqlUserRead(ctx context.Context, d *schema.ResourceData, met
 }
 
 func resourceDbaaSPgSqlUserDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).PsqlClient
+	client := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
 
 	clusterId := d.Get("cluster_id").(string)
 	username := d.Get("username").(string)
@@ -152,7 +158,7 @@ func resourceDbaasPgSqlUserImporter(ctx context.Context, d *schema.ResourceData,
 	}
 	clusterId := parts[0]
 	username := parts[1]
-	client := meta.(bundleclient.SdkBundle).PsqlClient
+	client := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
 	user, apiResponse, err := client.FindUserByUsername(ctx, clusterId, username)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
