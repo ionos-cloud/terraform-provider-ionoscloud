@@ -38,7 +38,6 @@ func New(clientOptions clientoptions.TerraformClientOptions, fileConfig *filecon
 		CDNClient:                     cdnService.NewClient(clientOptions, fileConfig),
 		AutoscalingClient:             autoscalingService.NewClient(clientOptions, fileConfig),
 		CertManagerClient:             cert.NewClient(clientOptions, fileConfig),
-		ContainerClient:               crService.NewClient(clientOptions, fileConfig),
 		DNSClient:                     dnsService.NewClient(clientOptions, fileConfig),
 		LoggingClient:                 loggingService.NewClient(clientOptions, fileConfig),
 		MariaDBClient:                 mariadb.NewClient(clientOptions, fileConfig),
@@ -65,7 +64,6 @@ type SdkBundle struct {
 	MariaDBClient                 *mariadb.Client
 	NFSClient                     *nfsService.Client
 	CertManagerClient             *cert.Client
-	ContainerClient               *crService.Client
 	DNSClient                     *dnsService.Client
 	LoggingClient                 *loggingService.Client
 	AutoscalingClient             *autoscalingService.Client
