@@ -130,7 +130,10 @@ func resourceSnapshot() *schema.Resource {
 
 func resourceSnapshotCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	dcId := d.Get("datacenter_id").(string)
 	volumeId := d.Get("volume_id").(string)
@@ -168,7 +171,10 @@ func resourceSnapshotCreate(ctx context.Context, d *schema.ResourceData, meta in
 
 func resourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	snapshot, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -191,7 +197,10 @@ func resourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta inte
 
 func resourceSnapshotUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	name := d.Get("name").(string)
 	// use ionoscloud.SnapshotProperties struct to initialize update input instead of ionoscloud.NewSnapshotProperties(),
@@ -227,7 +236,6 @@ func resourceSnapshotUpdate(ctx context.Context, d *schema.ResourceData, meta in
 		input.DiscVirtioHotUnplug = ionoscloud.ToPtr(d.Get("disc_virtio_hot_unplug").(bool))
 	}
 	if d.HasChange("require_legacy_bios") {
-		log.Printf("[DEBUG] require_legacy_bios has changed for snapshot %s, updating value to %t", d.Id(), d.Get("require_legacy_bios").(bool))
 		input.RequireLegacyBios = ionoscloud.ToPtr(d.Get("require_legacy_bios").(bool))
 	}
 
@@ -247,7 +255,10 @@ func resourceSnapshotUpdate(ctx context.Context, d *schema.ResourceData, meta in
 
 func resourceSnapshotDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	apiResponse, err := client.SnapshotsApi.SnapshotsDelete(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -277,9 +288,12 @@ func resourceSnapshotImport(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	snapshotID := parts[0]
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return nil, err
+	}
 
-	snapshot, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, d.Id()).Execute()
+	snapshot, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, snapshotID).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -290,7 +304,7 @@ func resourceSnapshotImport(ctx context.Context, d *schema.ResourceData, meta in
 		return nil, fmt.Errorf("an error occurred while retrieving the snapshot %q, %w", snapshotID, err)
 	}
 
-	log.Printf("[INFO] snapshot %s found: %+v", d.Id(), snapshot)
+	log.Printf("[INFO] snapshot %s found: %+v", importID, snapshot)
 
 	if err = setSnapshotData(d, &snapshot); err != nil {
 		return nil, err

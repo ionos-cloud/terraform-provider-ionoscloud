@@ -490,7 +490,10 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 
 func dataSourceServerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	datacenterId, dcIdOk := d.GetOk("datacenter_id")
 	if !dcIdOk {
@@ -507,7 +510,6 @@ func dataSourceServerRead(ctx context.Context, d *schema.ResourceData, meta inte
 		return diag.FromErr(errors.New("please provide either the server id or name"))
 	}
 	var server ionoscloud.Server
-	var err error
 	var apiResponse *ionoscloud.APIResponse
 
 	if idOk {

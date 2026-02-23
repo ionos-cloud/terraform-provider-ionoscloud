@@ -257,7 +257,10 @@ func resourceGPUServer() *schema.Resource {
 //nolint:gocyclo
 func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	server := ionoscloud.Server{
 		Properties: &ionoscloud.ServerProperties{},
@@ -293,7 +296,6 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta i
 		return diags
 	}
 
-	var err error
 	var volume *ionoscloud.VolumeProperties
 	if _, ok := d.GetOk("volume"); ok {
 		volume, err = getVolumeData(d, "volume.0.", constant.GpuType)

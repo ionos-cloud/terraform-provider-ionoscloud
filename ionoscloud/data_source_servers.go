@@ -250,7 +250,10 @@ func dataSourceFiltersSchema() *schema.Schema {
 
 func dataSourceServersRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	datacenterId, dcIdOk := d.GetOk("datacenter_id")
 	if !dcIdOk {
@@ -268,7 +271,6 @@ func dataSourceServersRead(ctx context.Context, d *schema.ResourceData, meta int
 			log.Printf("[INFO] Adding filter with name %s and value %s \n", name, value)
 		}
 	}
-	var err error
 	var apiResponse *ionoscloud.APIResponse
 
 	/* search by whatever filter is set above */

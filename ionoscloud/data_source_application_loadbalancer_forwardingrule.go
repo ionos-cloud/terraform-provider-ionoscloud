@@ -168,7 +168,10 @@ func dataSourceApplicationLoadBalancerForwardingRule() *schema.Resource {
 
 func dataSourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	datacenterId := d.Get("datacenter_id").(string)
 	albId := d.Get("application_loadbalancer_id").(string)
@@ -187,7 +190,6 @@ func dataSourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d 
 	}
 
 	var applicationLoadBalancerForwardingRule ionoscloud.ApplicationLoadBalancerForwardingRule
-	var err error
 	var apiResponse *ionoscloud.APIResponse
 
 	if idOk {

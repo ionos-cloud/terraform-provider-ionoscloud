@@ -216,7 +216,10 @@ func testAccCheckK8sClusterDestroyCheck(s *terraform.State) error {
 		}
 
 		location := rs.Primary.Attributes["location"]
-		client := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
+		if err != nil {
+			return err
+		}
 
 		_, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, rs.Primary.ID).Execute()
 		logApiRequestTime(apiResponse)
@@ -253,7 +256,10 @@ func testAccCheckK8sClusterExists(n string, k8sCluster *ionoscloud.KubernetesClu
 		}
 
 		location := rs.Primary.Attributes["location"]
-		client := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
+		if err != nil {
+			return err
+		}
 
 		foundK8sCluster, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, rs.Primary.ID).Execute()
 		logApiRequestTime(apiResponse)

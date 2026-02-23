@@ -49,7 +49,7 @@ func SetClientOptionsFromConfig(client ConfigProviderWithLoaderAndLocation, prod
 	defer client.ChangeConfigURL(location)
 	// do not set from config if we use IONOS_API_URL
 	if os.Getenv(shared.IonosApiUrlEnvVar) != "" {
-		log.Printf("[DEBUG] Using custom endpoint %s", os.Getenv(shared.IonosApiUrlEnvVar))
+		log.Printf("[DEBUG] Using custom endpoint from IONOS_API_URL env variable")
 		return
 	}
 	fileConfig := client.GetFileConfig()

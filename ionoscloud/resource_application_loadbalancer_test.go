@@ -131,7 +131,10 @@ func testAccCheckApplicationLoadBalancerDestroyCheck(s *terraform.State) error {
 		albId := rs.Primary.ID
 		location := rs.Primary.Attributes["location"]
 
-		client := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
+		if err != nil {
+			return err
+		}
 
 		_, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFindByApplicationLoadBalancerId(ctx, dcId, albId).Execute()
 		logApiRequestTime(apiResponse)
@@ -170,7 +173,10 @@ func testAccCheckApplicationLoadBalancerExists(n string, alb *ionoscloud.Applica
 		albId := rs.Primary.ID
 		location := rs.Primary.Attributes["location"]
 
-		client := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
+		if err != nil {
+			return err
+		}
 
 		foundNatGateway, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFindByApplicationLoadBalancerId(ctx, dcId, albId).Execute()
 		logApiRequestTime(apiResponse)

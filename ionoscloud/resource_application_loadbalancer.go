@@ -96,7 +96,10 @@ and log the extent to which your instances are being accessed.`,
 
 func resourceApplicationLoadBalancerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	applicationLoadBalancer := ionoscloud.ApplicationLoadBalancer{
 		Properties: &ionoscloud.ApplicationLoadBalancerProperties{},
@@ -212,7 +215,10 @@ func resourceApplicationLoadBalancerCreate(ctx context.Context, d *schema.Resour
 
 func resourceApplicationLoadBalancerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	dcId := d.Get("datacenter_id").(string)
 
@@ -246,7 +252,10 @@ func resourceApplicationLoadBalancerRead(ctx context.Context, d *schema.Resource
 
 func resourceApplicationLoadBalancerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	request := ionoscloud.ApplicationLoadBalancer{
 		Properties: &ionoscloud.ApplicationLoadBalancerProperties{},
@@ -354,7 +363,10 @@ func resourceApplicationLoadBalancerUpdate(ctx context.Context, d *schema.Resour
 
 func resourceApplicationLoadBalancerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	dcId := d.Get("datacenter_id").(string)
 
@@ -394,7 +406,10 @@ func resourceApplicationLoadBalancerImport(ctx context.Context, d *schema.Resour
 	datacenterId := parts[0]
 	albId := parts[1]
 
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return nil, err
+	}
 
 	alb, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFindByApplicationLoadBalancerId(ctx, datacenterId, albId).Execute()
 	logApiRequestTime(apiResponse)
@@ -410,12 +425,17 @@ func resourceApplicationLoadBalancerImport(ctx context.Context, d *schema.Resour
 	if err := d.Set("datacenter_id", datacenterId); err != nil {
 		return nil, fmt.Errorf("error while setting datacenter_id property for alb %q: %w", albId, err)
 	}
+	if err = d.Set("location", location); err != nil {
+		return nil, fmt.Errorf("error while setting location property for alb %q: %w", albId, err)
+	}
+
 	fw := cloudapiflowlog.Service{
 		Client: client,
 		Meta:   meta,
 		D:      d,
 	}
-	flowLog, apiResponse, err := fw.GetFlowLogForALB(ctx, datacenterId, d.Id(), 0)
+
+	flowLog, apiResponse, err := fw.GetFlowLogForALB(ctx, datacenterId, albId, 0)
 	if err != nil {
 		if !apiResponse.HttpNotFound() {
 			return nil, fmt.Errorf("error finding flowlog for application loadbalancer: %w, %s", err, responseBody(apiResponse))

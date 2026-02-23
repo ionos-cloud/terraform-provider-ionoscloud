@@ -100,7 +100,10 @@ func dataSourceNatGatewayRule() *schema.Resource {
 
 func dataSourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	datacenterId, dcIdOk := d.GetOk("datacenter_id")
 	if !dcIdOk {
@@ -123,7 +126,6 @@ func dataSourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	var natGatewayRule ionoscloud.NatGatewayRule
-	var err error
 	var apiResponse *ionoscloud.APIResponse
 
 	if idOk {

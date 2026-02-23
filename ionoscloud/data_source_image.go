@@ -141,7 +141,10 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 	imgAlias := imgAliasVal.(string)
 	var results []ionoscloud.Image
 
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	images, apiResponse, err := client.ImagesApi.ImagesGet(ctx).Depth(1).Execute()
 	logApiRequestTime(apiResponse)

@@ -64,7 +64,10 @@ func dataSourceGpus() *schema.Resource {
 
 func dataSourceGpusRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	datacenterID := d.Get("datacenter_id").(string)
 	serverID := d.Get("server_id").(string)

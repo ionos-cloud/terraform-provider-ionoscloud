@@ -270,7 +270,10 @@ func dataSourceK8sCluster() *schema.Resource {
 
 func dataSourceK8sReadCluster(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")
@@ -282,7 +285,6 @@ func dataSourceK8sReadCluster(ctx context.Context, d *schema.ResourceData, meta 
 		return diag.FromErr(errors.New("please provide either the k8s cluster id or name"))
 	}
 	var cluster ionoscloud.KubernetesCluster
-	var err error
 	var apiResponse *ionoscloud.APIResponse
 
 	if idOk {

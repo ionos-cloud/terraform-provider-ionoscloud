@@ -90,7 +90,10 @@ func testAccCheckLanIPFailoverGroupExists(n string) resource.TestCheckFunc {
 		ip := rs.Primary.Attributes["ip"]
 		location := rs.Primary.Attributes["location"]
 
-		client := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
+		if err != nil {
+			return err
+		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 		defer cancel()
@@ -127,7 +130,10 @@ func testAccCheckLanIPFailoverDestroyCheck(s *terraform.State) error {
 		ip := rs.Primary.Attributes["ip"]
 		location := rs.Primary.Attributes["location"]
 
-		client := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
+		if err != nil {
+			return err
+		}
 
 		lan, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, dcId, lanId).Execute()
 		logApiRequestTime(apiResponse)
