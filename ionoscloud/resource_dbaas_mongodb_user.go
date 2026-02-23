@@ -70,7 +70,10 @@ func resourceDbaasMongoUser() *schema.Resource {
 }
 
 func resourceDbaasMongoUserCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).NewMongoClient(d.Get("location").(string))
+	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(d.Get("location").(string))
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	request := mongo.User{
 		Properties: &mongo.UserProperties{},
 	}
@@ -125,7 +128,10 @@ func resourceDbaasMongoUserCreate(ctx context.Context, d *schema.ResourceData, m
 }
 
 func resourceDbaasMongoUserUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).NewMongoClient(d.Get("location").(string))
+	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(d.Get("location").(string))
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	request := mongo.PatchUserRequest{
 		Properties: mongo.NewPatchUserProperties(),
 	}
@@ -173,7 +179,10 @@ func resourceDbaasMongoUserUpdate(ctx context.Context, d *schema.ResourceData, m
 }
 
 func resourceDbaasMongoUserRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).NewMongoClient(d.Get("location").(string))
+	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(d.Get("location").(string))
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	clusterId := d.Get("cluster_id").(string)
 	username := d.Get("username").(string)
@@ -196,11 +205,14 @@ func resourceDbaasMongoUserRead(ctx context.Context, d *schema.ResourceData, met
 }
 
 func resourceDbaasMongoUserDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).NewMongoClient(d.Get("location").(string))
+	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(d.Get("location").(string))
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	clusterId := d.Get("cluster_id").(string)
 	username := d.Get("username").(string)
-	_, err := client.DeleteUser(ctx, clusterId, username)
+	_, err = client.DeleteUser(ctx, clusterId, username)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occurred while deleting the Mongo user with ID: %v, error: %w", d.Id(), err))
 		return diags
@@ -218,7 +230,10 @@ func resourceDbaasMongoUserDelete(ctx context.Context, d *schema.ResourceData, m
 }
 
 func resourceDbaasMongoUserImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(bundleclient.SdkBundle).NewMongoClient(d.Get("location").(string))
+	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(d.Get("location").(string))
+	if err != nil {
+		return nil, err
+	}
 
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 2 {

@@ -75,7 +75,10 @@ func dataSourceDbaasMongoUser() *schema.Resource {
 }
 
 func dataSourceDbaasMongoReadUser(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).NewMongoClient(d.Get("location").(string))
+	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(d.Get("location").(string))
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	clusterIdIf, idOk := d.GetOk("cluster_id")
 	usernameIf, nameOk := d.GetOk("username")
@@ -88,7 +91,6 @@ func dataSourceDbaasMongoReadUser(ctx context.Context, d *schema.ResourceData, m
 	username := usernameIf.(string)
 	clusterId := clusterIdIf.(string)
 	var user mongo.User
-	var err error
 
 	users, _, err := client.GetUsers(ctx, clusterId)
 

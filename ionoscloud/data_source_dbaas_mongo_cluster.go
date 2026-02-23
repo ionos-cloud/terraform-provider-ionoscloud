@@ -248,7 +248,10 @@ func dataSourceDbaasMongoCluster() *schema.Resource {
 }
 
 func dataSourceDbaasMongoReadCluster(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).NewMongoClient(d.Get("location").(string))
+	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(d.Get("location").(string))
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("display_name")
@@ -263,7 +266,6 @@ func dataSourceDbaasMongoReadCluster(ctx context.Context, d *schema.ResourceData
 	}
 
 	var cluster mongo.ClusterResponse
-	var err error
 
 	if idOk {
 		/* search by ID */

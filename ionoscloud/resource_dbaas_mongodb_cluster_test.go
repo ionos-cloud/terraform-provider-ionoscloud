@@ -283,7 +283,10 @@ func testAccCheckDbaasMongoClusterDestroyCheck(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		client := testAccProvider.Meta().(bundleclient.SdkBundle).NewMongoClient(rs.Primary.Attributes["location"])
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewMongoClient(rs.Primary.Attributes["location"])
+		if err != nil {
+			return err
+		}
 
 		_, apiResponse, err := client.GetCluster(ctx, rs.Primary.ID)
 
@@ -312,7 +315,10 @@ func testAccCheckDbaasMongoClusterExists(n string, cluster *mongo.ClusterRespons
 			return fmt.Errorf("no Record ID is set")
 		}
 
-		client := testAccProvider.Meta().(bundleclient.SdkBundle).NewMongoClient(rs.Primary.Attributes["location"])
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewMongoClient(rs.Primary.Attributes["location"])
+		if err != nil {
+			return err
+		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
