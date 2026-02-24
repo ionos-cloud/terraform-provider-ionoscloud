@@ -263,6 +263,11 @@ func resourceContainerRegistryTokenImport(ctx context.Context, d *schema.Resourc
 		return nil, err
 	}
 
+	err = d.Set("location", location)
+	if err != nil {
+		return nil, err
+	}
+
 	if err := crService.SetTokenData(d, registryToken.Properties); err != nil {
 		return nil, err
 	}
