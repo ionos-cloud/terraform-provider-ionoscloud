@@ -95,7 +95,10 @@ func dataSourceContainerRegistryToken() *schema.Resource {
 
 func dataSourceContainerRegistryTokenRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	registryId := d.Get("registry_id").(string)
 	idValue, idOk := d.GetOk("id")
@@ -114,7 +117,6 @@ func dataSourceContainerRegistryTokenRead(ctx context.Context, d *schema.Resourc
 	}
 
 	var token cr.TokenResponse
-	var err error
 
 	if idOk {
 		/* search by ID */

@@ -130,7 +130,10 @@ func dataSourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData
 	name := nameValue.(string)
 	location := locationValue.(string)
 
-	client := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	if idOk && (nameOk || locationOk) {
 		diags := diag.FromErr(errors.New("id and name or location cannot be both specified in the same time"))
@@ -142,7 +145,6 @@ func dataSourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData
 	}
 
 	var registry cr.RegistryResponse
-	var err error
 
 	if idOk {
 		/* search by ID */

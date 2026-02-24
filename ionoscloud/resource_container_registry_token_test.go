@@ -124,7 +124,10 @@ func testAccCheckContainerRegistryTokenDestroyCheck(s *terraform.State) error {
 			continue
 		}
 
-		client := testAccProvider.Meta().(bundleclient.SdkBundle).NewContainerRegistryClient(rs.Primary.Attributes["location"])
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewContainerRegistryClient(rs.Primary.Attributes["location"])
+		if err != nil {
+			return err
+		}
 
 		_, apiResponse, err := client.GetToken(ctx, rs.Primary.Attributes["registry_id"], rs.Primary.ID)
 
@@ -153,7 +156,10 @@ func testAccCheckContainerRegistryTokenExists(n string, registry *cr.TokenRespon
 			return fmt.Errorf("no Record ID is set")
 		}
 
-		client := testAccProvider.Meta().(bundleclient.SdkBundle).NewContainerRegistryClient(rs.Primary.Attributes["location"])
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewContainerRegistryClient(rs.Primary.Attributes["location"])
+		if err != nil {
+			return err
+		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
