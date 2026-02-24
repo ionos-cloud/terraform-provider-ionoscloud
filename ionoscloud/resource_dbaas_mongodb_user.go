@@ -3,7 +3,6 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -230,15 +229,21 @@ func resourceDbaasMongoUserDelete(ctx context.Context, d *schema.ResourceData, m
 }
 
 func resourceDbaasMongoUserImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(d.Get("location").(string))
+	importID := d.Id()
+	location, parts := splitImportID(importID, "/")
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("invalid import identifier: expected one of <location>:<cluster-id>/<username> or <cluster-id>/<username>, got: %s", importID)
+	}
+
+	if err := validateImportIDParts(parts); err != nil {
+		return nil, fmt.Errorf("failed validating import identifier %q: %w", importID, err)
+	}
+
+	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(location)
 	if err != nil {
 		return nil, err
 	}
 
-	parts := strings.Split(d.Id(), "/")
-	if len(parts) != 2 {
-		return nil, fmt.Errorf("invalid import format: %s, expecting the following format: {clusterID}/{username}", d.Id())
-	}
 	clusterID := parts[0]
 	username := parts[1]
 
@@ -255,6 +260,9 @@ func resourceDbaasMongoUserImporter(ctx context.Context, d *schema.ResourceData,
 	}
 	if err := d.Set("cluster_id", clusterID); err != nil {
 		return nil, utils.GenerateSetError("MongoDB user", "cluster_id", err)
+	}
+	if err := d.Set("location", location); err != nil {
+		return nil, utils.GenerateSetError("MongoDB user", "location", err)
 	}
 	return []*schema.ResourceData{d}, nil
 }

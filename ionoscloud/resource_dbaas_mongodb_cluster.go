@@ -441,12 +441,21 @@ func resourceDbaasMongoClusterDelete(ctx context.Context, d *schema.ResourceData
 }
 
 func resourceDbaasMongoClusterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(d.Get("location").(string))
+	importID := d.Id()
+	location, parts := splitImportID(importID, "/")
+	if len(parts) != 1 {
+		return nil, fmt.Errorf("invalid import identifier: expected one of <location>:<cluster-id> or <cluster-id>, got: %s", importID)
+	}
+
+	if err := validateImportIDParts(parts); err != nil {
+		return nil, fmt.Errorf("failed validating import identifier %q: %w", importID, err)
+	}
+	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(location)
 	if err != nil {
 		return nil, err
 	}
 
-	clusterId := d.Id()
+	clusterId := parts[0]
 
 	dbaasCluster, apiResponse, err := client.GetCluster(ctx, clusterId)
 
