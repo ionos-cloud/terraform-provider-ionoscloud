@@ -224,14 +224,23 @@ func resourceContainerRegistryTokenDelete(ctx context.Context, d *schema.Resourc
 }
 
 func resourceContainerRegistryTokenImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	location := d.Get("location").(string)
+	importID := d.Id()
+	location, parts := splitImportID(importID, "/")
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("invalid import identifier: expected one of <location>:<registry-id>/<token-id> or <registry-id>/<token-id>, got: %s", importID)
+	}
+
+	if err := validateImportIDParts(parts); err != nil {
+		return nil, fmt.Errorf("failed validating import identifier %q: %w", importID, err)
+	}
+
 	client, err := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(location)
 	if err != nil {
 		return nil, err
 	}
 
-	registryId := d.Get("registry_id").(string)
-	registryTokenId := d.Id()
+	registryId := parts[0]
+	registryTokenId := parts[1]
 
 	registryToken, apiResponse, err := client.GetToken(ctx, registryId, registryTokenId)
 
@@ -247,6 +256,11 @@ func resourceContainerRegistryTokenImport(ctx context.Context, d *schema.Resourc
 
 	if registryToken.Id != nil {
 		d.SetId(*registryToken.Id)
+	}
+
+	err = d.Set("registry_id", registryId)
+	if err != nil {
+		return nil, err
 	}
 
 	if err := crService.SetTokenData(d, registryToken.Properties); err != nil {
