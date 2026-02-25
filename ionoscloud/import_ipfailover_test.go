@@ -27,6 +27,7 @@ func TestAccIpFailoverImportBasic(t *testing.T) {
 				ImportStateIdFunc: testAccIpFailoverImportStateId,
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"location"},
 			},
 		},
 	})

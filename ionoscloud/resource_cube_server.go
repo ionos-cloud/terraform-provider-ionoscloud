@@ -1005,7 +1005,7 @@ func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta 
 
 	location, parts := splitImportID(importID, "/")
 
-	if len(parts) != 2 {
+	if len(parts) < 2 {
 		return nil, fmt.Errorf(
 			"invalid import identifier: expected one of <location>:<datacenter-id>/<server-id> "+
 				"or <datacenter-id>/<server-id>, got: %s", importID)

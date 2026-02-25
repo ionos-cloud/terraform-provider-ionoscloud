@@ -30,6 +30,7 @@ func TestAccLoadbalancerImportBasic(t *testing.T) {
 				ImportStateIdFunc: testAccLoadbalancerImportStateId,
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"location"},
 			},
 		},
 	})

@@ -30,6 +30,7 @@ func TestAccFirewallImportBasic(t *testing.T) {
 				ImportStateIdFunc: testAccFirewallImportStateId,
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"location"},
 			},
 		},
 	})

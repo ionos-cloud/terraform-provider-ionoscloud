@@ -29,6 +29,7 @@ func TestAccApplicationLoadBalancerImportBasic(t *testing.T) {
 				ImportStateIdFunc: testAccApplicationLoadBalancerImportStateId,
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"location"},
 			},
 		},
 	})

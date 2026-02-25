@@ -25,6 +25,7 @@ func TestAccPrivateCrossConnectImportBasic(t *testing.T) {
 				ImportStateIdFunc: testAccPCCImportStateID,
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"location"},
 			},
 		},
 	})

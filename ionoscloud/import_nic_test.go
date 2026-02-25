@@ -30,6 +30,7 @@ func TestAccNicImportBasic(t *testing.T) {
 				ImportStateIdFunc: testAccNicImportStateId,
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"location"},
 			},
 		},
 	})

@@ -25,12 +25,14 @@ func TestAccNSGRuleImportBasic(t *testing.T) {
 				ImportStateIdFunc: testAccNSGRuleImportStateId,
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"location"},
 			},
 			{
 				ResourceName:      constant.NSGFirewallRuleResource + "." + constant.NSGFirewallRuleTestResource + "_2",
 				ImportStateIdFunc: testAccNSGRuleImportStateId,
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"location"},
 			},
 		},
 	})

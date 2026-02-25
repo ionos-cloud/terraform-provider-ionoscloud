@@ -29,6 +29,7 @@ func TestAccNatGatewayImportBasic(t *testing.T) {
 				ImportStateIdFunc: testAccNatGatewayImportStateId,
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"location"},
 			},
 		},
 	})

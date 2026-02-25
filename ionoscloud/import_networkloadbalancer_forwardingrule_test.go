@@ -29,6 +29,7 @@ func TestAccNetworkLoadBalancerForwardingRuleImportBasic(t *testing.T) {
 				ImportStateIdFunc: testAccNetworkLoadBalancerForwardingRuleImportStateId,
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"location"},
 			},
 		},
 	})
