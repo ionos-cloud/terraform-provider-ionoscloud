@@ -23,10 +23,10 @@ func TestAccLanImportBasic(t *testing.T) {
 			},
 
 			{
-				ResourceName:      constant.LanResource + "." + constant.LanTestResource,
-				ImportStateIdFunc: testAccLanImportStateId,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            constant.LanResource + "." + constant.LanTestResource,
+				ImportStateIdFunc:       testAccLanImportStateId,
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location"},
 			},
 		},
