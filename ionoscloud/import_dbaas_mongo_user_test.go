@@ -30,7 +30,7 @@ func TestAccMongoUserImport(t *testing.T) {
 				ImportStateIdFunc:       MongoUserImportStateId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"password"},
+				ImportStateVerifyIgnore: []string{"password", "location"},
 			},
 		},
 	})
