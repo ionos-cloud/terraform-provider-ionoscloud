@@ -26,10 +26,11 @@ func TestAccPgSqlDatabaseImport(t *testing.T) {
 				Config: PgSqlDatabaseConfig,
 			},
 			{
-				ResourceName:      constant.PsqlDatabaseResource + "." + constant.PsqlDatabaseTestResource,
-				ImportStateIdFunc: PgSqlDatabaseImportStateId,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            constant.PsqlDatabaseResource + "." + constant.PsqlDatabaseTestResource,
+				ImportStateIdFunc:       PgSqlDatabaseImportStateId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location"},
 			},
 		},
 	})

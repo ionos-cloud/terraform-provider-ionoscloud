@@ -129,11 +129,11 @@ resource ` + constant.LanResource + ` "lan_example" {
 }
 
 resource ` + constant.PsqlClusterResource + ` ` + constant.DBaaSClusterTestResource + ` {
-  postgres_version   = 12
+  postgres_version   = 16
   instances          = 1
   cores              = 1
-  ram                = 2048
-  storage_size       = 2048
+  ram                = 4096
+  storage_size       = 10240
   storage_type       = "HDD"
   connections   {
 	datacenter_id   =  ` + constant.DatacenterResource + `.datacenter_example.id 

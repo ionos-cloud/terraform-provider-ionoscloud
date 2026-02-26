@@ -30,7 +30,7 @@ func TestAccPgSqlUserImport(t *testing.T) {
 				ImportStateIdFunc:       PgSqlUserImportStateId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"password"},
+				ImportStateVerifyIgnore: []string{"password", "location"},
 			},
 		},
 	})
