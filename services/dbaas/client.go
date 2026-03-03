@@ -29,19 +29,6 @@ func NewMongoClientFromConfig(config *shared.Configuration) *MongoClient {
 	return &MongoClient{sdkClient: mongo.NewAPIClient(config)}
 }
 
-func NewPSQLClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *fileconfiguration.FileConfig) *PsqlClient {
-	loadedconfig.SetGlobalClientOptionsFromFileConfig(&clientOptions, fileConfig, fileconfiguration.PSQL)
-	config := shared.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
-	config.MaxRetries = constant.MaxRetries
-	config.MaxWaitTime = constant.MaxWaitTime
-	config.UserAgent = fmt.Sprintf(
-		"terraform-provider/%s_ionos-cloud-sdk-go-dbaas-postgres/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-		clientOptions.Version, psql.Version, clientOptions.TerraformVersion,
-		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
-	)
-	client := &PsqlClient{
-		sdkClient: psql.NewAPIClient(config),
-	}
-	client.sdkClient.GetConfig().HTTPClient = &http.Client{Transport: shared.CreateTransport(clientOptions.SkipTLSVerify, clientOptions.Certificate)}
-	return client
+func NewPsqlClientFromConfig(config *shared.Configuration) *PsqlClient {
+	return &PsqlClient{sdkClient: psql.NewAPIClient(config)}
 }
