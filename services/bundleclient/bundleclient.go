@@ -9,8 +9,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	cr "github.com/ionos-cloud/sdk-go-bundle/products/containerregistry/v2"
-	psql "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2"
-	mongo "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
@@ -43,9 +43,7 @@ func New(clientOptions clientoptions.TerraformClientOptions, fileConfig *filecon
 		DNSClient:                     dnsService.NewClient(clientOptions, fileConfig),
 		LoggingClient:                 loggingService.NewClient(clientOptions, fileConfig),
 		MariaDBClient:                 mariadb.NewClient(clientOptions, fileConfig),
-		MongoClient:                   dbaasService.NewMongoClient(clientOptions, fileConfig),
 		NFSClient:                     nfsService.NewClient(clientOptions, fileConfig),
-		PsqlClient:                    dbaasService.NewPSQLClient(clientOptions, fileConfig),
 		KafkaClient:                   kafkaService.NewClient(clientOptions, fileConfig),
 		VPNClient:                     vpn.NewClient(clientOptions, fileConfig),
 		InMemoryDBClient:              inmemorydb.NewClient(clientOptions, fileConfig),
