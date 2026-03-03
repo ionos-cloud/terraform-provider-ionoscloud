@@ -26,10 +26,11 @@ func TestAccPgSqlDatabaseImport(t *testing.T) {
 				Config: PgSqlDatabaseConfig,
 			},
 			{
-				ResourceName:      constant.PsqlDatabaseResource + "." + constant.PsqlDatabaseTestResource,
-				ImportStateIdFunc: PgSqlDatabaseImportStateId,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            constant.PsqlDatabaseResource + "." + constant.PsqlDatabaseTestResource,
+				ImportStateIdFunc:       PgSqlDatabaseImportStateId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location"},
 			},
 		},
 	})
@@ -43,7 +44,7 @@ func PgSqlDatabaseImportStateId(s *terraform.State) (string, error) {
 			continue
 		}
 
-		importID = fmt.Sprintf("%s/%s", rs.Primary.Attributes["cluster_id"], rs.Primary.Attributes["name"])
+		importID = fmt.Sprintf("%s:%s/%s", rs.Primary.Attributes["location"], rs.Primary.Attributes["cluster_id"], rs.Primary.Attributes["name"])
 	}
 
 	return importID, nil
