@@ -8,6 +8,7 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
+	"github.com/ionos-cloud/sdk-go-bundle/shared/failover"
 )
 
 // Usage:
@@ -126,6 +127,9 @@ type FileConfig struct {
 	Profiles []Profile `yaml:"profiles"`
 	// Environments list of environments
 	Environments []Environment `yaml:"environments"`
+	// Failover controls transport-level endpoint failover behaviour.
+	// When set, it is applied to the runtime Configuration via ApplyFailoverToConfiguration.
+	Failover *failover.Options `yaml:"failover,omitempty"`
 }
 
 // DefaultConfigFileName returns the default file path for the loaded configuration
@@ -449,4 +453,13 @@ func (f *FileConfig) GetProductGlobalOverrides(productName string, index int) *E
 		return nil
 	}
 	return &endpoints[index]
+}
+
+// GetFailoverOptions returns the failover options from the file configuration.
+// Returns nil when no failover block is defined in the config file.
+func (f *FileConfig) GetFailoverOptions() *failover.Options {
+	if f == nil {
+		return nil
+	}
+	return f.Failover
 }

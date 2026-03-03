@@ -39,7 +39,7 @@ const (
 	IonosObjectStorageRegion  = "IONOS_OBJECT_STORAGE_REGION"
 	DefaultIonosServerUrl     = "https://api.ionos.com/"
 
-	defaultMaxRetries   = 3
+	DefaultMaxRetries   = 3
 	defaultWaitTime     = time.Duration(100) * time.Millisecond
 	defaultMaxWaitTime  = time.Duration(2000) * time.Millisecond
 	defaultPollInterval = 1 * time.Second
@@ -129,8 +129,8 @@ type Configuration struct {
 	DefaultHeader      map[string]string               `json:"defaultHeader,omitempty"`
 	DefaultQueryParams url.Values                      `json:"defaultQueryParams,omitempty"`
 	UserAgent          string                          `json:"userAgent,omitempty"`
-	Servers            ServerConfigurations            `json:"-"`
-	OperationServers   map[string]ServerConfigurations `json:"-"`
+	Servers            ServerConfigurations            `json:"servers,omitempty"`
+	OperationServers   map[string]ServerConfigurations `json:"operationServers,omitempty"`
 	HTTPClient         *http.Client                    `json:"-"` // blank out to avoid serialization on DeepCopy etc.
 	Username           string                          `json:"username,omitempty"`
 	Password           string                          `json:"password,omitempty"`
@@ -155,7 +155,7 @@ func NewConfiguration(username, password, token, hostUrl string) *Configuration 
 		Username:           username,
 		Password:           password,
 		Token:              token,
-		MaxRetries:         defaultMaxRetries,
+		MaxRetries:         DefaultMaxRetries,
 		MaxWaitTime:        defaultMaxWaitTime,
 		PollInterval:       defaultPollInterval,
 		WaitTime:           defaultWaitTime,
@@ -205,7 +205,7 @@ func NewConfigurationFromOptions(clientOptions ClientOptions) *Configuration {
 		Username:           clientOptions.Credentials.Username,
 		Password:           clientOptions.Credentials.Password,
 		Token:              clientOptions.Credentials.Token,
-		MaxRetries:         defaultMaxRetries,
+		MaxRetries:         DefaultMaxRetries,
 		MaxWaitTime:        defaultMaxWaitTime,
 		WaitTime:           defaultWaitTime,
 		Servers:            ServerConfigurations{},

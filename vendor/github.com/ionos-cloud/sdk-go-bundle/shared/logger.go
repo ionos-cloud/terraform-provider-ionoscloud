@@ -72,3 +72,19 @@ type Logger interface {
 func NewSdkLogger() {
 	SdkLogger = log.New(os.Stderr, "IONOSLOG ", log.LstdFlags)
 }
+
+// LogDebug logs a message at Debug level. It is a no-op when the SDK log
+// level is below Debug.
+func LogDebug(format string, args ...interface{}) {
+	if SdkLogLevel.Satisfies(Debug) {
+		SdkLogger.Printf(format, args...)
+	}
+}
+
+// LogTrace logs a message at Trace level. It is a no-op when the SDK log
+// level is below Trace.
+func LogTrace(format string, args ...interface{}) {
+	if SdkLogLevel.Satisfies(Trace) {
+		SdkLogger.Printf(format, args...)
+	}
+}

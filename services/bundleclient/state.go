@@ -37,7 +37,13 @@ func GetStateChangeConf(meta interface{}, d *schema.ResourceData, requestLocatio
 // resourceStateRefreshFunc tracks progress of a request
 func resourceStateRefreshFunc(meta interface{}, location, path string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		client, err := meta.(SdkBundle).NewCloudAPIClient(location)
+		var client *ionoscloud.APIClient
+		var err error
+		if location == "" {
+			client, err = meta.(SdkBundle).NewCloudAPIClientWithFailover()
+		} else {
+			client, err = meta.(SdkBundle).NewCloudAPIClient(location)
+		}
 		if err != nil {
 			return nil, "", err
 		}
