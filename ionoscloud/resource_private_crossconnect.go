@@ -306,6 +306,9 @@ func resourcePrivateCrossConnectImport(ctx context.Context, d *schema.ResourceDa
 	if err := d.Set("description", *pcc.Properties.Description); err != nil {
 		return nil, err
 	}
+	if err := d.Set("location", location); err != nil {
+		return nil, err
+	}
 
 	if err = setPccDataSource(d, &pcc); err != nil {
 		return nil, err
