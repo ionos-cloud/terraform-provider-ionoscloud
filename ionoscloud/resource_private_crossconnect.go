@@ -286,7 +286,7 @@ func resourcePrivateCrossConnectImport(ctx context.Context, d *schema.ResourceDa
 		return nil, err
 	}
 
-	pcc, apiResponse, err := client.PrivateCrossConnectsApi.PccsFindById(ctx, d.Id()).Execute()
+	pcc, apiResponse, err := client.PrivateCrossConnectsApi.PccsFindById(ctx, pccId).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
