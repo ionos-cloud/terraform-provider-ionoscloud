@@ -113,8 +113,6 @@ func TestAccContainerRegistryTokenBasic(t *testing.T) {
 }
 
 func testAccCheckContainerRegistryTokenDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(bundleclient.SdkBundle).ContainerClient
-
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
 	if cancel != nil {
@@ -124,6 +122,11 @@ func testAccCheckContainerRegistryTokenDestroyCheck(s *terraform.State) error {
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != constant.ContainerRegistryTokenResource {
 			continue
+		}
+
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewContainerRegistryClient(rs.Primary.Attributes["location"])
+		if err != nil {
+			return err
 		}
 
 		_, apiResponse, err := client.GetToken(ctx, rs.Primary.Attributes["registry_id"], rs.Primary.ID)
@@ -143,8 +146,6 @@ func testAccCheckContainerRegistryTokenDestroyCheck(s *terraform.State) error {
 
 func testAccCheckContainerRegistryTokenExists(n string, registry *cr.TokenResponse) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(bundleclient.SdkBundle).ContainerClient
-
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
@@ -153,6 +154,11 @@ func testAccCheckContainerRegistryTokenExists(n string, registry *cr.TokenRespon
 
 		if rs.Primary.ID == "" {
 			return fmt.Errorf("no Record ID is set")
+		}
+
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewContainerRegistryClient(rs.Primary.Attributes["location"])
+		if err != nil {
+			return err
 		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)

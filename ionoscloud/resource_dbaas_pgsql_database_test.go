@@ -68,13 +68,16 @@ func TestAccPgSqlDatabase(t *testing.T) {
 
 func pgSqlDatabaseExistsCheck(path string, database *pgsql.DatabaseResource) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(bundleclient.SdkBundle).PsqlClient
 		rs, ok := s.RootModule().Resources[path]
 		if !ok {
 			return fmt.Errorf("not found: %s", path)
 		}
 		if rs.Primary.ID == "" {
 			return fmt.Errorf("no ID is set for the PgSql database")
+		}
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewPsqlClient(rs.Primary.Attributes["location"])
+		if err != nil {
+			return err
 		}
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 		defer cancel()
@@ -91,13 +94,16 @@ func pgSqlDatabaseExistsCheck(path string, database *pgsql.DatabaseResource) res
 }
 
 func pgSqlDatabaseDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(bundleclient.SdkBundle).PsqlClient
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 	defer cancel()
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != constant.PsqlDatabaseResource {
 			continue
+		}
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewPsqlClient(rs.Primary.Attributes["location"])
+		if err != nil {
+			return err
 		}
 		clusterId := rs.Primary.Attributes["cluster_id"]
 		name := rs.Primary.Attributes["name"]

@@ -3,7 +3,6 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -25,6 +24,12 @@ func resourceDbaasMongoUser() *schema.Resource {
 			StateContext: resourceDbaasMongoUserImporter,
 		},
 		Schema: map[string]*schema.Schema{
+			"location": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "The location of the cluster this user belongs to.",
+			},
 			"cluster_id": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -64,7 +69,10 @@ func resourceDbaasMongoUser() *schema.Resource {
 }
 
 func resourceDbaasMongoUserCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).MongoClient
+	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(d.Get("location").(string))
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	request := mongo.User{
 		Properties: &mongo.UserProperties{},
 	}
@@ -119,7 +127,10 @@ func resourceDbaasMongoUserCreate(ctx context.Context, d *schema.ResourceData, m
 }
 
 func resourceDbaasMongoUserUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).MongoClient
+	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(d.Get("location").(string))
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	request := mongo.PatchUserRequest{
 		Properties: mongo.NewPatchUserProperties(),
 	}
@@ -167,7 +178,10 @@ func resourceDbaasMongoUserUpdate(ctx context.Context, d *schema.ResourceData, m
 }
 
 func resourceDbaasMongoUserRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).MongoClient
+	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(d.Get("location").(string))
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	clusterId := d.Get("cluster_id").(string)
 	username := d.Get("username").(string)
@@ -190,11 +204,14 @@ func resourceDbaasMongoUserRead(ctx context.Context, d *schema.ResourceData, met
 }
 
 func resourceDbaasMongoUserDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).MongoClient
+	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(d.Get("location").(string))
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	clusterId := d.Get("cluster_id").(string)
 	username := d.Get("username").(string)
-	_, err := client.DeleteUser(ctx, clusterId, username)
+	_, err = client.DeleteUser(ctx, clusterId, username)
 	if err != nil {
 		diags := diag.FromErr(fmt.Errorf("an error occurred while deleting the Mongo user with ID: %v, error: %w", d.Id(), err))
 		return diags
@@ -212,12 +229,21 @@ func resourceDbaasMongoUserDelete(ctx context.Context, d *schema.ResourceData, m
 }
 
 func resourceDbaasMongoUserImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(bundleclient.SdkBundle).MongoClient
-
-	parts := strings.Split(d.Id(), "/")
+	importID := d.Id()
+	location, parts := splitImportID(importID, "/")
 	if len(parts) != 2 {
-		return nil, fmt.Errorf("invalid import format: %s, expecting the following format: {clusterID}/{username}", d.Id())
+		return nil, fmt.Errorf("invalid import identifier: expected one of <location>:<cluster-id>/<username> or <cluster-id>/<username>, got: %s", importID)
 	}
+
+	if err := validateImportIDParts(parts); err != nil {
+		return nil, fmt.Errorf("failed validating import identifier %q: %w", importID, err)
+	}
+
+	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(location)
+	if err != nil {
+		return nil, err
+	}
+
 	clusterID := parts[0]
 	username := parts[1]
 
@@ -234,6 +260,9 @@ func resourceDbaasMongoUserImporter(ctx context.Context, d *schema.ResourceData,
 	}
 	if err := d.Set("cluster_id", clusterID); err != nil {
 		return nil, utils.GenerateSetError("MongoDB user", "cluster_id", err)
+	}
+	if err := d.Set("location", location); err != nil {
+		return nil, utils.GenerateSetError("MongoDB user", "location", err)
 	}
 	return []*schema.ResourceData{d}, nil
 }
