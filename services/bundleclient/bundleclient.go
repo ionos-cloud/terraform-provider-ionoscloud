@@ -12,6 +12,7 @@ import (
 	"github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
+	"github.com/ionos-cloud/sdk-go-bundle/shared/failover"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
@@ -87,6 +88,24 @@ func (c SdkBundle) newBundleClientConfig(userAgent string) *shared.Configuration
 	return config
 }
 
+// shouldApplyOverrides handles the early-exit checks common to all client constructors.
+// It returns true when the caller should proceed with custom location or failover configuration,
+// or false if the client should be returned immediately using the provided config (e.g. env var or default).
+func (c SdkBundle) shouldApplyOverrides(product string) bool {
+	if os.Getenv(shared.IonosApiUrlEnvVar) != "" {
+		log.Printf("[DEBUG] Using custom endpoint from IONOS_API_URL env variable")
+		return false
+	}
+	if c.fileConfig == nil {
+		return false
+	}
+	if c.fileConfig.GetProductOverrides(product) == nil {
+		log.Printf("[DEBUG] Missing config for %s product in file config, using SDK defaults", product)
+		return false
+	}
+	return true
+}
+
 // NewContainerRegistryClient creates a new Container Registry client for a specific location
 func (c SdkBundle) NewContainerRegistryClient(location string) (*crService.Client, error) {
 	config := c.newBundleClientConfig(fmt.Sprintf(
@@ -95,17 +114,7 @@ func (c SdkBundle) NewContainerRegistryClient(location string) (*crService.Clien
 		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
 	))
 
-	if os.Getenv(shared.IonosApiUrlEnvVar) != "" {
-		log.Printf("[DEBUG] Using custom endpoint from IONOS_API_URL env variable")
-		return crService.NewClientFromConfig(config), nil
-	}
-
-	if c.fileConfig == nil {
-		return crService.NewClientFromConfig(config), nil
-	}
-
-	if c.fileConfig.GetProductOverrides(fileconfiguration.ContainerRegistry) == nil {
-		log.Printf("[DEBUG] Missing config for %s product in file config, using SDK defaults", fileconfiguration.ContainerRegistry)
+	if !c.shouldApplyOverrides(fileconfiguration.ContainerRegistry) {
 		return crService.NewClientFromConfig(config), nil
 	}
 
@@ -143,17 +152,7 @@ func (c SdkBundle) NewMongoClient(location string) (*dbaasService.MongoClient, e
 		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
 	))
 
-	if os.Getenv(shared.IonosApiUrlEnvVar) != "" {
-		log.Printf("[DEBUG] Using custom endpoint from IONOS_API_URL env variable")
-		return dbaasService.NewMongoClientFromConfig(config), nil
-	}
-
-	if c.fileConfig == nil {
-		return dbaasService.NewMongoClientFromConfig(config), nil
-	}
-
-	if c.fileConfig.GetProductOverrides(fileconfiguration.Mongo) == nil {
-		log.Printf("[DEBUG] Missing config for %s product in file config, using SDK defaults", fileconfiguration.Mongo)
+	if !c.shouldApplyOverrides(fileconfiguration.Mongo) {
 		return dbaasService.NewMongoClientFromConfig(config), nil
 	}
 
@@ -191,17 +190,7 @@ func (c SdkBundle) NewPsqlClient(location string) (*dbaasService.PsqlClient, err
 		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
 	))
 
-	if os.Getenv(shared.IonosApiUrlEnvVar) != "" {
-		log.Printf("[DEBUG] Using custom endpoint from IONOS_API_URL env variable")
-		return dbaasService.NewPsqlClientFromConfig(config), nil
-	}
-
-	if c.fileConfig == nil {
-		return dbaasService.NewPsqlClientFromConfig(config), nil
-	}
-
-	if c.fileConfig.GetProductOverrides(fileconfiguration.PSQL) == nil {
-		log.Printf("[DEBUG] Missing config for %s product in file config, using SDK defaults", fileconfiguration.PSQL)
+	if !c.shouldApplyOverrides(fileconfiguration.PSQL) {
 		return dbaasService.NewPsqlClientFromConfig(config), nil
 	}
 
@@ -251,41 +240,23 @@ func (c SdkBundle) newCloudAPIClientConfig() *ionoscloud.Configuration {
 	return config
 }
 
-// NewCloudAPIClient creates a new *ionoscloud.APIClient using the client options and file config defined in the SdkBundle struct.
+// NewCloudAPIClient creates a new *ionoscloud.APIClient for the given location.
 // The endpoint is determined in the following order of precedence:
 //  1. IONOS_API_URL environment variable
 //  2. If no file config is provided, use the default endpoint from the SDK
-//  3. If file config is provided but no product overrides exist for cloud product, use the default endpoint from the SDK
+//  3. If file config is provided but no product overrides exist for the cloud product, use the default endpoint from the SDK
 //  4. If file config is provided and product overrides for cloud are found:
-//     a. If location override is found for the provided location, use the endpoint from the location override
-//     b. If no location override is found but a global override is found, use the endpoint from the global override
-//     c. If no location or global override is found, log a warning for invalid configuration and return nil with an error
+//     a. If a location override is found for the provided location, use that endpoint
+//     b. If no location override is found but a global override exists, use the global endpoint as fallback
+//     c. If neither is found, return an error
 func (c SdkBundle) NewCloudAPIClient(location string) (*ionoscloud.APIClient, error) {
 	config := c.newCloudAPIClientConfig()
-
-	if os.Getenv(shared.IonosApiUrlEnvVar) != "" {
-		log.Printf("[DEBUG] Using custom endpoint from IONOS_API_URL env variable")
-		return ionoscloud.NewAPIClient(config), nil
-	}
-
-	if c.fileConfig == nil {
-		return ionoscloud.NewAPIClient(config), nil
-	}
-
-	if c.fileConfig.GetProductOverrides(fileconfiguration.Cloud) == nil {
-		log.Printf("[DEBUG] Missing config for %s product in file config, using SDK defaults", fileconfiguration.Cloud)
+	if !c.shouldApplyOverrides(fileconfiguration.Cloud) {
 		return ionoscloud.NewAPIClient(config), nil
 	}
 
 	endpoint := c.fileConfig.GetLocationOverridesWithGlobalFallback(fileconfiguration.Cloud, location)
 	if endpoint == nil {
-		if location == "" {
-			return nil, fmt.Errorf(
-				"could not instantiate Cloud API client: invalid config found for %q product in file config: "+
-					"no global endpoints defined", fileconfiguration.Cloud,
-			)
-		}
-
 		return nil, fmt.Errorf(
 			"could not instantiate Cloud API client: invalid config found for %q product in file config: "+
 				"missing endpoint in location %q and no global endpoints defined for fallback",
@@ -298,7 +269,67 @@ func (c SdkBundle) NewCloudAPIClient(location string) (*ionoscloud.APIClient, er
 			Description: shared.EndpointOverridden + location,
 		},
 	}
-	config.HTTPClient = &http.Client{}
-	config.HTTPClient.Transport = shared.CreateTransport(endpoint.SkipTLSVerify, endpoint.CertificateAuthData)
+	config.HTTPClient = &http.Client{
+		Transport: shared.CreateTransport(endpoint.SkipTLSVerify, endpoint.CertificateAuthData),
+	}
+	return ionoscloud.NewAPIClient(config), nil
+}
+
+// NewCloudAPIClientWithFailover creates a new *ionoscloud.APIClient that distributes requests
+// across all global endpoints configured for the cloud product using the failover strategy
+// defined in the file config. It is intended for resources that do not have a location attribute.
+// The endpoint is determined in the following order of precedence:
+//  1. IONOS_API_URL environment variable
+//  2. If no file config is provided, use the default endpoint from the SDK
+//  3. If file config is provided but no product overrides exist for the cloud product, use the default endpoint from the SDK
+//  4. If file config is provided and product overrides for cloud are found:
+//     a. If no failover block is defined, or the strategy is "none", use the default endpoint from the SDK
+//     b. If the strategy is "roundRobin", configure failover across all global endpoints
+//     c. If no global endpoints are found, return an error
+//     d. Any other strategy value is an error
+func (c SdkBundle) NewCloudAPIClientWithFailover() (*ionoscloud.APIClient, error) {
+	config := c.newCloudAPIClientConfig()
+	if !c.shouldApplyOverrides(fileconfiguration.Cloud) {
+		return ionoscloud.NewAPIClient(config), nil
+	}
+
+	failoverOptions := c.fileConfig.GetFailoverOptions()
+	if failoverOptions == nil {
+		return ionoscloud.NewAPIClient(config), nil
+	}
+
+	switch failover.NormalizeStrategy(failoverOptions.Strategy) {
+	case failover.NormalizeStrategy(failover.RoundRobin):
+		// handled below
+	case failover.NormalizeStrategy(failover.None), "":
+		return ionoscloud.NewAPIClient(config), nil
+	default:
+		return nil, fmt.Errorf("invalid failover strategy %q defined in file config, only %q is supported", failoverOptions.Strategy, failover.RoundRobin)
+	}
+
+	product := c.fileConfig.GetProductOverrides(fileconfiguration.Cloud)
+	var failoverEndpoints []failover.Endpoint
+	var servers ionoscloud.ServerConfigurations
+	for _, ep := range product.Endpoints {
+		if ep.Location != "" {
+			continue
+		}
+		failoverEndpoints = append(failoverEndpoints, failover.Endpoint{
+			URL:                 ep.Name,
+			SkipTLSVerify:       ep.SkipTLSVerify,
+			CertificateAuthData: ep.CertificateAuthData,
+		})
+		servers = append(servers, ionoscloud.ServerConfiguration{
+			URL:         ep.Name,
+			Description: shared.EndpointOverridden + "global",
+		})
+		log.Printf("[DEBUG] Adding global override endpoint %+v for %s product from file config", ep, fileconfiguration.Cloud)
+	}
+	if len(failoverEndpoints) == 0 {
+		return nil, fmt.Errorf("no global failoverEndpoints configured for %q", fileconfiguration.Cloud)
+	}
+
+	config.Servers = servers
+	config.HTTPClient.Transport = failover.NewRoundTripper(failoverEndpoints, *failoverOptions, config.HTTPClient.Transport)
 	return ionoscloud.NewAPIClient(config), nil
 }
