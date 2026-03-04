@@ -2,7 +2,16 @@
 ### Features
 - Added `location` field to several resources and data sources to support regional endpoints via file configuration. The field should only be used if a file configuration is provided (e.g. at `IONOS_CONFIG_FILE`).
     - Updated Resources: `application_loadbalancer_forwardingrule`, `container_registry_token`, `cube_server`, `datacenter_nsg_selection`, `dbaas_mongodb_user`, `dbaas_pgsql_database`, `dbaas_pgsql_user`, `firewall`, `gpu_server`, `k8s_node_pool`, `lan`, `loadbalancer`, `natgateway`, `natgateway_rule`, `networkloadbalancer`, `networkloadbalancer_forwardingrule`, `nic`, `nsg`, `nsg_firewallrule`, `private_crossconnect`, `server`, `server_boot_device_selection`, `snapshot`, `vcpu_server`, `volume`.
-    - Updated Data Sources: `application_loadbalancer`, `application_loadbalancer_forwardingrule`, `container_registry_token`, `dbaas_mongo_user`, `dbaas_pgsql_backups`, `dbaas_pgsql_database`, `dbaas_pgsql_user`, `firewall`, `gpu`, `gpus`, `ipfailover`, `k8s_clusters`, `k8s_node_pool`, `k8s_node_pool_nodes`, `lan`, `natgateway`, `natgateway_rule`, `networkloadbalancer`, `networkloadbalancer_forwardingrule`, `nic`, `nsg`, `private_crossconnect`, `server`, `servers`, `vcpu_server`, `volume`.
+    - Updated Data Sources: `application_loadbalancer`, `application_loadbalancer_forwardingrule`, `container_registry_token`, `dbaas_mongo_user`, `dbaas_pgsql_backups`, `dbaas_pgsql_database`, `dbaas_pgsql_databases`, `dbaas_pgsql_user`, `firewall`, `gpu`, `gpus`, `ipfailover`, `k8s_clusters`, `k8s_node_pool`, `k8s_node_pool_nodes`, `lan`, `natgateway`, `natgateway_rule`, `networkloadbalancer`, `networkloadbalancer_forwardingrule`, `nic`, `nsg`, `private_crossconnect`, `server`, `servers`, `vcpu_server`, `volume`.
+- Added `ForceNew: true` for the following attributes:
+    - `location` inside `datacenter` resource;
+    - `datacenter_id` inside `datacenter_nsg_selection` resource;
+    - `datacenter_id` inside `k8s_node_pool` resource;
+    - `k8s_cluster_id` inside `k8s_node_pool` resource;
+    - `location` inside `snapshot` resource;
+- Added `Optional: true` for the following attributes:
+    - `location` inside `snapshot` resource;
+    - `location` inside `k8s_cluster` resource;
 
 ## 6.7.23
 ### Features
