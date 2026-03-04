@@ -23,9 +23,10 @@ func resourceDatacenterNSGSelection() *schema.Resource {
 		DeleteContext: resourceDatacenterNSGSelectionDelete,
 		Schema: map[string]*schema.Schema{
 			"location": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:        schema.TypeString,
+				Description: "The location of the resource. This field should be used only if you are also using a file configuration and should not be configured otherwise.",
+				Optional:    true,
+				ForceNew:    true,
 			},
 			"datacenter_id": {
 				Type:             schema.TypeString,

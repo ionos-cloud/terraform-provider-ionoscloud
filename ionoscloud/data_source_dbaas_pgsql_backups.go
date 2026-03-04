@@ -23,7 +23,7 @@ func dataSourceDbaasPgSqlBackups() *schema.Resource {
 			"location": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The location of the cluster the backups belong to.",
+				Description: "The location of the resource. This field should be used only if you are also using a file configuration and should not be configured otherwise.",
 			},
 			"cluster_backups": {
 				Type:        schema.TypeList,

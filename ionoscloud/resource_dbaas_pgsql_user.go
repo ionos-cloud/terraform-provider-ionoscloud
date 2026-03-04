@@ -49,7 +49,7 @@ func resourceDbaasPgSqlUser() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				ForceNew:    true,
-				Description: "The location of the cluster this user belongs to.",
+				Description: "The location of the resource. This field should be used only if you are also using a file configuration and should not be configured otherwise.",
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,

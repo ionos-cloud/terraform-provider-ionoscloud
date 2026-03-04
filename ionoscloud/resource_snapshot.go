@@ -46,7 +46,7 @@ func resourceSnapshot() *schema.Resource {
 				Computed:    true,
 				Optional:    true,
 				ForceNew:    true,
-				Description: "Location of that image/snapshot",
+				Description: "The location of the resource. This field should be used only if you are also using a file configuration and should not be configured otherwise.",
 			},
 			"size": {
 				Type:        schema.TypeInt,

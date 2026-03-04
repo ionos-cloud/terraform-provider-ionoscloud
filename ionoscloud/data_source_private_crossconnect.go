@@ -32,8 +32,9 @@ func dataSourcePcc() *schema.Resource {
 				Computed: true,
 			},
 			"location": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Description: "The location of the resource. This field should be used only if you are also using a file configuration and should not be configured otherwise.",
+				Optional:    true,
 			},
 			"peers": {
 				Type:     schema.TypeList,
