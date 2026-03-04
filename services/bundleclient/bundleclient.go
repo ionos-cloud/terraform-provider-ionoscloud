@@ -283,8 +283,8 @@ func (c SdkBundle) NewCloudAPIClient(location string) (*ionoscloud.APIClient, er
 //  2. If no file config is provided, use the default endpoint from the SDK
 //  3. If file config is provided but no product overrides exist for the cloud product, use the default endpoint from the SDK
 //  4. If file config is provided and product overrides for cloud are found:
-//     a. If no failover block is defined, or the strategy is "none", use the default endpoint from the SDK
-//     b. If the strategy is "roundRobin", configure failover across all global endpoints
+//     a. If no failover block is defined, or the strategy is "none", use first endpoint found in file configuration
+//     b. If the strategy is "roundRobin", configure failover across all global endpoints in the file configuration
 //     c. If no global endpoints are found, return an error
 //     d. Any other strategy value is an error
 func (c SdkBundle) NewCloudAPIClientWithFailover() (*ionoscloud.APIClient, error) {
@@ -298,22 +298,10 @@ func (c SdkBundle) NewCloudAPIClientWithFailover() (*ionoscloud.APIClient, error
 		return ionoscloud.NewAPIClient(config), nil
 	}
 
-	switch failover.NormalizeStrategy(failoverOptions.Strategy) {
-	case failover.NormalizeStrategy(failover.RoundRobin):
-		// handled below
-	case failover.NormalizeStrategy(failover.None), "":
-		return ionoscloud.NewAPIClient(config), nil
-	default:
-		return nil, fmt.Errorf("invalid failover strategy %q defined in file config, only %q is supported", failoverOptions.Strategy, failover.RoundRobin)
-	}
-
-	product := c.fileConfig.GetProductOverrides(fileconfiguration.Cloud)
+	endpoints := c.fileConfig.FilterGlobalOverrides(fileconfiguration.Cloud)
 	var failoverEndpoints []failover.Endpoint
 	var servers ionoscloud.ServerConfigurations
-	for _, ep := range product.Endpoints {
-		if ep.Location != "" {
-			continue
-		}
+	for _, ep := range endpoints {
 		failoverEndpoints = append(failoverEndpoints, failover.Endpoint{
 			URL:                 ep.Name,
 			SkipTLSVerify:       ep.SkipTLSVerify,
@@ -328,8 +316,18 @@ func (c SdkBundle) NewCloudAPIClientWithFailover() (*ionoscloud.APIClient, error
 	if len(failoverEndpoints) == 0 {
 		return nil, fmt.Errorf("no global failoverEndpoints configured for %q", fileconfiguration.Cloud)
 	}
-
+	switch failover.NormalizeStrategy(failoverOptions.Strategy) {
+	case failover.NormalizeStrategy(failover.RoundRobin):
+		config.HTTPClient.Transport = failover.NewRoundTripper(failoverEndpoints, *failoverOptions, config.HTTPClient.Transport)
+	case failover.NormalizeStrategy(failover.None), "":
+		servers = servers[0:1]
+		ep := failoverEndpoints[0]
+		if ep.SkipTLSVerify || ep.CertificateAuthData != "" {
+			config.HTTPClient.Transport = shared.CreateTransport(ep.SkipTLSVerify, ep.CertificateAuthData)
+		}
+	default:
+		return nil, fmt.Errorf("invalid failover strategy %q defined in file config, only %q is supported", failoverOptions.Strategy, failover.RoundRobin)
+	}
 	config.Servers = servers
-	config.HTTPClient.Transport = failover.NewRoundTripper(failoverEndpoints, *failoverOptions, config.HTTPClient.Transport)
 	return ionoscloud.NewAPIClient(config), nil
 }
