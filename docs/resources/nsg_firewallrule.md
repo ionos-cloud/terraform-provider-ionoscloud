@@ -56,17 +56,17 @@ The following arguments are supported:
 
 ## Import
 
-Resource Server can be imported using the `resource id`, `nsg id` and `datacenter id`, e.g.
+Resource NSG Firewallrule can be imported using the `datacenter id`, `nsg id` and `firewall rule id`, e.g.
 
 ```shell
-terraform import ionoscloud_nsg.mynsg datacenter uuid/nsg uuid/firewall uuid
+terraform import ionoscloud_nsg_firewallrule.mynsg_firewallrule datacenter_uuid/nsg_uuid/firewall_uuid
 ```
 
 Or by using an `import` block.
 ```hcl
 import {
-  to = ionoscloud_nsg.imported
-  id = "datacenter uuid/nsg uuid/firewall uuid" 
+  to = ionoscloud_nsg_firewallrule.imported
+  id = "datacenter uuid/nsg uuid/firewall uuid"
 }
   
 resource "ionoscloud_nsg_firewallrule" "imported" {
