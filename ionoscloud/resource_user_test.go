@@ -5,7 +5,11 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"os"
 	"regexp"
+	"sync/atomic"
 	"testing"
 
 	"github.com/hashicorp/go-version"
@@ -601,5 +605,177 @@ resource ` + constant.UserResource + ` ` + constant.UserTestResource + ` {
   administrator = true
   force_sec_auth= true
   active  = true
+}
+`
+
+// TestAccUserFailoverCreatesOnSecondEndpoint verifies that when the first configured endpoint
+// returns a retryable HTTP 503 error, the failover round-tripper retries the request against
+// the second endpoint (the real IONOS API) and the user is successfully created there.
+//
+// The test starts a local HTTP server that always returns 503, writes a temporary file config
+// that lists the mock server first and the real IONOS API second, and configures the provider
+// via IONOS_CONFIG_FILE to use that config with the roundRobin failover strategy.
+func TestAccUserFailoverCreatesOnSecondEndpoint(t *testing.T) {
+	if os.Getenv("IONOS_API_URL") != "" {
+		t.Skip("IONOS_API_URL is set; this test requires control over endpoint configuration")
+	}
+
+	// Count how many times the mock server is called so we can assert failover occurred.
+	var mockCallCount int32
+
+	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		atomic.AddInt32(&mockCallCount, 1)
+		w.WriteHeader(http.StatusServiceUnavailable)
+	}))
+	defer mockServer.Close()
+
+	// File config: mock server (returns 503) first, real IONOS API second.
+	//
+	// Both endpoints must include the full API base path (/cloudapi/v6) because:
+	//   - The ionoscloud SDK builds request URLs via simple concatenation:
+	//     localVarPath = localBasePath + "/um/users"
+	//   - The failover round-tripper rewrites only scheme+host, preserving the path.
+	// So the SDK builds "http://mock:PORT/cloudapi/v6/um/users"; failover rewrites
+	// scheme+host to produce "https://api.ionos.com/cloudapi/v6/um/users". ✓
+	//
+	// POST is added to retryableMethods so that user-create requests also participate in failover.
+	configContent := fmt.Sprintf(`version: 1.0
+environments:
+  - name: default
+    products:
+      - name: cloud
+        endpoints:
+          - name: %s/cloudapi/v6
+          - name: https://api.ionos.com/cloudapi/v6
+failover:
+  strategy: roundRobin
+  failoverOnStatusCodes:
+    - 503
+  retryableMethods:
+    - GET
+    - POST
+    - PUT
+    - DELETE
+    - HEAD
+    - OPTIONS
+  maxRetries: 1
+`, mockServer.URL)
+
+	tmpFile, err := os.CreateTemp("", "ionos-failover-test-*.yaml")
+	if err != nil {
+		t.Fatalf("failed to create temp config file: %s", err)
+	}
+	defer os.Remove(tmpFile.Name())
+	if _, err := tmpFile.WriteString(configContent); err != nil {
+		t.Fatalf("failed to write config file: %s", err)
+	}
+	tmpFile.Close()
+
+	t.Setenv("IONOS_CONFIG_FILE", tmpFile.Name())
+
+	// newRealAPIClient builds a client that talks directly to the IONOS API, bypassing the
+	// file config (and therefore the mock server).  Used for check/destroy helpers so that
+	// the 503 from the mock does not interfere with test assertions.
+	newRealAPIClient := func() (*ionoscloud.APIClient, error) {
+		token := os.Getenv("IONOS_TOKEN")
+		if token == "" {
+			return nil, fmt.Errorf("IONOS_TOKEN must be set for failover acceptance test")
+		}
+		cfg := ionoscloud.NewConfiguration("", "", token, "")
+		cfg.MaxRetries = constant.MaxRetries
+		cfg.WaitTime = constant.MaxWaitTime
+		return ionoscloud.NewAPIClient(cfg), nil
+	}
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		ExternalProviders:        randomProviderVersion343(),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy: func(s *terraform.State) error {
+			// Use the real API client directly; the file config is still active at this point
+			// and NewCloudAPIClient would route to the mock server.
+			client, err := newRealAPIClient()
+			if err != nil {
+				return err
+			}
+			ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
+			defer cancel()
+			for _, rs := range s.RootModule().Resources {
+				if rs.Type != constant.UserResource {
+					continue
+				}
+				_, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, rs.Primary.ID).Execute()
+				logApiRequestTime(apiResponse)
+				if err != nil {
+					if !httpNotFound(apiResponse) {
+						return fmt.Errorf("user still exists %s - an error occurred while checking it %s", rs.Primary.ID, err)
+					}
+				} else {
+					return fmt.Errorf("user still exists %s", rs.Primary.ID)
+				}
+			}
+			return nil
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckUserFailoverConfig,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(constant.UserResource+"."+constant.UserTestResource, "first_name", constant.UserTestResource),
+					resource.TestCheckResourceAttr(constant.UserResource+"."+constant.UserTestResource, "last_name", constant.UserTestResource),
+					resource.TestCheckResourceAttrSet(constant.UserResource+"."+constant.UserTestResource, "email"),
+					resource.TestCheckResourceAttr(constant.UserResource+"."+constant.UserTestResource, "administrator", "false"),
+					resource.TestCheckResourceAttr(constant.UserResource+"."+constant.UserTestResource, "active", "true"),
+					// Verify the user was actually created on the real IONOS API.
+					func(s *terraform.State) error {
+						rs, ok := s.RootModule().Resources[constant.UserResource+"."+constant.UserTestResource]
+						if !ok {
+							return fmt.Errorf("resource %s not found in state", constant.UserResource+"."+constant.UserTestResource)
+						}
+						client, err := newRealAPIClient()
+						if err != nil {
+							return err
+						}
+						ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+						defer cancel()
+						foundUser, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, rs.Primary.ID).Execute()
+						logApiRequestTime(apiResponse)
+						if err != nil {
+							return fmt.Errorf("error fetching user from real IONOS API: %s", err)
+						}
+						if *foundUser.Id != rs.Primary.ID {
+							return fmt.Errorf("user ID mismatch: got %s, want %s", *foundUser.Id, rs.Primary.ID)
+						}
+						return nil
+					},
+					// Verify the mock server was hit, proving requests went through the failover path.
+					func(_ *terraform.State) error {
+						if atomic.LoadInt32(&mockCallCount) == 0 {
+							return fmt.Errorf("mock server was never called; failover round-tripper did not route through the first endpoint")
+						}
+						return nil
+					},
+				),
+			},
+		},
+	})
+}
+
+var testAccCheckUserFailoverConfig = `
+resource ` + constant.RandomPassword + ` "user_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
+resource ` + constant.UserResource + ` ` + constant.UserTestResource + ` {
+  first_name     = "` + constant.UserTestResource + `"
+  last_name      = "` + constant.UserTestResource + `"
+  email          = "` + utils.GenerateEmail() + `"
+  password       = ` + constant.RandomPassword + `.user_password.result
+  administrator  = false
+  force_sec_auth = false
+  active         = true
 }
 `
