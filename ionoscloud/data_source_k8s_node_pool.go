@@ -40,8 +40,9 @@ func dataSourceK8sNodePool() *schema.Resource {
 				Description: "The UUID of the VDC",
 			},
 			"location": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Description: "The location of the resource. This field should be used only if you are also using a file configuration and should not be configured otherwise.",
+				Optional:    true,
 			},
 			"state": {
 				Type:     schema.TypeString,

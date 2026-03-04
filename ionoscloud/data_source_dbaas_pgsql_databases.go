@@ -3,6 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -28,7 +29,7 @@ func dataSourceDbaasPgSqlDatabases() *schema.Resource {
 			"location": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The location of the cluster the databases belong to.",
+				Description: "The location of the resource. This field should be used only if you are also using a file configuration and should not be configured otherwise.",
 			},
 			"databases": {
 				Type:        schema.TypeList,
