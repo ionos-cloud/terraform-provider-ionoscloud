@@ -1,8 +1,9 @@
 ## 6.7.25
 ### Features
-- File configuration failover for global resources : user, groups, target groups, s3keys, backupunits, contracts
+- File configuration failover for global resources : users, groups, target groups, s3keys, backupunits, contracts
 ### Fixes
 - Add debug log with error in case config file cannot be read due to whatever reason
+
 ## 6.7.24
 ### Features
 - Added `location` field to several resources and data sources to support regional endpoints via file configuration. The field should only be used if a file configuration is provided (e.g. at `IONOS_CONFIG_FILE`).

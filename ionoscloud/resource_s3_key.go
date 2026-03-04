@@ -54,7 +54,7 @@ func resourceS3Key() *schema.Resource {
 }
 
 func resourceS3KeyCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient("")
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -322,7 +322,7 @@ func resourceS3KeyImport(ctx context.Context, d *schema.ResourceData, meta inter
 	userId := parts[0]
 	keyId := parts[1]
 
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient("")
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
 	if err != nil {
 		return nil, err
 	}
