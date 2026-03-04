@@ -66,7 +66,7 @@ Or by using an `import` block.
 ```hcl
 import {
   to = ionoscloud_nsg_firewallrule.imported
-  id = "datacenter uuid/nsg uuid/firewall uuid"
+  id = "datacenter_uuid/nsg_uuid/firewall_uuid"
 }
   
 resource "ionoscloud_nsg_firewallrule" "imported" {
