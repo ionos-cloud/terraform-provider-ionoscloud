@@ -110,7 +110,7 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta in
 	location, locationOk := d.GetOk("location")
 	size, sizeOk := d.GetOk("size")
 
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location.(string))
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(d.Get("location").(string))
 	if err != nil {
 		return diag.FromErr(err)
 	}
