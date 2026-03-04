@@ -53,13 +53,16 @@ func TestAccPgSqlUser(t *testing.T) {
 
 func pgSqlUserExistsCheck(path string, user *pgsql.UserResource) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(bundleclient.SdkBundle).PsqlClient
 		rs, ok := s.RootModule().Resources[path]
 		if !ok {
 			return fmt.Errorf("not found: %s", path)
 		}
 		if rs.Primary.ID == "" {
 			return fmt.Errorf("no ID is set for the PgSql user")
+		}
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewPsqlClient(rs.Primary.Attributes["location"])
+		if err != nil {
+			return err
 		}
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 		defer cancel()
@@ -76,13 +79,16 @@ func pgSqlUserExistsCheck(path string, user *pgsql.UserResource) resource.TestCh
 }
 
 func pgSqlUserDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(bundleclient.SdkBundle).PsqlClient
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 	defer cancel()
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != constant.PsqlUserResource {
 			continue
+		}
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewPsqlClient(rs.Primary.Attributes["location"])
+		if err != nil {
+			return err
 		}
 		clusterId := rs.Primary.Attributes["cluster_id"]
 		username := rs.Primary.Attributes["username"]
@@ -123,11 +129,11 @@ resource ` + constant.LanResource + ` "lan_example" {
 }
 
 resource ` + constant.PsqlClusterResource + ` ` + constant.DBaaSClusterTestResource + ` {
-  postgres_version   = 12
+  postgres_version   = 16
   instances          = 1
   cores              = 1
-  ram                = 2048
-  storage_size       = 2048
+  ram                = 4096
+  storage_size       = 10240
   storage_type       = "HDD"
   connections   {
 	datacenter_id   =  ` + constant.DatacenterResource + `.datacenter_example.id 

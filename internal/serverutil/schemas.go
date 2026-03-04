@@ -155,6 +155,10 @@ var SchemaTemplatedDatasource = map[string]*schema.Schema{
 		Required:         true,
 		ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 	},
+	"location": {
+		Type:     schema.TypeString,
+		Optional: true,
+	},
 	"id": {
 		Type:     schema.TypeString,
 		Optional: true,

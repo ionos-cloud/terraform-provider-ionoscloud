@@ -156,8 +156,6 @@ func TestAccGpuServerBasic(t *testing.T) {
 }
 
 func testAccCheckGpuServerDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(bundleclient.SdkBundle).CloudApiClient
-
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 	if cancel != nil {
 		defer cancel()
@@ -169,6 +167,11 @@ func testAccCheckGpuServerDestroyCheck(s *terraform.State) error {
 		}
 
 		dcId := rs.Primary.Attributes["datacenter_id"]
+		location := rs.Primary.Attributes["location"]
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
+		if err != nil {
+			return err
+		}
 
 		_, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, dcId, rs.Primary.ID).Execute()
 		logApiRequestTime(apiResponse)
@@ -187,8 +190,6 @@ func testAccCheckGpuServerDestroyCheck(s *terraform.State) error {
 
 func testAccCheckGpuServerExists(n string, server *ionoscloud.Server) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(bundleclient.SdkBundle).CloudApiClient
-
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
 			return fmt.Errorf("testAccCheckGpuServerExists: Not found: %s", n)
@@ -201,6 +202,12 @@ func testAccCheckGpuServerExists(n string, server *ionoscloud.Server) resource.T
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 		if cancel != nil {
 			defer cancel()
+		}
+
+		location := rs.Primary.Attributes["location"]
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
+		if err != nil {
+			return err
 		}
 
 		foundServer, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.ID).Execute()

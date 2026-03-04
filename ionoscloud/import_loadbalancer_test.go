@@ -26,10 +26,11 @@ func TestAccLoadbalancerImportBasic(t *testing.T) {
 			},
 
 			{
-				ResourceName:      fmt.Sprintf("ionoscloud_loadbalancer.%s", resourceName),
-				ImportStateIdFunc: testAccLoadbalancerImportStateId,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            fmt.Sprintf("ionoscloud_loadbalancer.%s", resourceName),
+				ImportStateIdFunc:       testAccLoadbalancerImportStateId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location"},
 			},
 		},
 	})

@@ -27,6 +27,11 @@ func dataSourceLan() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"location": {
+				Type:        schema.TypeString,
+				Description: "The location of the resource. This field should be used only if you are also using a file configuration and should not be configured otherwise.",
+				Optional:    true,
+			},
 			"datacenter_id": {
 				Type:             schema.TypeString,
 				Required:         true,
@@ -89,8 +94,6 @@ func convertIpFailoverList(ips *[]ionoscloud.IPFailover) []interface{} {
 }
 
 func dataSourceLanRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
-
 	datacenterId, dcIdOk := d.GetOk("datacenter_id")
 	if !dcIdOk {
 		return diag.FromErr(errors.New("no datacenter_id was specified"))
@@ -108,6 +111,12 @@ func dataSourceLanRead(ctx context.Context, d *schema.ResourceData, meta interfa
 	var lan ionoscloud.Lan
 	var err error
 	var apiResponse *ionoscloud.APIResponse
+
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	if idOk {
 		/* search by ID */

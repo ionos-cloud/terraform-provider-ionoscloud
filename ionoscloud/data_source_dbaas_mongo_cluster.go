@@ -63,6 +63,7 @@ func dataSourceDbaasMongoCluster() *schema.Resource {
 				Type: schema.TypeString,
 				Description: "The physical location where the cluster will be created. This will be where all of your instances live. Property cannot be modified after datacenter creation (disallowed in update requests)." +
 					"Available locations: de/txl, gb/lhr, es/vit",
+				Optional: true,
 				Computed: true,
 			},
 			"connections": {
@@ -247,7 +248,10 @@ func dataSourceDbaasMongoCluster() *schema.Resource {
 }
 
 func dataSourceDbaasMongoReadCluster(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).MongoClient
+	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(d.Get("location").(string))
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("display_name")
@@ -262,7 +266,6 @@ func dataSourceDbaasMongoReadCluster(ctx context.Context, d *schema.ResourceData
 	}
 
 	var cluster mongo.ClusterResponse
-	var err error
 
 	if idOk {
 		/* search by ID */

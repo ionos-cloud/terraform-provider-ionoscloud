@@ -156,7 +156,10 @@ func dataSourceTargetGroup() *schema.Resource {
 }
 
 func dataSourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient("")
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	idValue, idOk := d.GetOk("id")
 	nameValue, nameOk := d.GetOk("name")
@@ -171,7 +174,6 @@ func dataSourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta
 		return diag.FromErr(errors.New("please provide either the target group id or name"))
 	}
 	var targetGroup ionoscloud.TargetGroup
-	var err error
 	var apiResponse *ionoscloud.APIResponse
 
 	if idOk {

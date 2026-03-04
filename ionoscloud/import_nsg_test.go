@@ -26,7 +26,7 @@ func TestAccNSGImportBasic(t *testing.T) {
 				ImportStateIdFunc:       testAccNSGImportStateId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"rule_ids"},
+				ImportStateVerifyIgnore: []string{"rule_ids", "location"},
 			},
 		},
 	})

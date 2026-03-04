@@ -23,10 +23,11 @@ func TestAccIpFailoverImportBasic(t *testing.T) {
 				Config: fmt.Sprintf(testAccCheckLanIPFailoverConfig),
 			},
 			{
-				ResourceName:      fmt.Sprintf("ionoscloud_ipfailover.%s", constant.IpfailoverName),
-				ImportStateIdFunc: testAccIpFailoverImportStateId,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            fmt.Sprintf("ionoscloud_ipfailover.%s", constant.IpfailoverName),
+				ImportStateIdFunc:       testAccIpFailoverImportStateId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location"},
 			},
 		},
 	})

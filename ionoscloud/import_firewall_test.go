@@ -26,10 +26,11 @@ func TestAccFirewallImportBasic(t *testing.T) {
 			},
 
 			{
-				ResourceName:      constant.FirewallResource + "." + constant.FirewallTestResource,
-				ImportStateIdFunc: testAccFirewallImportStateId,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            constant.FirewallResource + "." + constant.FirewallTestResource,
+				ImportStateIdFunc:       testAccFirewallImportStateId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location"},
 			},
 		},
 	})

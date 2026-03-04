@@ -43,7 +43,6 @@ const (
 	Cert                    = "cert"
 	Cloud                   = "cloud"
 	ContainerRegistry       = "containerregistry"
-	Dataplatform            = "dataplatform"
 	DNS                     = "dns"
 	Mongo                   = "mongo"
 	ObjectStorageManagement = "objectstoragemanagement"
@@ -66,7 +65,7 @@ const (
 type Endpoint struct {
 	// the location or the region
 	// Products that do not have a location and will override the endpoint that is used globally:
-	// cloud, objectstoragemanagement, kafka, dns, mongo, psql, dataplatform, creg, autoscaling, apigateway
+	// cloud, objectstoragemanagement, kafka, dns, mongo, psql, creg, autoscaling, apigateway
 	// Products that have location-based endpoints: logging, monitoring, containerregistry, vpn, inmemorydb, nfs, objectstorage, mariadb
 	Location            string `yaml:"location,omitempty"`
 	Name                string `yaml:"name"`
@@ -209,6 +208,10 @@ func NewFromEnv() (*FileConfig, error) {
 
 // GetProfileNames returns a list of profile names from the loaded configuration
 func (f *FileConfig) GetProfileNames() []string {
+	if f == nil {
+		return nil
+	}
+
 	names := make([]string, len(f.Profiles))
 	for i, p := range f.Profiles {
 		names[i] = p.Name
@@ -218,6 +221,10 @@ func (f *FileConfig) GetProfileNames() []string {
 
 // GetEnvironmentNames returns a list of environment names from the loaded configuration
 func (f *FileConfig) GetEnvironmentNames() []string {
+	if f == nil {
+		return nil
+	}
+
 	names := make([]string, len(f.Environments))
 	for i, e := range f.Environments {
 		names[i] = e.Name
@@ -227,9 +234,15 @@ func (f *FileConfig) GetEnvironmentNames() []string {
 
 // GetOverride returns the endpoint for a specific product and location
 // with fallback to the global endpoint if no location is found.
+// This function will pick the first endpoint defined for the product to attempt fallback. Even if there are global
+// endpoints configured, if the first is location-based, fallback will fail.
 //
 // It is a helper function combining GetProductLocationOverrides and GetProductOverrides
 func (f *FileConfig) GetOverride(productName, location string) *Endpoint {
+	if f == nil {
+		return nil
+	}
+
 	if locEp := f.GetProductLocationOverrides(productName, location); locEp != nil {
 		return locEp
 	}
@@ -239,14 +252,45 @@ func (f *FileConfig) GetOverride(productName, location string) *Endpoint {
 			// Check if we actually got a location-specific endpoint (e.g. the user asked for a wrong location
 			// and GetProductOverrides returned the first location-specific endpoint)
 			if shared.SdkLogLevel.Satisfies(shared.Debug) {
-				shared.SdkLogger.Printf("[DEBUG] Retrieved location-specific (%s) override '%s' for product '%s' "+
-					"when a location-less override was expected, discarding...", location, prod.Endpoints[0].Name, productName)
+				shared.SdkLogger.Printf(
+					"[DEBUG] Retrieved location-specific (%s) override '%s' for product '%s' "+
+						"when a location-less override was expected, discarding...", location, prod.Endpoints[0].Name, productName,
+				)
 			}
 			return nil
 		}
 		return &prod.Endpoints[0]
 	}
 	return nil
+}
+
+// GetLocationOverridesWithGlobalFallback returns the endpoint for a specific product and location
+// with fallback to the first global endpoint defined if the location is not found.
+// Unlike GetOverride, this function ensures that fallback is done only with global endpoints. It will maintain the order
+// in which the endpoints are defined.
+//
+// GetLocationOverridesWithGlobalFallback should fail only if the location requested does not exist and there are no
+// global endpoints in the product configuration to fallback on.
+func (f *FileConfig) GetLocationOverridesWithGlobalFallback(productName, location string) *Endpoint {
+	if f == nil {
+		return nil
+	}
+
+	if locEp := f.GetProductLocationOverrides(productName, location); locEp != nil {
+		return locEp
+	}
+
+	globalEndpoint := f.GetProductGlobalOverrides(productName, 0)
+	if globalEndpoint == nil {
+		if shared.SdkLogLevel.Satisfies(shared.Debug) {
+			shared.SdkLogger.Printf(
+				"[DEBUG] no global endpoints found for product %s to fallback on for location %s", productName, location,
+			)
+		}
+		return nil
+	}
+
+	return globalEndpoint
 }
 
 // GetCurrentProfile returns the current profile from the loaded configuration
@@ -318,6 +362,52 @@ func (f *FileConfig) GetProductOverrides(productName string) *Product {
 	return nil
 }
 
+// FilterOverrides returns all endpoints for which the predicate function returns true
+func (f *FileConfig) FilterOverrides(productName string, predicate func(Endpoint) bool) []Endpoint {
+	if f == nil {
+		return nil
+	}
+
+	product := f.GetProductOverrides(productName)
+	if product == nil {
+		return nil
+	}
+
+	var endpoints []Endpoint
+	for _, endpoint := range product.Endpoints {
+		if predicate(endpoint) {
+			endpoints = append(endpoints, endpoint)
+		}
+	}
+	return endpoints
+}
+
+// FilterGlobalOverrides returns all global endpoints defined for a given product
+func (f *FileConfig) FilterGlobalOverrides(productName string) []Endpoint {
+	if f == nil {
+		return nil
+	}
+
+	return f.FilterOverrides(
+		productName, func(endpoint Endpoint) bool {
+			return endpoint.Location == ""
+		},
+	)
+}
+
+// FilterLocationOverrides returns all location-based endpoints defined for a given product
+func (f *FileConfig) FilterLocationOverrides(productName string) []Endpoint {
+	if f == nil {
+		return nil
+	}
+
+	return f.FilterOverrides(
+		productName, func(endpoint Endpoint) bool {
+			return endpoint.Location != ""
+		},
+	)
+}
+
 // GetProductLocationOverrides returns the overrides for a specific product and location for the current environment
 func (f *FileConfig) GetProductLocationOverrides(productName, location string) *Endpoint {
 	if f == nil {
@@ -336,4 +426,27 @@ func (f *FileConfig) GetProductLocationOverrides(productName, location string) *
 		shared.SdkLogger.Printf("[DEBUG] no endpoint overrides found for product %s and location %s", productName, location)
 	}
 	return nil
+}
+
+// GetProductGlobalOverrides returns the n-th overrides for a specific product for the current environment.
+func (f *FileConfig) GetProductGlobalOverrides(productName string, index int) *Endpoint {
+	if f == nil {
+		return nil
+	}
+
+	endpoints := f.FilterGlobalOverrides(productName)
+	if endpoints == nil {
+		if shared.SdkLogLevel.Satisfies(shared.Debug) {
+			shared.SdkLogger.Printf("[DEBUG] no global endpoint overrides found for product %s", productName)
+		}
+		return nil
+	}
+
+	if index >= len(endpoints) {
+		if shared.SdkLogLevel.Satisfies(shared.Debug) {
+			shared.SdkLogger.Printf("[DEBUG] index %d out of range for global endpoints of product %s, only %d global endpoints found", index, productName, len(endpoints))
+		}
+		return nil
+	}
+	return &endpoints[index]
 }

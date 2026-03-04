@@ -25,10 +25,11 @@ func TestAccNatGatewayImportBasic(t *testing.T) {
 			},
 
 			{
-				ResourceName:      resourceNatGatewayResource,
-				ImportStateIdFunc: testAccNatGatewayImportStateId,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceNatGatewayResource,
+				ImportStateIdFunc:       testAccNatGatewayImportStateId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location"},
 			},
 		},
 	})

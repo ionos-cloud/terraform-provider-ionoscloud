@@ -34,12 +34,14 @@ func dataSourceDbaasPgSqlVersions() *schema.Resource {
 }
 
 func dataSourceDbaasPgSqlReadVersions(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).PsqlClient
+	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient("")
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	id, idOk := d.GetOk("cluster_id")
 
 	var postgresVersions psql.PostgresVersionList
-	var err error
 
 	if idOk {
 		/* search by ID */

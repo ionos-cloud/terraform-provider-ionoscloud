@@ -5,10 +5,11 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/go-version"
-	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 	"regexp"
 	"testing"
+
+	"github.com/hashicorp/go-version"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
@@ -173,7 +174,10 @@ func TestUserWriteOnlyPassword(t *testing.T) {
 }
 
 func testAccCheckUserDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(bundleclient.SdkBundle).CloudApiClient
+	client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient("")
+	if err != nil {
+		return err
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 	if cancel != nil {
@@ -201,7 +205,10 @@ func testAccCheckUserDestroyCheck(s *terraform.State) error {
 
 func testAccCheckUserExists(n string, user *ionoscloud.User) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(bundleclient.SdkBundle).CloudApiClient
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient("")
+		if err != nil {
+			return err
+		}
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
@@ -236,7 +243,10 @@ func testAccCheckUserExists(n string, user *ionoscloud.User) resource.TestCheckF
 
 func testAccRemoveUserFromGroup(group, user string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(bundleclient.SdkBundle).CloudApiClient
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient("")
+		if err != nil {
+			return err
+		}
 		gr, ok := s.RootModule().Resources[group]
 		if !ok {
 			return fmt.Errorf("testAccRemoveUserFromGroup: group not found: %s", group)

@@ -24,10 +24,11 @@ func TestAccApplicationLoadBalancerForwardingRuleImportBasic(t *testing.T) {
 			},
 
 			{
-				ResourceName:      resourceNameAlbRule,
-				ImportStateIdFunc: testAccApplicationLoadBalancerForwardingRuleImportStateId,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceNameAlbRule,
+				ImportStateIdFunc:       testAccApplicationLoadBalancerForwardingRuleImportStateId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location"},
 			},
 		},
 	})

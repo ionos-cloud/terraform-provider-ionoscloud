@@ -220,6 +220,7 @@ func dataSourceK8sClusterSchema() map[string]*schema.Schema {
 		"location": {
 			Type:     schema.TypeString,
 			Computed: true,
+			Optional: true,
 		},
 		"node_pools": {
 			Type:     schema.TypeList,
@@ -268,7 +269,11 @@ func dataSourceK8sCluster() *schema.Resource {
 }
 
 func dataSourceK8sReadCluster(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")
@@ -280,7 +285,6 @@ func dataSourceK8sReadCluster(ctx context.Context, d *schema.ResourceData, meta 
 		return diag.FromErr(errors.New("please provide either the k8s cluster id or name"))
 	}
 	var cluster ionoscloud.KubernetesCluster
-	var err error
 	var apiResponse *ionoscloud.APIResponse
 
 	if idOk {
