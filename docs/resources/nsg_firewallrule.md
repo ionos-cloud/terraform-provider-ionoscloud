@@ -56,7 +56,7 @@ The following arguments are supported:
 
 ## Import
 
-Resource NSG Firewallrule can be imported using the `datacenter id`, `nsg id` and `firewall rule id`, e.g.
+A Network Security Group firewall rule can be imported using the `datacenter id`, `nsg id` and `firewall rule id`, e.g.
 
 ```shell
 terraform import ionoscloud_nsg_firewallrule.mynsg_firewallrule datacenter_uuid/nsg_uuid/firewall_uuid
