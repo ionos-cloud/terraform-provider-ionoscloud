@@ -178,7 +178,7 @@ func TestUserWriteOnlyPassword(t *testing.T) {
 }
 
 func testAccCheckUserDestroyCheck(s *terraform.State) error {
-	client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient("")
+	client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
 	if err != nil {
 		return err
 	}
@@ -209,7 +209,7 @@ func testAccCheckUserDestroyCheck(s *terraform.State) error {
 
 func testAccCheckUserExists(n string, user *ionoscloud.User) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient("")
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
 		if err != nil {
 			return err
 		}
@@ -247,7 +247,7 @@ func testAccCheckUserExists(n string, user *ionoscloud.User) resource.TestCheckF
 
 func testAccRemoveUserFromGroup(group, user string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient("")
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
 		if err != nil {
 			return err
 		}

@@ -392,7 +392,7 @@ func TestAccGroupBasic(t *testing.T) {
 }
 
 func testAccCheckGroupDestroyCheck(s *terraform.State) error {
-	client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient("")
+	client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
 	if err != nil {
 		return err
 	}
@@ -424,7 +424,7 @@ func testAccCheckGroupDestroyCheck(s *terraform.State) error {
 
 func testAccCheckGroupExists(n string, group *ionoscloud.Group) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient("")
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
 		if err != nil {
 			return err
 		}
