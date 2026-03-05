@@ -123,13 +123,13 @@ func TestNewCloudAPIClientWithFailover(t *testing.T) {
 			name:            "roundRobin with no global endpoints returns error",
 			fileConfig:      newCloudFileConfig([]fileconfiguration.Endpoint{locationEp}, roundRobinFO),
 			wantErr:         true,
-			wantErrContains: "no global failoverEndpoints configured",
+			wantErrContains: "no global failover endpoints configured",
 		},
 		{
 			name:            "none strategy with no global endpoints returns error",
 			fileConfig:      newCloudFileConfig([]fileconfiguration.Endpoint{locationEp}, noneFO),
 			wantErr:         true,
-			wantErrContains: "no global failoverEndpoints configured",
+			wantErrContains: "no global failover endpoints configured",
 		},
 		{
 			name:            "invalid strategy returns descriptive error",

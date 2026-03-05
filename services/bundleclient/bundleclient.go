@@ -311,7 +311,8 @@ func (c SdkBundle) NewCloudAPIClientWithFailover() (*ionoscloud.APIClient, error
 			URL:         ep.Name,
 			Description: shared.EndpointOverridden + "global",
 		})
-		log.Printf("[DEBUG] Adding global override endpoint %+v for %s product from file config", ep, fileconfiguration.Cloud)
+		log.Printf("[DEBUG] Adding global override endpoint %s (skipTLSVerify=%t) for %s product from file config",
+			ep.Name, ep.SkipTLSVerify, fileconfiguration.Cloud)
 	}
 	if len(failoverEndpoints) == 0 {
 		return nil, fmt.Errorf("no global failover endpoints configured for %q", fileconfiguration.Cloud)
