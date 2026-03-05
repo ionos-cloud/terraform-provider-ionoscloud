@@ -11,6 +11,7 @@ import (
 	cr "github.com/ionos-cloud/sdk-go-bundle/products/containerregistry/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/failover"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
@@ -38,19 +39,18 @@ import (
 // New creates a new SdkBundle client
 func New(clientOptions clientoptions.TerraformClientOptions, fileConfig *fileconfiguration.FileConfig) *SdkBundle {
 	return &SdkBundle{
-		CDNClient:                     cdnService.NewClient(clientOptions, fileConfig),
-		AutoscalingClient:             autoscalingService.NewClient(clientOptions, fileConfig),
-		CertManagerClient:             cert.NewClient(clientOptions, fileConfig),
-		DNSClient:                     dnsService.NewClient(clientOptions, fileConfig),
-		LoggingClient:                 loggingService.NewClient(clientOptions, fileConfig),
-		MariaDBClient:                 mariadb.NewClient(clientOptions, fileConfig),
-		NFSClient:                     nfsService.NewClient(clientOptions, fileConfig),
-		KafkaClient:                   kafkaService.NewClient(clientOptions, fileConfig),
-		VPNClient:                     vpn.NewClient(clientOptions, fileConfig),
-		InMemoryDBClient:              inmemorydb.NewClient(clientOptions, fileConfig),
-		S3Client:                      objectStorageService.NewClient(clientOptions, fileConfig),
-		ObjectStorageManagementClient: objectStorageManagementService.NewClient(clientOptions, fileConfig),
-		MonitoringClient:              monitoringService.NewClient(clientOptions, fileConfig),
+		CDNClient:         cdnService.NewClient(clientOptions, fileConfig),
+		AutoscalingClient: autoscalingService.NewClient(clientOptions, fileConfig),
+		CertManagerClient: cert.NewClient(clientOptions, fileConfig),
+		DNSClient:         dnsService.NewClient(clientOptions, fileConfig),
+		LoggingClient:     loggingService.NewClient(clientOptions, fileConfig),
+		MariaDBClient:     mariadb.NewClient(clientOptions, fileConfig),
+		NFSClient:         nfsService.NewClient(clientOptions, fileConfig),
+		KafkaClient:       kafkaService.NewClient(clientOptions, fileConfig),
+		VPNClient:         vpn.NewClient(clientOptions, fileConfig),
+		InMemoryDBClient:  inmemorydb.NewClient(clientOptions, fileConfig),
+		S3Client:          objectStorageService.NewClient(clientOptions, fileConfig),
+		MonitoringClient:  monitoringService.NewClient(clientOptions, fileConfig),
 
 		clientOptions: clientOptions,
 		fileConfig:    fileConfig,
@@ -59,21 +59,20 @@ func New(clientOptions clientoptions.TerraformClientOptions, fileConfig *filecon
 
 // SdkBundle is a struct that defines the bundle client. It is used for both sdkv2 and plugin framework
 type SdkBundle struct {
-	InMemoryDBClient              *inmemorydb.Client
-	PsqlClient                    *dbaasService.PsqlClient
-	MongoClient                   *dbaasService.MongoClient
-	MariaDBClient                 *mariadb.Client
-	NFSClient                     *nfsService.Client
-	CertManagerClient             *cert.Client
-	DNSClient                     *dnsService.Client
-	LoggingClient                 *loggingService.Client
-	AutoscalingClient             *autoscalingService.Client
-	KafkaClient                   *kafkaService.Client
-	CDNClient                     *cdnService.Client
-	VPNClient                     *vpn.Client
-	S3Client                      *objectStorageService.Client
-	ObjectStorageManagementClient *objectStorageManagementService.Client
-	MonitoringClient              *monitoringService.Client
+	InMemoryDBClient  *inmemorydb.Client
+	PsqlClient        *dbaasService.PsqlClient
+	MongoClient       *dbaasService.MongoClient
+	MariaDBClient     *mariadb.Client
+	NFSClient         *nfsService.Client
+	CertManagerClient *cert.Client
+	DNSClient         *dnsService.Client
+	LoggingClient     *loggingService.Client
+	AutoscalingClient *autoscalingService.Client
+	KafkaClient       *kafkaService.Client
+	CDNClient         *cdnService.Client
+	VPNClient         *vpn.Client
+	S3Client          *objectStorageService.Client
+	MonitoringClient  *monitoringService.Client
 
 	clientOptions clientoptions.TerraformClientOptions
 	fileConfig    *fileconfiguration.FileConfig
@@ -332,4 +331,67 @@ func (c SdkBundle) NewCloudAPIClientWithFailover() (*ionoscloud.APIClient, error
 	}
 	config.Servers = servers
 	return ionoscloud.NewAPIClient(config), nil
+}
+
+// TODO -- Add function doc.
+func (c SdkBundle) NewObjectStorageManagementClient() (*objectStorageManagementService.Client, error) {
+	config := c.newBundleClientConfig(fmt.Sprintf(
+		"terraform-provider/%s_ionos-cloud-sdk-go-object-storage-management/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
+		c.clientOptions.Version, objectstoragemanagement.Version, c.clientOptions.TerraformVersion,
+		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
+	))
+
+	// TODO -- shouldApplyOverrides checks the value for the shared.IonosApiUrlEnvVar, but, in this case, the value for IONOS_API_URL_OBJECT_STORAGE_MANAGEMENT should be checked.
+	// TODO -- Modify shouldApplyOverrides signature to also accept the env var that needs to be checked.
+	if !c.shouldApplyOverrides(fileconfiguration.ObjectStorageManagement) {
+		return objectStorageManagementService.NewClientFromConfig(config), nil
+	}
+
+	failoverOptions := c.fileConfig.GetFailoverOptions()
+	if failoverOptions == nil {
+		failoverOptions = &failover.Options{Strategy: failover.None}
+	}
+
+	endpoints := c.fileConfig.FilterGlobalOverrides(fileconfiguration.ObjectStorageManagement)
+	var failoverEndpoints []failover.Endpoint
+	var servers shared.ServerConfigurations
+
+	for _, ep := range endpoints {
+		failoverEndpoints = append(failoverEndpoints, failover.Endpoint{
+			URL:                 ep.Name,
+			SkipTLSVerify:       ep.SkipTLSVerify,
+			CertificateAuthData: ep.CertificateAuthData,
+		})
+		servers = append(servers, shared.ServerConfiguration{
+			URL:         ep.Name,
+			Description: shared.EndpointOverridden + "global",
+		})
+		log.Printf("[DEBUG] Adding global override endpoint %s (skipTLSVerify=%t) for %s product from file config",
+			ep.Name, ep.SkipTLSVerify, fileconfiguration.ObjectStorageManagement)
+	}
+
+	if len(failoverEndpoints) == 0 {
+		return nil, fmt.Errorf("no global failover endpoints configured for %q", fileconfiguration.ObjectStorageManagement)
+	}
+
+	switch failover.NormalizeStrategy(failoverOptions.Strategy) {
+
+	case failover.NormalizeStrategy(failover.RoundRobin):
+		config.HTTPClient.Transport = failover.NewRoundTripper(failoverEndpoints, *failoverOptions, config.HTTPClient.Transport)
+
+	case failover.NormalizeStrategy(failover.None), "":
+		servers = servers[0:1]
+		ep := failoverEndpoints[0]
+		if ep.SkipTLSVerify || ep.CertificateAuthData != "" {
+			config.HTTPClient.Transport = shared.CreateTransport(ep.SkipTLSVerify, ep.CertificateAuthData)
+		}
+
+	default:
+		return nil, fmt.Errorf("invalid failover strategy %q defined in file config, only %q, %q or an empty value are supported",
+			failoverOptions.Strategy, failover.RoundRobin, failover.None)
+	}
+
+	config.Servers = servers
+
+	return objectStorageManagementService.NewClientFromConfig(config), nil
 }

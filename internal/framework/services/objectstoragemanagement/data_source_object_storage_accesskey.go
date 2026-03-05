@@ -48,7 +48,11 @@ func (d *accessKeyDataSource) Configure(ctx context.Context, req datasource.Conf
 		return
 	}
 
-	d.client = clientBundle.ObjectStorageManagementClient
+	var err error
+	d.client, err = clientBundle.NewObjectStorageManagementClient()
+	if err != nil {
+		resp.Diagnostics.AddError("Initialization error for Object Storage Management client ", err.Error())
+	}
 }
 
 // Schema returns the schema for the data source.

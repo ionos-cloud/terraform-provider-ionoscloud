@@ -36,7 +36,7 @@ func (d *regionDataSource) Configure(ctx context.Context, req datasource.Configu
 		return
 	}
 
-	clientbundle, ok := req.ProviderData.(*bundleclient.SdkBundle)
+	clientBundle, ok := req.ProviderData.(*bundleclient.SdkBundle)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",
@@ -46,7 +46,11 @@ func (d *regionDataSource) Configure(ctx context.Context, req datasource.Configu
 		return
 	}
 
-	d.client = clientbundle.ObjectStorageManagementClient
+	var err error
+	d.client, err = clientBundle.NewObjectStorageManagementClient()
+	if err != nil {
+		resp.Diagnostics.AddError("Initialization error for Object Storage Management client ", err.Error())
+	}
 }
 
 // Schema returns the schema for the data source.
