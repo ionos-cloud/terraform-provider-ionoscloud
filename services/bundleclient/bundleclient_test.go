@@ -86,11 +86,11 @@ func TestNewCloudAPIClientWithFailover(t *testing.T) {
 			},
 		},
 		{
-			name:       "Cloud product with nil failover block returns default client",
+			name:       "Cloud product with nil failover block behaves like none strategy",
 			fileConfig: newCloudFileConfig([]fileconfiguration.Endpoint{globalEp1}, nil),
 			validateClient: func(t *testing.T, client *ionoscloud.APIClient) {
 				assertNotFailoverTransport(t, client)
-				assertDefaultServer(t, client)
+				assertServerURLs(t, client, globalEp1.Name)
 			},
 		},
 		{
