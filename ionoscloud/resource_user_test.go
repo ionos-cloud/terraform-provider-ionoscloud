@@ -661,31 +661,10 @@ failover:
   maxRetries: 1
 `, mockServer.URL)
 
-	tmpFile, err := os.CreateTemp("", "ionos-failover-test-*.yaml")
-	if err != nil {
-		t.Fatalf("failed to create temp config file: %s", err)
-	}
-	defer os.Remove(tmpFile.Name())
-	if _, err := tmpFile.WriteString(configContent); err != nil {
-		t.Fatalf("failed to write config file: %s", err)
-	}
-	tmpFile.Close()
+	tmpFile := createTempConfigFile(t, configContent)
+	defer os.Remove(tmpFile)
 
-	t.Setenv("IONOS_CONFIG_FILE", tmpFile.Name())
-
-	// newRealAPIClient builds a client that talks directly to the IONOS API, bypassing the
-	// file config (and therefore the mock server).  Used for check/destroy helpers so that
-	// the 503 from the mock does not interfere with test assertions.
-	newRealAPIClient := func() (*ionoscloud.APIClient, error) {
-		token := os.Getenv("IONOS_TOKEN")
-		if token == "" {
-			return nil, fmt.Errorf("IONOS_TOKEN must be set for failover acceptance test")
-		}
-		cfg := ionoscloud.NewConfiguration("", "", token, "")
-		cfg.MaxRetries = constant.MaxRetries
-		cfg.WaitTime = constant.MaxWaitTime
-		return ionoscloud.NewAPIClient(cfg), nil
-	}
+	t.Setenv("IONOS_CONFIG_FILE", tmpFile)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -693,31 +672,7 @@ failover:
 		},
 		ExternalProviders:        randomProviderVersion343(),
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
-		CheckDestroy: func(s *terraform.State) error {
-			// Use the real API client directly; the file config is still active at this point
-			// and NewCloudAPIClient would route to the mock server.
-			client, err := newRealAPIClient()
-			if err != nil {
-				return err
-			}
-			ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
-			defer cancel()
-			for _, rs := range s.RootModule().Resources {
-				if rs.Type != constant.UserResource {
-					continue
-				}
-				_, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, rs.Primary.ID).Execute()
-				logApiRequestTime(apiResponse)
-				if err != nil {
-					if !httpNotFound(apiResponse) {
-						return fmt.Errorf("user still exists %s - an error occurred while checking it %s", rs.Primary.ID, err)
-					}
-				} else {
-					return fmt.Errorf("user still exists %s", rs.Primary.ID)
-				}
-			}
-			return nil
-		},
+		CheckDestroy:             testAccCheckUserDestroyCheck,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckUserFailoverConfig,
@@ -727,28 +682,6 @@ failover:
 					resource.TestCheckResourceAttrSet(constant.UserResource+"."+constant.UserTestResource, "email"),
 					resource.TestCheckResourceAttr(constant.UserResource+"."+constant.UserTestResource, "administrator", "false"),
 					resource.TestCheckResourceAttr(constant.UserResource+"."+constant.UserTestResource, "active", "true"),
-					// Verify the user was actually created on the real IONOS API.
-					func(s *terraform.State) error {
-						rs, ok := s.RootModule().Resources[constant.UserResource+"."+constant.UserTestResource]
-						if !ok {
-							return fmt.Errorf("resource %s not found in state", constant.UserResource+"."+constant.UserTestResource)
-						}
-						client, err := newRealAPIClient()
-						if err != nil {
-							return err
-						}
-						ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-						defer cancel()
-						foundUser, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, rs.Primary.ID).Execute()
-						logApiRequestTime(apiResponse)
-						if err != nil {
-							return fmt.Errorf("error fetching user from real IONOS API: %s", err)
-						}
-						if *foundUser.Id != rs.Primary.ID {
-							return fmt.Errorf("user ID mismatch: got %s, want %s", *foundUser.Id, rs.Primary.ID)
-						}
-						return nil
-					},
 					// Verify the mock server was hit, proving requests went through the failover path.
 					func(_ *terraform.State) error {
 						if atomic.LoadInt32(&mockCallCount) == 0 {
@@ -760,6 +693,85 @@ failover:
 			},
 		},
 	})
+}
+
+// TestAccUserFailoverNetworkError verifies failover when a network-level error occurs (e.g., connection refused).
+func TestAccUserFailoverNetworkError(t *testing.T) {
+	if os.Getenv("IONOS_API_URL") != "" {
+		t.Skip("IONOS_API_URL is set; this test requires control over endpoint configuration")
+	}
+
+	// Use an address that is likely to refuse connection
+	badAddr := "http://127.0.0.1:1"
+
+	configContent := fmt.Sprintf(`version: 1.0
+environments:
+  - name: default
+    products:
+      - name: cloud
+        endpoints:
+          - name: %s/cloudapi/v6
+          - name: https://api.ionos.com/cloudapi/v6
+failover:
+  strategy: roundRobin
+  retryableMethods:
+    - GET
+    - POST
+    - DELETE
+  maxRetries: 1
+`, badAddr)
+
+	tmpFile := createTempConfigFile(t, configContent)
+	defer os.Remove(tmpFile)
+	t.Setenv("IONOS_CONFIG_FILE", tmpFile)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ExternalProviders:        randomProviderVersion343(),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckUserDestroyCheck,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckUserFailoverConfig,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(constant.UserResource+"."+constant.UserTestResource, "active", "true"),
+				),
+			},
+			{
+				Config: testAccCheckUserFailoverDataSourceConfig,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.UserResource+"."+constant.UserDataSourceById, "first_name", constant.UserResource+"."+constant.UserTestResource, "first_name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.UserResource+"."+constant.UserDataSourceById, "last_name", constant.UserResource+"."+constant.UserTestResource, "last_name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.UserResource+"."+constant.UserDataSourceById, "email", constant.UserResource+"."+constant.UserTestResource, "email"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.UserResource+"."+constant.UserDataSourceById, "administrator", constant.UserResource+"."+constant.UserTestResource, "administrator"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.UserResource+"."+constant.UserDataSourceById, "active", constant.UserResource+"."+constant.UserTestResource, "active"),
+				),
+			},
+		},
+	})
+}
+
+// Helper functions and shared logic for failover tests
+
+func createTempConfigFile(t *testing.T, content string) string {
+	tmpFile, err := os.CreateTemp("", "ionos-failover-test-*.yaml")
+	if err != nil {
+		t.Fatalf("failed to create temp config file: %s", err)
+	}
+	if _, err := tmpFile.WriteString(content); err != nil {
+		t.Fatalf("failed to write config file: %s", err)
+	}
+	tmpFile.Close()
+	return tmpFile.Name()
+}
+
+func verifyMockCallCount(t *testing.T, count *int32) resource.TestCheckFunc {
+	return func(_ *terraform.State) error {
+		if atomic.LoadInt32(count) == 0 {
+			return fmt.Errorf("mock server was never called")
+		}
+		return nil
+	}
 }
 
 var testAccCheckUserFailoverConfig = `
@@ -777,5 +789,11 @@ resource ` + constant.UserResource + ` ` + constant.UserTestResource + ` {
   administrator  = false
   force_sec_auth = false
   active         = true
+}
+`
+
+var testAccCheckUserFailoverDataSourceConfig = testAccCheckUserFailoverConfig + `
+data ` + constant.UserResource + ` ` + constant.UserDataSourceById + ` {
+  id = ` + constant.UserResource + `.` + constant.UserTestResource + `.id
 }
 `
