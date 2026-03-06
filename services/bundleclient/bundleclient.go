@@ -90,9 +90,9 @@ func (c SdkBundle) newBundleClientConfig(userAgent string) *shared.Configuration
 // shouldApplyOverrides handles the early-exit checks common to all client constructors.
 // It returns true when the caller should proceed with custom location or failover configuration,
 // or false if the client should be returned immediately using the provided config (e.g. env var or default).
-func (c SdkBundle) shouldApplyOverrides(product string) bool {
-	if os.Getenv(shared.IonosApiUrlEnvVar) != "" {
-		log.Printf("[DEBUG] Using custom endpoint from IONOS_API_URL env variable")
+func (c SdkBundle) shouldApplyOverrides(product, productEnvVar string) bool {
+	if os.Getenv(productEnvVar) != "" {
+		log.Printf("[DEBUG] Using custom endpoint from %s env variable", productEnvVar)
 		return false
 	}
 	if c.fileConfig == nil {
@@ -113,7 +113,7 @@ func (c SdkBundle) NewContainerRegistryClient(location string) (*crService.Clien
 		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
 	))
 
-	if !c.shouldApplyOverrides(fileconfiguration.ContainerRegistry) {
+	if !c.shouldApplyOverrides(fileconfiguration.ContainerRegistry, shared.IonosApiUrlEnvVar) {
 		return crService.NewClientFromConfig(config), nil
 	}
 
@@ -151,7 +151,7 @@ func (c SdkBundle) NewMongoClient(location string) (*dbaasService.MongoClient, e
 		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
 	))
 
-	if !c.shouldApplyOverrides(fileconfiguration.Mongo) {
+	if !c.shouldApplyOverrides(fileconfiguration.Mongo, shared.IonosApiUrlEnvVar) {
 		return dbaasService.NewMongoClientFromConfig(config), nil
 	}
 
@@ -189,7 +189,7 @@ func (c SdkBundle) NewPsqlClient(location string) (*dbaasService.PsqlClient, err
 		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
 	))
 
-	if !c.shouldApplyOverrides(fileconfiguration.PSQL) {
+	if !c.shouldApplyOverrides(fileconfiguration.PSQL, shared.IonosApiUrlEnvVar) {
 		return dbaasService.NewPsqlClientFromConfig(config), nil
 	}
 
@@ -250,7 +250,7 @@ func (c SdkBundle) newCloudAPIClientConfig() *ionoscloud.Configuration {
 //     c. If neither is found, return an error
 func (c SdkBundle) NewCloudAPIClient(location string) (*ionoscloud.APIClient, error) {
 	config := c.newCloudAPIClientConfig()
-	if !c.shouldApplyOverrides(fileconfiguration.Cloud) {
+	if !c.shouldApplyOverrides(fileconfiguration.Cloud, shared.IonosApiUrlEnvVar) {
 		return ionoscloud.NewAPIClient(config), nil
 	}
 
@@ -288,7 +288,7 @@ func (c SdkBundle) NewCloudAPIClient(location string) (*ionoscloud.APIClient, er
 //     d. Any other strategy value is an error
 func (c SdkBundle) NewCloudAPIClientWithFailover() (*ionoscloud.APIClient, error) {
 	config := c.newCloudAPIClientConfig()
-	if !c.shouldApplyOverrides(fileconfiguration.Cloud) {
+	if !c.shouldApplyOverrides(fileconfiguration.Cloud, shared.IonosApiUrlEnvVar) {
 		return ionoscloud.NewAPIClient(config), nil
 	}
 
@@ -333,7 +333,9 @@ func (c SdkBundle) NewCloudAPIClientWithFailover() (*ionoscloud.APIClient, error
 	return ionoscloud.NewAPIClient(config), nil
 }
 
-// TODO -- Add function doc.
+// NewObjectStorageManagementClient creates a new Object Storage Management client that distributes requests
+// across all global endpoints configured for this product using the failover strategy
+// defined in the file config.
 func (c SdkBundle) NewObjectStorageManagementClient() (*objectStorageManagementService.Client, error) {
 	config := c.newBundleClientConfig(fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go-object-storage-management/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
@@ -341,9 +343,7 @@ func (c SdkBundle) NewObjectStorageManagementClient() (*objectStorageManagementS
 		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
 	))
 
-	// TODO -- shouldApplyOverrides checks the value for the shared.IonosApiUrlEnvVar, but, in this case, the value for IONOS_API_URL_OBJECT_STORAGE_MANAGEMENT should be checked.
-	// TODO -- Modify shouldApplyOverrides signature to also accept the env var that needs to be checked.
-	if !c.shouldApplyOverrides(fileconfiguration.ObjectStorageManagement) {
+	if !c.shouldApplyOverrides(fileconfiguration.ObjectStorageManagement, objectStorageManagementService.IonosAPIURLObjectStorageManagement) {
 		return objectStorageManagementService.NewClientFromConfig(config), nil
 	}
 
