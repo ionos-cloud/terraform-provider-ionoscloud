@@ -367,7 +367,7 @@ github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2
 # github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.2
 ## explicit; go 1.22
 github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2
-# github.com/ionos-cloud/sdk-go-bundle/shared v0.1.7 => /home/cguran/surse/oursdks/sdk-go-bundle/shared
+# github.com/ionos-cloud/sdk-go-bundle/shared v0.1.8
 ## explicit; go 1.24
 github.com/ionos-cloud/sdk-go-bundle/shared
 github.com/ionos-cloud/sdk-go-bundle/shared/failover
@@ -640,4 +640,3 @@ google.golang.org/protobuf/types/known/timestamppb
 # gopkg.in/yaml.v3 v3.0.1
 ## explicit
 gopkg.in/yaml.v3
-# github.com/ionos-cloud/sdk-go-bundle/shared => /home/cguran/surse/oursdks/sdk-go-bundle/shared

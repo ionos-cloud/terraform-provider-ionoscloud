@@ -3,6 +3,8 @@
 - File configuration failover for global resources : users, groups, target groups, s3keys, backupunits, contracts
 ### Fixes
 - Add debug log with error in case config file cannot be read due to whatever reason
+### Dependencies
+- Use shared v0.1.8
 
 ## 6.7.24
 ### Features

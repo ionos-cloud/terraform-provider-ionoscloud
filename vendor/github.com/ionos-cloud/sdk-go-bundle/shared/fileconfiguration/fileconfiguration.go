@@ -127,8 +127,8 @@ type FileConfig struct {
 	Profiles []Profile `yaml:"profiles"`
 	// Environments list of environments
 	Environments []Environment `yaml:"environments"`
-	// Failover controls transport-level endpoint failover behaviour.
-	// When set, it is applied to the runtime Configuration via ApplyFailoverToConfiguration.
+	// Failover controls transport-level endpoint failover behaviour and,
+	// when set, is propagated to the runtime configuration by the caller.
 	Failover *failover.Options `yaml:"failover,omitempty"`
 }
 
