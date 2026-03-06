@@ -327,6 +327,7 @@ func (c SdkBundle) NewCloudAPIClientWithFailover() (*ionoscloud.APIClient, error
 	if len(failoverEndpoints) == 0 {
 		return nil, fmt.Errorf("no global failover endpoints configured for %q", fileconfiguration.Cloud)
 	}
+	//nolint:exhaustive
 	switch failover.NormalizeStrategy(failoverOptions.Strategy) {
 	case failover.NormalizeStrategy(failover.RoundRobin):
 		config.HTTPClient.Transport = failover.NewRoundTripper(failoverEndpoints, *failoverOptions, config.HTTPClient.Transport)
@@ -385,6 +386,7 @@ func (c SdkBundle) NewObjectStorageManagementClient() (*objectStorageManagementS
 		return nil, fmt.Errorf("no global failover endpoints configured for %q", fileconfiguration.ObjectStorageManagement)
 	}
 
+	//nolint:exhaustive
 	switch failover.NormalizeStrategy(failoverOptions.Strategy) {
 
 	case failover.NormalizeStrategy(failover.RoundRobin):
