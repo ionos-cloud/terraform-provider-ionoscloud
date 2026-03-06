@@ -718,6 +718,7 @@ failover:
     - GET
     - POST
     - DELETE
+    - PUT
   maxRetries: 1
 `, badAddr)
 
@@ -740,6 +741,20 @@ failover:
 			{
 				Config: testAccCheckUserFailoverDataSourceConfig,
 				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.UserResource+"."+constant.UserDataSourceById, "first_name", constant.UserResource+"."+constant.UserTestResource, "first_name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.UserResource+"."+constant.UserDataSourceById, "last_name", constant.UserResource+"."+constant.UserTestResource, "last_name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.UserResource+"."+constant.UserDataSourceById, "email", constant.UserResource+"."+constant.UserTestResource, "email"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.UserResource+"."+constant.UserDataSourceById, "administrator", constant.UserResource+"."+constant.UserTestResource, "administrator"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.UserResource+"."+constant.UserDataSourceById, "active", constant.UserResource+"."+constant.UserTestResource, "active"),
+				),
+			},
+			{
+				Config: testAccCheckUserFailoverDataSourceConfigUpdate,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(constant.UserResource+"."+constant.UserTestResource, "first_name", constant.UpdatedResources),
+					resource.TestCheckResourceAttr(constant.UserResource+"."+constant.UserTestResource, "last_name", constant.UpdatedResources),
+					resource.TestCheckResourceAttr(constant.UserResource+"."+constant.UserTestResource, "administrator", "true"),
+					resource.TestCheckResourceAttr(constant.UserResource+"."+constant.UserTestResource, "active", "false"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.UserResource+"."+constant.UserDataSourceById, "first_name", constant.UserResource+"."+constant.UserTestResource, "first_name"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.UserResource+"."+constant.UserDataSourceById, "last_name", constant.UserResource+"."+constant.UserTestResource, "last_name"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.UserResource+"."+constant.UserDataSourceById, "email", constant.UserResource+"."+constant.UserTestResource, "email"),
@@ -793,6 +808,30 @@ resource ` + constant.UserResource + ` ` + constant.UserTestResource + ` {
 `
 
 var testAccCheckUserFailoverDataSourceConfig = testAccCheckUserFailoverConfig + `
+data ` + constant.UserResource + ` ` + constant.UserDataSourceById + ` {
+  id = ` + constant.UserResource + `.` + constant.UserTestResource + `.id
+}
+`
+
+var testAccCheckUserFailoverConfigUpdate = `
+resource ` + constant.RandomPassword + ` "user_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
+resource ` + constant.UserResource + ` ` + constant.UserTestResource + ` {
+  first_name     = "` + constant.UpdatedResources + `"
+  last_name      = "` + constant.UpdatedResources + `"
+  email          = "` + utils.GenerateEmail() + `"
+  password       = ` + constant.RandomPassword + `.user_password.result
+  administrator  = true
+  force_sec_auth = false
+  active         = false
+}
+`
+
+var testAccCheckUserFailoverDataSourceConfigUpdate = testAccCheckUserFailoverConfigUpdate + `
 data ` + constant.UserResource + ` ` + constant.UserDataSourceById + ` {
   id = ` + constant.UserResource + `.` + constant.UserTestResource + `.id
 }
