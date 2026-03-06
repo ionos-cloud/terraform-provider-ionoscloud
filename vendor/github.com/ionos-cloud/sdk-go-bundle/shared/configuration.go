@@ -39,7 +39,7 @@ const (
 	IonosObjectStorageRegion  = "IONOS_OBJECT_STORAGE_REGION"
 	DefaultIonosServerUrl     = "https://api.ionos.com/"
 
-	defaultMaxRetries   = 3
+	DefaultMaxRetries   = 3
 	defaultWaitTime     = time.Duration(100) * time.Millisecond
 	defaultMaxWaitTime  = time.Duration(2000) * time.Millisecond
 	defaultPollInterval = 1 * time.Second
@@ -155,7 +155,7 @@ func NewConfiguration(username, password, token, hostUrl string) *Configuration 
 		Username:           username,
 		Password:           password,
 		Token:              token,
-		MaxRetries:         defaultMaxRetries,
+		MaxRetries:         DefaultMaxRetries,
 		MaxWaitTime:        defaultMaxWaitTime,
 		PollInterval:       defaultPollInterval,
 		WaitTime:           defaultWaitTime,
@@ -205,7 +205,7 @@ func NewConfigurationFromOptions(clientOptions ClientOptions) *Configuration {
 		Username:           clientOptions.Credentials.Username,
 		Password:           clientOptions.Credentials.Password,
 		Token:              clientOptions.Credentials.Token,
-		MaxRetries:         defaultMaxRetries,
+		MaxRetries:         DefaultMaxRetries,
 		MaxWaitTime:        defaultMaxWaitTime,
 		WaitTime:           defaultWaitTime,
 		Servers:            ServerConfigurations{},

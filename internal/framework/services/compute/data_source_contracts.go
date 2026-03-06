@@ -183,7 +183,7 @@ func (d *contractsDataSource) Configure(_ context.Context, req datasource.Config
 		return
 	}
 
-	apiClient, err := client.NewCloudAPIClient("")
+	apiClient, err := client.NewCloudAPIClientWithFailover()
 	if err != nil {
 		resp.Diagnostics.AddError("Cloud API Client Error", err.Error())
 		return

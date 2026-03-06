@@ -92,7 +92,11 @@ func (r *accesskeyResource) Configure(_ context.Context, req resource.ConfigureR
 		return
 	}
 
-	r.client = clientBundle.ObjectStorageManagementClient
+	var err error
+	r.client, err = clientBundle.NewObjectStorageManagementClient()
+	if err != nil {
+		resp.Diagnostics.AddError("initialization error for Object Storage Management client", err.Error())
+	}
 }
 
 // Create creates the accesskey.

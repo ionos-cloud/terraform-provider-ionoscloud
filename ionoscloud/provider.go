@@ -266,6 +266,9 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	insecureBool := false
 
 	fileConfig, readFileErr := fileconfiguration.NewFromEnv()
+	if readFileErr != nil {
+		log.Printf("[DEBUG] Error reading file configuration: %s", readFileErr.Error())
+	}
 	if !tokenOk {
 		if !usernameOk || !passwordOk {
 			if readFileErr != nil {
@@ -283,7 +286,6 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 			return nil, diag.Errorf("missing credentials, either token or username and password must be set")
 		}
 	}
-
 	endpoint := utils.CleanURL(d.Get("endpoint").(string))
 
 	if contractNumber, contractOk := d.GetOk("contract_number"); contractOk {
