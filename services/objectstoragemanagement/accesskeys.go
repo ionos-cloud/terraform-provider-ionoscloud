@@ -36,16 +36,17 @@ type AccessKeyDataSourceModel struct {
 	ID              types.String `tfsdk:"id"`
 }
 
-var ionosAPIURLObjectStorageManagement = "IONOS_API_URL_OBJECT_STORAGE_MANAGEMENT"
+var IonosAPIURLObjectStorageManagement = "IONOS_API_URL_OBJECT_STORAGE_MANAGEMENT"
 
 // modifyConfigURL modifies the URL inside the client configuration.
 // This function is required in order to make requests to different endpoints.
+// TODO -- Remove this function. Read the env variable once when initializing the client and do the overwrite there instead of doing the overwrite for every request.
 func (c *Client) modifyConfigURL() {
 	clientConfig := c.client.GetConfig()
-	if os.Getenv(ionosAPIURLObjectStorageManagement) != "" {
+	if os.Getenv(IonosAPIURLObjectStorageManagement) != "" {
 		clientConfig.Servers = shared.ServerConfigurations{
 			{
-				URL: utils.CleanURL(os.Getenv(ionosAPIURLObjectStorageManagement)),
+				URL: utils.CleanURL(os.Getenv(IonosAPIURLObjectStorageManagement)),
 			},
 		}
 		return
