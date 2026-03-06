@@ -85,6 +85,7 @@ environments:
       - name: objectstoragemanagement
         endpoints:
           - name: %s
+          - name: %s
           - name: https://s3.ionos.com
 failover:
   strategy: roundRobin
@@ -97,8 +98,8 @@ failover:
     - DELETE
     - HEAD
     - OPTIONS
-  maxRetries: 1
-`, mockServer.URL)
+  maxRetries: 2
+`, mockServer.URL, mockServer.URL)
 
 	tmpFile := createTempConfigFile(t, configContent)
 	defer os.Remove(tmpFile)
@@ -153,6 +154,7 @@ environments:
       - name: objectstoragemanagement
         endpoints:
           - name: %s
+          - name: %s
           - name: https://s3.ionos.com
 failover:
   strategy: roundRobin
@@ -161,12 +163,14 @@ failover:
     - POST
     - DELETE
     - PUT
-  maxRetries: 1
-`, badAddr)
+  maxRetries: 2
+`, badAddr, badAddr)
 
 	tmpFile := createTempConfigFile(t, configContent)
 	defer os.Remove(tmpFile)
 	t.Setenv("IONOS_CONFIG_FILE", tmpFile)
+
+	dsAccesskeyName := "data.ionoscloud_object_storage_accesskey.testds"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -182,6 +186,36 @@ failover:
 				),
 			},
 			{
+				Config: testAccFailoverAccesskeyDataSourceByID(description),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(dsAccesskeyName, "id", name, "id"),
+					resource.TestCheckResourceAttrPair(dsAccesskeyName, "description", name, "description"),
+					resource.TestCheckResourceAttrPair(dsAccesskeyName, "accesskey", name, "accesskey"),
+					resource.TestCheckResourceAttrSet(dsAccesskeyName, "canonical_user_id"),
+					resource.TestCheckResourceAttrSet(dsAccesskeyName, "contract_user_id"),
+				),
+			},
+			{
+				Config: testAccFailoverAccesskeyDataSourceByDescription(description),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(dsAccesskeyName, "id", name, "id"),
+					resource.TestCheckResourceAttr(dsAccesskeyName, "description", description),
+					resource.TestCheckResourceAttrSet(dsAccesskeyName, "accesskey"),
+					resource.TestCheckResourceAttrSet(dsAccesskeyName, "canonical_user_id"),
+					resource.TestCheckResourceAttrSet(dsAccesskeyName, "contract_user_id"),
+				),
+			},
+			{
+				Config: testAccFailoverAccesskeyDataSourceByAccesskey(description),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(dsAccesskeyName, "id", name, "id"),
+					resource.TestCheckResourceAttrPair(dsAccesskeyName, "accesskey", name, "accesskey"),
+					resource.TestCheckResourceAttr(dsAccesskeyName, "description", description),
+					resource.TestCheckResourceAttrSet(dsAccesskeyName, "canonical_user_id"),
+					resource.TestCheckResourceAttrSet(dsAccesskeyName, "contract_user_id"),
+				),
+			},
+			{
 				Config: testAccAccesskeyConfigDescription(descriptionUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(name, "description", descriptionUpdated),
@@ -190,6 +224,42 @@ failover:
 			},
 		},
 	})
+}
+
+func testAccFailoverAccesskeyDataSourceByID(description string) string {
+	return fmt.Sprintf(`
+resource "ionoscloud_object_storage_accesskey" "test" {
+  description = %[1]q
+}
+
+data "ionoscloud_object_storage_accesskey" "testds" {
+  id = ionoscloud_object_storage_accesskey.test.id
+}
+`, description)
+}
+
+func testAccFailoverAccesskeyDataSourceByDescription(description string) string {
+	return fmt.Sprintf(`
+resource "ionoscloud_object_storage_accesskey" "test" {
+  description = %[1]q
+}
+
+data "ionoscloud_object_storage_accesskey" "testds" {
+  description = %[1]q
+}
+`, description)
+}
+
+func testAccFailoverAccesskeyDataSourceByAccesskey(description string) string {
+	return fmt.Sprintf(`
+resource "ionoscloud_object_storage_accesskey" "test" {
+  description = %[1]q
+}
+
+data "ionoscloud_object_storage_accesskey" "testds" {
+  accesskey = ionoscloud_object_storage_accesskey.test.accesskey
+}
+`, description)
 }
 
 func createTempConfigFile(t *testing.T, content string) string {
