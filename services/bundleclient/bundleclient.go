@@ -87,11 +87,15 @@ func (c SdkBundle) newBundleClientConfig(userAgent string) *shared.Configuration
 	return config
 }
 
-// shouldApplyOverrides handles the early-exit checks common to all client constructors.
+// shouldApplyOverridesCustomEnv handles the early-exit checks common to all client constructors.
 // It returns true when the caller should proceed with custom location or failover configuration,
-// or false if the client should be returned immediately using the provided config (e.g. env var or default).
-func (c SdkBundle) shouldApplyOverrides(product, productEnvVar string) bool {
-	if os.Getenv(productEnvVar) != "" {
+// or false if the client should be returned immediately using the provided config (e.g. env var provided as parameter or default).
+func (c SdkBundle) shouldApplyOverridesCustomEnv(product, productEnvVar string) bool {
+	if os.Getenv(shared.IonosApiUrlEnvVar) != "" {
+		log.Printf("[DEBUG] Using custom endpoint from %s env variable", shared.IonosApiUrlEnvVar)
+		return false
+	}
+	if productEnvVar != "" && os.Getenv(productEnvVar) != "" {
 		log.Printf("[DEBUG] Using custom endpoint from %s env variable", productEnvVar)
 		return false
 	}
@@ -105,6 +109,13 @@ func (c SdkBundle) shouldApplyOverrides(product, productEnvVar string) bool {
 	return true
 }
 
+// shouldApplyOverrides handles the early-exit checks common to all client constructors.
+// It returns true when the caller should proceed with custom location or failover configuration,
+// or false if the client should be returned immediately using the provided config (e.g. IONOS_API_URL env var or default).
+func (c SdkBundle) shouldApplyOverrides(product string) bool {
+	return c.shouldApplyOverridesCustomEnv(product, "")
+}
+
 // NewContainerRegistryClient creates a new Container Registry client for a specific location
 func (c SdkBundle) NewContainerRegistryClient(location string) (*crService.Client, error) {
 	config := c.newBundleClientConfig(fmt.Sprintf(
@@ -113,7 +124,7 @@ func (c SdkBundle) NewContainerRegistryClient(location string) (*crService.Clien
 		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
 	))
 
-	if !c.shouldApplyOverrides(fileconfiguration.ContainerRegistry, shared.IonosApiUrlEnvVar) {
+	if !c.shouldApplyOverrides(fileconfiguration.ContainerRegistry) {
 		return crService.NewClientFromConfig(config), nil
 	}
 
@@ -151,7 +162,7 @@ func (c SdkBundle) NewMongoClient(location string) (*dbaasService.MongoClient, e
 		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
 	))
 
-	if !c.shouldApplyOverrides(fileconfiguration.Mongo, shared.IonosApiUrlEnvVar) {
+	if !c.shouldApplyOverrides(fileconfiguration.Mongo) {
 		return dbaasService.NewMongoClientFromConfig(config), nil
 	}
 
@@ -189,7 +200,7 @@ func (c SdkBundle) NewPsqlClient(location string) (*dbaasService.PsqlClient, err
 		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
 	))
 
-	if !c.shouldApplyOverrides(fileconfiguration.PSQL, shared.IonosApiUrlEnvVar) {
+	if !c.shouldApplyOverrides(fileconfiguration.PSQL) {
 		return dbaasService.NewPsqlClientFromConfig(config), nil
 	}
 
@@ -250,7 +261,7 @@ func (c SdkBundle) newCloudAPIClientConfig() *ionoscloud.Configuration {
 //     c. If neither is found, return an error
 func (c SdkBundle) NewCloudAPIClient(location string) (*ionoscloud.APIClient, error) {
 	config := c.newCloudAPIClientConfig()
-	if !c.shouldApplyOverrides(fileconfiguration.Cloud, shared.IonosApiUrlEnvVar) {
+	if !c.shouldApplyOverrides(fileconfiguration.Cloud) {
 		return ionoscloud.NewAPIClient(config), nil
 	}
 
@@ -288,7 +299,7 @@ func (c SdkBundle) NewCloudAPIClient(location string) (*ionoscloud.APIClient, er
 //     d. Any other strategy value is an error
 func (c SdkBundle) NewCloudAPIClientWithFailover() (*ionoscloud.APIClient, error) {
 	config := c.newCloudAPIClientConfig()
-	if !c.shouldApplyOverrides(fileconfiguration.Cloud, shared.IonosApiUrlEnvVar) {
+	if !c.shouldApplyOverrides(fileconfiguration.Cloud) {
 		return ionoscloud.NewAPIClient(config), nil
 	}
 
@@ -343,7 +354,7 @@ func (c SdkBundle) NewObjectStorageManagementClient() (*objectStorageManagementS
 		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
 	))
 
-	if !c.shouldApplyOverrides(fileconfiguration.ObjectStorageManagement, objectStorageManagementService.IonosAPIURLObjectStorageManagement) {
+	if !c.shouldApplyOverridesCustomEnv(fileconfiguration.ObjectStorageManagement, objectStorageManagementService.IonosAPIURLObjectStorageManagement) {
 		return objectStorageManagementService.NewClientFromConfig(config), nil
 	}
 
