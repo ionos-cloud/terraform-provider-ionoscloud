@@ -1,6 +1,6 @@
 ## 6.7.25
 ### Features
-- File configuration failover for global resources : users, groups, target groups, s3keys, backupunits, contracts
+- File configuration failover for global resources: users, groups, target groups, s3keys, backupunits, contracts, object storage access keys
 ### Fixes
 - Add debug log with error in case config file cannot be read due to whatever reason
 ### Dependencies
