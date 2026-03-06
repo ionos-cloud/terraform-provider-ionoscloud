@@ -49,7 +49,7 @@ func (d *regionDataSource) Configure(ctx context.Context, req datasource.Configu
 	var err error
 	d.client, err = clientBundle.NewObjectStorageManagementClient()
 	if err != nil {
-		resp.Diagnostics.AddError("Initialization error for Object Storage Management client ", err.Error())
+		resp.Diagnostics.AddError("Initialization error for Object Storage Management client", err.Error())
 	}
 }
 
