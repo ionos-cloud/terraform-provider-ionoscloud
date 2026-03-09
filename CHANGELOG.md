@@ -1,3 +1,7 @@
+## Upcoming
+### Fixes
+- Improved error message when `image_name` matches an image that has a non-HDD type (e.g. CDROM) or is in a different location. The error now reports the found image's type and location.
+
 ## 6.7.24
 ### Features
 - Added `location` field to several resources and data sources to support regional endpoints via file configuration. The field should only be used if a file configuration is provided (e.g. at `IONOS_CONFIG_FILE`).
