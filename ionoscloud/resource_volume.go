@@ -801,9 +801,9 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 						if rejectedImg != nil {
 							return image, imageAlias, fmt.Errorf(
 								"image '%s' was found (name: '%s') with type '%s' in location '%s'; "+
-									"volume requires an image of type 'HDD' in location '%s'",
+									"volume requires an image of type '%s' in location '%s'",
 								imageName, *rejectedImg.Properties.Name, *rejectedImg.Properties.ImageType,
-								*rejectedImg.Properties.Location, *dc.Properties.Location)
+								*rejectedImg.Properties.Location, HDDImage, *dc.Properties.Location)
 						}
 						return image, imageAlias, fmt.Errorf("could not find an image/imagealias/snapshot that matches %s", imageName)
 					}
@@ -964,7 +964,7 @@ func getImageAlias(ctx context.Context, client *ionoscloud.APIClient, imageAlias
 func resolveVolumeImageName(ctx context.Context, client *ionoscloud.APIClient, imageName string, location string) (match *ionoscloud.Image, skipped *ionoscloud.Image, err error) {
 
 	if imageName == "" {
-		return nil, nil, fmt.Errorf("imageName not suplied")
+		return nil, nil, fmt.Errorf("image name not supplied")
 	}
 
 	images, apiResponse, err := client.ImagesApi.ImagesGet(ctx).Depth(1).Execute()
@@ -984,7 +984,7 @@ func resolveVolumeImageName(ctx context.Context, client *ionoscloud.APIClient, i
 
 			if imageEntry.Properties != nil && imageEntry.Properties.Name != nil && *imageEntry.Properties.Name != "" {
 
-				nameMatches := strings.EqualFold(imageName, *imageEntry.Id) ||
+				nameMatches := (imageEntry.Id != nil && strings.EqualFold(imageName, *imageEntry.Id)) ||
 					strings.EqualFold(*imageEntry.Properties.Name, imageName) ||
 					strings.Contains(strings.ToLower(*imageEntry.Properties.Name), strings.ToLower(imageName))
 
