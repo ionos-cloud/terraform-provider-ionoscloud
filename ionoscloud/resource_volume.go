@@ -846,7 +846,11 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 					return image, imageAlias, fmt.Errorf("error fetching datacenter %s: (%w)", dcId, err)
 				}
 
-				img, _, err := resolveVolumeImageName(ctx, client, imageName, *dc.Properties.Location)
+				img, rejectedImg, err := resolveVolumeImageName(ctx, client, imageName, *dc.Properties.Location)
+				if rejectedImg != nil {
+					log.Printf("[DEBUG] image '%s' matched by name but was filtered out (type: '%s', location: '%s')",
+						*rejectedImg.Properties.Name, *rejectedImg.Properties.ImageType, *rejectedImg.Properties.Location)
+				}
 
 				if err != nil {
 					return image, imageAlias, err
