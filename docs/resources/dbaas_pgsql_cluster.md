@@ -93,16 +93,16 @@ resource "ionoscloud_server" "example" {
 }
 
 locals {
- prefix                   = format("%s/%s", ionoscloud_server.example.nic[0].ips[0], "24")
+ prefix                   = format("%s/%s", tolist(ionoscloud_server.example.nic[0].ips)[0], "24")
  database_ip              = cidrhost(local.prefix, 1)
  database_ip_cidr         = format("%s/%s", local.database_ip, "24")
 }
 
 resource "ionoscloud_pg_cluster" "example" {
-  postgres_version        = "12"
+  postgres_version        = "14"
   instances               = 1
   cores                   = 4
-  ram                     = 2048
+  ram                     = 4096
   storage_size            = 10240
   storage_type            = "HDD"
   connection_pooler {

@@ -27,6 +27,11 @@ func dataSourceDbaasPgSqlDatabases() *schema.Resource {
 				Optional:    true,
 				Description: "Filter for this data source, using this you can retrieve all databases that belong to a specific user.",
 			},
+			"location": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The location of the resource. This field should be used only if you are also using a file configuration and should not be configured otherwise.",
+			},
 			"databases": {
 				Type:        schema.TypeList,
 				Description: "The list of databases",
@@ -54,7 +59,10 @@ func dataSourceDbaasPgSqlDatabases() *schema.Resource {
 }
 
 func dataSourceDbaasPgSqlReadDatabases(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).PsqlClient
+	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	clusterId := d.Get("cluster_id").(string)
 	owner, ownerOk := d.GetOk("owner")
 	resourceName := "PgSQL databases"

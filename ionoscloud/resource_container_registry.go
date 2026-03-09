@@ -110,7 +110,11 @@ func resourceContainerRegistry() *schema.Resource {
 }
 
 func resourceContainerRegistryCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).ContainerClient
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	containerRegistry, err := crService.GetRegistryDataCreate(d)
 	if err != nil {
@@ -133,8 +137,11 @@ func resourceContainerRegistryCreate(ctx context.Context, d *schema.ResourceData
 }
 
 func resourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-
-	client := meta.(bundleclient.SdkBundle).ContainerClient
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	registry, apiResponse, err := client.GetRegistry(ctx, d.Id())
 	if err != nil {
@@ -155,7 +162,11 @@ func resourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData, 
 }
 
 func resourceContainerRegistryUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).ContainerClient
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	containerRegistry, err := crService.GetRegistryDataUpdate(d)
 	if err != nil {
@@ -183,7 +194,11 @@ func resourceContainerRegistryUpdate(ctx context.Context, d *schema.ResourceData
 }
 
 func resourceContainerRegistryDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).ContainerClient
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	registryId := d.Id()
 
@@ -201,9 +216,21 @@ func resourceContainerRegistryDelete(ctx context.Context, d *schema.ResourceData
 }
 
 func resourceContainerRegistryImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(bundleclient.SdkBundle).ContainerClient
+	importID := d.Id()
+	location, parts := splitImportID(importID, "/")
+	if len(parts) != 1 {
+		return nil, fmt.Errorf("invalid import identifier: expected one of <location>:<registry-id> or <registry-id>, got: %s", importID)
+	}
 
-	registryId := d.Id()
+	if err := validateImportIDParts(parts); err != nil {
+		return nil, fmt.Errorf("failed validating import identifier %q: %w", importID, err)
+	}
+	client, err := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(location)
+	if err != nil {
+		return nil, err
+	}
+
+	registryId := parts[0]
 
 	containerRegistry, apiResponse, err := client.GetRegistry(ctx, registryId)
 

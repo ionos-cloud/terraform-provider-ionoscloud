@@ -3,7 +3,6 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -43,13 +42,22 @@ func resourceDbaasPgSqlDatabase() *schema.Resource {
 				Required:    true,
 				ForceNew:    true,
 			},
+			"location": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "The location of the resource. This field should be used only if you are also using a file configuration and should not be configured otherwise.",
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
 }
 
 func resourceDbaasPgSqlDatabaseCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).PsqlClient
+	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	clusterId := d.Get("cluster_id").(string)
 	name := d.Get("name").(string)
 	owner := d.Get("owner").(string)
@@ -67,7 +75,10 @@ func resourceDbaasPgSqlDatabaseCreate(ctx context.Context, d *schema.ResourceDat
 }
 
 func resourceDbaasPgSqlDatabaseRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).PsqlClient
+	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	clusterId := d.Get("cluster_id").(string)
 	name := d.Get("name").(string)
 
@@ -86,7 +97,10 @@ func resourceDbaasPgSqlDatabaseRead(ctx context.Context, d *schema.ResourceData,
 }
 
 func resourceDbaasPgSqlDatabaseDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).PsqlClient
+	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	clusterId := d.Get("cluster_id").(string)
 	name := d.Get("name").(string)
@@ -98,13 +112,24 @@ func resourceDbaasPgSqlDatabaseDelete(ctx context.Context, d *schema.ResourceDat
 }
 
 func resourceDbaasPgSqlDatabaseImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(d.Id(), "/")
+	importID := d.Id()
+	location, parts := splitImportID(importID, "/")
 	if len(parts) != 2 {
-		return nil, diagutil.ToError(d, fmt.Errorf("invalid import format:, expecting the following format: {clusterID}/{databaseName}"), nil)
+		return nil, diagutil.ToError(d, fmt.Errorf("invalid import identifier: expected one of <location>:<cluster-id>/<database-name> or <cluster-id>/<database-name>, got: %s", importID), nil)
 	}
+
+	if err := validateImportIDParts(parts); err != nil {
+		return nil, diagutil.ToError(d, fmt.Errorf("failed validating import identifier %q: %w", importID, err), nil)
+	}
+
+	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(location)
+	if err != nil {
+		return nil, err
+	}
+
 	clusterId := parts[0]
 	name := parts[1]
-	client := meta.(bundleclient.SdkBundle).PsqlClient
+
 	database, apiResponse, err := client.FindDatabaseByName(ctx, clusterId, name)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
@@ -118,6 +143,9 @@ func resourceDbaasPgSqlDatabaseImporter(ctx context.Context, d *schema.ResourceD
 	}
 	if err := d.Set("cluster_id", clusterId); err != nil {
 		return nil, utils.GenerateSetError("PgSQL database", "cluster_id", err)
+	}
+	if err := d.Set("location", location); err != nil {
+		return nil, utils.GenerateSetError("PgSQL database", "location", err)
 	}
 	return []*schema.ResourceData{d}, nil
 }

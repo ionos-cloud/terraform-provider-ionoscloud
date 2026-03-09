@@ -89,13 +89,22 @@ func dataSourceNatGatewayRule() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+			"location": {
+				Type:        schema.TypeString,
+				Description: "The location of the resource. This field should be used only if you are also using a file configuration and should not be configured otherwise.",
+				Optional:    true,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
 }
 
 func dataSourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	datacenterId, dcIdOk := d.GetOk("datacenter_id")
 	if !dcIdOk {
@@ -118,7 +127,6 @@ func dataSourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	var natGatewayRule ionoscloud.NatGatewayRule
-	var err error
 	var apiResponse *ionoscloud.APIResponse
 
 	if idOk {

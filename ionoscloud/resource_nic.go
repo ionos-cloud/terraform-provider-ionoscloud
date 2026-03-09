@@ -30,7 +30,6 @@ func resourceNic() *schema.Resource {
 			StateContext: resourceNicImport,
 		},
 		Schema: map[string]*schema.Schema{
-
 			"lan": {
 				Type:     schema.TypeInt,
 				Required: true,
@@ -95,6 +94,12 @@ func resourceNic() *schema.Resource {
 				Required:         true,
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+			},
+			"location": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The location of the resource. This field should be used only if you are also using a file configuration and should not be configured otherwise.",
+				ForceNew:    true,
 			},
 			"mac": {
 				Type:     schema.TypeString,
@@ -181,7 +186,11 @@ func ForceNewForFlowlogChanges(_ context.Context, d *schema.ResourceDiff, _ inte
 	return nil
 }
 func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
 
 	nic, err := cloudapinic.GetNicFromSchemaCreate(d, "")
@@ -208,8 +217,8 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 		}
 	}
 	// Sometimes there is an error because the nic is not found after it's created.
-	//Probably a read write consistency issue.
-	//We're retrying for 5 minutes. 404 - means we keep on trying.
+	// Probably a read write consistency issue.
+	// We're retrying for 5 minutes. 404 - means we keep on trying.
 	// Sometimes there is an error because the nic is not found after it's created.
 	// Probably a read write consistency issue.
 	// We're retrying for 5 minutes. 404 - means we keep on trying.
@@ -240,7 +249,12 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 }
 
 func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
 	dcid := d.Get("datacenter_id").(string)
 	srvid := d.Get("server_id").(string)
@@ -263,12 +277,16 @@ func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface
 }
 
 func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
 	dcID := d.Get("datacenter_id").(string)
 	srvID := d.Get("server_id").(string)
 	nicID := d.Id()
-	var err error
 	if d.HasChange("flowlog") {
 		oldV, newV := d.GetChange("flowlog")
 		var firstFlowLogId = ""
@@ -321,7 +339,12 @@ func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 }
 
 func resourceNicDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
 	dcid := d.Get("datacenter_id").(string)
 	srvid := d.Get("server_id").(string)
@@ -335,15 +358,28 @@ func resourceNicDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 }
 
 func resourceNicImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(d.Id(), "/")
-	if len(parts) != 3 || parts[0] == "" || parts[1] == "" {
-		return nil, diagutil.ToError(d, fmt.Errorf("invalid import. Expecting {datacenter}/{server}/{nic}"), nil)
+	importID := d.Id()
+
+	location, parts := splitImportID(importID, "/")
+	if len(parts) != 3 {
+		return nil, diagutil.ToError(d, fmt.Errorf(
+			"invalid import identifier: expected one of <location>:<datacenter>/<server>/<nic> or "+
+				"<datacenter>/<server>/<nic>, got: %s", importID,
+		), nil)
 	}
+
+	if err := validateImportIDParts(parts); err != nil {
+		return nil, diagutil.ToError(d, fmt.Errorf("failed validating import identifier %q: %w", importID, err), nil)
+	}
+
 	dcId := parts[0]
 	sId := parts[1]
 	nicId := parts[2]
 
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return nil, err
+	}
 
 	nic, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, dcId, sId, nicId).Execute()
 	logApiRequestTime(apiResponse)
@@ -365,6 +401,9 @@ func resourceNicImport(ctx context.Context, d *schema.ResourceData, meta interfa
 	err = d.Set("server_id", sId)
 	if err != nil {
 		return nil, diagutil.ToError(d, err, nil)
+	}
+	if err = d.Set("location", location); err != nil {
+		return nil, err
 	}
 
 	if err := cloudapinic.NicSetData(d, &nic); err != nil {

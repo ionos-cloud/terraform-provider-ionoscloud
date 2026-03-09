@@ -5,9 +5,8 @@ import (
 	"fmt"
 	"log"
 	"strconv"
-	"strings"
 
-	bundleclient "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 
@@ -95,13 +94,23 @@ func resourceFirewall() *schema.Resource {
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
+			"location": {
+				Type:        schema.TypeString,
+				Description: "The location of the resource. This field should be used only if you are also using a file configuration and should not be configured otherwise.",
+				Optional:    true,
+				ForceNew:    true,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
 }
 
 func resourceFirewallCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	firewall, diags := getFirewallData(d, "", false)
 	if diags != nil {
@@ -130,7 +139,11 @@ func resourceFirewallCreate(ctx context.Context, d *schema.ResourceData, meta in
 }
 
 func resourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	fw, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, d.Get("datacenter_id").(string),
 		d.Get("server_id").(string), d.Get("nic_id").(string), d.Id()).Execute()
@@ -154,7 +167,11 @@ func resourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta inte
 }
 
 func resourceFirewallUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	firewall, diags := getFirewallData(d, "", true)
 	if diags != nil {
@@ -176,7 +193,11 @@ func resourceFirewallUpdate(ctx context.Context, d *schema.ResourceData, meta in
 }
 
 func resourceFirewallDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	apiResponse, err := client.FirewallRulesApi.
 		DatacentersServersNicsFirewallrulesDelete(
@@ -199,18 +220,29 @@ func resourceFirewallDelete(ctx context.Context, d *schema.ResourceData, meta in
 }
 
 func resourceFirewallImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	importID := d.Id()
 
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location, parts := splitImportID(importID, "/")
+	if len(parts) != 4 {
+		return nil, fmt.Errorf(
+			"invalid import identifier: expected one of <location>:<datacenter-id>/<server-id>/<nic-id>/<firewall-id> "+
+				"or <datacenter-id>/<server-id>/<nic-id>/<firewall-id>, got: %s", importID,
+		)
+	}
 
-	parts := strings.Split(d.Id(), "/")
-	if len(parts) != 4 || parts[0] == "" || parts[1] == "" || parts[2] == "" || parts[3] == "" {
-		return nil, diagutil.ToError(d, fmt.Errorf("invalid import. Expecting {datacenter}/{server}/{nic}/{firewall}"), nil)
+	if err := validateImportIDParts(parts); err != nil {
+		return nil, diagutil.ToError(d, fmt.Errorf("failed validating import identifier %q: %w", importID, err), nil)
 	}
 
 	dcId := parts[0]
 	serverId := parts[1]
 	nicId := parts[2]
 	firewallId := parts[3]
+
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return nil, err
+	}
 
 	fw, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, dcId,
 		serverId, nicId, firewallId).Execute()
@@ -232,6 +264,9 @@ func resourceFirewallImport(ctx context.Context, d *schema.ResourceData, meta in
 	}
 	if err := d.Set("nic_id", nicId); err != nil {
 		return nil, diagutil.ToError(d, err, nil)
+	}
+	if err := d.Set("location", location); err != nil {
+		return nil, err
 	}
 
 	if err := setFirewallData(d, &fw); err != nil {

@@ -45,7 +45,10 @@ func dataSourceBackupUnit() *schema.Resource {
 }
 
 func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")
@@ -57,7 +60,6 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 		return diagutil.ToDiags(d, fmt.Errorf("please provide either the backup unit id or name"), nil)
 	}
 	var backupUnit ionoscloud.BackupUnit
-	var err error
 	var apiResponse *ionoscloud.APIResponse
 
 	if idOk {

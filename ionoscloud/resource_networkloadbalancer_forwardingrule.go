@@ -4,9 +4,8 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"strings"
 
-	bundleclient "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 
@@ -165,13 +164,23 @@ func resourceNetworkLoadBalancerForwardingRule() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+			"location": {
+				Type:        schema.TypeString,
+				Description: "The location of the resource. This field should be used only if you are also using a file configuration and should not be configured otherwise.",
+				Optional:    true,
+				ForceNew:    true,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
 }
 
 func resourceNetworkLoadBalancerForwardingRuleCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	networkLoadBalancerForwardingRule := ionoscloud.NetworkLoadBalancerForwardingRule{
 		Properties: &ionoscloud.NetworkLoadBalancerForwardingRuleProperties{},
@@ -342,7 +351,11 @@ func getTargetsData(targets interface{}) ([]ionoscloud.NetworkLoadBalancerForwar
 
 func resourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	dcId := d.Get("datacenter_id").(string)
 
@@ -369,7 +382,11 @@ func resourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *schem
 }
 
 func resourceNetworkLoadBalancerForwardingRuleUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	request := ionoscloud.NetworkLoadBalancerForwardingRule{
 		Properties: &ionoscloud.NetworkLoadBalancerForwardingRuleProperties{},
@@ -476,7 +493,11 @@ func resourceNetworkLoadBalancerForwardingRuleUpdate(ctx context.Context, d *sch
 }
 
 func resourceNetworkLoadBalancerForwardingRuleDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	dcId := d.Get("datacenter_id").(string)
 	nlbID := d.Get("networkloadbalancer_id").(string)
@@ -499,16 +520,28 @@ func resourceNetworkLoadBalancerForwardingRuleDelete(ctx context.Context, d *sch
 }
 
 func resourceNetworLoadBalancerForwardingRuleImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	importID := d.Id()
 
-	parts := strings.Split(d.Id(), "/")
-	if len(parts) != 3 || parts[0] == "" || parts[1] == "" || parts[2] == "" {
-		return nil, diagutil.ToError(d, fmt.Errorf("invalid import. Expecting {datacenter}/{natgateway}/{natgateway_rule}"), nil)
+	location, parts := splitImportID(importID, "/")
+	if len(parts) != 3 {
+		return nil, fmt.Errorf(
+			"invalid import identifier: expected one of <location>:<datacenter>/<nlb>/<nlb_rule> or "+
+				"<datacenter>/<nlb>/<nlb_rule>, got: %s", importID,
+		)
+	}
+
+	if err := validateImportIDParts(parts); err != nil {
+		return nil, diagutil.ToError(d, fmt.Errorf("failed validating import identifier %q: %w", importID, err), nil)
 	}
 
 	dcId := parts[0]
 	networkLoadBalancerId := parts[1]
 	networkLoadBalancerRuleId := parts[2]
+
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return nil, err
+	}
 
 	networkLoadBalancerForwardingRule, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesFindByForwardingRuleId(ctx, dcId, networkLoadBalancerId, networkLoadBalancerRuleId).Execute()
 	logApiRequestTime(apiResponse)
@@ -527,6 +560,9 @@ func resourceNetworLoadBalancerForwardingRuleImport(ctx context.Context, d *sche
 	}
 	if err := d.Set("networkloadbalancer_id", networkLoadBalancerId); err != nil {
 		return nil, diagutil.ToError(d, err, nil)
+	}
+	if err := d.Set("location", location); err != nil {
+		return nil, err
 	}
 
 	if err := setNetworkLoadBalancerForwardingRuleData(d, &networkLoadBalancerForwardingRule); err != nil {

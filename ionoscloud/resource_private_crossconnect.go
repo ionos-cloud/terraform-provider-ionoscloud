@@ -38,6 +38,12 @@ func resourcePrivateCrossConnect() *schema.Resource {
 				Description: "The desired description",
 				Optional:    true,
 			},
+			"location": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The location of the resource. This field should be used only if you are also using a file configuration and should not be configured otherwise.",
+				ForceNew:    true,
+			},
 			"connectable_datacenters": {
 				Type:        schema.TypeList,
 				Description: "A list containing all the connectable datacenters",
@@ -104,7 +110,11 @@ func resourcePrivateCrossConnect() *schema.Resource {
 }
 
 func resourcePrivateCrossConnectCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	name := d.Get("name").(string)
 	pcc := ionoscloud.PrivateCrossConnect{
@@ -137,7 +147,11 @@ func resourcePrivateCrossConnectCreate(ctx context.Context, d *schema.ResourceDa
 }
 
 func resourcePrivateCrossConnectRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	pcc, apiResponse, err := client.PrivateCrossConnectsApi.PccsFindById(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -159,7 +173,11 @@ func resourcePrivateCrossConnectRead(ctx context.Context, d *schema.ResourceData
 }
 
 func resourcePrivateCrossConnectUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	request := ionoscloud.PrivateCrossConnect{}
 	name := d.Get("name").(string)
@@ -203,7 +221,11 @@ func resourcePrivateCrossConnectUpdate(ctx context.Context, d *schema.ResourceDa
 }
 
 func resourcePrivateCrossConnectDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	apiResponse, err := client.PrivateCrossConnectsApi.PccsDelete(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
@@ -243,11 +265,24 @@ func resourcePrivateCrossConnectDelete(ctx context.Context, d *schema.ResourceDa
 }
 
 func resourcePrivateCrossConnectImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	importID := d.Id()
+	location, parts := splitImportID(importID, ":")
+	if len(parts) != 1 {
+		return nil, fmt.Errorf("invalid import identifier: expected one of <location>:<pcc-id> or <pcc-id>, got: %s", importID)
+	}
 
-	pccId := d.Id()
+	if err := validateImportIDParts(parts); err != nil {
+		return nil, fmt.Errorf("failed validating import identifier %q: %w", importID, err)
+	}
 
-	pcc, apiResponse, err := client.PrivateCrossConnectsApi.PccsFindById(ctx, d.Id()).Execute()
+	pccId := parts[0]
+
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return nil, err
+	}
+
+	pcc, apiResponse, err := client.PrivateCrossConnectsApi.PccsFindById(ctx, pccId).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -266,6 +301,9 @@ func resourcePrivateCrossConnectImport(ctx context.Context, d *schema.ResourceDa
 	}
 	if err := d.Set("description", *pcc.Properties.Description); err != nil {
 		return nil, diagutil.ToError(d, err, nil)
+	}
+	if err := d.Set("location", location); err != nil {
+		return nil, err
 	}
 
 	if err = setPccDataSource(d, &pcc); err != nil {

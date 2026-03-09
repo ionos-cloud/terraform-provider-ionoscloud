@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -12,7 +11,7 @@ import (
 
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
-	bundleclient "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
@@ -45,17 +44,27 @@ func resourceNSG() *schema.Resource {
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
+			"location": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The location of the resource. This field should be used only if you are also using a file configuration and should not be configured otherwise.",
+				ForceNew:    true,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
 }
 
 func resourceNSGCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
-
 	datacenterID := d.Get("datacenter_id").(string)
 	sgName := d.Get("name").(string)
 	sgDescription := d.Get("description").(string)
+	location := d.Get("location").(string)
+
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	sg := ionoscloud.SecurityGroupRequest{
 		Properties: &ionoscloud.SecurityGroupProperties{
@@ -79,8 +88,13 @@ func resourceNSGCreate(ctx context.Context, d *schema.ResourceData, meta any) di
 }
 
 func resourceNSGRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
 	datacenterID := d.Get("datacenter_id").(string)
+	location := d.Get("location").(string)
+
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	securityGroup, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsFindById(ctx, datacenterID, d.Id()).Depth(2).Execute()
 	apiResponse.LogInfo()
@@ -95,11 +109,15 @@ func resourceNSGRead(ctx context.Context, d *schema.ResourceData, meta interface
 }
 
 func resourceNSGUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
-
 	datacenterID := d.Get("datacenter_id").(string)
 	sgName := d.Get("name").(string)
 	sgDescription := d.Get("description").(string)
+	location := d.Get("location").(string)
+
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	sg := ionoscloud.SecurityGroupRequest{
 		Properties: &ionoscloud.SecurityGroupProperties{
@@ -123,9 +141,13 @@ func resourceNSGUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 }
 
 func resourceNSGDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
-
 	datacenterID := d.Get("datacenter_id").(string)
+	location := d.Get("location").(string)
+
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsDelete(ctx, datacenterID, d.Id()).Execute()
 	apiResponse.LogInfo()
@@ -142,16 +164,24 @@ func resourceNSGDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 }
 
 func resourceNSGImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	importID := d.Id()
 
-	parts := strings.Split(d.Id(), "/")
+	location, parts := splitImportID(importID, "/")
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("invalid import identifier: expected one of <location>:<datacenter-id>/<nsg-id> or <datacenter-id>/<nsg-id>, got: %s", importID)
+	}
 
-	if len(parts) < 2 || parts[0] == "" || parts[1] == "" {
-		return nil, diagutil.ToError(d, fmt.Errorf("invalid import. Expecting {datacenter UUID}/{nsg UUID}"), nil)
+	if err := validateImportIDParts(parts); err != nil {
+		return nil, diagutil.ToError(d, fmt.Errorf("failed validating import identifier %q: %w", importID, err), nil)
 	}
 
 	datacenterID := parts[0]
 	nsgID := parts[1]
+
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return nil, err
+	}
 
 	nsg, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsFindById(ctx, datacenterID, nsgID).Execute()
 	logApiRequestTime(apiResponse)
@@ -167,6 +197,9 @@ func resourceNSGImport(ctx context.Context, d *schema.ResourceData, meta interfa
 	log.Printf("[INFO] Datacenter found: %+v", nsg)
 	if err = d.Set("datacenter_id", datacenterID); err != nil {
 		return nil, diagutil.ToError(d, err, nil)
+	}
+	if err = d.Set("location", location); err != nil {
+		return nil, err
 	}
 	if err = setNSGData(d, &nsg); err != nil {
 		return nil, diagutil.ToError(d, err, nil)

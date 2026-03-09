@@ -4,9 +4,8 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"strings"
 
-	bundleclient "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 
@@ -83,20 +82,30 @@ func resourceNSGFirewallRule() *schema.Resource {
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
+			"location": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The location of the resource. This field should be used only if you are also using a file configuration and should not be configured otherwise.",
+				ForceNew:    true,
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
 }
 
 func resourceNSGFirewallCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
-
 	firewall, diags := getFirewallData(d, "", false)
 	if diags != nil {
 		return diags
 	}
 	nsgID := d.Get("nsg_id").(string)
 	dcID := d.Get("datacenter_id").(string)
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	fw, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsFirewallrulesPost(ctx, dcID, nsgID).FirewallRule(firewall).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
@@ -115,7 +124,11 @@ func resourceNSGFirewallCreate(ctx context.Context, d *schema.ResourceData, meta
 }
 
 func resourceNSGFirewallRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	fw, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsRulesFindById(ctx, d.Get("datacenter_id").(string),
 		d.Get("nsg_id").(string), d.Id()).Execute()
@@ -139,14 +152,19 @@ func resourceNSGFirewallRead(ctx context.Context, d *schema.ResourceData, meta i
 }
 
 func resourceNSGFirewallUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
-
 	firewall, diags := getFirewallData(d, "", true)
 	if diags != nil {
 		return diags
 	}
 	nsgID := d.Get("nsg_id").(string)
 	dcID := d.Get("datacenter_id").(string)
+	location := d.Get("location").(string)
+
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	_, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsRulesPatch(ctx, dcID, nsgID, d.Id()).Rule(*firewall.Properties).Execute()
 	logApiRequestTime(apiResponse)
 
@@ -163,9 +181,15 @@ func resourceNSGFirewallUpdate(ctx context.Context, d *schema.ResourceData, meta
 }
 
 func resourceNSGFirewallDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
 	dcID := d.Get("datacenter_id").(string)
 	nsgID := d.Get("nsg_id").(string)
+	location := d.Get("location").(string)
+
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	apiResponse, err := client.SecurityGroupsApi.
 		DatacentersSecuritygroupsFirewallrulesDelete(
 			ctx, dcID,
@@ -187,17 +211,28 @@ func resourceNSGFirewallDelete(ctx context.Context, d *schema.ResourceData, meta
 }
 
 func resourceNSGFirewallImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	importID := d.Id()
 
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location, parts := splitImportID(importID, "/")
+	if len(parts) != 3 {
+		return nil, fmt.Errorf(
+			"invalid import identifier: expected one of <location>:<datacenter-id>/<nsg-id>/<firewall-id> "+
+				"or <datacenter-id>/<nsg-id>/<firewall-id>, got: %s", importID,
+		)
+	}
 
-	parts := strings.Split(d.Id(), "/")
-	if len(parts) != 3 || parts[0] == "" || parts[1] == "" || parts[2] == "" {
-		return nil, diagutil.ToError(d, fmt.Errorf("invalid import. Expecting {datacenter}/{nsg}/{firewall}"), nil)
+	if err := validateImportIDParts(parts); err != nil {
+		return nil, diagutil.ToError(d, fmt.Errorf("failed validating import identifier %q: %w", importID, err), nil)
 	}
 
 	dcID := parts[0]
 	nsgID := parts[1]
 	firewallID := parts[2]
+
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return nil, err
+	}
 
 	fw, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsRulesFindById(ctx, dcID,
 		nsgID, firewallID).Execute()
@@ -216,6 +251,9 @@ func resourceNSGFirewallImport(ctx context.Context, d *schema.ResourceData, meta
 	}
 	if err := d.Set("nsg_id", nsgID); err != nil {
 		return nil, diagutil.ToError(d, err, nil)
+	}
+	if err := d.Set("location", location); err != nil {
+		return nil, err
 	}
 
 	if err := setFirewallData(d, &fw); err != nil {

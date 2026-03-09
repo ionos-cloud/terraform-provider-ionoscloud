@@ -212,7 +212,10 @@ func groupDataSourceSchemaV0() *schema.Resource {
 }
 
 func dataSourceGroupRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")
@@ -224,7 +227,6 @@ func dataSourceGroupRead(ctx context.Context, d *schema.ResourceData, meta inter
 		return diagutil.ToDiags(d, fmt.Errorf("please provide either the group id or name"), nil)
 	}
 	var group ionoscloud.Group
-	var err error
 
 	if idOk {
 		/* search by ID */

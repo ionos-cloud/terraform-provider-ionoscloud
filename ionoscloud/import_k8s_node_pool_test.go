@@ -28,7 +28,7 @@ func TestAccK8sNodePoolImportBasic(t *testing.T) {
 				ImportStateIdFunc:       testAccK8sNodePoolImportStateID,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"maintenance_window.0.time", "allow_replace"},
+				ImportStateVerifyIgnore: []string{"maintenance_window.0.time", "allow_replace", "location"},
 			},
 		},
 	})

@@ -64,7 +64,10 @@ func dataSourceLocation() *schema.Resource {
 }
 
 func dataSourceLocationRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	name, nameOk := d.GetOk("name")
 	feature, featureOk := d.GetOk("feature")

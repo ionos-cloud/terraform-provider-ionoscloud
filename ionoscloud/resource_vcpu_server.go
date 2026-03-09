@@ -104,6 +104,12 @@ func resourceVCPUServer() *schema.Resource {
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
+			"location": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The location of the resource. This field should be used only if you are also using a file configuration and should not be configured otherwise.",
+				ForceNew:    true,
+			},
 			"image_password": {
 				Type:      schema.TypeString,
 				Optional:  true,

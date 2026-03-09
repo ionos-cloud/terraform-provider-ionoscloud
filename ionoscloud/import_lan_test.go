@@ -4,10 +4,9 @@ package ionoscloud
 
 import (
 	"fmt"
+	"testing"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
-
-	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -24,10 +23,11 @@ func TestAccLanImportBasic(t *testing.T) {
 			},
 
 			{
-				ResourceName:      constant.LanResource + "." + constant.LanTestResource,
-				ImportStateIdFunc: testAccLanImportStateId,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            constant.LanResource + "." + constant.LanTestResource,
+				ImportStateIdFunc:       testAccLanImportStateId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location"},
 			},
 		},
 	})

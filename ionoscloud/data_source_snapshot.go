@@ -105,12 +105,15 @@ func dataSourceSnapshot() *schema.Resource {
 }
 
 func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
-
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")
 	location, locationOk := d.GetOk("location")
 	size, sizeOk := d.GetOk("size")
+
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(d.Get("location").(string))
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	if idOk && nameOk {
 		return diagutil.ToDiags(d, fmt.Errorf("id and name cannot be both specified in the same time"), nil)
@@ -120,7 +123,6 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	var snapshot ionoscloud.Snapshot
-	var err error
 	var apiResponse *ionoscloud.APIResponse
 
 	if idOk {

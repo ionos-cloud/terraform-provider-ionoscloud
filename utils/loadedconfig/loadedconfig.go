@@ -1,7 +1,6 @@
 package loadedconfig
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -50,7 +49,7 @@ func SetClientOptionsFromConfig(client ConfigProviderWithLoaderAndLocation, prod
 	defer client.ChangeConfigURL(location)
 	// do not set from config if we use IONOS_API_URL
 	if os.Getenv(shared.IonosApiUrlEnvVar) != "" {
-		fmt.Printf("[DEBUG] Using custom endpoint %s\n", os.Getenv(shared.IonosApiUrlEnvVar))
+		log.Printf("[DEBUG] Using custom endpoint from IONOS_API_URL env variable")
 		return
 	}
 	fileConfig := client.GetFileConfig()

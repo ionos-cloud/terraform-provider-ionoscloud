@@ -25,7 +25,7 @@ resource "ionoscloud_dns_zone" "example" {
 
 ## Argument reference
 
-* `name` - (Required)[string] The name of the DNS Zone.
+* `name` - (Required)[string] The name of the DNS Zone. This property is immutable.
 * `description` - (Optional)[string] The description for the DNS Zone.
 * `enabled` - (Optional)[bool] Indicates if the DNS Zone is active or not. Default is `true`.
 

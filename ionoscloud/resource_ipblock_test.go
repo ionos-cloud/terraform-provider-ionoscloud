@@ -107,8 +107,6 @@ func TestAccIPBlockBasic(t *testing.T) {
 }
 
 func testAccCheckIPBlockDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(bundleclient.SdkBundle).CloudApiClient
-
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 	if cancel != nil {
 		defer cancel()
@@ -118,6 +116,10 @@ func testAccCheckIPBlockDestroyCheck(s *terraform.State) error {
 			continue
 		}
 
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(rs.Primary.Attributes["location"])
+		if err != nil {
+			return err
+		}
 		_, apiResponse, err := client.IPBlocksApi.IpblocksFindById(ctx, rs.Primary.ID).Execute()
 		logApiRequestTime(apiResponse)
 
@@ -149,8 +151,6 @@ func testAccCheckIPBlockAttributes(n string, location string) resource.TestCheck
 
 func testAccCheckIPBlockExists(n string, ipblock *ionoscloud.IpBlock) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(bundleclient.SdkBundle).CloudApiClient
-
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
 			return fmt.Errorf("testAccCheckIPBlockExists: Not found: %s", n)
@@ -163,6 +163,11 @@ func testAccCheckIPBlockExists(n string, ipblock *ionoscloud.IpBlock) resource.T
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 		if cancel != nil {
 			defer cancel()
+		}
+
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(rs.Primary.Attributes["location"])
+		if err != nil {
+			return err
 		}
 		foundIP, apiResponse, err := client.IPBlocksApi.IpblocksFindById(ctx, rs.Primary.ID).Execute()
 		logApiRequestTime(apiResponse)

@@ -34,6 +34,11 @@ func dataSourceGpu() *schema.Resource {
 				Required:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
+			"location": {
+				Type:        schema.TypeString,
+				Description: "The location of the resource. This field should be used only if you are also using a file configuration and should not be configured otherwise.",
+				Optional:    true,
+			},
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -58,7 +63,11 @@ func dataSourceGpu() *schema.Resource {
 
 //nolint:gocyclo
 func dataSourceGpuRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	datacenterID := d.Get("datacenter_id").(string)
 	serverID := d.Get("server_id").(string)
@@ -84,7 +93,6 @@ func dataSourceGpuRead(ctx context.Context, d *schema.ResourceData, meta interfa
 	}
 
 	var gpu ionoscloud.Gpu
-	var err error
 	var apiResponse *ionoscloud.APIResponse
 
 	if idOk {

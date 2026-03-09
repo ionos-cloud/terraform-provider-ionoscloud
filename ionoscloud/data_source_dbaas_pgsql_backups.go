@@ -21,6 +21,11 @@ func dataSourceDbaasPgSqlBackups() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"location": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The location of the resource. This field should be used only if you are also using a file configuration and should not be configured otherwise.",
+			},
 			"cluster_backups": {
 				Type:        schema.TypeList,
 				Description: "list of backups",
@@ -89,7 +94,10 @@ func dataSourceDbaasPgSqlBackups() *schema.Resource {
 }
 
 func dataSourceDbaasPgSqlReadBackups(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).PsqlClient
+	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	id, idOk := d.GetOk("cluster_id")
 	idStr := id.(string)

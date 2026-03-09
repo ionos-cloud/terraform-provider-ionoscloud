@@ -4,9 +4,8 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"strings"
 
-	bundleclient "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	cloudapiflowlog "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/flowlog"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
@@ -83,6 +82,12 @@ func resourceNetworkLoadBalancer() *schema.Resource {
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
+			"location": {
+				Type:        schema.TypeString,
+				Description: "The location of the resource. This field should be used only if you are also using a file configuration and should not be configured otherwise.",
+				Optional:    true,
+				ForceNew:    true,
+			},
 			"flowlog": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -100,7 +105,11 @@ and log the extent to which your instances are being accessed.`,
 }
 
 func resourceNetworkLoadBalancerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	networkLoadBalancer := ionoscloud.NetworkLoadBalancer{
 		Properties: &ionoscloud.NetworkLoadBalancerProperties{},
@@ -197,7 +206,11 @@ func resourceNetworkLoadBalancerCreate(ctx context.Context, d *schema.ResourceDa
 }
 
 func resourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	dcId := d.Get("datacenter_id").(string)
 
@@ -222,7 +235,11 @@ func resourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceData
 }
 
 func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	request := ionoscloud.NetworkLoadBalancer{
 		Properties: &ionoscloud.NetworkLoadBalancerProperties{},
 	}
@@ -337,7 +354,11 @@ func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceDa
 }
 
 func resourceNetworkLoadBalancerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	dcId := d.Get("datacenter_id").(string)
 
@@ -359,15 +380,27 @@ func resourceNetworkLoadBalancerDelete(ctx context.Context, d *schema.ResourceDa
 }
 
 func resourceNetworkLoadBalancerImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	importID := d.Id()
 
-	parts := strings.Split(d.Id(), "/")
-	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
-		return nil, diagutil.ToError(d, fmt.Errorf("invalid import. Expecting {datacenter}/{networkloadbalancer}"), nil)
+	location, parts := splitImportID(importID, "/")
+	if len(parts) != 2 {
+		return nil, fmt.Errorf(
+			"invalid import identifier: expected one of <location>:<datacenter>/<networkloadbalancer> or "+
+				"<datacenter>/<networkloadbalancer>, got: %s", importID,
+		)
+	}
+
+	if err := validateImportIDParts(parts); err != nil {
+		return nil, diagutil.ToError(d, fmt.Errorf("failed validating import identifier %q: %w", importID, err), nil)
 	}
 
 	dcId := parts[0]
 	networkLoadBalancerId := parts[1]
+
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return nil, err
+	}
 
 	networkLoadBalancer, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFindByNetworkLoadBalancerId(ctx, dcId, networkLoadBalancerId).Execute()
 	logApiRequestTime(apiResponse)
@@ -383,6 +416,9 @@ func resourceNetworkLoadBalancerImport(ctx context.Context, d *schema.ResourceDa
 
 	if err := d.Set("datacenter_id", dcId); err != nil {
 		return nil, diagutil.ToError(d, err, nil)
+	}
+	if err := d.Set("location", location); err != nil {
+		return nil, err
 	}
 
 	if err := setNetworkLoadBalancerData(d, &networkLoadBalancer); err != nil {

@@ -78,7 +78,10 @@ func dataSourceUser() *schema.Resource {
 }
 
 func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	idValue, idOk := d.GetOk("id")
 	emailValue, emailOk := d.GetOk("email")
@@ -99,7 +102,6 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interf
 		log.Printf("[INFO] email got from provider configuration since none was provided")
 	}
 	var user ionoscloud.User
-	var err error
 	var apiResponse *ionoscloud.APIResponse
 
 	if idOk {

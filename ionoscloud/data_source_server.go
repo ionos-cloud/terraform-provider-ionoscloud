@@ -30,6 +30,11 @@ func dataSourceServer() *schema.Resource {
 				Required:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
+			"location": {
+				Type:        schema.TypeString,
+				Description: "The location of the resource. This field should be used only if you are also using a file configuration and should not be configured otherwise.",
+				Optional:    true,
+			},
 			"id": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -485,7 +490,11 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 }
 
 func dataSourceServerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	datacenterId, dcIdOk := d.GetOk("datacenter_id")
 	if !dcIdOk {
@@ -502,7 +511,6 @@ func dataSourceServerRead(ctx context.Context, d *schema.ResourceData, meta inte
 		return diagutil.ToDiags(d, fmt.Errorf("please provide either the server id or name"), nil)
 	}
 	var server ionoscloud.Server
-	var err error
 	var apiResponse *ionoscloud.APIResponse
 
 	if idOk {

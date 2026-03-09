@@ -123,8 +123,6 @@ func dataSourceContainerRegistry() *schema.Resource {
 
 //nolint:gocyclo
 func dataSourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).ContainerClient
-
 	idValue, idOk := d.GetOk("id")
 	nameValue, nameOk := d.GetOk("name")
 	locationValue, locationOk := d.GetOk("location")
@@ -132,6 +130,11 @@ func dataSourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData
 	id := idValue.(string)
 	name := nameValue.(string)
 	location := locationValue.(string)
+
+	client, err := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	if idOk && (nameOk || locationOk) {
 		return diagutil.ToDiags(d, fmt.Errorf("id and name or location cannot be both specified in the same time"), nil)
@@ -142,7 +145,6 @@ func dataSourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData
 
 	var registry cr.RegistryResponse
 	var apiResponse *shared.APIResponse
-	var err error
 
 	if idOk {
 		/* search by ID */

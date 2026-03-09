@@ -3,12 +3,11 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	mongo "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
@@ -26,6 +25,12 @@ func resourceDbaasMongoUser() *schema.Resource {
 			StateContext: resourceDbaasMongoUserImporter,
 		},
 		Schema: map[string]*schema.Schema{
+			"location": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "The location of the resource. This field should be used only if you are also using a file configuration and should not be configured otherwise.",
+			},
 			"cluster_id": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -65,7 +70,10 @@ func resourceDbaasMongoUser() *schema.Resource {
 }
 
 func resourceDbaasMongoUserCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).MongoClient
+	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(d.Get("location").(string))
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	request := mongo.User{
 		Properties: &mongo.UserProperties{},
 	}
@@ -119,7 +127,10 @@ func resourceDbaasMongoUserCreate(ctx context.Context, d *schema.ResourceData, m
 }
 
 func resourceDbaasMongoUserUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).MongoClient
+	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(d.Get("location").(string))
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	request := mongo.PatchUserRequest{
 		Properties: mongo.NewPatchUserProperties(),
 	}
@@ -166,7 +177,10 @@ func resourceDbaasMongoUserUpdate(ctx context.Context, d *schema.ResourceData, m
 }
 
 func resourceDbaasMongoUserRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).MongoClient
+	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(d.Get("location").(string))
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	clusterId := d.Get("cluster_id").(string)
 	username := d.Get("username").(string)
@@ -189,7 +203,10 @@ func resourceDbaasMongoUserRead(ctx context.Context, d *schema.ResourceData, met
 }
 
 func resourceDbaasMongoUserDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).MongoClient
+	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(d.Get("location").(string))
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	clusterId := d.Get("cluster_id").(string)
 	username := d.Get("username").(string)
@@ -210,12 +227,21 @@ func resourceDbaasMongoUserDelete(ctx context.Context, d *schema.ResourceData, m
 }
 
 func resourceDbaasMongoUserImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(bundleclient.SdkBundle).MongoClient
-
-	parts := strings.Split(d.Id(), "/")
+	importID := d.Id()
+	location, parts := splitImportID(importID, "/")
 	if len(parts) != 2 {
-		return nil, diagutil.ToError(d, fmt.Errorf("invalid import format:, expecting the following format: {clusterID}/{username}"), nil)
+		return nil, diagutil.ToError(d, fmt.Errorf("invalid import identifier: expected one of <location>:<cluster-id>/<username> or <cluster-id>/<username>, got: %s", importID), nil)
 	}
+
+	if err := validateImportIDParts(parts); err != nil {
+		return nil, diagutil.ToError(d, fmt.Errorf("failed validating import identifier %q: %w", importID, err), nil)
+	}
+
+	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(location)
+	if err != nil {
+		return nil, err
+	}
+
 	clusterID := parts[0]
 	username := parts[1]
 
@@ -232,6 +258,9 @@ func resourceDbaasMongoUserImporter(ctx context.Context, d *schema.ResourceData,
 	}
 	if err := d.Set("cluster_id", clusterID); err != nil {
 		return nil, utils.GenerateSetError("MongoDB user", "cluster_id", err)
+	}
+	if err := d.Set("location", location); err != nil {
+		return nil, utils.GenerateSetError("MongoDB user", "location", err)
 	}
 	return []*schema.ResourceData{d}, nil
 }

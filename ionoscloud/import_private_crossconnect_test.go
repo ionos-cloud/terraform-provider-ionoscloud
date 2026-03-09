@@ -22,10 +22,11 @@ func TestAccPrivateCrossConnectImportBasic(t *testing.T) {
 				Config: testAccCheckPrivateCrossConnectConfigBasic,
 			},
 			{
-				ResourceName:      constant.PCCResource + "." + constant.PCCTestResource,
-				ImportStateIdFunc: testAccPCCImportStateID,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            constant.PCCResource + "." + constant.PCCTestResource,
+				ImportStateIdFunc:       testAccPCCImportStateID,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location"},
 			},
 		},
 	})

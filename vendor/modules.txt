@@ -50,6 +50,9 @@ github.com/aws/aws-sdk-go/private/protocol/rest
 # github.com/cenkalti/backoff/v4 v4.3.0
 ## explicit; go 1.18
 github.com/cenkalti/backoff/v4
+# github.com/cenkalti/backoff/v5 v5.0.3
+## explicit; go 1.23
+github.com/cenkalti/backoff/v5
 # github.com/cloudflare/circl v1.6.1
 ## explicit; go 1.22.0
 github.com/cloudflare/circl/dh/x25519
@@ -355,8 +358,8 @@ github.com/ionos-cloud/sdk-go-bundle/products/nfs/v2
 # github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2 v2.0.2
 ## explicit; go 1.24
 github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2
-# github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2 v2.0.0
-## explicit; go 1.22
+# github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2 v2.0.1
+## explicit; go 1.24
 github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2
 # github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2 v2.0.1
 ## explicit; go 1.22
@@ -364,10 +367,12 @@ github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2
 # github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.2
 ## explicit; go 1.22
 github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2
-# github.com/ionos-cloud/sdk-go-bundle/shared v0.1.6
+# github.com/ionos-cloud/sdk-go-bundle/shared v0.1.8
 ## explicit; go 1.24
 github.com/ionos-cloud/sdk-go-bundle/shared
+github.com/ionos-cloud/sdk-go-bundle/shared/failover
 github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration
+github.com/ionos-cloud/sdk-go-bundle/shared/retry
 # github.com/ionos-cloud/sdk-go/v6 v6.3.6
 ## explicit; go 1.24
 github.com/ionos-cloud/sdk-go/v6

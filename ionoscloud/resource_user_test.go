@@ -5,7 +5,11 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"os"
 	"regexp"
+	"sync/atomic"
 	"testing"
 
 	"github.com/hashicorp/go-version"
@@ -174,7 +178,10 @@ func TestUserWriteOnlyPassword(t *testing.T) {
 }
 
 func testAccCheckUserDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(bundleclient.SdkBundle).CloudApiClient
+	client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
+	if err != nil {
+		return err
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 	if cancel != nil {
@@ -202,7 +209,10 @@ func testAccCheckUserDestroyCheck(s *terraform.State) error {
 
 func testAccCheckUserExists(n string, user *ionoscloud.User) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(bundleclient.SdkBundle).CloudApiClient
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
+		if err != nil {
+			return err
+		}
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
@@ -237,7 +247,10 @@ func testAccCheckUserExists(n string, user *ionoscloud.User) resource.TestCheckF
 
 func testAccRemoveUserFromGroup(group, user string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(bundleclient.SdkBundle).CloudApiClient
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
+		if err != nil {
+			return err
+		}
 		gr, ok := s.RootModule().Resources[group]
 		if !ok {
 			return fmt.Errorf("testAccRemoveUserFromGroup: group not found: %s", group)
@@ -592,5 +605,234 @@ resource ` + constant.UserResource + ` ` + constant.UserTestResource + ` {
   administrator = true
   force_sec_auth= true
   active  = true
+}
+`
+
+// TestAccUserFailoverCreatesOnSecondEndpoint verifies that when the first configured endpoint
+// returns a retryable HTTP 503 error, the failover round-tripper retries the request against
+// the second endpoint (the real IONOS API) and the user is successfully created there.
+//
+// The test starts a local HTTP server that always returns 503, writes a temporary file config
+// that lists the mock server first and the real IONOS API second, and configures the provider
+// via IONOS_CONFIG_FILE to use that config with the roundRobin failover strategy.
+func TestAccUserFailoverCreatesOnSecondEndpoint(t *testing.T) {
+	if os.Getenv("IONOS_API_URL") != "" {
+		t.Skip("IONOS_API_URL is set; this test requires control over endpoint configuration")
+	}
+
+	// Count how many times the mock server is called so we can assert failover occurred.
+	var mockCallCount int32
+
+	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		atomic.AddInt32(&mockCallCount, 1)
+		w.WriteHeader(http.StatusServiceUnavailable)
+	}))
+	defer mockServer.Close()
+
+	// File config: mock server (returns 503) first, real IONOS API second.
+	//
+	// Both endpoints must include the full API base path (/cloudapi/v6) because:
+	//   - The ionoscloud SDK builds request URLs via simple concatenation:
+	//     localVarPath = localBasePath + "/um/users"
+	//   - The failover round-tripper rewrites only scheme+host, preserving the path.
+	// So the SDK builds "http://mock:PORT/cloudapi/v6/um/users"; failover rewrites
+	// scheme+host to produce "https://api.ionos.com/cloudapi/v6/um/users". ✓
+	//
+	// POST is added to retryableMethods so that user-create requests also participate in failover.
+	configContent := fmt.Sprintf(`version: 1.0
+environments:
+  - name: default
+    products:
+      - name: cloud
+        endpoints:
+          - name: %s/cloudapi/v6
+          - name: https://api.ionos.com/cloudapi/v6
+failover:
+  strategy: roundRobin
+  failoverOnStatusCodes:
+    - 503
+  retryableMethods:
+    - GET
+    - POST
+    - PUT
+    - DELETE
+    - HEAD
+    - OPTIONS
+  maxRetries: 1
+`, mockServer.URL)
+
+	tmpFile := createTempConfigFile(t, configContent)
+	defer os.Remove(tmpFile)
+
+	t.Setenv("IONOS_CONFIG_FILE", tmpFile)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		ExternalProviders:        randomProviderVersion343(),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckUserDestroyCheck,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckUserFailoverConfig,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(constant.UserResource+"."+constant.UserTestResource, "first_name", constant.UserTestResource),
+					resource.TestCheckResourceAttr(constant.UserResource+"."+constant.UserTestResource, "last_name", constant.UserTestResource),
+					resource.TestCheckResourceAttrSet(constant.UserResource+"."+constant.UserTestResource, "email"),
+					resource.TestCheckResourceAttr(constant.UserResource+"."+constant.UserTestResource, "administrator", "false"),
+					resource.TestCheckResourceAttr(constant.UserResource+"."+constant.UserTestResource, "active", "true"),
+					// Verify the mock server was hit, proving requests went through the failover path.
+					func(_ *terraform.State) error {
+						if atomic.LoadInt32(&mockCallCount) == 0 {
+							return fmt.Errorf("mock server was never called; failover round-tripper did not route through the first endpoint")
+						}
+						return nil
+					},
+				),
+			},
+		},
+	})
+}
+
+// TestAccUserFailoverNetworkError verifies failover when a network-level error occurs (e.g., connection refused).
+func TestAccUserFailoverNetworkError(t *testing.T) {
+	if os.Getenv("IONOS_API_URL") != "" {
+		t.Skip("IONOS_API_URL is set; this test requires control over endpoint configuration")
+	}
+
+	// Use an address that is likely to refuse connection
+	badAddr := "http://127.0.0.1:1"
+
+	configContent := fmt.Sprintf(`version: 1.0
+environments:
+  - name: default
+    products:
+      - name: cloud
+        endpoints:
+          - name: %s/cloudapi/v6
+          - name: https://api.ionos.com/cloudapi/v6
+failover:
+  strategy: roundRobin
+  retryableMethods:
+    - GET
+    - POST
+    - DELETE
+    - PUT
+  maxRetries: 1
+`, badAddr)
+
+	tmpFile := createTempConfigFile(t, configContent)
+	defer os.Remove(tmpFile)
+	t.Setenv("IONOS_CONFIG_FILE", tmpFile)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ExternalProviders:        randomProviderVersion343(),
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckUserDestroyCheck,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckUserFailoverConfig,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(constant.UserResource+"."+constant.UserTestResource, "active", "true"),
+				),
+			},
+			{
+				Config: testAccCheckUserFailoverDataSourceConfig,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.UserResource+"."+constant.UserDataSourceById, "first_name", constant.UserResource+"."+constant.UserTestResource, "first_name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.UserResource+"."+constant.UserDataSourceById, "last_name", constant.UserResource+"."+constant.UserTestResource, "last_name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.UserResource+"."+constant.UserDataSourceById, "email", constant.UserResource+"."+constant.UserTestResource, "email"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.UserResource+"."+constant.UserDataSourceById, "administrator", constant.UserResource+"."+constant.UserTestResource, "administrator"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.UserResource+"."+constant.UserDataSourceById, "active", constant.UserResource+"."+constant.UserTestResource, "active"),
+				),
+			},
+			{
+				Config: testAccCheckUserFailoverDataSourceConfigUpdate,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(constant.UserResource+"."+constant.UserTestResource, "first_name", constant.UpdatedResources),
+					resource.TestCheckResourceAttr(constant.UserResource+"."+constant.UserTestResource, "last_name", constant.UpdatedResources),
+					resource.TestCheckResourceAttr(constant.UserResource+"."+constant.UserTestResource, "administrator", "true"),
+					resource.TestCheckResourceAttr(constant.UserResource+"."+constant.UserTestResource, "active", "false"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.UserResource+"."+constant.UserDataSourceById, "first_name", constant.UserResource+"."+constant.UserTestResource, "first_name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.UserResource+"."+constant.UserDataSourceById, "last_name", constant.UserResource+"."+constant.UserTestResource, "last_name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.UserResource+"."+constant.UserDataSourceById, "email", constant.UserResource+"."+constant.UserTestResource, "email"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.UserResource+"."+constant.UserDataSourceById, "administrator", constant.UserResource+"."+constant.UserTestResource, "administrator"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.UserResource+"."+constant.UserDataSourceById, "active", constant.UserResource+"."+constant.UserTestResource, "active"),
+				),
+			},
+		},
+	})
+}
+
+// Helper functions and shared logic for failover tests
+
+func createTempConfigFile(t *testing.T, content string) string {
+	tmpFile, err := os.CreateTemp("", "ionos-failover-test-*.yaml")
+	if err != nil {
+		t.Fatalf("failed to create temp config file: %s", err)
+	}
+	if _, err := tmpFile.WriteString(content); err != nil {
+		t.Fatalf("failed to write config file: %s", err)
+	}
+	tmpFile.Close()
+	return tmpFile.Name()
+}
+
+func verifyMockCallCount(t *testing.T, count *int32) resource.TestCheckFunc {
+	return func(_ *terraform.State) error {
+		if atomic.LoadInt32(count) == 0 {
+			return fmt.Errorf("mock server was never called")
+		}
+		return nil
+	}
+}
+
+var testAccCheckUserFailoverConfig = `
+resource ` + constant.RandomPassword + ` "user_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
+resource ` + constant.UserResource + ` ` + constant.UserTestResource + ` {
+  first_name     = "` + constant.UserTestResource + `"
+  last_name      = "` + constant.UserTestResource + `"
+  email          = "` + utils.GenerateEmail() + `"
+  password       = ` + constant.RandomPassword + `.user_password.result
+  administrator  = false
+  force_sec_auth = false
+  active         = true
+}
+`
+
+var testAccCheckUserFailoverDataSourceConfig = testAccCheckUserFailoverConfig + `
+data ` + constant.UserResource + ` ` + constant.UserDataSourceById + ` {
+  id = ` + constant.UserResource + `.` + constant.UserTestResource + `.id
+}
+`
+
+var testAccCheckUserFailoverConfigUpdate = `
+resource ` + constant.RandomPassword + ` "user_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
+resource ` + constant.UserResource + ` ` + constant.UserTestResource + ` {
+  first_name     = "` + constant.UpdatedResources + `"
+  last_name      = "` + constant.UpdatedResources + `"
+  email          = "` + utils.GenerateEmail() + `"
+  password       = ` + constant.RandomPassword + `.user_password.result
+  administrator  = true
+  force_sec_auth = false
+  active         = false
+}
+`
+
+var testAccCheckUserFailoverDataSourceConfigUpdate = testAccCheckUserFailoverConfigUpdate + `
+data ` + constant.UserResource + ` ` + constant.UserDataSourceById + ` {
+  id = ` + constant.UserResource + `.` + constant.UserTestResource + `.id
 }
 `

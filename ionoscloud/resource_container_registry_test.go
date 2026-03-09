@@ -122,8 +122,6 @@ func TestAccContainerRegistryBasic(t *testing.T) {
 }
 
 func testAccCheckContainerRegistryDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(bundleclient.SdkBundle).ContainerClient
-
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
 	if cancel != nil {
@@ -133,6 +131,11 @@ func testAccCheckContainerRegistryDestroyCheck(s *terraform.State) error {
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != constant.ContainerRegistryResource {
 			continue
+		}
+
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewContainerRegistryClient(rs.Primary.Attributes["location"])
+		if err != nil {
+			return err
 		}
 
 		_, apiResponse, err := client.GetRegistry(ctx, rs.Primary.ID)
@@ -152,8 +155,6 @@ func testAccCheckContainerRegistryDestroyCheck(s *terraform.State) error {
 
 func testAccCheckContainerRegistryExists(n string, registry *cr.RegistryResponse) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(bundleclient.SdkBundle).ContainerClient
-
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
@@ -162,6 +163,11 @@ func testAccCheckContainerRegistryExists(n string, registry *cr.RegistryResponse
 
 		if rs.Primary.ID == "" {
 			return fmt.Errorf("no Record ID is set")
+		}
+
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewContainerRegistryClient(rs.Primary.Attributes["location"])
+		if err != nil {
+			return err
 		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)

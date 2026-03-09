@@ -26,10 +26,11 @@ func TestAccNicImportBasic(t *testing.T) {
 				Config: fmt.Sprintf(testAccCheckNicConfigBasic, volumeName),
 			},
 			{
-				ResourceName:      constant.FullNicResourceName,
-				ImportStateIdFunc: testAccNicImportStateId,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            constant.FullNicResourceName,
+				ImportStateIdFunc:       testAccNicImportStateId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location"},
 			},
 		},
 	})

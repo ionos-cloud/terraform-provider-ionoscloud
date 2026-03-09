@@ -25,10 +25,11 @@ func TestAccNetworkLoadBalancerImportBasic(t *testing.T) {
 			},
 
 			{
-				ResourceName:      networkLoadBalancerResource,
-				ImportStateIdFunc: testAccNetworkLoadBalancerImportStateId,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            networkLoadBalancerResource,
+				ImportStateIdFunc:       testAccNetworkLoadBalancerImportStateId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location"},
 			},
 		},
 	})

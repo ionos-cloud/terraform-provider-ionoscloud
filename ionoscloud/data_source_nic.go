@@ -34,6 +34,11 @@ func dataSourceNIC() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"location": {
+				Type:        schema.TypeString,
+				Description: "The location of the resource. This field should be used only if you are also using a file configuration and should not be configured otherwise.",
+				Optional:    true,
+			},
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -105,8 +110,6 @@ func dataSourceNIC() *schema.Resource {
 }
 
 func dataSourceNicRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
-
 	t, dIdOk := data.GetOk("datacenter_id")
 	st, sIdOk := data.GetOk("server_id")
 	if !dIdOk || !sIdOk {
@@ -114,12 +117,15 @@ func dataSourceNicRead(ctx context.Context, data *schema.ResourceData, meta inte
 	}
 	var datacenterId, serverId string
 
-	if dIdOk {
-		datacenterId = t.(string)
+	datacenterId = t.(string)
+	serverId = st.(string)
+
+	location := data.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
 	}
-	if sIdOk {
-		serverId = st.(string)
-	}
+
 	var name string
 	id, idOk := data.GetOk("id")
 

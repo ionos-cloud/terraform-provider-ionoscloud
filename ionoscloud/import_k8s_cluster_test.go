@@ -27,7 +27,7 @@ func TestAcck8sClusterImportBasic(t *testing.T) {
 				ImportStateIdFunc:       testAccK8sClusterImportStateId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"allow_replace"},
+				ImportStateVerifyIgnore: []string{"allow_replace", "location"},
 			},
 		},
 	})

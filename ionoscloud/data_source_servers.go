@@ -29,6 +29,11 @@ func dataSourceServers() *schema.Resource {
 				Required:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
+			"location": {
+				Type:        schema.TypeString,
+				Description: "The location of the resource. This field should be used only if you are also using a file configuration and should not be configured otherwise.",
+				Optional:    true,
+			},
 			"filter": dataSourceFiltersSchema(),
 			"servers": {
 				Type:        schema.TypeList,
@@ -245,7 +250,11 @@ func dataSourceFiltersSchema() *schema.Schema {
 }
 
 func dataSourceServersRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	datacenterId, dcIdOk := d.GetOk("datacenter_id")
 	if !dcIdOk {
@@ -263,7 +272,6 @@ func dataSourceServersRead(ctx context.Context, d *schema.ResourceData, meta int
 			log.Printf("[INFO] Adding filter with name %s and value %s \n", name, value)
 		}
 	}
-	var err error
 	var apiResponse *ionoscloud.APIResponse
 
 	/* search by whatever filter is set above */

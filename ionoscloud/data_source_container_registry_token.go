@@ -84,13 +84,22 @@ func dataSourceContainerRegistryToken() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"location": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The location of the resource. This field should be used only if you are also using a file configuration and should not be configured otherwise.",
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
 }
 
 func dataSourceContainerRegistryTokenRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).ContainerClient
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	registryId := d.Get("registry_id").(string)
 	idValue, idOk := d.GetOk("id")
@@ -108,7 +117,6 @@ func dataSourceContainerRegistryTokenRead(ctx context.Context, d *schema.Resourc
 
 	var token cr.TokenResponse
 	var apiResponse *shared.APIResponse
-	var err error
 
 	if idOk {
 		/* search by ID */

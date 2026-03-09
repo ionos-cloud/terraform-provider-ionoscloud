@@ -75,6 +75,11 @@ func dataSourceNSG() *schema.Resource {
 				Required:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
+			"location": {
+				Type:        schema.TypeString,
+				Description: "The location of the resource. This field should be used only if you are also using a file configuration and should not be configured otherwise.",
+				Optional:    true,
+			},
 			"id": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -105,8 +110,6 @@ func dataSourceNSG() *schema.Resource {
 }
 
 func dataSourceNSGRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
-
 	datacenterID := d.Get("datacenter_id").(string)
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")
@@ -116,6 +119,13 @@ func dataSourceNSGRead(ctx context.Context, d *schema.ResourceData, meta interfa
 	}
 	if !idOk && !nameOk {
 		return diagutil.ToDiags(d, fmt.Errorf("please provide either the network security group id or name"), nil)
+	}
+
+	location := d.Get("location").(string)
+
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
 	if idOk {

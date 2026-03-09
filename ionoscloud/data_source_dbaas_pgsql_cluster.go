@@ -108,6 +108,7 @@ func dataSourceDbaasPgSqlCluster() *schema.Resource {
 			"location": {
 				Type:        schema.TypeString,
 				Description: "The physical location where the cluster will be created. This will be where all of your instances live. Property cannot be modified after datacenter creation (disallowed in update requests)",
+				Optional:    true,
 				Computed:    true,
 			},
 			"backup_location": {
@@ -167,7 +168,10 @@ func dataSourceDbaasPgSqlCluster() *schema.Resource {
 }
 
 func dataSourceDbaasPgSqlReadCluster(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).PsqlClient
+	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("display_name")
@@ -181,7 +185,6 @@ func dataSourceDbaasPgSqlReadCluster(ctx context.Context, d *schema.ResourceData
 
 	var cluster dbaas.ClusterResponse
 	var apiResponse *shared.APIResponse
-	var err error
 
 	if idOk {
 		/* search by ID */

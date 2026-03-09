@@ -86,6 +86,12 @@ func resourceGPUServer() *schema.Resource {
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
+			"location": {
+				Type:        schema.TypeString,
+				Description: "The location of the resource. This field should be used only if you are also using a file configuration and should not be configured otherwise.",
+				Optional:    true,
+				ForceNew:    true,
+			},
 			"image_password": {
 				Type:      schema.TypeString,
 				Optional:  true,
@@ -252,7 +258,11 @@ func resourceGPUServer() *schema.Resource {
 
 //nolint:gocyclo
 func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).CloudApiClient
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	server := ionoscloud.Server{
 		Properties: &ionoscloud.ServerProperties{},
@@ -287,7 +297,6 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta i
 		return diagutil.ToDiags(d, fmt.Errorf("boot_volume argument can be set only in update requests"), nil)
 	}
 
-	var err error
 	var volume *ionoscloud.VolumeProperties
 	if _, ok := d.GetOk("volume"); ok {
 		volume, err = getVolumeData(d, "volume.0.", constant.GpuType)

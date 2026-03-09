@@ -97,13 +97,23 @@ func resourceContainerRegistryToken() *schema.Resource {
 				Description:      "Saves password to file. Only works on create. Takes as argument a file name, or a file path",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
+			"location": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "The location of the resource. This field should be used only if you are also using a file configuration and should not be configured otherwise.",
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
 }
 
 func resourceContainerRegistryTokenCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).ContainerClient
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	registryId := d.Get("registry_id").(string)
 	fileStr := d.Get("save_password_to_file").(string)
@@ -139,8 +149,11 @@ func resourceContainerRegistryTokenCreate(ctx context.Context, d *schema.Resourc
 }
 
 func resourceContainerRegistryTokenRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-
-	client := meta.(bundleclient.SdkBundle).ContainerClient
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	registryId := d.Get("registry_id").(string)
 	registryTokenId := d.Id()
@@ -164,7 +177,11 @@ func resourceContainerRegistryTokenRead(ctx context.Context, d *schema.ResourceD
 }
 
 func resourceContainerRegistryTokenUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).ContainerClient
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	registryId := d.Get("registry_id").(string)
 	registryTokenId := d.Id()
@@ -182,7 +199,11 @@ func resourceContainerRegistryTokenUpdate(ctx context.Context, d *schema.Resourc
 }
 
 func resourceContainerRegistryTokenDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).ContainerClient
+	location := d.Get("location").(string)
+	client, err := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	registryId := d.Get("registry_id").(string)
 	registryTokenId := d.Id()
@@ -201,10 +222,23 @@ func resourceContainerRegistryTokenDelete(ctx context.Context, d *schema.Resourc
 }
 
 func resourceContainerRegistryTokenImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client := meta.(bundleclient.SdkBundle).ContainerClient
+	importID := d.Id()
+	location, parts := splitImportID(importID, "/")
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("invalid import identifier: expected one of <location>:<registry-id>/<token-id> or <registry-id>/<token-id>, got: %s", importID)
+	}
 
-	registryId := d.Get("registry_id").(string)
-	registryTokenId := d.Id()
+	if err := validateImportIDParts(parts); err != nil {
+		return nil, fmt.Errorf("failed validating import identifier %q: %w", importID, err)
+	}
+
+	client, err := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(location)
+	if err != nil {
+		return nil, err
+	}
+
+	registryId := parts[0]
+	registryTokenId := parts[1]
 
 	registryToken, apiResponse, err := client.GetToken(ctx, registryId, registryTokenId)
 
@@ -220,6 +254,16 @@ func resourceContainerRegistryTokenImport(ctx context.Context, d *schema.Resourc
 
 	if registryToken.Id != nil {
 		d.SetId(*registryToken.Id)
+	}
+
+	err = d.Set("registry_id", registryId)
+	if err != nil {
+		return nil, err
+	}
+
+	err = d.Set("location", location)
+	if err != nil {
+		return nil, err
 	}
 
 	if err := crService.SetTokenData(d, registryToken.Properties); err != nil {

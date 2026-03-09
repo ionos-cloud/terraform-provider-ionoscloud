@@ -3,7 +3,6 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -47,13 +46,22 @@ func resourceDbaasPgSqlUser() *schema.Resource {
 				Description: "Describes whether this user is a system user or not. A system user cannot be updated or deleted.",
 				Computed:    true,
 			},
+			"location": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "The location of the resource. This field should be used only if you are also using a file configuration and should not be configured otherwise.",
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
 }
 
 func resourceDbaasPgSqlUserCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).PsqlClient
+	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	clusterId := d.Get("cluster_id").(string)
 	username := d.Get("username").(string)
@@ -80,7 +88,10 @@ func resourceDbaasPgSqlUserCreate(ctx context.Context, d *schema.ResourceData, m
 }
 
 func resourceDbaasPgSqlUserUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).PsqlClient
+	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	request := pgsql.UsersPatchRequest{
 		Properties: *pgsql.NewPatchUserProperties(),
@@ -109,7 +120,10 @@ func resourceDbaasPgSqlUserUpdate(ctx context.Context, d *schema.ResourceData, m
 }
 
 func resourceDbaasPgSqlUserRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).PsqlClient
+	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	clusterId := d.Get("cluster_id").(string)
 	username := d.Get("username").(string)
 
@@ -130,7 +144,10 @@ func resourceDbaasPgSqlUserRead(ctx context.Context, d *schema.ResourceData, met
 }
 
 func resourceDbaaSPgSqlUserDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(bundleclient.SdkBundle).PsqlClient
+	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	clusterId := d.Get("cluster_id").(string)
 	username := d.Get("username").(string)
@@ -146,13 +163,24 @@ func resourceDbaaSPgSqlUserDelete(ctx context.Context, d *schema.ResourceData, m
 }
 
 func resourceDbaasPgSqlUserImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(d.Id(), "/")
+	importID := d.Id()
+	location, parts := splitImportID(importID, "/")
 	if len(parts) != 2 {
-		return nil, diagutil.ToError(d, fmt.Errorf("invalid import format:, expecting the following format: {clusterID}/{username}"), nil)
+		return nil, diagutil.ToError(d, fmt.Errorf("invalid import identifier: expected one of <location>:<cluster-id>/<username> or <cluster-id>/<username>, got: %s", importID), nil)
 	}
+
+	if err := validateImportIDParts(parts); err != nil {
+		return nil, diagutil.ToError(d, fmt.Errorf("failed validating import identifier %q: %w", importID, err), nil)
+	}
+
+	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(location)
+	if err != nil {
+		return nil, err
+	}
+
 	clusterId := parts[0]
 	username := parts[1]
-	client := meta.(bundleclient.SdkBundle).PsqlClient
+
 	user, apiResponse, err := client.FindUserByUsername(ctx, clusterId, username)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
@@ -166,6 +194,9 @@ func resourceDbaasPgSqlUserImporter(ctx context.Context, d *schema.ResourceData,
 	}
 	if err := d.Set("cluster_id", clusterId); err != nil {
 		return nil, utils.GenerateSetError("PgSQL user", "cluster_id", err)
+	}
+	if err := d.Set("location", location); err != nil {
+		return nil, utils.GenerateSetError("PgSQL user", "location", err)
 	}
 	return []*schema.ResourceData{d}, nil
 }

@@ -144,8 +144,6 @@ func TestAccFirewallUDP(t *testing.T) {
 }
 
 func testAccCheckFirewallDestroyCheck(s *terraform.State) error {
-	client := testAccProvider.Meta().(bundleclient.SdkBundle).CloudApiClient
-
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
 	if cancel != nil {
@@ -155,6 +153,12 @@ func testAccCheckFirewallDestroyCheck(s *terraform.State) error {
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != constant.FirewallResource {
 			continue
+		}
+
+		location := rs.Primary.Attributes["location"]
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
+		if err != nil {
+			return err
 		}
 
 		_, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, rs.Primary.Attributes["datacenter_id"],
@@ -175,8 +179,6 @@ func testAccCheckFirewallDestroyCheck(s *terraform.State) error {
 
 func testAccCheckFirewallExists(n string, firewall *ionoscloud.FirewallRule) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(bundleclient.SdkBundle).CloudApiClient
-
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
@@ -191,6 +193,12 @@ func testAccCheckFirewallExists(n string, firewall *ionoscloud.FirewallRule) res
 
 		if cancel != nil {
 			defer cancel()
+		}
+
+		location := rs.Primary.Attributes["location"]
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
+		if err != nil {
+			return err
 		}
 
 		foundServer, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, rs.Primary.Attributes["datacenter_id"],

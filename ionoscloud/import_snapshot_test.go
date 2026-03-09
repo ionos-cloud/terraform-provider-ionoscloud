@@ -28,7 +28,7 @@ func TestAccSnapshotImportBasic(t *testing.T) {
 				ImportStateIdFunc:       testAccSnapshotImportStateId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"datacenter_id", "volume_id"},
+				ImportStateVerifyIgnore: []string{"datacenter_id", "volume_id", "location"},
 			},
 		},
 	})
