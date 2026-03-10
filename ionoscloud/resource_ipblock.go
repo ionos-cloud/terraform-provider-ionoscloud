@@ -128,7 +128,8 @@ func resourceIPBlockCreate(ctx context.Context, d *schema.ResourceData, meta int
 		if bundleclient.IsRequestFailed(errState) {
 			d.SetId("")
 		}
-		return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutCreate})
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutCreate, RequestLocation: requestLocation})
 	}
 
 	return resourceIPBlockRead(ctx, d, meta)
@@ -205,7 +206,8 @@ func resourceIPBlockDelete(ctx context.Context, d *schema.ResourceData, meta int
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete})
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete, RequestLocation: requestLocation})
 	}
 
 	d.SetId("")

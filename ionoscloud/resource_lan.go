@@ -148,7 +148,8 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 				d.SetId("")
 			}
 		}
-		return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutCreate})
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutCreate, RequestLocation: requestLocation})
 	}
 
 	for {
@@ -258,7 +259,8 @@ func resourceLanUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutUpdate})
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutUpdate, RequestLocation: requestLocation})
 	}
 
 	return resourceLanRead(ctx, d, meta)

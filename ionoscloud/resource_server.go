@@ -596,7 +596,8 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 			log.Printf("[DEBUG] failed to create server resource")
 			d.SetId("")
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error waiting for state change for server creation %w", errState), &diagutil.DiagsOpts{Timeout: schema.TimeoutCreate})
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, fmt.Errorf("error waiting for state change for server creation %w", errState), &diagutil.DiagsOpts{Timeout: schema.TimeoutCreate, RequestLocation: requestLocation})
 	}
 	if v, ok := d.GetOk("security_groups_ids"); ok {
 		raw := v.(*schema.Set).List()
@@ -876,7 +877,8 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutUpdate})
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutUpdate, RequestLocation: requestLocation})
 	}
 
 	if d.HasChange("security_groups_ids") {
@@ -936,7 +938,8 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 				}
 
 				if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-					return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutUpdate})
+					requestLocation, _ := apiResponse.Location()
+					return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutUpdate, RequestLocation: requestLocation})
 				}
 			}
 		}
@@ -1145,7 +1148,8 @@ func deleteInlineVolumes(ctx context.Context, d *schema.ResourceData, meta inter
 		}
 
 		if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-			return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete})
+			requestLocation, _ := apiResponse.Location()
+			return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete, RequestLocation: requestLocation})
 		}
 
 	}
@@ -1184,7 +1188,8 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error getting state change for datacenter delete %w", errState), &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete})
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, fmt.Errorf("error getting state change for datacenter delete %w", errState), &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete, RequestLocation: requestLocation})
 	}
 
 	d.SetId("")

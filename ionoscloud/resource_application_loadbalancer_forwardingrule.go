@@ -257,7 +257,8 @@ func resourceApplicationLoadBalancerForwardingRuleCreate(ctx context.Context, d 
 		if bundleclient.IsRequestFailed(errState) {
 			d.SetId("")
 		}
-		return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutCreate})
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutCreate, RequestLocation: requestLocation})
 	}
 
 	return resourceApplicationLoadBalancerForwardingRuleRead(ctx, d, meta)
@@ -367,7 +368,8 @@ func resourceApplicationLoadBalancerForwardingRuleUpdate(ctx context.Context, d 
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutUpdate})
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutUpdate, RequestLocation: requestLocation})
 	}
 
 	return resourceApplicationLoadBalancerForwardingRuleRead(ctx, d, meta)
@@ -392,7 +394,8 @@ func resourceApplicationLoadBalancerForwardingRuleDelete(ctx context.Context, d 
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete})
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete, RequestLocation: requestLocation})
 	}
 
 	d.SetId("")

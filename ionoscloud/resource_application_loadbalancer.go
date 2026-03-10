@@ -180,7 +180,8 @@ func resourceApplicationLoadBalancerCreate(ctx context.Context, d *schema.Resour
 		if bundleclient.IsRequestFailed(errState) {
 			d.SetId("")
 		}
-		return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutCreate})
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutCreate, RequestLocation: requestLocation})
 	}
 
 	if flowLogs, ok := d.GetOk("flowlog"); ok {
@@ -352,7 +353,8 @@ func resourceApplicationLoadBalancerUpdate(ctx context.Context, d *schema.Resour
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutUpdate})
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutUpdate, RequestLocation: requestLocation})
 	}
 
 	return resourceApplicationLoadBalancerRead(ctx, d, meta)
@@ -376,7 +378,8 @@ func resourceApplicationLoadBalancerDelete(ctx context.Context, d *schema.Resour
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete})
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete, RequestLocation: requestLocation})
 	}
 
 	d.SetId("")

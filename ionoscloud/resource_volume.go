@@ -288,7 +288,8 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		if bundleclient.IsRequestFailed(errState) {
 			d.SetId("")
 		}
-		return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutCreate})
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutCreate, RequestLocation: requestLocation})
 	}
 
 	volumeToAttach := ionoscloud.Volume{Id: volume.Id}
@@ -309,10 +310,11 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
 		if bundleclient.IsRequestFailed(errState) {
 			if sErr := d.Set("server_id", ""); sErr != nil {
-				return diagutil.ToDiags(d, fmt.Errorf("error while setting serverId: %w", sErr), &diagutil.DiagsOpts{Timeout: schema.TimeoutCreate})
+				return diagutil.ToDiags(d, fmt.Errorf("error while setting serverId: %w", sErr), nil)
 			}
 		}
-		return diagutil.ToDiags(d, errState, nil)
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{RequestLocation: requestLocation})
 	}
 
 	return resourceVolumeRead(ctx, d, meta)
@@ -406,7 +408,8 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 
 	// Wait, catching any errors
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutUpdate})
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutUpdate, RequestLocation: requestLocation})
 	}
 
 	if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode > 299 {
@@ -427,7 +430,8 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 
 		if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
-			return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutCreate})
+			requestLocation, _ := apiResponse.Location()
+			return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutCreate, RequestLocation: requestLocation})
 		}
 	}
 
@@ -452,7 +456,8 @@ func resourceVolumeDelete(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete})
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete, RequestLocation: requestLocation})
 	}
 
 	d.SetId("")

@@ -131,8 +131,9 @@ func resourceFirewallCreate(ctx context.Context, d *schema.ResourceData, meta in
 			log.Printf("[DEBUG] firewall resource failed to be created")
 			d.SetId("")
 		}
+		requestLocation, _ := apiResponse.Location()
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating a firewall rule dcId: %s server_id: %s  "+
-			"nic_id: %s %s", d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string), errState), &diagutil.DiagsOpts{Timeout: schema.TimeoutCreate})
+			"nic_id: %s %s", d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string), errState), &diagutil.DiagsOpts{Timeout: schema.TimeoutCreate, RequestLocation: requestLocation})
 	}
 
 	return resourceFirewallRead(ctx, d, meta)
@@ -186,7 +187,8 @@ func resourceFirewallUpdate(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error getting state change for firewall patch %w", errState), &diagutil.DiagsOpts{Timeout: schema.TimeoutUpdate})
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, fmt.Errorf("error getting state change for firewall patch %w", errState), &diagutil.DiagsOpts{Timeout: schema.TimeoutUpdate, RequestLocation: requestLocation})
 	}
 
 	return resourceFirewallRead(ctx, d, meta)
@@ -211,7 +213,8 @@ func resourceFirewallDelete(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error getting state change for firewall delete %w", errState), &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete})
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, fmt.Errorf("error getting state change for firewall delete %w", errState), &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete, RequestLocation: requestLocation})
 	}
 
 	d.SetId("")

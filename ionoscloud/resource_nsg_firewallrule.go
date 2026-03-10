@@ -117,7 +117,8 @@ func resourceNSGFirewallCreate(ctx context.Context, d *schema.ResourceData, meta
 	// Wait, catching any errors
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
 		d.SetId("")
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating a nsg firewall rule dcId: %s nsg_id: %s %w", d.Get("datacenter_id").(string), d.Get("nsg_id").(string), errState), &diagutil.DiagsOpts{Timeout: schema.TimeoutCreate})
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating a nsg firewall rule dcId: %s nsg_id: %s %w", d.Get("datacenter_id").(string), d.Get("nsg_id").(string), errState), &diagutil.DiagsOpts{Timeout: schema.TimeoutCreate, RequestLocation: requestLocation})
 	}
 
 	return resourceNSGFirewallRead(ctx, d, meta)
@@ -174,7 +175,8 @@ func resourceNSGFirewallUpdate(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error getting state change for nsg firewall patch %w", errState), &diagutil.DiagsOpts{Timeout: schema.TimeoutUpdate})
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, fmt.Errorf("error getting state change for nsg firewall patch %w", errState), &diagutil.DiagsOpts{Timeout: schema.TimeoutUpdate, RequestLocation: requestLocation})
 	}
 
 	return resourceNSGFirewallRead(ctx, d, meta)
@@ -202,7 +204,8 @@ func resourceNSGFirewallDelete(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error getting state change for firewall delete %w", errState), &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete})
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, fmt.Errorf("error getting state change for firewall delete %w", errState), &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete, RequestLocation: requestLocation})
 	}
 
 	d.SetId("")

@@ -449,7 +449,8 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 			log.Printf("[DEBUG] failed to create createdServer resource")
 			d.SetId("")
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error waiting for state change for server creation %w", errState), &diagutil.DiagsOpts{Timeout: schema.TimeoutCreate})
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, fmt.Errorf("error waiting for state change for server creation %w", errState), &diagutil.DiagsOpts{Timeout: schema.TimeoutCreate, RequestLocation: requestLocation})
 	}
 
 	// get additional data for schema
@@ -760,7 +761,8 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutUpdate})
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutUpdate, RequestLocation: requestLocation})
 	}
 
 	if d.HasChange("security_groups_ids") {
@@ -819,7 +821,8 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 				}
 
 				if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-					return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutUpdate})
+					requestLocation, _ := apiResponse.Location()
+					return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutUpdate, RequestLocation: requestLocation})
 				}
 			}
 		}
@@ -923,7 +926,8 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 			}
 
 			if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
-				return diagutil.ToDiags(d, fmt.Errorf("on cube update an error occurred while waiting for state change dcId: %s server_id: %s nic_id %s ID: %s Response: %w", dcId, *server.Id, *nic.Id, firewallId, errState), &diagutil.DiagsOpts{Timeout: schema.TimeoutCreate})
+				requestLocation, _ := apiResponse.Location()
+				return diagutil.ToDiags(d, fmt.Errorf("on cube update an error occurred while waiting for state change dcId: %s server_id: %s nic_id %s ID: %s Response: %w", dcId, *server.Id, *nic.Id, firewallId, errState), &diagutil.DiagsOpts{Timeout: schema.TimeoutCreate, RequestLocation: requestLocation})
 			}
 
 			if firewallId == "" && firewall.Id != nil {

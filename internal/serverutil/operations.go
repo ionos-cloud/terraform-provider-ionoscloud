@@ -62,7 +62,8 @@ func ResourceCommonServerDelete(ctx context.Context, d *schema.ResourceData, met
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error getting state change for server delete %w", errState), &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete})
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, fmt.Errorf("error getting state change for server delete %w", errState), &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete, RequestLocation: requestLocation})
 	}
 
 	d.SetId("")

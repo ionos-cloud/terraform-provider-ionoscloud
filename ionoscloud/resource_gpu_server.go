@@ -399,7 +399,8 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta i
 			log.Printf("[DEBUG] failed to create createdServer resource")
 			d.SetId("")
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error waiting for state change for server creation %w", errState), &diagutil.DiagsOpts{Timeout: schema.TimeoutCreate})
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, fmt.Errorf("error waiting for state change for server creation %w", errState), &diagutil.DiagsOpts{Timeout: schema.TimeoutCreate, RequestLocation: requestLocation})
 	}
 
 	// get additional data for schema
