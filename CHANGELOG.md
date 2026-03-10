@@ -1,3 +1,10 @@
+## 6.7.28
+### Fixes
+- Fix possible type assertion panic in `location` and `template` data sources.
+
+### Dependencies
+- Bump google.golang.org/grpc from 1.72.1 to 1.79.3 to mitigate vulnerability.
+
 ## 6.7.27
 ### Features
 - Add `nic_multi_queue` attribute to the `ionoscloud_servers` data source.
