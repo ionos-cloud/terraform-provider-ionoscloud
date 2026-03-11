@@ -104,7 +104,7 @@ func resourceNatGatewayCreate(ctx context.Context, d *schema.ResourceData, meta 
 			}
 			natGateway.Properties.PublicIps = &publicIps
 		} else {
-			return diagutil.ToDiags(d, fmt.Errorf("you must provide public_ips for nat gateway resource \n"), nil)
+			return diagutil.ToDiags(d, fmt.Errorf("you must provide public_ips for nat gateway resource"), nil)
 		}
 	}
 
@@ -144,7 +144,7 @@ func resourceNatGatewayCreate(ctx context.Context, d *schema.ResourceData, meta 
 				log.Printf("[INFO] NatGateway LANs set to %+v", lans)
 				natGateway.Properties.Lans = &lans
 			} else {
-				return diagutil.ToDiags(d, fmt.Errorf("you must provide lans for the nat gateway resource \n"), nil)
+				return diagutil.ToDiags(d, fmt.Errorf("you must provide lans for the nat gateway resource"), nil)
 			}
 		}
 	}
