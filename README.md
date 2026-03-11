@@ -19,15 +19,36 @@ The IonosCloud provider gives the ability to deploy and configure resources usin
 
 ---
 
+## Table of Contents
+
+- [Requirements](#requirements)
+- [Using the Provider](#using-the-provider)
+- [Environment Variables](#environment-variables)
+- [Certificate Pinning](#certificate-pinning)
+- [Debugging](#debugging)
+- [Building the Provider](#building-the-provider)
+- [Developing the Provider](#developing-the-provider)
+- [Testing the Provider](#testing-the-provider)
+- [Migrating from the ProfitBricks Provider](#migrating-from-the-profitbricks-provider)
+- [Frequently Asked Questions](#frequently-asked-questions)
+
+---
+
 ## Requirements
 
-- [Terraform](https://www.terraform.io/downloads.html) 0.12.x+
+- [Terraform](https://www.terraform.io/downloads.html) 1.x+
 
-**NOTE:** In order to use a specific version of this provider, please include the following block at the beginning of your terraform config files [details](https://www.terraform.io/docs/configuration/terraform.html#specifying-a-required-terraform-version):
+**NOTE:** In order to use a specific version of this provider, please include the following block at the beginning of your terraform config files:
 
 ```terraform
-provider "ionoscloud" {
-  version = ">= 6.4.10"
+terraform {
+  required_providers {
+    ionoscloud = {
+      source  = "ionos-cloud/ionoscloud"
+      version = ">= 6.4.10"
+    }
+  }
+  required_version = ">= 1.0"
 }
 ```
 
@@ -146,9 +167,12 @@ See the [IonosCloud Provider documentation](https://registry.terraform.io/provid
 | `IONOS_S3_ACCESS_KEY`   | Specify the access key used to authenticate against the IONOS Object Storage API                                                                                         |
 | `IONOS_S3_SECRET_KEY`   | Specify the secret key used to authenticate against the IONOS Object Storage API                                                                                         |
 | `IONOS_S3_REGION`       | Region for IONOS Object Storage operations. Default value: eu-central-3. **If you use IONOS_API_URL_OBJECT_STORAGE, `IONOS_S3_REGION` is mandatory**                     |
+| `IONOS_API_URL_OBJECT_STORAGE` | Specify a custom API URL for IONOS Object Storage. If set, `IONOS_S3_REGION` becomes mandatory                                                                 |
+| `IONOS_CONFIG_FILE`     | Specify the path to the YAML configuration file. Defaults to `~/.ionos/config.yaml`                                                                                     |
+| `IONOS_CURRENT_PROFILE` | Override the `currentProfile` field from the YAML configuration file                                                                                                    |
 
 
-## Certificate pinning:
+## Certificate Pinning
 
 You can enable certificate pinning if you want to bypass the normal certificate checking procedure, by doing the following:
 
@@ -169,17 +193,16 @@ Verbose request and response logging can also significantly impact your applicat
 $ export IONOS_LOG_LEVEL=debug
 ```
 
-⚠️ **Note:** `IONOS_DEBUG` is now deprecated and will be removed in a future release.
+<details><summary>Using the deprecated <code>IONOS_DEBUG</code> variable (click to expand)</summary>
 
-⚠️ **Note:** We recommend you only use `IONOS_DEBUG` for debugging purposes. Disable it in your production environments because it can log sensitive data. It logs the full request and response without encryption, even for an HTTPS call.
-Verbose request and response logging can also significantly impact your application’s performance.
+> ⚠️ **Deprecated:** `IONOS_DEBUG` is deprecated and will be removed in a future release. Use `IONOS_LOG_LEVEL` instead.
 
 ```bash
 $ export TF_LOG=debug
 $ export IONOS_DEBUG=true
 $ terraform apply
 ```
-now you can see the response body incl. api error message:
+You can see the response body including the API error message:
 ```json
 {
   "httpStatus" : 422,
@@ -190,44 +213,46 @@ now you can see the response body incl. api error message:
 }
 ```
 
-## Building The Provider
+</details>
 
-  **NOTE:**: Building the provider is only necessary if you want to contribute to the provider. It is not a prerequisite for using it.
+## Building the Provider
 
-  ### Requirements:
+**NOTE:** Building the provider is only necessary if you want to contribute to the provider. It is not a prerequisite for using it.
 
-    - [Go](https://golang.org/doc/install) 1.20 (to build the provider plugin)
+### Requirements
 
-  Clone repository to: `$GOPATH/src/github.com/ionos-cloud/terraform-provider-ionoscloud`
+- [Go](https://golang.org/doc/install) 1.26 (to build the provider plugin)
 
-  ```sh
-  $ mkdir -p $GOPATH/src/github.com/ionos-cloud; cd $GOPATH/src/github.com/ionos-cloud
-  $ git clone https://github.com/ionos-cloud/terraform-provider-ionoscloud.git
-  ```
+Clone repository to: `$GOPATH/src/github.com/ionos-cloud/terraform-provider-ionoscloud`
 
-  Enter the provider directory and build the provider
+```sh
+$ mkdir -p $GOPATH/src/github.com/ionos-cloud; cd $GOPATH/src/github.com/ionos-cloud
+$ git clone https://github.com/ionos-cloud/terraform-provider-ionoscloud.git
+```
 
-  ```sh
-  $ cd $GOPATH/src/github.com/ionos-cloud/terraform-provider-ionoscloud
-  $ make build
-  ```
+Enter the provider directory and build the provider
 
-  ## Developing the Provider
+```sh
+$ cd $GOPATH/src/github.com/ionos-cloud/terraform-provider-ionoscloud
+$ make build
+```
 
-  If you wish to work on the provider, you'll first need [Go](http://www.golang.org) installed on your machine (version 1.18+ is _required_). You'll also need to correctly set up a [GOPATH](http://golang.org/doc/code.html#GOPATH), as well as adding `$GOPATH/bin` to your `$PATH`.
+## Developing the Provider
 
-  To compile the provider, run `make build`. This will build the provider and put the provider binary in the `$GOPATH/bin` directory.
+If you wish to work on the provider, you'll first need [Go](http://www.golang.org) installed on your machine (version 1.26+ is _required_). You'll also need to correctly set up a [GOPATH](http://golang.org/doc/code.html#GOPATH), as well as adding `$GOPATH/bin` to your `$PATH`.
 
-  ```sh
-  $ make build
-  ...
-  $ $GOPATH/bin/terraform-provider-ionoscloud
-  ...
-  ```
+To compile the provider, run `make build`. This will build the provider and put the provider binary in the `$GOPATH/bin` directory.
 
-  ## Testing the Provider
+```sh
+$ make build
+...
+$ $GOPATH/bin/terraform-provider-ionoscloud
+...
+```
 
-  ### What Are We Testing?
+## Testing the Provider
+
+### What Are We Testing?
 
   The purpose of our acceptance tests is to **provision** resources containing all the available arguments, followed by **updates** on all arguments that allow this action. Beside the provisioning part, **data-sources** with all possible arguments and **imports** are also tested.
 
@@ -260,32 +285,42 @@ now you can see the response body incl. api error message:
 
   <details> <summary title="Click to toggle">See more details about <b>test tags</b></summary>
 
-    **Build tags** are named as follows:
+  **Build tags** are named as follows:
 
-    - `compute` - all **compute engine** tests (datacenter, firewall rule, image, IP block, IP failover, lan, location, nic, cross connect, server, snapshot, template, volume)
-    - `nlb` - **network load balancer** and **network load balancer forwarding rule** tests
-    - `natgateway` - **NAT gateway** and **NAT gateway rule** tests
-    - `k8s` - **k8s cluster** and **k8s node pool** tests
-    - `dbaas` - **DBaaS postgres cluster** tests
-    - `alb` - **Application Load Balancer** tests
+  - `compute` - all **compute engine** tests (datacenter, firewall rule, image, IP block, IP failover, lan, location, nic, cross connect, server, snapshot, template, volume)
+  - `nlb` - **network load balancer** and **network load balancer forwarding rule** tests
+  - `natgateway` - **NAT gateway** and **NAT gateway rule** tests
+  - `k8s` - **k8s cluster** and **k8s node pool** tests
+  - `dbaas` - **DBaaS Postgres cluster** tests
+  - `dbaas_mariadb` - **DBaaS MariaDB cluster** tests
+  - `inmemorydb` - **In-Memory DB** tests
+  - `alb` - **Application Load Balancer** tests
+  - `dns` - **DNS zone** and **DNS record** tests
+  - `nfs` - **Network File Storage** cluster and share tests
+  - `cdn` - **CDN distribution** tests
+  - `kafka` - **Kafka cluster** and topic tests
+  - `monitoring` - **Monitoring pipeline** tests
+  - `containerregistry` - **Container Registry** tests
+  - `vpn` - **VPN gateway** and tunnel tests (IPSec and WireGuard)
+  - `autoscaling` - **VM Autoscaling** group tests
 
-    ``` sh
-    $ make testacc TAGS=dbaas
-    ```
+  ``` sh
+  $ make testacc TAGS=dbaas
+  ```
 
-    You can also test one single resource, using one of the tags: `backup`, `datacenter`, `dbaas`, `firewall`, `group`, `image`, `ipblock`, `ipfailover`, `k8s`, `lan`, `location`, `natgateway`,
-    `nlb`, `nic`, `pcc`, `resource`, `s3key`, `server`, `share`, `snapshot`, `template`, `user`, `volume`
+  You can also test one single resource, using one of the tags: `backup`, `datacenter`, `dbaas`, `dbaas_mariadb`, `dns`, `firewall`, `group`, `image`, `inmemorydb`, `ipblock`, `ipfailover`,
+  `k8s`, `kafka`, `lan`, `location`, `natgateway`, `nlb`, `nic`, `nfs`, `pcc`, `resource`, `s3key`, `server`, `share`, `snapshot`, `template`, `user`, `volume`, `vpn`
 
   </details>
 
-  ## Migrating from the ProfitBricks provider
+## Migrating from the ProfitBricks Provider
 
-  Please see the [Documentation](docs/index.md#migrating-from-the-profitbricks-provider) on how to migrate from the ProfitBricks provider.
+Please see the [Documentation](docs/index.md#migrating-from-the-profitbricks-provider) on how to migrate from the ProfitBricks provider.
 
-  ## Frequently Asked Questions
+## Frequently Asked Questions
 
-  ### How can I find out the IP for the added NIC on a K8s nodepool?
-  Please check out this [module](https://github.com/ionos-cloud/terraform-ionoscloud-kube-lan-ip).
-  
-  ### For more complex examples on how to use the provider
-  Please check out the [examples](examples/) directory.
+### How can I find out the IP for the added NIC on a K8s nodepool?
+Please check out this [module](https://github.com/ionos-cloud/terraform-ionoscloud-kube-lan-ip).
+
+### For more complex examples on how to use the provider
+Please check out the [examples](examples/) directory.
