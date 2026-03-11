@@ -2,13 +2,13 @@ package kafka
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	kafkaSDK "github.com/ionos-cloud/sdk-go-bundle/products/kafka/v2"
 
 	kafkaService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/kafka"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 type userCredentialsModel struct {
@@ -41,13 +41,13 @@ func getUserCredentials(ctx context.Context, client kafkaService.Client, data us
 	if userID != "" {
 		userCredentials, _, err = client.GetUserCredentialsByID(ctx, clusterID, userID, location)
 		if err != nil {
-			diags.AddError("API Error Reading Kafka User Credentials", fmt.Sprintf("Failed to retrieve user credentials for user with ID: %s, cluster ID: %s, error: %s", userID, clusterID, err))
+			diags.AddError("API Error Reading Kafka User Credentials", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceID: userID}).Error())
 			return userCredentials, diags
 		}
 	} else if username != "" {
 		userCredentials, _, err = client.GetUserCredentialsByName(ctx, clusterID, username, location)
 		if err != nil {
-			diags.AddError("API Error Reading Kafka User Credentials", fmt.Sprintf("Failed to retrieve user credentials for user with name: %s, cluster ID: %s, error: %s", username, clusterID, err))
+			diags.AddError("API Error Reading Kafka User Credentials", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: username}).Error())
 			return userCredentials, diags
 		}
 	}

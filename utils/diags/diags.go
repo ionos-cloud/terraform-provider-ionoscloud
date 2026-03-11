@@ -20,6 +20,63 @@ type DiagsOpts struct {
 	StatusCode         int // HTTP status code from API response; 0 means not available
 }
 
+// ErrorContext holds plain-string context for error enrichment.
+// Used directly by framework code, and populated from *schema.ResourceData by SDKv2 code.
+type ErrorContext struct {
+	ResourceID      string
+	ResourceName    string
+	Timeout         string
+	StatusCode      int    // 0 = not available
+	RequestLocation string // raw Location header/URL string for request ID extraction
+}
+
+// buildContextString constructs context info from plain values (no SDKv2 dependency).
+func buildContextString(ctx *ErrorContext) string {
+	if ctx == nil {
+		return ""
+	}
+
+	var sb strings.Builder
+
+	if ctx.StatusCode >= 500 {
+		sb.WriteString("\nThis is an API Error. Please contact API support.")
+	}
+
+	if ctx.ResourceID != "" {
+		fmt.Fprintf(&sb, "\nResource ID: %s", ctx.ResourceID)
+	}
+
+	if ctx.ResourceName != "" {
+		fmt.Fprintf(&sb, "\nResource Name: %s", ctx.ResourceName)
+	}
+
+	if ctx.Timeout != "" {
+		fmt.Fprintf(&sb, "\nConfigured timeout: %s", ctx.Timeout)
+	}
+
+	if ctx.RequestLocation != "" {
+		reqID := extractRequestId(ctx.RequestLocation)
+		if reqID != "" {
+			fmt.Fprintf(&sb, "\nRequest ID: %s", reqID)
+		}
+	}
+
+	return sb.String()
+}
+
+// WrapError wraps an error with context from an ErrorContext.
+// Used by framework code: resp.Diagnostics.AddError("title", diags.WrapError(err, ctx).Error())
+func WrapError(err error, ctx *ErrorContext) error {
+	if err == nil {
+		return nil
+	}
+	context := buildContextString(ctx)
+	if context != "" {
+		return fmt.Errorf("%w%s", err, context)
+	}
+	return err
+}
+
 // buildContext constructs context information to append after an error message.
 func buildContext(d *schema.ResourceData, opts *DiagsOpts) string {
 	targetField := "name"
@@ -27,35 +84,24 @@ func buildContext(d *schema.ResourceData, opts *DiagsOpts) string {
 		targetField = opts.ResourceNameString
 	}
 
-	var sb strings.Builder
-
-	if opts != nil && opts.StatusCode >= 500 {
-		sb.WriteString("\nThis is an API Error. Please contact API support.")
-	}
-
-	if d.Id() != "" {
-		fmt.Fprintf(&sb, "\nResource ID: %s", d.Id())
-	}
+	ctx := &ErrorContext{}
+	ctx.ResourceID = d.Id()
 
 	if v, ok := d.GetOk(targetField); ok {
 		if nameVal, isString := v.(string); isString {
-			fmt.Fprintf(&sb, "\nResource Name: %s", nameVal)
+			ctx.ResourceName = nameVal
 		}
 	}
 
 	if opts != nil {
-		if opts.Timeout != "" {
-			fmt.Fprintf(&sb, "\nConfigured timeout: %s", opts.Timeout)
-		}
+		ctx.Timeout = opts.Timeout
+		ctx.StatusCode = opts.StatusCode
 		if opts.RequestLocation != nil {
-			reqID := extractRequestId(opts.RequestLocation.String())
-			if reqID != "" {
-				fmt.Fprintf(&sb, "\nRequest ID: %s", reqID)
-			}
+			ctx.RequestLocation = opts.RequestLocation.String()
 		}
 	}
 
-	return sb.String()
+	return buildContextString(ctx)
 }
 
 // ToDiags wraps an error into a Terraform diagnostic with additional context.

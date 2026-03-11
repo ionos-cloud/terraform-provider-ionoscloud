@@ -6,6 +6,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstorage"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -79,7 +80,7 @@ func (d *bucketDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 
 	result, found, err := d.client.GetBucketForDataSource(ctx, data.Name)
 	if err != nil {
-		resp.Diagnostics.AddError("failed to get bucket", err.Error())
+		resp.Diagnostics.AddError("failed to get bucket", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Name.ValueString()}).Error())
 		return
 	}
 

@@ -6,6 +6,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstorage"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -130,7 +131,7 @@ func (r *bucketCorsConfiguration) Create(ctx context.Context, req resource.Creat
 	}
 
 	if err := r.client.CreateBucketCors(ctx, data); err != nil {
-		resp.Diagnostics.AddError("Failed to create resource", err.Error())
+		resp.Diagnostics.AddError("Failed to create resource", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
 		return
 	}
 
@@ -152,7 +153,7 @@ func (r *bucketCorsConfiguration) Read(ctx context.Context, req resource.ReadReq
 
 	result, found, err := r.client.GetBucketCors(ctx, data.Bucket)
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to read resource", err.Error())
+		resp.Diagnostics.AddError("Failed to read resource", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
 		return
 	}
 
@@ -184,7 +185,7 @@ func (r *bucketCorsConfiguration) Update(ctx context.Context, req resource.Updat
 	}
 
 	if err := r.client.UpdateBucketCors(ctx, data); err != nil {
-		resp.Diagnostics.AddError("Failed to read resource", err.Error())
+		resp.Diagnostics.AddError("Failed to read resource", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
 		return
 	}
 
@@ -205,7 +206,7 @@ func (r *bucketCorsConfiguration) Delete(ctx context.Context, req resource.Delet
 	}
 
 	if err := r.client.DeleteBucketCors(ctx, data.Bucket); err != nil {
-		resp.Diagnostics.AddError("Failed to delete resource", err.Error())
+		resp.Diagnostics.AddError("Failed to delete resource", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
 		return
 	}
 }

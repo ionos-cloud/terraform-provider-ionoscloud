@@ -21,6 +21,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstorage"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 var (
@@ -227,12 +228,12 @@ func (r *objectResource) Create(ctx context.Context, req resource.CreateRequest,
 
 	result, err := r.client.UploadObject(ctx, data)
 	if err != nil {
-		resp.Diagnostics.AddError("failed to create object", formatXMLError(err).Error())
+		resp.Diagnostics.AddError("failed to create object", diagutil.WrapError(formatXMLError(err), &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString() + "/" + data.Key.ValueString()}).Error())
 		return
 	}
 
 	if err = r.client.SetObjectComputedAttributes(ctx, data, result); err != nil {
-		resp.Diagnostics.AddError("failed to set computed attributes", err.Error())
+		resp.Diagnostics.AddError("failed to set computed attributes", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString() + "/" + data.Key.ValueString()}).Error())
 		return
 	}
 
@@ -254,7 +255,7 @@ func (r *objectResource) Read(ctx context.Context, req resource.ReadRequest, res
 
 	result, found, err := r.client.GetObject(ctx, data)
 	if err != nil {
-		resp.Diagnostics.AddError("failed to read object", formatXMLError(err).Error())
+		resp.Diagnostics.AddError("failed to read object", diagutil.WrapError(formatXMLError(err), &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString() + "/" + data.Key.ValueString()}).Error())
 		return
 	}
 
@@ -290,7 +291,7 @@ func (r *objectResource) Update(ctx context.Context, req resource.UpdateRequest,
 	}
 
 	if err := r.client.UpdateObject(ctx, plan, state); err != nil {
-		resp.Diagnostics.AddError("failed to update object", formatXMLError(err).Error())
+		resp.Diagnostics.AddError("failed to update object", diagutil.WrapError(formatXMLError(err), &diagutil.ErrorContext{ResourceName: plan.Bucket.ValueString() + "/" + plan.Key.ValueString()}).Error())
 		return
 	}
 
@@ -311,7 +312,7 @@ func (r *objectResource) Delete(ctx context.Context, req resource.DeleteRequest,
 	}
 
 	if err := r.client.DeleteObject(ctx, data); err != nil {
-		resp.Diagnostics.AddError("failed to delete object", formatXMLError(err).Error())
+		resp.Diagnostics.AddError("failed to delete object", diagutil.WrapError(formatXMLError(err), &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString() + "/" + data.Key.ValueString()}).Error())
 		return
 	}
 }
@@ -325,7 +326,7 @@ func splitImportID(path string) (string, string, error) {
 	// Split the path into two parts: bucket and the remaining key
 	parts := strings.SplitN(path, "/", 2)
 	if len(parts) != 2 {
-		return "", "", fmt.Errorf("invalid path format")
+		return "", "", fmt.Errorf("invalid path format, expected 'bucket/key'. Got: %q", path)
 	}
 
 	bucket := parts[0]

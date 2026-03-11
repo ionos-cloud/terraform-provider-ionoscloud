@@ -6,6 +6,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstorage"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -105,7 +106,7 @@ func (r *serverSideEncryptionConfiguration) Create(ctx context.Context, req reso
 	}
 
 	if err := r.client.CreateBucketSSE(ctx, data); err != nil {
-		resp.Diagnostics.AddError("Failed to create resource", err.Error())
+		resp.Diagnostics.AddError("Failed to create resource", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
 		return
 	}
 
@@ -127,7 +128,7 @@ func (r *serverSideEncryptionConfiguration) Read(ctx context.Context, req resour
 
 	result, found, err := r.client.GetBucketSSE(ctx, data.Bucket)
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to read resource", err.Error())
+		resp.Diagnostics.AddError("Failed to read resource", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
 		return
 	}
 
@@ -159,7 +160,7 @@ func (r *serverSideEncryptionConfiguration) Update(ctx context.Context, req reso
 	}
 
 	if err := r.client.UpdateBucketSSE(ctx, data); err != nil {
-		resp.Diagnostics.AddError("Failed to update resource", err.Error())
+		resp.Diagnostics.AddError("Failed to update resource", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
 		return
 	}
 
@@ -180,7 +181,7 @@ func (r *serverSideEncryptionConfiguration) Delete(ctx context.Context, req reso
 	}
 
 	if err := r.client.DeleteBucketSSE(ctx, data.Bucket); err != nil {
-		resp.Diagnostics.AddError("Failed to delete resource", err.Error())
+		resp.Diagnostics.AddError("Failed to delete resource", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
 		return
 	}
 }
