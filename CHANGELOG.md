@@ -1,3 +1,8 @@
+## Upcoming
+
+### Testing
+- Add import tests for CUBE servers.
+
 ## 6.7.25
 ### Features
 - File configuration failover for global resources: users, groups, target groups, s3keys, backupunits, contracts, object storage access keys
