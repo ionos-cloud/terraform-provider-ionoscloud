@@ -1,7 +1,9 @@
 package diags
 
 import (
+	"encoding/base64"
 	"errors"
+	"fmt"
 	"net/url"
 	"strings"
 	"testing"
@@ -137,6 +139,58 @@ func TestBuildContextString_NilContext(t *testing.T) {
 	}
 }
 
+// Tests for contract number resolver
+
+func TestSetupContractNumberResolver_ExplicitContractNumber(t *testing.T) {
+	SetupContractNumberResolver("12345678", "", func() string { return "should-not-be-called" })
+	original := errors.New("something failed")
+	got := WrapError(original, &ErrorContext{ResourceID: "abc"})
+	if !strings.Contains(got.Error(), "Contract number: 12345678") {
+		t.Fatalf("expected output to contain 'Contract number: 12345678', got %q", got.Error())
+	}
+}
+
+func TestSetupContractNumberResolver_FromToken(t *testing.T) {
+	token := buildTestJWT(`{"identity":{"contractNumber":99999}}`)
+	SetupContractNumberResolver("", token, func() string { return "should-not-be-called" })
+	original := errors.New("something failed")
+	got := WrapError(original, &ErrorContext{ResourceID: "abc"})
+	if !strings.Contains(got.Error(), "Contract number: 99999") {
+		t.Fatalf("expected output to contain 'Contract number: 99999', got %q", got.Error())
+	}
+}
+
+func TestSetupContractNumberResolver_APIFallback(t *testing.T) {
+	calls := 0
+	SetupContractNumberResolver("", "", func() string {
+		calls++
+		return "77777"
+	})
+	WrapError(errors.New("err1"), &ErrorContext{ResourceID: "a"})
+	WrapError(errors.New("err2"), &ErrorContext{ResourceID: "b"})
+	if calls != 1 {
+		t.Fatalf("expected API fallback to be called once, got %d", calls)
+	}
+}
+
+func TestSetupContractNumberResolver_NoResolver(t *testing.T) {
+	contractNumberFunc = nil
+	original := errors.New("something failed")
+	got := WrapError(original, &ErrorContext{ResourceID: "abc"})
+	if strings.Contains(got.Error(), "Contract number") {
+		t.Fatalf("expected no contract number, got %q", got.Error())
+	}
+}
+
+func TestSetupContractNumberResolver_EmptyFallback(t *testing.T) {
+	SetupContractNumberResolver("", "", func() string { return "" })
+	original := errors.New("something failed")
+	got := WrapError(original, &ErrorContext{ResourceID: "abc"})
+	if strings.Contains(got.Error(), "Contract number") {
+		t.Fatalf("expected no contract number, got %q", got.Error())
+	}
+}
+
 // Tests for ExtractRequestID
 
 func TestExtractRequestID_ValidURL(t *testing.T) {
@@ -159,6 +213,64 @@ func TestExtractRequestID_NoMatch(t *testing.T) {
 	got := ExtractRequestID(u)
 	if got != "" {
 		t.Fatalf("expected empty string, got %q", got)
+	}
+}
+
+// Tests for ContractNumberFromToken
+
+func buildTestJWT(payload string) string {
+	header := base64.RawURLEncoding.EncodeToString([]byte(`{"alg":"RS256"}`))
+	body := base64.RawURLEncoding.EncodeToString([]byte(payload))
+	sig := base64.RawURLEncoding.EncodeToString([]byte("fakesignature"))
+	return fmt.Sprintf("%s.%s.%s", header, body, sig)
+}
+
+func TestContractNumberFromToken_ValidToken(t *testing.T) {
+	got := ContractNumberFromToken(buildTestJWT(`{"identity":{"contractNumber":31884391}}`))
+	if got != "31884391" {
+		t.Fatalf("expected '31884391', got %q", got)
+	}
+}
+
+func TestContractNumberFromToken_StringContractNumber(t *testing.T) {
+	got := ContractNumberFromToken(buildTestJWT(`{"identity":{"contractNumber":"12345"}}`))
+	if got != "12345" {
+		t.Fatalf("expected '12345', got %q", got)
+	}
+}
+
+func TestContractNumberFromToken_MissingIdentity(t *testing.T) {
+	got := ContractNumberFromToken(buildTestJWT(`{"iss":"ionoscloud"}`))
+	if got != "" {
+		t.Fatalf("expected empty string, got %q", got)
+	}
+}
+
+func TestContractNumberFromToken_MissingContractNumber(t *testing.T) {
+	got := ContractNumberFromToken(buildTestJWT(`{"identity":{"role":"owner"}}`))
+	if got != "" {
+		t.Fatalf("expected empty string, got %q", got)
+	}
+}
+
+func TestContractNumberFromToken_InvalidJWT(t *testing.T) {
+	tests := []struct {
+		name  string
+		token string
+	}{
+		{"empty string", ""},
+		{"no dots", "notajwt"},
+		{"one part", "header.payload"},
+		{"invalid base64", "header.!!!invalid!!!.signature"},
+		{"invalid json", fmt.Sprintf("header.%s.signature", base64.RawURLEncoding.EncodeToString([]byte("not json")))},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := ContractNumberFromToken(tt.token)
+			if got != "" {
+				t.Fatalf("expected empty string, got %q", got)
+			}
+		})
 	}
 }
 

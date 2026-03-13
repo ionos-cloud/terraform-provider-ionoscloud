@@ -16,7 +16,9 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	contractService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/contract"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 var Version = "DEV"
@@ -319,6 +321,10 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	}
 
 	client := bundleclient.New(clientOptions, fileConfig)
+
+	diagutil.SetupContractNumberResolver(d.Get("contract_number").(string), token, func() string {
+		return contractService.GetContractNumber(client)
+	})
 
 	return *client, nil
 }

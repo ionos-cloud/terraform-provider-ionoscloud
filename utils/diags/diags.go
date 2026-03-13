@@ -1,9 +1,11 @@
 package diags
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"net/url"
-"regexp"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -12,6 +14,40 @@ import (
 )
 
 var requestIDPattern = regexp.MustCompile(`/requests/([-A-Fa-f0-9]+)/`)
+
+var contractNumberFunc func() string
+
+// SetupContractNumberResolver configures the contract number resolver based on
+// available credentials. If contractNumber is set explicitly, it is used directly.
+// If a token is available, the contract number is extracted from the JWT.
+// Otherwise, apiFallback is called lazily on the first error (and cached).
+func SetupContractNumberResolver(contractNumber, token string, apiFallback func() string) {
+	switch {
+	case contractNumber != "":
+		cn := contractNumber
+		contractNumberFunc = func() string { return cn }
+	case token != "":
+		cn := ContractNumberFromToken(token)
+		contractNumberFunc = func() string { return cn }
+	default:
+		called := false
+		var cn string
+		contractNumberFunc = func() string {
+			if !called {
+				called = true
+				cn = apiFallback()
+			}
+			return cn
+		}
+	}
+}
+
+func getContractNumber() string {
+	if contractNumberFunc != nil {
+		return contractNumberFunc()
+	}
+	return ""
+}
 
 // ErrorContext holds context for error enrichment.
 // Used by both SDKv2 (via ToDiags/ToError) and framework code (via WrapError).
@@ -34,6 +70,27 @@ func ExtractRequestID(loc *url.URL) string {
 		return matches[1]
 	}
 	return ""
+}
+
+// ContractNumberFromToken extracts the contract number from a JWT token payload.
+func ContractNumberFromToken(token string) string {
+	parts := strings.Split(token, ".")
+	if len(parts) != 3 {
+		return ""
+	}
+	payload, err := base64.RawURLEncoding.DecodeString(parts[1])
+	if err != nil {
+		return ""
+	}
+	var claims struct {
+		Identity struct {
+			ContractNumber json.Number `json:"contractNumber"`
+		} `json:"identity"`
+	}
+	if err := json.Unmarshal(payload, &claims); err != nil {
+		return ""
+	}
+	return claims.Identity.ContractNumber.String()
 }
 
 // buildContextString constructs context info from an ErrorContext.
@@ -62,6 +119,10 @@ func buildContextString(errCtx *ErrorContext) string {
 
 	if errCtx.RequestID != "" {
 		fmt.Fprintf(&sb, "\nRequest ID: %s", errCtx.RequestID)
+	}
+
+	if cn := getContractNumber(); cn != "" {
+		fmt.Fprintf(&sb, "\nContract number: %s", cn)
 	}
 
 	if len(errCtx.AdditionalInfo) > 0 {
