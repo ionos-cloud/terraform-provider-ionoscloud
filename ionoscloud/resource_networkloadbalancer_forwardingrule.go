@@ -266,7 +266,7 @@ func resourceNetworkLoadBalancerForwardingRuleCreate(ctx context.Context, d *sch
 	if err != nil {
 		d.SetId("")
 		requestLocation, _ := apiResponse.Location()
-		return diagutil.ToDiags(d, fmt.Errorf("error creating network loadbalancer: %w \n ApiError: %s", err, responseBody(apiResponse)), &diagutil.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error creating network loadbalancer: %w \n ApiError: %s", err, responseBody(apiResponse)), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
 	}
 
 	d.SetId(*networkLoadBalancerForwardingRuleResp.Id)
@@ -276,7 +276,7 @@ func resourceNetworkLoadBalancerForwardingRuleCreate(ctx context.Context, d *sch
 			d.SetId("")
 		}
 		requestLocation, _ := apiResponse.Location()
-		return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutCreate, RequestLocation: requestLocation})
+		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: schema.TimeoutCreate, RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	return resourceNetworkLoadBalancerForwardingRuleRead(ctx, d, meta)
@@ -483,12 +483,12 @@ func resourceNetworkLoadBalancerForwardingRuleUpdate(ctx context.Context, d *sch
 	if err != nil {
 		requestLocation, _ := apiResponse.Location()
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating a network loadbalancer forwarding rule ID %s %w \n ApiError: %s",
-			d.Id(), err, responseBody(apiResponse)), &diagutil.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
+			d.Id(), err, responseBody(apiResponse)), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
 		requestLocation, _ := apiResponse.Location()
-		return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutUpdate, RequestLocation: requestLocation})
+		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: schema.TimeoutUpdate, RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	return resourceNetworkLoadBalancerForwardingRuleRead(ctx, d, meta)
@@ -509,12 +509,12 @@ func resourceNetworkLoadBalancerForwardingRuleDelete(ctx context.Context, d *sch
 
 	if err != nil {
 		requestLocation, _ := apiResponse.Location()
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while deleting a network loadbalancer forwarding rule: %w", err), &diagutil.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while deleting a network loadbalancer forwarding rule: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
 		requestLocation, _ := apiResponse.Location()
-		return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete, RequestLocation: requestLocation})
+		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: schema.TimeoutDelete, RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	d.SetId("")

@@ -68,7 +68,7 @@ func resourceShareCreate(ctx context.Context, d *schema.ResourceData, meta inter
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		requestLocation, _ := apiResponse.Location()
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating a share: %w", err), &diagutil.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating a share: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
 	}
 	d.SetId(*rsp.Id)
 
@@ -77,7 +77,7 @@ func resourceShareCreate(ctx context.Context, d *schema.ResourceData, meta inter
 			d.SetId("")
 		}
 		requestLocation, _ := apiResponse.Location()
-		return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutCreate, RequestLocation: requestLocation})
+		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: schema.TimeoutCreate, RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	return resourceShareRead(ctx, d, meta)
@@ -129,12 +129,12 @@ func resourceShareUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		requestLocation, _ := apiResponse.Location()
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while patching a share: %w", err), &diagutil.DiagsOpts{RequestLocation: requestLocation, StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while patching a share: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
 		requestLocation, _ := apiResponse.Location()
-		return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutUpdate, RequestLocation: requestLocation})
+		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: schema.TimeoutUpdate, RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	return resourceShareRead(ctx, d, meta)
@@ -158,7 +158,7 @@ func resourceShareDelete(ctx context.Context, d *schema.ResourceData, meta inter
 	}
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
 		requestLocation, _ := apiResponse.Location()
-		return diagutil.ToDiags(d, errState, &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete, RequestLocation: requestLocation})
+		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: schema.TimeoutDelete, RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	d.SetId("")

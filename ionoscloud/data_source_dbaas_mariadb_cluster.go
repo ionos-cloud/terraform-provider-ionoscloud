@@ -149,12 +149,12 @@ func dataSourceMariaDBClusterRead(ctx context.Context, d *schema.ResourceData, m
 		/* search by ID */
 		cluster, apiResponse, err = client.GetCluster(ctx, id.(string), location)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the MariaDB cluster with ID %v: %w", id.(string), err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the MariaDB cluster with ID %v: %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 		}
 	} else {
 		clusters, apiResponse, err := client.ListClusters(ctx, "", location)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching MariaDB clusters: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching MariaDB clusters: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 		}
 
 		var results []dbaas.ClusterResponse

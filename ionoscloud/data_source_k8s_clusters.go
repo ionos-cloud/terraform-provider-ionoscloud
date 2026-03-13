@@ -73,7 +73,7 @@ func dataSourceK8sReadClusters(ctx context.Context, d *schema.ResourceData, meta
 	clusters, apiResponse, err := req.Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching k8s clusters: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching k8s clusters: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 	if clusters.Items != nil && len(*clusters.Items) == 0 {
 		return diagutil.ToDiags(d, fmt.Errorf("no clusters found"), nil)

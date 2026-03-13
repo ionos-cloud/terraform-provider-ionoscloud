@@ -139,13 +139,13 @@ func dataSourceVpnWireguardGatewayRead(ctx context.Context, d *schema.ResourceDa
 	if idOk {
 		wireguardGw, apiResponse, err = client.GetWireguardGatewayByID(ctx, id, location)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the WireGuard Gateway with ID: %s, error: %w", id, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the WireGuard Gateway with ID: %s, error: %w", id, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 		}
 	} else {
 		var results []vpnSdk.WireguardGatewayRead
 		gateways, apiResponse, err := client.ListWireguardGateways(ctx, location)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching WireGuard Gateways: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching WireGuard Gateways: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 		}
 		for _, recordItem := range gateways.Items {
 			if len(results) == 1 {

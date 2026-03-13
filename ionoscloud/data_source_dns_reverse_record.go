@@ -94,7 +94,7 @@ func dataSourceReverseRecordRead(ctx context.Context, d *schema.ResourceData, me
 	if idOk {
 		record, apiResponse, err = client.GetReverseRecordById(ctx, recordId)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the DNS Reverse Record with ID: %s, error: %w", recordId, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the DNS Reverse Record with ID: %s, error: %w", recordId, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 		}
 	} else {
 
@@ -106,7 +106,7 @@ func dataSourceReverseRecordRead(ctx context.Context, d *schema.ResourceData, me
 				// build a list of partial matches based on the response
 				records, apiResponse, err := client.ListReverseRecords(ctx, nil)
 				if err != nil {
-					return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching DNS Reverse Records: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+					return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching DNS Reverse Records: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 				}
 				for _, recordItem := range records.Items {
 					if strings.Contains(recordItem.Properties.Name, recordName) {
@@ -118,7 +118,7 @@ func dataSourceReverseRecordRead(ctx context.Context, d *schema.ResourceData, me
 				// build a list of exact matches based on the response
 				records, apiResponse, err := client.ListReverseRecords(ctx, nil)
 				if err != nil {
-					return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching DNS Reverse Records: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+					return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching DNS Reverse Records: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 				}
 				for _, recordItem := range records.Items {
 					if strings.EqualFold(recordItem.Properties.Name, recordName) {
@@ -129,7 +129,7 @@ func dataSourceReverseRecordRead(ctx context.Context, d *schema.ResourceData, me
 		} else {
 			records, apiResponse, err := client.ListReverseRecords(ctx, []string{recordIp})
 			if err != nil {
-				return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching DNS Reverse Records: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+				return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching DNS Reverse Records: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 			}
 			results = records.Items
 

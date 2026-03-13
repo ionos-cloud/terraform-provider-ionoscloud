@@ -99,13 +99,13 @@ func resourceNFSClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 	response, apiResponse, err := client.CreateNFSCluster(ctx, d)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error creating NFS Cluster: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error creating NFS Cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 	clusterID := response.Id
 	d.SetId(clusterID)
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsClusterReady)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error checking status for NFS Cluster with ID %v: %w", clusterID, err), nil)
+		return diagutil.ToDiags(d, fmt.Errorf("error checking status for NFS Cluster with ID %v: %w", clusterID, err), &diagutil.ErrorContext{Timeout: schema.TimeoutCreate})
 	}
 	if err := client.SetNFSClusterData(d, response); err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -118,11 +118,11 @@ func resourceNFSClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 	response, apiResponse, err := client.UpdateNFSCluster(ctx, d)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error updating NFS Cluster: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error updating NFS Cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsClusterReady)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error checking status for NFS Cluster %w", err), nil)
+		return diagutil.ToDiags(d, fmt.Errorf("error checking status for NFS Cluster %w", err), &diagutil.ErrorContext{Timeout: schema.TimeoutUpdate})
 	}
 	if err := client.SetNFSClusterData(d, response); err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -135,11 +135,11 @@ func resourceNFSClusterDelete(ctx context.Context, d *schema.ResourceData, meta 
 	clusterID := d.Id()
 	apiResponse, err := client.DeleteNFSCluster(ctx, d)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error deleting NFS Cluster with ID: %v, error: %w", clusterID, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error deleting NFS Cluster with ID: %v, error: %w", clusterID, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsClusterDeleted)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("deletion check failed for NFS Cluster with ID: %v, error: %w", clusterID, err), &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete})
+		return diagutil.ToDiags(d, fmt.Errorf("deletion check failed for NFS Cluster with ID: %v, error: %w", clusterID, err), &diagutil.ErrorContext{Timeout: schema.TimeoutDelete})
 	}
 	return nil
 }

@@ -45,7 +45,7 @@ func reverseRecordCreate(ctx context.Context, d *schema.ResourceData, meta inter
 
 	recordResponse, apiResponse, err := client.CreateReverseRecord(ctx, d)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating reverse record, error: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating reverse record, error: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 
 	d.SetId(recordResponse.Id)
@@ -62,7 +62,7 @@ func reverseRecordRead(ctx context.Context, d *schema.ResourceData, meta interfa
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while fetching the DNS Reverse Record: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while fetching the DNS Reverse Record: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 	log.Printf("[INFO] Successfully retrieved DNS Reverse Record %s: %+v", recordId, record)
 	if err := client.SetReverseRecordData(d, record); err != nil {
@@ -77,7 +77,7 @@ func reverseRecordUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 
 	_, apiResponse, err := client.UpdateReverseRecord(ctx, recordId, d)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating the DNS Reverse Record: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating the DNS Reverse Record: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 	return reverseRecordRead(ctx, d, meta)
 }
@@ -92,11 +92,11 @@ func reverseRecordDelete(ctx context.Context, d *schema.ResourceData, meta inter
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while deleting DNS Reverse Record: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while deleting DNS Reverse Record: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsReverseRecordDeleted)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while waiting for the DNS Reverse Record to be deleted: %w", err), &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while waiting for the DNS Reverse Record to be deleted: %w", err), &diagutil.ErrorContext{Timeout: schema.TimeoutDelete})
 	}
 	return nil
 }
@@ -110,9 +110,9 @@ func reverseRecordImport(ctx context.Context, d *schema.ResourceData, meta inter
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("DNS Reverse Record with ID: %s does not exist", recordId), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return nil, diagutil.ToError(d, fmt.Errorf("DNS Reverse Record with ID: %s does not exist", recordId), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 		}
-		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to import the DNS Reverse Record: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to import the DNS Reverse Record: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 	log.Printf("[INFO] DNS Reverse Record found: %+v", record)
 	if err := client.SetReverseRecordData(d, record); err != nil {

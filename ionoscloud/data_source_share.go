@@ -55,9 +55,9 @@ func dataSourceShareRead(ctx context.Context, d *schema.ResourceData, meta inter
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		if httpNotFound(apiResponse) {
-			return diagutil.ToDiags(d, fmt.Errorf("group_id %s resource_id %s not found", groupID, resourceID), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("group_id %s resource_id %s not found", groupID, resourceID), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching a share with group_id %s resource_id %s %w", groupID, resourceID, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching a share with group_id %s resource_id %s %w", groupID, resourceID, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 	if rsp.Properties == nil {
 		return diagutil.ToDiags(d, fmt.Errorf("no properties found in the response"), nil)

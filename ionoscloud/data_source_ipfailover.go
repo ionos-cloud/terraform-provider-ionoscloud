@@ -68,9 +68,9 @@ func dataSourceIpFailoverRead(ctx context.Context, d *schema.ResourceData, meta 
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return diagutil.ToDiags(d, fmt.Errorf("unable to find the LAN with ID: %s, datacenter ID: %s", lanId, dcId), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("unable to find the LAN with ID: %s, datacenter ID: %s", lanId, dcId), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while fetching LAN with ID: %s, datacenter ID: %s, err: %w", lanId, dcId, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while fetching LAN with ID: %s, datacenter ID: %s, err: %w", lanId, dcId, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 	if lan.Properties == nil || lan.Properties.IpFailover == nil {
 		return diagutil.ToDiags(d, fmt.Errorf("expected a LAN response containing IP failover groups but received 'nil' instead"), nil)

@@ -86,7 +86,7 @@ func dataSourceLocationRead(ctx context.Context, d *schema.ResourceData, meta in
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching locations: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching locations: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 	var results []ionoscloud.Location
 

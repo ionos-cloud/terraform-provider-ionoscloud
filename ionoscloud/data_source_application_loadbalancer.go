@@ -126,7 +126,7 @@ func dataSourceApplicationLoadBalancerRead(ctx context.Context, d *schema.Resour
 		applicationLoadBalancer, apiResponse, err = client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFindByApplicationLoadBalancerId(ctx, datacenterId, id).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the application load balancer while searching by ID %s: %w", id, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the application load balancer while searching by ID %s: %w", id, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 		}
 	} else {
 		/* search by name */
@@ -141,7 +141,7 @@ func dataSourceApplicationLoadBalancerRead(ctx context.Context, d *schema.Resour
 			logApiRequestTime(apiResponse)
 
 			if err != nil {
-				return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching application load balancers: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+				return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching application load balancers: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 			}
 
 			results = *applicationLoadBalancers.Items
@@ -150,7 +150,7 @@ func dataSourceApplicationLoadBalancerRead(ctx context.Context, d *schema.Resour
 			logApiRequestTime(apiResponse)
 
 			if err != nil {
-				return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching application load balancers: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+				return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching application load balancers: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 			}
 
 			if applicationLoadBalancers.Items != nil {
@@ -159,7 +159,7 @@ func dataSourceApplicationLoadBalancerRead(ctx context.Context, d *schema.Resour
 						tmpAlb, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFindByApplicationLoadBalancerId(ctx, datacenterId, *alb.Id).Execute()
 						logApiRequestTime(apiResponse)
 						if err != nil {
-							return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching application load balancer with ID %s: %w", *alb.Id, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+							return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching application load balancer with ID %s: %w", *alb.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 						}
 						results = append(results, tmpAlb)
 					}
@@ -185,7 +185,7 @@ func dataSourceApplicationLoadBalancerRead(ctx context.Context, d *schema.Resour
 	flowLog, apiResponse, err := fw.GetFlowLogForALB(ctx, datacenterId, *applicationLoadBalancer.Id, 2)
 	if err != nil {
 		if !apiResponse.HttpNotFound() {
-			return diagutil.ToDiags(d, fmt.Errorf("error finding flowlog for application loadbalancer: %w, %s", err, responseBody(apiResponse)), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("error finding flowlog for application loadbalancer: %w, %s", err, responseBody(apiResponse)), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 		}
 	}
 	if err = setApplicationLoadBalancerData(d, &applicationLoadBalancer, flowLog); err != nil {

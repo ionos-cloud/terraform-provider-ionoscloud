@@ -109,14 +109,14 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interf
 		user, apiResponse, err = client.UserManagementApi.UmUsersFindById(ctx, id).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching user with ID %s: %w", id, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching user with ID %s: %w", id, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 		}
 	} else {
 		/* search by email */
 		users, apiResponse, err := client.UserManagementApi.UmUsersGet(ctx).Depth(1).Filter("email", email).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching users: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching users: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 		}
 		if users.Items == nil || len(*users.Items) == 0 {
 			return diagutil.ToDiags(d, fmt.Errorf("no user found with the specified criteria: email = %s", email), nil)

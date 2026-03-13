@@ -49,7 +49,7 @@ func dataSourceResourceRead(ctx context.Context, d *schema.ResourceData, meta in
 		result, apiResponse, err := client.UserManagementApi.UmResourcesFindByTypeAndId(ctx, resourceType, resourceId).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching resource by type %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching resource by type %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 		}
 		results = append(results, result)
 
@@ -66,7 +66,7 @@ func dataSourceResourceRead(ctx context.Context, d *schema.ResourceData, meta in
 		items, apiResponse, err := client.UserManagementApi.UmResourcesFindByType(ctx, resourceType).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching resources by type %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching resources by type %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 		}
 		results = *items.Items
 		if len(results) > 0 && results[0].Type != nil {
@@ -81,7 +81,7 @@ func dataSourceResourceRead(ctx context.Context, d *schema.ResourceData, meta in
 		items, apiResponse, err := client.UserManagementApi.UmResourcesGet(ctx).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching resources %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching resources %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 		}
 		results = *items.Items
 	}

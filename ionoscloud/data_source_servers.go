@@ -278,7 +278,7 @@ func dataSourceServersRead(ctx context.Context, d *schema.ResourceData, meta int
 	servers, apiResponse, err := req.Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching servers: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching servers: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 	serverEntry := make(map[string]interface{})
 	var serversIntf []interface{}

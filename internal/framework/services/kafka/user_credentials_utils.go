@@ -2,7 +2,6 @@ package kafka
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -42,15 +41,19 @@ func getUserCredentials(ctx context.Context, client kafkaService.Client, data us
 	if userID != "" {
 		userCredentials, _, err = client.GetUserCredentialsByID(ctx, clusterID, userID, location)
 		if err != nil {
-			wrapped := fmt.Errorf("%w\nCluster ID: %s", err, clusterID)
-			diags.AddError("API Error Reading Kafka User Credentials", diagutil.WrapError(wrapped, &diagutil.ErrorContext{ResourceID: userID}).Error())
+			diags.AddError("API Error Reading Kafka User Credentials", diagutil.WrapError(err, &diagutil.ErrorContext{
+				ResourceID: userID,
+				AdditionalInfo:    map[string]string{"Cluster ID": clusterID},
+			}).Error())
 			return userCredentials, diags
 		}
 	} else if username != "" {
 		userCredentials, _, err = client.GetUserCredentialsByName(ctx, clusterID, username, location)
 		if err != nil {
-			wrapped := fmt.Errorf("%w\nCluster ID: %s", err, clusterID)
-			diags.AddError("API Error Reading Kafka User Credentials", diagutil.WrapError(wrapped, &diagutil.ErrorContext{ResourceName: username}).Error())
+			diags.AddError("API Error Reading Kafka User Credentials", diagutil.WrapError(err, &diagutil.ErrorContext{
+				ResourceName: username,
+				AdditionalInfo:      map[string]string{"Cluster ID": clusterID},
+			}).Error())
 			return userCredentials, diags
 		}
 	}

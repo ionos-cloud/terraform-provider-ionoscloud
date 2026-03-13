@@ -126,12 +126,12 @@ func resourceContainerRegistryCreate(ctx context.Context, d *schema.ResourceData
 
 	containerRegistryResponse, apiResponse, err := client.CreateRegistry(ctx, *containerRegistry)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating the registry: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating the registry: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 	d.SetId(*containerRegistryResponse.Id)
 
 	if err := utils.WaitForResourceToBeReady(ctx, d, client.IsRegistryReady); err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error waiting for registry to be ready: %w", err), nil)
+		return diagutil.ToDiags(d, fmt.Errorf("error waiting for registry to be ready: %w", err), &diagutil.ErrorContext{Timeout: schema.TimeoutCreate})
 	}
 	return append(warnings, resourceContainerRegistryRead(ctx, d, meta)...)
 }
@@ -149,7 +149,7 @@ func resourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData, 
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while fetching registry: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while fetching registry: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 
 	log.Printf("[INFO] Successfully retrieved registry %s: %+v", d.Id(), registry)
@@ -183,11 +183,11 @@ func resourceContainerRegistryUpdate(ctx context.Context, d *schema.ResourceData
 
 	_, apiResponse, err := client.PatchRegistry(ctx, registryId, *containerRegistry)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating a registry: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating a registry: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 
 	if err := utils.WaitForResourceToBeReady(ctx, d, client.IsRegistryReady); err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error waiting for registry to be ready: %w", err), nil)
+		return diagutil.ToDiags(d, fmt.Errorf("error waiting for registry to be ready: %w", err), &diagutil.ErrorContext{Timeout: schema.TimeoutUpdate})
 	}
 
 	return append(warnings, resourceContainerRegistryRead(ctx, d, meta)...)
@@ -209,10 +209,10 @@ func resourceContainerRegistryDelete(ctx context.Context, d *schema.ResourceData
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while deleting registry %s: %w", registryId, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while deleting registry %s: %w", registryId, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 
-	return diagutil.ToDiags(d, utils.WaitForResourceToBeDeleted(ctx, d, client.IsRegistryDeleted), &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete})
+	return diagutil.ToDiags(d, utils.WaitForResourceToBeDeleted(ctx, d, client.IsRegistryDeleted), &diagutil.ErrorContext{Timeout: schema.TimeoutDelete})
 }
 
 func resourceContainerRegistryImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
@@ -237,9 +237,9 @@ func resourceContainerRegistryImport(ctx context.Context, d *schema.ResourceData
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("registry does not exist %q", registryId), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return nil, diagutil.ToError(d, fmt.Errorf("registry does not exist %q", registryId), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 		}
-		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the import of registry %q, error:%w", registryId, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the import of registry %q, error:%w", registryId, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 
 	log.Printf("[INFO] registry found: %+v", containerRegistry)

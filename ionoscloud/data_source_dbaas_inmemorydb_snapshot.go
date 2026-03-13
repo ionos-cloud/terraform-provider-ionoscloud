@@ -71,7 +71,7 @@ func dataSourceInMemoryDBSnapshotRead(ctx context.Context, d *schema.ResourceDat
 
 	snapshot, apiResponse, err := client.GetSnapshot(ctx, id, location)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the InMemoryDB snapshot with ID: %v, error: %w", id, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the InMemoryDB snapshot with ID: %v, error: %w", id, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 	if err := client.SetSnapshotData(d, snapshot); err != nil {
 		return diagutil.ToDiags(d, err, nil)

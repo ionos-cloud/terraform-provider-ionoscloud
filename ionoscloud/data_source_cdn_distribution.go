@@ -159,14 +159,14 @@ func dataSourceCDNDistributionRead(ctx context.Context, d *schema.ResourceData, 
 		/* search by ID */
 		distribution, apiResponse, err = client.SdkClient.DistributionsApi.DistributionsFindById(ctx, id).Execute()
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the distribution with ID %s: %w", id, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the distribution with ID %s: %w", id, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 		}
 	} else {
 		var results []cdn.Distribution
 
 		distributions, apiResponse, err := client.SdkClient.DistributionsApi.DistributionsGet(ctx).Execute()
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching container distributions: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching container distributions: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 		}
 
 		results = distributions.Items

@@ -199,13 +199,13 @@ func resourceVpnIPSecTunnelCreate(ctx context.Context, d *schema.ResourceData, m
 
 	tunnel, apiResponse, err := client.CreateIPSecTunnel(ctx, d)
 	if err != nil {
-		return diagutil.ToDiags(d, err, &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, err, &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 
 	d.SetId(tunnel.Id)
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsIPSecTunnelReady)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("creating %w ", err), nil)
+		return diagutil.ToDiags(d, fmt.Errorf("creating %w ", err), &diagutil.ErrorContext{Timeout: schema.TimeoutCreate})
 	}
 
 	auth := d.Get("auth").([]interface{})
@@ -236,7 +236,7 @@ func resourceVpnIPSecTunnelRead(ctx context.Context, d *schema.ResourceData, met
 			return nil
 		}
 
-		return diagutil.ToDiags(d, fmt.Errorf("error while fetching IPSec Gateway Tunnel: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while fetching IPSec Gateway Tunnel: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 
 	err = vpn.SetIPSecTunnelData(d, tunnel)
@@ -270,12 +270,12 @@ func resourceVpnIPSecTunnelUpdate(ctx context.Context, d *schema.ResourceData, m
 
 	tunnel, apiResponse, err := client.UpdateIPSecTunnel(ctx, d)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error updating IPSec Gateway Tunnel: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error updating IPSec Gateway Tunnel: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsIPSecTunnelReady)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("while waiting for IPSec Gateway Tunnel to be ready: %w", err), nil)
+		return diagutil.ToDiags(d, fmt.Errorf("while waiting for IPSec Gateway Tunnel to be ready: %w", err), &diagutil.ErrorContext{Timeout: schema.TimeoutUpdate})
 	}
 
 	err = vpn.SetIPSecTunnelData(d, tunnel)
@@ -305,13 +305,13 @@ func resourceVpnIPSecTunnelDelete(ctx context.Context, d *schema.ResourceData, m
 			return nil
 		}
 
-		return diagutil.ToDiags(d, fmt.Errorf("error while deleting IPSec Gateway Tunnel: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while deleting IPSec Gateway Tunnel: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 
 	time.Sleep(5 * time.Second)
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsIPSecTunnelDeleted)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("while deleting IPSec Gateway Tunnel: %w", err), &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete})
+		return diagutil.ToDiags(d, fmt.Errorf("while deleting IPSec Gateway Tunnel: %w", err), &diagutil.ErrorContext{Timeout: schema.TimeoutDelete})
 	}
 
 	return nil

@@ -55,9 +55,9 @@ func dataSourceDbaasPgSqlReadDatabase(ctx context.Context, d *schema.ResourceDat
 	database, apiResponse, err := client.FindDatabaseByName(ctx, clusterId, name)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
-			return diagutil.ToDiags(d, fmt.Errorf("no PgSql database found with the specified name: %s and cluster ID: %s", name, clusterId), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("no PgSql database found with the specified name: %s and cluster ID: %s", name, clusterId), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the PgSql database: %s, cluster ID: %s, err: %w", name, clusterId, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the PgSql database: %s, cluster ID: %s, err: %w", name, clusterId, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 	if err := dbaas.SetDatabasePgSqlData(d, &database); err != nil {
 		return diagutil.ToDiags(d, err, nil)

@@ -101,7 +101,7 @@ func dataSourceRecordRead(ctx context.Context, d *schema.ResourceData, meta inte
 	if idOk {
 		record, apiResponse, err = client.GetRecordById(ctx, zoneId, recordId)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the DNS Record with ID: %s, DNS Zone ID: %s, error: %w", recordId, zoneId, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the DNS Record with ID: %s, DNS Zone ID: %s, error: %w", recordId, zoneId, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 		}
 	} else {
 		var results []dns.RecordRead
@@ -111,7 +111,7 @@ func dataSourceRecordRead(ctx context.Context, d *schema.ResourceData, meta inte
 			// is true.
 			records, apiResponse, err := client.ListRecords(ctx, recordName)
 			if err != nil {
-				return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching DNS Records: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+				return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching DNS Records: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 			}
 			results = records.Items
 		} else {
@@ -120,7 +120,7 @@ func dataSourceRecordRead(ctx context.Context, d *schema.ResourceData, meta inte
 			// filter.name only does a partial match.
 			records, apiResponse, err := client.ListRecords(ctx, "")
 			if err != nil {
-				return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching DNS Records: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+				return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching DNS Records: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 			}
 			for _, recordItem := range records.Items {
 				// Since each record has a unique name, there is no need to keep on searching if

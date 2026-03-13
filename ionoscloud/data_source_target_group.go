@@ -183,7 +183,7 @@ func dataSourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the target group %s: %w", id, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the target group %s: %w", id, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 		}
 	} else {
 		/* search by name */
@@ -198,7 +198,7 @@ func dataSourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta
 			logApiRequestTime(apiResponse)
 
 			if err != nil {
-				return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching target groups: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+				return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching target groups: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 			}
 
 			results = *targetGroups.Items
@@ -207,7 +207,7 @@ func dataSourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta
 			logApiRequestTime(apiResponse)
 
 			if err != nil {
-				return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching target groups: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+				return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching target groups: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 			}
 
 			if targetGroups.Items != nil {
@@ -216,7 +216,7 @@ func dataSourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta
 						tmpTargetGroup, apiResponse, err := client.TargetGroupsApi.TargetgroupsFindByTargetGroupId(ctx, *t.Id).Execute()
 						logApiRequestTime(apiResponse)
 						if err != nil {
-							return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching target group with ID %s: %w", *t.Id, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+							return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching target group with ID %s: %w", *t.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 						}
 						results = append(results, tmpTargetGroup)
 

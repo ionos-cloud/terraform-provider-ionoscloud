@@ -133,13 +133,13 @@ func dataSourcePipelineRead(ctx context.Context, d *schema.ResourceData, meta in
 	if idOk {
 		pipeline, apiResponse, err = client.GetPipelineByID(ctx, location, id)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the Logging pipeline with ID: %s, error: %w", id, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the Logging pipeline with ID: %s, error: %w", id, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 		}
 	} else {
 		var results []logging.PipelineRead
 		pipelines, apiResponse, err := client.ListPipelines(ctx, location)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching Logging pipelines: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching Logging pipelines: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 		}
 		for _, pipelineItem := range pipelines.Items {
 			if strings.EqualFold(pipelineItem.Properties.Name, name) {

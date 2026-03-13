@@ -125,7 +125,7 @@ func datasourceIpBlockRead(ctx context.Context, data *schema.ResourceData, meta 
 		ipBlock, apiResponse, err = client.IPBlocksApi.IpblocksFindById(ctx, id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diagutil.ToDiags(data, fmt.Errorf("error getting ip block with id %s %w", id.(string), err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(data, fmt.Errorf("error getting ip block with id %s %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 		}
 		if nameOk {
 			if ipBlock.Properties != nil && *ipBlock.Properties.Name != name {
@@ -146,7 +146,7 @@ func datasourceIpBlockRead(ctx context.Context, data *schema.ResourceData, meta 
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return diagutil.ToDiags(data, fmt.Errorf("an error occurred while fetching ipBlocks: %w ", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(data, fmt.Errorf("an error occurred while fetching ipBlocks: %w ", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 		}
 
 		var results []ionoscloud.IpBlock

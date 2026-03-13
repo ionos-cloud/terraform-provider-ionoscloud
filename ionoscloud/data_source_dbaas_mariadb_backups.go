@@ -107,7 +107,7 @@ func dataSourceDBaaSMariaDBReadBackups(ctx context.Context, d *schema.ResourceDa
 		var backupsResponse mariadbSDK.BackupList
 		backupsResponse, apiResponse, err = client.GetClusterBackups(ctx, clusterId, location)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching backups for cluster with ID %s: %w", clusterId, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching backups for cluster with ID %s: %w", clusterId, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 		}
 		if backupsResponse.Items == nil {
 			return diagutil.ToDiags(d, fmt.Errorf("expected valid properties in the API response for cluster backups, but received 'nil' instead, cluster ID: %s", clusterId), nil)
@@ -117,7 +117,7 @@ func dataSourceDBaaSMariaDBReadBackups(ctx context.Context, d *schema.ResourceDa
 		var backup mariadbSDK.BackupResponse
 		backup, apiResponse, err = client.FindBackupByID(ctx, backupId, location)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching backup with ID %s: %w", backupId, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching backup with ID %s: %w", backupId, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 		}
 		if backup.Properties == nil {
 			return diagutil.ToDiags(d, fmt.Errorf("expected valid properties in the API response for backup, but received 'nil' instead, backup ID: %s", backupId), nil)

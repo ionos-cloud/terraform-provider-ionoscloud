@@ -102,7 +102,7 @@ func resourceVpnWireguardPeerCreate(ctx context.Context, d *schema.ResourceData,
 	peer, apiResponse, err := client.CreateWireguardGatewayPeers(ctx, d, gatewayID)
 	if err != nil {
 		d.SetId("")
-		return diagutil.ToDiags(d, fmt.Errorf("error creating WireGuard Peer: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error creating WireGuard Peer: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 	if err := vpn.SetWireguardPeerData(d, peer); err != nil {
 		d.SetId("")
@@ -135,7 +135,7 @@ func resourceVpnWireguardPeerUpdate(ctx context.Context, d *schema.ResourceData,
 	gatewayID := d.Get("gateway_id").(string)
 	_, apiResponse, err := client.UpdateWireguardPeer(ctx, gatewayID, d.Id(), d)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error updating WireGuard Peer: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error updating WireGuard Peer: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 	return nil
 }
@@ -149,12 +149,12 @@ func resourceVpnWireguardPeerDelete(ctx context.Context, d *schema.ResourceData,
 		if apiResponse.HttpNotFound() {
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error deleting WireGuard Peer: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error deleting WireGuard Peer: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsWireguardPeerDeleted)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("deleting %w", err), &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete})
+		return diagutil.ToDiags(d, fmt.Errorf("deleting %w", err), &diagutil.ErrorContext{Timeout: schema.TimeoutDelete})
 	}
 
 	log.Printf("[INFO] Successfully deleted WireGuard Peer: %s", d.Id())
@@ -174,7 +174,7 @@ func resourceVpnWireguardPeerImport(ctx context.Context, d *schema.ResourceData,
 	peerID := parts[2]
 	peer, apiResponse, err := client.GetWireguardPeerByID(ctx, gatewayID, peerID, location)
 	if err != nil {
-		return nil, diagutil.ToError(d, err, &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return nil, diagutil.ToError(d, err, &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 	if err := d.Set("gateway_id", gatewayID); err != nil {
 		return nil, diagutil.ToError(d, err, nil)

@@ -111,7 +111,7 @@ func resourceKafkaClusterCreate(ctx context.Context, d *schema.ResourceData, met
 	createdCluster, apiResponse, err := client.CreateCluster(ctx, d)
 	if err != nil {
 		d.SetId("")
-		return diagutil.ToDiags(d, fmt.Errorf("error creating Kafka Cluster: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error creating Kafka Cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 
 	d.SetId(createdCluster.Id)
@@ -122,7 +122,7 @@ func resourceKafkaClusterCreate(ctx context.Context, d *schema.ResourceData, met
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsClusterAvailable)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while Kafka Cluster waiting to be ready: %w", err), nil)
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while Kafka Cluster waiting to be ready: %w", err), &diagutil.ErrorContext{Timeout: schema.TimeoutCreate})
 	}
 
 	return resourceKafkaClusterRead(ctx, d, meta)
@@ -137,7 +137,7 @@ func resourceKafkaClusterRead(ctx context.Context, d *schema.ResourceData, meta 
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while fetching Kafka Cluster: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while fetching Kafka Cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 
 	log.Printf("[INFO] Successfully retreived Kafka Cluster %s: %+v", d.Id(), cluster)
@@ -158,12 +158,12 @@ func resourceKafkaClusterDelete(ctx context.Context, d *schema.ResourceData, met
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while deleting Kafka Cluster: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while deleting Kafka Cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsClusterDeleted)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("the check for Kafka Cluster deletion failed with the following error: %w", err), &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete})
+		return diagutil.ToDiags(d, fmt.Errorf("the check for Kafka Cluster deletion failed with the following error: %w", err), &diagutil.ErrorContext{Timeout: schema.TimeoutDelete})
 	}
 
 	d.SetId("")

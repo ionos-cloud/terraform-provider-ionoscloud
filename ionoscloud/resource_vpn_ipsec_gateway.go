@@ -128,13 +128,13 @@ func resourceVpnIPSecGatewayCreate(ctx context.Context, d *schema.ResourceData, 
 
 	gateway, apiResponse, err := client.CreateIPSecGateway(ctx, d)
 	if err != nil {
-		return diagutil.ToDiags(d, err, &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, err, &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 
 	d.SetId(gateway.Id)
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsIPSecGatewayReady)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("creating %w ", err), nil)
+		return diagutil.ToDiags(d, fmt.Errorf("creating %w ", err), &diagutil.ErrorContext{Timeout: schema.TimeoutCreate})
 	}
 
 	return resourceVpnIPSecGatewayRead(ctx, d, meta)
@@ -152,7 +152,7 @@ func resourceVpnIPSecGatewayRead(ctx context.Context, d *schema.ResourceData, me
 			return nil
 		}
 
-		return diagutil.ToDiags(d, fmt.Errorf("error while fetching IPSec Gateway: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while fetching IPSec Gateway: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 
 	return diagutil.ToDiags(d, vpn.SetIPSecGatewayData(d, gateway), nil)
@@ -162,12 +162,12 @@ func resourceVpnIPSecGatewayUpdate(ctx context.Context, d *schema.ResourceData, 
 
 	gateway, apiResponse, err := client.UpdateIPSecGateway(ctx, d)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error updating IPSec Gateway: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error updating IPSec Gateway: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsIPSecGatewayReady)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("while waiting for IPSec Gateway to be ready: %w", err), nil)
+		return diagutil.ToDiags(d, fmt.Errorf("while waiting for IPSec Gateway to be ready: %w", err), &diagutil.ErrorContext{Timeout: schema.TimeoutUpdate})
 	}
 
 	return diagutil.ToDiags(d, vpn.SetIPSecGatewayData(d, gateway), nil)
@@ -185,13 +185,13 @@ func resourceVpnIPSecGatewayDelete(ctx context.Context, d *schema.ResourceData, 
 			return nil
 		}
 
-		return diagutil.ToDiags(d, fmt.Errorf("error while deleting IPSec Gateway: %w", err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while deleting IPSec Gateway: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 
 	time.Sleep(5 * time.Second)
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsIPSecGatewayDeleted)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("while deleting IPSec Gateway: %w", err), &diagutil.DiagsOpts{Timeout: schema.TimeoutDelete})
+		return diagutil.ToDiags(d, fmt.Errorf("while deleting IPSec Gateway: %w", err), &diagutil.ErrorContext{Timeout: schema.TimeoutDelete})
 	}
 
 	return nil

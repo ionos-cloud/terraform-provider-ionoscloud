@@ -77,7 +77,7 @@ func dataSourceGpusRead(ctx context.Context, d *schema.ResourceData, meta interf
 	gpus, apiResponse, err := client.GraphicsProcessingUnitCardsApi.DatacentersServersGPUsGet(ctx, datacenterID, serverID).Depth(1).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching GPUs for server %s in datacenter %s: %w", serverID, datacenterID, err), &diagutil.DiagsOpts{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching GPUs for server %s in datacenter %s: %w", serverID, datacenterID, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 
 	d.SetId(fmt.Sprintf("%s/gpus", serverID))
