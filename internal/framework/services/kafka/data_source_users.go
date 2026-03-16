@@ -120,7 +120,9 @@ func (d *usersDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 	location := data.Location.ValueString()
 	users, _, err := d.client.GetUsers(ctx, clusterID, location)
 	if err != nil {
-		resp.Diagnostics.AddError("API Error Reading Kafka Users", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceID: clusterID}).Error())
+		resp.Diagnostics.AddError("API Error Reading Kafka Users", diagutil.WrapError(err, &diagutil.ErrorContext{
+			AdditionalInfo: map[string]string{"Cluster ID": clusterID},
+		}).Error())
 		return
 	}
 
