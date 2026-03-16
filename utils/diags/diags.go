@@ -52,12 +52,12 @@ func getContractNumber() string {
 // ErrorContext holds context for error enrichment.
 // Used by both SDKv2 (via ToDiags/ToError) and framework code (via WrapError).
 type ErrorContext struct {
-	ResourceID   string
-	ResourceName string
-	Timeout      string
-	StatusCode   int               // HTTP status code from API response; 0 means not available
-	RequestID    string            // pre-extracted UUID from request location
-	AdditionalInfo      map[string]string // additional context, e.g. "Cluster ID" -> "abc"
+	ResourceID     string
+	ResourceName   string
+	Timeout        string
+	StatusCode     int               // HTTP status code from API response; 0 means not available
+	RequestID      string            // pre-extracted UUID from request location
+	AdditionalInfo map[string]string // additional context, e.g. "Cluster ID" -> "abc"
 }
 
 // ExtractRequestID extracts the request UUID from a *url.URL location header.

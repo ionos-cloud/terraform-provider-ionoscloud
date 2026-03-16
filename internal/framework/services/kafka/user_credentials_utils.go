@@ -42,8 +42,8 @@ func getUserCredentials(ctx context.Context, client kafkaService.Client, data us
 		userCredentials, _, err = client.GetUserCredentialsByID(ctx, clusterID, userID, location)
 		if err != nil {
 			diags.AddError("API Error Reading Kafka User Credentials", diagutil.WrapError(err, &diagutil.ErrorContext{
-				ResourceID: userID,
-				AdditionalInfo:    map[string]string{"Cluster ID": clusterID},
+				ResourceID:     userID,
+				AdditionalInfo: map[string]string{"Cluster ID": clusterID},
 			}).Error())
 			return userCredentials, diags
 		}
@@ -51,8 +51,8 @@ func getUserCredentials(ctx context.Context, client kafkaService.Client, data us
 		userCredentials, _, err = client.GetUserCredentialsByName(ctx, clusterID, username, location)
 		if err != nil {
 			diags.AddError("API Error Reading Kafka User Credentials", diagutil.WrapError(err, &diagutil.ErrorContext{
-				ResourceName: username,
-				AdditionalInfo:      map[string]string{"Cluster ID": clusterID},
+				ResourceName:   username,
+				AdditionalInfo: map[string]string{"Cluster ID": clusterID},
 			}).Error())
 			return userCredentials, diags
 		}

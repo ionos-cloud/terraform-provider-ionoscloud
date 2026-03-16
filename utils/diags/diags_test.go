@@ -99,12 +99,12 @@ func TestWrapError_WithAdditionalInfo(t *testing.T) {
 func TestWrapError_AllFields(t *testing.T) {
 	original := errors.New("base error")
 	ctx := &ErrorContext{
-		ResourceID:   "res-id-1",
-		ResourceName: "my-server",
-		Timeout:      "60m",
-		StatusCode:   502,
-		RequestID:    "deadbeef-dead-beef-dead-beefdeadbeef",
-		AdditionalInfo:      map[string]string{"Cluster ID": "cl-1"},
+		ResourceID:     "res-id-1",
+		ResourceName:   "my-server",
+		Timeout:        "60m",
+		StatusCode:     502,
+		RequestID:      "deadbeef-dead-beef-dead-beefdeadbeef",
+		AdditionalInfo: map[string]string{"Cluster ID": "cl-1"},
 	}
 	got := WrapError(original, ctx)
 	msg := got.Error()
@@ -273,4 +273,3 @@ func TestContractNumberFromToken_InvalidJWT(t *testing.T) {
 		})
 	}
 }
-

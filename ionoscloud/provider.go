@@ -15,8 +15,8 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	contractService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/contract"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
