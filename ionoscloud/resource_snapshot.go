@@ -449,7 +449,7 @@ func validateNoUpdateOnlyAttrs(d *schema.ResourceData) diag.Diagnostics {
 	if len(invalidAttrs) > 0 {
 		return diagutil.ToDiags(d, fmt.Errorf(
 			"the following attributes will not be set during creation and can only be updated after "+
-				"the snapshot is created: %s. Create the resource without these attributes and then update them.",
+				"the snapshot is created: %s. Create the resource without these attributes and then update them",
 			strings.Join(invalidAttrs, ", "),
 		), nil)
 	}
