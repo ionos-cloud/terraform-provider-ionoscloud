@@ -1,3 +1,8 @@
+## Upcoming
+
+### Enhancements
+- Add validation error when update-only attributes are set during snapshot creation
+
 ## 6.7.25
 ### Features
 - File configuration failover for global resources: users, groups, target groups, s3keys, backupunits, contracts, object storage access keys

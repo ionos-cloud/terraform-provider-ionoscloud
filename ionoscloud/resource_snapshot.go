@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -134,6 +135,10 @@ func resourceSnapshotCreate(ctx context.Context, d *schema.ResourceData, meta in
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
 		return diag.FromErr(err)
+	}
+
+	if diags := validateNoUpdateOnlyAttrs(d); diags != nil {
+		return diags
 	}
 
 	dcId := d.Get("datacenter_id").(string)
@@ -422,5 +427,32 @@ func setSnapshotData(d *schema.ResourceData, snapshot *ionoscloud.Snapshot) erro
 			}
 		}
 	}
+	return nil
+}
+
+// check that update-only attributes are not explicitly
+// set during snapshot creation and return an error if any are found.
+func validateNoUpdateOnlyAttrs(d *schema.ResourceData) diag.Diagnostics {
+	updateOnlyAttrs := []string{
+		"cpu_hot_plug", "ram_hot_plug", "nic_hot_plug", "nic_hot_unplug",
+		"disc_virtio_hot_plug", "disc_virtio_hot_unplug",
+	}
+
+	configMap := d.GetRawConfig().AsValueMap()
+	var invalidAttrs []string
+	for _, attr := range updateOnlyAttrs {
+		if v, ok := configMap[attr]; ok && !v.IsNull() {
+			invalidAttrs = append(invalidAttrs, attr)
+		}
+	}
+
+	if len(invalidAttrs) > 0 {
+		return diagutil.ToDiags(d, fmt.Errorf(
+			"the following attributes will not be set during creation and can only be updated after "+
+				"the snapshot is created: %s. Create the resource without these attributes and then update them.",
+			strings.Join(invalidAttrs, ", "),
+		), nil)
+	}
+
 	return nil
 }
