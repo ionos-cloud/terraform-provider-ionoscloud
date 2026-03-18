@@ -118,7 +118,13 @@ func (r *bucketPolicyResource) Read(ctx context.Context, req resource.ReadReques
 		return
 	}
 
-	data = result
+	// If the API response is semantically equivalent to the existing state
+	// (same principals, effects, etc. — just different JSON formatting like
+	// Principal as ["arn:..."] vs {"AWS": "arn:..."}), preserve the state's
+	// JSON to avoid perpetual diffs from format normalization.
+	if !objectstorage.PoliciesSemanticEqual(data.Policy.ValueString(), result.Policy.ValueString()) {
+		data = result
+	}
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
