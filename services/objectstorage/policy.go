@@ -56,15 +56,22 @@ type bucketPolicyPrincipal struct {
 }
 
 func (p *bucketPolicyPrincipal) MarshalJSON() ([]byte, error) {
-	// Match the API's canonical form: single principal → string, multiple → array
+	// Match the API's canonical form: single principal -> string, multiple -> array.
+	// Keep empty principals deterministic as [] rather than null.
 	if len(p.AWS) == 1 {
 		return json.Marshal(struct {
 			AWS string `json:"AWS"`
 		}{AWS: p.AWS[0]})
 	}
+
+	aws := p.AWS
+	if aws == nil {
+		aws = []string{}
+	}
+
 	return json.Marshal(struct {
 		AWS []string `json:"AWS"`
-	}{AWS: p.AWS})
+	}{AWS: aws})
 }
 
 func (p *bucketPolicyPrincipal) UnmarshalJSON(data []byte) error {
@@ -110,26 +117,47 @@ type bucketPolicyStatementCondition struct {
 // same policy, regardless of JSON key ordering or Principal format differences
 // (e.g. ["arn:..."] vs {"AWS": "arn:..."}).
 func PoliciesSemanticEqual(statePolicy, apiPolicy string) bool {
-	normalize := func(s string) any {
+	normalize := func(s string) (any, error) {
 		var data bucketPolicy
 		if err := json.Unmarshal([]byte(s), &data); err != nil {
-			log.Printf("[WARN] PoliciesSemanticEqual: failed to unmarshal policy: %v", err)
+			log.Printf("[WARN] PoliciesSemanticEqual: failed to unmarshal policy with typed schema: %v", err)
 			var raw any
-			json.Unmarshal([]byte(s), &raw)
-			return raw
+			if rawErr := json.Unmarshal([]byte(s), &raw); rawErr != nil {
+				return s, rawErr
+			}
+			return raw, nil
 		}
+
 		normalized, err := json.Marshal(data)
 		if err != nil {
 			log.Printf("[WARN] PoliciesSemanticEqual: failed to marshal normalized policy: %v", err)
 			var raw any
-			json.Unmarshal([]byte(s), &raw)
-			return raw
+			if rawErr := json.Unmarshal([]byte(s), &raw); rawErr != nil {
+				return s, rawErr
+			}
+			return raw, nil
 		}
+
 		var result any
-		json.Unmarshal(normalized, &result)
-		return result
+		if err := json.Unmarshal(normalized, &result); err != nil {
+			return string(normalized), err
+		}
+		return result, nil
 	}
-	return reflect.DeepEqual(normalize(statePolicy), normalize(apiPolicy))
+
+	stateNormalized, stateErr := normalize(statePolicy)
+	apiNormalized, apiErr := normalize(apiPolicy)
+	if stateErr != nil || apiErr != nil {
+		if stateErr != nil {
+			log.Printf("[WARN] PoliciesSemanticEqual: state policy normalization failed: %v", stateErr)
+		}
+		if apiErr != nil {
+			log.Printf("[WARN] PoliciesSemanticEqual: api policy normalization failed: %v", apiErr)
+		}
+		return statePolicy == apiPolicy
+	}
+
+	return reflect.DeepEqual(stateNormalized, apiNormalized)
 }
 
 // CreateBucketPolicy creates a new bucket policy.
