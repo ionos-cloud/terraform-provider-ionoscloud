@@ -45,8 +45,9 @@ type bucketPolicyStatement struct {
 }
 
 // bucketPolicyPrincipal is the canonical representation of the S3 Principal field.
-// It always marshals to {"AWS": [...]} to match what the API stores and returns,
-// and accepts all common input forms on unmarshal:
+// It marshals to {"AWS":"..."} when there is exactly one principal and to
+// {"AWS":[...]} otherwise, matching the API's canonicalization behavior, and
+// accepts all common input forms on unmarshal:
 //   - {"AWS": ["arn:..."]} — API array form
 //   - {"AWS": "arn:..."}   — API single-string form
 //   - ["arn:..."]          — legacy flat array form
