@@ -119,3 +119,40 @@ func (v *NullablePrincipal) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+// UnmarshalJSON handles AWS field being either a string or []string
+// Note: added in post-gen sdk generation
+func (o *Principal) UnmarshalJSON(src []byte) error {
+	// Reset to zero value to avoid stale data across unmarshals
+	*o = Principal{}
+
+	// Handle "Principal": "*" (wildcard string, not an object)
+	var s string
+	if err := json.Unmarshal(src, &s); err == nil {
+		if s == "*" {
+			o.AWS = []string{"*"}
+			return nil
+		}
+	}
+
+	var raw struct {
+		AWS json.RawMessage `json:"AWS"`
+	}
+	if err := json.Unmarshal(src, &raw); err != nil {
+		return err
+	}
+	if raw.AWS == nil {
+		return nil
+	}
+	var arr []string
+	if err := json.Unmarshal(raw.AWS, &arr); err == nil {
+		o.AWS = arr
+		return nil
+	}
+	s = ""
+	if err := json.Unmarshal(raw.AWS, &s); err != nil {
+		return err
+	}
+	o.AWS = []string{s}
+	return nil
+}
