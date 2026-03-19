@@ -1,3 +1,10 @@
+## 6.7.26
+### Fixes
+ * The ionoscloud_s3_bucket_policy resource now correctly handles all standard S3 Principal representations:
+  - "Principal": "*" — wildcard string
+  - "Principal": ["arn:...", "*"] — flat array
+  - "Principal": {"AWS": "arn:..."} — object with single string
+  - "Principal": {"AWS": ["arn:...", "arn:..."]} — object with array
 ## 6.7.25
 ### Features
 - File configuration failover for global resources: users, groups, target groups, s3keys, backupunits, contracts, object storage access keys
