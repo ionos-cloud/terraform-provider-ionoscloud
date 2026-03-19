@@ -29,7 +29,7 @@ resource "ionoscloud_ipblock" "example" {
 
 resource "ionoscloud_lan" "example" {
     datacenter_id           = ionoscloud_datacenter.example.id
-    public                  = true
+    public                  = false
     name                    = "Lan Example"
 }
 
