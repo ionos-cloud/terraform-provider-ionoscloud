@@ -24,6 +24,7 @@ func resourceSnapshot() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceSnapshotImport,
 		},
+		CustomizeDiff: checkSnapshotUpdateOnlyAttrs,
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:             schema.TypeString,
@@ -135,10 +136,6 @@ func resourceSnapshotCreate(ctx context.Context, d *schema.ResourceData, meta in
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
 		return diag.FromErr(err)
-	}
-
-	if diags := validateNoUpdateOnlyAttrs(d); diags != nil {
-		return diags
 	}
 
 	dcId := d.Get("datacenter_id").(string)
@@ -432,13 +429,23 @@ func setSnapshotData(d *schema.ResourceData, snapshot *ionoscloud.Snapshot) erro
 
 // check that update-only attributes are not explicitly
 // set during snapshot creation and return an error if any are found.
-func validateNoUpdateOnlyAttrs(d *schema.ResourceData) diag.Diagnostics {
+func checkSnapshotUpdateOnlyAttrs(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
+	// Only validate during creation (no ID yet)
+	if diff.Id() != "" {
+		return nil
+	}
+
 	updateOnlyAttrs := []string{
 		"cpu_hot_plug", "ram_hot_plug", "nic_hot_plug", "nic_hot_unplug",
 		"disc_virtio_hot_plug", "disc_virtio_hot_unplug",
 	}
 
-	configMap := d.GetRawConfig().AsValueMap()
+	rawConfig := diff.GetRawConfig()
+	if rawConfig.IsNull() || !rawConfig.IsKnown() {
+		return nil
+	}
+	configMap := rawConfig.AsValueMap()
+
 	var invalidAttrs []string
 	for _, attr := range updateOnlyAttrs {
 		if v, ok := configMap[attr]; ok && !v.IsNull() {
@@ -447,11 +454,11 @@ func validateNoUpdateOnlyAttrs(d *schema.ResourceData) diag.Diagnostics {
 	}
 
 	if len(invalidAttrs) > 0 {
-		return diagutil.ToDiags(d, fmt.Errorf(
-			"the following attributes will not be set during creation and can only be updated after "+
-				"the snapshot is created: %s. Create the resource without these attributes and then update them",
+		return fmt.Errorf(
+			"the following attributes cannot be set during snapshot creation and can only be "+
+				"updated after the snapshot exists: %s",
 			strings.Join(invalidAttrs, ", "),
-		), nil)
+		)
 	}
 
 	return nil
