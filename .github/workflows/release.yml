@@ -20,15 +20,19 @@ jobs:
     steps:
       -
         name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       -
         name: Unshallow
         run: git fetch --prune --unshallow
       -
         name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version-file: 'go.mod'
+
+      # 1. Install Syft so GoReleaser can use it
+      - name: Install Syft
+        uses: anchore/sbom-action/download-syft@v0
       -
         name: Import GPG key
         id: import_gpg

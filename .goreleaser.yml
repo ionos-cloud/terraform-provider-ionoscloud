@@ -43,9 +43,11 @@ checksum:
   name_template: '{{ .ProjectName }}_{{ .Version }}_SHA256SUMS'
   algorithm: sha256
 signs:
-  - artifacts: checksum
+  - &gpg_sign
+    id: checksum-sign
+    artifacts: checksum
     args:
-      # if you are using this is a GitHub action or some other automated pipeline, you 
+      # if you are using this is a GitHub action or some other automated pipeline, you
       # need to pass the batch flag to indicate its not interactive.
       - "--batch"
       - "--local-user"
@@ -54,8 +56,20 @@ signs:
       - "${signature}"
       - "--detach-sign"
       - "${artifact}"
+  - <<: *gpg_sign
+    id: sbom-sign
+    artifacts: sbom
 release:
   # If you want to manually examine the release before its live, uncomment this line:
   # draft: true
 changelog:
   disable: true
+sboms:
+  - id: ionoscloud-sbom
+    artifacts: binary
+    args:
+      - "$artifact"
+      - "--output"
+      - "cyclonedx-json=$document"
+    documents:
+      - "{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}.cyclonedx.json"
