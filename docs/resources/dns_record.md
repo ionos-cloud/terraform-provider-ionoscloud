@@ -35,7 +35,7 @@ resource "ionoscloud_dns_record" "recordexample" {
 
 ## Argument reference
 
-* `name` - (Required)[string] The name of the DNS Record.
+* `name` - (Required)[string] The name of the DNS Record. This property is immutable.
 * `type` - (Required)[string] The type of the DNS Record, can have one of these values: `A, AAAA, CNAME, ALIAS, MX, NS, SRV, TXT, CAA, SSHFP, TLSA, SMIMEA, DS, HTTPS, SVCB, OPENPGPKEY, CERT, URI, RP, LOC`. More details about types can be found [here](https://docs.ionos.com/cloud/network-services/cloud-dns/cloud-dns-faq#what-types-of-dns-records-does-cloud-dns-support).
 * `content` - (Required)[string] The content of the DNS Record.
 * `ttl` - (Optional)[int] Time to live for the DNS Record. Default is `3600`.
