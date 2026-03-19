@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -23,6 +24,7 @@ func resourceSnapshot() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceSnapshotImport,
 		},
+		CustomizeDiff: checkSnapshotUpdateOnlyAttrs,
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:             schema.TypeString,
@@ -422,5 +424,42 @@ func setSnapshotData(d *schema.ResourceData, snapshot *ionoscloud.Snapshot) erro
 			}
 		}
 	}
+	return nil
+}
+
+// check that update-only attributes are not explicitly
+// set during snapshot creation and return an error if any are found.
+func checkSnapshotUpdateOnlyAttrs(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
+	// Only validate during creation (no ID yet)
+	if diff.Id() != "" {
+		return nil
+	}
+
+	updateOnlyAttrs := []string{
+		"cpu_hot_plug", "ram_hot_plug", "nic_hot_plug", "nic_hot_unplug",
+		"disc_virtio_hot_plug", "disc_virtio_hot_unplug",
+	}
+
+	rawConfig := diff.GetRawConfig()
+	if rawConfig.IsNull() || !rawConfig.IsKnown() {
+		return nil
+	}
+	configMap := rawConfig.AsValueMap()
+
+	var invalidAttrs []string
+	for _, attr := range updateOnlyAttrs {
+		if v, ok := configMap[attr]; ok && !v.IsNull() {
+			invalidAttrs = append(invalidAttrs, attr)
+		}
+	}
+
+	if len(invalidAttrs) > 0 {
+		return fmt.Errorf(
+			"the following attributes cannot be set during snapshot creation and can only be "+
+				"updated after the snapshot exists: %s",
+			strings.Join(invalidAttrs, ", "),
+		)
+	}
+
 	return nil
 }
