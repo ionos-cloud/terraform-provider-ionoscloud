@@ -242,11 +242,14 @@ func (c *Client) UpdateBucketPolicy(ctx context.Context, data *BucketPolicyModel
 	// re-serialized API response — that would change the JSON structure
 	// (e.g. key ordering, Principal format) and cause a plan/state mismatch.
 	_, found, err := c.GetBucketPolicy(ctx, data.Bucket)
+	if err != nil {
+		return err
+	}
 	if !found {
 		return fmt.Errorf("bucket policy not found for bucket %s", data.Bucket.ValueString())
 	}
 
-	return err
+	return nil
 }
 
 // DeleteBucketPolicy deletes a bucket policy.
