@@ -1,5 +1,5 @@
-//go:build all || objectstoragemanagement || objectstoragemanagement
-// +build all objectstoragemanagement objectstoragemanagement
+//go:build all || objectstoragemanagement
+// +build all objectstoragemanagement
 
 package objectstoragemanagement_test
 
