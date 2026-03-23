@@ -9,23 +9,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check if comment triggers E2E tests
-        if: ${{ (github.event.comment.author_association == 'OWNER' || github.event.comment.author_association == 'MEMBER' || github.event.comment.author_association == 'COLLABORATOR' || github.event.comment.author_association == 'CONTRIBUTOR' ) &&
-          github.event.issue.pull_request &&
-          contains(github.event.comment.body,  '/test') }}
-        uses: actions/github-script@v6
+        if: ${{ (github.event.comment.author_association == 'OWNER' || github.event.comment.author_association == 'MEMBER' || github.event.comment.author_association == 'COLLABORATOR' || github.event.comment.author_association == 'CONTRIBUTOR' ) && github.event.issue.pull_request && contains(github.event.comment.body,  '/test') }}
+        uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410 # ratchet:actions/github-script@v6
         with:
-          script: |
+          script: |-
             const prNumber = context.payload.issue.number;
             const repo = context.repo.repo;
             const owner = context.repo.owner;
-            
+
             // Extract the tagname from the comment
+
             const commentBody = context.payload.comment.body.trim();
             const tagMatch = commentBody.match(/^\/test\s+(\S+)/);
             if (!tagMatch) {
               throw new Error('Comment must be in the format: /test tagname');
             }
             const tagname = tagMatch[1];
+
 
             await github.rest.actions.createWorkflowDispatch({
               owner: owner,

@@ -1,7 +1,7 @@
 name: Issue Creation Tracker
 on:
   issues:
-    types: [ opened, reopened ]
+    types: [opened, reopened]
 
 env:
   ISSUE_CREATOR: ${{ github.event.issue.user.login }}
@@ -47,8 +47,8 @@ jobs:
                 }
               ]
             }')
-          
+
           curl --location --request POST '${{ secrets.ISSUE_TRACKER_WEBHOOK }}' \
           --header 'Content-Type: application/json' \
           --data-raw "$payload"
-          
+
