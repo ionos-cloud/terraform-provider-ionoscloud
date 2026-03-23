@@ -149,10 +149,11 @@ func TestBucketPolicyPrincipal_RoundTrip(t *testing.T) {
 
 func TestPoliciesSemanticEqual(t *testing.T) {
 	tests := []struct {
-		name     string
-		a        string
-		b        string
-		expected bool
+		name      string
+		a         string
+		b         string
+		expected  bool
+		expectErr bool
 	}{
 		{
 			name: "identical policies",
@@ -244,11 +245,128 @@ func TestPoliciesSemanticEqual(t *testing.T) {
 				"Principal":{"AWS":"arn:aws:iam:::user/456"}}]}`,
 			expected: false,
 		},
+		{
+			name:      "invalid json identical strings",
+			a:         `{invalid json`,
+			b:         `{invalid json`,
+			expectErr: true,
+		},
+		{
+			name:      "invalid json different strings",
+			a:         `{invalid json a`,
+			b:         `{invalid json b`,
+			expectErr: true,
+		},
+		{
+			name:      "one valid one invalid json",
+			a:         `{"Version":"2012-10-17","Statement":[]}`,
+			b:         `{invalid json`,
+			expectErr: true,
+		},
+		{
+			name: "multiple principals object array vs flat array",
+			a: `{"Version":"2012-10-17","Statement":[{
+				"Effect":"Allow","Action":["s3:GetObject"],
+				"Resource":["arn:aws:s3:::bucket/*"],
+				"Principal":{"AWS":["arn:aws:iam:::user/123","arn:aws:iam:::user/456"]}}]}`,
+			b: `{"Version":"2012-10-17","Statement":[{
+				"Effect":"Allow","Action":["s3:GetObject"],
+				"Resource":["arn:aws:s3:::bucket/*"],
+				"Principal":["arn:aws:iam:::user/123","arn:aws:iam:::user/456"]}]}`,
+			expected: true,
+		},
+		{
+			name: "multiple principals same entries different order",
+			a: `{"Version":"2012-10-17","Statement":[{
+				"Effect":"Allow","Action":["s3:GetObject"],
+				"Resource":["arn:aws:s3:::bucket/*"],
+				"Principal":{"AWS":["arn:aws:iam:::user/123","arn:aws:iam:::user/456"]}}]}`,
+			b: `{"Version":"2012-10-17","Statement":[{
+				"Effect":"Allow","Action":["s3:GetObject"],
+				"Resource":["arn:aws:s3:::bucket/*"],
+				"Principal":{"AWS":["arn:aws:iam:::user/456","arn:aws:iam:::user/123"]}}]}`,
+			expected: true,
+		},
+		{
+			name: "multiple principals different sets",
+			a: `{"Version":"2012-10-17","Statement":[{
+				"Effect":"Allow","Action":["s3:GetObject"],
+				"Resource":["arn:aws:s3:::bucket/*"],
+				"Principal":{"AWS":["arn:aws:iam:::user/123","arn:aws:iam:::user/456"]}}]}`,
+			b: `{"Version":"2012-10-17","Statement":[{
+				"Effect":"Allow","Action":["s3:GetObject"],
+				"Resource":["arn:aws:s3:::bucket/*"],
+				"Principal":{"AWS":["arn:aws:iam:::user/123","arn:aws:iam:::user/789"]}}]}`,
+			expected: false,
+		},
+		{
+			name: "actions different order",
+			a: `{"Version":"2012-10-17","Statement":[{
+				"Effect":"Allow","Action":["s3:PutObject","s3:GetObject"],
+				"Resource":["arn:aws:s3:::bucket/*"],
+				"Principal":{"AWS":"*"}}]}`,
+			b: `{"Version":"2012-10-17","Statement":[{
+				"Effect":"Allow","Action":["s3:GetObject","s3:PutObject"],
+				"Resource":["arn:aws:s3:::bucket/*"],
+				"Principal":{"AWS":"*"}}]}`,
+			expected: true,
+		},
+		{
+			name: "resources different order",
+			a: `{"Version":"2012-10-17","Statement":[{
+				"Effect":"Allow","Action":["s3:GetObject"],
+				"Resource":["arn:aws:s3:::bucket/b","arn:aws:s3:::bucket/a"],
+				"Principal":{"AWS":"*"}}]}`,
+			b: `{"Version":"2012-10-17","Statement":[{
+				"Effect":"Allow","Action":["s3:GetObject"],
+				"Resource":["arn:aws:s3:::bucket/a","arn:aws:s3:::bucket/b"],
+				"Principal":{"AWS":"*"}}]}`,
+			expected: true,
+		},
+		{
+			name: "statements different order",
+			a: `{"Version":"2012-10-17","Statement":[
+				{"Effect":"Deny","Action":["s3:DeleteObject"],"Resource":["arn:aws:s3:::bucket/*"],"Principal":{"AWS":"*"}},
+				{"Effect":"Allow","Action":["s3:GetObject"],"Resource":["arn:aws:s3:::bucket/*"],"Principal":{"AWS":"*"}}
+			]}`,
+			b: `{"Version":"2012-10-17","Statement":[
+				{"Effect":"Allow","Action":["s3:GetObject"],"Resource":["arn:aws:s3:::bucket/*"],"Principal":{"AWS":"*"}},
+				{"Effect":"Deny","Action":["s3:DeleteObject"],"Resource":["arn:aws:s3:::bucket/*"],"Principal":{"AWS":"*"}}
+			]}`,
+			expected: true,
+		},
+		{
+			name: "statements different order with different content is not equal",
+			a: `{"Version":"2012-10-17","Statement":[
+				{"Effect":"Deny","Action":["s3:DeleteObject"],"Resource":["arn:aws:s3:::bucket/*"],"Principal":{"AWS":"*"}},
+				{"Effect":"Allow","Action":["s3:GetObject"],"Resource":["arn:aws:s3:::bucket/*"],"Principal":{"AWS":"*"}}
+			]}`,
+			b: `{"Version":"2012-10-17","Statement":[
+				{"Effect":"Allow","Action":["s3:PutObject"],"Resource":["arn:aws:s3:::bucket/*"],"Principal":{"AWS":"*"}},
+				{"Effect":"Deny","Action":["s3:DeleteObject"],"Resource":["arn:aws:s3:::bucket/*"],"Principal":{"AWS":"*"}}
+			]}`,
+			expected: false,
+		},
+		{
+			name:      "fails typed unmarshal (Statement as object instead of array)",
+			a:         `{"Statement":{"Effect":"Allow"}}`,
+			b:         `{ "Statement": { "Effect": "Allow" } }`,
+			expectErr: true,
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := PoliciesSemanticEqual(tt.a, tt.b)
+			result, err := PoliciesSemanticEqual(tt.a, tt.b)
+			if tt.expectErr {
+				if err == nil {
+					t.Errorf("PoliciesSemanticEqual() expected error, got nil")
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("PoliciesSemanticEqual() unexpected error: %v", err)
+			}
 			if result != tt.expected {
 				t.Errorf("PoliciesSemanticEqual() = %v, want %v", result, tt.expected)
 			}

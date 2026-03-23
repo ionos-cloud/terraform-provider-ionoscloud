@@ -193,7 +193,11 @@ func testAccCheckBucketPolicySemanticEqual(expected string) func(s *terraform.St
 			if actual == "" {
 				return fmt.Errorf("policy attribute is empty")
 			}
-			if !objectstorage.PoliciesSemanticEqual(actual, expected) {
+			equal, err := objectstorage.PoliciesSemanticEqual(actual, expected)
+			if err != nil {
+				return fmt.Errorf("failed to compare policies: %w", err)
+			}
+			if !equal {
 				return fmt.Errorf("policy not semantically equal.\nGot:      %s\nExpected: %s", actual, expected)
 			}
 		}

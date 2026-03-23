@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
-	"reflect"
+	"slices"
+	"strings"
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
@@ -114,51 +114,60 @@ type bucketPolicyStatementCondition struct {
 	DateLessThan    *string  `json:"DateLessThan,omitempty"`
 }
 
+// sortPolicy sorts all order-independent slices within a bucketPolicy so that
+// two semantically identical policies produce the same JSON after marshaling.
+func sortPolicy(p *bucketPolicy) {
+	for i := range p.Statement {
+		slices.Sort(p.Statement[i].Action)
+		slices.Sort(p.Statement[i].Resources)
+		slices.Sort(p.Statement[i].Principal.AWS)
+		if p.Statement[i].Condition != nil {
+			slices.Sort(p.Statement[i].Condition.IPs)
+			slices.Sort(p.Statement[i].Condition.ExcludedIPs)
+		}
+	}
+	slices.SortFunc(p.Statement, func(a, b bucketPolicyStatement) int {
+		aj, _ := json.Marshal(a)
+		bj, _ := json.Marshal(b)
+		return strings.Compare(string(aj), string(bj))
+	})
+}
+
 // PoliciesSemanticEqual returns true if two policy JSON strings represent the
-// same policy, regardless of JSON key ordering or Principal format differences
-// (e.g. ["arn:..."] vs {"AWS": "arn:..."}).
-func PoliciesSemanticEqual(statePolicy, apiPolicy string) bool {
-	normalize := func(s string) (any, error) {
-		var data bucketPolicy
-		if err := json.Unmarshal([]byte(s), &data); err != nil {
-			log.Printf("[WARN] PoliciesSemanticEqual: failed to unmarshal policy with typed schema: %v", err)
-			var raw any
-			if rawErr := json.Unmarshal([]byte(s), &raw); rawErr != nil {
-				return s, rawErr
-			}
-			return raw, nil
-		}
-
-		normalized, err := json.Marshal(data)
-		if err != nil {
-			log.Printf("[WARN] PoliciesSemanticEqual: failed to marshal normalized policy: %v", err)
-			var raw any
-			if rawErr := json.Unmarshal([]byte(s), &raw); rawErr != nil {
-				return s, rawErr
-			}
-			return raw, nil
-		}
-
-		var result any
-		if err := json.Unmarshal(normalized, &result); err != nil {
-			return string(normalized), err
-		}
-		return result, nil
+// same policy, regardless of JSON key ordering, element ordering within arrays,
+// or Principal format differences (e.g. ["arn:..."] vs {"AWS": "arn:..."}).
+// It returns an error if either policy string cannot be normalized into the
+// supported bucket policy representation.
+func PoliciesSemanticEqual(statePolicy, apiPolicy string) (bool, error) {
+	stateNormalized, err := normalizePolicy(statePolicy)
+	if err != nil {
+		return false, fmt.Errorf("normalizing state policy: %w", err)
+	}
+	apiNormalized, err := normalizePolicy(apiPolicy)
+	if err != nil {
+		return false, fmt.Errorf("normalizing API policy: %w", err)
 	}
 
-	stateNormalized, stateErr := normalize(statePolicy)
-	apiNormalized, apiErr := normalize(apiPolicy)
-	if stateErr != nil || apiErr != nil {
-		if stateErr != nil {
-			log.Printf("[WARN] PoliciesSemanticEqual: state policy normalization failed: %v", stateErr)
-		}
-		if apiErr != nil {
-			log.Printf("[WARN] PoliciesSemanticEqual: api policy normalization failed: %v", apiErr)
-		}
-		return statePolicy == apiPolicy
+	return stateNormalized == apiNormalized, nil
+}
+
+// normalizePolicy unmarshalls a policy JSON string into the canonical typed
+// representation, sorts all order-independent slices, and re-marshals it to
+// produce a deterministic string suitable for byte-level comparison.
+func normalizePolicy(s string) (string, error) {
+	var data bucketPolicy
+	if err := json.Unmarshal([]byte(s), &data); err != nil {
+		return "", fmt.Errorf("unmarshalling policy: %w", err)
 	}
 
-	return reflect.DeepEqual(stateNormalized, apiNormalized)
+	sortPolicy(&data)
+
+	normalized, err := json.Marshal(data)
+	if err != nil {
+		return "", fmt.Errorf("marshaling normalized policy: %w", err)
+	}
+
+	return string(normalized), nil
 }
 
 // CreateBucketPolicy creates a new bucket policy.
@@ -238,9 +247,11 @@ func (c *Client) UpdateBucketPolicy(ctx context.Context, data *BucketPolicyModel
 		return err
 	}
 
-	// Verify the policy was persisted, but don't overwrite data with the
-	// re-serialized API response — that would change the JSON structure
-	// (e.g. key ordering, Principal format) and cause a plan/state mismatch.
+	// Verify the policy was persisted, but keep the planned JSON in state.
+	// The API may re-serialize equivalent policies differently (for example by
+	// changing key ordering or Principal format), and writing that response back
+	// here would cause unnecessary state churn. Any real semantic drift must be
+	// detected later during Read via PoliciesSemanticEqual.
 	_, found, err := c.GetBucketPolicy(ctx, data.Bucket)
 	if err != nil {
 		return err

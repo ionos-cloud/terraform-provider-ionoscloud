@@ -122,7 +122,11 @@ func (r *bucketPolicyResource) Read(ctx context.Context, req resource.ReadReques
 	// (same principals, effects, etc. — just different JSON formatting like
 	// Principal as ["arn:..."] vs {"AWS": "arn:..."}), preserve the state's
 	// JSON to avoid perpetual diffs from format normalization.
-	if !objectstorage.PoliciesSemanticEqual(data.Policy.ValueString(), result.Policy.ValueString()) {
+	equal, err := objectstorage.PoliciesSemanticEqual(data.Policy.ValueString(), result.Policy.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddWarning("failed to compare bucket policies", err.Error())
+		data = result
+	} else if !equal {
 		data = result
 	}
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
