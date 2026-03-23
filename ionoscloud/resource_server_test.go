@@ -36,6 +36,10 @@ func TestAccServerBasic(t *testing.T) {
 		CheckDestroy:             testAccCheckServerDestroyCheck,
 		Steps: []resource.TestStep{
 			{
+				Config:      testAccCheckServerCdromImageError,
+				ExpectError: regexp.MustCompile(`was found.*with type.*CDROM`),
+			},
+			{
 				Config:      testAccCheckServerNoPwdOrSSH,
 				ExpectError: regexp.MustCompile(`either 'image_password' or 'ssh_key_path'/'ssh_keys' must be provided`),
 			},
