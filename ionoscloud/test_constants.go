@@ -62,6 +62,27 @@ resource ` + constant.PCCResource + ` ` + constant.PCCTestResource + ` {
 
 // Server Constants
 
+const testAccCheckServerCdromImageError = `
+resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
+  name     = "server-test"
+  location = "de/fra"
+}
+resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
+  name           = "` + constant.ServerTestResource + `"
+  datacenter_id  = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  cores          = 1
+  ram            = 1024
+  image_name     = "live-server-amd64.iso"
+  image_password = ` + constant.RandomPassword + `.server_image_password.result
+  type           = "ENTERPRISE"
+  volume {
+    name      = "system"
+    size      = 5
+    disk_type = "HDD"
+  }
+}
+` + ServerImagePassword
+
 const (
 	testAccCheckServerNoPwdOrSSH = `
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
