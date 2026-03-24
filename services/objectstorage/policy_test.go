@@ -348,6 +348,62 @@ func TestPoliciesSemanticEqual(t *testing.T) {
 			expected: false,
 		},
 		{
+			name: "condition IPs different order",
+			a: `{"Version":"2012-10-17","Statement":[{
+				"Effect":"Deny","Action":["s3:GetObject"],
+				"Resource":["arn:aws:s3:::bucket/*"],
+				"Principal":{"AWS":"*"},
+				"Condition":{"IpAddress":["192.168.1.1","10.0.0.1"]}}]}`,
+			b: `{"Version":"2012-10-17","Statement":[{
+				"Effect":"Deny","Action":["s3:GetObject"],
+				"Resource":["arn:aws:s3:::bucket/*"],
+				"Principal":{"AWS":"*"},
+				"Condition":{"IpAddress":["10.0.0.1","192.168.1.1"]}}]}`,
+			expected: true,
+		},
+		{
+			name: "condition ExcludedIPs different order",
+			a: `{"Version":"2012-10-17","Statement":[{
+				"Effect":"Deny","Action":["s3:GetObject"],
+				"Resource":["arn:aws:s3:::bucket/*"],
+				"Principal":{"AWS":"*"},
+				"Condition":{"NotIpAddress":["172.16.0.1","10.0.0.1"]}}]}`,
+			b: `{"Version":"2012-10-17","Statement":[{
+				"Effect":"Deny","Action":["s3:GetObject"],
+				"Resource":["arn:aws:s3:::bucket/*"],
+				"Principal":{"AWS":"*"},
+				"Condition":{"NotIpAddress":["10.0.0.1","172.16.0.1"]}}]}`,
+			expected: true,
+		},
+		{
+			name: "condition IPs different values",
+			a: `{"Version":"2012-10-17","Statement":[{
+				"Effect":"Deny","Action":["s3:GetObject"],
+				"Resource":["arn:aws:s3:::bucket/*"],
+				"Principal":{"AWS":"*"},
+				"Condition":{"IpAddress":["192.168.1.1","10.0.0.1"]}}]}`,
+			b: `{"Version":"2012-10-17","Statement":[{
+				"Effect":"Deny","Action":["s3:GetObject"],
+				"Resource":["arn:aws:s3:::bucket/*"],
+				"Principal":{"AWS":"*"},
+				"Condition":{"IpAddress":["192.168.1.1","10.0.0.2"]}}]}`,
+			expected: false,
+		},
+		{
+			name: "condition both IPs and ExcludedIPs different order",
+			a: `{"Version":"2012-10-17","Statement":[{
+				"Effect":"Deny","Action":["s3:GetObject"],
+				"Resource":["arn:aws:s3:::bucket/*"],
+				"Principal":{"AWS":"*"},
+				"Condition":{"IpAddress":["192.168.1.1","10.0.0.1"],"NotIpAddress":["172.16.0.1","10.10.0.1"]}}]}`,
+			b: `{"Version":"2012-10-17","Statement":[{
+				"Effect":"Deny","Action":["s3:GetObject"],
+				"Resource":["arn:aws:s3:::bucket/*"],
+				"Principal":{"AWS":"*"},
+				"Condition":{"IpAddress":["10.0.0.1","192.168.1.1"],"NotIpAddress":["10.10.0.1","172.16.0.1"]}}]}`,
+			expected: true,
+		},
+		{
 			name:      "fails typed unmarshal (Statement as object instead of array)",
 			a:         `{"Statement":{"Effect":"Allow"}}`,
 			b:         `{ "Statement": { "Effect": "Allow" } }`,
