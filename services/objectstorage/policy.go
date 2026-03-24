@@ -259,7 +259,6 @@ func (c *Client) UpdateBucketPolicy(ctx context.Context, data *BucketPolicyModel
 	if !found {
 		return fmt.Errorf("bucket policy not found for bucket %s", data.Bucket.ValueString())
 	}
-
 	return nil
 }
 

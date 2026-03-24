@@ -101,13 +101,13 @@ func (r *bucketPolicyResource) Read(ctx context.Context, req resource.ReadReques
 		return
 	}
 
-	var stateData *objectstorage.BucketPolicyModel
-	resp.Diagnostics.Append(req.State.Get(ctx, &stateData)...)
+	var state *objectstorage.BucketPolicyModel
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	result, found, err := r.client.GetBucketPolicy(ctx, stateData.Bucket)
+	result, found, err := r.client.GetBucketPolicy(ctx, state.Bucket)
 	if err != nil {
 		resp.Diagnostics.AddError("failed to read bucket policy", err.Error())
 		return
@@ -118,22 +118,22 @@ func (r *bucketPolicyResource) Read(ctx context.Context, req resource.ReadReques
 		return
 	}
 
-	// Default to the API response. Only preserve the existing stateData JSON when
+	// Default to the API response. Only preserve the existing state JSON when
 	// the policy is semantically equal (same principals, effects, etc.) to
 	// avoid perpetual diffs from format normalization.
-	if !stateData.Policy.IsNull() && !stateData.Policy.IsUnknown() {
-		equal, err := objectstorage.PoliciesSemanticEqual(stateData.Policy.ValueString(), result.Policy.ValueString())
+	if !state.Policy.IsNull() && !state.Policy.IsUnknown() {
+		equal, err := objectstorage.PoliciesSemanticEqual(state.Policy.ValueString(), result.Policy.ValueString())
 		if err != nil {
 			resp.Diagnostics.AddWarning("failed to compare bucket policies", err.Error())
 		}
 
 		if err == nil && equal {
-			result = stateData
+			result = state
 		}
 	}
 
-	stateData = result
-	resp.Diagnostics.Append(resp.State.Set(ctx, &stateData)...)
+	state = result
+	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 
 }
 
