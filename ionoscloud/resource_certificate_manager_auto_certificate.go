@@ -87,7 +87,7 @@ func autoCertificateCreate(ctx context.Context, d *schema.ResourceData, meta int
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsAutoCertificateReady)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while checking the creation status for the auto-certificate with ID: %v, error: %w", autoCertificateID, err), &diagutil.ErrorContext{Timeout: schema.TimeoutCreate})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while checking the creation status for the auto-certificate with ID: %v, error: %w", autoCertificateID, err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String()})
 	}
 	// Return with another read call because 'last_issued_certificate_id' is not provided in the
 	// creation response.
@@ -124,7 +124,7 @@ func autoCertificateUpdate(ctx context.Context, d *schema.ResourceData, meta int
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating auto-certificate: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 	if err = utils.WaitForResourceToBeReady(ctx, d, client.IsAutoCertificateReady); err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while checking the update status for the auto-certificate: %w", err), &diagutil.ErrorContext{Timeout: schema.TimeoutUpdate})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while checking the update status for the auto-certificate: %w", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String()})
 	}
 	if err = cert.SetAutoCertificateData(d, autoCertificate); err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -146,7 +146,7 @@ func autoCertificateDelete(ctx context.Context, d *schema.ResourceData, meta int
 	}
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsAutoCertificateDeleted)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("deletion check failed for auto-certificate: %w", err), &diagutil.ErrorContext{Timeout: schema.TimeoutDelete})
+		return diagutil.ToDiags(d, fmt.Errorf("deletion check failed for auto-certificate: %w", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String()})
 	}
 	return nil
 }

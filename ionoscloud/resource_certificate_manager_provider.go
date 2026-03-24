@@ -90,7 +90,7 @@ func providerCreate(ctx context.Context, d *schema.ResourceData, meta interface{
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsProviderReady)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while checking the creation status for the auto-certificate provider with ID: %v, error: %w", providerID, err), &diagutil.ErrorContext{Timeout: schema.TimeoutCreate})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while checking the creation status for the auto-certificate provider with ID: %v, error: %w", providerID, err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String()})
 	}
 	if err := cert.SetProviderData(d, response); err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -128,7 +128,7 @@ func providerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating auto-certificate provider with ID: %v, error: %w", providerID, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 	if err = utils.WaitForResourceToBeReady(ctx, d, client.IsProviderReady); err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while checking the update status for the auto-certificate provider with ID: %v, error: %w", providerID, err), &diagutil.ErrorContext{Timeout: schema.TimeoutUpdate})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while checking the update status for the auto-certificate provider with ID: %v, error: %w", providerID, err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String()})
 	}
 	if err := cert.SetProviderData(d, provider); err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -150,7 +150,7 @@ func providerDelete(ctx context.Context, d *schema.ResourceData, meta interface{
 	}
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsProviderDeleted)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("deletion check failed for auto-certificate provider with ID: %v, error: %w", providerID, err), &diagutil.ErrorContext{Timeout: schema.TimeoutDelete})
+		return diagutil.ToDiags(d, fmt.Errorf("deletion check failed for auto-certificate provider with ID: %v, error: %w", providerID, err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String()})
 	}
 	return nil
 }

@@ -122,7 +122,7 @@ func resourceKafkaClusterCreate(ctx context.Context, d *schema.ResourceData, met
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsClusterAvailable)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while Kafka Cluster waiting to be ready: %w", err), &diagutil.ErrorContext{Timeout: schema.TimeoutCreate})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while Kafka Cluster waiting to be ready: %w", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String()})
 	}
 
 	return resourceKafkaClusterRead(ctx, d, meta)
@@ -163,7 +163,7 @@ func resourceKafkaClusterDelete(ctx context.Context, d *schema.ResourceData, met
 
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsClusterDeleted)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("the check for Kafka Cluster deletion failed with the following error: %w", err), &diagutil.ErrorContext{Timeout: schema.TimeoutDelete})
+		return diagutil.ToDiags(d, fmt.Errorf("the check for Kafka Cluster deletion failed with the following error: %w", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String()})
 	}
 
 	d.SetId("")

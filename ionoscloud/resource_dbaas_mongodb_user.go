@@ -120,7 +120,7 @@ func resourceDbaasMongoUserCreate(ctx context.Context, d *schema.ResourceData, m
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsUserReady)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while waiting for the Mongo user to become available, user ID: %v, error: %w", clusterId+user.Properties.Username, err), &diagutil.ErrorContext{Timeout: schema.TimeoutCreate})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while waiting for the Mongo user to become available, user ID: %v, error: %w", clusterId+user.Properties.Username, err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String()})
 	}
 
 	return diagutil.ToDiags(d, dbaas.SetUserMongoData(d, &user), nil)
@@ -170,7 +170,7 @@ func resourceDbaasMongoUserUpdate(ctx context.Context, d *schema.ResourceData, m
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsUserReady)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while waiting for a Mongo user to become available after an update, username: %v, cluster ID: %v, error: %w", username, clusterId, err), &diagutil.ErrorContext{Timeout: schema.TimeoutUpdate})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while waiting for a Mongo user to become available after an update, username: %v, cluster ID: %v, error: %w", username, clusterId, err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String()})
 	}
 
 	return diagutil.ToDiags(d, dbaas.SetUserMongoData(d, &user), nil)
@@ -218,7 +218,7 @@ func resourceDbaasMongoUserDelete(ctx context.Context, d *schema.ResourceData, m
 	// Wait, catching any errors
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsUserDeleted)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while waiting for the Mongo user: to be deleted, error: %w", err), &diagutil.ErrorContext{Timeout: schema.TimeoutDelete})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while waiting for the Mongo user: to be deleted, error: %w", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String()})
 	}
 
 	d.SetId("")

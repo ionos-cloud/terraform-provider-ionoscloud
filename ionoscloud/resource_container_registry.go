@@ -131,7 +131,7 @@ func resourceContainerRegistryCreate(ctx context.Context, d *schema.ResourceData
 	d.SetId(*containerRegistryResponse.Id)
 
 	if err := utils.WaitForResourceToBeReady(ctx, d, client.IsRegistryReady); err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error waiting for registry to be ready: %w", err), &diagutil.ErrorContext{Timeout: schema.TimeoutCreate})
+		return diagutil.ToDiags(d, fmt.Errorf("error waiting for registry to be ready: %w", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String()})
 	}
 	return append(warnings, resourceContainerRegistryRead(ctx, d, meta)...)
 }
@@ -187,7 +187,7 @@ func resourceContainerRegistryUpdate(ctx context.Context, d *schema.ResourceData
 	}
 
 	if err := utils.WaitForResourceToBeReady(ctx, d, client.IsRegistryReady); err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error waiting for registry to be ready: %w", err), &diagutil.ErrorContext{Timeout: schema.TimeoutUpdate})
+		return diagutil.ToDiags(d, fmt.Errorf("error waiting for registry to be ready: %w", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String()})
 	}
 
 	return append(warnings, resourceContainerRegistryRead(ctx, d, meta)...)
@@ -212,7 +212,7 @@ func resourceContainerRegistryDelete(ctx context.Context, d *schema.ResourceData
 		return diagutil.ToDiags(d, fmt.Errorf("error while deleting registry %s: %w", registryId, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 
-	return diagutil.ToDiags(d, utils.WaitForResourceToBeDeleted(ctx, d, client.IsRegistryDeleted), &diagutil.ErrorContext{Timeout: schema.TimeoutDelete})
+	return diagutil.ToDiags(d, utils.WaitForResourceToBeDeleted(ctx, d, client.IsRegistryDeleted), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String()})
 }
 
 func resourceContainerRegistryImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {

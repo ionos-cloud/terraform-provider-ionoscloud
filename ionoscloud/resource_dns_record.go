@@ -137,7 +137,7 @@ func recordDelete(ctx context.Context, d *schema.ResourceData, meta interface{})
 	}
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsRecordDeleted)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while waiting for the DNS Record to be deleted, error: %w", err), &diagutil.ErrorContext{Timeout: schema.TimeoutDelete})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while waiting for the DNS Record to be deleted, error: %w", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String()})
 	}
 	return nil
 }

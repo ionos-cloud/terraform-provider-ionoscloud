@@ -215,7 +215,7 @@ func mariaDBClusterCreate(ctx context.Context, d *schema.ResourceData, meta inte
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsClusterReady)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error occurred while checking the status for MariaDB cluster with ID: %v, error: %w", clusterID, err), &diagutil.ErrorContext{Timeout: schema.TimeoutCreate})
+		return diagutil.ToDiags(d, fmt.Errorf("error occurred while checking the status for MariaDB cluster with ID: %v, error: %w", clusterID, err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String()})
 	}
 	if err := client.SetMariaDBClusterData(d, response); err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -236,7 +236,7 @@ func mariaDBClusterDelete(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsClusterDeleted)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("deletion check failed for MariaDB cluster with ID: %v, error: %w", clusterID, err), &diagutil.ErrorContext{Timeout: schema.TimeoutDelete})
+		return diagutil.ToDiags(d, fmt.Errorf("deletion check failed for MariaDB cluster with ID: %v, error: %w", clusterID, err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String()})
 	}
 
 	// wait after the deletion of the cluster, for the lan to be freed
@@ -311,7 +311,7 @@ func mariaDBClusterUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsClusterReady)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error occurred while checking the status for MariaDB cluster with ID: %v in location %s, error: %w", clusterID, location, err), &diagutil.ErrorContext{Timeout: schema.TimeoutUpdate})
+		return diagutil.ToDiags(d, fmt.Errorf("error occurred while checking the status for MariaDB cluster with ID: %v in location %s, error: %w", clusterID, location, err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String()})
 	}
 	if err := client.SetMariaDBClusterData(d, response); err != nil {
 		return diagutil.ToDiags(d, err, nil)

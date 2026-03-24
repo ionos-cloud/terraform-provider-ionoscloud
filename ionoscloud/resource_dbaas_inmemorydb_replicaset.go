@@ -214,7 +214,7 @@ func replicaSetCreate(ctx context.Context, d *schema.ResourceData, meta interfac
 	d.SetId(replicaSetID)
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsReplicaSetReady)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error occurred while checking the status for InMemoryDB replica set with ID: %v, error: %w", replicaSetID, err), &diagutil.ErrorContext{Timeout: schema.TimeoutCreate})
+		return diagutil.ToDiags(d, fmt.Errorf("error occurred while checking the status for InMemoryDB replica set with ID: %v, error: %w", replicaSetID, err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String()})
 	}
 	// Call the read function to save the DNS name in the state (DNS name is not present in the creation response).
 	return replicaSetRead(ctx, d, meta)
@@ -233,7 +233,7 @@ func replicaSetDelete(ctx context.Context, d *schema.ResourceData, meta interfac
 	}
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsReplicaSetDeleted)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("deletion check failed for InMemoryDB replica set with ID: %v, error: %w", replicaSetID, err), &diagutil.ErrorContext{Timeout: schema.TimeoutDelete})
+		return diagutil.ToDiags(d, fmt.Errorf("deletion check failed for InMemoryDB replica set with ID: %v, error: %w", replicaSetID, err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String()})
 	}
 
 	// wait for the lan to be freed after the deletion of the replica set
@@ -269,7 +269,7 @@ func replicaSetUpdate(ctx context.Context, d *schema.ResourceData, meta interfac
 	}
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsReplicaSetReady)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error occurred while checking the status for InMemoryDB replica set after update, replica set ID: %v, error: %w", replicaSetID, err), &diagutil.ErrorContext{Timeout: schema.TimeoutUpdate})
+		return diagutil.ToDiags(d, fmt.Errorf("error occurred while checking the status for InMemoryDB replica set after update, replica set ID: %v, error: %w", replicaSetID, err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String()})
 	}
 	if err := client.SetReplicaSetData(d, response); err != nil {
 		return diagutil.ToDiags(d, err, nil)

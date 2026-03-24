@@ -134,7 +134,7 @@ func resourceVpnIPSecGatewayCreate(ctx context.Context, d *schema.ResourceData, 
 	d.SetId(gateway.Id)
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsIPSecGatewayReady)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("creating %w ", err), &diagutil.ErrorContext{Timeout: schema.TimeoutCreate})
+		return diagutil.ToDiags(d, fmt.Errorf("creating %w ", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String()})
 	}
 
 	return resourceVpnIPSecGatewayRead(ctx, d, meta)
@@ -167,7 +167,7 @@ func resourceVpnIPSecGatewayUpdate(ctx context.Context, d *schema.ResourceData, 
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsIPSecGatewayReady)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("while waiting for IPSec Gateway to be ready: %w", err), &diagutil.ErrorContext{Timeout: schema.TimeoutUpdate})
+		return diagutil.ToDiags(d, fmt.Errorf("while waiting for IPSec Gateway to be ready: %w", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String()})
 	}
 
 	return diagutil.ToDiags(d, vpn.SetIPSecGatewayData(d, gateway), nil)
@@ -191,7 +191,7 @@ func resourceVpnIPSecGatewayDelete(ctx context.Context, d *schema.ResourceData, 
 	time.Sleep(5 * time.Second)
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsIPSecGatewayDeleted)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("while deleting IPSec Gateway: %w", err), &diagutil.ErrorContext{Timeout: schema.TimeoutDelete})
+		return diagutil.ToDiags(d, fmt.Errorf("while deleting IPSec Gateway: %w", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String()})
 	}
 
 	return nil

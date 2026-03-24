@@ -105,7 +105,7 @@ func resourceNFSClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 	d.SetId(clusterID)
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsClusterReady)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error checking status for NFS Cluster with ID %v: %w", clusterID, err), &diagutil.ErrorContext{Timeout: schema.TimeoutCreate})
+		return diagutil.ToDiags(d, fmt.Errorf("error checking status for NFS Cluster with ID %v: %w", clusterID, err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String()})
 	}
 	if err := client.SetNFSClusterData(d, response); err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -122,7 +122,7 @@ func resourceNFSClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsClusterReady)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error checking status for NFS Cluster %w", err), &diagutil.ErrorContext{Timeout: schema.TimeoutUpdate})
+		return diagutil.ToDiags(d, fmt.Errorf("error checking status for NFS Cluster %w", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String()})
 	}
 	if err := client.SetNFSClusterData(d, response); err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -139,7 +139,7 @@ func resourceNFSClusterDelete(ctx context.Context, d *schema.ResourceData, meta 
 	}
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsClusterDeleted)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("deletion check failed for NFS Cluster with ID: %v, error: %w", clusterID, err), &diagutil.ErrorContext{Timeout: schema.TimeoutDelete})
+		return diagutil.ToDiags(d, fmt.Errorf("deletion check failed for NFS Cluster with ID: %v, error: %w", clusterID, err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String()})
 	}
 	return nil
 }

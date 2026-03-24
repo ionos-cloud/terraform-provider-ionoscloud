@@ -96,7 +96,7 @@ func reverseRecordDelete(ctx context.Context, d *schema.ResourceData, meta inter
 	}
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsReverseRecordDeleted)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while waiting for the DNS Reverse Record to be deleted: %w", err), &diagutil.ErrorContext{Timeout: schema.TimeoutDelete})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while waiting for the DNS Reverse Record to be deleted: %w", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String()})
 	}
 	return nil
 }

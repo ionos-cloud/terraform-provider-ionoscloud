@@ -101,7 +101,7 @@ func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsTopicAvailable)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred  while Kafka Cluster Topic waiting to be ready: %w", err), &diagutil.ErrorContext{Timeout: schema.TimeoutCreate})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred  while Kafka Cluster Topic waiting to be ready: %w", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String()})
 	}
 
 	return resourceKafkaTopicRead(ctx, d, meta)
@@ -148,7 +148,7 @@ func resourceKafkaTopicDelete(ctx context.Context, d *schema.ResourceData, meta 
 
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsTopicDeleted)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("the check for Kafka Cluster Topic deletion failed with the following error: %w", err), &diagutil.ErrorContext{Timeout: schema.TimeoutDelete})
+		return diagutil.ToDiags(d, fmt.Errorf("the check for Kafka Cluster Topic deletion failed with the following error: %w", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String()})
 	}
 
 	d.SetId("")

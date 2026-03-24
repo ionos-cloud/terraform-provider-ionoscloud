@@ -111,7 +111,7 @@ func resourceCertificateManagerCreate(ctx context.Context, d *schema.ResourceDat
 	d.SetId(certificateDto.Id)
 
 	if err = utils.WaitForResourceToBeReady(ctx, d, client.IsCertReady); err != nil {
-		return diagutil.ToDiags(d, err, &diagutil.ErrorContext{Timeout: schema.TimeoutCreate})
+		return diagutil.ToDiags(d, err, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String()})
 	}
 
 	return resourceCertificateManagerRead(ctx, d, meta)
@@ -149,7 +149,7 @@ func resourceCertificateManagerUpdate(ctx context.Context, d *schema.ResourceDat
 	}
 
 	if err = utils.WaitForResourceToBeReady(ctx, d, client.IsCertReady); err != nil {
-		return diagutil.ToDiags(d, err, &diagutil.ErrorContext{Timeout: schema.TimeoutUpdate})
+		return diagutil.ToDiags(d, err, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String()})
 	}
 
 	return resourceCertificateManagerRead(ctx, d, meta)
@@ -165,7 +165,7 @@ func resourceCertificateManagerDelete(ctx context.Context, d *schema.ResourceDat
 
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsCertDeleted)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("deleting %w", err), &diagutil.ErrorContext{Timeout: schema.TimeoutDelete})
+		return diagutil.ToDiags(d, fmt.Errorf("deleting %w", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String()})
 	}
 
 	log.Printf("[INFO] Successfully deleted certificate: %s", d.Id())
