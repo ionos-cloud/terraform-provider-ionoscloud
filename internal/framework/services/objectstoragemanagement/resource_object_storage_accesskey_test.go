@@ -1,5 +1,5 @@
-//go:build all || objectstorage || objectstoragemanagement
-// +build all objectstorage objectstoragemanagement
+//go:build all || objectstoragemanagement
+// +build all objectstoragemanagement
 
 package objectstoragemanagement_test
 
@@ -13,6 +13,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/acctest"
 )
 
