@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # ratchet:actions/checkout@v4
         with:
           submodules: true
 
@@ -53,7 +53,7 @@ jobs:
             -f context="test-${{ github.event.inputs.tag }}"
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # ratchet:actions/setup-go@v5
         with:
           go-version-file: 'go.mod'
 
@@ -83,7 +83,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           EXAMPLE_HASH: ${{ needs.get-example-list.outputs.example_hash }}
-        run: |
+        run: |-
           gh api \
             --method POST \
             -H "Accept: application/vnd.github+json" \
