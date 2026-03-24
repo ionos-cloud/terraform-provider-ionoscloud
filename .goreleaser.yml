@@ -72,4 +72,4 @@ sboms:
       - "--output"
       - "cyclonedx-json=$document"
     documents:
-      - "{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}.cyclonedx.json"
+      - "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}.cyclonedx.json"
