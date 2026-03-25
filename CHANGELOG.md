@@ -11,6 +11,7 @@
 - Remove unused `password` field from `users` attribute in `ionoscloud_group` resource schema.
 - Fixed VPN IPSec Gateway to use correct `fileconfiguration.VPN` constant instead of incorrect `fileconfiguration.APIGateway`.
 - Fixed typo in VPN IPSec Gateway data source documentation heading.
+- Fixed `logging_format` field in `ionoscloud_networkloadbalancer` resource causing perpetual drift by adding `Computed: true` to the schema ([#918](https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/918)).
 
 ## 6.7.22
 ### Features
