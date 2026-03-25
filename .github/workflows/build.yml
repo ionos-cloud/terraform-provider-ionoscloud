@@ -41,6 +41,8 @@ jobs:
           go mod vendor
           if [ -n "$(git status --porcelain vendor/)" ]; then
             echo "::error::vendor/ is out of date. Please run 'go mod vendor' and commit the changes."
+            echo "git status --porcelain vendor/:"
+            git status --porcelain vendor/
             git diff --stat vendor/
             exit 1
           fi
