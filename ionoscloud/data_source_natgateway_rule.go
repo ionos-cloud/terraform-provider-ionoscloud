@@ -2,7 +2,6 @@ package ionoscloud
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 
@@ -11,6 +10,7 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 func dataSourceNatGatewayRule() *schema.Resource {
@@ -108,22 +108,22 @@ func dataSourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, m
 
 	datacenterId, dcIdOk := d.GetOk("datacenter_id")
 	if !dcIdOk {
-		return diag.FromErr(errors.New("no datacenter_id was specified"))
+		return diagutil.ToDiags(d, fmt.Errorf("no datacenter_id was specified"), nil)
 	}
 
 	natgatewayId, ngIdOk := d.GetOk("natgateway_id")
 	if !ngIdOk {
-		return diag.FromErr(errors.New("no natgateway_id was specified"))
+		return diagutil.ToDiags(d, fmt.Errorf("no natgateway_id was specified"), nil)
 	}
 
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")
 
 	if idOk && nameOk {
-		return diag.FromErr(errors.New("id and name cannot be both specified in the same time"))
+		return diagutil.ToDiags(d, fmt.Errorf("id and name cannot be both specified in the same time"), nil)
 	}
 	if !idOk && !nameOk {
-		return diag.FromErr(errors.New("please provide either the lan id or name"))
+		return diagutil.ToDiags(d, fmt.Errorf("please provide either the lan id or name"), nil)
 	}
 
 	var natGatewayRule ionoscloud.NatGatewayRule
@@ -134,7 +134,7 @@ func dataSourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, m
 		natGatewayRule, apiResponse, err = client.NATGatewaysApi.DatacentersNatgatewaysRulesFindByNatGatewayRuleId(ctx, datacenterId.(string), natgatewayId.(string), id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching the nat gateway rule %s: %w", id.(string), err))
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the nat gateway rule %s: %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 		}
 	} else {
 		/* search by name */
@@ -143,7 +143,7 @@ func dataSourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, m
 		natGatewayRules, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesGet(ctx, datacenterId.(string), natgatewayId.(string)).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching nat gateway rules: %w", err))
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching nat gateway rules: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 		}
 
 		var results []ionoscloud.NatGatewayRule
@@ -153,7 +153,7 @@ func dataSourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, m
 					tmpNatGatewayRule, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesFindByNatGatewayRuleId(ctx, datacenterId.(string), natgatewayId.(string), *ngr.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {
-						return diag.FromErr(fmt.Errorf("an error occurred while fetching nat gateway rule with ID %s: %w", *ngr.Id, err))
+						return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching nat gateway rule with ID %s: %w", *ngr.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 					}
 					results = append(results, tmpNatGatewayRule)
 				}
@@ -162,9 +162,9 @@ func dataSourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, m
 		}
 
 		if results == nil || len(results) == 0 {
-			return diag.FromErr(fmt.Errorf("no nat gateway rule found with the specified criteria: name = %s", name.(string)))
+			return diagutil.ToDiags(d, fmt.Errorf("no nat gateway rule found with the specified criteria: name = %s", name.(string)), nil)
 		} else if len(results) > 1 {
-			return diag.FromErr(fmt.Errorf("more than one nat gateway rule found with the specified criteria: name = %s", name.(string)))
+			return diagutil.ToDiags(d, fmt.Errorf("more than one nat gateway rule found with the specified criteria: name = %s", name.(string)), nil)
 		} else {
 			natGatewayRule = results[0]
 		}
@@ -172,7 +172,7 @@ func dataSourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	if err = setNatGatewayRuleData(d, &natGatewayRule); err != nil {
-		return diag.FromErr(err)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	return nil

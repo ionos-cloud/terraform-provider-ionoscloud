@@ -232,12 +232,6 @@ func DiffEmptyIps(_, old, new string, _ *schema.ResourceData) bool {
 	return false
 }
 
-// ApiResponseInfo - interface over different ApiResponse types from sdks
-type ApiResponseInfo interface {
-	HttpNotFound() bool
-	LogInfo()
-}
-
 // ResourceReadyFunc polls api to see if resource exists based on id
 type ResourceReadyFunc func(ctx context.Context, d *schema.ResourceData) (bool, error)
 

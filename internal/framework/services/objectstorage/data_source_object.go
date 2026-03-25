@@ -12,6 +12,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstorage"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 var (
@@ -160,7 +161,7 @@ func (d *objectDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 
 	result, found, err := d.client.GetObjectForDataSource(ctx, data)
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to read resource", err.Error())
+		resp.Diagnostics.AddError("Failed to read resource", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString() + "/" + data.Key.ValueString()}).Error())
 		return
 	}
 

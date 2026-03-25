@@ -13,6 +13,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstorage"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 var (
@@ -87,7 +88,7 @@ func (r *bucketPolicyResource) Create(ctx context.Context, req resource.CreateRe
 	}
 
 	if err := r.client.CreateBucketPolicy(ctx, data); err != nil {
-		resp.Diagnostics.AddError("Failed to create resource", err.Error())
+		resp.Diagnostics.AddError("Failed to create resource", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
 		return
 	}
 
@@ -109,7 +110,7 @@ func (r *bucketPolicyResource) Read(ctx context.Context, req resource.ReadReques
 
 	result, found, err := r.client.GetBucketPolicy(ctx, state.Bucket)
 	if err != nil {
-		resp.Diagnostics.AddError("failed to read bucket policy", err.Error())
+		resp.Diagnostics.AddError("failed to read bucket policy", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
 		return
 	}
 
@@ -155,7 +156,7 @@ func (r *bucketPolicyResource) Update(ctx context.Context, req resource.UpdateRe
 	}
 
 	if err := r.client.UpdateBucketPolicy(ctx, data); err != nil {
-		resp.Diagnostics.AddError("failed to update bucket policy", err.Error())
+		resp.Diagnostics.AddError("failed to update bucket policy", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
 		return
 	}
 
@@ -176,7 +177,7 @@ func (r *bucketPolicyResource) Delete(ctx context.Context, req resource.DeleteRe
 	}
 
 	if err := r.client.DeleteBucketPolicy(ctx, data.Bucket); err != nil {
-		resp.Diagnostics.AddError("failed to delete bucket policy", err.Error())
+		resp.Diagnostics.AddError("failed to delete bucket policy", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
 		return
 	}
 }

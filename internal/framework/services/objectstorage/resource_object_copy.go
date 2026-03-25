@@ -19,6 +19,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstorage"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 var (
@@ -243,7 +244,7 @@ func (r *objectCopyResource) Create(ctx context.Context, req resource.CreateRequ
 	}
 
 	if err := r.client.CopyObject(ctx, data); err != nil {
-		resp.Diagnostics.AddError("failed to create object copy", formatXMLError(err).Error())
+		resp.Diagnostics.AddError("failed to create object copy", diagutil.WrapError(formatXMLError(err), &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString() + "/" + data.Key.ValueString()}).Error())
 		return
 	}
 
@@ -265,7 +266,7 @@ func (r *objectCopyResource) Read(ctx context.Context, req resource.ReadRequest,
 
 	result, found, err := r.client.GetObjectCopy(ctx, data)
 	if err != nil {
-		resp.Diagnostics.AddError("failed to read object copy", formatXMLError(err).Error())
+		resp.Diagnostics.AddError("failed to read object copy", diagutil.WrapError(formatXMLError(err), &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString() + "/" + data.Key.ValueString()}).Error())
 		return
 	}
 
@@ -303,7 +304,7 @@ func (r *objectCopyResource) Update(ctx context.Context, req resource.UpdateRequ
 	}
 
 	if err := r.client.UpdateObjectCopy(ctx, plan, state); err != nil {
-		resp.Diagnostics.AddError("failed to update object copy", formatXMLError(err).Error())
+		resp.Diagnostics.AddError("failed to update object copy", diagutil.WrapError(formatXMLError(err), &diagutil.ErrorContext{ResourceName: plan.Bucket.ValueString() + "/" + plan.Key.ValueString()}).Error())
 		return
 	}
 
@@ -324,7 +325,7 @@ func (r *objectCopyResource) Delete(ctx context.Context, req resource.DeleteRequ
 	}
 
 	if err := r.client.DeleteObjectCopy(ctx, data); err != nil {
-		resp.Diagnostics.AddError("failed to delete object copy", formatXMLError(err).Error())
+		resp.Diagnostics.AddError("failed to delete object copy", diagutil.WrapError(formatXMLError(err), &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString() + "/" + data.Key.ValueString()}).Error())
 		return
 	}
 }

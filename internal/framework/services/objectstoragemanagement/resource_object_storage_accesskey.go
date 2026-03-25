@@ -15,6 +15,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	objectStorageManagementService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstoragemanagement"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 var (
@@ -124,7 +125,7 @@ func (r *accesskeyResource) Create(ctx context.Context, req resource.CreateReque
 	}
 	accessKeyResponse, _, err := r.client.CreateAccessKey(ctx, accessKey, createTimeout)
 	if err != nil {
-		resp.Diagnostics.AddError("failed to create accessKey", err.Error())
+		resp.Diagnostics.AddError("failed to create accessKey", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Description.ValueString()}).Error())
 		return
 	}
 	// we need this because secretkey is only available on create response
@@ -132,7 +133,7 @@ func (r *accesskeyResource) Create(ctx context.Context, req resource.CreateReque
 
 	accessKeyRead, _, err := r.client.GetAccessKey(ctx, data.ID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("access Key API error", err.Error())
+		resp.Diagnostics.AddError("access Key API error", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceID: data.ID.ValueString()}).Error())
 		return
 	}
 
@@ -156,7 +157,7 @@ func (r *accesskeyResource) Read(ctx context.Context, req resource.ReadRequest, 
 
 	accessKey, apiResponse, err := r.client.GetAccessKey(ctx, data.ID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("read Access Key API error", err.Error())
+		resp.Diagnostics.AddError("read Access Key API error", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceID: data.ID.ValueString()}).Error())
 		return
 	}
 	if apiResponse.HttpNotFound() {
@@ -197,7 +198,7 @@ func (r *accesskeyResource) Update(ctx context.Context, req resource.UpdateReque
 
 	accessKeyResponse, _, err := r.client.UpdateAccessKey(ctx, state.ID.ValueString(), accessKey, updateTimeout)
 	if err != nil {
-		resp.Diagnostics.AddError("failed to update accessKey", err.Error())
+		resp.Diagnostics.AddError("failed to update accessKey", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceID: state.ID.ValueString()}).Error())
 		return
 	}
 
@@ -205,7 +206,7 @@ func (r *accesskeyResource) Update(ctx context.Context, req resource.UpdateReque
 
 	accessKeyRead, _, err := r.client.GetAccessKey(ctx, accessKeyResponse.Id)
 	if err != nil {
-		resp.Diagnostics.AddError("on update, read access Key API error", err.Error())
+		resp.Diagnostics.AddError("on update, read access Key API error", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceID: accessKeyResponse.Id}).Error())
 		return
 	}
 
@@ -235,7 +236,7 @@ func (r *accesskeyResource) Delete(ctx context.Context, req resource.DeleteReque
 	defer cancel()
 
 	if _, err := r.client.DeleteAccessKey(ctx, data.ID.ValueString(), deleteTimeout); err != nil {
-		resp.Diagnostics.AddError("failed to delete accesskey", err.Error())
+		resp.Diagnostics.AddError("failed to delete accesskey", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceID: data.ID.ValueString()}).Error())
 		return
 	}
 }

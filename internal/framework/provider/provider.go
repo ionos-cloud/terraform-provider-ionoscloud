@@ -25,7 +25,9 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/objectstoragemanagement"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
+	contractService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/contract"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 // FrameworkClientOptions is the configuration for the provider.
@@ -239,6 +241,10 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 	resp.DataSourceData = client
 	resp.EphemeralResourceData = client
 	resp.ResourceData = client
+
+	diagutil.SetupContractNumberResolver(clientOpts.ContractNumber.ValueString(), token, func() string { //nolint:contextcheck
+		return contractService.GetContractNumber(client)
+	})
 }
 
 // Resources returns the resources for the provider.

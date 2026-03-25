@@ -10,6 +10,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 func dataSourceDbaasPgSqlDatabase() *schema.Resource {
@@ -54,12 +55,12 @@ func dataSourceDbaasPgSqlReadDatabase(ctx context.Context, d *schema.ResourceDat
 	database, apiResponse, err := client.FindDatabaseByName(ctx, clusterId, name)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
-			return diag.FromErr(fmt.Errorf("no PgSql database found with the specified name: %s and cluster ID: %s", name, clusterId))
+			return diagutil.ToDiags(d, fmt.Errorf("no PgSql database found with the specified name: %s and cluster ID: %s", name, clusterId), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 		}
-		return diag.FromErr(fmt.Errorf("an error occurred while fetching the PgSql database: %s, cluster ID: %s, err: %w", name, clusterId, err))
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the PgSql database: %s, cluster ID: %s, err: %w", name, clusterId, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 	if err := dbaas.SetDatabasePgSqlData(d, &database); err != nil {
-		return diag.FromErr(err)
+		return diagutil.ToDiags(d, err, nil)
 	}
 	return nil
 }

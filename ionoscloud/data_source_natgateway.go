@@ -2,7 +2,6 @@ package ionoscloud
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 
@@ -12,6 +11,7 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 func dataSourceNatGateway() *schema.Resource {
@@ -84,17 +84,17 @@ func dataSourceNatGatewayRead(ctx context.Context, d *schema.ResourceData, meta 
 
 	datacenterId, dcIdOk := d.GetOk("datacenter_id")
 	if !dcIdOk {
-		return diag.FromErr(errors.New("no datacenter_id was specified"))
+		return diagutil.ToDiags(d, fmt.Errorf("no datacenter_id was specified"), nil)
 	}
 
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")
 
 	if idOk && nameOk {
-		return diag.FromErr(errors.New("id and name cannot be both specified in the same time"))
+		return diagutil.ToDiags(d, fmt.Errorf("id and name cannot be both specified in the same time"), nil)
 	}
 	if !idOk && !nameOk {
-		return diag.FromErr(errors.New("please provide either the nat gateway id or name"))
+		return diagutil.ToDiags(d, fmt.Errorf("please provide either the nat gateway id or name"), nil)
 	}
 	var natGateway ionoscloud.NatGateway
 	var apiResponse *ionoscloud.APIResponse
@@ -104,7 +104,7 @@ func dataSourceNatGatewayRead(ctx context.Context, d *schema.ResourceData, meta 
 		natGateway, apiResponse, err = client.NATGatewaysApi.DatacentersNatgatewaysFindByNatGatewayId(ctx, datacenterId.(string), id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching the nat gateway %s: %w", id.(string), err))
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the nat gateway %s: %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 		}
 	} else {
 		/* search by name */
@@ -113,7 +113,7 @@ func dataSourceNatGatewayRead(ctx context.Context, d *schema.ResourceData, meta 
 		natGateways, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysGet(ctx, datacenterId.(string)).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching nat gateway: %w", err))
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching nat gateway: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 		}
 
 		var results []ionoscloud.NatGateway
@@ -123,7 +123,7 @@ func dataSourceNatGatewayRead(ctx context.Context, d *schema.ResourceData, meta 
 					tmpNatGateway, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysFindByNatGatewayId(ctx, datacenterId.(string), *ng.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {
-						return diag.FromErr(fmt.Errorf("an error occurred while fetching nat gateway with ID %s: %w", *ng.Id, err))
+						return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching nat gateway with ID %s: %w", *ng.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 					}
 					natGateway = tmpNatGateway
 					results = append(results, natGateway)
@@ -133,9 +133,9 @@ func dataSourceNatGatewayRead(ctx context.Context, d *schema.ResourceData, meta 
 		}
 
 		if results == nil || len(results) == 0 {
-			return diag.FromErr(fmt.Errorf("no nat gateway found with the specified criteria: name = %s", name.(string)))
+			return diagutil.ToDiags(d, fmt.Errorf("no nat gateway found with the specified criteria: name = %s", name.(string)), nil)
 		} else if len(results) > 1 {
-			return diag.FromErr(fmt.Errorf("more than one nat gateway found with the specified criteria: name = %s", name.(string)))
+			return diagutil.ToDiags(d, fmt.Errorf("more than one nat gateway found with the specified criteria: name = %s", name.(string)), nil)
 		} else {
 			natGateway = results[0]
 		}
@@ -143,7 +143,7 @@ func dataSourceNatGatewayRead(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	if err = setNatGatewayData(d, &natGateway); err != nil {
-		return diag.FromErr(err)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	return nil

@@ -17,6 +17,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapinic"
 	cloudapiflowlog "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/flowlog"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/nsg"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 func resourceNic() *schema.Resource {
@@ -194,16 +195,14 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	nic, err := cloudapinic.GetNicFromSchemaCreate(d, "")
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error occurred while getting nic from schema: %w", err))
-		return diags
+		return diagutil.ToDiags(d, fmt.Errorf("error occurred while getting nic from schema: %w", err), nil)
 	}
 
 	dcid := d.Get("datacenter_id").(string)
 	srvid := d.Get("server_id").(string)
-	createdNic, _, err := ns.Create(ctx, dcid, srvid, nic)
+	createdNic, apiResponse, err := ns.Create(ctx, dcid, srvid, nic)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error occurred while creating a nic: %w", err))
-		return diags
+		return diagutil.ToDiags(d, fmt.Errorf("error occurred while creating a nic: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 
 	if createdNic.Id != nil {
@@ -224,7 +223,7 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 	// Probably a read write consistency issue.
 	// We're retrying for 5 minutes. 404 - means we keep on trying.
 	var foundNic = &ionoscloud.Nic{}
-	var apiResponse = &ionoscloud.APIResponse{}
+	apiResponse = &ionoscloud.APIResponse{}
 	err = retry.RetryContext(ctx, 5*time.Minute, func() *retry.RetryError {
 		var err error
 		foundNic, apiResponse, err = ns.Get(ctx, dcid, srvid, *createdNic.Id, 3)
@@ -239,11 +238,11 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 	})
 
 	if err != nil {
-		return diag.FromErr(err)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	if foundNic == nil || *foundNic.Id == "" {
-		return diag.FromErr(fmt.Errorf("could not find nic with id %s after creation ", *nic.Id))
+		return diagutil.ToDiags(d, fmt.Errorf("could not find nic with id %s after creation ", *nic.Id), nil)
 	}
 
 	return resourceNicRead(ctx, d, meta)
@@ -267,12 +266,11 @@ func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error occurred while fetching a nic ID %s %w", d.Id(), err))
-		return diags
+		return diagutil.ToDiags(d, fmt.Errorf("error occurred while fetching a nic: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 
 	if err := cloudapinic.NicSetData(d, nic); err != nil {
-		return diag.FromErr(err)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	return nil
@@ -311,7 +309,7 @@ func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 						if firstFlowLogId == "" {
 							_ = d.Set("flowlog", nil)
 						}
-						return diag.FromErr(err)
+						return diagutil.ToDiags(d, err, nil)
 					}
 				}
 			}
@@ -320,14 +318,12 @@ func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	nic, err := cloudapinic.GetNicFromSchema(d, "")
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("update error occurred while getting nic from schema: %w", err))
-		return diags
+		return diagutil.ToDiags(d, fmt.Errorf("update error occurred while getting nic from schema: %w", err), nil)
 	}
 
-	_, _, err = ns.Update(ctx, dcID, srvID, nicID, *nic.Properties)
+	_, apiResponse, err := ns.Update(ctx, dcID, srvID, nicID, *nic.Properties)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error occurred while updating a nic: %w", err))
-		return diags
+		return diagutil.ToDiags(d, fmt.Errorf("error occurred while updating a nic: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 	if d.HasChange("security_groups_ids") {
 		if v, ok := d.GetOk("security_groups_ids"); ok {
@@ -353,10 +349,9 @@ func resourceNicDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 	dcid := d.Get("datacenter_id").(string)
 	srvid := d.Get("server_id").(string)
 	nicid := d.Id()
-	_, err = ns.Delete(ctx, dcid, srvid, nicid)
+	apiResponse, err := ns.Delete(ctx, dcid, srvid, nicid)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while deleting a nic dcId %s ID %s %s", d.Get("datacenter_id").(string), d.Id(), err))
-		return diags
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while deleting a nic dcId %s %w", d.Get("datacenter_id").(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 	d.SetId("")
 	return nil
@@ -367,14 +362,14 @@ func resourceNicImport(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	location, parts := splitImportID(importID, "/")
 	if len(parts) != 3 {
-		return nil, fmt.Errorf(
+		return nil, diagutil.ToError(d, fmt.Errorf(
 			"invalid import identifier: expected one of <location>:<datacenter>/<server>/<nic> or "+
 				"<datacenter>/<server>/<nic>, got: %s", importID,
-		)
+		), nil)
 	}
 
 	if err := validateImportIDParts(parts); err != nil {
-		return nil, fmt.Errorf("failed validating import identifier %q: %w", importID, err)
+		return nil, diagutil.ToError(d, fmt.Errorf("failed validating import identifier %q: %w", importID, err), nil)
 	}
 
 	dcId := parts[0]
@@ -392,27 +387,27 @@ func resourceNicImport(ctx context.Context, d *schema.ResourceData, meta interfa
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, fmt.Errorf("lan does not exist%q", nicId)
+			return nil, diagutil.ToError(d, fmt.Errorf("lan does not exist%q", nicId), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 		}
 
-		return nil, fmt.Errorf("an error occurred while trying to fetch the nic %q, error:%w", nicId, err)
+		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the nic %q, error:%w", nicId, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 
 	}
 
 	err = d.Set("datacenter_id", dcId)
 	if err != nil {
-		return nil, err
+		return nil, diagutil.ToError(d, err, nil)
 	}
 	err = d.Set("server_id", sId)
 	if err != nil {
-		return nil, err
+		return nil, diagutil.ToError(d, err, nil)
 	}
 	if err = d.Set("location", location); err != nil {
 		return nil, err
 	}
 
 	if err := cloudapinic.NicSetData(d, &nic); err != nil {
-		return nil, err
+		return nil, diagutil.ToError(d, err, nil)
 	}
 
 	log.Printf("[INFO] nic found: %+v", nic)

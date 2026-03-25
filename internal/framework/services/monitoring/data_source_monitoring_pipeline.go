@@ -14,6 +14,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	monitoringService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/monitoring"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 var _ datasource.DataSourceWithConfigure = (*pipelineDataSource)(nil)
@@ -125,7 +126,7 @@ func (d *pipelineDataSource) Read(ctx context.Context, req datasource.ReadReques
 		pipeline, _, err = d.client.GetPipelineByID(ctx, pipelineID, location)
 
 		if err != nil {
-			resp.Diagnostics.AddError("failed to get Monitoring pipeline", err.Error())
+			resp.Diagnostics.AddError("failed to get Monitoring pipeline", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceID: pipelineID}).Error())
 			return
 		}
 	}
@@ -135,7 +136,7 @@ func (d *pipelineDataSource) Read(ctx context.Context, req datasource.ReadReques
 		// Retrieve ALL pipelines.
 		retrievedPipelines, _, err := d.client.GetPipelines(ctx, location)
 		if err != nil {
-			resp.Diagnostics.AddError(fmt.Sprintf("failed to get Monitoring pipelines from location: %s", location), err.Error())
+			resp.Diagnostics.AddError(fmt.Sprintf("failed to get Monitoring pipelines from location: %s", location), diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: pipelineName}).Error())
 			return
 		}
 

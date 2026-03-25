@@ -6,6 +6,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstorage"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -98,7 +99,7 @@ func (d *objectsDataSource) Read(ctx context.Context, req datasource.ReadRequest
 	}
 
 	if err := d.client.ListObjects(ctx, data); err != nil {
-		resp.Diagnostics.AddError("error fetching objects", err.Error())
+		resp.Diagnostics.AddError("error fetching objects", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
 		return
 	}
 

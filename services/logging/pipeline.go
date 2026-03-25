@@ -18,7 +18,7 @@ import (
 var pipelineResourceName = "Logging Pipeline"
 
 // CreatePipeline creates a new pipeline
-func (c *Client) CreatePipeline(ctx context.Context, d *schema.ResourceData) (logging.PipelineRead, utils.ApiResponseInfo, error) {
+func (c *Client) CreatePipeline(ctx context.Context, d *schema.ResourceData) (logging.PipelineRead, *shared.APIResponse, error) {
 	location := d.Get("location").(string)
 	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Logging, location)
 	request := setPipelinePostRequest(d)
@@ -40,7 +40,7 @@ func (c *Client) IsPipelineAvailable(ctx context.Context, d *schema.ResourceData
 }
 
 // UpdatePipeline updates a pipeline
-func (c *Client) UpdatePipeline(ctx context.Context, id string, d *schema.ResourceData) (logging.PipelineRead, utils.ApiResponseInfo, error) {
+func (c *Client) UpdatePipeline(ctx context.Context, id string, d *schema.ResourceData) (logging.PipelineRead, *shared.APIResponse, error) {
 	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Logging, d.Get("location").(string))
 	request := setPipelinePatchRequest(d)
 	pipelineResponse, apiResponse, err := c.sdkClient.PipelinesApi.PipelinesPatch(ctx, id).PipelinePatch(*request).Execute()
@@ -49,7 +49,7 @@ func (c *Client) UpdatePipeline(ctx context.Context, id string, d *schema.Resour
 }
 
 // DeletePipeline deletes a pipeline
-func (c *Client) DeletePipeline(ctx context.Context, location, id string) (utils.ApiResponseInfo, error) {
+func (c *Client) DeletePipeline(ctx context.Context, location, id string) (*shared.APIResponse, error) {
 	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Logging, location)
 	apiResponse, err := c.sdkClient.PipelinesApi.PipelinesDelete(ctx, id).Execute()
 	apiResponse.LogInfo()

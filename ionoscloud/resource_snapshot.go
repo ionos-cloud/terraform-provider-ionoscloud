@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -11,6 +12,7 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 func resourceSnapshot() *schema.Resource {
@@ -22,6 +24,7 @@ func resourceSnapshot() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceSnapshotImport,
 		},
+		CustomizeDiff: checkSnapshotUpdateOnlyAttrs,
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:             schema.TypeString,
@@ -154,8 +157,8 @@ func resourceSnapshotCreate(ctx context.Context, d *schema.ResourceData, meta in
 	rsp, apiResponse, err := client.VolumesApi.DatacentersVolumesCreateSnapshotPost(ctx, dcId, volumeId).Snapshot(*snapshot).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while creating a snapshot: %w ", err))
-		return diags
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating a snapshot: %w ", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
 	}
 
 	d.SetId(*rsp.Id)
@@ -163,7 +166,8 @@ func resourceSnapshotCreate(ctx context.Context, d *schema.ResourceData, meta in
 		if bundleclient.IsRequestFailed(errState) {
 			d.SetId("")
 		}
-		return diag.FromErr(errState)
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	return resourceSnapshotRead(ctx, d, meta)
@@ -184,12 +188,11 @@ func resourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta inte
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error occurred while fetching a snapshot ID %s %w", d.Id(), err))
-		return diags
+		return diagutil.ToDiags(d, fmt.Errorf("error occurred while fetching a snapshot: %w", err), nil)
 	}
 
 	if err = setSnapshotData(d, &snapshot); err != nil {
-		return diag.FromErr(err)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	return nil
@@ -242,12 +245,13 @@ func resourceSnapshotUpdate(ctx context.Context, d *schema.ResourceData, meta in
 	_, apiResponse, err := client.SnapshotsApi.SnapshotsPatch(ctx, d.Id()).Snapshot(input).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while restoring a snapshot ID %s %w", d.Id(), err))
-		return diags
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while restoring a snapshot: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		return diag.FromErr(errState)
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	return resourceSnapshotRead(ctx, d, meta)
@@ -263,12 +267,13 @@ func resourceSnapshotDelete(ctx context.Context, d *schema.ResourceData, meta in
 	apiResponse, err := client.SnapshotsApi.SnapshotsDelete(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while deleting a snapshot ID %s %w", d.Id(), err))
-		return diags
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while deleting a snapshot: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		return diag.FromErr(errState)
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	d.SetId("")
@@ -299,15 +304,15 @@ func resourceSnapshotImport(ctx context.Context, d *schema.ResourceData, meta in
 	if err != nil {
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, fmt.Errorf("unable to find snapshot %q", snapshotID)
+			return nil, diagutil.ToError(d, fmt.Errorf("unable to find snapshot %q", snapshotID), nil)
 		}
-		return nil, fmt.Errorf("an error occurred while retrieving the snapshot %q, %w", snapshotID, err)
+		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while retrieving the snapshot %q, %w", snapshotID, err), nil)
 	}
 
 	log.Printf("[INFO] snapshot %s found: %+v", importID, snapshot)
 
 	if err = setSnapshotData(d, &snapshot); err != nil {
-		return nil, err
+		return nil, diagutil.ToError(d, err, nil)
 	}
 
 	return []*schema.ResourceData{d}, nil
@@ -419,5 +424,42 @@ func setSnapshotData(d *schema.ResourceData, snapshot *ionoscloud.Snapshot) erro
 			}
 		}
 	}
+	return nil
+}
+
+// check that update-only attributes are not explicitly
+// set during snapshot creation and return an error if any are found.
+func checkSnapshotUpdateOnlyAttrs(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
+	// Only validate during creation (no ID yet)
+	if diff.Id() != "" {
+		return nil
+	}
+
+	updateOnlyAttrs := []string{
+		"cpu_hot_plug", "ram_hot_plug", "nic_hot_plug", "nic_hot_unplug",
+		"disc_virtio_hot_plug", "disc_virtio_hot_unplug",
+	}
+
+	rawConfig := diff.GetRawConfig()
+	if rawConfig.IsNull() || !rawConfig.IsKnown() {
+		return nil
+	}
+	configMap := rawConfig.AsValueMap()
+
+	var invalidAttrs []string
+	for _, attr := range updateOnlyAttrs {
+		if v, ok := configMap[attr]; ok && !v.IsNull() {
+			invalidAttrs = append(invalidAttrs, attr)
+		}
+	}
+
+	if len(invalidAttrs) > 0 {
+		return fmt.Errorf(
+			"the following attributes cannot be set during snapshot creation and can only be "+
+				"updated after the snapshot exists: %s",
+			strings.Join(invalidAttrs, ", "),
+		)
+	}
+
 	return nil
 }

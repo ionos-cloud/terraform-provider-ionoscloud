@@ -10,10 +10,12 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	nfs2 "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/nfs"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 
 	"github.com/ionos-cloud/sdk-go-bundle/products/nfs/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 )
 
 func dataSourceNFSCluster() *schema.Resource {
@@ -102,23 +104,24 @@ func dataSourceNFSClusterRead(ctx context.Context, d *schema.ResourceData, meta 
 	location := d.Get("location").(string)
 
 	if idOk && nameOk {
-		return diag.FromErr(fmt.Errorf("ID and name cannot be both specified at the same time"))
+		return diagutil.ToDiags(d, fmt.Errorf("ID and name cannot be both specified at the same time"), nil)
 	}
 	if !idOk && !nameOk {
-		return diag.FromErr(fmt.Errorf("please provide either the NFS Cluster ID or name"))
+		return diagutil.ToDiags(d, fmt.Errorf("please provide either the NFS Cluster ID or name"), nil)
 	}
 
 	var cluster nfs.ClusterRead
+	var apiResponse *shared.APIResponse
 	var err error
 	if idOk {
-		cluster, _, err = client.GetNFSClusterByID(ctx, id, location)
+		cluster, apiResponse, err = client.GetNFSClusterByID(ctx, id, location)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching the NFS Cluster with ID: %s, error: %w", idValue, err))
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the NFS Cluster with ID: %s, error: %w", idValue, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 		}
 	} else {
-		clusters, _, err := client.ListNFSClusters(ctx, d)
+		clusters, apiResponse, err := client.ListNFSClusters(ctx, d)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching NFS Clusters: %w", err))
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching NFS Clusters: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 		}
 
 		var results []nfs.ClusterRead
@@ -130,16 +133,16 @@ func dataSourceNFSClusterRead(ctx context.Context, d *schema.ResourceData, meta 
 
 		switch {
 		case len(results) == 0:
-			return diag.FromErr(fmt.Errorf("no NFS Cluster found with the specified name: %s", name))
+			return diagutil.ToDiags(d, fmt.Errorf("no NFS Cluster found with the specified name: %s", name), nil)
 		case len(results) > 1:
-			return diag.FromErr(fmt.Errorf("more than one NFS Cluster found with the specified name: %s", name))
+			return diagutil.ToDiags(d, fmt.Errorf("more than one NFS Cluster found with the specified name: %s", name), nil)
 		default:
 			cluster = results[0]
 		}
 	}
 
 	if err = client.SetNFSClusterData(d, cluster); err != nil {
-		return diag.FromErr(err)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	return nil

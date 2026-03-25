@@ -16,6 +16,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/slice"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 func resourceUser() *schema.Resource {
@@ -139,7 +140,7 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 		// get write-only value from configuration
 		passwordWO, err := writeonly.GetStringValue(d, "password_wo")
 		if err != nil {
-			return diag.FromErr(err)
+			return diagutil.ToDiags(d, err, nil)
 		}
 		request.Properties.Password = shared.ToPtr(passwordWO)
 	}
@@ -154,16 +155,15 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 	request.Properties.Active = &active
 
 	if _, ok := d.GetOk("sec_auth_active"); ok {
-		diags := diag.FromErr(fmt.Errorf("sec_auth_active attribute is not allowed in create requests"))
-		return diags
+		return diagutil.ToDiags(d, fmt.Errorf("sec_auth_active attribute is not allowed in create requests"), nil)
 	}
 
 	rsp, apiResponse, err := client.UserManagementApi.UmUsersPost(ctx).User(request).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while creating a user: %w", err))
-		return diags
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating a user: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
 	}
 
 	d.SetId(*rsp.Id)
@@ -172,7 +172,8 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 		if bundleclient.IsRequestFailed(errState) {
 			d.SetId("")
 		}
-		return diag.FromErr(errState)
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	// Add the user to the specified groups, if any.
@@ -183,7 +184,7 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 			for _, groupsItem := range groupsList {
 				groupId := groupsItem.(string)
 				if err := addUserToGroup(d.Id(), groupId, ctx, d, meta); err != nil {
-					return diag.FromErr(err)
+					return diagutil.ToDiags(d, err, nil)
 				}
 			}
 		}
@@ -206,12 +207,12 @@ func resourceUserRead(ctx context.Context, d *schema.ResourceData, meta interfac
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("an error occurred while fetching a User ID %s %w", d.Id(), err))
-		return diags
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching a User: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
 	}
 
 	if err = setUserData(d, &user); err != nil {
-		return diag.FromErr(err)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	return nil
@@ -226,8 +227,8 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 	foundUser, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while fetching a User ID %s %w", d.Id(), err))
-		return diags
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching a User: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
 	}
 
 	userReq := ionoscloud.UserPut{
@@ -281,7 +282,7 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 	} else if d.HasChange("password_wo_version") {
 		passwordWO, err := writeonly.GetStringValue(d, "password_wo")
 		if err != nil {
-			return diag.FromErr(err)
+			return diagutil.ToDiags(d, err, nil)
 		}
 		userReq.Properties.Password = shared.ToPtr(passwordWO)
 	}
@@ -298,7 +299,7 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 			log.Printf("[INFO] New groups to add: %+v", newGroups)
 			for _, groupId := range newGroups {
 				if err := addUserToGroup(d.Id(), groupId, ctx, d, meta); err != nil {
-					return diag.FromErr(err)
+					return diagutil.ToDiags(d, err, nil)
 				}
 			}
 		}
@@ -307,7 +308,7 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 			log.Printf("[INFO] Groups to delete: %+v", deletedGroups)
 			for _, groupId := range deletedGroups {
 				if err := deleteUserFromGroup(d.Id(), groupId, ctx, d, meta); err != nil {
-					return diag.FromErr(err)
+					return diagutil.ToDiags(d, err, nil)
 				}
 			}
 		}
@@ -316,12 +317,13 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 	_, apiResponse, err = client.UserManagementApi.UmUsersPut(ctx, d.Id()).User(userReq).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while patching a user ID %s %w", d.Id(), err))
-		return diags
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while patching a user: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		return diag.FromErr(errState)
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	return resourceUserRead(ctx, d, meta)
@@ -336,12 +338,13 @@ func resourceUserDelete(ctx context.Context, d *schema.ResourceData, meta interf
 	apiResponse, err := client.UserManagementApi.UmUsersDelete(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(err)
-		return diags
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, err, &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		return diag.FromErr(errState)
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	d.SetId("")
@@ -363,18 +366,18 @@ func resourceUserImporter(ctx context.Context, d *schema.ResourceData, meta inte
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, fmt.Errorf("user does not exist%q", userId)
+			return nil, diagutil.ToError(d, fmt.Errorf("user does not exist%q", userId), nil)
 		}
-		return nil, fmt.Errorf("an error occurred while trying to fetch the user %q, error:%w", userId, err)
+		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the user: %w", err), nil)
 
 	}
 
 	if err = setUserData(d, &user); err != nil {
-		return nil, err
+		return nil, diagutil.ToError(d, err, nil)
 	}
 
 	if err = d.Set("group_ids", getUserGroups(&user)); err != nil {
-		return nil, err
+		return nil, diagutil.ToError(d, err, nil)
 	}
 
 	log.Printf("[INFO] user found: %+v", user)

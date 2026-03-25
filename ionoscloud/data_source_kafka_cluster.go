@@ -13,6 +13,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/kafka"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 func dataSourceKafkaCluster() *schema.Resource {
@@ -102,10 +103,10 @@ func dataSourceKafkaClusterRead(ctx context.Context, d *schema.ResourceData, met
 	location := d.Get("location").(string)
 
 	if idOk && nameOk {
-		return diag.FromErr(fmt.Errorf("ID and name cannot be both specified at the same time"))
+		return diagutil.ToDiags(d, fmt.Errorf("ID and name cannot be both specified at the same time"), nil)
 	}
 	if !idOk && !nameOk {
-		return diag.FromErr(fmt.Errorf("please provide either the Kafka Cluster ID or name"))
+		return diagutil.ToDiags(d, fmt.Errorf("please provide either the Kafka Cluster ID or name"), nil)
 	}
 
 	partialMatch := d.Get("partial_match").(bool)
@@ -114,14 +115,14 @@ func dataSourceKafkaClusterRead(ctx context.Context, d *schema.ResourceData, met
 	if idOk {
 		cluster, _, err = client.GetClusterByID(ctx, id, location)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching the Kafka Cluster with ID: %s, error: %w", id, err))
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the Kafka Cluster with ID: %s, error: %w", id, err), nil)
 		}
 	} else {
 		var results []kafkaSdk.ClusterRead
 
 		clusters, _, err := client.ListClusters(ctx, location)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching Kafka Cluster: %w", err))
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching Kafka Cluster: %w", err), nil)
 		}
 
 		for _, cluster := range clusters.Items {
@@ -132,16 +133,16 @@ func dataSourceKafkaClusterRead(ctx context.Context, d *schema.ResourceData, met
 
 		switch {
 		case len(results) == 0:
-			return diag.FromErr(fmt.Errorf("no Kafka Clusters found with the specified name: %s", name))
+			return diagutil.ToDiags(d, fmt.Errorf("no Kafka Clusters found with the specified name: %s", name), nil)
 		case len(results) > 1:
-			return diag.FromErr(fmt.Errorf("more than one Kafka Cluster found with the specified name: %s", name))
+			return diagutil.ToDiags(d, fmt.Errorf("more than one Kafka Cluster found with the specified name: %s", name), nil)
 		default:
 			cluster = results[0]
 		}
 	}
 
 	if err := client.SetKafkaClusterData(d, &cluster); err != nil {
-		return diag.FromErr(err)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	return nil

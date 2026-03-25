@@ -17,11 +17,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/tags"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstorage"
-
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 var (
@@ -148,14 +149,14 @@ func (r *bucketResource) Create(ctx context.Context, req resource.CreateRequest,
 	defer cancel()
 
 	if err := r.client.CreateBucket(ctx, data.Name, data.Region, data.ObjectLockEnabled, data.Tags, createTimeout); err != nil {
-		resp.Diagnostics.AddError("failed to create bucket", err.Error())
+		resp.Diagnostics.AddError("failed to create bucket", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Name.ValueString()}).Error())
 		return
 	}
 
 	// Set computed values
 	location, err := r.client.GetBucketLocation(ctx, data.Name)
 	if err != nil {
-		resp.Diagnostics.AddError("failed to get bucket location", err.Error())
+		resp.Diagnostics.AddError("failed to get bucket location", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Name.ValueString()}).Error())
 		return
 	}
 
@@ -179,7 +180,7 @@ func (r *bucketResource) Read(ctx context.Context, req resource.ReadRequest, res
 
 	bucket, found, err := r.client.GetBucket(ctx, data.Name, data.Region)
 	if err != nil {
-		resp.Diagnostics.AddError("Bucket API error", err.Error())
+		resp.Diagnostics.AddError("Bucket API error", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Name.ValueString()}).Error())
 		return
 	}
 
@@ -201,7 +202,8 @@ func (r *bucketResource) ImportState(ctx context.Context, req resource.ImportSta
 
 	parts := strings.Split(req.ID, ":")
 	if len(parts) > 2 {
-		resp.Diagnostics.AddError("invalid import ID", "expected ID in the format 'region:bucket_name' OR 'bucket_name'")
+		resp.Diagnostics.AddError("invalid import ID", fmt.Sprintf("expected ID in the format 'region:bucket_name' OR 'bucket_name'. Got: %q", req.ID))
+		return
 	}
 	if len(parts) == 2 {
 		region = parts[0]
@@ -210,7 +212,8 @@ func (r *bucketResource) ImportState(ctx context.Context, req resource.ImportSta
 		name = parts[0]
 	}
 	if name == "" {
-		resp.Diagnostics.AddError("invalid bucket name", "please provide a non-empty string for the bucket name")
+		resp.Diagnostics.AddError("invalid bucket name", fmt.Sprintf("please provide a non-empty string for the bucket name. Got: %q", req.ID))
+		return
 	}
 
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("region"), region)...)
@@ -231,7 +234,7 @@ func (r *bucketResource) Update(ctx context.Context, req resource.UpdateRequest,
 
 	if !plan.Tags.Equal(state.Tags) {
 		if err := r.client.UpdateBucketTags(ctx, plan.Name.ValueString(), plan.Region.ValueString(), tags.NewFromMap(plan.Tags), tags.NewFromMap(state.Tags)); err != nil {
-			resp.Diagnostics.AddError("failed to update tags", err.Error())
+			resp.Diagnostics.AddError("failed to update tags", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: plan.Name.ValueString()}).Error())
 			return
 		}
 	}
@@ -262,7 +265,7 @@ func (r *bucketResource) Delete(ctx context.Context, req resource.DeleteRequest,
 	defer cancel()
 
 	if err := r.client.DeleteBucket(ctx, data.Name, data.ObjectLockEnabled, data.ForceDestroy, data.Region, deleteTimeout); err != nil {
-		resp.Diagnostics.AddError("failed to delete bucket", err.Error())
+		resp.Diagnostics.AddError("failed to delete bucket", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Name.ValueString()}).Error())
 		return
 	}
 }

@@ -1,4 +1,8 @@
 ## Upcoming
+
+### Enhancements
+- Add validation error when update-only attributes are set during snapshot creation
+- Add more information to error messages
 ### Fixes
 - Improved error message when `image_name` matches an image that has a non-HDD type (e.g. CDROM) or is in a different location. The error now reports the found image's type and location.
 

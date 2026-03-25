@@ -2,13 +2,14 @@ package acctest
 
 import (
 	"context"
-	"github.com/ionos-cloud/sdk-go-bundle/shared"
-	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	"log"
 	"os"
 	"strconv"
 	"sync"
 	"testing"
+
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
+	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-mux/tf5to6server"

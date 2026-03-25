@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -309,8 +310,8 @@ func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta inter
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while creating a group: %w", err))
-		return diags
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating a group: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
 	}
 
 	log.Printf("[DEBUG] GROUP ID: %s", *group.Id)
@@ -321,7 +322,8 @@ func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta inter
 		if bundleclient.IsRequestFailed(errState) {
 			d.SetId("")
 		}
-		return diag.FromErr(errState)
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	// add users to group if any is provided
@@ -329,7 +331,7 @@ func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta inter
 		userID := userVal.(string)
 		log.Printf("[INFO] Adding user %+v to group...", userID)
 		if err := addUserToGroup(userID, d.Id(), ctx, d, meta); err != nil {
-			return diag.FromErr(err)
+			return diagutil.ToDiags(d, err, nil)
 		}
 	}
 
@@ -340,7 +342,7 @@ func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta inter
 				userID := userItem.(string)
 				log.Printf("[INFO] Adding user %+v to group...", userID)
 				if err := addUserToGroup(userID, d.Id(), ctx, d, meta); err != nil {
-					return diag.FromErr(err)
+					return diagutil.ToDiags(d, err, nil)
 				}
 			}
 		}
@@ -362,12 +364,11 @@ func resourceGroupRead(ctx context.Context, d *schema.ResourceData, meta interfa
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("an error occurred while fetching a Group ID %s %w", d.Id(), err))
-		return diags
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching a Group: %w", err), nil)
 	}
 
 	if err := setGroupData(ctx, client, d, &group); err != nil {
-		return diag.FromErr(err)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	return nil
@@ -443,12 +444,13 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 	_, apiResponse, err := client.UserManagementApi.UmGroupsPut(ctx, d.Id()).Group(groupReq).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while patching a group ID %s %w", d.Id(), err))
-		return diags
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while patching a group: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		return diag.FromErr(errState)
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	if d.HasChange("user_id") {
@@ -462,13 +464,13 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 
 		if userIdToAdd != "" {
 			if err := addUserToGroup(userIdToAdd, d.Id(), ctx, d, meta); err != nil {
-				return diag.FromErr(err)
+				return diagutil.ToDiags(d, err, nil)
 			}
 		}
 
 		if userIdToRemove != "" {
 			if err := deleteUserFromGroup(userIdToRemove, d.Id(), ctx, d, meta); err != nil {
-				return diag.FromErr(err)
+				return diagutil.ToDiags(d, err, nil)
 			}
 		}
 	}
@@ -485,7 +487,7 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 			log.Printf("[INFO] New users to add: %+v", newUsers)
 			for _, userID := range newUsers {
 				if err := addUserToGroup(userID, d.Id(), ctx, d, meta); err != nil {
-					return diag.FromErr(err)
+					return diagutil.ToDiags(d, err, nil)
 				}
 			}
 		}
@@ -494,7 +496,7 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 			log.Printf("[INFO] Users to delete: %+v", deletedUsers)
 			for _, userID := range deletedUsers {
 				if err := deleteUserFromGroup(userID, d.Id(), ctx, d, meta); err != nil {
-					return diag.FromErr(err)
+					return diagutil.ToDiags(d, err, nil)
 				}
 			}
 		}
@@ -512,12 +514,13 @@ func resourceGroupDelete(ctx context.Context, d *schema.ResourceData, meta inter
 	apiResponse, err := client.UserManagementApi.UmGroupsDelete(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(err)
-		return diags
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, err, &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		return diag.FromErr(errState)
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	d.SetId("")
@@ -538,20 +541,20 @@ func resourceGroupImporter(ctx context.Context, d *schema.ResourceData, meta int
 	if err != nil {
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, fmt.Errorf("group does not exist%q", grpId)
+			return nil, diagutil.ToError(d, fmt.Errorf("group does not exist%q", grpId), nil)
 		}
-		return nil, fmt.Errorf("an error occurred while trying to fetch the group %q, error:%w", grpId, err)
+		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the group: %w", err), nil)
 
 	}
 
 	log.Printf("[INFO] group found: %+v", group)
 
 	if err := d.Set("get_users_data", constant.DefaultGetUsersData); err != nil {
-		return nil, fmt.Errorf("error while setting the default value for the 'get_users_data' attribute inside the import function, error: %w", err)
+		return nil, diagutil.ToError(d, fmt.Errorf("error while setting the default value for the 'get_users_data' attribute inside the import function, error: %w", err), nil)
 	}
 
 	if err := setGroupData(ctx, client, d, &group); err != nil {
-		return nil, err
+		return nil, diagutil.ToError(d, err, nil)
 	}
 
 	return []*schema.ResourceData{d}, nil

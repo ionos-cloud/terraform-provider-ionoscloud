@@ -13,6 +13,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	cloudapiflowlog "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/flowlog"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 func resourceApplicationLoadBalancer() *schema.Resource {
@@ -109,16 +110,14 @@ func resourceApplicationLoadBalancerCreate(ctx context.Context, d *schema.Resour
 		name := name.(string)
 		applicationLoadBalancer.Properties.Name = &name
 	} else {
-		diags := diag.FromErr(fmt.Errorf("name must be provided for application loadbalancer"))
-		return diags
+		return diagutil.ToDiags(d, fmt.Errorf("name must be provided for application loadbalancer"), nil)
 	}
 
 	if listenerLan, listenerLanOk := d.GetOk("listener_lan"); listenerLanOk {
 		listener := int32(listenerLan.(int))
 		applicationLoadBalancer.Properties.ListenerLan = &listener
 	} else {
-		diags := diag.FromErr(fmt.Errorf("listener_lan must be provided for application loadbalancer"))
-		return diags
+		return diagutil.ToDiags(d, fmt.Errorf("listener_lan must be provided for application loadbalancer"), nil)
 	}
 
 	if centralLogging, centralLoggingOk := d.GetOk("central_logging"); centralLoggingOk {
@@ -148,8 +147,7 @@ func resourceApplicationLoadBalancerCreate(ctx context.Context, d *schema.Resour
 		targetLan := int32(targetLan.(int))
 		applicationLoadBalancer.Properties.TargetLan = &targetLan
 	} else {
-		diags := diag.FromErr(fmt.Errorf("target_lan must be provided for application loadbalancer"))
-		return diags
+		return diagutil.ToDiags(d, fmt.Errorf("target_lan must be provided for application loadbalancer"), nil)
 	}
 
 	if privateIpsVal, privateIpsOk := d.GetOk("lb_private_ips"); privateIpsOk {
@@ -172,8 +170,8 @@ func resourceApplicationLoadBalancerCreate(ctx context.Context, d *schema.Resour
 
 	if err != nil {
 		d.SetId("")
-		diags := diag.FromErr(fmt.Errorf("error creating application loadbalancer: %w, %s", err, responseBody(apiResponse)))
-		return diags
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, fmt.Errorf("error creating application loadbalancer: %w, %s", err, responseBody(apiResponse)), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
 	}
 
 	d.SetId(*applicationLoadbalancer.Id)
@@ -182,7 +180,8 @@ func resourceApplicationLoadBalancerCreate(ctx context.Context, d *schema.Resour
 		if bundleclient.IsRequestFailed(errState) {
 			d.SetId("")
 		}
-		return diag.FromErr(errState)
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	if flowLogs, ok := d.GetOk("flowlog"); ok {
@@ -202,7 +201,7 @@ func resourceApplicationLoadBalancerCreate(ctx context.Context, d *schema.Resour
 						if diags != nil {
 							log.Printf("[ERROR] could not delete alb %v", diags)
 						}
-						diags = diag.FromErr(fmt.Errorf("error creating flowlog for application loadbalancer: %w, %s", err, responseBody(apiResponse)))
+						diags = diagutil.ToDiags(d, fmt.Errorf("error creating flowlog for application loadbalancer: %w, %s", err, responseBody(apiResponse)), nil)
 						return diags
 					}
 				}
@@ -242,12 +241,11 @@ func resourceApplicationLoadBalancerRead(ctx context.Context, d *schema.Resource
 	flowLog, apiResponse, err := fw.GetFlowLogForALB(ctx, dcId, *applicationLoadBalancer.Id, 1)
 	if err != nil {
 		if !apiResponse.HttpNotFound() {
-			diags := diag.FromErr(fmt.Errorf("error finding flowlog for application loadbalancer: %w, %s", err, responseBody(apiResponse)))
-			return diags
+			return diagutil.ToDiags(d, fmt.Errorf("error finding flowlog for application loadbalancer: %w, %s", err, responseBody(apiResponse)), nil)
 		}
 	}
 
-	return diag.FromErr(setApplicationLoadBalancerData(d, &applicationLoadBalancer, flowLog))
+	return diagutil.ToDiags(d, setApplicationLoadBalancerData(d, &applicationLoadBalancer, flowLog), nil)
 }
 
 func resourceApplicationLoadBalancerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -340,7 +338,7 @@ func resourceApplicationLoadBalancerUpdate(ctx context.Context, d *schema.Resour
 						if firstFlowLogId == "" {
 							_ = d.Set("flowlog", nil)
 						}
-						return diag.FromErr(err)
+						return diagutil.ToDiags(d, err, nil)
 					}
 				}
 			}
@@ -350,12 +348,13 @@ func resourceApplicationLoadBalancerUpdate(ctx context.Context, d *schema.Resour
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while updating application loadbalancer ID %s %w", d.Id(), err))
-		return diags
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating application loadbalancer: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		return diag.FromErr(errState)
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	return resourceApplicationLoadBalancerRead(ctx, d, meta)
@@ -374,12 +373,13 @@ func resourceApplicationLoadBalancerDelete(ctx context.Context, d *schema.Resour
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while deleting an application loadbalancer %s %w", d.Id(), err))
-		return diags
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while deleting an application loadbalancer: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		return diag.FromErr(errState)
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	d.SetId("")
@@ -393,14 +393,14 @@ func resourceApplicationLoadBalancerImport(ctx context.Context, d *schema.Resour
 	location, parts := splitImportID(importID, "/")
 
 	if len(parts) != 2 {
-		return nil, fmt.Errorf(
+		return nil, diagutil.ToError(d, fmt.Errorf(
 			"invalid import identifier: expected one of <location>:<datacenter-id>/<alb> or "+
 				"<datacenter-id>/<alb>, got: %s", importID,
-		)
+		), nil)
 	}
 
 	if err := validateImportIDParts(parts); err != nil {
-		return nil, fmt.Errorf("failed validating import identifier %q: %w", importID, err)
+		return nil, diagutil.ToError(d, fmt.Errorf("failed validating import identifier %q: %w", importID, err), nil)
 	}
 
 	datacenterId := parts[0]
@@ -417,13 +417,13 @@ func resourceApplicationLoadBalancerImport(ctx context.Context, d *schema.Resour
 	if err != nil {
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, fmt.Errorf("unable to find alb %q", albId)
+			return nil, diagutil.ToError(d, fmt.Errorf("unable to find alb %q", albId), nil)
 		}
-		return nil, fmt.Errorf("an error occurred while retrieving the alb %q, %w", albId, err)
+		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while retrieving the alb %q, %w", albId, err), nil)
 	}
 
 	if err := d.Set("datacenter_id", datacenterId); err != nil {
-		return nil, fmt.Errorf("error while setting datacenter_id property for alb %q: %w", albId, err)
+		return nil, diagutil.ToError(d, fmt.Errorf("error while setting datacenter_id property for alb %q: %w", albId, err), nil)
 	}
 	if err = d.Set("location", location); err != nil {
 		return nil, fmt.Errorf("error while setting location property for alb %q: %w", albId, err)
@@ -438,11 +438,11 @@ func resourceApplicationLoadBalancerImport(ctx context.Context, d *schema.Resour
 	flowLog, apiResponse, err := fw.GetFlowLogForALB(ctx, datacenterId, albId, 0)
 	if err != nil {
 		if !apiResponse.HttpNotFound() {
-			return nil, fmt.Errorf("error finding flowlog for application loadbalancer: %w, %s", err, responseBody(apiResponse))
+			return nil, diagutil.ToError(d, fmt.Errorf("error finding flowlog for application loadbalancer: %w, %s", err, responseBody(apiResponse)), nil)
 		}
 	}
 	if err := setApplicationLoadBalancerData(d, &alb, flowLog); err != nil {
-		return nil, err
+		return nil, diagutil.ToError(d, err, nil)
 	}
 	return []*schema.ResourceData{d}, nil
 }

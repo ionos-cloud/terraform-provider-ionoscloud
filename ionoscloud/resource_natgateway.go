@@ -11,6 +11,7 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 func resourceNatGateway() *schema.Resource {
@@ -103,8 +104,7 @@ func resourceNatGatewayCreate(ctx context.Context, d *schema.ResourceData, meta 
 			}
 			natGateway.Properties.PublicIps = &publicIps
 		} else {
-			diags := diag.FromErr(fmt.Errorf("you must provide public_ips for nat gateway resource \n"))
-			return diags
+			return diagutil.ToDiags(d, fmt.Errorf("you must provide public_ips for nat gateway resource"), nil)
 		}
 	}
 
@@ -144,8 +144,7 @@ func resourceNatGatewayCreate(ctx context.Context, d *schema.ResourceData, meta 
 				log.Printf("[INFO] NatGateway LANs set to %+v", lans)
 				natGateway.Properties.Lans = &lans
 			} else {
-				diags := diag.FromErr(fmt.Errorf("you must provide lans for the nat gateway resource \n"))
-				return diags
+				return diagutil.ToDiags(d, fmt.Errorf("you must provide lans for the nat gateway resource"), nil)
 			}
 		}
 	}
@@ -158,8 +157,8 @@ func resourceNatGatewayCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 	if err != nil {
 		d.SetId("")
-		diags := diag.FromErr(fmt.Errorf("error creating natGateway: %w, %s", err, responseBody(apiResponse)))
-		return diags
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, fmt.Errorf("error creating natGateway: %w, %s", err, responseBody(apiResponse)), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
 	}
 
 	d.SetId(*natGatewayResp.Id)
@@ -168,7 +167,8 @@ func resourceNatGatewayCreate(ctx context.Context, d *schema.ResourceData, meta 
 		if bundleclient.IsRequestFailed(errState) {
 			d.SetId("")
 		}
-		return diag.FromErr(errState)
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	return resourceNatGatewayRead(ctx, d, meta)
@@ -197,8 +197,7 @@ func resourceNatGatewayRead(ctx context.Context, d *schema.ResourceData, meta in
 	log.Printf("[INFO] Successfully retrieved nat gateway %s: %+v", d.Id(), natGateway)
 
 	if err := setNatGatewayData(d, &natGateway); err != nil {
-		diags := diag.FromErr(err)
-		return diags
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	return nil
@@ -279,12 +278,13 @@ func resourceNatGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while updating a nat gateway ID %s %w", d.Id(), err))
-		return diags
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating a nat gateway: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		return diag.FromErr(errState)
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	return resourceNatGatewayRead(ctx, d, meta)
@@ -303,12 +303,13 @@ func resourceNatGatewayDelete(ctx context.Context, d *schema.ResourceData, meta 
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while deleting a nat gateway %s %w", d.Id(), err))
-		return diags
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while deleting a nat gateway: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		return diag.FromErr(errState)
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	d.SetId("")
@@ -328,7 +329,7 @@ func resourceNatGatewayImport(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	if err := validateImportIDParts(parts); err != nil {
-		return nil, fmt.Errorf("failed validating import identifier %q: %w", importID, err)
+		return nil, diagutil.ToError(d, fmt.Errorf("failed validating import identifier %q: %w", importID, err), nil)
 	}
 
 	dcId := parts[0]
@@ -346,20 +347,20 @@ func resourceNatGatewayImport(ctx context.Context, d *schema.ResourceData, meta 
 		log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, fmt.Errorf("unable to find nat gateway  %q", natGatewayId)
+			return nil, diagutil.ToError(d, fmt.Errorf("unable to find nat gateway  %q", natGatewayId), nil)
 		}
-		return nil, fmt.Errorf("an error occurred while retrieving nat gateway  %q: %w ", natGatewayId, err)
+		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while retrieving nat gateway  %q: %w ", natGatewayId, err), nil)
 	}
 
 	if err := d.Set("datacenter_id", dcId); err != nil {
-		return nil, err
+		return nil, diagutil.ToError(d, err, nil)
 	}
 	if err := d.Set("location", location); err != nil {
 		return nil, err
 	}
 
 	if err := setNatGatewayData(d, &natGateway); err != nil {
-		return nil, err
+		return nil, diagutil.ToError(d, err, nil)
 	}
 
 	return []*schema.ResourceData{d}, nil

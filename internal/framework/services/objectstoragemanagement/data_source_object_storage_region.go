@@ -6,6 +6,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	objectStorageManagementService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstoragemanagement"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -120,7 +121,7 @@ func (d *regionDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		return
 	}
 	if err != nil {
-		resp.Diagnostics.AddError("failed to get region", err.Error())
+		resp.Diagnostics.AddError("failed to get region", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceID: data.ID.ValueString()}).Error())
 		return
 	}
 

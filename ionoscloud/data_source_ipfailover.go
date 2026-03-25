@@ -7,6 +7,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/uuidgen"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -67,12 +68,12 @@ func dataSourceIpFailoverRead(ctx context.Context, d *schema.ResourceData, meta 
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return diag.FromErr(fmt.Errorf("unable to find the LAN with ID: %s, datacenter ID: %s", lanId, dcId))
+			return diagutil.ToDiags(d, fmt.Errorf("unable to find the LAN with ID: %s, datacenter ID: %s", lanId, dcId), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 		}
-		return diag.FromErr(fmt.Errorf("error while fetching LAN with ID: %s, datacenter ID: %s, err: %w", lanId, dcId, err))
+		return diagutil.ToDiags(d, fmt.Errorf("error while fetching LAN with ID: %s, datacenter ID: %s, err: %w", lanId, dcId, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 	if lan.Properties == nil || lan.Properties.IpFailover == nil {
-		return diag.FromErr(fmt.Errorf("expected a LAN response containing IP failover groups but received 'nil' instead"))
+		return diagutil.ToDiags(d, fmt.Errorf("expected a LAN response containing IP failover groups but received 'nil' instead"), nil)
 	}
 
 	ipFailoverGroups := lan.Properties.IpFailover
@@ -86,7 +87,7 @@ func dataSourceIpFailoverRead(ctx context.Context, d *schema.ResourceData, meta 
 				d.SetId(uuidgen.GenerateUuidFromName(ip))
 
 				if err := d.Set("nicuuid", *ipFailoverGroup.NicUuid); err != nil {
-					return diag.FromErr(utils.GenerateSetError(constant.ResourceIpFailover, "nicuuid", err))
+					return diagutil.ToDiags(d, utils.GenerateSetError(constant.ResourceIpFailover, "nicuuid", err), nil)
 				}
 				ipFailoverGroupFound = true
 				// After we find the IP Failover Group, we can stop searching since the IP is unique
@@ -96,7 +97,7 @@ func dataSourceIpFailoverRead(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	if !ipFailoverGroupFound {
-		return diag.FromErr(fmt.Errorf("IP Failover Group with IP: %s does not exist in the LAN with ID: %s, datacenter ID: %s", ip, lanId, dcId))
+		return diagutil.ToDiags(d, fmt.Errorf("IP Failover Group with IP: %s does not exist in the LAN with ID: %s, datacenter ID: %s", ip, lanId, dcId), nil)
 	}
 	return nil
 }

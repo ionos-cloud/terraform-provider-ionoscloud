@@ -12,6 +12,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 
 	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
 )
@@ -117,22 +118,20 @@ func resourceContainerRegistryCreate(ctx context.Context, d *schema.ResourceData
 
 	containerRegistry, err := crService.GetRegistryDataCreate(d)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error occurred while getting container registry from schema: %w", err))
-		return diags
+		return diagutil.ToDiags(d, fmt.Errorf("error occurred while getting container registry from schema: %w", err), nil)
 	}
 
 	containerRegistryFeatures, warnings := crService.GetRegistryFeatures(d)
 	containerRegistry.Properties.Features = containerRegistryFeatures
 
-	containerRegistryResponse, _, err := client.CreateRegistry(ctx, *containerRegistry)
+	containerRegistryResponse, apiResponse, err := client.CreateRegistry(ctx, *containerRegistry)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while creating the registry: %w", err))
-		return diags
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating the registry: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 	d.SetId(*containerRegistryResponse.Id)
 
 	if err := utils.WaitForResourceToBeReady(ctx, d, client.IsRegistryReady); err != nil {
-		return diag.FromErr(fmt.Errorf("error waiting for registry to be ready: %w", err))
+		return diagutil.ToDiags(d, fmt.Errorf("error waiting for registry to be ready: %w", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String()})
 	}
 	return append(warnings, resourceContainerRegistryRead(ctx, d, meta)...)
 }
@@ -150,14 +149,13 @@ func resourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData, 
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while fetching registry %s: %w", d.Id(), err))
-		return diags
+		return diagutil.ToDiags(d, fmt.Errorf("error while fetching registry: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 
 	log.Printf("[INFO] Successfully retrieved registry %s: %+v", d.Id(), registry)
 
 	if err := crService.SetRegistryData(d, registry); err != nil {
-		return diag.FromErr(err)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	return nil
@@ -172,8 +170,7 @@ func resourceContainerRegistryUpdate(ctx context.Context, d *schema.ResourceData
 
 	containerRegistry, err := crService.GetRegistryDataUpdate(d)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error occurred while getting container registry from schema: %w", err))
-		return diags
+		return diagutil.ToDiags(d, fmt.Errorf("error occurred while getting container registry from schema: %w", err), nil)
 	}
 	containerRegistryFeatures, warnings := crService.GetRegistryFeatures(d)
 	containerRegistry.Features = containerRegistryFeatures
@@ -184,14 +181,13 @@ func resourceContainerRegistryUpdate(ctx context.Context, d *schema.ResourceData
 
 	registryId := d.Id()
 
-	_, _, err = client.PatchRegistry(ctx, registryId, *containerRegistry)
+	_, apiResponse, err := client.PatchRegistry(ctx, registryId, *containerRegistry)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while updating a registry: %w", err))
-		return diags
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating a registry: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 
 	if err := utils.WaitForResourceToBeReady(ctx, d, client.IsRegistryReady); err != nil {
-		return diag.FromErr(fmt.Errorf("error waiting for registry to be ready: %w", err))
+		return diagutil.ToDiags(d, fmt.Errorf("error waiting for registry to be ready: %w", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String()})
 	}
 
 	return append(warnings, resourceContainerRegistryRead(ctx, d, meta)...)
@@ -213,11 +209,10 @@ func resourceContainerRegistryDelete(ctx context.Context, d *schema.ResourceData
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while deleting registry %s: %w", registryId, err))
-		return diags
+		return diagutil.ToDiags(d, fmt.Errorf("error while deleting registry %s: %w", registryId, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 
-	return diag.FromErr(utils.WaitForResourceToBeDeleted(ctx, d, client.IsRegistryDeleted))
+	return diagutil.ToDiags(d, utils.WaitForResourceToBeDeleted(ctx, d, client.IsRegistryDeleted), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String()})
 }
 
 func resourceContainerRegistryImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
@@ -242,15 +237,15 @@ func resourceContainerRegistryImport(ctx context.Context, d *schema.ResourceData
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, fmt.Errorf("registry does not exist %q", registryId)
+			return nil, diagutil.ToError(d, fmt.Errorf("registry does not exist %q", registryId), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 		}
-		return nil, fmt.Errorf("an error occurred while trying to fetch the import of registry %q, error:%w", registryId, err)
+		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the import of registry %q, error:%w", registryId, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 
 	log.Printf("[INFO] registry found: %+v", containerRegistry)
 
 	if err := crService.SetRegistryData(d, containerRegistry); err != nil {
-		return nil, err
+		return nil, diagutil.ToError(d, err, nil)
 	}
 
 	return []*schema.ResourceData{d}, nil

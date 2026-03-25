@@ -20,6 +20,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/nsg"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 func resourceGPUServer() *schema.Resource {
@@ -293,20 +294,18 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta i
 	}
 
 	if _, ok := d.GetOk("boot_volume"); ok {
-		diags := diag.FromErr(fmt.Errorf("boot_volume argument can be set only in update requests"))
-		return diags
+		return diagutil.ToDiags(d, fmt.Errorf("boot_volume argument can be set only in update requests"), nil)
 	}
 
 	var volume *ionoscloud.VolumeProperties
 	if _, ok := d.GetOk("volume"); ok {
 		volume, err = getVolumeData(d, "volume.0.", constant.GpuType)
 		if err != nil {
-			diags := diag.FromErr(err)
-			return diags
+			return diagutil.ToDiags(d, err, nil)
 		}
 		image, imageAlias, err = getImage(ctx, client, d, *volume)
 		if err != nil {
-			return diag.FromErr(err)
+			return diagutil.ToDiags(d, err, nil)
 		}
 
 		if image != "" {
@@ -323,8 +322,7 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta i
 		if backupUnitID, ok := d.GetOk("volume.0.backup_unit_id"); ok {
 			if utils.IsValidUUID(backupUnitID.(string)) {
 				if image == "" && imageAlias == "" {
-					diags := diag.FromErr(fmt.Errorf("it is mandatory to provide either public image or imageAlias in conjunction with backup unit id property"))
-					return diags
+					return diagutil.ToDiags(d, fmt.Errorf("it is mandatory to provide either public image or imageAlias in conjunction with backup unit id property"), nil)
 				}
 				backupUnitID := backupUnitID.(string)
 				volume.BackupunitId = &backupUnitID
@@ -332,8 +330,7 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta i
 		}
 		if userData, ok := d.GetOk("volume.0.user_data"); ok {
 			if image == "" && imageAlias == "" {
-				diags := diag.FromErr(fmt.Errorf("it is mandatory to provide either public image or imageAlias that has cloud-init compatibility in conjunction with backup unit id property "))
-				return diags
+				return diagutil.ToDiags(d, fmt.Errorf("it is mandatory to provide either public image or imageAlias that has cloud-init compatibility in conjunction with backup unit id property "), nil)
 			}
 			userData := userData.(string)
 			volume.UserData = &userData
@@ -353,8 +350,7 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta i
 	if _, ok := d.GetOk("nic"); ok {
 		nic, err := cloudapinic.GetNicFromSchemaCreate(d, "nic.0.")
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("gpu error occurred while getting nic from schema: %w", err))
-			return diags
+			return diagutil.ToDiags(d, fmt.Errorf("gpu error occurred while getting nic from schema: %w", err), nil)
 		}
 
 		server.Entities.Nics = &ionoscloud.Nics{
@@ -393,8 +389,8 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta i
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error creating server: %w", err))
-		return diags
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, fmt.Errorf("error creating server: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
 	}
 	d.SetId(*createdServer.Id)
 
@@ -403,7 +399,8 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta i
 			log.Printf("[DEBUG] failed to create createdServer resource")
 			d.SetId("")
 		}
-		return diag.FromErr(fmt.Errorf("error waiting for state change for server creation %w", errState))
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, fmt.Errorf("error waiting for state change for server creation %w", errState), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	// get additional data for schema
@@ -411,8 +408,8 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta i
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error fetching server: (%w)", err))
-		return diags
+		requestLocation, _ := apiResponse.Location()
+		return diagutil.ToDiags(d, fmt.Errorf("error fetching server: (%w)", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
 	}
 	if v, ok := d.GetOk("security_groups_ids"); ok {
 		raw := v.(*schema.Set).List()
@@ -427,15 +424,14 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta i
 			*createdServer.Id, *(*createdServer.Entities.Nics.Items)[0].Id).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching firewall rules: %w", err))
-			return diags
+			requestLocation, _ := apiResponse.Location()
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching firewall rules: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
 		}
 
 		if firewallRules.Items != nil {
 			if len(*firewallRules.Items) > 0 {
 				if err := d.Set("firewallrule_id", *(*firewallRules.Items)[0].Id); err != nil {
-					diags := diag.FromErr(err)
-					return diags
+					return diagutil.ToDiags(d, err, nil)
 				}
 			}
 		}
@@ -444,8 +440,7 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta i
 			primaryNicID := *(*createdServer.Entities.Nics.Items)[0].Id
 			err := d.Set("primary_nic", primaryNicID)
 			if err != nil {
-				diags := diag.FromErr(fmt.Errorf("error while setting primary nic %s: %w", d.Id(), err))
-				return diags
+				return diagutil.ToDiags(d, fmt.Errorf("error while setting primary nic: %w", err), nil)
 			}
 			if v, ok := d.GetOk("nic.0.security_groups_ids"); ok {
 				raw := v.(*schema.Set).List()
@@ -480,7 +475,7 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta i
 		}
 
 		if err := d.Set("inline_volume_ids", inlineVolumeIds); err != nil {
-			return diag.FromErr(utils.GenerateSetError("server", "inline_volume_ids", err))
+			return diagutil.ToDiags(d, utils.GenerateSetError("server", "inline_volume_ids", err), nil)
 		}
 	}
 
@@ -491,7 +486,7 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta i
 		if strings.EqualFold(initialState, constant.CubeVMStateStop) ||
 			strings.EqualFold(initialState, constant.GpuVMStateStop) {
 			if err := ss.Stop(ctx, dcID, d.Id(), serverType); err != nil {
-				return diag.FromErr(err)
+				return diagutil.ToDiags(d, err, nil)
 			}
 		}
 

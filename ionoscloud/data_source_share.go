@@ -10,6 +10,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 func dataSourceShare() *schema.Resource {
@@ -54,19 +55,19 @@ func dataSourceShareRead(ctx context.Context, d *schema.ResourceData, meta inter
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		if httpNotFound(apiResponse) {
-			return diag.FromErr(fmt.Errorf("group_id %s resource_id %s not found", groupID, resourceID))
+			return diagutil.ToDiags(d, fmt.Errorf("group_id %s resource_id %s not found", groupID, resourceID), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 		}
-		return diag.FromErr(fmt.Errorf("an error occurred while fetching a share with group_id %s resource_id %s %w", groupID, resourceID, err))
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching a share with group_id %s resource_id %s %w", groupID, resourceID, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 	}
 	if rsp.Properties == nil {
-		return diag.FromErr(fmt.Errorf("no properties found in the response"))
+		return diagutil.ToDiags(d, fmt.Errorf("no properties found in the response"), nil)
 	}
 	d.SetId(*rsp.Id)
 	if err := d.Set("edit_privilege", *rsp.Properties.EditPrivilege); err != nil {
-		return diag.FromErr(utils.GenerateSetError("share", "edit_privilege", err))
+		return diagutil.ToDiags(d, utils.GenerateSetError("share", "edit_privilege", err), nil)
 	}
 	if err := d.Set("share_privilege", *rsp.Properties.SharePrivilege); err != nil {
-		return diag.FromErr(utils.GenerateSetError("share", "share_privilege", err))
+		return diagutil.ToDiags(d, utils.GenerateSetError("share", "share_privilege", err), nil)
 	}
 	return nil
 }
