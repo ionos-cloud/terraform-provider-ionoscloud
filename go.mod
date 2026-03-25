@@ -15,6 +15,7 @@ require (
 	github.com/hashicorp/terraform-plugin-testing v1.13.2
 	github.com/huandu/xstrings v1.5.0
 	github.com/iancoleman/strcase v0.3.0
+	github.com/ionos-cloud/pgsqlv2 v0.0.0
 	github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2 v2.1.0
 	github.com/ionos-cloud/sdk-go-bundle/products/cert/v2 v2.2.0
 	github.com/ionos-cloud/sdk-go-bundle/products/containerregistry/v2 v2.1.0
@@ -104,3 +105,5 @@ require (
 	google.golang.org/grpc v1.72.1 // indirect
 	google.golang.org/protobuf v1.36.6 // indirect
 )
+
+replace github.com/ionos-cloud/pgsqlv2 => /home/adeatcu/work/sdks/generated_locally/pgsqlv2-bundle
