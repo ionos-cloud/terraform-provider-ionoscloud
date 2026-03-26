@@ -1,7 +1,7 @@
 /*
- * IONOS Cloud - DBaas - Postgres
+ * IONOS Cloud - DBaas - PostgreSQL
  *
- * DBaaS Postgres v2 is the new version of Postgres API at IONOS cloud
+ * DBaaS PostgreSQL v2 is the new version of the PostgreSQL API at IONOS cloud.
  *
  * API version: 2.0.0
  * Contact: support@cloud.ionos.com
@@ -20,7 +20,7 @@ var _ MappedNullable = &ClusterMetadataAllOf1{}
 
 // ClusterMetadataAllOf1 struct for ClusterMetadataAllOf1
 type ClusterMetadataAllOf1 struct {
-	// the DNS name used to access the cluster
+	// The DNS name used to access the cluster.
 	DnsName *string `json:"dnsName,omitempty"`
 }
 

@@ -18,6 +18,7 @@ import (
 	pgsqlv2 "github.com/ionos-cloud/pgsqlv2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	pgsqlv2Service "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/pgsqlv2"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
@@ -106,8 +107,6 @@ func (r *clusterResource) Schema(ctx context.Context, req resource.SchemaRequest
 				Optional:    true,
 				Description: "Human-readable description for the cluster.",
 			},
-			// TODO -- Computed: true assumes the API assigns a default version when omitted.
-			// Verify during acceptance testing; if it doesn't, remove Computed and make it Required or just Optional.
 			"version": schema.StringAttribute{
 				Optional:    true,
 				Computed:    true,
@@ -117,10 +116,9 @@ func (r *clusterResource) Schema(ctx context.Context, req resource.SchemaRequest
 				Computed:    true,
 				Description: "The DNS name used to access the cluster.",
 			},
-			// TODO -- Test that requiresReplace works properly.
 			"location": schema.StringAttribute{
 				Required:    true,
-				Description: "The location of the PostgreSQL cluster. This is used for routing to the regional API endpoint.",
+				Description: "The location of the PostgreSQL cluster. This is used for routing to the regional API endpoint. Available locations: " + pgsqlv2Service.AvailableLocationsString() + ".",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
@@ -131,10 +129,8 @@ func (r *clusterResource) Schema(ctx context.Context, req resource.SchemaRequest
 			},
 			"replication_mode": schema.StringAttribute{
 				Required:    true,
-				Description: "Replication mode across the instances. Only has effect if instances count is greater than 1.",
+				Description: "Replication mode across the instances.",
 			},
-			// TODO -- Computed: true based on swagger default of DISABLED.
-			// Verify during acceptance testing; if the API does not return a value when omitted, remove Computed.
 			"connection_pooler": schema.StringAttribute{
 				Optional:    true,
 				Computed:    true,
@@ -274,6 +270,15 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	// WriteOnly attributes (e.g. password) are null in the plan;
+	// read them from the config instead.
+	var config clusterResourceModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	plan.Credentials.Password = config.Credentials.Password
 
 	location := plan.Location.ValueString()
 	client, err := r.bundle.NewPgSQLV2Client(location)
@@ -491,19 +496,19 @@ func buildClusterCreateProperties(plan *clusterResourceModel) (pgsqlv2.ClusterCr
 		props.Description = plan.Description.ValueStringPointer()
 	}
 
-	if !plan.Version.IsNull() {
+	if !plan.Version.IsUnknown() {
 		props.Version = plan.Version.ValueStringPointer()
 	}
 
-	if !plan.ConnectionPooler.IsNull() {
+	if !plan.ConnectionPooler.IsUnknown() {
 		props.ConnectionPooler = plan.ConnectionPooler.ValueStringPointer()
 	}
 
-	if !plan.LogsEnabled.IsNull() {
+	if !plan.LogsEnabled.IsUnknown() {
 		props.LogsEnabled = plan.LogsEnabled.ValueBoolPointer()
 	}
 
-	if !plan.MetricsEnabled.IsNull() {
+	if !plan.MetricsEnabled.IsUnknown() {
 		props.MetricsEnabled = plan.MetricsEnabled.ValueBoolPointer()
 	}
 
@@ -527,14 +532,14 @@ func buildClusterCreateProperties(plan *clusterResourceModel) (pgsqlv2.ClusterCr
 
 	props.Credentials = pgsqlv2.PostgresUser{
 		Username: plan.Credentials.Username.ValueString(),
-		Password: pgsqlv2.PostgresUserPassword{},
+		Password: plan.Credentials.Password.ValueString(),
 		Database: plan.Credentials.Database.ValueString(),
 	}
 
 	if plan.RestoreFromBackup != nil {
 		restore := &pgsqlv2.PostgresClusterFromBackup{}
 		if !plan.RestoreFromBackup.SourceBackupID.IsNull() {
-			restore.SourceBackupId = plan.RestoreFromBackup.SourceBackupID.ValueStringPointer()
+			restore.SourceBackupId = plan.RestoreFromBackup.SourceBackupID.ValueString()
 		}
 		if !plan.RestoreFromBackup.RecoveryTargetDateTime.IsNull() {
 			t, err := time.Parse(time.RFC3339, plan.RestoreFromBackup.RecoveryTargetDateTime.ValueString())
@@ -565,19 +570,19 @@ func buildClusterProperties(plan *clusterResourceModel) (pgsqlv2.Cluster, diag.D
 		props.Description = plan.Description.ValueStringPointer()
 	}
 
-	if !plan.Version.IsNull() {
+	if !plan.Version.IsUnknown() {
 		props.Version = plan.Version.ValueStringPointer()
 	}
 
-	if !plan.ConnectionPooler.IsNull() {
+	if !plan.ConnectionPooler.IsUnknown() {
 		props.ConnectionPooler = plan.ConnectionPooler.ValueStringPointer()
 	}
 
-	if !plan.LogsEnabled.IsNull() {
+	if !plan.LogsEnabled.IsUnknown() {
 		props.LogsEnabled = plan.LogsEnabled.ValueBoolPointer()
 	}
 
-	if !plan.MetricsEnabled.IsNull() {
+	if !plan.MetricsEnabled.IsUnknown() {
 		props.MetricsEnabled = plan.MetricsEnabled.ValueBoolPointer()
 	}
 
@@ -602,7 +607,7 @@ func buildClusterProperties(plan *clusterResourceModel) (pgsqlv2.Cluster, diag.D
 	if plan.RestoreFromBackup != nil {
 		restore := &pgsqlv2.PostgresClusterFromBackup{}
 		if !plan.RestoreFromBackup.SourceBackupID.IsNull() {
-			restore.SourceBackupId = plan.RestoreFromBackup.SourceBackupID.ValueStringPointer()
+			restore.SourceBackupId = plan.RestoreFromBackup.SourceBackupID.ValueString()
 		}
 		if !plan.RestoreFromBackup.RecoveryTargetDateTime.IsNull() {
 			t, err := time.Parse(time.RFC3339, plan.RestoreFromBackup.RecoveryTargetDateTime.ValueString())
@@ -641,7 +646,6 @@ func mapClusterResponseToModel(cluster *pgsqlv2.ClusterRead, model *clusterResou
 	if props.ConnectionPooler != nil {
 		model.ConnectionPooler = types.StringValue(*props.ConnectionPooler)
 	}
-	// TODO -- Iterate one more time over these attributes and check which ones are actually computed or not and based on that decide if we especially need to set them to Null when they are not present in the API response.
 	if props.LogsEnabled != nil {
 		model.LogsEnabled = types.BoolValue(*props.LogsEnabled)
 	}
@@ -669,7 +673,9 @@ func mapClusterResponseToModel(cluster *pgsqlv2.ClusterRead, model *clusterResou
 
 	// Credentials block: the API returns username and database but not the password.
 	if props.Credentials != nil {
-		model.Credentials.Username = types.StringValue(props.Credentials.Username)
-		model.Credentials.Database = types.StringValue(props.Credentials.Database)
+		model.Credentials = credentialsModel{
+			Username: types.StringValue(props.Credentials.Username),
+			Database: types.StringValue(props.Credentials.Database),
+		}
 	}
 }

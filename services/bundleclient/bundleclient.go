@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"runtime"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	cr "github.com/ionos-cloud/sdk-go-bundle/products/containerregistry/v2"
@@ -241,16 +242,10 @@ func (c SdkBundle) NewPgSQLV2Client(location string) (*pgsqlv2Service.Client, er
 	))
 
 	if c.fileConfig != nil {
-		// TODO -- Modify shared and include a new constant for PgSQLV2
-		if c.fileConfig.GetProductOverrides(fileconfiguration.PgSQLV2) != nil {
-			endpoint := c.fileConfig.GetLocationOverridesWithGlobalFallback(fileconfiguration.PgSQLV2, location)
-			if endpoint == nil {
-				return nil, fmt.Errorf(
-					"could not instantiate PostgreSQL v2 client: invalid config found for %q product in file config: "+
-						"missing endpoint in location %q and no global endpoints defined for fallback",
-					fileconfiguration.PgSQLV2, location,
-				)
-			}
+		endpoint := c.fileConfig.GetProductLocationOverrides(fileconfiguration.PSQLV2, location)
+		if endpoint == nil {
+			log.Printf("[WARN] product %q is missing from config file or location %q is not defined for product %q, using internal locations map to configure the endpoint", fileconfiguration.PSQLV2, location, fileconfiguration.PSQLV2)
+		} else {
 			config.Servers = shared.ServerConfigurations{
 				{
 					URL:         endpoint.Name,
@@ -260,14 +255,16 @@ func (c SdkBundle) NewPgSQLV2Client(location string) (*pgsqlv2Service.Client, er
 			config.HTTPClient = &http.Client{}
 			config.HTTPClient.Transport = shared.CreateTransport(endpoint.SkipTLSVerify, endpoint.CertificateAuthData)
 			return pgsqlv2Service.NewClientFromConfig(config), nil
-		} else {
-			log.Printf("[DEBUG] Missing config for %q product in file config, using internal locations map to configure the endpoint", fileconfiguration.PgSQLV2)
 		}
 	}
 
+	endpoint := pgsqlv2Service.LocationToURL[location]
+	if endpoint == "" {
+		return nil, fmt.Errorf("can't configure endpoint for location %q, available locations: %s", location, strings.Join(pgsqlv2Service.AvailableLocations(), ", "))
+	}
 	config.Servers = shared.ServerConfigurations{
 		{
-			URL:         pgsqlv2Service.LocationToURL[location],
+			URL:         endpoint,
 			Description: "endpoint from the internal locations map, location: " + location,
 		},
 	}

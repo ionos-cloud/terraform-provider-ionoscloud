@@ -1,7 +1,7 @@
 /*
- * IONOS Cloud - DBaas - Postgres
+ * IONOS Cloud - DBaas - PostgreSQL
  *
- * DBaaS Postgres v2 is the new version of Postgres API at IONOS cloud
+ * DBaaS PostgreSQL v2 is the new version of the PostgreSQL API at IONOS cloud.
  *
  * API version: 2.0.0
  * Contact: support@cloud.ionos.com
@@ -18,11 +18,12 @@ import (
 // checks if the PostgresUser type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &PostgresUser{}
 
-// PostgresUser Credentials for the master database user to be created.
+// PostgresUser Credentials for the primary database user to be created.
 type PostgresUser struct {
 	// The username of the master database user. Must be 16 characters or less and must include only alphanumeric characters (`[A-Za-z0-9_]`) and underscores (`_`).
-	Username string               `json:"username"`
-	Password PostgresUserPassword `json:"password"`
+	Username string `json:"username"`
+	// The password for the master database user. Must meet the following requirements: - At least 8 characters long. - Contains at least one lowercase letter. - Contains at least one uppercase letter. - Contains at least one digit (0-9). - Contains at least one special character from the set: @$!%*?&
+	Password string `json:"password"`
 	// The name of the initial database to be created. Must be 63 characters or less and must include only alphanumeric characters (`[a-z0-9A-Z]`) and underscores (`_`).
 	Database string `json:"database"`
 }
@@ -31,7 +32,7 @@ type PostgresUser struct {
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewPostgresUser(username string, password PostgresUserPassword, database string) *PostgresUser {
+func NewPostgresUser(username string, password string, database string) *PostgresUser {
 	this := PostgresUser{}
 
 	this.Username = username
@@ -74,9 +75,9 @@ func (o *PostgresUser) SetUsername(v string) {
 }
 
 // GetPassword returns the Password field value
-func (o *PostgresUser) GetPassword() PostgresUserPassword {
+func (o *PostgresUser) GetPassword() string {
 	if o == nil {
-		var ret PostgresUserPassword
+		var ret string
 		return ret
 	}
 
@@ -85,7 +86,7 @@ func (o *PostgresUser) GetPassword() PostgresUserPassword {
 
 // GetPasswordOk returns a tuple with the Password field value
 // and a boolean to check if the value has been set.
-func (o *PostgresUser) GetPasswordOk() (*PostgresUserPassword, bool) {
+func (o *PostgresUser) GetPasswordOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -93,7 +94,7 @@ func (o *PostgresUser) GetPasswordOk() (*PostgresUserPassword, bool) {
 }
 
 // SetPassword sets field value
-func (o *PostgresUser) SetPassword(v PostgresUserPassword) {
+func (o *PostgresUser) SetPassword(v string) {
 	o.Password = v
 }
 

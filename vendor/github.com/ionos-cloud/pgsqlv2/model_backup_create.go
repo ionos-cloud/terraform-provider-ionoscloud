@@ -1,7 +1,7 @@
 /*
- * IONOS Cloud - DBaas - Postgres
+ * IONOS Cloud - DBaas - PostgreSQL
  *
- * DBaaS Postgres v2 is the new version of Postgres API at IONOS cloud
+ * DBaaS PostgreSQL v2 is the new version of the PostgreSQL API at IONOS cloud.
  *
  * API version: 2.0.0
  * Contact: support@cloud.ionos.com
@@ -20,7 +20,9 @@ var _ MappedNullable = &BackupCreate{}
 
 // BackupCreate struct for BackupCreate
 type BackupCreate struct {
-	Properties Backup `json:"properties"`
+	// Metadata
+	Metadata   map[string]interface{} `json:"metadata,omitempty"`
+	Properties Backup                 `json:"properties"`
 }
 
 // NewBackupCreate instantiates a new BackupCreate object
@@ -41,6 +43,38 @@ func NewBackupCreate(properties Backup) *BackupCreate {
 func NewBackupCreateWithDefaults() *BackupCreate {
 	this := BackupCreate{}
 	return &this
+}
+
+// GetMetadata returns the Metadata field value if set, zero value otherwise.
+func (o *BackupCreate) GetMetadata() map[string]interface{} {
+	if o == nil || IsNil(o.Metadata) {
+		var ret map[string]interface{}
+		return ret
+	}
+	return o.Metadata
+}
+
+// GetMetadataOk returns a tuple with the Metadata field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *BackupCreate) GetMetadataOk() (map[string]interface{}, bool) {
+	if o == nil || IsNil(o.Metadata) {
+		return map[string]interface{}{}, false
+	}
+	return o.Metadata, true
+}
+
+// HasMetadata returns a boolean if a field has been set.
+func (o *BackupCreate) HasMetadata() bool {
+	if o != nil && !IsNil(o.Metadata) {
+		return true
+	}
+
+	return false
+}
+
+// SetMetadata gets a reference to the given map[string]interface{} and assigns it to the Metadata field.
+func (o *BackupCreate) SetMetadata(v map[string]interface{}) {
+	o.Metadata = v
 }
 
 // GetProperties returns the Properties field value
@@ -77,6 +111,9 @@ func (o BackupCreate) MarshalJSON() ([]byte, error) {
 
 func (o BackupCreate) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	if !IsNil(o.Metadata) {
+		toSerialize["metadata"] = o.Metadata
+	}
 	toSerialize["properties"] = o.Properties
 	return toSerialize, nil
 }

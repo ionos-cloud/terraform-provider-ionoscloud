@@ -1,6 +1,10 @@
 package pgsqlv2
 
 import (
+	"fmt"
+	"sort"
+	"strings"
+
 	pgsqlv2 "github.com/ionos-cloud/pgsqlv2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 )
@@ -17,16 +21,37 @@ func NewClientFromConfig(config *shared.Configuration) *Client {
 	}
 }
 
+// TODO -- Replace dev endpoints with production endpoints before merging (remove "dev." prefix from all URLs).
 var LocationToURL = map[string]string{
-	"":         "https://postgresql.de-txl.ionos.com",
-	"de/txl":   "https://postgresql.de-txl.ionos.com",
-	"de/fra":   "https://postgresql.de-fra.ionos.com",
-	"de/fra/2": "https://postgresql.de-fra.ionos.com",
-	"fr/par":   "https://postgresql.fr-par.ionos.com",
+	"de/txl":   "https://dev.postgresql.de-txl.ionos.com",
+	"de/fra":   "https://dev.postgresql.de-fra.ionos.com",
+	"de/fra/2": "https://dev.postgresql.de-fra.ionos.com",
+	"fr/par":   "https://dev.postgresql.fr-par.ionos.com",
 	"es/vit":   "https://postgresql.es-vit.ionos.com",
-	"gb/lhr":   "https://postgresql.gb-lhr.ionos.com",
-	"gb/bhx":   "https://postgresql.gb-bhx.ionos.com",
-	"us/las":   "https://postgresql.us-las.ionos.com",
-	"us/mci":   "https://postgresql.us-mci.ionos.com",
-	"us/ewr":   "https://postgresql.us-ewr.ionos.com",
+	"gb/lhr":   "https://dev.postgresql.gb-lhr.ionos.com",
+	"gb/bhx":   "https://dev.postgresql.gb-bhx.ionos.com",
+	"us/las":   "https://dev.postgresql.us-las.ionos.com",
+	"us/mci":   "https://dev.postgresql.us-mci.ionos.com",
+	"us/ewr":   "https://dev.postgresql.us-ewr.ionos.com",
+}
+
+// AvailableLocations returns a sorted list of available PgSQL v2 locations.
+func AvailableLocations() []string {
+	locations := make([]string, 0, len(LocationToURL))
+	for loc := range LocationToURL {
+		locations = append(locations, loc)
+	}
+	sort.Strings(locations)
+	return locations
+}
+
+// AvailableLocationsString returns a comma-separated string of available PgSQL v2 locations,
+// each location enclosed in backticks for display in Terraform schema descriptions.
+func AvailableLocationsString() string {
+	locations := AvailableLocations()
+	quoted := make([]string, len(locations))
+	for i, loc := range locations {
+		quoted[i] = fmt.Sprintf("`%s`", loc)
+	}
+	return strings.Join(quoted, ", ")
 }

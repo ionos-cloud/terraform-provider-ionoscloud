@@ -48,7 +48,6 @@ const (
 	Mongo                   = "mongo"
 	ObjectStorageManagement = "objectstoragemanagement"
 	PSQL                    = "psql"
-	PgSQLV2 = "pgsqlv2"
 )
 
 // products that have a location and will override the endpoint that is for each location
@@ -61,6 +60,7 @@ const (
 	NFS           = "nfs"
 	ObjectStorage = "objectstorage"
 	VPN           = "vpn"
+	PSQLV2		  = "psqlv2"
 )
 
 // Endpoint is a struct that represents an endpoint

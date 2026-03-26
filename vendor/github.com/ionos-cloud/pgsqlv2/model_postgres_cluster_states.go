@@ -1,7 +1,7 @@
 /*
- * IONOS Cloud - DBaas - Postgres
+ * IONOS Cloud - DBaas - PostgreSQL
  *
- * DBaaS Postgres v2 is the new version of Postgres API at IONOS cloud
+ * DBaaS PostgreSQL v2 is the new version of the PostgreSQL API at IONOS cloud.
  *
  * API version: 2.0.0
  * Contact: support@cloud.ionos.com
@@ -17,13 +17,14 @@ import (
 	"fmt"
 )
 
-// PostgresClusterStates The current status of the Postgres cluster provisioning process. PROVISIONING: The system is actively working to provision the changes. PROVISIONED: The cluster is fully provisioned. DESTROYING: The system is in the process of tearing down the cluster. FAILED: The provisioning could not be completed due to an internal error.
+// PostgresClusterStates The current lifecycle state of the cluster. - `PROVISIONING`: The system is actively applying the changes. - `AVAILABLE`: The resource is fully operational with no pending changes. - `UPDATING`: A modification is in progress. - `DESTROYING`: The resource is being deleted. - `FAILED`: The provisioning failed due to an internal error.
 type PostgresClusterStates string
 
 // List of PostgresClusterStates
 const (
 	POSTGRESCLUSTERSTATES_PROVISIONING PostgresClusterStates = "PROVISIONING"
-	POSTGRESCLUSTERSTATES_PROVISIONED  PostgresClusterStates = "PROVISIONED"
+	POSTGRESCLUSTERSTATES_AVAILABLE    PostgresClusterStates = "AVAILABLE"
+	POSTGRESCLUSTERSTATES_UPDATING     PostgresClusterStates = "UPDATING"
 	POSTGRESCLUSTERSTATES_DESTROYING   PostgresClusterStates = "DESTROYING"
 	POSTGRESCLUSTERSTATES_FAILED       PostgresClusterStates = "FAILED"
 )
@@ -35,7 +36,7 @@ func (v *PostgresClusterStates) UnmarshalJSON(src []byte) error {
 		return err
 	}
 	enumTypeValue := PostgresClusterStates(value)
-	for _, existing := range []PostgresClusterStates{"PROVISIONING", "PROVISIONED", "DESTROYING", "FAILED"} {
+	for _, existing := range []PostgresClusterStates{"PROVISIONING", "AVAILABLE", "UPDATING", "DESTROYING", "FAILED"} {
 		if existing == enumTypeValue {
 			*v = enumTypeValue
 			return nil

@@ -1,7 +1,7 @@
 /*
- * IONOS Cloud - DBaas - Postgres
+ * IONOS Cloud - DBaas - PostgreSQL
  *
- * DBaaS Postgres v2 is the new version of Postgres API at IONOS cloud
+ * DBaaS PostgreSQL v2 is the new version of the PostgreSQL API at IONOS cloud.
  *
  * API version: 2.0.0
  * Contact: support@cloud.ionos.com
@@ -22,13 +22,17 @@ var _ MappedNullable = &Backup{}
 
 // Backup struct for Backup
 type Backup struct {
-	ClusterId                  *string    `json:"clusterId,omitempty"`
-	PostgresClusterVersion     *string    `json:"postgresClusterVersion,omitempty"`
-	IsActive                   *bool      `json:"isActive,omitempty"`
+	// The unique identifier of the cluster this backup belongs to.
+	ClusterId *string `json:"clusterId,omitempty"`
+	// The PostgreSQL version of the cluster at backup time.
+	PostgresClusterVersion *string `json:"postgresClusterVersion,omitempty"`
+	// Whether this is the currently active backup for the cluster.
+	IsActive *bool `json:"isActive,omitempty"`
+	// The earliest point in time to which the cluster can be restored from this backup.
 	EarliestRecoveryTargetTime *IonosTime `json:"earliestRecoveryTargetTime,omitempty"`
 	// The latest possible point in time to which the cluster can be restored. If the backup can be restored up to the current time, this field will be null.
 	LatestRecoveryTargetTime *IonosTime `json:"latestRecoveryTargetTime,omitempty"`
-	// The s3 location where the backup will be created. A list of supported locations is provided by the BackupLocations endpoint
+	// The Object Storage location where the backup will be created. The BackupLocations provides a list of supported locations.
 	Location *string `json:"location,omitempty"`
 }
 

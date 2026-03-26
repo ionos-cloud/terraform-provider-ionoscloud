@@ -1,7 +1,7 @@
 /*
- * IONOS Cloud - DBaas - Postgres
+ * IONOS Cloud - DBaas - PostgreSQL
  *
- * DBaaS Postgres v2 is the new version of Postgres API at IONOS cloud
+ * DBaaS PostgreSQL v2 is the new version of the PostgreSQL API at IONOS cloud.
  *
  * API version: 2.0.0
  * Contact: support@cloud.ionos.com
@@ -20,7 +20,7 @@ var _ MappedNullable = &PostgresVersion{}
 
 // PostgresVersion Postgres version.
 type PostgresVersion struct {
-	// version of Postgres for the cluster
+	// The PostgreSQL version for the cluster.
 	Version *string `json:"version,omitempty"`
 	// The support status of the version.
 	Status *string `json:"status,omitempty"`

@@ -1,7 +1,7 @@
 /*
- * IONOS Cloud - DBaas - Postgres
+ * IONOS Cloud - DBaas - PostgreSQL
  *
- * DBaaS Postgres v2 is the new version of Postgres API at IONOS cloud
+ * DBaaS PostgreSQL v2 is the new version of the PostgreSQL API at IONOS cloud.
  *
  * API version: 2.0.0
  * Contact: support@cloud.ionos.com
@@ -17,7 +17,7 @@ import (
 	"fmt"
 )
 
-// PostgresClusterReplicationMode Replication mode across the instances. Only has effect if instances.count > 1 ASYNCHRONOUS: Updates are propagated to other instances without waiting for confirmation. This mode offers higher performance but may result in temporary data inconsistencies during replication delays. STRICTLY_SYNCHRONOUS: All instances must acknowledge the update before it is committed. Guarantees strong consistency but may impact performance in high-latency environments.
+// PostgresClusterReplicationMode Defines the replication mode across instances. - `ASYNCHRONOUS`: Propagates updates to other instances without waiting for confirmation. Offers higher performance but may result in temporary data inconsistencies during replication delays. - `STRICTLY_SYNCHRONOUS`: Only supported for clusters with at least 3 instances. Requires all instances to acknowledge the update before it is committed, guaranteeing strong consistency at the cost of potential performance impact in high-latency environments.
 type PostgresClusterReplicationMode string
 
 // List of PostgresClusterReplicationMode
