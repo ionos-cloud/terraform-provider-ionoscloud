@@ -1,9 +1,15 @@
 ## Upcoming
+### Features
+- Add DBaaS PostgreSQL v2 support:
+  - New resource: `ionoscloud_pg_cluster_v2`
+  - New data sources: `ionoscloud_pg_cluster_v2`, `ionoscloud_pg_clusters_v2`, `ionoscloud_pg_backups_v2`, `ionoscloud_pg_versions_v2`, `ionoscloud_pg_backup_location`
+
 ### Fixes
 - Improved error message when `image_name` matches an image that has a non-HDD type (e.g. CDROM) or is in a different location. The error now reports the found image's type and location.
 
 ### Testing
 - Add import tests for CUBE servers.
+- Add acceptance tests for DBaaS PostgreSQL v2 resource and data sources.
 
 ### Fixes
  * The ionoscloud_s3_bucket_policy resource now correctly handles all standard S3 Principal representations:
