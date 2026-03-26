@@ -74,8 +74,8 @@ func dataSourceVpnWireguardPeer() *schema.Resource {
 	}
 }
 
-func dataSourceVpnWireguardPeerRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(bundleclient.SdkBundle).VPNClient
+func dataSourceVpnWireguardPeerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(bundleclient.SdkBundle).VPNClient
 	gatewayID := d.Get("gateway_id").(string)
 	idValue, idOk := d.GetOk("id")
 	nameValue, nameOk := d.GetOk("name")
