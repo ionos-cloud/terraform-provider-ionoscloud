@@ -1,7 +1,7 @@
 /*
- * IONOS Cloud - DBaas - Postgres
+ * IONOS Cloud - DBaas - PostgreSQL
  *
- * DBaaS Postgres v2 is the new version of Postgres API at IONOS cloud
+ * DBaaS PostgreSQL v2 is the new version of the PostgreSQL API at IONOS cloud.
  *
  * API version: 2.0.0
  * Contact: support@cloud.ionos.com
@@ -37,7 +37,9 @@ type ClusterMetadata struct {
 	// Unique name of the resource.
 	ResourceURN *string                `json:"resourceURN,omitempty"`
 	State       *PostgresClusterStates `json:"state,omitempty"`
-	// the DNS name used to access the cluster
+	// A human-readable message describing the current state. Populated when `state` is `FAILED`.
+	StatusMessage *string `json:"statusMessage,omitempty"`
+	// The DNS name used to access the cluster.
 	DnsName *string `json:"dnsName,omitempty"`
 }
 
@@ -315,6 +317,38 @@ func (o *ClusterMetadata) SetState(v PostgresClusterStates) {
 	o.State = &v
 }
 
+// GetStatusMessage returns the StatusMessage field value if set, zero value otherwise.
+func (o *ClusterMetadata) GetStatusMessage() string {
+	if o == nil || IsNil(o.StatusMessage) {
+		var ret string
+		return ret
+	}
+	return *o.StatusMessage
+}
+
+// GetStatusMessageOk returns a tuple with the StatusMessage field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ClusterMetadata) GetStatusMessageOk() (*string, bool) {
+	if o == nil || IsNil(o.StatusMessage) {
+		return nil, false
+	}
+	return o.StatusMessage, true
+}
+
+// HasStatusMessage returns a boolean if a field has been set.
+func (o *ClusterMetadata) HasStatusMessage() bool {
+	if o != nil && !IsNil(o.StatusMessage) {
+		return true
+	}
+
+	return false
+}
+
+// SetStatusMessage gets a reference to the given string and assigns it to the StatusMessage field.
+func (o *ClusterMetadata) SetStatusMessage(v string) {
+	o.StatusMessage = &v
+}
+
 // GetDnsName returns the DnsName field value if set, zero value otherwise.
 func (o *ClusterMetadata) GetDnsName() string {
 	if o == nil || IsNil(o.DnsName) {
@@ -380,6 +414,9 @@ func (o ClusterMetadata) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.State) {
 		toSerialize["state"] = o.State
+	}
+	if !IsNil(o.StatusMessage) {
+		toSerialize["statusMessage"] = o.StatusMessage
 	}
 	if !IsNil(o.DnsName) {
 		toSerialize["dnsName"] = o.DnsName

@@ -1,7 +1,7 @@
 /*
- * IONOS Cloud - DBaas - Postgres
+ * IONOS Cloud - DBaas - PostgreSQL
  *
- * DBaaS Postgres v2 is the new version of Postgres API at IONOS cloud
+ * DBaaS PostgreSQL v2 is the new version of the PostgreSQL API at IONOS cloud.
  *
  * API version: 2.0.0
  * Contact: support@cloud.ionos.com
@@ -18,27 +18,27 @@ import (
 // checks if the Cluster type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &Cluster{}
 
-// Cluster A PostgreSQL (PG) cluster is a unified group of one or more interconnected database instances.       It consists of a single primary instance that handles all write operations,       along with optional standby replicas that provide high availability.       This entity represents the entire logical unit, allowing for the unified management of all its nodes and configurations.
+// Cluster A PostgreSQL (PG) cluster is a unified group of one or more interconnected database instances. It consists of a single primary instance that handles all write operations, along with optional standby replicas that provide high availability. This entity represents the entire logical unit, allowing for the unified management of all its nodes and configurations.
 type Cluster struct {
-	// The name of your Postgres cluster. Must be 63 characters or less and must begin and end with an alphanumeric character (`[a-z0-9A-Z]`) with dashes (`-`), underscores (`_`), dots (`.`), and alphanumerics between.
+	// The name of your PostgreSQL cluster. Must be 63 characters or less and must begin and end with an alphanumeric character (`[a-z0-9A-Z]`) with dashes (`-`), underscores (`_`), dots (`.`), and alphanumerics between.
 	Name string `json:"name"`
-	// Human readable description for the cluster
+	// Human-readable description for the cluster.
 	Description *string `json:"description,omitempty"`
-	// version of Postgres for the cluster
+	// The PostgreSQL version for the cluster.
 	Version           *string                        `json:"version,omitempty"`
 	Instances         InstanceConfiguration          `json:"instances"`
 	Connection        PostgresClusterConnection      `json:"connection"`
 	MaintenanceWindow MaintenanceWindow              `json:"maintenanceWindow"`
 	ReplicationMode   PostgresClusterReplicationMode `json:"replicationMode"`
 	Credentials       *PostgresUser                  `json:"credentials,omitempty"`
-	// Defines how database connections are managed and reused. Default is DISABLED DISABLED: No connection pooling is used. Each request opens a new connection, which is closed immediately after use. This ensures isolation but may impact performance due to frequent connection setup and teardown. TRANSACTION: Connections are pooled and reused for the duration of a transaction. Once the transaction completes, the connection is returned to the pool. This mode balances efficiency with transactional integrity. SESSION: Connections are retained for the entire session and reused across multiple transactions. Offers the highest performance by minimizing connection overhead, but may tie up resources longer.
+	// Defines how database connections are managed and reused. Default value is DISABLED. DISABLED: No connection pooling is used. Each request opens a new connection, which is closed immediately after use. It ensures isolation but may impact performance due to frequent connection setup and teardown. TRANSACTION: Connections are pooled and reused for the duration of a transaction. Once the transaction completes, the connection is returned to the pool. This mode balances efficiency with transactional integrity. SESSION: Connections are retained for the entire session and reused across multiple transactions. Offers the highest performance by minimizing connection overhead, but may tie up resources longer.
 	ConnectionPooler  *string                    `json:"connectionPooler,omitempty"`
 	RestoreFromBackup *PostgresClusterFromBackup `json:"restoreFromBackup,omitempty"`
-	// The s3 location where the backup will be created. A list of supported locations is provided by the BackupLocations endpoint
+	// The Object Storage location where the backup will be created. The BackupLocations provides a list of supported locations.
 	BackupLocation string `json:"backupLocation"`
-	// This field enables or disables the collection and reporting of logs for observability of this cluster.
+	// Allows or disallows the collection and reporting of logs for this cluster's observability.
 	LogsEnabled *bool `json:"logsEnabled,omitempty"`
-	// This field enables or disables the collection and reporting of metrics for observability of this cluster.
+	// Allows or disallows the collection and reporting of metrics for this cluster's observability.
 	MetricsEnabled *bool `json:"metricsEnabled,omitempty"`
 }
 

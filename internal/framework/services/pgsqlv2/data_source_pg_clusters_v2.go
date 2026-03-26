@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	pgsqlv2Service "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/pgsqlv2"
 )
 
 var _ datasource.DataSourceWithConfigure = (*clustersDataSource)(nil)
@@ -18,9 +19,9 @@ type clustersDataSource struct {
 }
 
 type clustersDataSourceModel struct {
-	Location types.String               `tfsdk:"location"`
-	Name     types.String               `tfsdk:"name"`
-	Clusters []clusterDataSourceModel   `tfsdk:"clusters"`
+	Location types.String             `tfsdk:"location"`
+	Name     types.String             `tfsdk:"name"`
+	Clusters []clusterDataSourceModel `tfsdk:"clusters"`
 }
 
 // NewClustersDataSource creates a new data source for listing PgSQL v2 clusters.
@@ -58,7 +59,7 @@ func (d *clustersDataSource) Schema(_ context.Context, _ datasource.SchemaReques
 		Attributes: map[string]schema.Attribute{
 			"location": schema.StringAttribute{
 				Required:    true,
-				Description: "The region in which to look up clusters.",
+				Description: "The region in which to look up clusters. Available locations: " + pgsqlv2Service.AvailableLocationsString() + ".",
 			},
 			"name": schema.StringAttribute{
 				Optional:    true,

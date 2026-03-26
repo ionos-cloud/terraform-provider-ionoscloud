@@ -12,6 +12,7 @@ import (
 	pgsqlv2 "github.com/ionos-cloud/pgsqlv2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	pgsqlv2Service "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/pgsqlv2"
 )
 
 var (
@@ -107,7 +108,7 @@ func (d *clusterDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 			},
 			"location": schema.StringAttribute{
 				Required:    true,
-				Description: "The region in which to look up the cluster.",
+				Description: "The region in which to look up the cluster. Available locations: " + pgsqlv2Service.AvailableLocationsString() + ".",
 			},
 			"backup_location": schema.StringAttribute{
 				Computed:    true,
@@ -230,7 +231,6 @@ func (d *clusterDataSource) Read(ctx context.Context, req datasource.ReadRequest
 			}
 		}
 
-		// TODO -- Check if it's possible to have multiple clusters with the same name.
 		if len(matched) > 1 {
 			resp.Diagnostics.AddError("multiple PostgreSQL v2 clusters found with the same name", "Please search using the cluster ID instead.")
 			return

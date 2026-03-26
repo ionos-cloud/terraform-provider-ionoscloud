@@ -1,7 +1,7 @@
 /*
- * IONOS Cloud - DBaas - Postgres
+ * IONOS Cloud - DBaas - PostgreSQL
  *
- * DBaaS Postgres v2 is the new version of Postgres API at IONOS cloud
+ * DBaaS PostgreSQL v2 is the new version of the PostgreSQL API at IONOS cloud.
  *
  * API version: 2.0.0
  * Contact: support@cloud.ionos.com
@@ -18,13 +18,13 @@ import (
 // checks if the PostgresClusterConnection type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &PostgresClusterConnection{}
 
-// PostgresClusterConnection Connection information of the postgres cluster.
+// PostgresClusterConnection Connection information of the PostgreSQL cluster.
 type PostgresClusterConnection struct {
 	// The datacenter to connect your instance to.
 	DatacenterId string `json:"datacenterId"`
 	// The numeric LAN ID to connect your instance to.
 	LanId string `json:"lanId"`
-	// The IP and netmask that will be assigned to a cluster primary instance. Note the following unavailable IP range: 10.208.0.0/12
+	// Assigns the IP address and netmask to the cluster's primary instance. Note the following unavailable IP range: 10.208.0.0/12
 	PrimaryInstanceAddress string `json:"primaryInstanceAddress"`
 }
 

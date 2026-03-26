@@ -1,7 +1,7 @@
 /*
- * IONOS Cloud - DBaas - Postgres
+ * IONOS Cloud - DBaas - PostgreSQL
  *
- * DBaaS Postgres v2 is the new version of Postgres API at IONOS cloud
+ * DBaaS PostgreSQL v2 is the new version of the PostgreSQL API at IONOS cloud.
  *
  * API version: 2.0.0
  * Contact: support@cloud.ionos.com
@@ -20,7 +20,7 @@ var _ MappedNullable = &BackupLocation{}
 
 // BackupLocation Backup location.
 type BackupLocation struct {
-	// The s3 location where the backup will be created. A list of supported locations is provided by the BackupLocations endpoint
+	// The Object Storage location where the backup will be created. The BackupLocations provides a list of supported locations.
 	Location *string `json:"location,omitempty"`
 }
 

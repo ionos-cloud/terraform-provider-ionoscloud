@@ -6,12 +6,13 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	pgsqlv2 "github.com/ionos-cloud/pgsqlv2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	pgsqlv2Service "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/pgsqlv2"
 )
 
 var _ datasource.DataSourceWithConfigure = (*versionsDataSource)(nil)
@@ -21,7 +22,7 @@ type versionsDataSource struct {
 }
 
 type versionsDataSourceModel struct {
-	Location types.String       `tfsdk:"location"`
+	Location types.String   `tfsdk:"location"`
 	Versions []versionModel `tfsdk:"versions"`
 }
 
@@ -68,7 +69,7 @@ func (d *versionsDataSource) Schema(_ context.Context, _ datasource.SchemaReques
 		Attributes: map[string]schema.Attribute{
 			"location": schema.StringAttribute{
 				Required:    true,
-				Description: "The region in which to look up available versions.",
+				Description: "The region in which to look up available versions. Available locations: " + pgsqlv2Service.AvailableLocationsString() + ".",
 			},
 			"versions": schema.ListNestedAttribute{
 				Computed:    true,

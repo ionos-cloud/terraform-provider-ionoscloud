@@ -1,6 +1,6 @@
 # Go API client for ionoscloud
 
-DBaaS Postgres v2 is the new version of Postgres API at IONOS cloud
+DBaaS PostgreSQL v2 is the new version of the PostgreSQL API at IONOS cloud.
 
 
 ## Overview
@@ -271,7 +271,6 @@ All URIs are relative to *https://postgresql.de-txl.ionos.com*
  - [PostgresClusterReplicationMode](docs/models/PostgresClusterReplicationMode)
  - [PostgresClusterStates](docs/models/PostgresClusterStates)
  - [PostgresUser](docs/models/PostgresUser)
- - [PostgresUserPassword](docs/models/PostgresUserPassword)
  - [PostgresVersion](docs/models/PostgresVersion)
  - [PostgresVersionRead](docs/models/PostgresVersionRead)
  - [PostgresVersionReadList](docs/models/PostgresVersionReadList)

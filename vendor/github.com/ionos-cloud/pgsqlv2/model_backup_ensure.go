@@ -1,7 +1,7 @@
 /*
- * IONOS Cloud - DBaas - Postgres
+ * IONOS Cloud - DBaas - PostgreSQL
  *
- * DBaaS Postgres v2 is the new version of Postgres API at IONOS cloud
+ * DBaaS PostgreSQL v2 is the new version of the PostgreSQL API at IONOS cloud.
  *
  * API version: 2.0.0
  * Contact: support@cloud.ionos.com
@@ -21,8 +21,10 @@ var _ MappedNullable = &BackupEnsure{}
 // BackupEnsure struct for BackupEnsure
 type BackupEnsure struct {
 	// The ID (UUID) of the Backup.
-	Id         string `json:"id"`
-	Properties Backup `json:"properties"`
+	Id string `json:"id"`
+	// Metadata
+	Metadata   map[string]interface{} `json:"metadata,omitempty"`
+	Properties Backup                 `json:"properties"`
 }
 
 // NewBackupEnsure instantiates a new BackupEnsure object
@@ -70,6 +72,38 @@ func (o *BackupEnsure) SetId(v string) {
 	o.Id = v
 }
 
+// GetMetadata returns the Metadata field value if set, zero value otherwise.
+func (o *BackupEnsure) GetMetadata() map[string]interface{} {
+	if o == nil || IsNil(o.Metadata) {
+		var ret map[string]interface{}
+		return ret
+	}
+	return o.Metadata
+}
+
+// GetMetadataOk returns a tuple with the Metadata field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *BackupEnsure) GetMetadataOk() (map[string]interface{}, bool) {
+	if o == nil || IsNil(o.Metadata) {
+		return map[string]interface{}{}, false
+	}
+	return o.Metadata, true
+}
+
+// HasMetadata returns a boolean if a field has been set.
+func (o *BackupEnsure) HasMetadata() bool {
+	if o != nil && !IsNil(o.Metadata) {
+		return true
+	}
+
+	return false
+}
+
+// SetMetadata gets a reference to the given map[string]interface{} and assigns it to the Metadata field.
+func (o *BackupEnsure) SetMetadata(v map[string]interface{}) {
+	o.Metadata = v
+}
+
 // GetProperties returns the Properties field value
 func (o *BackupEnsure) GetProperties() Backup {
 	if o == nil {
@@ -105,6 +139,9 @@ func (o BackupEnsure) MarshalJSON() ([]byte, error) {
 func (o BackupEnsure) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["id"] = o.Id
+	if !IsNil(o.Metadata) {
+		toSerialize["metadata"] = o.Metadata
+	}
 	toSerialize["properties"] = o.Properties
 	return toSerialize, nil
 }

@@ -10,6 +10,7 @@ import (
 	pgsqlv2 "github.com/ionos-cloud/pgsqlv2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	pgsqlv2Service "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/pgsqlv2"
 )
 
 var _ datasource.DataSourceWithConfigure = (*backupsDataSource)(nil)
@@ -69,7 +70,7 @@ func (d *backupsDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 		Attributes: map[string]schema.Attribute{
 			"location": schema.StringAttribute{
 				Required:    true,
-				Description: "The region in which to look up backups.",
+				Description: "The region in which to look up backups. Available locations: " + pgsqlv2Service.AvailableLocationsString() + ".",
 			},
 			"cluster_id": schema.StringAttribute{
 				Optional:    true,

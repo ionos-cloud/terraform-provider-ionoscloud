@@ -49,23 +49,20 @@ func (c *Client) DeleteCluster(ctx context.Context, clusterID string) (*shared.A
 	return apiResponse, err
 }
 
-// IsClusterReady checks if the cluster has reached the PROVISIONED state.
+// IsClusterReady checks if the cluster has reached the AVAILABLE state.
 func (c *Client) IsClusterReady(ctx context.Context, clusterID string) error {
 	cluster, _, err := c.GetCluster(ctx, clusterID)
 	if err != nil {
 		return backoff.Permanent(err)
 	}
-	log.Printf("[DEBUG] PostgreSQL v2 cluster state: %v", cluster.Metadata.State)
 	if cluster.Metadata.State != nil {
-		if *cluster.Metadata.State == pgsqlv2.POSTGRESCLUSTERSTATES_PROVISIONED {
+		log.Printf("[DEBUG] PostgreSQL v2 cluster state: %s", *cluster.Metadata.State)
+		if *cluster.Metadata.State == pgsqlv2.POSTGRESCLUSTERSTATES_AVAILABLE {
 			return nil
 		}
-		// TODO -- Check if for 'Failed' status we keep polling or if we exit immediately.
-		if *cluster.Metadata.State == pgsqlv2.POSTGRESCLUSTERSTATES_FAILED {
-			return backoff.Permanent(fmt.Errorf("cluster reached FAILED state"))
-		}
+		return fmt.Errorf("cluster is not ready, current state: %s", *cluster.Metadata.State)
 	}
-	return fmt.Errorf("cluster is not ready, current state: %v", cluster.Metadata.State)
+	return backoff.Permanent(fmt.Errorf("can't read cluster state, state is nil, unexpected API response"))
 }
 
 // IsClusterDeleted checks if the cluster has been deleted (returns 404).
@@ -77,6 +74,8 @@ func (c *Client) IsClusterDeleted(ctx context.Context, clusterID string) error {
 		}
 		return backoff.Permanent(err)
 	}
-	log.Printf("[DEBUG] PostgreSQL v2 cluster state: %v", cluster.Metadata.State)
+	if cluster.Metadata.State != nil {
+		log.Printf("[DEBUG] PostgreSQL v2 cluster state: %s", *cluster.Metadata.State)
+	}
 	return fmt.Errorf("cluster with ID: %s is not deleted yet", clusterID)
 }

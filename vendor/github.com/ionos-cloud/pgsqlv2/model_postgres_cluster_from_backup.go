@@ -1,7 +1,7 @@
 /*
- * IONOS Cloud - DBaas - Postgres
+ * IONOS Cloud - DBaas - PostgreSQL
  *
- * DBaaS Postgres v2 is the new version of Postgres API at IONOS cloud
+ * DBaaS PostgreSQL v2 is the new version of the PostgreSQL API at IONOS cloud.
  *
  * API version: 2.0.0
  * Contact: support@cloud.ionos.com
@@ -20,11 +20,11 @@ import (
 // checks if the PostgresClusterFromBackup type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &PostgresClusterFromBackup{}
 
-// PostgresClusterFromBackup If specified when creating a new cluster, this field configures the cluster to be initialized with data from an existing backup. If modifying an existing cluster, this field would configure an in-place restore from the specified backup, overwriting the current data with the backup data. The cluster may experience a brief period of downtime during this process.
+// PostgresClusterFromBackup If you specify this field when creating a new cluster, it initializes the cluster with data from an existing backup. If modifying an existing cluster, this field would configure an in-place restore from the specified backup, overwriting the current data with the backup data. The cluster may experience a brief period of downtime during this process.
 type PostgresClusterFromBackup struct {
 	// UUID for the backup to get data from
-	SourceBackupId *string `json:"sourceBackupId,omitempty"`
-	// If this value is supplied as ISO 8601 timestamp, the backup will be replayed up until the given timestamp. If empty, the backup will be applied completely.
+	SourceBackupId string `json:"sourceBackupId"`
+	// Providing this value as an ISO 8601 timestamp causes the system to replay the backups up to the specified time; if empty, the system applies the backup in its entirety.
 	RecoveryTargetDatetime *IonosTime `json:"recoveryTargetDatetime,omitempty"`
 }
 
@@ -32,8 +32,10 @@ type PostgresClusterFromBackup struct {
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewPostgresClusterFromBackup() *PostgresClusterFromBackup {
+func NewPostgresClusterFromBackup(sourceBackupId string) *PostgresClusterFromBackup {
 	this := PostgresClusterFromBackup{}
+
+	this.SourceBackupId = sourceBackupId
 
 	return &this
 }
@@ -46,36 +48,28 @@ func NewPostgresClusterFromBackupWithDefaults() *PostgresClusterFromBackup {
 	return &this
 }
 
-// GetSourceBackupId returns the SourceBackupId field value if set, zero value otherwise.
+// GetSourceBackupId returns the SourceBackupId field value
 func (o *PostgresClusterFromBackup) GetSourceBackupId() string {
-	if o == nil || IsNil(o.SourceBackupId) {
+	if o == nil {
 		var ret string
 		return ret
 	}
-	return *o.SourceBackupId
+
+	return o.SourceBackupId
 }
 
-// GetSourceBackupIdOk returns a tuple with the SourceBackupId field value if set, nil otherwise
+// GetSourceBackupIdOk returns a tuple with the SourceBackupId field value
 // and a boolean to check if the value has been set.
 func (o *PostgresClusterFromBackup) GetSourceBackupIdOk() (*string, bool) {
-	if o == nil || IsNil(o.SourceBackupId) {
+	if o == nil {
 		return nil, false
 	}
-	return o.SourceBackupId, true
+	return &o.SourceBackupId, true
 }
 
-// HasSourceBackupId returns a boolean if a field has been set.
-func (o *PostgresClusterFromBackup) HasSourceBackupId() bool {
-	if o != nil && !IsNil(o.SourceBackupId) {
-		return true
-	}
-
-	return false
-}
-
-// SetSourceBackupId gets a reference to the given string and assigns it to the SourceBackupId field.
+// SetSourceBackupId sets field value
 func (o *PostgresClusterFromBackup) SetSourceBackupId(v string) {
-	o.SourceBackupId = &v
+	o.SourceBackupId = v
 }
 
 // GetRecoveryTargetDatetime returns the RecoveryTargetDatetime field value if set, zero value otherwise.
@@ -120,9 +114,7 @@ func (o PostgresClusterFromBackup) MarshalJSON() ([]byte, error) {
 
 func (o PostgresClusterFromBackup) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.SourceBackupId) {
-		toSerialize["sourceBackupId"] = o.SourceBackupId
-	}
+	toSerialize["sourceBackupId"] = o.SourceBackupId
 	if !IsNil(o.RecoveryTargetDatetime) {
 		toSerialize["recoveryTargetDatetime"] = o.RecoveryTargetDatetime
 	}

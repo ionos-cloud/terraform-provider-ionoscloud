@@ -1,7 +1,7 @@
 /*
- * IONOS Cloud - DBaas - Postgres
+ * IONOS Cloud - DBaas - PostgreSQL
  *
- * DBaaS Postgres v2 is the new version of Postgres API at IONOS cloud
+ * DBaaS PostgreSQL v2 is the new version of the PostgreSQL API at IONOS cloud.
  *
  * API version: 2.0.0
  * Contact: support@cloud.ionos.com
@@ -53,12 +53,12 @@ const (
 	RequestStatusFailed  = "FAILED"
 	RequestStatusDone    = "DONE"
 
-	Version               = "1.0.0"
+	Version               = "2.0.0"
 	DefaultIonosServerUrl = "https://postgresql.de-txl.ionos.com"
 	DefaultIonosBasePath  = ""
 )
 
-// APIClient manages communication with the IONOS Cloud - DBaas - Postgres API v2.0.0
+// APIClient manages communication with the IONOS Cloud - DBaas - PostgreSQL API v2.0.0
 // In most cases there should be only one, shared, APIClient.
 type APIClient struct {
 	cfg    *shared.Configuration
@@ -118,7 +118,7 @@ func NewAPIClient(cfg *shared.Configuration) *APIClient {
 	}
 
 	if cfgCopy.UserAgent == "" {
-		cfgCopy.UserAgent = "sdk-go-bundle/1.0.0"
+		cfgCopy.UserAgent = "sdk-go-bundle/2.0.0"
 	}
 
 	// Initialize default values in the copied configuration

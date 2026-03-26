@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	pgsqlv2Service "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/pgsqlv2"
 )
 
 var _ datasource.DataSourceWithConfigure = (*backupLocationDataSource)(nil)
@@ -17,9 +18,8 @@ type backupLocationDataSource struct {
 	bundle *bundleclient.SdkBundle
 }
 
-// TODO -- Since endpoints are regional, how does backup locations make sense?
 type backupLocationDataSourceModel struct {
-	Location        types.String              `tfsdk:"location"`
+	Location        types.String          `tfsdk:"location"`
 	BackupLocations []backupLocationModel `tfsdk:"backup_locations"`
 }
 
@@ -63,7 +63,7 @@ func (d *backupLocationDataSource) Schema(_ context.Context, _ datasource.Schema
 		Attributes: map[string]schema.Attribute{
 			"location": schema.StringAttribute{
 				Required:    true,
-				Description: "The region in which to look up backup locations.",
+				Description: "The region in which to look up backup locations. Available locations: " + pgsqlv2Service.AvailableLocationsString() + ".",
 			},
 			"backup_locations": schema.ListNestedAttribute{
 				Computed:    true,

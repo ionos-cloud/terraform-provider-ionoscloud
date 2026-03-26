@@ -1,7 +1,7 @@
 /*
- * IONOS Cloud - DBaas - Postgres
+ * IONOS Cloud - DBaas - PostgreSQL
  *
- * DBaaS Postgres v2 is the new version of Postgres API at IONOS cloud
+ * DBaaS PostgreSQL v2 is the new version of the PostgreSQL API at IONOS cloud.
  *
  * API version: 2.0.0
  * Contact: support@cloud.ionos.com
@@ -21,6 +21,8 @@ var _ MappedNullable = &ClusterMetadataAllOf{}
 // ClusterMetadataAllOf struct for ClusterMetadataAllOf
 type ClusterMetadataAllOf struct {
 	State *PostgresClusterStates `json:"state,omitempty"`
+	// A human-readable message describing the current state. Populated when `state` is `FAILED`.
+	StatusMessage *string `json:"statusMessage,omitempty"`
 }
 
 // NewClusterMetadataAllOf instantiates a new ClusterMetadataAllOf object
@@ -73,6 +75,38 @@ func (o *ClusterMetadataAllOf) SetState(v PostgresClusterStates) {
 	o.State = &v
 }
 
+// GetStatusMessage returns the StatusMessage field value if set, zero value otherwise.
+func (o *ClusterMetadataAllOf) GetStatusMessage() string {
+	if o == nil || IsNil(o.StatusMessage) {
+		var ret string
+		return ret
+	}
+	return *o.StatusMessage
+}
+
+// GetStatusMessageOk returns a tuple with the StatusMessage field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ClusterMetadataAllOf) GetStatusMessageOk() (*string, bool) {
+	if o == nil || IsNil(o.StatusMessage) {
+		return nil, false
+	}
+	return o.StatusMessage, true
+}
+
+// HasStatusMessage returns a boolean if a field has been set.
+func (o *ClusterMetadataAllOf) HasStatusMessage() bool {
+	if o != nil && !IsNil(o.StatusMessage) {
+		return true
+	}
+
+	return false
+}
+
+// SetStatusMessage gets a reference to the given string and assigns it to the StatusMessage field.
+func (o *ClusterMetadataAllOf) SetStatusMessage(v string) {
+	o.StatusMessage = &v
+}
+
 func (o ClusterMetadataAllOf) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -85,6 +119,9 @@ func (o ClusterMetadataAllOf) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.State) {
 		toSerialize["state"] = o.State
+	}
+	if !IsNil(o.StatusMessage) {
+		toSerialize["statusMessage"] = o.StatusMessage
 	}
 	return toSerialize, nil
 }
