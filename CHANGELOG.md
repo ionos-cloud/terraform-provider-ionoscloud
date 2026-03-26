@@ -1,9 +1,13 @@
 ## Upcoming
+### Features
+- Added `nic_multi_queue` attribute to the `servers` (plural) data source.
+
 ### Fixes
 - Improved error message when `image_name` matches an image that has a non-HDD type (e.g. CDROM) or is in a different location. The error now reports the found image's type and location.
 
 ### Testing
 - Add import tests for CUBE servers.
+- Add acceptance test for `nic_multi_queue` in the `servers` data source.
 
 ### Fixes
  * The ionoscloud_s3_bucket_policy resource now correctly handles all standard S3 Principal representations:
