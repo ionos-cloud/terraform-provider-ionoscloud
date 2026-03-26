@@ -2,6 +2,7 @@ package logging
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"runtime"
 	"strings"
@@ -13,6 +14,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/configlog"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
@@ -51,15 +53,18 @@ func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *f
 func (c *Client) ChangeConfigURL(location string) {
 	config := c.sdkClient.GetConfig()
 	if location == "" && os.Getenv(ionosAPIURLLogging) != "" {
+		url := utils.CleanURL(os.Getenv(ionosAPIURLLogging))
+		log.Printf("[DEBUG] Logging: endpoint from %s: %s", ionosAPIURLLogging, url)
 		c.GetConfig().Servers = shared.ServerConfigurations{
 			{
-				URL: utils.CleanURL(os.Getenv(ionosAPIURLLogging)),
+				URL: url,
 			},
 		}
 		return
 	}
 	for _, server := range config.Servers {
 		if strings.EqualFold(server.Description, shared.EndpointOverridden+location) || strings.EqualFold(server.URL, locationToURL[location]) {
+			log.Printf("[DEBUG] Logging: endpoint for location %s: %s", configlog.FormatLocation(location), server.URL)
 			config.Servers = shared.ServerConfigurations{
 				{
 					URL:         server.URL,
@@ -69,6 +74,7 @@ func (c *Client) ChangeConfigURL(location string) {
 			return
 		}
 	}
+	log.Printf("[DEBUG] Logging: endpoint for location %s: %s", configlog.FormatLocation(location), locationToURL[location])
 }
 
 var (

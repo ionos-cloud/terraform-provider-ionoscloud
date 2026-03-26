@@ -16,8 +16,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
-
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/compute"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/kafka"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/monitoring"
@@ -26,6 +24,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/configlog"
 )
 
 // FrameworkClientOptions is the configuration for the provider.
@@ -186,7 +185,15 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 		insecureBool = clientOpts.Insecure.ValueBool()
 	}
 
-	fileConfig, readFileErr := fileconfiguration.NewFromEnv()
+	fileConfig, readFileErr := configlog.LoadFileConfigWithLogging()
+	if readFileErr == nil {
+		configlog.LogProfileAndEnvironment(fileConfig)
+		configlog.LogFileConfigEndpoints(fileConfig)
+	}
+	configlog.LogEndpointEnvVars()
+
+	fileConfigUsed := false
+	profileName := ""
 	if token == "" && (username == "" || password == "") {
 		if readFileErr != nil {
 			resp.Diagnostics.AddError("missing credentials", "either token or username and password must be set")
@@ -201,6 +208,8 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 		token = profile.Credentials.Token
 		username = profile.Credentials.Username
 		password = profile.Credentials.Password
+		fileConfigUsed = true
+		profileName = profile.Name
 	}
 	if accessKey == "" || secretKey == "" {
 		if readFileErr == nil {
@@ -211,7 +220,13 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 			}
 		}
 	}
+
+	configlog.LogCredentialResolution(token, username, password, accessKey, secretKey, fileConfigUsed, profileName)
+
 	cleanedEndpoint := utils.CleanURL(endpoint)
+	configlog.LogEndpoint(cleanedEndpoint)
+	configlog.LogS3Region(region)
+	configlog.LogTLSConfig(insecureBool)
 
 	if insecureBool == true {
 		resp.Diagnostics.AddWarning("insecure mode enabled", "This is not recommended for production environments.")
