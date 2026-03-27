@@ -294,6 +294,14 @@ const (
 	PsqlVersionsResource         = "ionoscloud_pg_versions"
 	PsqlVersionsTest             = "test_dbaas_versions"
 
+	// PgSql v2 constants
+	PsqlV2ClusterResource          = "ionoscloud_pg_cluster_v2"
+	PsqlV2ClusterDataSource        = "ionoscloud_pg_cluster_v2"
+	PsqlV2ClustersDataSource       = "ionoscloud_pg_clusters_v2"
+	PsqlBackupLocationDataSource = "ionoscloud_pg_backup_location"
+	PsqlV2BackupsDataSource        = "ionoscloud_pg_backups_v2"
+	PsqlV2VersionsDataSource       = "ionoscloud_pg_versions_v2"
+
 	// MariaDB constants
 	DBaaSMariaDBClusterResource       = "ionoscloud_mariadb_cluster"
 	DBaaSMariaDBBackupsDataSource     = "ionoscloud_mariadb_backups"

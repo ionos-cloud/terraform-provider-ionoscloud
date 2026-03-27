@@ -60,6 +60,7 @@ const (
 	NFS           = "nfs"
 	ObjectStorage = "objectstorage"
 	VPN           = "vpn"
+	PSQLV2		  = "psqlv2"
 )
 
 // Endpoint is a struct that represents an endpoint
