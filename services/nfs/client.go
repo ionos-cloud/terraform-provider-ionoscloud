@@ -12,6 +12,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/configlog"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/ionos-cloud/sdk-go-bundle/products/nfs/v2"
@@ -58,9 +59,11 @@ func (c *Client) changeConfigURL(location string) {
 	config := c.sdkClient.GetConfig()
 	// if there is no location set, return the client as is. allows to overwrite the url with IONOS_API_URL
 	if location == "" && os.Getenv(ionosAPIURLNFS) != "" {
+		url := utils.CleanURL(os.Getenv(ionosAPIURLNFS))
+		log.Printf("[DEBUG] NFS: endpoint from %s: %s", ionosAPIURLNFS, url)
 		config.Servers = shared.ServerConfigurations{
 			{
-				URL: utils.CleanURL(os.Getenv(ionosAPIURLNFS)),
+				URL: url,
 			},
 		}
 		return
@@ -68,6 +71,7 @@ func (c *Client) changeConfigURL(location string) {
 
 	for _, server := range config.Servers {
 		if strings.EqualFold(server.Description, shared.EndpointOverridden+location) || strings.EqualFold(server.URL, locationToURL[location]) {
+			log.Printf("[DEBUG] NFS: endpoint for location %s: %s", configlog.FormatLocation(location), server.URL)
 			config.Servers = shared.ServerConfigurations{
 				{
 					URL:         server.URL,
@@ -77,6 +81,7 @@ func (c *Client) changeConfigURL(location string) {
 			return
 		}
 	}
+	log.Printf("[DEBUG] NFS: endpoint for location %s: %s", configlog.FormatLocation(location), locationToURL[location])
 }
 
 // overrideClientEndpoint todo - after move to bundle, replace with generic function from fileConfig
@@ -84,7 +89,7 @@ func (c *Client) overrideClientEndpoint(productName, location string) {
 	// whatever is set, at the end we need to check if the IONOS_API_URL_productname is set and use override the endpoint if yes
 	defer c.changeConfigURL(location)
 	if os.Getenv(shared.IonosApiUrlEnvVar) != "" {
-		fmt.Printf("[DEBUG] Using custom endpoint %s\n", os.Getenv(shared.IonosApiUrlEnvVar))
+		log.Printf("[DEBUG] NFS: endpoint from %s: %s", shared.IonosApiUrlEnvVar, os.Getenv(shared.IonosApiUrlEnvVar))
 		return
 	}
 	fileConfig := c.GetFileConfig()

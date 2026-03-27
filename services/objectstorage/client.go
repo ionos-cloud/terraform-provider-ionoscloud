@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"runtime"
@@ -52,11 +53,17 @@ func NewClient(clientOptions clientoptions.TerraformClientOptions, config *filec
 	// Set custom endpoint if provided
 	if envValue := os.Getenv(ionosAPIURLObjectStorage); envValue != "" {
 		clientOptions.Endpoint = envValue
+		log.Printf("[DEBUG] Object Storage: endpoint from %s: %s", ionosAPIURLObjectStorage, envValue)
 	}
 	certificateAuthData := ""
 	if clientOptions.Endpoint == "" {
+		region := clientOptions.StorageOptions.Region
+		if region == "" {
+			region = "eu-central-3"
+		}
 		if endpointOverrides := config.GetProductLocationOverrides(fileconfiguration.ObjectStorage, clientOptions.StorageOptions.Region); endpointOverrides != nil {
 			clientOptions.Endpoint = endpointOverrides.Name
+			log.Printf("[DEBUG] Object Storage: endpoint from file config for region %q: %s", region, endpointOverrides.Name)
 			if !clientOptions.SkipTLSVerify {
 				clientOptions.SkipTLSVerify = endpointOverrides.SkipTLSVerify
 			}
@@ -67,6 +74,7 @@ func NewClient(clientOptions clientoptions.TerraformClientOptions, config *filec
 	if clientOptions.StorageOptions.Region == "" {
 		clientOptions.StorageOptions.Region = "eu-central-3"
 	}
+	log.Printf("[DEBUG] Object Storage: region=%q, endpoint=%q", clientOptions.StorageOptions.Region, clientOptions.Endpoint)
 
 	// TODO -- replace with WithObjectStorage from sdk-go-bundle
 	cfg := shared.NewConfigurationFromOptions(clientOptions.ClientOptions)

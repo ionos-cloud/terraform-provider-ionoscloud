@@ -2,6 +2,7 @@ package inmemorydb
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"runtime"
@@ -14,6 +15,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/configlog"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
@@ -75,15 +77,18 @@ var (
 func (c *Client) changeConfigURL(location string) {
 	clientConfig := c.sdkClient.GetConfig()
 	if location == "" && os.Getenv(ionosAPIURLInMemoryDB) != "" {
+		url := utils.CleanURL(os.Getenv(ionosAPIURLInMemoryDB))
+		log.Printf("[DEBUG] InMemoryDB: endpoint from %s: %s", ionosAPIURLInMemoryDB, url)
 		clientConfig.Servers = shared.ServerConfigurations{
 			{
-				URL: utils.CleanURL(os.Getenv(ionosAPIURLInMemoryDB)),
+				URL: url,
 			},
 		}
 		return
 	}
 	for _, server := range clientConfig.Servers {
 		if strings.EqualFold(server.Description, shared.EndpointOverridden+location) || strings.EqualFold(server.URL, locationToURL[location]) {
+			log.Printf("[DEBUG] InMemoryDB: endpoint for location %s: %s", configlog.FormatLocation(location), server.URL)
 			clientConfig.Servers = shared.ServerConfigurations{
 				{
 					URL:         server.URL,
@@ -93,4 +98,5 @@ func (c *Client) changeConfigURL(location string) {
 			return
 		}
 	}
+	log.Printf("[DEBUG] InMemoryDB: endpoint for location %s: %s", configlog.FormatLocation(location), locationToURL[location])
 }

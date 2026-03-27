@@ -49,7 +49,7 @@ func SetClientOptionsFromConfig(client ConfigProviderWithLoaderAndLocation, prod
 	defer client.ChangeConfigURL(location)
 	// do not set from config if we use IONOS_API_URL
 	if os.Getenv(shared.IonosApiUrlEnvVar) != "" {
-		log.Printf("[DEBUG] Using custom endpoint from IONOS_API_URL env variable")
+		log.Printf("[DEBUG] %s: using endpoint from %s: %s", productName, shared.IonosApiUrlEnvVar, os.Getenv(shared.IonosApiUrlEnvVar))
 		return
 	}
 	fileConfig := client.GetFileConfig()
@@ -73,6 +73,9 @@ func SetClientOptionsFromConfig(client ConfigProviderWithLoaderAndLocation, prod
 	}
 	config.HTTPClient = &http.Client{}
 	config.HTTPClient.Transport = shared.CreateTransport(endpoint.SkipTLSVerify, endpoint.CertificateAuthData)
+	if endpoint.SkipTLSVerify || endpoint.CertificateAuthData != "" {
+		log.Printf("[DEBUG] %s: skipTlsVerify=%t, certificateAuthData=%t (len=%d)", productName, endpoint.SkipTLSVerify, endpoint.CertificateAuthData != "", len(endpoint.CertificateAuthData))
+	}
 }
 
 // SetGlobalClientOptionsFromFileConfig sets the client options from the loaded config if not already set
@@ -92,9 +95,16 @@ func SetGlobalClientOptionsFromFileConfig(clientOptions *clientoptions.Terraform
 
 	if !clientOptions.SkipTLSVerify {
 		clientOptions.SkipTLSVerify = productOverrides.Endpoints[0].SkipTLSVerify
+		if clientOptions.SkipTLSVerify {
+			log.Printf("[DEBUG] File config TLS for %s: skipTlsVerify=%t", productName, clientOptions.SkipTLSVerify)
+		}
 	}
 	if clientOptions.Endpoint == "" {
 		clientOptions.Endpoint = productOverrides.Endpoints[0].Name
+		log.Printf("[DEBUG] File config global endpoint for %s: %s", productName, clientOptions.Endpoint)
+	}
+	if productOverrides.Endpoints[0].CertificateAuthData != "" {
+		log.Printf("[DEBUG] File config certificateAuthData for %s: present (len=%d)", productName, len(productOverrides.Endpoints[0].CertificateAuthData))
 	}
 	clientOptions.Certificate = productOverrides.Endpoints[0].CertificateAuthData
 }

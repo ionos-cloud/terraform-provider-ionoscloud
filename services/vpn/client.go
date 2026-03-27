@@ -2,6 +2,7 @@ package vpn
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"runtime"
 
@@ -12,6 +13,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/configlog"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
@@ -71,17 +73,21 @@ func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *f
 func (c *Client) ChangeConfigURL(location string) {
 	config := c.sdkClient.GetConfig()
 	if location == "" && os.Getenv(ionosAPIURLVPN) != "" {
+		url := utils.CleanURL(os.Getenv(ionosAPIURLVPN))
+		log.Printf("[DEBUG] VPN: endpoint from %s: %s", ionosAPIURLVPN, url)
 		config.Servers = shared.ServerConfigurations{
 			{
-				URL: utils.CleanURL(os.Getenv(ionosAPIURLVPN)),
+				URL: url,
 			},
 		}
 		return
 	}
 
+	url := locationToURL[location]
+	log.Printf("[DEBUG] VPN: endpoint for location %s: %s", configlog.FormatLocation(location), url)
 	config.Servers = shared.ServerConfigurations{
 		{
-			URL: locationToURL[location],
+			URL: url,
 		},
 	}
 }
