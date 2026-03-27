@@ -4,7 +4,7 @@
 
 ### Testing
 - Add import tests for CUBE servers.
-- Add `nic_multi_queue` tests for VCPU servers.
+- Add checks for the `nic_multi_queue` attribute inside VCPU servers tests.
 
 ### Fixes
  * The ionoscloud_s3_bucket_policy resource now correctly handles all standard S3 Principal representations:
