@@ -108,6 +108,7 @@ func dataSourceNIC() *schema.Resource {
 	}
 }
 
+//nolint:gocyclo
 func dataSourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	t, dIdOk := d.GetOk("datacenter_id")
 	st, sIdOk := d.GetOk("server_id")
