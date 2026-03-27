@@ -112,9 +112,7 @@ func (d *backupLocationDataSource) Read(ctx context.Context, req datasource.Read
 		item := backupLocationModel{
 			ID: types.StringValue(bl.Id),
 		}
-		if bl.Properties.Location != nil {
-			item.Location = types.StringValue(*bl.Properties.Location)
-		}
+		item.Location = types.StringPointerValue(bl.Properties.Location)
 		backupLocations = append(backupLocations, item)
 	}
 

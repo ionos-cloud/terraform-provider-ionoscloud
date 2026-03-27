@@ -155,22 +155,14 @@ func (d *backupsDataSource) Read(ctx context.Context, req datasource.ReadRequest
 func mapBackupResponseToModel(backup *pgsqlv2.BackupRead, model *backupModel) {
 	model.ID = types.StringValue(backup.Id)
 	props := &backup.Properties
-	if props.ClusterId != nil {
-		model.ClusterID = types.StringValue(*props.ClusterId)
-	}
-	if props.PostgresClusterVersion != nil {
-		model.PostgresClusterVersion = types.StringValue(*props.PostgresClusterVersion)
-	}
-	if props.IsActive != nil {
-		model.IsActive = types.BoolValue(*props.IsActive)
-	}
+	model.ClusterID = types.StringPointerValue(props.ClusterId)
+	model.PostgresClusterVersion = types.StringPointerValue(props.PostgresClusterVersion)
+	model.IsActive = types.BoolPointerValue(props.IsActive)
 	if props.EarliestRecoveryTargetTime != nil {
 		model.EarliestRecoveryTargetTime = types.StringValue(props.EarliestRecoveryTargetTime.String())
 	}
 	if props.LatestRecoveryTargetTime != nil {
 		model.LatestRecoveryTargetTime = types.StringValue(props.LatestRecoveryTargetTime.String())
 	}
-	if props.Location != nil {
-		model.Location = types.StringValue(*props.Location)
-	}
+	model.Location = types.StringPointerValue(props.Location)
 }

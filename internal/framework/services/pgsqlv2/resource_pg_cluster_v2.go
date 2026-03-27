@@ -624,30 +624,18 @@ func buildClusterUpdateProperties(plan *clusterResourceModel) (pgsqlv2.Cluster, 
 func mapClusterResponseToModel(cluster *pgsqlv2.ClusterRead, model *clusterResourceModel) {
 	model.ID = types.StringValue(cluster.Id)
 
-	if cluster.Metadata.DnsName != nil {
-		model.DNSName = types.StringValue(*cluster.Metadata.DnsName)
-	}
+	model.DNSName = types.StringPointerValue(cluster.Metadata.DnsName)
 
 	props := &cluster.Properties
 
 	model.Name = types.StringValue(props.Name)
-	if props.Description != nil {
-		model.Description = types.StringValue(*props.Description)
-	}
-	if props.Version != nil {
-		model.Version = types.StringValue(*props.Version)
-	}
+	model.Description = types.StringPointerValue(props.Description)
+	model.Version = types.StringPointerValue(props.Version)
 	model.ReplicationMode = types.StringValue(string(props.ReplicationMode))
 	model.BackupLocation = types.StringValue(props.BackupLocation)
-	if props.ConnectionPooler != nil {
-		model.ConnectionPooler = types.StringValue(*props.ConnectionPooler)
-	}
-	if props.LogsEnabled != nil {
-		model.LogsEnabled = types.BoolValue(*props.LogsEnabled)
-	}
-	if props.MetricsEnabled != nil {
-		model.MetricsEnabled = types.BoolValue(*props.MetricsEnabled)
-	}
+	model.ConnectionPooler = types.StringPointerValue(props.ConnectionPooler)
+	model.LogsEnabled = types.BoolPointerValue(props.LogsEnabled)
+	model.MetricsEnabled = types.BoolPointerValue(props.MetricsEnabled)
 
 	model.Instances = instancesModel{
 		Count:       types.Int32Value(props.Instances.Count),
