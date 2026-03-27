@@ -4,7 +4,7 @@
 
 ### Testing
 - Add import tests for CUBE servers.
-- Add acceptance test for `nic_multi_queue` in the `ionoscloud_servers` data source.
+- Modify `ionoscloud_servers` data source test to include a check for the `nic_multi_queue` attribute.
 
 ### Fixes
  * The ionoscloud_s3_bucket_policy resource now correctly handles all standard S3 Principal representations:
