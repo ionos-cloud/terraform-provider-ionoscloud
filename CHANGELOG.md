@@ -4,6 +4,7 @@
 
 ### Testing
 - Add import tests for CUBE servers.
+- Add checks for the `nic_multi_queue` attribute inside VCPU servers tests.
 - Modify `ionoscloud_servers` data source test to include a check for the `nic_multi_queue` attribute.
 
 ### Fixes

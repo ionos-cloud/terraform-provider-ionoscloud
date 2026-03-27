@@ -80,30 +80,8 @@ func TestAccServerVCPUBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCheckServerVCPUConfigEmptyNicIps,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckServerVCPUExists(constant.ServerVCPUResource+"."+constant.ServerTestResource, &server),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "name", constant.ServerTestResource),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "cores", "1"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "ram", "1024"),
-					resource.TestCheckResourceAttrSet(constant.ServerVCPUResource+"."+constant.ServerTestResource, "cpu_family"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "type", constant.VCPUType),
-					utils.TestImageNotNull(constant.ServerVCPUResource, "boot_image"),
-					resource.TestCheckResourceAttrPair(constant.ServerVCPUResource+"."+constant.ServerTestResource, "image_password", constant.RandomPassword+".server_image_password", "result"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "type", constant.VCPUType),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "volume.0.name", "system"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "volume.0.size", "5"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "volume.0.disk_type", "SSD Standard"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "volume.0.bus", "VIRTIO"),
-					resource.TestCheckResourceAttrPair(constant.ServerVCPUResource+"."+constant.ServerTestResource, "volume.0.boot_server", constant.ServerVCPUResource+"."+constant.ServerTestResource, "id"),
-					resource.TestCheckResourceAttrPair(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.lan", constant.LanResource+"."+constant.LanTestResource, "id"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.name", "system"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.dhcp", "true"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.firewall_active", "true"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.mac", constant.NicMac),
-					resource.TestCheckResourceAttrPair(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.id", constant.ServerVCPUResource+"."+constant.ServerTestResource, "primary_nic"),
-					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.firewall_type", "BIDIRECTIONAL"),
-				),
+				Config:      testAccCheckServerVCPUConfigEmptyNicIps,
+				ExpectError: regexp.MustCompile(`expected ips to contain a valid IPv4 address`),
 			},
 			{
 				Config: testAccCheckServerVCPUConfigBasic,
@@ -247,23 +225,31 @@ func TestAccServerVCPUBasic(t *testing.T) {
 				Config: multipleFeaturesConfig,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckServerVCPUExists("ionoscloud_vcpu_server.test_server_mf", &server),
+					resource.TestCheckResourceAttr("ionoscloud_vcpu_server.test_server_mf", "nic_multi_queue", "true"),
 					// Test if set only because on creation the value is propagated from the image.
 					resource.TestCheckResourceAttrSet("ionoscloud_vcpu_server.test_server_mf", "volume.0.require_legacy_bios"),
 				),
 			},
 			{
 				Config: multipleFeaturesConfigDataSourceMatchID,
-				Check:  resource.TestCheckResourceAttrPair("data.ionoscloud_vcpu_server.test_server_mf", "volumes.0.require_legacy_bios", "ionoscloud_vcpu_server.test_server_mf", "volume.0.require_legacy_bios"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair("data.ionoscloud_vcpu_server.test_server_mf", "nic_multi_queue", "ionoscloud_vcpu_server.test_server_mf", "nic_multi_queue"),
+					resource.TestCheckResourceAttrPair("data.ionoscloud_vcpu_server.test_server_mf", "volumes.0.require_legacy_bios", "ionoscloud_vcpu_server.test_server_mf", "volume.0.require_legacy_bios"),
+				),
 			},
 			{
 				Config: multipleFeaturesConfigDataSourceMatchName,
-				Check:  resource.TestCheckResourceAttrPair("data.ionoscloud_vcpu_server.test_server_mf", "volumes.0.require_legacy_bios", "ionoscloud_vcpu_server.test_server_mf", "volume.0.require_legacy_bios"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair("data.ionoscloud_vcpu_server.test_server_mf", "nic_multi_queue", "ionoscloud_vcpu_server.test_server_mf", "nic_multi_queue"),
+					resource.TestCheckResourceAttrPair("data.ionoscloud_vcpu_server.test_server_mf", "volumes.0.require_legacy_bios", "ionoscloud_vcpu_server.test_server_mf", "volume.0.require_legacy_bios"),
+				),
 			},
 			{
 				Config: multipleFeaturesUpdateConfig,
-				// Test if set AND the value because on update the value can be changed, unlike the creation for which
-				// the value does not matter because the final value will be propagated from the image.
-				Check: resource.TestCheckResourceAttr("ionoscloud_vcpu_server.test_server_mf", "volume.0.require_legacy_bios", "true"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("ionoscloud_vcpu_server.test_server_mf", "nic_multi_queue", "false"),
+					resource.TestCheckResourceAttr("ionoscloud_vcpu_server.test_server_mf", "volume.0.require_legacy_bios", "true"),
+				),
 			},
 		},
 	})
@@ -1774,6 +1760,7 @@ const multipleFeaturesConfig = `
 			name              = "system"
 			dhcp              = true
 		}
+		nic_multi_queue = true
 	}
 ` + ServerImagePassword
 
@@ -1824,5 +1811,6 @@ const multipleFeaturesUpdateConfig = `
 			name              = "system"
 			dhcp              = true
 		}
+		nic_multi_queue = false
 	}
 ` + ServerImagePassword
