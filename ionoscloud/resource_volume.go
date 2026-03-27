@@ -31,6 +31,70 @@ func resourceVolume() *schema.Resource {
 		},
 		CustomizeDiff: checkVolumeImmutableFields,
 		Schema: map[string]*schema.Schema{
+			"availability_zone": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"AUTO", "ZONE_1", "ZONE_2", "ZONE_3"}, true)),
+			},
+			"backup_unit_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"boot_server": {
+				Type:        schema.TypeString,
+				Description: "The UUID of the attached server.",
+				Computed:    true,
+			},
+			"bus": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"cpu_hot_plug": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"datacenter_id": {
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+			},
+			"device_number": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			"disc_virtio_hot_plug": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"disc_virtio_hot_unplug": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"disk_type": {
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+			},
+			"expose_serial": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+				Description: "If set to `true` will expose the serial id of the disk attached to the server. " +
+					"If set to `false` will not expose the serial id. Some operating systems or software solutions require the serial id to be exposed to work properly. " +
+					"Exposing the serial can influence licensed software (e.g. Windows) behavior",
+			},
+			"image": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"image_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"image_name": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -41,23 +105,6 @@ func resourceVolume() *schema.Resource {
 					return false
 				},
 			},
-			"image": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"image_id": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"size": {
-				Type:     schema.TypeInt,
-				Required: true,
-			},
-			"disk_type": {
-				Type:             schema.TypeString,
-				Required:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
-			},
 			"image_password": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -66,6 +113,47 @@ func resourceVolume() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+			},
+			"location": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The location of the resource. This field should be used only if you are also using a file configuration and should not be configured otherwise.",
+				ForceNew:    true,
+			},
+			"name": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"nic_hot_plug": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"nic_hot_unplug": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"pci_slot": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			"ram_hot_plug": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"require_legacy_bios": {
+				Type:        schema.TypeBool,
+				Description: "Indicates if the image requires the legacy BIOS for compatibility or specific needs.",
+				Optional:    true,
+				Computed:    true,
+			},
+			"server_id": {
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+			},
+			"size": {
+				Type:     schema.TypeInt,
+				Required: true,
 			},
 			"ssh_key_path": {
 				Type:     schema.TypeList,
@@ -81,98 +169,10 @@ func resourceVolume() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"bus": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
-			"name": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"availability_zone": {
-				Type:             schema.TypeString,
-				Optional:         true,
-				Computed:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"AUTO", "ZONE_1", "ZONE_2", "ZONE_3"}, true)),
-			},
-			"cpu_hot_plug": {
-				Type:     schema.TypeBool,
-				Computed: true,
-			},
-			"ram_hot_plug": {
-				Type:     schema.TypeBool,
-				Computed: true,
-			},
-			"nic_hot_plug": {
-				Type:     schema.TypeBool,
-				Computed: true,
-			},
-			"nic_hot_unplug": {
-				Type:     schema.TypeBool,
-				Computed: true,
-			},
-			"disc_virtio_hot_plug": {
-				Type:     schema.TypeBool,
-				Computed: true,
-			},
-			"disc_virtio_hot_unplug": {
-				Type:     schema.TypeBool,
-				Computed: true,
-			},
-			"backup_unit_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
 			"user_data": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
-			},
-			"device_number": {
-				Type:     schema.TypeInt,
-				Computed: true,
-			},
-			"pci_slot": {
-				Type:     schema.TypeInt,
-				Computed: true,
-			},
-			"boot_server": {
-				Type:        schema.TypeString,
-				Description: "The UUID of the attached server.",
-				Computed:    true,
-			},
-			"server_id": {
-				Type:             schema.TypeString,
-				Required:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
-			},
-			"datacenter_id": {
-				Type:             schema.TypeString,
-				Required:         true,
-				ForceNew:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
-			},
-			"location": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "The location of the resource. This field should be used only if you are also using a file configuration and should not be configured otherwise.",
-				ForceNew:    true,
-			},
-			"expose_serial": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Computed: true,
-				Description: "If set to `true` will expose the serial id of the disk attached to the server. " +
-					"If set to `false` will not expose the serial id. Some operating systems or software solutions require the serial id to be exposed to work properly. " +
-					"Exposing the serial can influence licensed software (e.g. Windows) behavior",
-			},
-			"require_legacy_bios": {
-				Type:        schema.TypeBool,
-				Description: "Indicates if the image requires the legacy BIOS for compatibility or specific needs.",
-				Optional:    true,
-				Computed:    true,
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
