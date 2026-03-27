@@ -206,9 +206,6 @@ func (r *clusterResource) Schema(ctx context.Context, req resource.SchemaRequest
 					"username": schema.StringAttribute{
 						Required:    true,
 						Description: "The username of the master database user.",
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.RequiresReplace(),
-						},
 					},
 					"password": schema.StringAttribute{
 						Required:    true,
@@ -218,9 +215,6 @@ func (r *clusterResource) Schema(ctx context.Context, req resource.SchemaRequest
 					"database": schema.StringAttribute{
 						Required:    true,
 						Description: "The name of the initial database to be created.",
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.RequiresReplace(),
-						},
 					},
 				},
 			},
@@ -378,6 +372,15 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	// WriteOnly attributes (e.g. password) are null in the plan;
+	// read them from the config instead.
+	var config clusterResourceModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	plan.Credentials.Password = config.Credentials.Password
 
 	clusterID := state.ID.ValueString()
 	location := plan.Location.ValueString()
@@ -584,6 +587,12 @@ func buildClusterUpdateProperties(plan *clusterResourceModel) (pgsqlv2.Cluster, 
 	props.MaintenanceWindow = pgsqlv2.MaintenanceWindow{
 		Time:         plan.MaintenanceWindow.Time.ValueString(),
 		DayOfTheWeek: pgsqlv2.DayOfTheWeek(plan.MaintenanceWindow.DayOfTheWeek.ValueString()),
+	}
+
+	props.Credentials = &pgsqlv2.PostgresUser{
+		Username: plan.Credentials.Username.ValueString(),
+		Password: plan.Credentials.Password.ValueString(),
+		Database: plan.Credentials.Database.ValueString(),
 	}
 
 	props.Description = plan.Description.ValueStringPointer()
