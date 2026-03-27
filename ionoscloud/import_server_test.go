@@ -14,6 +14,7 @@ import (
 )
 
 func TestAccServerImportBasic(t *testing.T) {
+	t.Parallel()
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ExternalProviders:        randomProviderVersion343(),
@@ -35,6 +36,7 @@ func TestAccServerImportBasic(t *testing.T) {
 }
 
 func TestAccServerWithLabelsImport(t *testing.T) {
+	t.Parallel()
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
