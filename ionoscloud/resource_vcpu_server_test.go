@@ -79,7 +79,6 @@ func TestAccServerVCPUBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "vm_state", constant.VMStateStart),
 				),
 			},
-			// Solves #372 - ips = [""] is now rejected by validation instead of crashing the provider.
 			{
 				Config:      testAccCheckServerVCPUConfigEmptyNicIps,
 				ExpectError: regexp.MustCompile(`expected ips to contain a valid IPv4 address`),
