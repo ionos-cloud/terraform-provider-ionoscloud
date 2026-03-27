@@ -108,8 +108,7 @@ func (r *clusterResource) Schema(ctx context.Context, req resource.SchemaRequest
 				Description: "Human-readable description for the cluster.",
 			},
 			"version": schema.StringAttribute{
-				Optional:    true,
-				Computed:    true,
+				Required:    true,
 				Description: "The PostgreSQL version of the cluster.",
 			},
 			"dns_name": schema.StringAttribute{
@@ -207,6 +206,9 @@ func (r *clusterResource) Schema(ctx context.Context, req resource.SchemaRequest
 					"username": schema.StringAttribute{
 						Required:    true,
 						Description: "The username of the master database user.",
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.RequiresReplace(),
+						},
 					},
 					"password": schema.StringAttribute{
 						Required:    true,
@@ -216,6 +218,9 @@ func (r *clusterResource) Schema(ctx context.Context, req resource.SchemaRequest
 					"database": schema.StringAttribute{
 						Required:    true,
 						Description: "The name of the initial database to be created.",
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.RequiresReplace(),
+						},
 					},
 				},
 			},
@@ -389,7 +394,7 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	updateProps, diags := buildClusterProperties(&plan)
+	updateProps, diags := buildClusterUpdateProperties(&plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -492,25 +497,7 @@ func buildClusterCreateProperties(plan *clusterResourceModel) (pgsqlv2.ClusterCr
 		BackupLocation:  plan.BackupLocation.ValueString(),
 	}
 
-	if !plan.Description.IsNull() {
-		props.Description = plan.Description.ValueStringPointer()
-	}
-
-	if !plan.Version.IsUnknown() {
-		props.Version = plan.Version.ValueStringPointer()
-	}
-
-	if !plan.ConnectionPooler.IsUnknown() {
-		props.ConnectionPooler = plan.ConnectionPooler.ValueStringPointer()
-	}
-
-	if !plan.LogsEnabled.IsUnknown() {
-		props.LogsEnabled = plan.LogsEnabled.ValueBoolPointer()
-	}
-
-	if !plan.MetricsEnabled.IsUnknown() {
-		props.MetricsEnabled = plan.MetricsEnabled.ValueBoolPointer()
-	}
+	props.Version = plan.Version.ValueStringPointer()
 
 	props.Instances = pgsqlv2.InstanceConfiguration{
 		Count:       plan.Instances.Count.ValueInt32(),
@@ -536,6 +523,20 @@ func buildClusterCreateProperties(plan *clusterResourceModel) (pgsqlv2.ClusterCr
 		Database: plan.Credentials.Database.ValueString(),
 	}
 
+	props.Description = plan.Description.ValueStringPointer()
+
+	if !plan.ConnectionPooler.IsUnknown() {
+		props.ConnectionPooler = plan.ConnectionPooler.ValueStringPointer()
+	}
+
+	if !plan.LogsEnabled.IsUnknown() {
+		props.LogsEnabled = plan.LogsEnabled.ValueBoolPointer()
+	}
+
+	if !plan.MetricsEnabled.IsUnknown() {
+		props.MetricsEnabled = plan.MetricsEnabled.ValueBoolPointer()
+	}
+
 	if plan.RestoreFromBackup != nil {
 		restore := &pgsqlv2.PostgresClusterFromBackup{}
 		if !plan.RestoreFromBackup.SourceBackupID.IsNull() {
@@ -556,9 +557,8 @@ func buildClusterCreateProperties(plan *clusterResourceModel) (pgsqlv2.ClusterCr
 	return props, diagnostics
 }
 
-// buildClusterProperties constructs the Cluster properties for PUT update.
-// Credentials are NOT included on update.
-func buildClusterProperties(plan *clusterResourceModel) (pgsqlv2.Cluster, diag.Diagnostics) {
+// buildClusterUpdateProperties constructs the Cluster properties for PUT update.
+func buildClusterUpdateProperties(plan *clusterResourceModel) (pgsqlv2.Cluster, diag.Diagnostics) {
 	var diagnostics diag.Diagnostics
 	props := pgsqlv2.Cluster{
 		Name:            plan.Name.ValueString(),
@@ -566,25 +566,7 @@ func buildClusterProperties(plan *clusterResourceModel) (pgsqlv2.Cluster, diag.D
 		BackupLocation:  plan.BackupLocation.ValueString(),
 	}
 
-	if !plan.Description.IsNull() {
-		props.Description = plan.Description.ValueStringPointer()
-	}
-
-	if !plan.Version.IsUnknown() {
-		props.Version = plan.Version.ValueStringPointer()
-	}
-
-	if !plan.ConnectionPooler.IsUnknown() {
-		props.ConnectionPooler = plan.ConnectionPooler.ValueStringPointer()
-	}
-
-	if !plan.LogsEnabled.IsUnknown() {
-		props.LogsEnabled = plan.LogsEnabled.ValueBoolPointer()
-	}
-
-	if !plan.MetricsEnabled.IsUnknown() {
-		props.MetricsEnabled = plan.MetricsEnabled.ValueBoolPointer()
-	}
+	props.Version = plan.Version.ValueStringPointer()
 
 	props.Instances = pgsqlv2.InstanceConfiguration{
 		Count:       plan.Instances.Count.ValueInt32(),
@@ -602,6 +584,20 @@ func buildClusterProperties(plan *clusterResourceModel) (pgsqlv2.Cluster, diag.D
 	props.MaintenanceWindow = pgsqlv2.MaintenanceWindow{
 		Time:         plan.MaintenanceWindow.Time.ValueString(),
 		DayOfTheWeek: pgsqlv2.DayOfTheWeek(plan.MaintenanceWindow.DayOfTheWeek.ValueString()),
+	}
+
+	props.Description = plan.Description.ValueStringPointer()
+
+	if !plan.ConnectionPooler.IsUnknown() {
+		props.ConnectionPooler = plan.ConnectionPooler.ValueStringPointer()
+	}
+
+	if !plan.LogsEnabled.IsUnknown() {
+		props.LogsEnabled = plan.LogsEnabled.ValueBoolPointer()
+	}
+
+	if !plan.MetricsEnabled.IsUnknown() {
+		props.MetricsEnabled = plan.MetricsEnabled.ValueBoolPointer()
 	}
 
 	if plan.RestoreFromBackup != nil {
