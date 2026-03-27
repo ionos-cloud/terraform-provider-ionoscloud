@@ -50,7 +50,7 @@ func resourceContainerRegistryToken() *schema.Resource {
 			"name": {
 				Type:             schema.TypeString,
 				Required:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringMatch(regexp.MustCompile("^[a-z][-a-z0-9]{1,61}[a-z0-9]$"), "")),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringMatch(regexp.MustCompile("^[a-z][-a-z0-9]{1,61}[a-z0-9]$"), "must start with a lowercase letter, contain only lowercase alphanumeric characters or hyphens, and be 3-63 characters long")),
 				ForceNew:         true,
 			},
 			"scopes": {
@@ -88,7 +88,7 @@ func resourceContainerRegistryToken() *schema.Resource {
 			"registry_id": {
 				Type:             schema.TypeString,
 				Required:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringMatch(regexp.MustCompile("^[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$"), "")),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringMatch(regexp.MustCompile("^[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$"), "must be a valid UUID")),
 			},
 			"save_password_to_file": {
 				Type:             schema.TypeString,

@@ -94,17 +94,17 @@ func dataSourceIpBlock() *schema.Resource {
 
 }
 
-func datasourceIpBlockRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	id, idOk := data.GetOk("id")
+func datasourceIpBlockRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	id, idOk := d.GetOk("id")
 
 	var name, location string
 
-	t, nameOk := data.GetOk("name")
+	t, nameOk := d.GetOk("name")
 	if nameOk {
 		name = t.(string)
 	}
 
-	t, locationOk := data.GetOk("location")
+	t, locationOk := d.GetOk("location")
 	if locationOk {
 		location = t.(string)
 	}
@@ -191,7 +191,7 @@ func datasourceIpBlockRead(ctx context.Context, data *schema.ResourceData, meta 
 
 	}
 
-	if err := IpBlockSetData(data, &ipBlock); err != nil {
+	if err := IpBlockSetData(d, &ipBlock); err != nil {
 		return diag.FromErr(err)
 	}
 
