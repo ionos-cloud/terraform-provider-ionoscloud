@@ -1,10 +1,11 @@
 ## Upcoming
-### Fixes
-- Improved error message when `image_name` matches an image that has a non-HDD type (e.g. CDROM) or is in a different location. The error now reports the found image's type and location.
+### Features
+- Add `nic_multi_queue` attribute to the `ionoscloud_servers` data source.
 
 ### Testing
 - Add import tests for CUBE servers.
 - Add checks for the `nic_multi_queue` attribute inside VCPU servers tests.
+- Modify `ionoscloud_servers` data source test to include a check for the `nic_multi_queue` attribute.
 
 ### Fixes
  * The ionoscloud_s3_bucket_policy resource now correctly handles all standard S3 Principal representations:
@@ -12,6 +13,7 @@
   - "Principal": ["arn:...", "*"] — flat array
   - "Principal": {"AWS": "arn:..."} — object with single string
   - "Principal": {"AWS": ["arn:...", "arn:..."]} — object with array
+ - Improved error message when `image_name` matches an image that has a non-HDD type (e.g. CDROM) or is in a different location. The error now reports the found image's type and location.
 
 ## 6.7.25
 ### Features
