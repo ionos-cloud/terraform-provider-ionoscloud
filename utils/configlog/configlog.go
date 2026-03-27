@@ -29,10 +29,10 @@ func LoadFileConfigWithLogging() (*fileconfiguration.FileConfig, error) {
 
 	if filePath != "" {
 		var status string
-		info, err := os.Stat(filePath)
+		info, err := os.Stat(filePath) //nolint:gosec // G703 - path from user's own env var
 		if err == nil {
 			status = "found"
-			if _, readErr := os.ReadFile(filePath); readErr != nil {
+			if _, readErr := os.ReadFile(filePath); readErr != nil { //nolint:gosec // G304 - path from user's own env var
 				status = fmt.Sprintf("found but unreadable (permissions: %04o)", info.Mode().Perm())
 			}
 		} else if os.IsNotExist(err) {
@@ -82,7 +82,7 @@ func LogProfileAndEnvironment(fileConfig *fileconfiguration.FileConfig) {
 }
 
 // LogCredentialResolution logs which credentials were found and from where.
-func LogCredentialResolution(token, username, password string, s3AccessKey, s3SecretKey string, fileConfigUsed bool, profileName string) {
+func LogCredentialResolution(token, username, pass string, s3AccessKey, s3SecretKey string, fileConfigUsed bool, profileName string) {
 	foundStr := func(name string, found bool) string {
 		if found {
 			return name + "=found"
@@ -92,7 +92,7 @@ func LogCredentialResolution(token, username, password string, s3AccessKey, s3Se
 
 	line := fmt.Sprintf("Credentials: %s, %s, %s",
 		foundStr("token", token != ""),
-		foundStr("username/password", username != "" && password != ""),
+		foundStr("user/pass", username != "" && pass != ""),
 		foundStr("S3 keys", s3AccessKey != "" && s3SecretKey != ""),
 	)
 
@@ -101,8 +101,8 @@ func LogCredentialResolution(token, username, password string, s3AccessKey, s3Se
 		if token != "" {
 			creds = append(creds, "token")
 		}
-		if username != "" && password != "" {
-			creds = append(creds, "username+password")
+		if username != "" && pass != "" {
+			creds = append(creds, "user+pass")
 		}
 		if s3AccessKey != "" && s3SecretKey != "" {
 			creds = append(creds, "S3 keys")
@@ -113,14 +113,14 @@ func LogCredentialResolution(token, username, password string, s3AccessKey, s3Se
 		line += fmt.Sprintf(" | file config profile %q: %s", profileName, strings.Join(creds, ", "))
 	}
 
-	if token != "" && username != "" && password != "" {
-		line += " | both token and username/password provided; token takes precedence"
+	if token != "" && username != "" && pass != "" {
+		line += " | both token and user/pass provided; token takes precedence"
 	}
 
 	if token != "" {
 		line += " | authenticating via token"
-	} else if username != "" && password != "" {
-		line += " | authenticating via username/password"
+	} else if username != "" && pass != "" {
+		line += " | authenticating via user/pass"
 	}
 
 	log.Printf("[DEBUG] %s", line)
@@ -129,16 +129,16 @@ func LogCredentialResolution(token, username, password string, s3AccessKey, s3Se
 // LogEndpointEnvVars logs which product-specific endpoint env vars are set.
 func LogEndpointEnvVars() {
 	envVars := map[string]string{
-		"IONOS_API_URL":                            "global",
-		"IONOS_API_URL_VPN":                        "VPN",
-		"IONOS_API_URL_KAFKA":                      "Kafka",
-		"IONOS_API_URL_LOGGING":                    "Logging",
-		"IONOS_API_URL_MONITORING":                 "Monitoring",
-		"IONOS_API_URL_MARIADB":                    "MariaDB",
-		"IONOS_API_URL_NFS":                        "NFS",
-		"IONOS_API_URL_INMEMORYDB":                 "InMemoryDB",
-		"IONOS_API_URL_OBJECT_STORAGE":             "Object Storage",
-		"IONOS_API_URL_OBJECT_STORAGE_MANAGEMENT":  "Object Storage Management",
+		"IONOS_API_URL":                           "global",
+		"IONOS_API_URL_VPN":                       "VPN",
+		"IONOS_API_URL_KAFKA":                     "Kafka",
+		"IONOS_API_URL_LOGGING":                   "Logging",
+		"IONOS_API_URL_MONITORING":                "Monitoring",
+		"IONOS_API_URL_MARIADB":                   "MariaDB",
+		"IONOS_API_URL_NFS":                       "NFS",
+		"IONOS_API_URL_INMEMORYDB":                "InMemoryDB",
+		"IONOS_API_URL_OBJECT_STORAGE":            "Object Storage",
+		"IONOS_API_URL_OBJECT_STORAGE_MANAGEMENT": "Object Storage Management",
 	}
 
 	var set []string

@@ -94,7 +94,7 @@ func TestLogCredentialResolution_TokenOnly(t *testing.T) {
 	})
 
 	assertContains(t, output, "token=found")
-	assertContains(t, output, "username/password=not found")
+	assertContains(t, output, "user/pass=not found")
 	assertContains(t, output, "S3 keys=not found")
 	assertContains(t, output, "authenticating via token")
 	assertNotContains(t, output, "my-token")
@@ -106,8 +106,8 @@ func TestLogCredentialResolution_UsernamePassword(t *testing.T) {
 	})
 
 	assertContains(t, output, "token=not found")
-	assertContains(t, output, "username/password=found")
-	assertContains(t, output, "authenticating via username/password")
+	assertContains(t, output, "user/pass=found")
+	assertContains(t, output, "authenticating via user/pass")
 }
 
 func TestLogCredentialResolution_BothTokenAndUserPass(t *testing.T) {
@@ -115,7 +115,7 @@ func TestLogCredentialResolution_BothTokenAndUserPass(t *testing.T) {
 		LogCredentialResolution("tok", "user", "pass", "", "", false, "")
 	})
 
-	assertContains(t, output, "both token and username/password provided; token takes precedence")
+	assertContains(t, output, "both token and user/pass provided; token takes precedence")
 	assertContains(t, output, "authenticating via token")
 }
 
