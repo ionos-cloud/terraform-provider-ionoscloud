@@ -146,15 +146,9 @@ func mapVersionResponseToModel(version *pgsqlv2.PostgresVersionRead, model *vers
 	var diagnostics diag.Diagnostics
 	model.ID = types.StringValue(version.Id)
 	props := &version.Properties
-	if props.Version != nil {
-		model.Version = types.StringValue(*props.Version)
-	}
-	if props.Status != nil {
-		model.Status = types.StringValue(*props.Status)
-	}
-	if props.Comment != nil {
-		model.Comment = types.StringValue(*props.Comment)
-	}
+	model.Version = types.StringPointerValue(props.Version)
+	model.Status = types.StringPointerValue(props.Status)
+	model.Comment = types.StringPointerValue(props.Comment)
 	if props.CanUpgradeTo != nil {
 		values := make([]attr.Value, len(props.CanUpgradeTo))
 		for i, v := range props.CanUpgradeTo {
