@@ -23,7 +23,7 @@ const (
 	clustersDSAddr       = "data." + constant.PsqlV2ClustersDataSource + ".test"
 	backupsDSAddr        = "data." + constant.PsqlV2BackupsDataSource + ".test"
 	versionsDSAddr       = "data." + constant.PsqlV2VersionsDataSource + ".test"
-	backupLocationDSAddr = "data." + constant.PsqlV2BackupLocationDataSource + ".test"
+	backupLocationDSAddr = "data." + constant.PsqlBackupLocationDataSource + ".test"
 )
 
 // --- Shared Terraform Configs ---

@@ -18,6 +18,10 @@
   - "Principal": {"AWS": ["arn:...", "arn:..."]} — object with array
  - Improved error message when `image_name` matches an image that has a non-HDD type (e.g. CDROM) or is in a different location. The error now reports the found image's type and location.
 
+### Testing
+- Add import tests for CUBE servers.
+- Add acceptance tests for DBaaS PostgreSQL v2 resource and data sources.
+
 ## 6.7.25
 ### Features
 - File configuration failover for global resources: users, groups, target groups, s3keys, backupunits, contracts, object storage access keys
