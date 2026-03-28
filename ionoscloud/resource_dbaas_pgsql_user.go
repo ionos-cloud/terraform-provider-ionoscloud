@@ -31,9 +31,11 @@ func resourceDbaasPgSqlUser() *schema.Resource {
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
 			"username": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:             schema.TypeString,
+				Description:      "The username of the user.",
+				Required:         true,
+				ForceNew:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"password": {
 				Type:      schema.TypeString,
