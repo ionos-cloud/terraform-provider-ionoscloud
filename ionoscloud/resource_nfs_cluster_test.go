@@ -164,7 +164,52 @@ resource "ionoscloud_server" "nfs_server" {
 }
 `
 
-const testAccCheckNFSClusterConfigBasic = temporaryConfigSetup + `
+const nfsConfigSetup = `
+resource ` + constant.DatacenterResource + ` ` + datacenterResourceName + ` {
+  name        = "nfs_datacenter_example"
+  location    = "de/txl"
+  description = "Datacenter for testing nfs"
+}
+
+resource ` + constant.LanResource + ` ` + lanResourceName + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + datacenterResourceName + `.id 
+  public        = false
+  name          = "nfs_lan_test"
+}
+
+resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
+  name                    = "example"
+  datacenter_id           = ` + constant.DatacenterResource + `.` + datacenterResourceName + `.id
+  cores                   = 2
+  ram                     = 2048
+  image_name             = "rocky:latest"
+  image_password          = ` + constant.RandomPassword + `.server_image_password.result
+  volume {
+    name                  = "example"
+    size                  = 20
+    disk_type             = "SSD Standard"
+  }
+  nic {
+    lan                   = ` + constant.LanResource + `.` + lanResourceName + `.id
+    name                  = "example"
+    dhcp                  = true
+  }
+}
+
+locals {
+ prefix                   = format("%s/%s", ` + constant.ServerResource + `.` + constant.ServerTestResource + `.nic[0].ips[0], "24")
+ database_ip              = cidrhost(local.prefix, 1)
+ database_ip_cidr         = format("%s/%s", local.database_ip, "24")
+}
+
+resource ` + constant.RandomPassword + ` "replicaset_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+` + ServerImagePassword
+
+const testAccCheckNFSClusterConfigBasic = nfsConfigSetup + `
 resource "ionoscloud_nfs_cluster" "example" {
   name = "example"
   location = "de/txl"
@@ -175,14 +220,14 @@ resource "ionoscloud_nfs_cluster" "example" {
   }
 
   connections {
-    datacenter_id = data.ionoscloud_datacenter.datacenterDS.id
-    ip_address    = format("%s/24", data.ionoscloud_server.serverDS.nics[0].ips[0])
-    lan           = data.ionoscloud_lan.lanDS.id
+    datacenter_id = ` + constant.DatacenterResource + `.` + datacenterResourceName + `.id
+	ip_address    = format("%s/24", ionoscloud_server.test_server.nic[0].ips[0])
+    lan           = ` + constant.LanResource + `.` + lanResourceName + `.id
   }
 }
 `
 
-const testAccCheckNFSClusterConfigUpdate = temporaryConfigSetup + `
+const testAccCheckNFSClusterConfigUpdate = nfsConfigSetup + `
 resource "ionoscloud_nfs_cluster" "example" {
   name = "example_updated"
   location = "de/txl"
@@ -193,9 +238,9 @@ resource "ionoscloud_nfs_cluster" "example" {
   }
 
   connections {
-    datacenter_id = data.ionoscloud_datacenter.datacenterDS.id
-    ip_address    = format("%s/24", data.ionoscloud_server.serverDS.nics[0].ips[0])
-    lan           = data.ionoscloud_lan.lanDS.id
+    datacenter_id = ` + constant.DatacenterResource + `.` + datacenterResourceName + `.id
+    ip_address    = format("%s/24", ionoscloud_server.test_server.nic[0].ips[0])
+    lan           = ` + constant.LanResource + `.` + lanResourceName + `.id
   }
 }
 `
