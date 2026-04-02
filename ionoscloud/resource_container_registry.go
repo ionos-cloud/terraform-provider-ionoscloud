@@ -62,7 +62,7 @@ func resourceContainerRegistry() *schema.Resource {
 			"name": {
 				Type:             schema.TypeString,
 				Required:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringMatch(regexp.MustCompile("^[a-z][-a-z0-9]{1,61}[a-z0-9]$"), "")),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringMatch(regexp.MustCompile("^[a-z][-a-z0-9]{1,61}[a-z0-9]$"), "must start with a lowercase letter, contain only lowercase alphanumeric characters or hyphens, and be 3-63 characters long")),
 				ForceNew:         true,
 			},
 			"api_subnet_allow_list": {

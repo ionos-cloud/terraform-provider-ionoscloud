@@ -95,8 +95,8 @@ func resourceVpnWireguardPeer() *schema.Resource {
 	}
 }
 
-func resourceVpnWireguardPeerCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(bundleclient.SdkBundle).VPNClient
+func resourceVpnWireguardPeerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(bundleclient.SdkBundle).VPNClient
 	gatewayID := d.Get("gateway_id").(string)
 	peer, _, err := client.CreateWireguardGatewayPeers(ctx, d, gatewayID)
 	if err != nil {
@@ -129,8 +129,8 @@ func resourceVpnWireguardPeerRead(ctx context.Context, d *schema.ResourceData, m
 	return nil
 }
 
-func resourceVpnWireguardPeerUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(bundleclient.SdkBundle).VPNClient
+func resourceVpnWireguardPeerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(bundleclient.SdkBundle).VPNClient
 	gatewayID := d.Get("gateway_id").(string)
 	_, _, err := client.UpdateWireguardPeer(ctx, gatewayID, d.Id(), d)
 	if err != nil {
@@ -139,8 +139,8 @@ func resourceVpnWireguardPeerUpdate(ctx context.Context, d *schema.ResourceData,
 	return nil
 }
 
-func resourceVpnWireguardPeerDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(bundleclient.SdkBundle).VPNClient
+func resourceVpnWireguardPeerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(bundleclient.SdkBundle).VPNClient
 	gatewayID := d.Get("gateway_id").(string)
 	location := d.Get("location").(string)
 	apiResponse, err := client.DeleteWireguardPeer(ctx, gatewayID, d.Id(), location)
