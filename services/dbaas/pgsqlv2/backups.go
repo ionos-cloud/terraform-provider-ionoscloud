@@ -3,7 +3,7 @@ package pgsqlv2
 import (
 	"context"
 
-	pgsqlv2 "github.com/ionos-cloud/pgsqlv2"
+	pgsqlv2 "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v3"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 )
 

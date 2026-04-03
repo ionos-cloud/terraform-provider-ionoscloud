@@ -15,7 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	pgsqlv2 "github.com/ionos-cloud/pgsqlv2"
+	pgsqlv2 "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v3"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	pgsqlv2Service "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/pgsqlv2"
@@ -98,6 +98,9 @@ func (r *clusterResource) Schema(ctx context.Context, req resource.SchemaRequest
 			"id": schema.StringAttribute{
 				Computed:    true,
 				Description: "The ID (UUID) of the cluster.",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"name": schema.StringAttribute{
 				Required:    true,
@@ -114,6 +117,9 @@ func (r *clusterResource) Schema(ctx context.Context, req resource.SchemaRequest
 			"dns_name": schema.StringAttribute{
 				Computed:    true,
 				Description: "The DNS name used to access the cluster.",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"location": schema.StringAttribute{
 				Required:    true,
@@ -209,7 +215,7 @@ func (r *clusterResource) Schema(ctx context.Context, req resource.SchemaRequest
 					},
 					"password": schema.StringAttribute{
 						Required:    true,
-						WriteOnly:   true,
+						Sensitive:   true,
 						Description: "The password for the master database user.",
 					},
 					"database": schema.StringAttribute{
@@ -269,15 +275,6 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
-	// WriteOnly attributes (e.g. password) are null in the plan;
-	// read them from the config instead.
-	var config clusterResourceModel
-	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-	plan.Credentials.Password = config.Credentials.Password
 
 	location := plan.Location.ValueString()
 	client, err := r.bundle.NewPgSQLV2Client(location)
@@ -372,15 +369,6 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
-	// WriteOnly attributes (e.g. password) are null in the plan;
-	// read them from the config instead.
-	var config clusterResourceModel
-	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-	plan.Credentials.Password = config.Credentials.Password
 
 	clusterID := state.ID.ValueString()
 	location := plan.Location.ValueString()
@@ -665,9 +653,15 @@ func mapClusterResponseToModel(cluster *pgsqlv2.ClusterRead, model *clusterResou
 	}
 
 	// Credentials block: the API returns username and database but not the password.
+	// Preserve the password from the existing model (state/plan) since the API never returns it.
 	if props.Credentials != nil {
+		var existingPassword types.String
+		if model.Credentials != nil {
+			existingPassword = model.Credentials.Password
+		}
 		model.Credentials = &credentialsModel{
 			Username: types.StringValue(props.Credentials.Username),
+			Password: existingPassword,
 			Database: types.StringValue(props.Credentials.Database),
 		}
 	}

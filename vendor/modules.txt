@@ -319,9 +319,6 @@ github.com/huandu/xstrings
 # github.com/iancoleman/strcase v0.3.0
 ## explicit; go 1.16
 github.com/iancoleman/strcase
-# github.com/ionos-cloud/pgsqlv2 v0.0.0 => /home/adeatcu/work/sdks/generated_locally/pgsqlv2-bundle
-## explicit; go 1.24
-github.com/ionos-cloud/pgsqlv2
 # github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2 v2.1.0
 ## explicit; go 1.22
 github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2
@@ -343,6 +340,9 @@ github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2
 # github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2 v2.0.5
 ## explicit; go 1.22
 github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2
+# github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v3 v3.0.1
+## explicit; go 1.24
+github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v3
 # github.com/ionos-cloud/sdk-go-bundle/products/dns/v2 v2.2.2
 ## explicit; go 1.24
 github.com/ionos-cloud/sdk-go-bundle/products/dns/v2
@@ -370,7 +370,7 @@ github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2
 # github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.2
 ## explicit; go 1.22
 github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2
-# github.com/ionos-cloud/sdk-go-bundle/shared v0.1.9-0.20260326111641-78941071438b
+# github.com/ionos-cloud/sdk-go-bundle/shared v0.1.9
 ## explicit; go 1.24
 github.com/ionos-cloud/sdk-go-bundle/shared
 github.com/ionos-cloud/sdk-go-bundle/shared/failover
@@ -643,4 +643,3 @@ google.golang.org/protobuf/types/known/timestamppb
 # gopkg.in/yaml.v3 v3.0.1
 ## explicit
 gopkg.in/yaml.v3
-# github.com/ionos-cloud/pgsqlv2 => /home/adeatcu/work/sdks/generated_locally/pgsqlv2-bundle

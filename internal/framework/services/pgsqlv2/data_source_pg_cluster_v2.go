@@ -7,9 +7,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/datasourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	pgsqlv2 "github.com/ionos-cloud/pgsqlv2"
+	pgsqlv2 "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v3"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	pgsqlv2Service "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/pgsqlv2"
@@ -224,30 +225,43 @@ func (d *clusterDataSource) Read(ctx context.Context, req datasource.ReadRequest
 			return
 		}
 
-		var matched []pgsqlv2.ClusterRead
-		for _, c := range clusterList.Items {
-			if c.Properties.Name == clusterName {
-				matched = append(matched, c)
-			}
-		}
-
-		if len(matched) > 1 {
-			resp.Diagnostics.AddError("multiple PostgreSQL v2 clusters found with the same name", "Please search using the cluster ID instead.")
+		found, diags := findClusterByName(clusterList.Items, clusterName, location)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
 			return
 		}
-		if len(matched) == 0 {
-			resp.Diagnostics.AddError(
-				fmt.Sprintf("no PostgreSQL v2 cluster found with name: %s in location: %s", clusterName, location),
-				"Please make sure that the name and location are correct, or search using the cluster ID instead.",
-			)
-			return
-		}
-		cluster = matched[0]
+		cluster = found
 	}
 
 	mapClusterResponseToDataSourceModel(&cluster, &data)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+}
+
+// findClusterByName finds exactly one cluster with the given name from a list.
+// Returns an error diagnostic if zero or multiple clusters match.
+func findClusterByName(clusters []pgsqlv2.ClusterRead, name, location string) (pgsqlv2.ClusterRead, diag.Diagnostics) {
+	var matched []pgsqlv2.ClusterRead
+	for _, c := range clusters {
+		if c.Properties.Name == name {
+			matched = append(matched, c)
+		}
+	}
+
+	if len(matched) > 1 {
+		return pgsqlv2.ClusterRead{}, diag.Diagnostics{
+			diag.NewErrorDiagnostic("multiple PostgreSQL v2 clusters found with the same name", "Please search using the cluster ID instead."),
+		}
+	}
+	if len(matched) == 0 {
+		return pgsqlv2.ClusterRead{}, diag.Diagnostics{
+			diag.NewErrorDiagnostic(
+				fmt.Sprintf("no PostgreSQL v2 cluster found with name: %s in location: %s", name, location),
+				"Please make sure that the name and location are correct, or search using the cluster ID instead.",
+			),
+		}
+	}
+	return matched[0], nil
 }
 
 // mapClusterResponseToDataSourceModel maps the API response to the data source model.
