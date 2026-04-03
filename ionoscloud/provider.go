@@ -266,10 +266,6 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	insecureBool := false
 
 	fileConfig, readFileErr := configlog.LoadFileConfigWithLogging()
-	if readFileErr == nil {
-		configlog.LogProfileAndEnvironment(fileConfig)
-		configlog.LogFileConfigEndpoints(fileConfig)
-	}
 	configlog.LogEndpointEnvVars()
 
 	fileConfigUsed := false
@@ -294,7 +290,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		}
 	}
 
-	configlog.LogCredentialResolution(token, username, password, "", "", fileConfigUsed, profileName)
+	configlog.LogCredentialResolution(shared.Credentials{Token: token, Username: username, Password: password}, fileConfigUsed, profileName)
 
 	endpoint := utils.CleanURL(d.Get("endpoint").(string))
 	configlog.LogEndpoint(endpoint)

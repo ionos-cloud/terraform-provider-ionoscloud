@@ -32,8 +32,10 @@ func LoadFileConfigWithLogging() (*fileconfiguration.FileConfig, error) {
 		info, err := os.Stat(filePath) //nolint:gosec // G703 - path from user's own env var
 		if err == nil {
 			status = "found"
-			if _, readErr := os.ReadFile(filePath); readErr != nil { //nolint:gosec // G304 - path from user's own env var
+			if f, readErr := os.Open(filePath); readErr != nil { //nolint:gosec // G304 - path from user's own env var
 				status = fmt.Sprintf("found but unreadable (permissions: %04o)", info.Mode().Perm())
+			} else {
+				f.Close()
 			}
 		} else if os.IsNotExist(err) {
 			status = "not found"
@@ -48,15 +50,14 @@ func LoadFileConfigWithLogging() (*fileconfiguration.FileConfig, error) {
 	}
 
 	log.Printf("[DEBUG] Config file loaded successfully (version: %.1f)", float64(fileConfig.Version))
+	logProfileAndEnvironment(fileConfig)
+	logFileConfigEndpoints(fileConfig)
+
 	return fileConfig, nil
 }
 
-// LogProfileAndEnvironment logs profile and environment resolution details.
-func LogProfileAndEnvironment(fileConfig *fileconfiguration.FileConfig) {
-	if fileConfig == nil {
-		return
-	}
-
+// logProfileAndEnvironment logs profile and environment resolution details.
+func logProfileAndEnvironment(fileConfig *fileconfiguration.FileConfig) {
 	var parts []string
 	parts = append(parts, fmt.Sprintf("%d profile(s), currentProfile: %q", len(fileConfig.Profiles), fileConfig.CurrentProfile))
 
@@ -81,8 +82,34 @@ func LogProfileAndEnvironment(fileConfig *fileconfiguration.FileConfig) {
 	log.Printf("[DEBUG] Profile resolution: %s", strings.Join(parts, " | "))
 }
 
+// logFileConfigEndpoints logs product and endpoint counts from the active environment in the file config.
+func logFileConfigEndpoints(fileConfig *fileconfiguration.FileConfig) {
+	failoverOpts := fileConfig.GetFailoverOptions()
+	if failoverOpts != nil {
+		log.Printf("[DEBUG] Failover config: strategy=%q", failoverOpts.Strategy)
+	} else {
+		log.Printf("[DEBUG] Failover config: not set (default: none)")
+	}
+
+	envName := fileConfig.GetEnvForCurrentProfile()
+	if envName == "" {
+		return
+	}
+
+	for _, env := range fileConfig.Environments {
+		if env.Name == envName {
+			var products []string
+			for _, product := range env.Products {
+				products = append(products, fmt.Sprintf("%s(%d)", product.Name, len(product.Endpoints)))
+			}
+			log.Printf("[DEBUG] Environment %q: %d product(s): %s", env.Name, len(env.Products), strings.Join(products, ", "))
+			return
+		}
+	}
+}
+
 // LogCredentialResolution logs which credentials were found and from where.
-func LogCredentialResolution(token, username, pass string, s3AccessKey, s3SecretKey string, fileConfigUsed bool, profileName string) {
+func LogCredentialResolution(creds shared.Credentials, fileConfigUsed bool, profileName string) {
 	foundStr := func(name string, found bool) string {
 		if found {
 			return name + "=found"
@@ -91,35 +118,35 @@ func LogCredentialResolution(token, username, pass string, s3AccessKey, s3Secret
 	}
 
 	line := fmt.Sprintf("Credentials: %s, %s, %s",
-		foundStr("token", token != ""),
-		foundStr("user/pass", username != "" && pass != ""),
-		foundStr("S3 keys", s3AccessKey != "" && s3SecretKey != ""),
+		foundStr("token", creds.Token != ""),
+		foundStr("user/pass", creds.Username != "" && creds.Password != ""),
+		foundStr("S3 keys", creds.S3AccessKey != "" && creds.S3SecretKey != ""),
 	)
 
 	if fileConfigUsed && profileName != "" {
-		var creds []string
-		if token != "" {
-			creds = append(creds, "token")
+		var found []string
+		if creds.Token != "" {
+			found = append(found, "token")
 		}
-		if username != "" && pass != "" {
-			creds = append(creds, "user+pass")
+		if creds.Username != "" && creds.Password != "" {
+			found = append(found, "user+pass")
 		}
-		if s3AccessKey != "" && s3SecretKey != "" {
-			creds = append(creds, "S3 keys")
+		if creds.S3AccessKey != "" && creds.S3SecretKey != "" {
+			found = append(found, "S3 keys")
 		}
-		if len(creds) == 0 {
-			creds = append(creds, "none")
+		if len(found) == 0 {
+			found = append(found, "none")
 		}
-		line += fmt.Sprintf(" | file config profile %q: %s", profileName, strings.Join(creds, ", "))
+		line += fmt.Sprintf(" | file config profile %q: %s", profileName, strings.Join(found, ", "))
 	}
 
-	if token != "" && username != "" && pass != "" {
+	if creds.Token != "" && creds.Username != "" && creds.Password != "" {
 		line += " | both token and user/pass provided; token takes precedence"
 	}
 
-	if token != "" {
+	if creds.Token != "" {
 		line += " | authenticating via token"
-	} else if username != "" && pass != "" {
+	} else if creds.Username != "" && creds.Password != "" {
 		line += " | authenticating via user/pass"
 	}
 
@@ -150,36 +177,6 @@ func LogEndpointEnvVars() {
 	sort.Strings(set)
 	if len(set) > 0 {
 		log.Printf("[DEBUG] Endpoint env vars: %s", strings.Join(set, " | "))
-	}
-}
-
-// LogFileConfigEndpoints logs product and endpoint counts from the active environment in the file config.
-func LogFileConfigEndpoints(fileConfig *fileconfiguration.FileConfig) {
-	if fileConfig == nil {
-		return
-	}
-
-	failoverOpts := fileConfig.GetFailoverOptions()
-	if failoverOpts != nil {
-		log.Printf("[DEBUG] Failover config: strategy=%q", failoverOpts.Strategy)
-	} else {
-		log.Printf("[DEBUG] Failover config: not set (default: none)")
-	}
-
-	envName := fileConfig.GetEnvForCurrentProfile()
-	if envName == "" {
-		return
-	}
-
-	for _, env := range fileConfig.Environments {
-		if env.Name == envName {
-			var products []string
-			for _, product := range env.Products {
-				products = append(products, fmt.Sprintf("%s(%d)", product.Name, len(product.Endpoints)))
-			}
-			log.Printf("[DEBUG] Environment %q: %d product(s): %s", env.Name, len(env.Products), strings.Join(products, ", "))
-			return
-		}
 	}
 }
 
@@ -221,29 +218,4 @@ func FormatLocation(location string) string {
 		return "(no location)"
 	}
 	return location
-}
-
-// LogLocationEndpoint logs endpoint resolution for location-based services.
-func LogLocationEndpoint(productName, location, url string) {
-	log.Printf("[DEBUG] %s: endpoint for location %s: %s", productName, FormatLocation(location), url)
-}
-
-// LogEnvEndpoint logs when a product endpoint comes from an env var.
-func LogEnvEndpoint(productName, envVar, url string) {
-	log.Printf("[DEBUG] %s: endpoint from %s: %s", productName, envVar, url)
-}
-
-// LogRegionEndpoint logs endpoint resolution for region-based services.
-func LogRegionEndpoint(productName, region, url string) {
-	log.Printf("[DEBUG] %s: endpoint for region %q: %s", productName, region, url)
-}
-
-// LogFailoverConfig logs failover configuration for a product.
-func LogFailoverConfig(productName string, strategy string, endpointCount int) {
-	log.Printf("[DEBUG] Failover for %s: strategy=%q, endpoints=%d", productName, strategy, endpointCount)
-}
-
-// LogNoFileConfig logs when file config is not available for a product.
-func LogNoFileConfig(productName string) {
-	log.Printf("[DEBUG] No file config available for %s", productName)
 }

@@ -101,7 +101,7 @@ func (c SdkBundle) shouldApplyOverridesCustomEnv(product, productEnvVar string) 
 		return false
 	}
 	if c.fileConfig == nil {
-		configlog.LogNoFileConfig(product)
+		log.Printf("[DEBUG] No file config available for %s", product)
 		return false
 	}
 	if c.fileConfig.GetProductOverrides(product) == nil {
@@ -333,7 +333,7 @@ func (c SdkBundle) NewCloudAPIClientWithFailover() (*ionoscloud.APIClient, error
 			log.Printf("[DEBUG] %s: certificateAuthData present (len=%d) for endpoint %s", fileconfiguration.Cloud, len(ep.CertificateAuthData), ep.Name)
 		}
 	}
-	configlog.LogFailoverConfig(fileconfiguration.Cloud, string(failoverOptions.Strategy), len(failoverEndpoints))
+	log.Printf("[DEBUG] Failover for %s: strategy=%q, endpoints=%d", fileconfiguration.Cloud, failoverOptions.Strategy, len(failoverEndpoints))
 	if len(failoverEndpoints) == 0 {
 		return nil, fmt.Errorf("no global failover endpoints configured for %q", fileconfiguration.Cloud)
 	}
@@ -394,7 +394,7 @@ func (c SdkBundle) NewObjectStorageManagementClient() (*objectStorageManagementS
 			log.Printf("[DEBUG] %s: certificateAuthData present (len=%d) for endpoint %s", fileconfiguration.ObjectStorageManagement, len(ep.CertificateAuthData), ep.Name)
 		}
 	}
-	configlog.LogFailoverConfig(fileconfiguration.ObjectStorageManagement, string(failoverOptions.Strategy), len(failoverEndpoints))
+	log.Printf("[DEBUG] Failover for %s: strategy=%q, endpoints=%d", fileconfiguration.ObjectStorageManagement, failoverOptions.Strategy, len(failoverEndpoints))
 
 	if len(failoverEndpoints) == 0 {
 		return nil, fmt.Errorf("no global failover endpoints configured for %q", fileconfiguration.ObjectStorageManagement)

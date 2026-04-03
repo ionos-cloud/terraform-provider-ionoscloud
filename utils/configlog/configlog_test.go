@@ -26,15 +26,6 @@ func captureLog(fn func()) string {
 	return buf.String()
 }
 
-func TestLogProfileAndEnvironment_NilConfig(t *testing.T) {
-	output := captureLog(func() {
-		LogProfileAndEnvironment(nil)
-	})
-	if output != "" {
-		t.Errorf("expected no output for nil config, got: %s", output)
-	}
-}
-
 func TestLogProfileAndEnvironment_WithProfiles(t *testing.T) {
 	cfg := &fileconfiguration.FileConfig{
 		CurrentProfile: "prod",
@@ -45,7 +36,7 @@ func TestLogProfileAndEnvironment_WithProfiles(t *testing.T) {
 	}
 
 	output := captureLog(func() {
-		LogProfileAndEnvironment(cfg)
+		logProfileAndEnvironment(cfg)
 	})
 
 	assertContains(t, output, "Profile resolution:")
@@ -64,7 +55,7 @@ func TestLogProfileAndEnvironment_NoMatchingProfile(t *testing.T) {
 	}
 
 	output := captureLog(func() {
-		LogProfileAndEnvironment(cfg)
+		logProfileAndEnvironment(cfg)
 	})
 
 	assertContains(t, output, `no matching profile for "staging"`)
@@ -82,7 +73,7 @@ func TestLogProfileAndEnvironment_EnvOverride(t *testing.T) {
 	}
 
 	output := captureLog(func() {
-		LogProfileAndEnvironment(cfg)
+		logProfileAndEnvironment(cfg)
 	})
 
 	assertContains(t, output, `overrides to "override-profile"`)
@@ -90,7 +81,7 @@ func TestLogProfileAndEnvironment_EnvOverride(t *testing.T) {
 
 func TestLogCredentialResolution_TokenOnly(t *testing.T) {
 	output := captureLog(func() {
-		LogCredentialResolution("my-token", "", "", "", "", false, "")
+		LogCredentialResolution(shared.Credentials{Token: "my-token"}, false, "")
 	})
 
 	assertContains(t, output, "token=found")
@@ -102,7 +93,7 @@ func TestLogCredentialResolution_TokenOnly(t *testing.T) {
 
 func TestLogCredentialResolution_UsernamePassword(t *testing.T) {
 	output := captureLog(func() {
-		LogCredentialResolution("", "user", "pass", "", "", false, "")
+		LogCredentialResolution(shared.Credentials{Username: "user", Password: "pass"}, false, "")
 	})
 
 	assertContains(t, output, "token=not found")
@@ -112,7 +103,7 @@ func TestLogCredentialResolution_UsernamePassword(t *testing.T) {
 
 func TestLogCredentialResolution_BothTokenAndUserPass(t *testing.T) {
 	output := captureLog(func() {
-		LogCredentialResolution("tok", "user", "pass", "", "", false, "")
+		LogCredentialResolution(shared.Credentials{Token: "tok", Username: "user", Password: "pass"}, false, "")
 	})
 
 	assertContains(t, output, "both token and user/pass provided; token takes precedence")
@@ -121,7 +112,7 @@ func TestLogCredentialResolution_BothTokenAndUserPass(t *testing.T) {
 
 func TestLogCredentialResolution_FileConfigProfile(t *testing.T) {
 	output := captureLog(func() {
-		LogCredentialResolution("tok", "", "", "ak", "sk", true, "myprofile")
+		LogCredentialResolution(shared.Credentials{Token: "tok", S3AccessKey: "ak", S3SecretKey: "sk"}, true, "myprofile")
 	})
 
 	assertContains(t, output, `file config profile "myprofile": token, S3 keys`)
@@ -129,7 +120,7 @@ func TestLogCredentialResolution_FileConfigProfile(t *testing.T) {
 
 func TestLogCredentialResolution_FileConfigNoCredentials(t *testing.T) {
 	output := captureLog(func() {
-		LogCredentialResolution("", "", "", "", "", true, "empty")
+		LogCredentialResolution(shared.Credentials{}, true, "empty")
 	})
 
 	assertContains(t, output, `file config profile "empty": none`)
@@ -167,15 +158,6 @@ func TestLogEndpointEnvVars_SomeSet(t *testing.T) {
 	assertContains(t, output, "IONOS_API_URL_KAFKA (Kafka): https://kafka.custom.example.com")
 }
 
-func TestLogFileConfigEndpoints_NilConfig(t *testing.T) {
-	output := captureLog(func() {
-		LogFileConfigEndpoints(nil)
-	})
-	if output != "" {
-		t.Errorf("expected no output for nil config, got: %s", output)
-	}
-}
-
 func TestLogFileConfigEndpoints_WithEnvironment(t *testing.T) {
 	cfg := &fileconfiguration.FileConfig{
 		CurrentProfile: "prod",
@@ -194,7 +176,7 @@ func TestLogFileConfigEndpoints_WithEnvironment(t *testing.T) {
 	}
 
 	output := captureLog(func() {
-		LogFileConfigEndpoints(cfg)
+		logFileConfigEndpoints(cfg)
 	})
 
 	assertContains(t, output, `Environment "production": 2 product(s):`)
@@ -214,7 +196,7 @@ func TestLogFileConfigEndpoints_NoMatchingEnvironment(t *testing.T) {
 	}
 
 	output := captureLog(func() {
-		LogFileConfigEndpoints(cfg)
+		logFileConfigEndpoints(cfg)
 	})
 
 	assertNotContains(t, output, "product(s)")
@@ -270,20 +252,6 @@ func TestLogS3Region_Default(t *testing.T) {
 	assertContains(t, output, "S3 region: eu-central-3 (source: default)")
 }
 
-func TestLogLocationEndpoint(t *testing.T) {
-	output := captureLog(func() {
-		LogLocationEndpoint("VPN", "de/fra", "https://vpn.de-fra.ionos.com")
-	})
-	assertContains(t, output, `VPN: endpoint for location de/fra: https://vpn.de-fra.ionos.com`)
-}
-
-func TestLogLocationEndpoint_NoLocation(t *testing.T) {
-	output := captureLog(func() {
-		LogLocationEndpoint("Cloud API", "", "https://api.ionos.com")
-	})
-	assertContains(t, output, `Cloud API: endpoint for location (no location): https://api.ionos.com`)
-}
-
 func TestFormatLocation(t *testing.T) {
 	if FormatLocation("") != "(no location)" {
 		t.Error("expected (no location) for empty string")
@@ -291,34 +259,6 @@ func TestFormatLocation(t *testing.T) {
 	if FormatLocation("de/fra") != "de/fra" {
 		t.Error("expected de/fra")
 	}
-}
-
-func TestLogEnvEndpoint(t *testing.T) {
-	output := captureLog(func() {
-		LogEnvEndpoint("VPN", "IONOS_API_URL_VPN", "https://vpn.custom.com")
-	})
-	assertContains(t, output, "VPN: endpoint from IONOS_API_URL_VPN: https://vpn.custom.com")
-}
-
-func TestLogRegionEndpoint(t *testing.T) {
-	output := captureLog(func() {
-		LogRegionEndpoint("Object Storage", "eu-central-3", "https://s3.eu-central-3.ionoscloud.com")
-	})
-	assertContains(t, output, `Object Storage: endpoint for region "eu-central-3": https://s3.eu-central-3.ionoscloud.com`)
-}
-
-func TestLogFailoverConfig(t *testing.T) {
-	output := captureLog(func() {
-		LogFailoverConfig("cloud", "roundRobin", 3)
-	})
-	assertContains(t, output, `Failover for cloud: strategy="roundRobin", endpoints=3`)
-}
-
-func TestLogNoFileConfig(t *testing.T) {
-	output := captureLog(func() {
-		LogNoFileConfig("vpn")
-	})
-	assertContains(t, output, "No file config available for vpn")
 }
 
 func TestLoadFileConfigWithLogging_UnreadableFile(t *testing.T) {

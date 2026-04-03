@@ -186,10 +186,6 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 	}
 
 	fileConfig, readFileErr := configlog.LoadFileConfigWithLogging()
-	if readFileErr == nil {
-		configlog.LogProfileAndEnvironment(fileConfig)
-		configlog.LogFileConfigEndpoints(fileConfig)
-	}
 	configlog.LogEndpointEnvVars()
 
 	fileConfigUsed := false
@@ -221,7 +217,7 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 		}
 	}
 
-	configlog.LogCredentialResolution(token, username, password, accessKey, secretKey, fileConfigUsed, profileName)
+	configlog.LogCredentialResolution(shared.Credentials{Token: token, Username: username, Password: password, S3AccessKey: accessKey, S3SecretKey: secretKey}, fileConfigUsed, profileName)
 
 	cleanedEndpoint := utils.CleanURL(endpoint)
 	configlog.LogEndpoint(cleanedEndpoint)
