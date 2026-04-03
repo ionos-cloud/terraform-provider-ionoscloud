@@ -110,7 +110,7 @@ func (r *bucketPolicyResource) Read(ctx context.Context, req resource.ReadReques
 
 	result, found, err := r.client.GetBucketPolicy(ctx, state.Bucket)
 	if err != nil {
-		resp.Diagnostics.AddError("failed to read bucket policy", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
+		resp.Diagnostics.AddError("failed to read bucket policy", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: state.Bucket.ValueString()}).Error())
 		return
 	}
 
