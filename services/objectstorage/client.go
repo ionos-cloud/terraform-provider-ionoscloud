@@ -20,6 +20,7 @@ import (
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 // Client is a wrapper around the Object Storage client.
@@ -59,7 +60,7 @@ func NewClient(clientOptions clientoptions.TerraformClientOptions, config *filec
 	if clientOptions.Endpoint == "" {
 		region := clientOptions.StorageOptions.Region
 		if region == "" {
-			region = "eu-central-3"
+			region = constant.DefaultS3Region
 		}
 		if endpointOverrides := config.GetProductLocationOverrides(fileconfiguration.ObjectStorage, clientOptions.StorageOptions.Region); endpointOverrides != nil {
 			clientOptions.Endpoint = endpointOverrides.Name
@@ -72,7 +73,7 @@ func NewClient(clientOptions clientoptions.TerraformClientOptions, config *filec
 	}
 
 	if clientOptions.StorageOptions.Region == "" {
-		clientOptions.StorageOptions.Region = "eu-central-3"
+		clientOptions.StorageOptions.Region = constant.DefaultS3Region
 	}
 	log.Printf("[DEBUG] Object Storage: region=%q, endpoint=%q", clientOptions.StorageOptions.Region, clientOptions.Endpoint)
 

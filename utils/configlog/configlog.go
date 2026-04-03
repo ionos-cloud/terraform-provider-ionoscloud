@@ -9,6 +9,8 @@ import (
 
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 // LoadFileConfigWithLogging wraps fileconfiguration.NewFromEnv() with pre/post logging
@@ -35,7 +37,7 @@ func LoadFileConfigWithLogging() (*fileconfiguration.FileConfig, error) {
 			if f, readErr := os.Open(filePath); readErr != nil { //nolint:gosec // G304 - path from user's own env var
 				status = fmt.Sprintf("found but unreadable (permissions: %04o)", info.Mode().Perm())
 			} else {
-				f.Close()
+				_ = f.Close()
 			}
 		} else if os.IsNotExist(err) {
 			status = "not found"
@@ -206,9 +208,9 @@ func LogEndpoint(endpoint string) {
 // LogS3Region logs the S3 region configuration.
 func LogS3Region(region string) {
 	if region != "" {
-		log.Printf("[DEBUG] S3 region: %s (source: explicit)", region)
+		log.Printf("[DEBUG] S3 region: %s", region)
 	} else {
-		log.Printf("[DEBUG] S3 region: eu-central-3 (source: default)")
+		log.Printf("[DEBUG] S3 region: %s (default)", constant.DefaultS3Region)
 	}
 }
 

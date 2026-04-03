@@ -9,6 +9,8 @@ import (
 
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 // captureLog captures log output during fn execution and returns it as a string.
@@ -242,14 +244,14 @@ func TestLogS3Region_Explicit(t *testing.T) {
 	output := captureLog(func() {
 		LogS3Region("us-central-1")
 	})
-	assertContains(t, output, "S3 region: us-central-1 (source: explicit)")
+	assertContains(t, output, "S3 region: us-central-1")
 }
 
 func TestLogS3Region_Default(t *testing.T) {
 	output := captureLog(func() {
 		LogS3Region("")
 	})
-	assertContains(t, output, "S3 region: eu-central-3 (source: default)")
+	assertContains(t, output, "S3 region: "+constant.DefaultS3Region+" (default)")
 }
 
 func TestFormatLocation(t *testing.T) {

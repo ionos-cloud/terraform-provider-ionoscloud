@@ -76,7 +76,7 @@ func Provider() *schema.Provider {
 			"s3_region": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Default:     "eu-central-3",
+				Default:     constant.DefaultS3Region,
 				DefaultFunc: schema.EnvDefaultFunc("IONOS_S3_REGION", nil),
 				Description: "Region for IONOS Object Storage operations.",
 			},
