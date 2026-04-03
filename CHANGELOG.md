@@ -3,7 +3,7 @@
 - Add `nic_multi_queue` attribute to the `ionoscloud_servers` data source.
 - Add DBaaS PostgreSQL v2 support:
   - New resource: `ionoscloud_pg_cluster_v2`
-  - New data sources: `ionoscloud_pg_cluster_v2`, `ionoscloud_pg_clusters_v2`, `ionoscloud_pg_backups_v2`, `ionoscloud_pg_versions_v2`, `ionoscloud_pg_backup_location`
+  - New data sources: `ionoscloud_pg_cluster_v2`, `ionoscloud_pg_clusters_v2`, `ionoscloud_pg_backups_v2`, `ionoscloud_pg_versions_v2`, `ionoscloud_pg_backup_location_v2`
 
 ### Testing
 - Add import tests for CUBE servers.

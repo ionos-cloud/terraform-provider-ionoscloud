@@ -3,9 +3,9 @@ package pgsqlv2
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/cenkalti/backoff/v4"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	pgsqlv2 "github.com/ionos-cloud/pgsqlv2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 )
@@ -56,7 +56,7 @@ func (c *Client) IsClusterReady(ctx context.Context, clusterID string) error {
 		return backoff.Permanent(err)
 	}
 	if cluster.Metadata.State != nil {
-		log.Printf("[DEBUG] PostgreSQL v2 cluster state: %s", *cluster.Metadata.State)
+		tflog.Debug(ctx, "PostgreSQL v2 cluster state", map[string]interface{}{"state": *cluster.Metadata.State})
 		if *cluster.Metadata.State == pgsqlv2.POSTGRESCLUSTERSTATES_AVAILABLE {
 			return nil
 		}
@@ -75,7 +75,7 @@ func (c *Client) IsClusterDeleted(ctx context.Context, clusterID string) error {
 		return backoff.Permanent(err)
 	}
 	if cluster.Metadata.State != nil {
-		log.Printf("[DEBUG] PostgreSQL v2 cluster state: %s", *cluster.Metadata.State)
+		tflog.Debug(ctx, "PostgreSQL v2 cluster state", map[string]interface{}{"state": *cluster.Metadata.State})
 	}
 	return fmt.Errorf("cluster with ID: %s is not deleted yet", clusterID)
 }

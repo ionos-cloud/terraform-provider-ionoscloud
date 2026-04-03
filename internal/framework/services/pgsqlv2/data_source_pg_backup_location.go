@@ -35,7 +35,7 @@ func NewBackupLocationDataSource() datasource.DataSource {
 
 // Metadata returns the metadata for the backup location data source.
 func (d *backupLocationDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_pg_backup_location"
+	resp.TypeName = req.ProviderTypeName + "_pg_backup_location_v2"
 }
 
 // Configure configures the data source.

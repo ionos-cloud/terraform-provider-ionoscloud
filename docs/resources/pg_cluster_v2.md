@@ -32,7 +32,7 @@ resource "ionoscloud_pg_cluster_v2" "example" {
   location          = "de/txl"
   backup_location   = "de"
   replication_mode  = "ASYNCHRONOUS"
-  connection_pooler = "ENABLED"
+  connection_pooler = "DISABLED"
   logs_enabled      = true
   metrics_enabled   = true
 
@@ -85,7 +85,7 @@ resource "random_password" "cluster_password" {
 * `description` - (Optional)[string] Human-readable description for the cluster.
 * `version` - (Optional)(Computed)[string] The PostgreSQL version of the cluster. If omitted, the API assigns a default version.
 * `location` - (Required)[string] The location of the PostgreSQL cluster. This is used for routing to the regional API endpoint. Changing this value will destroy the existing cluster and create a new one in the specified location. Available locations: `de/fra`, `de/fra/2`, `de/txl`, `es/vit`, `fr/par`, `gb/bhx`, `gb/lhr`, `us/ewr`, `us/las`, `us/mci`.
-* `backup_location` - (Required)[string] The S3 location where the backups will be created. Supported locations are provided by the `ionoscloud_pg_backup_location` data source.
+* `backup_location` - (Required)[string] The S3 location where the backups will be created. Supported locations are provided by the `ionoscloud_pg_backup_location_v2` data source.
 * `replication_mode` - (Required)[string] Replication mode across the instances. Possible values: `ASYNCHRONOUS`, `STRICTLY_SYNCHRONOUS`.
 * `connection_pooler` - (Optional)(Computed)[string] Defines how database connections are managed and reused. Possible values: `DISABLED`, `TRANSACTION`, `SESSION`.
 * `logs_enabled` - (Optional)(Computed)[bool] Enables or disables the collection and reporting of logs for observability of this cluster.

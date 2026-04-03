@@ -1,13 +1,13 @@
 ---
 subcategory: "Database as a Service - PostgreSQL v2"
 layout: "ionoscloud"
-page_title: "IonosCloud : ionoscloud_pg_backup_location"
-sidebar_current: "docs-ionoscloud_pg_backup_location"
+page_title: "IonosCloud : ionoscloud_pg_backup_location_v2"
+sidebar_current: "docs-ionoscloud_pg_backup_location_v2"
 description: |-
   Get information on DBaaS PostgreSQL v2 Backup Locations
 ---
 
-# ionoscloud_pg_backup_location
+# ionoscloud_pg_backup_location_v2
 
 The **DBaaS PostgreSQL v2 Backup Locations data source** can be used to retrieve the list of available backup locations.
 Use this data source to find valid values for the `backup_location` attribute of the `ionoscloud_pg_cluster_v2` resource.
@@ -15,7 +15,7 @@ Use this data source to find valid values for the `backup_location` attribute of
 ## Example Usage
 
 ```hcl
-data "ionoscloud_pg_backup_location" "example" {
+data "ionoscloud_pg_backup_location_v2" "example" {
   location = "de/txl"
 }
 ```

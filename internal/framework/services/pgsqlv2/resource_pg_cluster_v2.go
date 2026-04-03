@@ -45,10 +45,10 @@ type clusterResourceModel struct {
 	MetricsEnabled   types.Bool     `tfsdk:"metrics_enabled"`
 	Timeouts         timeouts.Value `tfsdk:"timeouts"`
 
-	Instances         instancesModel          `tfsdk:"instances"`
-	Connections       connectionModel         `tfsdk:"connections"`
-	MaintenanceWindow maintenanceWindowModel  `tfsdk:"maintenance_window"`
-	Credentials       credentialsModel        `tfsdk:"credentials"`
+	Instances         *instancesModel         `tfsdk:"instances"`
+	Connections       *connectionModel        `tfsdk:"connections"`
+	MaintenanceWindow *maintenanceWindowModel `tfsdk:"maintenance_window"`
+	Credentials       *credentialsModel       `tfsdk:"credentials"`
 	RestoreFromBackup *restoreFromBackupModel `tfsdk:"restore_from_backup"`
 }
 
@@ -646,27 +646,27 @@ func mapClusterResponseToModel(cluster *pgsqlv2.ClusterRead, model *clusterResou
 	model.LogsEnabled = types.BoolPointerValue(props.LogsEnabled)
 	model.MetricsEnabled = types.BoolPointerValue(props.MetricsEnabled)
 
-	model.Instances = instancesModel{
+	model.Instances = &instancesModel{
 		Count:       types.Int32Value(props.Instances.Count),
 		Cores:       types.Int32Value(props.Instances.Cores),
 		RAM:         types.Int32Value(props.Instances.Ram),
 		StorageSize: types.Int32Value(props.Instances.StorageSize),
 	}
 
-	model.Connections = connectionModel{
+	model.Connections = &connectionModel{
 		DatacenterID:           types.StringValue(props.Connection.DatacenterId),
 		LanID:                  types.StringValue(props.Connection.LanId),
 		PrimaryInstanceAddress: types.StringValue(props.Connection.PrimaryInstanceAddress),
 	}
 
-	model.MaintenanceWindow = maintenanceWindowModel{
+	model.MaintenanceWindow = &maintenanceWindowModel{
 		Time:         types.StringValue(props.MaintenanceWindow.Time),
 		DayOfTheWeek: types.StringValue(string(props.MaintenanceWindow.DayOfTheWeek)),
 	}
 
 	// Credentials block: the API returns username and database but not the password.
 	if props.Credentials != nil {
-		model.Credentials = credentialsModel{
+		model.Credentials = &credentialsModel{
 			Username: types.StringValue(props.Credentials.Username),
 			Database: types.StringValue(props.Credentials.Database),
 		}

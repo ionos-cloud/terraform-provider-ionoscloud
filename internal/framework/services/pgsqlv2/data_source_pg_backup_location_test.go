@@ -36,7 +36,7 @@ func TestAccPgBackupLocationsV2DataSource(t *testing.T) {
 // --- Configs ---
 
 var backupLocationDSConfig = fmt.Sprintf(`
-data "ionoscloud_pg_backup_location" "test" {
+data "ionoscloud_pg_backup_location_v2" "test" {
   location = "%s"
 }
 `, testLocation)

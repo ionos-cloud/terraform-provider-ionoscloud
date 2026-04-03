@@ -298,7 +298,7 @@ const (
 	PsqlV2ClusterResource          = "ionoscloud_pg_cluster_v2"
 	PsqlV2ClusterDataSource        = "ionoscloud_pg_cluster_v2"
 	PsqlV2ClustersDataSource       = "ionoscloud_pg_clusters_v2"
-	PsqlBackupLocationDataSource = "ionoscloud_pg_backup_location"
+	PsqlV2BackupLocationDataSource = "ionoscloud_pg_backup_location_v2"
 	PsqlV2BackupsDataSource        = "ionoscloud_pg_backups_v2"
 	PsqlV2VersionsDataSource       = "ionoscloud_pg_versions_v2"
 

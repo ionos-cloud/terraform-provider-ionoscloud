@@ -23,7 +23,7 @@ const (
 	clustersDSAddr       = "data." + constant.PsqlV2ClustersDataSource + ".test"
 	backupsDSAddr        = "data." + constant.PsqlV2BackupsDataSource + ".test"
 	versionsDSAddr       = "data." + constant.PsqlV2VersionsDataSource + ".test"
-	backupLocationDSAddr = "data." + constant.PsqlBackupLocationDataSource + ".test"
+	backupLocationDSAddr = "data." + constant.PsqlV2BackupLocationDataSource + ".test"
 )
 
 // --- Shared Terraform Configs ---
@@ -56,9 +56,9 @@ resource "ionoscloud_pg_cluster_v2" "test" {
   description       = "Test PgSQL v2 cluster"
   version           = "17"
   location          = "%[1]s"
-  backup_location   = "de"
+  backup_location   = "eu-central-3"
   replication_mode  = "ASYNCHRONOUS"
-  connection_pooler = "TRANSACTION"
+  connection_pooler = "DISABLED"
   logs_enabled      = true
   metrics_enabled   = true
 
@@ -95,7 +95,7 @@ resource "ionoscloud_pg_cluster_v2" "test" {
   description       = "Updated PgSQL v2 cluster"
   version           = "17"
   location          = "%[1]s"
-  backup_location   = "eu-central-2"
+  backup_location   = "eu-central-3"
   replication_mode  = "ASYNCHRONOUS"
   connection_pooler = "DISABLED"
   logs_enabled      = false
@@ -226,7 +226,7 @@ resource "ionoscloud_pg_cluster_v2" "test" {
   description       = "Updated PgSQL v2 cluster"
   version           = "17"
   location          = "%[1]s"
-  backup_location   = "eu-central-2"
+  backup_location   = "eu-central-3"
   replication_mode  = "ASYNCHRONOUS"
   connection_pooler = "DISABLED"
   logs_enabled      = false
