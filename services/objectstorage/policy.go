@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"slices"
+	"strings"
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
@@ -38,8 +40,71 @@ type bucketPolicyStatement struct {
 	Effect    string                          `json:"Effect"`
 	Action    []string                        `json:"Action"`
 	Resources []string                        `json:"Resource"`
-	Principal []string                        `json:"Principal"`
+	Principal bucketPolicyPrincipal           `json:"Principal"`
 	Condition *bucketPolicyStatementCondition `json:"Condition,omitempty"`
+}
+
+// bucketPolicyPrincipal is the canonical representation of the S3 Principal field.
+// It marshals to {"AWS":"..."} when there is exactly one principal and to
+// {"AWS":[...]} otherwise, matching the API's canonicalization behavior, and
+// accepts all common input forms on unmarshal:
+//   - {"AWS": ["arn:..."]} — API array form
+//   - {"AWS": "arn:..."}   — API single-string form
+//   - ["arn:..."]          — legacy flat array form
+//   - "arn:..." / "*"      — bare string form
+type bucketPolicyPrincipal struct {
+	AWS []string
+}
+
+func (p *bucketPolicyPrincipal) MarshalJSON() ([]byte, error) {
+	// Match the API's canonical form: single principal -> string, multiple -> array.
+	// Keep empty principals deterministic as [] rather than null.
+	if len(p.AWS) == 1 {
+		return json.Marshal(struct {
+			AWS string `json:"AWS"`
+		}{AWS: p.AWS[0]})
+	}
+
+	aws := p.AWS
+	if aws == nil {
+		aws = []string{}
+	}
+
+	return json.Marshal(struct {
+		AWS []string `json:"AWS"`
+	}{AWS: aws})
+}
+
+func (p *bucketPolicyPrincipal) UnmarshalJSON(data []byte) error {
+	// object form: {"AWS": "..." | [...]}
+	var obj struct {
+		AWS json.RawMessage `json:"AWS"`
+	}
+	if err := json.Unmarshal(data, &obj); err == nil && obj.AWS != nil {
+		var arr []string
+		if err := json.Unmarshal(obj.AWS, &arr); err == nil {
+			p.AWS = arr
+			return nil
+		}
+		var str string
+		if err := json.Unmarshal(obj.AWS, &str); err == nil {
+			p.AWS = []string{str}
+			return nil
+		}
+	}
+	// flat array: ["arn:..."]
+	var arr []string
+	if err := json.Unmarshal(data, &arr); err == nil {
+		p.AWS = arr
+		return nil
+	}
+	// bare string: "*" or "arn:..."
+	var s string
+	if err := json.Unmarshal(data, &s); err == nil {
+		p.AWS = []string{s}
+		return nil
+	}
+	return fmt.Errorf("cannot unmarshal Principal: %s", string(data))
 }
 
 type bucketPolicyStatementCondition struct {
@@ -47,6 +112,62 @@ type bucketPolicyStatementCondition struct {
 	ExcludedIPs     []string `json:"NotIpAddress,omitempty"`
 	DateGreaterThan *string  `json:"DateGreaterThan,omitempty"`
 	DateLessThan    *string  `json:"DateLessThan,omitempty"`
+}
+
+// sortPolicy sorts all order-independent slices within a bucketPolicy so that
+// two semantically identical policies produce the same JSON after marshaling.
+func sortPolicy(p *bucketPolicy) {
+	for i := range p.Statement {
+		slices.Sort(p.Statement[i].Action)
+		slices.Sort(p.Statement[i].Resources)
+		slices.Sort(p.Statement[i].Principal.AWS)
+		if p.Statement[i].Condition != nil {
+			slices.Sort(p.Statement[i].Condition.IPs)
+			slices.Sort(p.Statement[i].Condition.ExcludedIPs)
+		}
+	}
+	slices.SortFunc(p.Statement, func(a, b bucketPolicyStatement) int {
+		aj, _ := json.Marshal(a)
+		bj, _ := json.Marshal(b)
+		return strings.Compare(string(aj), string(bj))
+	})
+}
+
+// PoliciesSemanticEqual returns true if two policy JSON strings represent the
+// same policy, regardless of JSON key ordering, element ordering within arrays,
+// or Principal format differences (e.g. ["arn:..."] vs {"AWS": "arn:..."}).
+// It returns an error if either policy string cannot be normalized into the
+// supported bucket policy representation.
+func PoliciesSemanticEqual(statePolicy, apiPolicy string) (bool, error) {
+	stateNormalized, err := normalizePolicy(statePolicy)
+	if err != nil {
+		return false, fmt.Errorf("normalizing state policy: %w", err)
+	}
+	apiNormalized, err := normalizePolicy(apiPolicy)
+	if err != nil {
+		return false, fmt.Errorf("normalizing API policy: %w", err)
+	}
+
+	return stateNormalized == apiNormalized, nil
+}
+
+// normalizePolicy unmarshalls a policy JSON string into the canonical typed
+// representation, sorts all order-independent slices, and re-marshals it to
+// produce a deterministic string suitable for byte-level comparison.
+func normalizePolicy(s string) (string, error) {
+	var data bucketPolicy
+	if err := json.Unmarshal([]byte(s), &data); err != nil {
+		return "", fmt.Errorf("unmarshalling policy: %w", err)
+	}
+
+	sortPolicy(&data)
+
+	normalized, err := json.Marshal(data)
+	if err != nil {
+		return "", fmt.Errorf("marshaling normalized policy: %w", err)
+	}
+
+	return string(normalized), nil
 }
 
 // CreateBucketPolicy creates a new bucket policy.
@@ -126,16 +247,18 @@ func (c *Client) UpdateBucketPolicy(ctx context.Context, data *BucketPolicyModel
 		return err
 	}
 
-	model, found, err := c.GetBucketPolicy(ctx, data.Bucket)
-	if !found {
-		return fmt.Errorf("bucket policy not found for bucket %s", data.Bucket.ValueString())
-	}
-
+	// Verify the policy was persisted, but keep the planned JSON in state.
+	// The API may re-serialize equivalent policies differently (for example by
+	// changing key ordering or Principal format), and writing that response back
+	// here would cause unnecessary state churn. Any real semantic drift must be
+	// detected later during Read via PoliciesSemanticEqual.
+	_, found, err := c.GetBucketPolicy(ctx, data.Bucket)
 	if err != nil {
 		return err
 	}
-
-	*data = *model
+	if !found {
+		return fmt.Errorf("bucket policy not found for bucket %s", data.Bucket.ValueString())
+	}
 	return nil
 }
 
@@ -198,7 +321,7 @@ func setBucketPolicyData(policyResponse *objstorage.BucketPolicy, data *BucketPo
 				Resources: statementResponse.Resource,
 			}
 			if statementResponse.Principal != nil && statementResponse.Principal.AWS != nil {
-				statementData.Principal = statementResponse.Principal.AWS
+				statementData.Principal = bucketPolicyPrincipal{AWS: statementResponse.Principal.AWS}
 			}
 			if statementResponse.Condition != nil {
 				conditionData := bucketPolicyStatementCondition{}
@@ -247,7 +370,7 @@ func buildBucketPolicyFromModel(policyModel *BucketPolicyModel) (objstorage.Buck
 	for _, statementData := range policyData.Statement {
 		statementInput := objstorage.NewBucketPolicyStatement(statementData.Action, statementData.Effect, statementData.Resources)
 		statementInput.Sid = statementData.SID
-		statementInput.Principal = objstorage.NewPrincipal(statementData.Principal)
+		statementInput.Principal = objstorage.NewPrincipal(statementData.Principal.AWS)
 
 		if statementData.Condition != nil {
 			statementInput.Condition = objstorage.NewBucketPolicyCondition()

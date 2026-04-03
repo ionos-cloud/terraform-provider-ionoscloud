@@ -75,6 +75,7 @@ func resourceNetworkLoadBalancer() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "Specifies the format of the logs.",
 				Optional:    true,
+				Computed:    true,
 			},
 			"datacenter_id": {
 				Type:             schema.TypeString,

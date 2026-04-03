@@ -3,11 +3,22 @@
 ### Enhancements
 - Add validation error when update-only attributes are set during snapshot creation
 - Add more information to error messages
-### Fixes
-- Improved error message when `image_name` matches an image that has a non-HDD type (e.g. CDROM) or is in a different location. The error now reports the found image's type and location.
+
+### Features
+- Add `nic_multi_queue` attribute to the `ionoscloud_servers` data source.
 
 ### Testing
 - Add import tests for CUBE servers.
+- Add checks for the `nic_multi_queue` attribute inside VCPU servers tests.
+- Modify `ionoscloud_servers` data source test to include a check for the `nic_multi_queue` attribute.
+
+### Fixes
+ * The ionoscloud_s3_bucket_policy resource now correctly handles all standard S3 Principal representations:
+  - "Principal": "*" — wildcard string
+  - "Principal": ["arn:...", "*"] — flat array
+  - "Principal": {"AWS": "arn:..."} — object with single string
+  - "Principal": {"AWS": ["arn:...", "arn:..."]} — object with array
+ - Improved error message when `image_name` matches an image that has a non-HDD type (e.g. CDROM) or is in a different location. The error now reports the found image's type and location.
 
 ## 6.7.25
 ### Features
@@ -45,6 +56,7 @@
 - Remove unused `password` field from `users` attribute in `ionoscloud_group` resource schema.
 - Fixed VPN IPSec Gateway to use correct `fileconfiguration.VPN` constant instead of incorrect `fileconfiguration.APIGateway`.
 - Fixed typo in VPN IPSec Gateway data source documentation heading.
+- Fixed `logging_format` field in `ionoscloud_networkloadbalancer` resource causing perpetual drift by adding `Computed: true` to the schema ([#918](https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/918)).
 
 ## 6.7.22
 ### Features

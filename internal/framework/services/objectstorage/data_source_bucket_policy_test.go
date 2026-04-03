@@ -13,7 +13,7 @@ import (
 )
 
 func TestAccBucketPolicyDataSource(t *testing.T) {
-	rName := "tf-acctest-test-bucket-policy"
+	rName := acctest.GenerateRandomResourceName(bucketPrefix)
 	name := "ionoscloud_s3_bucket_policy.test"
 
 	resource.Test(t, resource.TestCase{
@@ -26,7 +26,7 @@ func TestAccBucketPolicyDataSource(t *testing.T) {
 				Config: testAccBucketPolicyDataSourceConfig_basic(rName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(name, "bucket", rName),
-					testAccCheckBucketPolicyData(PolicyJSON),
+					testAccCheckBucketPolicySemanticEqual(PolicyJSON),
 				),
 			},
 		},

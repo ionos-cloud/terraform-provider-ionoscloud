@@ -40,6 +40,8 @@ func TestAccDataSourceServersBasic(t *testing.T) {
 						constant.ServerResource+"."+serverTestResource2, "type"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.type",
 						constant.ServerResource+"."+serverTestResource2, "type"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.nic_multi_queue",
+						constant.ServerResource+"."+serverTestResource2, "nic_multi_queue"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.volumes.0.name",
 						constant.ServerResource+"."+serverTestResource2, "volume.0.name"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.0.volumes.0.size",
@@ -184,6 +186,7 @@ resource ` + constant.ServerResource + ` ` + serverTestResource2 + ` {
   image_name ="ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server2_image_password.result
   type = "ENTERPRISE"
+  nic_multi_queue = true
   volume {
     name = "` + constant.VolumeTestResource + "2" + `"
     size = 6
@@ -221,11 +224,11 @@ data ` + constant.ServersDataSource + ` ` + constant.ServerDataSourceByName + ` 
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   filter {
    name = "name"
-   value = "${ionoscloud_server.test_server2.name}" 
+   value = "${ionoscloud_server.test_server2.name}"
   }
   filter {
     name = "cores"
-    value = "` + noCoresTest + `" 
+    value = "` + noCoresTest + `"
   }
 } `
 

@@ -76,14 +76,12 @@ func dataSourceVpnWireguardPeer() *schema.Resource {
 	}
 }
 
-func dataSourceVpnWireguardPeerRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	client := m.(bundleclient.SdkBundle).VPNClient
+func dataSourceVpnWireguardPeerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(bundleclient.SdkBundle).VPNClient
 	gatewayID := d.Get("gateway_id").(string)
 	idValue, idOk := d.GetOk("id")
 	nameValue, nameOk := d.GetOk("name")
 	location := d.Get("location").(string)
-	id := idValue.(string)
-	name := nameValue.(string)
 
 	if idOk && nameOk {
 		return diagutil.ToDiags(d, fmt.Errorf("ID and name cannot be both specified at the same time"), nil)
@@ -96,11 +94,13 @@ func dataSourceVpnWireguardPeerRead(ctx context.Context, d *schema.ResourceData,
 	var apiResponse *shared.APIResponse
 	var err error
 	if idOk {
+		id := idValue.(string)
 		peer, apiResponse, err = client.GetWireguardPeerByID(ctx, gatewayID, id, location)
 		if err != nil {
 			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the WireGuard Peer with ID: %s, error: %w", id, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
 		}
 	} else {
+		name := nameValue.(string)
 		var results []vpnSdk.WireguardPeerRead
 		peers, apiResponse, err := client.ListWireguardPeers(ctx, gatewayID, location)
 		if err != nil {
