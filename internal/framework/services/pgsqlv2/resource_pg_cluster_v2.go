@@ -95,83 +95,14 @@ func (r *clusterResource) Metadata(_ context.Context, req resource.MetadataReque
 func (r *clusterResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			"id": schema.StringAttribute{
-				Computed:    true,
-				Description: "The ID (UUID) of the cluster.",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
-			},
-			"name": schema.StringAttribute{
-				Required:    true,
-				Description: "The name of the PostgreSQL cluster.",
-			},
-			"description": schema.StringAttribute{
-				Optional:    true,
-				Description: "Human-readable description for the cluster.",
-			},
-			"version": schema.StringAttribute{
-				Required:    true,
-				Description: "The PostgreSQL version of the cluster.",
-			},
-			"dns_name": schema.StringAttribute{
-				Computed:    true,
-				Description: "The DNS name used to access the cluster.",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
-			},
-			"location": schema.StringAttribute{
-				Required:    true,
-				Description: "The location of the PostgreSQL cluster. This is used for routing to the regional API endpoint. Available locations: " + pgsqlv2Service.AvailableLocationsString() + ".",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
-			},
 			"backup_location": schema.StringAttribute{
 				Required:    true,
 				Description: "The S3 location where the backups will be created. Supported locations are provided by the backup locations endpoint.",
-			},
-			"replication_mode": schema.StringAttribute{
-				Required:    true,
-				Description: "Replication mode across the instances.",
 			},
 			"connection_pooler": schema.StringAttribute{
 				Optional:    true,
 				Computed:    true,
 				Description: "Defines how database connections are managed and reused.",
-			},
-			"logs_enabled": schema.BoolAttribute{
-				Optional:    true,
-				Computed:    true,
-				Description: "Enables or disables the collection and reporting of logs for observability of this cluster.",
-			},
-			"metrics_enabled": schema.BoolAttribute{
-				Optional:    true,
-				Computed:    true,
-				Description: "Enables or disables the collection and reporting of metrics for observability of this cluster.",
-			},
-			"instances": schema.SingleNestedAttribute{
-				Required:    true,
-				Description: "The instance configuration for the PostgreSQL cluster.",
-				Attributes: map[string]schema.Attribute{
-					"count": schema.Int32Attribute{
-						Required:    true,
-						Description: "The total number of instances in the cluster (one primary and n-1 secondary).",
-					},
-					"cores": schema.Int32Attribute{
-						Required:    true,
-						Description: "The number of CPU cores per instance.",
-					},
-					"ram": schema.Int32Attribute{
-						Required:    true,
-						Description: "The amount of memory per instance in gigabytes (GB).",
-					},
-					"storage_size": schema.Int32Attribute{
-						Required:    true,
-						Description: "The amount of storage per instance in gigabytes (GB).",
-					},
-				},
 			},
 			"connections": schema.SingleNestedAttribute{
 				Required:    true,
@@ -191,52 +122,121 @@ func (r *clusterResource) Schema(ctx context.Context, req resource.SchemaRequest
 					},
 				},
 			},
-			"maintenance_window": schema.SingleNestedAttribute{
-				Required:    true,
-				Description: "A weekly 4 hour-long window, during which maintenance might occur.",
-				Attributes: map[string]schema.Attribute{
-					"time": schema.StringAttribute{
-						Required:    true,
-						Description: "Start of the maintenance window in UTC time.",
-					},
-					"day_of_the_week": schema.StringAttribute{
-						Required:    true,
-						Description: "The name of the week day.",
-					},
-				},
-			},
 			"credentials": schema.SingleNestedAttribute{
 				Required:    true,
 				Description: "Credentials for the master database user to be created.",
 				Attributes: map[string]schema.Attribute{
-					"username": schema.StringAttribute{
+					"database": schema.StringAttribute{
 						Required:    true,
-						Description: "The username of the master database user.",
+						Description: "The name of the initial database to be created.",
 					},
 					"password": schema.StringAttribute{
 						Required:    true,
 						Sensitive:   true,
 						Description: "The password for the master database user.",
 					},
-					"database": schema.StringAttribute{
+					"username": schema.StringAttribute{
 						Required:    true,
-						Description: "The name of the initial database to be created.",
+						Description: "The username of the master database user.",
 					},
 				},
+			},
+			"description": schema.StringAttribute{
+				Optional:    true,
+				Description: "Human-readable description for the cluster.",
+			},
+			"dns_name": schema.StringAttribute{
+				Computed:    true,
+				Description: "The DNS name used to access the cluster.",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"id": schema.StringAttribute{
+				Computed:    true,
+				Description: "The ID (UUID) of the cluster.",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"instances": schema.SingleNestedAttribute{
+				Required:    true,
+				Description: "The instance configuration for the PostgreSQL cluster.",
+				Attributes: map[string]schema.Attribute{
+					"cores": schema.Int32Attribute{
+						Required:    true,
+						Description: "The number of CPU cores per instance.",
+					},
+					"count": schema.Int32Attribute{
+						Required:    true,
+						Description: "The total number of instances in the cluster (one primary and n-1 secondary).",
+					},
+					"ram": schema.Int32Attribute{
+						Required:    true,
+						Description: "The amount of memory per instance in gigabytes (GB).",
+					},
+					"storage_size": schema.Int32Attribute{
+						Required:    true,
+						Description: "The amount of storage per instance in gigabytes (GB).",
+					},
+				},
+			},
+			"location": schema.StringAttribute{
+				Required:    true,
+				Description: "The location of the PostgreSQL cluster. This is used for routing to the regional API endpoint. Available locations: " + pgsqlv2Service.AvailableLocationsString() + ".",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
+			},
+			"logs_enabled": schema.BoolAttribute{
+				Optional:    true,
+				Computed:    true,
+				Description: "Enables or disables the collection and reporting of logs for observability of this cluster.",
+			},
+			"maintenance_window": schema.SingleNestedAttribute{
+				Required:    true,
+				Description: "A weekly 4 hour-long window, during which maintenance might occur.",
+				Attributes: map[string]schema.Attribute{
+					"day_of_the_week": schema.StringAttribute{
+						Required:    true,
+						Description: "The name of the week day.",
+					},
+					"time": schema.StringAttribute{
+						Required:    true,
+						Description: "Start of the maintenance window in UTC time.",
+					},
+				},
+			},
+			"metrics_enabled": schema.BoolAttribute{
+				Optional:    true,
+				Computed:    true,
+				Description: "Enables or disables the collection and reporting of metrics for observability of this cluster.",
+			},
+			"name": schema.StringAttribute{
+				Required:    true,
+				Description: "The name of the PostgreSQL cluster.",
+			},
+			"replication_mode": schema.StringAttribute{
+				Required:    true,
+				Description: "Replication mode across the instances.",
 			},
 			"restore_from_backup": schema.SingleNestedAttribute{
 				Optional:    true,
 				Description: "Configures the cluster to be initialized with data from an existing backup.",
 				Attributes: map[string]schema.Attribute{
-					"source_backup_id": schema.StringAttribute{
-						Optional:    true,
-						Description: "The UUID of the backup to restore data from.",
-					},
 					"recovery_target_datetime": schema.StringAttribute{
 						Optional:    true,
 						Description: "If supplied as ISO 8601 timestamp, the backup will be replayed up until the given timestamp. If empty, the backup will be applied completely.",
 					},
+					"source_backup_id": schema.StringAttribute{
+						Optional:    true,
+						Description: "The UUID of the backup to restore data from.",
+					},
 				},
+			},
+			"version": schema.StringAttribute{
+				Required:    true,
+				Description: "The PostgreSQL version of the cluster.",
 			},
 		},
 		Blocks: map[string]schema.Block{

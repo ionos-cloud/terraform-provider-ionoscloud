@@ -76,26 +76,26 @@ func (d *versionsDataSource) Schema(_ context.Context, _ datasource.SchemaReques
 				Description: "The list of available PostgreSQL versions.",
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
-						"id": schema.StringAttribute{
+						"can_upgrade_to": schema.ListAttribute{
 							Computed:    true,
-							Description: "The ID (UUID) of the PostgreSQL version.",
-						},
-						"version": schema.StringAttribute{
-							Computed:    true,
-							Description: "The PostgreSQL version string.",
-						},
-						"status": schema.StringAttribute{
-							Computed:    true,
-							Description: "The support status of the version (e.g. BETA, SUPPORTED, RECOMMENDED, DEPRECATED).",
+							ElementType: types.StringType,
+							Description: "List of versions that this version can be upgraded to.",
 						},
 						"comment": schema.StringAttribute{
 							Computed:    true,
 							Description: "Additional information about the version status.",
 						},
-						"can_upgrade_to": schema.ListAttribute{
+						"id": schema.StringAttribute{
 							Computed:    true,
-							ElementType: types.StringType,
-							Description: "List of versions that this version can be upgraded to.",
+							Description: "The ID (UUID) of the PostgreSQL version.",
+						},
+						"status": schema.StringAttribute{
+							Computed:    true,
+							Description: "The support status of the version (e.g. BETA, SUPPORTED, RECOMMENDED, DEPRECATED).",
+						},
+						"version": schema.StringAttribute{
+							Computed:    true,
+							Description: "The PostgreSQL version string.",
 						},
 					},
 				},

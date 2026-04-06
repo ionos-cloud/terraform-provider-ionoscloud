@@ -85,73 +85,13 @@ func (d *clusterDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 	resp.Schema = schema.Schema{
 		Description: "Reads a single PostgreSQL v2 cluster by ID or name.",
 		Attributes: map[string]schema.Attribute{
-			"id": schema.StringAttribute{
-				Optional:    true,
-				Computed:    true,
-				Description: "The ID (UUID) of the cluster.",
-			},
-			"name": schema.StringAttribute{
-				Optional:    true,
-				Computed:    true,
-				Description: "The name of the PostgreSQL cluster.",
-			},
-			"description": schema.StringAttribute{
-				Computed:    true,
-				Description: "Human-readable description of the cluster.",
-			},
-			"version": schema.StringAttribute{
-				Computed:    true,
-				Description: "The PostgreSQL version of the cluster.",
-			},
-			"dns_name": schema.StringAttribute{
-				Computed:    true,
-				Description: "The DNS name used to access the cluster.",
-			},
-			"location": schema.StringAttribute{
-				Required:    true,
-				Description: "The region in which to look up the cluster. Available locations: " + pgsqlv2Service.AvailableLocationsString() + ".",
-			},
 			"backup_location": schema.StringAttribute{
 				Computed:    true,
 				Description: "The S3 location where the backups are stored.",
 			},
-			"replication_mode": schema.StringAttribute{
-				Computed:    true,
-				Description: "Replication mode across the instances.",
-			},
 			"connection_pooler": schema.StringAttribute{
 				Computed:    true,
 				Description: "How database connections are managed and reused.",
-			},
-			"logs_enabled": schema.BoolAttribute{
-				Computed:    true,
-				Description: "Whether the collection and reporting of logs is enabled for this cluster.",
-			},
-			"metrics_enabled": schema.BoolAttribute{
-				Computed:    true,
-				Description: "Whether the collection and reporting of metrics is enabled for this cluster.",
-			},
-			"instances": schema.SingleNestedAttribute{
-				Computed:    true,
-				Description: "The instance configuration for the PostgreSQL cluster.",
-				Attributes: map[string]schema.Attribute{
-					"count": schema.Int32Attribute{
-						Computed:    true,
-						Description: "The total number of instances in the cluster (one primary and n-1 secondary).",
-					},
-					"cores": schema.Int32Attribute{
-						Computed:    true,
-						Description: "The number of CPU cores per instance.",
-					},
-					"ram": schema.Int32Attribute{
-						Computed:    true,
-						Description: "The amount of memory per instance in gigabytes (GB).",
-					},
-					"storage_size": schema.Int32Attribute{
-						Computed:    true,
-						Description: "The amount of storage per instance in gigabytes (GB).",
-					},
-				},
 			},
 			"connections": schema.SingleNestedAttribute{
 				Computed:    true,
@@ -171,19 +111,79 @@ func (d *clusterDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 					},
 				},
 			},
+			"description": schema.StringAttribute{
+				Computed:    true,
+				Description: "Human-readable description of the cluster.",
+			},
+			"dns_name": schema.StringAttribute{
+				Computed:    true,
+				Description: "The DNS name used to access the cluster.",
+			},
+			"id": schema.StringAttribute{
+				Optional:    true,
+				Computed:    true,
+				Description: "The ID (UUID) of the cluster.",
+			},
+			"instances": schema.SingleNestedAttribute{
+				Computed:    true,
+				Description: "The instance configuration for the PostgreSQL cluster.",
+				Attributes: map[string]schema.Attribute{
+					"cores": schema.Int32Attribute{
+						Computed:    true,
+						Description: "The number of CPU cores per instance.",
+					},
+					"count": schema.Int32Attribute{
+						Computed:    true,
+						Description: "The total number of instances in the cluster (one primary and n-1 secondary).",
+					},
+					"ram": schema.Int32Attribute{
+						Computed:    true,
+						Description: "The amount of memory per instance in gigabytes (GB).",
+					},
+					"storage_size": schema.Int32Attribute{
+						Computed:    true,
+						Description: "The amount of storage per instance in gigabytes (GB).",
+					},
+				},
+			},
+			"location": schema.StringAttribute{
+				Required:    true,
+				Description: "The region in which to look up the cluster. Available locations: " + pgsqlv2Service.AvailableLocationsString() + ".",
+			},
+			"logs_enabled": schema.BoolAttribute{
+				Computed:    true,
+				Description: "Whether the collection and reporting of logs is enabled for this cluster.",
+			},
 			"maintenance_window": schema.SingleNestedAttribute{
 				Computed:    true,
 				Description: "A weekly 4 hour-long window, during which maintenance might occur.",
 				Attributes: map[string]schema.Attribute{
-					"time": schema.StringAttribute{
-						Computed:    true,
-						Description: "Start of the maintenance window in UTC time.",
-					},
 					"day_of_the_week": schema.StringAttribute{
 						Computed:    true,
 						Description: "The name of the week day.",
 					},
+					"time": schema.StringAttribute{
+						Computed:    true,
+						Description: "Start of the maintenance window in UTC time.",
+					},
 				},
+			},
+			"metrics_enabled": schema.BoolAttribute{
+				Computed:    true,
+				Description: "Whether the collection and reporting of metrics is enabled for this cluster.",
+			},
+			"name": schema.StringAttribute{
+				Optional:    true,
+				Computed:    true,
+				Description: "The name of the PostgreSQL cluster.",
+			},
+			"replication_mode": schema.StringAttribute{
+				Computed:    true,
+				Description: "Replication mode across the instances.",
+			},
+			"version": schema.StringAttribute{
+				Computed:    true,
+				Description: "The PostgreSQL version of the cluster.",
 			},
 		},
 	}

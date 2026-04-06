@@ -68,38 +68,26 @@ func (d *backupsDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 	resp.Schema = schema.Schema{
 		Description: "Lists PostgreSQL v2 backups.",
 		Attributes: map[string]schema.Attribute{
-			"location": schema.StringAttribute{
-				Required:    true,
-				Description: "The region in which to look up backups. Available locations: " + pgsqlv2Service.AvailableLocationsString() + ".",
-			},
-			"cluster_id": schema.StringAttribute{
-				Optional:    true,
-				Description: "The ID (UUID) of the cluster to filter backups by.",
-			},
 			"backups": schema.ListNestedAttribute{
 				Computed:    true,
 				Description: "The list of backups.",
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
-						"id": schema.StringAttribute{
-							Computed:    true,
-							Description: "The ID (UUID) of the backup.",
-						},
 						"cluster_id": schema.StringAttribute{
 							Computed:    true,
 							Description: "The ID (UUID) of the cluster the backup belongs to.",
 						},
-						"postgres_cluster_version": schema.StringAttribute{
+						"earliest_recovery_target_time": schema.StringAttribute{
 							Computed:    true,
-							Description: "The PostgreSQL version of the cluster.",
+							Description: "The earliest point in time to which the cluster can be restored.",
+						},
+						"id": schema.StringAttribute{
+							Computed:    true,
+							Description: "The ID (UUID) of the backup.",
 						},
 						"is_active": schema.BoolAttribute{
 							Computed:    true,
 							Description: "Whether the backup is active.",
-						},
-						"earliest_recovery_target_time": schema.StringAttribute{
-							Computed:    true,
-							Description: "The earliest point in time to which the cluster can be restored.",
 						},
 						"latest_recovery_target_time": schema.StringAttribute{
 							Computed:    true,
@@ -109,8 +97,20 @@ func (d *backupsDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 							Computed:    true,
 							Description: "The S3 location where the backup is stored.",
 						},
+						"postgres_cluster_version": schema.StringAttribute{
+							Computed:    true,
+							Description: "The PostgreSQL version of the cluster.",
+						},
 					},
 				},
+			},
+			"cluster_id": schema.StringAttribute{
+				Optional:    true,
+				Description: "The ID (UUID) of the cluster to filter backups by.",
+			},
+			"location": schema.StringAttribute{
+				Required:    true,
+				Description: "The region in which to look up backups. Available locations: " + pgsqlv2Service.AvailableLocationsString() + ".",
 			},
 		},
 	}

@@ -61,10 +61,6 @@ func (d *backupLocationDataSource) Schema(_ context.Context, _ datasource.Schema
 	resp.Schema = schema.Schema{
 		Description: "Lists PostgreSQL v2 backup locations.",
 		Attributes: map[string]schema.Attribute{
-			"location": schema.StringAttribute{
-				Required:    true,
-				Description: "The region in which to look up backup locations. Available locations: " + pgsqlv2Service.AvailableLocationsString() + ".",
-			},
 			"backup_locations": schema.ListNestedAttribute{
 				Computed:    true,
 				Description: "The list of available backup locations.",
@@ -80,6 +76,10 @@ func (d *backupLocationDataSource) Schema(_ context.Context, _ datasource.Schema
 						},
 					},
 				},
+			},
+			"location": schema.StringAttribute{
+				Required:    true,
+				Description: "The region in which to look up backup locations. Available locations: " + pgsqlv2Service.AvailableLocationsString() + ".",
 			},
 		},
 	}
