@@ -36,6 +36,7 @@ import (
 	objectStorageService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstorage"
 	objectStorageManagementService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstoragemanagement"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/vpn"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/configlog"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
@@ -95,18 +96,19 @@ func (c SdkBundle) newBundleClientConfig(userAgent string) *shared.Configuration
 // or false if the client should be returned immediately using the provided config (e.g. env var provided as parameter or default).
 func (c SdkBundle) shouldApplyOverridesCustomEnv(product, productEnvVar string) bool {
 	if os.Getenv(shared.IonosApiUrlEnvVar) != "" {
-		log.Printf("[DEBUG] Using custom endpoint from %s env variable", shared.IonosApiUrlEnvVar)
+		log.Printf("[DEBUG] %s: using endpoint from %s: %s", product, shared.IonosApiUrlEnvVar, os.Getenv(shared.IonosApiUrlEnvVar))
 		return false
 	}
 	if productEnvVar != "" && os.Getenv(productEnvVar) != "" {
-		log.Printf("[DEBUG] Using custom endpoint from %s env variable", productEnvVar)
+		log.Printf("[DEBUG] %s: using endpoint from %s: %s", product, productEnvVar, os.Getenv(productEnvVar))
 		return false
 	}
 	if c.fileConfig == nil {
+		log.Printf("[DEBUG] No file config available for %s", product)
 		return false
 	}
 	if c.fileConfig.GetProductOverrides(product) == nil {
-		log.Printf("[DEBUG] Missing config for %s product in file config, using SDK defaults", product)
+		log.Printf("[DEBUG] %s: no config in file config, using SDK defaults", product)
 		return false
 	}
 	return true
@@ -146,6 +148,7 @@ func (c SdkBundle) NewContainerRegistryClient(location string) (*crService.Clien
 			fileconfiguration.ContainerRegistry, location,
 		)
 	}
+	log.Printf("[DEBUG] Container Registry: endpoint for location %s: %s", configlog.FormatLocation(location), endpoint.Name)
 	config.Servers = shared.ServerConfigurations{
 		{
 			URL:         endpoint.Name,
@@ -184,6 +187,7 @@ func (c SdkBundle) NewMongoClient(location string) (*dbaasService.MongoClient, e
 			fileconfiguration.Mongo, location,
 		)
 	}
+	log.Printf("[DEBUG] Mongo: endpoint for location %s: %s", configlog.FormatLocation(location), endpoint.Name)
 	config.Servers = shared.ServerConfigurations{
 		{
 			URL:         endpoint.Name,
@@ -222,6 +226,7 @@ func (c SdkBundle) NewPsqlClient(location string) (*dbaasService.PsqlClient, err
 			fileconfiguration.PSQL, location,
 		)
 	}
+	log.Printf("[DEBUG] PostgreSQL: endpoint for location %s: %s", configlog.FormatLocation(location), endpoint.Name)
 	config.Servers = shared.ServerConfigurations{
 		{
 			URL:         endpoint.Name,
@@ -315,6 +320,7 @@ func (c SdkBundle) NewCloudAPIClient(location string) (*ionoscloud.APIClient, er
 			fileconfiguration.Cloud, location,
 		)
 	}
+	log.Printf("[DEBUG] Cloud API: endpoint for location %s: %s", configlog.FormatLocation(location), endpoint.Name)
 	config.Servers = ionoscloud.ServerConfigurations{
 		{
 			URL:         endpoint.Name,
@@ -365,7 +371,11 @@ func (c SdkBundle) NewCloudAPIClientWithFailover() (*ionoscloud.APIClient, error
 		})
 		log.Printf("[DEBUG] Adding global override endpoint %s (skipTLSVerify=%t) for %s product from file config",
 			ep.Name, ep.SkipTLSVerify, fileconfiguration.Cloud)
+		if ep.CertificateAuthData != "" {
+			log.Printf("[DEBUG] %s: certificateAuthData present (len=%d) for endpoint %s", fileconfiguration.Cloud, len(ep.CertificateAuthData), ep.Name)
+		}
 	}
+	log.Printf("[DEBUG] Failover for %s: strategy=%q, endpoints=%d", fileconfiguration.Cloud, failoverOptions.Strategy, len(failoverEndpoints))
 	if len(failoverEndpoints) == 0 {
 		return nil, fmt.Errorf("no global failover endpoints configured for %q", fileconfiguration.Cloud)
 	}
@@ -422,7 +432,11 @@ func (c SdkBundle) NewObjectStorageManagementClient() (*objectStorageManagementS
 		})
 		log.Printf("[DEBUG] Adding global override endpoint %s (skipTLSVerify=%t) for %s product from file config",
 			ep.Name, ep.SkipTLSVerify, fileconfiguration.ObjectStorageManagement)
+		if ep.CertificateAuthData != "" {
+			log.Printf("[DEBUG] %s: certificateAuthData present (len=%d) for endpoint %s", fileconfiguration.ObjectStorageManagement, len(ep.CertificateAuthData), ep.Name)
+		}
 	}
+	log.Printf("[DEBUG] Failover for %s: strategy=%q, endpoints=%d", fileconfiguration.ObjectStorageManagement, failoverOptions.Strategy, len(failoverEndpoints))
 
 	if len(failoverEndpoints) == 0 {
 		return nil, fmt.Errorf("no global failover endpoints configured for %q", fileconfiguration.ObjectStorageManagement)

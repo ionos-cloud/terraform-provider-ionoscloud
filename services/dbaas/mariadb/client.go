@@ -2,6 +2,7 @@ package mariadb
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"runtime"
@@ -14,6 +15,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/configlog"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
@@ -58,15 +60,18 @@ func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *f
 func (c *Client) ChangeConfigURL(location string) {
 	clientConfig := c.sdkClient.GetConfig()
 	if location == "" && os.Getenv(ionosAPIURLMariaDB) != "" {
+		url := utils.CleanURL(os.Getenv(ionosAPIURLMariaDB))
+		log.Printf("[DEBUG] MariaDB: endpoint from %s: %s", ionosAPIURLMariaDB, url)
 		clientConfig.Servers = shared.ServerConfigurations{
 			{
-				URL: utils.CleanURL(os.Getenv(ionosAPIURLMariaDB)),
+				URL: url,
 			},
 		}
 		return
 	}
 	for _, server := range clientConfig.Servers {
 		if strings.EqualFold(server.Description, shared.EndpointOverridden+location) || strings.EqualFold(server.URL, locationToURL[location]) {
+			log.Printf("[DEBUG] MariaDB: endpoint for location %s: %s", configlog.FormatLocation(location), server.URL)
 			clientConfig.Servers = shared.ServerConfigurations{
 				{
 					URL:         server.URL,
@@ -76,7 +81,7 @@ func (c *Client) ChangeConfigURL(location string) {
 			return
 		}
 	}
-
+	log.Printf("[DEBUG] MariaDB: endpoint for location %s: %s", configlog.FormatLocation(location), locationToURL[location])
 }
 
 var (

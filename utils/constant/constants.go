@@ -30,6 +30,9 @@ const (
 // DefaultTier is the default tier value for Wireguard & IPSec gateways
 const DefaultTier = "STANDARD"
 
+// Object Storage Constants
+const DefaultS3Region = "eu-central-3"
+
 // Group Constants
 const DefaultGetUsersData = true
 

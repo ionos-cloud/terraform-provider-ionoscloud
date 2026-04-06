@@ -2,6 +2,7 @@ package kafka
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"runtime"
 
@@ -11,6 +12,7 @@ import (
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/configlog"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
@@ -73,9 +75,11 @@ func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *f
 // ChangeConfigURL changes the url in the config based on the location
 func (c *Client) ChangeConfigURL(location string) {
 	config := c.sdkClient.GetConfig()
+	url := locationToURL[location]
+	log.Printf("[DEBUG] Kafka: endpoint for location %s: %s", configlog.FormatLocation(location), url)
 	config.Servers = shared.ServerConfigurations{
 		{
-			URL: locationToURL[location],
+			URL: url,
 		},
 	}
 }
