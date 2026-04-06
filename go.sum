@@ -132,6 +132,8 @@ github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2 v2.1.1 h1:eH4AZ7YCX
 github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2 v2.1.1/go.mod h1:wSlye7CEzwnHow17pvGiwBvlfihh9QhowFXJBFhSFXQ=
 github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2 v2.0.5 h1:wlqzODzGihO/q9LgzaH+8IrrC86QQ4yLVehBU0O9xIU=
 github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2 v2.0.5/go.mod h1:V+PguySovCY0Ajdg8+GYVXem32tNB8iBXOhqIukT1xE=
+github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v3 v3.0.1 h1:x7634zPyuK4kPrGvGppLj5i8D9XW/rsQH12lSjSFeqk=
+github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v3 v3.0.1/go.mod h1:u6YnbB2zgH7zsJEh5ujVAEfxhRzUdIIslxUiyPHh51s=
 github.com/ionos-cloud/sdk-go-bundle/products/dns/v2 v2.2.2 h1:bO4Xd2TFgdjzy6kZrIGBEjlN4pCJFVV1E0w/fuazgG0=
 github.com/ionos-cloud/sdk-go-bundle/products/dns/v2 v2.2.2/go.mod h1:L7NCJ92L/AcqtuKomLN78gQZI0UE93MXjZFCxd7R2xU=
 github.com/ionos-cloud/sdk-go-bundle/products/kafka/v2 v2.1.0 h1:QkMyUjp1Lfc84oaWRG6CJ9SvXsGaaYnpqfnmBCbV/B0=
@@ -150,8 +152,8 @@ github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2 v2.0.1 h1:FOwVFj5
 github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2 v2.0.1/go.mod h1:InNuTTzgLZker3i9JpyTho9mHr5DDIFnEPwykbSIfyw=
 github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.2 h1:qR/ul88v/3ZF+ZLFFv6LE9TrjZS1qM4R10UlXCaQzcs=
 github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.2/go.mod h1:V6WHbWsQDlZsLtHqgsXO81Z9eJBsczE3Q6VY8J+rutc=
-github.com/ionos-cloud/sdk-go-bundle/shared v0.1.8 h1:i89bZfl4mnFvCNxczswo5JHRzPadST8cHto34LMnNN0=
-github.com/ionos-cloud/sdk-go-bundle/shared v0.1.8/go.mod h1:R/vPCwxsYxk4pcfA2Ew7Pf1fCkzmPaROxYKgnhh0wpg=
+github.com/ionos-cloud/sdk-go-bundle/shared v0.1.9 h1:Nn7kr05qaoISHSkHULznSnA4IPhIK2FRdYWToKEwsx8=
+github.com/ionos-cloud/sdk-go-bundle/shared v0.1.9/go.mod h1:R/vPCwxsYxk4pcfA2Ew7Pf1fCkzmPaROxYKgnhh0wpg=
 github.com/ionos-cloud/sdk-go/v6 v6.3.6 h1:l/TtKgdQ1wUH3DDe2SfFD78AW+TJWdEbDpQhHkWd6CM=
 github.com/ionos-cloud/sdk-go/v6 v6.3.6/go.mod h1:nUGHP4kZHAZngCVr4v6C8nuargFrtvt7GrzH/hqn7c4=
 github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 h1:BQSFePA1RWJOlocH6Fxy8MmwDt+yVQYULKfN0RoTN8A=
