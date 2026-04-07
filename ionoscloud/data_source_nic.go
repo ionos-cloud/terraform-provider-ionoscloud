@@ -108,9 +108,10 @@ func dataSourceNIC() *schema.Resource {
 	}
 }
 
-func dataSourceNicRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	t, dIdOk := data.GetOk("datacenter_id")
-	st, sIdOk := data.GetOk("server_id")
+//nolint:gocyclo
+func dataSourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	t, dIdOk := d.GetOk("datacenter_id")
+	st, sIdOk := d.GetOk("server_id")
 	if !dIdOk || !sIdOk {
 		return diag.FromErr(fmt.Errorf("datacenter id and server id must be set"))
 	}
@@ -119,21 +120,21 @@ func dataSourceNicRead(ctx context.Context, data *schema.ResourceData, meta inte
 	datacenterId = t.(string)
 	serverId = st.(string)
 
-	location := data.Get("location").(string)
+	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	var name string
-	id, idOk := data.GetOk("id")
+	id, idOk := d.GetOk("id")
 
-	t, nameOk := data.GetOk("name")
+	t, nameOk := d.GetOk("name")
 	if nameOk {
 		name = t.(string)
 	}
 	var nic ionoscloud.Nic
-	ns := cloudapinic.Service{Client: client, Meta: meta, D: data}
+	ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
 	if !idOk && !nameOk {
 		return diag.FromErr(fmt.Errorf("either id, or name must be set"))
 	}
@@ -174,7 +175,7 @@ func dataSourceNicRead(ctx context.Context, data *schema.ResourceData, meta inte
 		}
 	}
 
-	if err := cloudapinic.NicSetData(data, &nic); err != nil {
+	if err := cloudapinic.NicSetData(d, &nic); err != nil {
 		return diag.FromErr(err)
 	}
 

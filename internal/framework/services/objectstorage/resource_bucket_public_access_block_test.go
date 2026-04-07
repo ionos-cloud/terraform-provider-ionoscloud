@@ -15,7 +15,7 @@ import (
 )
 
 func TestAccBucketPublicAccessBlockResource(t *testing.T) {
-	rName := "acctest-tf-bucket"
+	rName := acctest.GenerateRandomResourceName(bucketPrefix)
 	name := "ionoscloud_s3_bucket_public_access_block.test"
 
 	resource.Test(t, resource.TestCase{

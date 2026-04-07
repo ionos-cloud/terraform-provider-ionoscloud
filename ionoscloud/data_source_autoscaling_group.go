@@ -359,9 +359,6 @@ func DataSourceAutoscalingGroup() *schema.Resource {
 			},
 		},
 		Timeouts: &schema.ResourceTimeout{
-			Create:  schema.DefaultTimeout(utils.DefaultTimeout),
-			Update:  schema.DefaultTimeout(utils.DefaultTimeout),
-			Delete:  schema.DefaultTimeout(utils.DefaultTimeout),
 			Default: schema.DefaultTimeout(utils.DefaultTimeout),
 		},
 	}

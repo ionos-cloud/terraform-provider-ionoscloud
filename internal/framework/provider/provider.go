@@ -21,6 +21,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/monitoring"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/objectstorage"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/objectstoragemanagement"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/pgsqlv2"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
@@ -259,6 +260,7 @@ func (p *IonosCloudProvider) Resources(_ context.Context) []func() resource.Reso
 		objectstorage.Resources(),
 		objectstoragemanagement.Resources(),
 		monitoring.Resources(),
+		pgsqlv2.Resources(),
 	}
 
 	for _, r := range resources {
@@ -277,6 +279,7 @@ func (p *IonosCloudProvider) DataSources(_ context.Context) []func() datasource.
 		monitoring.DataSources(),
 		compute.DataSources(),
 		kafka.DataSources(),
+		pgsqlv2.DataSources(),
 	}
 
 	for _, r := range dataSources {

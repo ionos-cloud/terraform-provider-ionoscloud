@@ -1,9 +1,32 @@
-## Upcoming
+## 6.7.27
+### Features
+- Add `nic_multi_queue` attribute to the `ionoscloud_servers` data source.
+- Add DBaaS PostgreSQL v2 support:
+  - New resource: `ionoscloud_pg_cluster_v2`
+  - New data sources: `ionoscloud_pg_cluster_v2`, `ionoscloud_pg_clusters_v2`, `ionoscloud_pg_backups_v2`, `ionoscloud_pg_versions_v2`, `ionoscloud_pg_backup_location_v2`
+
+### Testing
+- Add checks for the `nic_multi_queue` attribute inside VCPU servers tests.
+- Modify `ionoscloud_servers` data source test to include a check for the `nic_multi_queue` attribute.
+
+## 6.7.26
 ### Fixes
+- The ionoscloud_s3_bucket_policy resource now correctly handles all standard S3 Principal representations:
+  - "Principal": "*" — wildcard string
+  - "Principal": ["arn:...", "*"] — flat array
+  - "Principal": {"AWS": "arn:..."} — object with single string
+  - "Principal": {"AWS": ["arn:...", "arn:..."]} — object with array
+- Make DNS Record name immutable, fixes [#953](https://github.com/ionos-cloud/terraform-provider-ionoscloud/pull/953)
 - Improved error message when `image_name` matches an image that has a non-HDD type (e.g. CDROM) or is in a different location. The error now reports the found image's type and location.
 
 ### Testing
 - Add import tests for CUBE servers.
+
+### Docs
+- Update documentation for `ionoscloud_nsg_firewallrule`, `ionoscloud_natgateway` and `ionoscloud_ipfailover` resources
+
+### Enhancements
+- Add `sbom` to `release` workflow
 
 ## 6.7.25
 ### Features
@@ -41,6 +64,7 @@
 - Remove unused `password` field from `users` attribute in `ionoscloud_group` resource schema.
 - Fixed VPN IPSec Gateway to use correct `fileconfiguration.VPN` constant instead of incorrect `fileconfiguration.APIGateway`.
 - Fixed typo in VPN IPSec Gateway data source documentation heading.
+- Fixed `logging_format` field in `ionoscloud_networkloadbalancer` resource causing perpetual drift by adding `Computed: true` to the schema ([#918](https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/918)).
 
 ## 6.7.22
 ### Features

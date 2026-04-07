@@ -48,7 +48,7 @@ var (
 )
 
 const (
-	Version               = "products/objectstorage/v2.0.2"
+	Version               = "products/objectstorage/v2.0.3"
 	DefaultIonosServerUrl = "https://s3.eu-central-3.ionoscloud.com"
 	DefaultIonosBasePath  = ""
 )
@@ -132,7 +132,7 @@ func NewAPIClient(cfg *shared.Configuration) *APIClient {
 		}
 	}
 	if cfgCopy.UserAgent == "" {
-		cfgCopy.UserAgent = "sdk-go-bundle/products/objectstorage/v2.0.2"
+		cfgCopy.UserAgent = "sdk-go-bundle/products/objectstorage/v2.0.3"
 	}
 
 	if cfg.Middleware != nil {

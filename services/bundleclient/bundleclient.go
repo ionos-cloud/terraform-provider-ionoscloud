@@ -6,11 +6,13 @@ import (
 	"net/http"
 	"os"
 	"runtime"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	cr "github.com/ionos-cloud/sdk-go-bundle/products/containerregistry/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2"
+	pgsqlv2sdk "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v3"
 	"github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/failover"
@@ -25,6 +27,7 @@ import (
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/inmemorydb"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/mariadb"
+	pgsqlv2Service "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/pgsqlv2"
 	dnsService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dns"
 	kafkaService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/kafka"
 	loggingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/logging"
@@ -233,6 +236,45 @@ func (c SdkBundle) NewPsqlClient(location string) (*dbaasService.PsqlClient, err
 	config.HTTPClient = &http.Client{}
 	config.HTTPClient.Transport = shared.CreateTransport(endpoint.SkipTLSVerify, endpoint.CertificateAuthData)
 	return dbaasService.NewPsqlClientFromConfig(config), nil
+}
+
+// NewPgSQLV2Client creates a new PostgreSQL v2 client for a specific location.
+func (c SdkBundle) NewPgSQLV2Client(location string) (*pgsqlv2Service.Client, error) {
+	config := c.newBundleClientConfig(fmt.Sprintf(
+		"terraform-provider/%s_ionos-cloud-sdk-go-dbaas-pgsqlv2/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
+		c.clientOptions.Version, pgsqlv2sdk.Version, c.clientOptions.TerraformVersion,
+		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
+	))
+
+	if c.fileConfig != nil {
+		endpoint := c.fileConfig.GetProductLocationOverrides(fileconfiguration.PSQLV2, location)
+		if endpoint == nil {
+			log.Printf("[WARN] product %q is missing from config file or location %q is not defined for product %q, using internal locations map to configure the endpoint", fileconfiguration.PSQLV2, location, fileconfiguration.PSQLV2)
+		} else {
+			config.Servers = shared.ServerConfigurations{
+				{
+					URL:         endpoint.Name,
+					Description: shared.EndpointOverridden + location,
+				},
+			}
+			config.HTTPClient = &http.Client{}
+			config.HTTPClient.Transport = shared.CreateTransport(endpoint.SkipTLSVerify, endpoint.CertificateAuthData)
+			return pgsqlv2Service.NewClientFromConfig(config), nil
+		}
+	}
+
+	endpoint := pgsqlv2Service.LocationToURL[location]
+	if endpoint == "" {
+		return nil, fmt.Errorf("can't configure endpoint for location %q, available locations: %s", location, strings.Join(pgsqlv2Service.AvailableLocations(), ", "))
+	}
+	config.Servers = shared.ServerConfigurations{
+		{
+			URL:         endpoint,
+			Description: "endpoint from the internal locations map, location: " + location,
+		},
+	}
+
+	return pgsqlv2Service.NewClientFromConfig(config), nil
 }
 
 // newCloudAPIClientConfig creates a new *ionoscloud.Configuration using the client options defined in the SdkBundle struct.

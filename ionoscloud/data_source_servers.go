@@ -222,6 +222,10 @@ func dataSourceServers() *schema.Resource {
 							Computed: true,
 							Elem:     labelDataSource,
 						},
+						"nic_multi_queue": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
 					},
 				},
 			},
@@ -399,6 +403,7 @@ func SetServerProperties(server ionoscloud.Server) map[string]interface{} {
 		utils.SetPropWithNilCheck(serverMap, "availability_zone", server.Properties.AvailabilityZone)
 		utils.SetPropWithNilCheck(serverMap, "cpu_family", server.Properties.CpuFamily)
 		utils.SetPropWithNilCheck(serverMap, "type", server.Properties.Type)
+		utils.SetPropWithNilCheck(serverMap, "nic_multi_queue", server.Properties.NicMultiQueue)
 		if server.Properties.BootCdrom != nil && server.Properties.BootCdrom.Id != nil {
 			utils.SetPropWithNilCheck(serverMap, "boot_cdrom", *server.Properties.BootCdrom.Id)
 		}
