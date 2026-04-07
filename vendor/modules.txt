@@ -367,13 +367,13 @@ github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2
 # github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.2
 ## explicit; go 1.22
 github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2
-# github.com/ionos-cloud/sdk-go-bundle/shared v0.1.8
+# github.com/ionos-cloud/sdk-go-bundle/shared v0.1.8 => ../sdk-go-bundle/shared
 ## explicit; go 1.24
 github.com/ionos-cloud/sdk-go-bundle/shared
 github.com/ionos-cloud/sdk-go-bundle/shared/failover
 github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration
 github.com/ionos-cloud/sdk-go-bundle/shared/retry
-# github.com/ionos-cloud/sdk-go/v6 v6.3.6
+# github.com/ionos-cloud/sdk-go/v6 v6.3.6 => /home/rmocanu/work/sdk-resources/dist/sdk-clouadapi-go
 ## explicit; go 1.24
 github.com/ionos-cloud/sdk-go/v6
 # github.com/jmespath/go-jmespath v0.4.0
@@ -640,3 +640,5 @@ google.golang.org/protobuf/types/known/timestamppb
 # gopkg.in/yaml.v3 v3.0.1
 ## explicit
 gopkg.in/yaml.v3
+# github.com/ionos-cloud/sdk-go-bundle/shared => ../sdk-go-bundle/shared
+# github.com/ionos-cloud/sdk-go/v6 => /home/rmocanu/work/sdk-resources/dist/sdk-clouadapi-go

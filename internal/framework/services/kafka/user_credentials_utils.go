@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	kafkaSDK "github.com/ionos-cloud/sdk-go-bundle/products/kafka/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	kafkaService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/kafka"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
@@ -31,6 +32,7 @@ func getUserCredentials(ctx context.Context, client kafkaService.Client, data us
 	var userCredentials kafkaSDK.UserReadAccess
 	var err error
 	var diags diag.Diagnostics
+	var apiResponse *shared.APIResponse
 
 	clusterID := data.ClusterID.ValueString()
 	userID := data.ID.ValueString()
@@ -39,19 +41,21 @@ func getUserCredentials(ctx context.Context, client kafkaService.Client, data us
 
 	// The config validator ensures that 'id' and 'username' are mutually exclusive.
 	if userID != "" {
-		userCredentials, _, err = client.GetUserCredentialsByID(ctx, clusterID, userID, location)
+		userCredentials, apiResponse, err = client.GetUserCredentialsByID(ctx, clusterID, userID, location)
 		if err != nil {
 			diags.AddError("API Error Reading Kafka User Credentials", diagutil.WrapError(err, &diagutil.ErrorContext{
 				ResourceID:     userID,
+				StatusCode:     apiResponse.SafeStatusCode(),
 				AdditionalInfo: map[string]string{"Cluster ID": clusterID},
 			}).Error())
 			return userCredentials, diags
 		}
 	} else if username != "" {
-		userCredentials, _, err = client.GetUserCredentialsByName(ctx, clusterID, username, location)
+		userCredentials, apiResponse, err = client.GetUserCredentialsByName(ctx, clusterID, username, location)
 		if err != nil {
 			diags.AddError("API Error Reading Kafka User Credentials", diagutil.WrapError(err, &diagutil.ErrorContext{
 				ResourceName:   username,
+				StatusCode:     apiResponse.SafeStatusCode(),
 				AdditionalInfo: map[string]string{"Cluster ID": clusterID},
 			}).Error())
 			return userCredentials, diags

@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	kafkaSdk "github.com/ionos-cloud/sdk-go-bundle/products/kafka/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/kafka"
@@ -94,18 +95,19 @@ func dataSourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, meta 
 	partialMatch := d.Get("partial_match").(bool)
 
 	var topic kafkaSdk.TopicRead
+	var apiResponse *shared.APIResponse
 	var err error
 	if idOk {
-		topic, _, err = client.GetTopicByID(ctx, clusterID, id, location)
+		topic, apiResponse, err = client.GetTopicByID(ctx, clusterID, id, location)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the Kafka Cluster Topic with ID: %s, error: %w", id, err), nil)
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the Kafka Cluster Topic with ID: %s, error: %w", id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 	} else {
 		var results []kafkaSdk.TopicRead
 
-		topics, _, err := client.ListTopics(ctx, clusterID, location)
+		topics, apiResponse, err := client.ListTopics(ctx, clusterID, location)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching Kafka Cluster Topics: %w", err), nil)
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching Kafka Cluster Topics: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 
 		for _, t := range topics.Items {

@@ -123,17 +123,17 @@ func (r *accesskeyResource) Create(ctx context.Context, req resource.CreateReque
 			Description: data.Description.ValueString(),
 		},
 	}
-	accessKeyResponse, _, err := r.client.CreateAccessKey(ctx, accessKey, createTimeout)
+	accessKeyResponse, apiResponse, err := r.client.CreateAccessKey(ctx, accessKey, createTimeout)
 	if err != nil {
-		resp.Diagnostics.AddError("failed to create accessKey", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Description.ValueString()}).Error())
+		resp.Diagnostics.AddError("failed to create accessKey", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Description.ValueString(), StatusCode: apiResponse.SafeStatusCode()}).Error())
 		return
 	}
 	// we need this because secretkey is only available on create response
 	objectStorageManagementService.SetAccessKeyPropertiesToPlan(data, accessKeyResponse)
 
-	accessKeyRead, _, err := r.client.GetAccessKey(ctx, data.ID.ValueString())
+	accessKeyRead, apiResponse, err := r.client.GetAccessKey(ctx, data.ID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("access Key API error", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceID: data.ID.ValueString()}).Error())
+		resp.Diagnostics.AddError("access Key API error", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceID: data.ID.ValueString(), StatusCode: apiResponse.SafeStatusCode()}).Error())
 		return
 	}
 
@@ -196,17 +196,17 @@ func (r *accesskeyResource) Update(ctx context.Context, req resource.UpdateReque
 		},
 	}
 
-	accessKeyResponse, _, err := r.client.UpdateAccessKey(ctx, state.ID.ValueString(), accessKey, updateTimeout)
+	accessKeyResponse, apiResponse, err := r.client.UpdateAccessKey(ctx, state.ID.ValueString(), accessKey, updateTimeout)
 	if err != nil {
-		resp.Diagnostics.AddError("failed to update accessKey", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceID: state.ID.ValueString()}).Error())
+		resp.Diagnostics.AddError("failed to update accessKey", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceID: state.ID.ValueString(), StatusCode: apiResponse.SafeStatusCode()}).Error())
 		return
 	}
 
 	plan.ID = basetypes.NewStringValue(accessKeyResponse.Id)
 
-	accessKeyRead, _, err := r.client.GetAccessKey(ctx, accessKeyResponse.Id)
+	accessKeyRead, apiResponse, err := r.client.GetAccessKey(ctx, accessKeyResponse.Id)
 	if err != nil {
-		resp.Diagnostics.AddError("on update, read access Key API error", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceID: accessKeyResponse.Id}).Error())
+		resp.Diagnostics.AddError("on update, read access Key API error", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceID: accessKeyResponse.Id, StatusCode: apiResponse.SafeStatusCode()}).Error())
 		return
 	}
 

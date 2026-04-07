@@ -117,7 +117,7 @@ func (d *accessKeyDataSource) Read(ctx context.Context, req datasource.ReadReque
 			return
 		}
 		if err != nil {
-			resp.Diagnostics.AddError("an error occurred while fetching the accesskey with", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceID: id}).Error())
+			resp.Diagnostics.AddError("an error occurred while fetching the accesskey with", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceID: id, StatusCode: apiResponse.SafeStatusCode()}).Error())
 			return
 		}
 		if !data.AccessKey.IsNull() && accessKey.Properties.AccessKey != accessKeyID {
@@ -141,9 +141,9 @@ func (d *accessKeyDataSource) Read(ctx context.Context, req datasource.ReadReque
 			return
 		}
 	case !data.AccessKey.IsNull():
-		accessKeys, _, err = d.client.ListAccessKeysFilter(ctx, accessKeyID)
+		accessKeys, apiResponse, err := d.client.ListAccessKeysFilter(ctx, accessKeyID)
 		if err != nil {
-			resp.Diagnostics.AddError("an error occurred while fetching the accesskeys", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: accessKeyID}).Error())
+			resp.Diagnostics.AddError("an error occurred while fetching the accesskeys", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: accessKeyID, StatusCode: apiResponse.SafeStatusCode()}).Error())
 			return
 		}
 		if len(accessKeys.Items) != 0 {
@@ -163,9 +163,9 @@ func (d *accessKeyDataSource) Read(ctx context.Context, req datasource.ReadReque
 			return
 		}
 	case !data.Description.IsNull():
-		accessKeys, _, err = d.client.ListAccessKeys(ctx)
+		accessKeys, apiResponse, err = d.client.ListAccessKeys(ctx)
 		if err != nil {
-			resp.Diagnostics.AddError("an error occurred while fetching the accesskeys", err.Error())
+			resp.Diagnostics.AddError("an error occurred while fetching the accesskeys", diagutil.WrapError(err, &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()}).Error())
 			return
 		}
 		found := false

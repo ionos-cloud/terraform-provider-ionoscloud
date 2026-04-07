@@ -140,9 +140,9 @@ func dataSourceNicRead(ctx context.Context, d *schema.ResourceData, meta interfa
 		return diagutil.ToDiags(d, fmt.Errorf("either id, or name must be set"), nil)
 	}
 	if idOk {
-		foundNic, _, err := ns.Get(ctx, datacenterId, serverId, id.(string), 3)
+		foundNic, apiResponse, err := ns.Get(ctx, datacenterId, serverId, id.(string), 3)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("error getting nic with id %s %w", id.(string), err), nil)
+			return diagutil.ToDiags(d, fmt.Errorf("error getting nic with id %s %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 		if nameOk {
 			if foundNic.Properties != nil && *foundNic.Properties.Name != name {

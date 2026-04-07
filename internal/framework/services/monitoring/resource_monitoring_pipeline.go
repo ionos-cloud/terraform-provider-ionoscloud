@@ -133,9 +133,9 @@ func (r *pipelineResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
-	pipelineResponse, _, err := r.client.CreatePipeline(ctx, createReq, location)
+	pipelineResponse, apiResponse, err := r.client.CreatePipeline(ctx, createReq, location)
 	if err != nil {
-		resp.Diagnostics.AddError("failed to create Monitoring pipeline", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Name.ValueString()}).Error())
+		resp.Diagnostics.AddError("failed to create Monitoring pipeline", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Name.ValueString(), StatusCode: apiResponse.SafeStatusCode()}).Error())
 		return
 	}
 	pipelineID := pipelineResponse.Id
@@ -150,9 +150,9 @@ func (r *pipelineResource) Create(ctx context.Context, req resource.CreateReques
 
 	// Make another `GET` request after the pipeline becomes 'AVAILABLE' in order to retrieve some
 	// attributes that are not set in the `POST` response.
-	retrievedPipeline, _, err := r.client.GetPipelineByID(ctx, pipelineID, location)
+	retrievedPipeline, apiResponse, err := r.client.GetPipelineByID(ctx, pipelineID, location)
 	if err != nil {
-		resp.Diagnostics.AddError("error while fetching Monitoring pipeline after creation", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceID: pipelineID, ResourceName: data.Name.ValueString()}).Error())
+		resp.Diagnostics.AddError("error while fetching Monitoring pipeline after creation", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceID: pipelineID, ResourceName: data.Name.ValueString(), StatusCode: apiResponse.SafeStatusCode()}).Error())
 		return
 	}
 
@@ -186,7 +186,7 @@ func (r *pipelineResource) Read(ctx context.Context, req resource.ReadRequest, r
 			resp.State.RemoveResource(ctx)
 			return
 		}
-		resp.Diagnostics.AddError("error while fetching Monitoring pipeline", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceID: pipelineID, ResourceName: data.Name.ValueString()}).Error())
+		resp.Diagnostics.AddError("error while fetching Monitoring pipeline", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceID: pipelineID, ResourceName: data.Name.ValueString(), StatusCode: apiResponse.SafeStatusCode()}).Error())
 		return
 	}
 
@@ -251,9 +251,9 @@ func (r *pipelineResource) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
-	pipelineResponse, _, err := r.client.UpdatePipeline(ctx, updateReq, pipelineID, location)
+	pipelineResponse, apiResponse, err := r.client.UpdatePipeline(ctx, updateReq, pipelineID, location)
 	if err != nil {
-		resp.Diagnostics.AddError("error while updating Monitoring pipeline", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceID: pipelineID, ResourceName: plan.Name.ValueString()}).Error())
+		resp.Diagnostics.AddError("error while updating Monitoring pipeline", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceID: pipelineID, ResourceName: plan.Name.ValueString(), StatusCode: apiResponse.SafeStatusCode()}).Error())
 		return
 	}
 	err = backoff.Retry(func() error {

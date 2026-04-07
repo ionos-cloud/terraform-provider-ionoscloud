@@ -104,3 +104,7 @@ require (
 	google.golang.org/grpc v1.72.1 // indirect
 	google.golang.org/protobuf v1.36.6 // indirect
 )
+
+replace github.com/ionos-cloud/sdk-go-bundle/shared => ../sdk-go-bundle/shared
+
+replace github.com/ionos-cloud/sdk-go/v6 => /home/rmocanu/work/sdk-resources/dist/sdk-clouadapi-go

@@ -625,9 +625,9 @@ func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta in
 		}
 		ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
 
-		nic, _, err := ns.Get(ctx, dcId, serverId, primarynic.(string), 0)
+		nic, apiResponse, err := ns.Get(ctx, dcId, serverId, primarynic.(string), 0)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("error occurred while fetching nic %s %w", primarynic.(string), err), nil)
+			return diagutil.ToDiags(d, fmt.Errorf("error occurred while fetching nic %s %w", primarynic.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 
 		if len(*nic.Properties.Ips) > 0 {
@@ -949,9 +949,9 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 		log.Printf("[DEBUG] Updating props: %s", string(mProp))
 		ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
-		_, _, err = ns.Update(ctx, d.Get("datacenter_id").(string), *server.Id, *nic.Id, properties)
+		_, apiResponse, err = ns.Update(ctx, d.Get("datacenter_id").(string), *server.Id, *nic.Id, properties)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("error updating nic (%w)", err), nil)
+			return diagutil.ToDiags(d, fmt.Errorf("error updating nic (%w)", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 
 		if d.HasChange("nic.0.security_groups_ids") {

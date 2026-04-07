@@ -67,9 +67,9 @@ func dataSourceDbaasPgSqlReadDatabases(ctx context.Context, d *schema.ResourceDa
 	owner, ownerOk := d.GetOk("owner")
 	resourceName := "PgSQL databases"
 
-	retrievedDatabases, _, err := client.GetDatabases(ctx, clusterId)
+	retrievedDatabases, apiResponse, err := client.GetDatabases(ctx, clusterId)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching PgSql databases for the cluster with ID: %s, error: %w", clusterId, err), nil)
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching PgSql databases for the cluster with ID: %s, error: %w", clusterId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	if retrievedDatabases.Items == nil {
 		return diagutil.ToDiags(d, fmt.Errorf("expected a list of PgSql databases, but received 'nil' instead, cluster ID: %s", clusterId), nil)

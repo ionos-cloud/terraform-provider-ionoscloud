@@ -91,10 +91,10 @@ func dataSourceDbaasMongoReadUser(ctx context.Context, d *schema.ResourceData, m
 	clusterId := clusterIdIf.(string)
 	var user mongo.User
 
-	users, _, err := client.GetUsers(ctx, clusterId)
+	users, apiResponse, err := client.GetUsers(ctx, clusterId)
 
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching dbaas mongo users: %w", err), nil)
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching dbaas mongo users: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	var results []mongo.User

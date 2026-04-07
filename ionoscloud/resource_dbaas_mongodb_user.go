@@ -109,9 +109,9 @@ func resourceDbaasMongoUserCreate(ctx context.Context, d *schema.ResourceData, m
 		request.Properties.Roles = roles
 	}
 
-	user, _, err := client.CreateUser(ctx, clusterId, request)
+	user, apiResponse, err := client.CreateUser(ctx, clusterId, request)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while adding a user to mongoDB: %w", err), nil)
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while adding a user to mongoDB: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if user.Properties != nil {
