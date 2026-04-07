@@ -292,7 +292,7 @@ func dataSourceK8sReadCluster(ctx context.Context, d *schema.ResourceData, meta 
 		cluster, apiResponse, err = client.KubernetesApi.K8sFindByClusterId(ctx, id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the k8s cluster with ID %s: %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the k8s cluster with ID %s: %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 	} else {
 		/* search by name */
@@ -301,7 +301,7 @@ func dataSourceK8sReadCluster(ctx context.Context, d *schema.ResourceData, meta 
 		clusters, apiResponse, err := client.KubernetesApi.K8sGet(ctx).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching k8s clusters: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching k8s clusters: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 
 		if clusters.Items != nil {
@@ -312,7 +312,7 @@ func dataSourceK8sReadCluster(ctx context.Context, d *schema.ResourceData, meta 
 					tmpCluster, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, *c.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {
-						return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching k8s cluster with ID %s: %w", *c.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+						return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching k8s cluster with ID %s: %w", *c.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 					}
 					results = append(results, tmpCluster)
 					break

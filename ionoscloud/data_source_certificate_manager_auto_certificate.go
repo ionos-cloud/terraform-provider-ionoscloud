@@ -92,12 +92,12 @@ func dataSourceAutoCertificateRead(ctx context.Context, d *schema.ResourceData, 
 		id := id.(string)
 		autoCertificate, apiResponse, err = client.GetAutoCertificate(ctx, id, location)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the auto-certificate with ID: %v, error: %w", id, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the auto-certificate with ID: %v, error: %w", id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 	} else {
 		autoCertificates, apiResponse, err := client.ListAutoCertificates(ctx, location)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching auto-certificates: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching auto-certificates: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 		var results []certsdk.AutoCertificateRead
 		if autoCertificates.Items != nil {

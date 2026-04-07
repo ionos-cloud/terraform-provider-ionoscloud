@@ -126,7 +126,7 @@ func resourceContainerRegistryCreate(ctx context.Context, d *schema.ResourceData
 
 	containerRegistryResponse, apiResponse, err := client.CreateRegistry(ctx, *containerRegistry)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating the registry: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating the registry: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	d.SetId(*containerRegistryResponse.Id)
 
@@ -149,7 +149,7 @@ func resourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData, 
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while fetching registry: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while fetching registry: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	log.Printf("[INFO] Successfully retrieved registry %s: %+v", d.Id(), registry)
@@ -183,7 +183,7 @@ func resourceContainerRegistryUpdate(ctx context.Context, d *schema.ResourceData
 
 	_, apiResponse, err := client.PatchRegistry(ctx, registryId, *containerRegistry)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating a registry: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating a registry: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if err := utils.WaitForResourceToBeReady(ctx, d, client.IsRegistryReady); err != nil {
@@ -209,7 +209,7 @@ func resourceContainerRegistryDelete(ctx context.Context, d *schema.ResourceData
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while deleting registry %s: %w", registryId, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while deleting registry %s: %w", registryId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	return diagutil.ToDiags(d, utils.WaitForResourceToBeDeleted(ctx, d, client.IsRegistryDeleted), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String()})
@@ -237,9 +237,9 @@ func resourceContainerRegistryImport(ctx context.Context, d *schema.ResourceData
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("registry does not exist %q", registryId), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+			return nil, diagutil.ToError(d, fmt.Errorf("registry does not exist %q", registryId), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
-		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the import of registry %q, error:%w", registryId, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the import of registry %q, error:%w", registryId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	log.Printf("[INFO] registry found: %+v", containerRegistry)

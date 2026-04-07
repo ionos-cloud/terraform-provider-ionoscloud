@@ -250,7 +250,7 @@ func testAccCheckDbaasPgSqlClusterDestroyCheck(s *terraform.State) error {
 		}
 		_, apiResponse, err := client.GetCluster(ctx, rs.Primary.ID)
 		if err != nil {
-			if apiResponse == nil || apiResponse.StatusCode != 404 {
+			if apiResponse == nil || apiResponse.SafeStatusCode() != 404 {
 				return fmt.Errorf("an error occurred while checking the destruction of psql cluster %s: %w", rs.Primary.ID, err)
 			}
 		} else {

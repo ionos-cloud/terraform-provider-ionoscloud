@@ -284,7 +284,7 @@ func resourceDbaasPgSqlClusterCreate(ctx context.Context, d *schema.ResourceData
 	dbaasClusterResponse, apiResponse, err := client.CreateCluster(ctx, *dbaasCluster)
 
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating a DBaaS psql cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating a DBaaS psql cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	d.SetId(*dbaasClusterResponse.Id)
@@ -310,7 +310,7 @@ func resourceDbaasPgSqlClusterRead(ctx context.Context, d *schema.ResourceData, 
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while fetching dbaas cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while fetching dbaas cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	log.Printf("[INFO] Successfully retrieved cluster %s: %+v", d.Id(), cluster)
@@ -336,7 +336,7 @@ func resourceDbaasPgSqlClusterUpdate(ctx context.Context, d *schema.ResourceData
 	dbaasClusterResponse, apiResponse, err := client.UpdateCluster(ctx, d.Id(), *cluster)
 
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating a dbaas cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating a dbaas cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	d.SetId(*dbaasClusterResponse.Id)
@@ -364,7 +364,7 @@ func resourceDbaasPgSqlClusterDelete(ctx context.Context, d *schema.ResourceData
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while deleting dbaas cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while deleting dbaas cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsClusterDeleted)
@@ -400,9 +400,9 @@ func resourceDbaasPgSqlClusterImport(ctx context.Context, d *schema.ResourceData
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("dbaas cluster does not exist %q", clusterId), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+			return nil, diagutil.ToError(d, fmt.Errorf("dbaas cluster does not exist %q", clusterId), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
-		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the import of dbaas cluster %q, error:%w", clusterId, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the import of dbaas cluster %q, error:%w", clusterId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	log.Printf("[INFO] dbaas cluster found: %+v", dbaasCluster)

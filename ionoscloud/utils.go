@@ -98,14 +98,12 @@ func logApiRequestTime(resp *ionoscloud.APIResponse) {
 	if resp != nil {
 		log.Printf("[DEBUG] Request time : %s for operation : %s",
 			resp.RequestTime, resp.Operation)
-		if resp.Response != nil {
-			log.Printf("[DEBUG] response status code : %d\n", resp.StatusCode)
-		}
+		log.Printf("[DEBUG] response status code : %d\n", resp.SafeStatusCode())
 	}
 }
 
 func httpNotFound(resp *ionoscloud.APIResponse) bool {
-	if resp != nil && resp.Response != nil && resp.StatusCode == http.StatusNotFound {
+	if resp.SafeStatusCode() == http.StatusNotFound {
 		return true
 	}
 	return false

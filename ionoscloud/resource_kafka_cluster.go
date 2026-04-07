@@ -111,7 +111,7 @@ func resourceKafkaClusterCreate(ctx context.Context, d *schema.ResourceData, met
 	createdCluster, apiResponse, err := client.CreateCluster(ctx, d)
 	if err != nil {
 		d.SetId("")
-		return diagutil.ToDiags(d, fmt.Errorf("error creating Kafka Cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error creating Kafka Cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	d.SetId(createdCluster.Id)
@@ -137,7 +137,7 @@ func resourceKafkaClusterRead(ctx context.Context, d *schema.ResourceData, meta 
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while fetching Kafka Cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while fetching Kafka Cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	log.Printf("[INFO] Successfully retreived Kafka Cluster %s: %+v", d.Id(), cluster)
@@ -158,7 +158,7 @@ func resourceKafkaClusterDelete(ctx context.Context, d *schema.ResourceData, met
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while deleting Kafka Cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while deleting Kafka Cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsClusterDeleted)

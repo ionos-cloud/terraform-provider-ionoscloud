@@ -390,7 +390,7 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta i
 
 	if err != nil {
 		requestLocation, _ := apiResponse.Location()
-		return diagutil.ToDiags(d, fmt.Errorf("error creating server: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error creating server: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 	d.SetId(*createdServer.Id)
 
@@ -409,7 +409,7 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta i
 
 	if err != nil {
 		requestLocation, _ := apiResponse.Location()
-		return diagutil.ToDiags(d, fmt.Errorf("error fetching server: (%w)", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error fetching server: (%w)", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 	if v, ok := d.GetOk("security_groups_ids"); ok {
 		raw := v.(*schema.Set).List()
@@ -425,7 +425,7 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta i
 		logApiRequestTime(apiResponse)
 		if err != nil {
 			requestLocation, _ := apiResponse.Location()
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching firewall rules: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching firewall rules: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 		}
 
 		if firewallRules.Items != nil {

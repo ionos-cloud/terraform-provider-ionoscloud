@@ -82,7 +82,7 @@ func resourceBackupUnitCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 	if err != nil {
 		d.SetId("")
-		return diagutil.ToDiags(d, fmt.Errorf("error creating backup unit: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error creating backup unit: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	d.SetId(*createdBackupUnit.Id)
@@ -109,14 +109,14 @@ func resourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta in
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while fetching backup unit: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while fetching backup unit: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	contractResources, contractApiResponse, cErr := client.ContractResourcesApi.ContractsGet(ctx).Execute()
 	logApiRequestTime(contractApiResponse)
 
 	if cErr != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error while fetching contract resources for backup unit: %w", cErr), &diagutil.ErrorContext{StatusCode: contractApiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while fetching contract resources for backup unit: %w", cErr), &diagutil.ErrorContext{StatusCode: contractApiResponse.SafeStatusCode()})
 	}
 
 	log.Printf("[INFO] Successfully retrieved contract resource for backup unit unit %s: %+v", d.Id(), contractResources)
@@ -170,7 +170,7 @@ func resourceBackupUnitUpdate(ctx context.Context, d *schema.ResourceData, meta 
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while updating backup unit: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while updating backup unit: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if diags := waitForUnitToBeReady(ctx, d, client); diags != nil {
@@ -220,7 +220,7 @@ func resourceBackupUnitDelete(ctx context.Context, d *schema.ResourceData, meta 
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while deleting backup unit: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while deleting backup unit: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	for {
@@ -263,9 +263,9 @@ func resourceBackupUnitImport(ctx context.Context, d *schema.ResourceData, meta 
 	if err != nil {
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("unable to find Backup Unit %q", buId), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+			return nil, diagutil.ToError(d, fmt.Errorf("unable to find Backup Unit %q", buId), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
-		return nil, diagutil.ToError(d, fmt.Errorf("unable to retrieve Backup Unit: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return nil, diagutil.ToError(d, fmt.Errorf("unable to retrieve Backup Unit: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	log.Printf("[INFO] Backup Unit found: %+v", backupUnit)
@@ -274,7 +274,7 @@ func resourceBackupUnitImport(ctx context.Context, d *schema.ResourceData, meta 
 	logApiRequestTime(apiResponse)
 
 	if cErr != nil {
-		return nil, diagutil.ToError(d, fmt.Errorf("error while fetching contract resources for backup unit: %w", cErr), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return nil, diagutil.ToError(d, fmt.Errorf("error while fetching contract resources for backup unit: %w", cErr), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if err := setBackupUnitData(d, &backupUnit, &contractResources); err != nil {

@@ -120,7 +120,7 @@ func resourceDatacenterCreate(ctx context.Context, d *schema.ResourceData, meta 
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		requestLocation, _ := apiResponse.Location()
-		return diagutil.ToDiags(d, err, &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, err, &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 	d.SetId(*createdDatacenter.Id)
 
@@ -202,7 +202,7 @@ func resourceDatacenterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 	if err != nil {
 		requestLocation, _ := apiResponse.Location()
-		return diagutil.ToDiags(d, err, &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, err, &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
@@ -226,7 +226,7 @@ func resourceDatacenterDelete(ctx context.Context, d *schema.ResourceData, meta 
 
 	if err != nil {
 		requestLocation, _ := apiResponse.Location()
-		return diagutil.ToDiags(d, err, &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, err, &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {

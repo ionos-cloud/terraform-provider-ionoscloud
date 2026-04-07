@@ -208,7 +208,7 @@ func replicaSetCreate(ctx context.Context, d *schema.ResourceData, meta interfac
 	replicaSet := inmemorydb.GetReplicaSetDataCreate(d)
 	response, apiResponse, err := client.CreateReplicaSet(ctx, replicaSet, d.Get("location").(string))
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating an InMemoryDB replica set: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating an InMemoryDB replica set: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	replicaSetID := response.Id
 	d.SetId(replicaSetID)
@@ -229,7 +229,7 @@ func replicaSetDelete(ctx context.Context, d *schema.ResourceData, meta interfac
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while deleting InMemoryDB replica set with ID: %v, error: %w", replicaSetID, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while deleting InMemoryDB replica set with ID: %v, error: %w", replicaSetID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsReplicaSetDeleted)
 	if err != nil {
@@ -250,7 +250,7 @@ func replicaSetRead(ctx context.Context, d *schema.ResourceData, meta interface{
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while fetching InMemoryDB replica set with ID: %v, error: %w", replicaSetID, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while fetching InMemoryDB replica set with ID: %v, error: %w", replicaSetID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	log.Printf("[INFO] Successfully retrieved InMemoryDB replica set with ID: %v, replica set info: %+v", replicaSetID, replicaSet)
 	if err := client.SetReplicaSetData(d, replicaSet); err != nil {
@@ -265,7 +265,7 @@ func replicaSetUpdate(ctx context.Context, d *schema.ResourceData, meta interfac
 	replicaSet := inmemorydb.GetReplicaSetDataUpdate(d)
 	response, apiResponse, err := client.UpdateReplicaSet(ctx, replicaSetID, d.Get("location").(string), replicaSet)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating InMemoryDB replica set with ID: %v, error: %w", replicaSetID, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating InMemoryDB replica set with ID: %v, error: %w", replicaSetID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsReplicaSetReady)
 	if err != nil {
@@ -289,9 +289,9 @@ func replicaSetImport(ctx context.Context, d *schema.ResourceData, meta interfac
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("InMemoryDB replica set does not exist, error: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+			return nil, diagutil.ToError(d, fmt.Errorf("InMemoryDB replica set does not exist, error: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
-		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to import InMemoryDB replica set with ID: %v, error: %w", replicaSetID, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to import InMemoryDB replica set with ID: %v, error: %w", replicaSetID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	log.Printf("[INFO] InMemoryDB replica set found: %+v", replicaSet)
 	if err := d.Set("location", location); err != nil {

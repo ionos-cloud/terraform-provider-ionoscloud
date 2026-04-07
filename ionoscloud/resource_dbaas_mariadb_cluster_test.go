@@ -157,7 +157,7 @@ func testAccCheckDBaaSMariaDBClusterDestroyCheck(s *terraform.State) error {
 		}
 		_, apiResponse, err := client.GetCluster(ctx, rs.Primary.ID, rs.Primary.Attributes[clusterLocationAttribute])
 		if err != nil {
-			if apiResponse == nil || apiResponse.StatusCode != 404 {
+			if apiResponse == nil || apiResponse.SafeStatusCode() != 404 {
 				return fmt.Errorf("an error occurred while checking the destruction of MariaDB cluster with ID: %v, error: %w", rs.Primary.ID, err)
 			}
 		} else {

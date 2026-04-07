@@ -105,7 +105,7 @@ func resourceCertificateManagerCreate(ctx context.Context, d *schema.ResourceDat
 	certificateDto, apiResponse, err := client.CreateCertificate(ctx, *certPostDto)
 	if err != nil {
 		d.SetId("")
-		return diagutil.ToDiags(d, fmt.Errorf("error creating certificate: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error creating certificate: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	d.SetId(certificateDto.Id)
@@ -127,7 +127,7 @@ func resourceCertificateManagerRead(ctx context.Context, d *schema.ResourceData,
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, err, &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, err, &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	log.Printf("[INFO] Successfully retrieved certificate %s: %+v", d.Id(), certDto)
@@ -145,7 +145,7 @@ func resourceCertificateManagerUpdate(ctx context.Context, d *schema.ResourceDat
 
 	_, apiResponse, err := client.UpdateCertificate(ctx, d.Id(), *certPatchDto)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating certificate with, %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating certificate with, %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if err = utils.WaitForResourceToBeReady(ctx, d, client.IsCertReady); err != nil {
@@ -160,7 +160,7 @@ func resourceCertificateManagerDelete(ctx context.Context, d *schema.ResourceDat
 
 	apiResponse, err := client.DeleteCertificate(ctx, d.Id())
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while deleting the certificate: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while deleting the certificate: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsCertDeleted)
@@ -183,9 +183,9 @@ func resourceCertificateManagerImport(ctx context.Context, d *schema.ResourceDat
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("unable to find cert %q", certId), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+			return nil, diagutil.ToError(d, fmt.Errorf("unable to find cert %q", certId), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
-		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while retrieving the cert %q, %w", certId, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while retrieving the cert %q, %w", certId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if err := cert.SetCertificateData(d, &certDto); err != nil {

@@ -248,7 +248,7 @@ func resourceApplicationLoadBalancerForwardingRuleCreate(ctx context.Context, d 
 	if err != nil {
 		d.SetId("")
 		requestLocation, _ := apiResponse.Location()
-		return diagutil.ToDiags(d, fmt.Errorf("error creating application loadbalancer forwarding rule: %w \n ApiError: %s", err, responseBody(apiResponse)), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error creating application loadbalancer forwarding rule: %w \n ApiError: %s", err, responseBody(apiResponse)), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	d.SetId(*albForwardingRuleResp.Id)
@@ -364,7 +364,7 @@ func resourceApplicationLoadBalancerForwardingRuleUpdate(ctx context.Context, d 
 	if err != nil {
 		requestLocation, _ := apiResponse.Location()
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating a application loadbalancer forwarding rule ID %s %w",
-			d.Id(), err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
+			d.Id(), err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
@@ -390,7 +390,7 @@ func resourceApplicationLoadBalancerForwardingRuleDelete(ctx context.Context, d 
 
 	if err != nil {
 		requestLocation, _ := apiResponse.Location()
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while deleting a application loadbalancer forwarding rule: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while deleting a application loadbalancer forwarding rule: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {

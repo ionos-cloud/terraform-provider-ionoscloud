@@ -149,7 +149,7 @@ func resourceVpnWireguardGatewayCreate(ctx context.Context, d *schema.ResourceDa
 
 	gateway, apiResponse, err := client.CreateWireguardGateway(ctx, d)
 	if err != nil {
-		return diagutil.ToDiags(d, err, &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, err, &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	d.SetId(gateway.Id)
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsWireguardGatewayReady)
@@ -164,7 +164,7 @@ func resourceVpnWireguardGatewayRead(ctx context.Context, d *schema.ResourceData
 	location := d.Get("location").(string)
 	wireguard, apiResponse, err := client.GetWireguardGatewayByID(ctx, d.Id(), location)
 	if err != nil {
-		return diagutil.ToDiags(d, err, &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, err, &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	return diagutil.ToDiags(d, vpn.SetWireguardGWData(d, wireguard), nil)
 }
@@ -173,7 +173,7 @@ func resourceVpnWireguardGatewayUpdate(ctx context.Context, d *schema.ResourceDa
 
 	wireguard, apiResponse, err := client.UpdateWireguardGateway(ctx, d.Id(), d)
 	if err != nil {
-		return diagutil.ToDiags(d, err, &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, err, &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsWireguardGatewayReady)
 	if err != nil {
@@ -192,7 +192,7 @@ func resourceVpnWireguardGatewayDelete(ctx context.Context, d *schema.ResourceDa
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while deleting WireGuard Gateway: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while deleting WireGuard Gateway: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	//todo: for now we need to keep this because otherwise we get an internal server error on the first find after the delete
 	// remove when no longer necessary
@@ -218,7 +218,7 @@ func resourceVpnWireguardGatewayImport(ctx context.Context, d *schema.ResourceDa
 	ID := parts[1]
 	gateway, apiResponse, err := client.GetWireguardGatewayByID(ctx, ID, location)
 	if err != nil {
-		return nil, diagutil.ToError(d, err, &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return nil, diagutil.ToError(d, err, &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	if err := d.Set("location", location); err != nil {
 		return nil, diagutil.ToError(d, err, nil)

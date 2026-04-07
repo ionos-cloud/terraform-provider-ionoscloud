@@ -135,7 +135,7 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 	if err != nil {
 		d.SetId("")
 		requestLocation, _ := apiResponse.Location()
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating LAN: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating LAN: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	d.SetId(*rsp.Id)
@@ -255,7 +255,7 @@ func resourceLanUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	if err != nil {
 		requestLocation, _ := apiResponse.Location()
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while patching a lan: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while patching a lan: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
@@ -306,7 +306,7 @@ func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 	return nil
 }
 func isDeleteProtected(apiResponse *ionoscloud.APIResponse, errMessage string) bool {
-	if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 403 {
+	if apiResponse.SafeStatusCode() == 403 {
 		if strings.Contains(errMessage, "is delete-protected by") {
 			return true
 		}

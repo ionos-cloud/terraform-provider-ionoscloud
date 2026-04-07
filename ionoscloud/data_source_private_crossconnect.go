@@ -190,7 +190,7 @@ func dataSourcePccRead(ctx context.Context, d *schema.ResourceData, meta interfa
 		pcc, apiResponse, err = client.PrivateCrossConnectsApi.PccsFindById(ctx, id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the pcc with ID %s: %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the pcc with ID %s: %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 	}
 	if nameOk {
@@ -199,7 +199,7 @@ func dataSourcePccRead(ctx context.Context, d *schema.ResourceData, meta interfa
 		pccs, apiResponse, err := client.PrivateCrossConnectsApi.PccsGet(ctx).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching pccs: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching pccs: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 
 		var results []ionoscloud.PrivateCrossConnect
@@ -210,7 +210,7 @@ func dataSourcePccRead(ctx context.Context, d *schema.ResourceData, meta interfa
 					pcc, apiResponse, err = client.PrivateCrossConnectsApi.PccsFindById(ctx, *p.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {
-						return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the pcc with ID %s: %w", *p.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+						return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the pcc with ID %s: %w", *p.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 					}
 					results = append(results, pcc)
 				}

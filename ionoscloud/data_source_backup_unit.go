@@ -67,7 +67,7 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 		backupUnit, apiResponse, err = BackupUnitFindByID(ctx, id.(string), client)
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the backup unit %s: %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the backup unit %s: %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 		if backupUnit.Properties != nil {
 			log.Printf("[INFO] Got backupUnit [Name=%s] [Id=%s]", *backupUnit.Properties.Name, *backupUnit.Id)
@@ -80,7 +80,7 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching backup unit: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching backup unit: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 
 		var results []ionoscloud.BackupUnit
@@ -90,7 +90,7 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 					tmpBackupUnit, apiResponse, err := BackupUnitFindByID(ctx, *bu.Id, client)
 					logApiRequestTime(apiResponse)
 					if err != nil {
-						return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching backup unit with ID %s: %w", *bu.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+						return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching backup unit with ID %s: %w", *bu.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 					}
 					results = append(results, tmpBackupUnit)
 				}
@@ -110,7 +110,7 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 	logApiRequestTime(apiResponse)
 
 	if cErr != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error while fetching contract resources for backup unit: %w", cErr), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while fetching contract resources for backup unit: %w", cErr), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if err := setBackupUnitData(d, &backupUnit, &contractResources); err != nil {

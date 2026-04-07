@@ -88,12 +88,12 @@ func dataSourceProviderRead(ctx context.Context, d *schema.ResourceData, meta in
 		id := id.(string)
 		provider, apiResponse, err = client.GetProvider(ctx, id, location)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the auto-certificate provider with ID: %v, error: %w", id, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the auto-certificate provider with ID: %v, error: %w", id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 	} else {
 		providers, apiResponse, err := client.ListProviders(ctx, location)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching auto-certificate providers: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching auto-certificate providers: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 		var results []certSDK.ProviderRead
 		if providers.Items != nil {

@@ -87,7 +87,7 @@ func dataSourceK8sReadNodePoolNodes(ctx context.Context, d *schema.ResourceData,
 	nodesList, apiResponse, err := client.KubernetesApi.K8sNodepoolsNodesGet(ctx, clusterId.(string), nodePoolIdStr).Depth(1).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching k8s nodes: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching k8s nodes: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	if nodesList.Items == nil {
 		return diagutil.ToDiags(d, fmt.Errorf("no nodes found for nodepool with id %s", nodePoolIdStr), nil)

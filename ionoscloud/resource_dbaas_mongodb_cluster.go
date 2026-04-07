@@ -350,7 +350,7 @@ func resourceDbaasMongoClusterCreate(ctx context.Context, d *schema.ResourceData
 
 	if err != nil {
 		d.SetId("")
-		return diagutil.ToDiags(d, fmt.Errorf("create error for dbaas mongo cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("create error for dbaas mongo cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	d.SetId(*createdCluster.Id)
 
@@ -376,7 +376,7 @@ func resourceDbaasMongoClusterUpdate(ctx context.Context, d *schema.ResourceData
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("update error while fetching dbaas mongo cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("update error while fetching dbaas mongo cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsClusterReady)
@@ -400,7 +400,7 @@ func resourceDbaasMongoClusterRead(ctx context.Context, d *schema.ResourceData, 
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("read error while fetching dbaas mongo cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("read error while fetching dbaas mongo cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	log.Printf("[INFO] Successfully retrieved cluster %s: %+v", d.Id(), cluster)
@@ -425,7 +425,7 @@ func resourceDbaasMongoClusterDelete(ctx context.Context, d *schema.ResourceData
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while deleting mongo dbaas cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while deleting mongo dbaas cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsClusterDeleted)
@@ -460,9 +460,9 @@ func resourceDbaasMongoClusterImport(ctx context.Context, d *schema.ResourceData
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("dbaas cluster does not exist %q", clusterId), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+			return nil, diagutil.ToError(d, fmt.Errorf("dbaas cluster does not exist %q", clusterId), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
-		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the import of dbaas cluster %q, error:%w", clusterId, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the import of dbaas cluster %q, error:%w", clusterId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	log.Printf("[INFO] dbaas cluster found: %+v", dbaasCluster)

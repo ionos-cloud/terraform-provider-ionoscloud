@@ -86,7 +86,7 @@ func dataSourceTemplateRead(ctx context.Context, d *schema.ResourceData, meta in
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching IonosCloud templates %w ", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching IonosCloud templates %w ", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	name, nameOk := d.GetOk("name")

@@ -196,7 +196,7 @@ func resourceNatGatewayRuleCreate(ctx context.Context, d *schema.ResourceData, m
 	if err != nil {
 		d.SetId("")
 		requestLocation, _ := apiResponse.Location()
-		return diagutil.ToDiags(d, fmt.Errorf("error creating nat gateway rule: %w \n ApiError %s", err, responseBody(apiResponse)), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error creating nat gateway rule: %w \n ApiError %s", err, responseBody(apiResponse)), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	d.SetId(*natGatewayRuleResp.Id)
@@ -332,7 +332,7 @@ func resourceNatGatewayRuleUpdate(ctx context.Context, d *schema.ResourceData, m
 
 	if err != nil {
 		requestLocation, _ := apiResponse.Location()
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating a nat gateway rule: %w \n ApiError: %s", err, responseBody(apiResponse)), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating a nat gateway rule: %w \n ApiError: %s", err, responseBody(apiResponse)), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
@@ -358,7 +358,7 @@ func resourceNatGatewayRuleDelete(ctx context.Context, d *schema.ResourceData, m
 
 	if err != nil {
 		requestLocation, _ := apiResponse.Location()
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while deleting a nat gateway rule: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while deleting a nat gateway rule: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {

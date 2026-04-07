@@ -540,7 +540,7 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		d.SetId("")
-		return diagutil.ToDiags(d, fmt.Errorf("error creating k8s node pool: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error creating k8s node pool: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	d.SetId(*createdNodepool.Id)
@@ -588,7 +588,7 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta i
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, err, &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, err, &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	log.Printf("[INFO] Successfully retrieved k8s node pool %s: %+v", d.Id(), k8sNodepool)
@@ -770,7 +770,7 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while updating k8s node pool: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while updating k8s node pool: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	for {
@@ -813,7 +813,7 @@ func resourcek8sNodePoolDelete(ctx context.Context, d *schema.ResourceData, meta
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while deleting k8s node pool: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while deleting k8s node pool: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	for {
@@ -870,10 +870,10 @@ func resourceK8sNodepoolImport(ctx context.Context, d *schema.ResourceData, meta
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
 			if httpNotFound(apiResponse) {
 				d.SetId("")
-				return nil, diagutil.ToError(d, fmt.Errorf("unable to find k8s node pool %q", npId), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+				return nil, diagutil.ToError(d, fmt.Errorf("unable to find k8s node pool %q", npId), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 			}
 		}
-		return nil, diagutil.ToError(d, fmt.Errorf("unable to retrieve k8s node pool %q, error:%w", npId, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return nil, diagutil.ToError(d, fmt.Errorf("unable to retrieve k8s node pool %q, error:%w", npId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	log.Printf("[INFO] K8s node pool found: %+v", k8sNodepool)

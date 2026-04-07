@@ -82,7 +82,7 @@ func resourceDatacenterNSGSelectionRead(ctx context.Context, d *schema.ResourceD
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, err, &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, err, &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if err = setDatacenterDefaultNSGSelectionData(d, &datacenter); err != nil {

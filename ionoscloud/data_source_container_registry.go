@@ -150,14 +150,14 @@ func dataSourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData
 		/* search by ID */
 		registry, apiResponse, err = client.GetRegistry(ctx, id)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the registry with ID %s: %w", id, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the registry with ID %s: %w", id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 	} else {
 		var results []cr.RegistryResponse
 
 		registries, apiResponse, err := client.ListRegistries(ctx)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching container registries: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching container registries: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 
 		results = registries.Items

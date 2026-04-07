@@ -125,7 +125,7 @@ func pipelineCreate(ctx context.Context, d *schema.ResourceData, meta interface{
 	client := meta.(bundleclient.SdkBundle).LoggingClient
 	pipelineResponse, apiResponse, err := client.CreatePipeline(ctx, d)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating a Logging pipeline: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating a Logging pipeline: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	d.SetId(pipelineResponse.Id)
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsPipelineAvailable)
@@ -157,7 +157,7 @@ func pipelineRead(ctx context.Context, d *schema.ResourceData, meta interface{})
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while fetching Logging pipeline: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while fetching Logging pipeline: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	log.Printf("[INFO] Successfully retrieved Logging pipeline with ID: %s: %+v", pipelineID, pipeline)
@@ -178,7 +178,7 @@ func pipelineDelete(ctx context.Context, d *schema.ResourceData, meta interface{
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while deleting Logging pipeline, location %s, error: %w", location, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while deleting Logging pipeline, location %s, error: %w", location, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsPipelineDeleted)
@@ -194,7 +194,7 @@ func pipelineUpdate(ctx context.Context, d *schema.ResourceData, meta interface{
 
 	pipelineResponse, apiResponse, err := client.UpdatePipeline(ctx, pipelineID, d)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating the Logging pipeline: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating the Logging pipeline: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsPipelineAvailable)
 	if err != nil {

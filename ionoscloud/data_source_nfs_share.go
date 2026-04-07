@@ -149,12 +149,12 @@ func dataSourceNFSShareRead(ctx context.Context, d *schema.ResourceData, meta in
 	if idOk {
 		share, apiResponse, err = client.GetNFSShareByID(ctx, clusterID, id, location)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the NFS Share with ID: %s, error: %w", idValue, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the NFS Share with ID: %s, error: %w", idValue, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 	} else {
 		shares, apiResponse, err := client.ListNFSShares(ctx, d)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching NFS Shares: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching NFS Shares: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 
 		var results []nfs.ShareRead

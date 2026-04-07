@@ -122,14 +122,14 @@ func dataSourceContainerRegistryTokenRead(ctx context.Context, d *schema.Resourc
 		/* search by ID */
 		token, apiResponse, err = client.GetToken(ctx, registryId, id)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the token with ID %s: %w", id, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the token with ID %s: %w", id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 	} else {
 		var results []cr.TokenResponse
 
 		tokens, apiResponse, err := client.ListTokens(ctx, registryId)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching registry tokens: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching registry tokens: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 
 		partialMatch := d.Get("partial_match").(bool)

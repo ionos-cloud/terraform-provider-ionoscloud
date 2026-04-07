@@ -167,13 +167,13 @@ func dataSourceReplicaSetRead(ctx context.Context, d *schema.ResourceData, meta 
 		// search by ID
 		replica, apiResponse, err = client.GetReplicaSet(ctx, id.(string), location)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the InMemoryDB replica set with ID %v: %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the InMemoryDB replica set with ID %v: %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 	} else {
 		// list, then filter by name
 		clusters, apiResponse, err := client.ListReplicaSets(ctx, displayName.(string), location)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching InMemoryDB replica sets: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching InMemoryDB replica sets: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 
 		var results []inmemorydb.ReplicaSetRead

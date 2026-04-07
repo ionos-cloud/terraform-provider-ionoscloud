@@ -109,13 +109,11 @@ func dataSourceDbaasPgSqlReadBackups(ctx context.Context, d *schema.ResourceData
 	clusterBackups, resp, err := client.GetClusterBackups(ctx, idStr)
 	if resp != nil {
 		log.Printf("operation %s", resp.Operation)
-		if resp.Response != nil {
-			log.Printf("[DEBUG] response status code : %d\n", resp.StatusCode)
-		}
+		log.Printf("[DEBUG] response status code : %d\n", resp.SafeStatusCode())
 	}
 
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching backup for cluster with ID %s: %w", idStr, err), &diagutil.ErrorContext{StatusCode: resp.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching backup for cluster with ID %s: %w", idStr, err), &diagutil.ErrorContext{StatusCode: resp.SafeStatusCode()})
 	}
 	if len(clusterBackups.Items) == 0 {
 		return diagutil.ToDiags(d, fmt.Errorf("could not find backups for cluster with ID %s: %w", idStr, err), nil)

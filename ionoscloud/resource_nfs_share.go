@@ -129,7 +129,7 @@ func resourceNFSShareCreate(ctx context.Context, d *schema.ResourceData, meta in
 	client := meta.(bundleclient.SdkBundle).NFSClient
 	response, apiResponse, err := client.CreateNFSShare(ctx, d)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error creating NFS Share: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error creating NFS Share: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	shareID := response.Id
 	d.SetId(shareID)
@@ -148,7 +148,7 @@ func resourceNFSShareRead(ctx context.Context, d *schema.ResourceData, meta inte
 
 	share, apiResponse, err := client.GetNFSShareByID(ctx, clusterID, shareID, location)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error finding NFS Share: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error finding NFS Share: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if err := client.SetNFSShareData(d, share); err != nil {
@@ -161,7 +161,7 @@ func resourceNFSShareUpdate(ctx context.Context, d *schema.ResourceData, meta in
 	client := meta.(bundleclient.SdkBundle).NFSClient
 	response, apiResponse, err := client.UpdateNFSShare(ctx, d)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error updating NFS Share: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error updating NFS Share: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if err := client.SetNFSShareData(d, response); err != nil {
@@ -178,7 +178,7 @@ func resourceNFSShareDelete(ctx context.Context, d *schema.ResourceData, meta in
 
 	apiResponse, err := client.DeleteNFSShare(ctx, clusterID, shareID, location)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error deleting NFS Share: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error deleting NFS Share: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	return nil
 }
@@ -208,7 +208,7 @@ func resourceNFSShareImport(ctx context.Context, d *schema.ResourceData, meta in
 
 	share, apiResponse, err := client.GetNFSShareByID(ctx, clusterID, shareID, location)
 	if err != nil {
-		return nil, diagutil.ToError(d, fmt.Errorf("error finding NFS Share: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return nil, diagutil.ToError(d, fmt.Errorf("error finding NFS Share: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if err := client.SetNFSShareData(d, share); err != nil {

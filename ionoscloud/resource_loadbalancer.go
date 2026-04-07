@@ -98,7 +98,7 @@ func resourceLoadbalancerCreate(ctx context.Context, d *schema.ResourceData, met
 
 	if err != nil {
 		requestLocation, _ := apiResponse.Location()
-		return diagutil.ToDiags(d, fmt.Errorf("error occurred while creating a loadbalancer %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error occurred while creating a loadbalancer %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	d.SetId(*resp.Id)
@@ -186,7 +186,7 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 		logApiRequestTime(apiResponse)
 		if err != nil {
 			requestLocation, _ := apiResponse.Location()
-			return diagutil.ToDiags(d, fmt.Errorf("error while updating loadbalancer: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("error while updating loadbalancer: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 		}
 	}
 
@@ -224,7 +224,7 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 			logApiRequestTime(apiResponse)
 			if err != nil {
 				requestLocation, _ := apiResponse.Location()
-				return diagutil.ToDiags(d, fmt.Errorf("[load balancer update] an error occurred while creating a balanced nic: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
+				return diagutil.ToDiags(d, fmt.Errorf("[load balancer update] an error occurred while creating a balanced nic: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 			}
 			if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
 				requestLocation, _ := apiResponse.Location()
@@ -250,7 +250,7 @@ func resourceLoadbalancerDelete(ctx context.Context, d *schema.ResourceData, met
 
 	if err != nil {
 		requestLocation, _ := apiResponse.Location()
-		return diagutil.ToDiags(d, fmt.Errorf("[load balancer delete] an error occurred while deleting a loadbalancer: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("[load balancer delete] an error occurred while deleting a loadbalancer: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {

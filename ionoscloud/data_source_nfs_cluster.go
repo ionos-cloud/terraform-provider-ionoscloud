@@ -116,12 +116,12 @@ func dataSourceNFSClusterRead(ctx context.Context, d *schema.ResourceData, meta 
 	if idOk {
 		cluster, apiResponse, err = client.GetNFSClusterByID(ctx, id, location)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the NFS Cluster with ID: %s, error: %w", idValue, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the NFS Cluster with ID: %s, error: %w", idValue, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 	} else {
 		clusters, apiResponse, err := client.ListNFSClusters(ctx, d)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching NFS Clusters: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching NFS Clusters: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 
 		var results []nfs.ClusterRead

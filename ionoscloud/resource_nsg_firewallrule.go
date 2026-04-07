@@ -110,7 +110,7 @@ func resourceNSGFirewallCreate(ctx context.Context, d *schema.ResourceData, meta
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		requestLocation, _ := apiResponse.Location()
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating a nsg firewall rule nsg id %s dcid %s : %w", nsgID, dcID, err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating a nsg firewall rule nsg id %s dcid %s : %w", nsgID, dcID, err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 	d.SetId(*fw.Id)
 
@@ -171,7 +171,7 @@ func resourceNSGFirewallUpdate(ctx context.Context, d *schema.ResourceData, meta
 
 	if err != nil {
 		requestLocation, _ := apiResponse.Location()
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating a nsg firewall rule: dcID %s nsgID %s %w", dcID, nsgID, err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating a nsg firewall rule: dcID %s nsgID %s %w", dcID, nsgID, err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
@@ -200,7 +200,7 @@ func resourceNSGFirewallDelete(ctx context.Context, d *schema.ResourceData, meta
 
 	if err != nil {
 		requestLocation, _ := apiResponse.Location()
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while deleting a nsg firewall rule ID %s nsgID %s %w", nsgID, dcID, err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while deleting a nsg firewall rule ID %s nsgID %s %w", nsgID, dcID, err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {

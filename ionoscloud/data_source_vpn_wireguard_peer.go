@@ -97,14 +97,14 @@ func dataSourceVpnWireguardPeerRead(ctx context.Context, d *schema.ResourceData,
 		id := idValue.(string)
 		peer, apiResponse, err = client.GetWireguardPeerByID(ctx, gatewayID, id, location)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the WireGuard Peer with ID: %s, error: %w", id, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the WireGuard Peer with ID: %s, error: %w", id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 	} else {
 		name := nameValue.(string)
 		var results []vpnSdk.WireguardPeerRead
 		peers, apiResponse, err := client.ListWireguardPeers(ctx, gatewayID, location)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching WireGuard Peers: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching WireGuard Peers: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 		for _, recordItem := range peers.Items {
 			if len(results) == 1 {

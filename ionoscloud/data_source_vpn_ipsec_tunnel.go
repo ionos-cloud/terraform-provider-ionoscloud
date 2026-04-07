@@ -165,13 +165,13 @@ func dataSourceVpnIPSecTunnelRead(ctx context.Context, d *schema.ResourceData, m
 	if idOk {
 		tunnel, apiResponse, err = client.GetIPSecTunnelByID(ctx, id, gatewayID, location)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the IPSec Gateway Tunnel with ID: %s, error: %w", id, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the IPSec Gateway Tunnel with ID: %s, error: %w", id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 	} else {
 		var results []vpnSdk.IPSecTunnelRead
 		gateways, apiResponse, err := client.ListIPSecTunnel(ctx, gatewayID, location)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching IPSec Gateway Tunnels: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching IPSec Gateway Tunnels: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 
 		for _, recordItem := range gateways.Items {

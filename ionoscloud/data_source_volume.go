@@ -156,7 +156,7 @@ func dataSourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta inte
 		volume, apiResponse, err = client.VolumesApi.DatacentersVolumesFindById(ctx, datacenterId.(string), id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching volume with ID %s: %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching volume with ID %s: %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 	} else {
 		/* search by name */
@@ -165,7 +165,7 @@ func dataSourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta inte
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching volumes: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching volumes: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 
 		var results []ionoscloud.Volume
@@ -176,7 +176,7 @@ func dataSourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta inte
 					volume, apiResponse, err = client.VolumesApi.DatacentersVolumesFindById(ctx, datacenterId.(string), *v.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {
-						return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching volume %s: %w", *v.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+						return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching volume %s: %w", *v.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 					}
 					results = append(results, volume)
 				}

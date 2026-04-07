@@ -100,7 +100,7 @@ func resourceLanIPFailoverCreate(ctx context.Context, d *schema.ResourceData, me
 	apiResponse.LogInfo()
 	if err != nil {
 		requestLocation, _ := apiResponse.Location()
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while patching a lans IP failover group, LAN ID: %s, error: %w", lanId, err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while patching a lans IP failover group, LAN ID: %s, error: %w", lanId, err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
@@ -207,7 +207,7 @@ func resourceLanIPFailoverUpdate(ctx context.Context, d *schema.ResourceData, me
 		apiResponse.LogInfo()
 		if err != nil {
 			requestLocation, _ := apiResponse.Location()
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while patching the lan with ID: %s, error: %w", lanId, err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while patching the lan with ID: %s, error: %w", lanId, err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 		}
 
 		if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
@@ -252,7 +252,7 @@ func resourceLanIPFailoverDelete(ctx context.Context, d *schema.ResourceData, me
 	apiResponse.LogInfo()
 	if err != nil {
 		requestLocation, _ := apiResponse.Location()
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while removing an IP failover group with IP: %s for the LAN with ID: %s, datacenter ID: %s, error: %w", ip, lanId, dcId, err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while removing an IP failover group with IP: %s for the LAN with ID: %s, datacenter ID: %s, error: %w", ip, lanId, dcId, err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {

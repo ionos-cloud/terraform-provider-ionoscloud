@@ -99,7 +99,7 @@ func resourceNFSClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 	response, apiResponse, err := client.CreateNFSCluster(ctx, d)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error creating NFS Cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error creating NFS Cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	clusterID := response.Id
 	d.SetId(clusterID)
@@ -118,7 +118,7 @@ func resourceNFSClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 	response, apiResponse, err := client.UpdateNFSCluster(ctx, d)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error updating NFS Cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error updating NFS Cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsClusterReady)
 	if err != nil {
@@ -135,7 +135,7 @@ func resourceNFSClusterDelete(ctx context.Context, d *schema.ResourceData, meta 
 	clusterID := d.Id()
 	apiResponse, err := client.DeleteNFSCluster(ctx, d)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error deleting NFS Cluster with ID: %v, error: %w", clusterID, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error deleting NFS Cluster with ID: %v, error: %w", clusterID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsClusterDeleted)
 	if err != nil {

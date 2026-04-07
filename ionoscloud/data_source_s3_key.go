@@ -65,18 +65,18 @@ func dataSourceObjectStorageKeyRead(ctx context.Context, d *schema.ResourceData,
 		apiResponse.LogInfo()
 		if err != nil {
 			if apiResponse.HttpNotFound() || isS3KeyNotFound(err) {
-				return diagutil.ToDiags(d, fmt.Errorf("no storage key found with the specified criteria: userID = %s id = %s", userID, id), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+				return diagutil.ToDiags(d, fmt.Errorf("no storage key found with the specified criteria: userID = %s id = %s", userID, id), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 			}
-			return diagutil.ToDiags(d, fmt.Errorf("error while reading Object Storage key: %w, %s", err, userID), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("error while reading Object Storage key: %w, %s", err, userID), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 	} else {
 		s3Keys, apiResponse, err = client.UserS3KeysApi.UmUsersS3keysGet(ctx, userID).Depth(2).Execute()
 		apiResponse.LogInfo()
 		if apiResponse.HttpNotFound() || isS3KeyNotFound(err) {
-			return diagutil.ToDiags(d, fmt.Errorf("no storage key found with the specified criteria: userID = %s", userID), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("no storage key found with the specified criteria: userID = %s", userID), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("error while reading Object Storage key: %w, %s", err, userID), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("error while reading Object Storage key: %w, %s", err, userID), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 		if s3Keys.Items == nil || len(*s3Keys.Items) == 0 {
 			return diagutil.ToDiags(d, fmt.Errorf("no storage key found with the specified criteria: userID = %s", userID), nil)

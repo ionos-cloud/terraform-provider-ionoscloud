@@ -144,7 +144,7 @@ func testAccCheckCDNDistributionDestroyCheck(s *terraform.State) error {
 		_, apiResponse, err := client.SdkClient.DistributionsApi.DistributionsFindById(ctx, rs.Primary.ID).Execute()
 
 		if err != nil {
-			if apiResponse.StatusCode != 404 {
+			if apiResponse.SafeStatusCode() != 404 {
 				return fmt.Errorf("an error occurred while checking the destruction of distribution %s: %w", rs.Primary.ID, err)
 			}
 		} else {

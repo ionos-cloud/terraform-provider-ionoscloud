@@ -69,7 +69,7 @@ func dataSourceCertificateRead(ctx context.Context, d *schema.ResourceData, meta
 	if idOk {
 		certificate, apiResponse, err = client.GetCertificate(ctx, idStr)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("error getting certificate with id %s %w", idStr, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("error getting certificate with id %s %w", idStr, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 		if nameOk {
 			if !strings.EqualFold(certificate.Properties.Name, name) {
@@ -84,7 +84,7 @@ func dataSourceCertificateRead(ctx context.Context, d *schema.ResourceData, meta
 
 		certificates, apiResponse, err := client.ListCertificates(ctx)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching certificates: %w ", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching certificates: %w ", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 
 		var results []certmanager.CertificateRead

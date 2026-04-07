@@ -132,7 +132,7 @@ func dataSourceNSGRead(ctx context.Context, d *schema.ResourceData, meta interfa
 		securityGroup, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsFindById(ctx, datacenterID, id.(string)).Depth(3).Execute()
 		apiResponse.LogInfo()
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while retrieving network security group with ID: %s, %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while retrieving network security group with ID: %s, %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 		return diagutil.ToDiags(d, setNSGDataSource(d, &securityGroup), nil)
 	}
@@ -140,7 +140,7 @@ func dataSourceNSGRead(ctx context.Context, d *schema.ResourceData, meta interfa
 	securityGroups, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsGet(ctx, datacenterID).Depth(3).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while retrieving network security groups: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while retrieving network security groups: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	var results []ionoscloud.SecurityGroup
 	if securityGroups.Items != nil {

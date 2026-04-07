@@ -74,7 +74,7 @@ func recordCreate(ctx context.Context, d *schema.ResourceData, meta interface{})
 
 	recordResponse, apiResponse, err := client.CreateRecord(ctx, zoneId, d)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating a record for the DNS zone with ID: %s, error: %w", zoneId, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating a record for the DNS zone with ID: %s, error: %w", zoneId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if recordResponse.Metadata.State == dns.PROVISIONINGSTATE_FAILED {
@@ -97,7 +97,7 @@ func recordRead(ctx context.Context, d *schema.ResourceData, meta interface{}) d
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while fetching the DNS Record, zone ID: %s, error: %w", zoneId, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while fetching the DNS Record, zone ID: %s, error: %w", zoneId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	log.Printf("[INFO] Successfully retrieved DNS Record %s: %+v", recordId, record)
 	if err := client.SetRecordData(d, record); err != nil {
@@ -113,7 +113,7 @@ func recordUpdate(ctx context.Context, d *schema.ResourceData, meta interface{})
 
 	recordResponse, apiResponse, err := client.UpdateRecord(ctx, zoneId, recordId, d)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating the DNS Record, zone ID: %s, error: %w", zoneId, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating the DNS Record, zone ID: %s, error: %w", zoneId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	if recordResponse.Metadata.State == dns.PROVISIONINGSTATE_FAILED {
 		// This is a temporary error message since right now the API is not returning errors that we can work with.
@@ -134,7 +134,7 @@ func recordDelete(ctx context.Context, d *schema.ResourceData, meta interface{})
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while deleting DNS Record, zone ID: %s, error: %w", zoneId, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while deleting DNS Record, zone ID: %s, error: %w", zoneId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsRecordDeleted)
 	if err != nil {
@@ -158,9 +158,9 @@ func recordImport(ctx context.Context, d *schema.ResourceData, meta interface{})
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("DNS Record with ID: %s does not exist, zone ID: %s", recordId, zoneId), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+			return nil, diagutil.ToError(d, fmt.Errorf("DNS Record with ID: %s does not exist, zone ID: %s", recordId, zoneId), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
-		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to import the DNS Record with ID: %s, zone ID: %s, error: %w", recordId, zoneId, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to import the DNS Record with ID: %s, zone ID: %s, error: %w", recordId, zoneId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	log.Printf("[INFO] DNS Record found: %+v", record)
 	if err := client.SetRecordData(d, record); err != nil {

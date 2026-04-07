@@ -179,7 +179,7 @@ func testAccCheckDBaaSInMemoryDBReplicaSetDestroyCheck(s *terraform.State) error
 		}
 		_, apiResponse, err := client.GetReplicaSet(ctx, rs.Primary.ID, rs.Primary.Attributes[clusterLocationAttribute])
 		if err != nil {
-			if apiResponse == nil || apiResponse.StatusCode != 404 {
+			if apiResponse == nil || apiResponse.SafeStatusCode() != 404 {
 				return fmt.Errorf("an error occured while checking the destruction of InMemoryDB replica set with ID: %v, error: %w", rs.Primary.ID, err)
 			}
 		} else {

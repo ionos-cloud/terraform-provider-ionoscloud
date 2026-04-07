@@ -51,13 +51,11 @@ func ResourceCommonServerDelete(ctx context.Context, d *schema.ResourceData, met
 	if apiResponse != nil {
 		log.Printf("[DEBUG] Request time : %s for operation : %s",
 			apiResponse.RequestTime, apiResponse.Operation)
-		if apiResponse.Response != nil {
-			log.Printf("[DEBUG] response status code : %d\n", apiResponse.StatusCode)
-		}
+		log.Printf("[DEBUG] response status code : %d\n", apiResponse.SafeStatusCode())
 	}
 	if err != nil {
 		requestLocation, _ := apiResponse.Location()
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while deleting a server: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while deleting a server: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 
 	}
 

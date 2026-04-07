@@ -85,7 +85,7 @@ func dataSourceZoneRead(ctx context.Context, d *schema.ResourceData, meta interf
 	if idOk {
 		zone, apiResponse, err = client.GetZoneById(ctx, id)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the DNS Zone with ID: %s, error: %w", id, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the DNS Zone with ID: %s, error: %w", id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 	} else {
 		var results []dns.ZoneRead
@@ -96,7 +96,7 @@ func dataSourceZoneRead(ctx context.Context, d *schema.ResourceData, meta interf
 			// is true.
 			zones, apiResponse, err := client.ListZones(ctx, name)
 			if err != nil {
-				return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching DNS Zones: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+				return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching DNS Zones: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 			}
 			results = zones.Items
 		} else {
@@ -105,7 +105,7 @@ func dataSourceZoneRead(ctx context.Context, d *schema.ResourceData, meta interf
 			// filter.zoneName only does a partial match.
 			zones, apiResponse, err := client.ListZones(ctx, "")
 			if err != nil {
-				return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching DNS Zones: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+				return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching DNS Zones: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 			}
 			for _, zoneItem := range zones.Items {
 				// Since each zone has a unique name, there is no need to keep on searching if

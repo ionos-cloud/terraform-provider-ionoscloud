@@ -124,7 +124,7 @@ func resourceContainerRegistryTokenCreate(ctx context.Context, d *schema.Resourc
 	}
 	registryTokenResponse, apiResponse, err := client.CreateToken(ctx, registryId, *registryToken)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating the registry token: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating the registry token: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	d.SetId(*registryTokenResponse.Id)
@@ -164,7 +164,7 @@ func resourceContainerRegistryTokenRead(ctx context.Context, d *schema.ResourceD
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while fetching registry token: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while fetching registry token: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	log.Printf("[INFO] Successfully retrieved registry token %s: %+v", d.Id(), registryToken)
@@ -192,7 +192,7 @@ func resourceContainerRegistryTokenUpdate(ctx context.Context, d *schema.Resourc
 
 	_, apiResponse, err := client.PatchToken(ctx, registryId, registryTokenId, *registryToken)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating a registry token: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating a registry token: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	return resourceContainerRegistryTokenRead(ctx, d, meta)
@@ -215,7 +215,7 @@ func resourceContainerRegistryTokenDelete(ctx context.Context, d *schema.Resourc
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while deleting registry token %s: %w", registryTokenId, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error while deleting registry token %s: %w", registryTokenId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	return nil
@@ -245,9 +245,9 @@ func resourceContainerRegistryTokenImport(ctx context.Context, d *schema.Resourc
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("registry does not exist %q", registryTokenId), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+			return nil, diagutil.ToError(d, fmt.Errorf("registry does not exist %q", registryTokenId), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
-		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the import of registry token %q, error:%w", registryTokenId, err), &diagutil.ErrorContext{StatusCode: apiResponse.StatusCode})
+		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the import of registry token %q, error:%w", registryTokenId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	log.Printf("[INFO] registry token found: %+v", registryToken)

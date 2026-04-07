@@ -440,7 +440,7 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 	if err != nil {
 		requestLocation, _ := apiResponse.Location()
-		return diagutil.ToDiags(d, fmt.Errorf("error creating server: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error creating server: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 	d.SetId(*createdServer.Id)
 
@@ -459,7 +459,7 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 	if err != nil {
 		requestLocation, _ := apiResponse.Location()
-		return diagutil.ToDiags(d, fmt.Errorf("error fetching server: (%w)", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error fetching server: (%w)", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 	if v, ok := d.GetOk("security_groups_ids"); ok {
 		raw := v.(*schema.Set).List()
@@ -474,7 +474,7 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		requestLocation, _ := apiResponse.Location()
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching firewall rules: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching firewall rules: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if firewallRules.Items != nil {
@@ -647,7 +647,7 @@ func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta in
 			logApiRequestTime(apiResponse)
 			if err != nil {
 				requestLocation, _ := apiResponse.Location()
-				return diagutil.ToDiags(d, fmt.Errorf("error occurred while fetching firewallrule %s for server ID %s %w", firewallId.(string), serverId, err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
+				return diagutil.ToDiags(d, fmt.Errorf("error occurred while fetching firewallrule %s for server ID %s %w", firewallId.(string), serverId, err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 			}
 
 			fw := cloudapifirewall.SetProperties(firewall)
@@ -671,7 +671,7 @@ func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta in
 			logApiRequestTime(apiResponse)
 			if err != nil {
 				requestLocation, _ := apiResponse.Location()
-				return diagutil.ToDiags(d, fmt.Errorf("error retrieving inline volume %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
+				return diagutil.ToDiags(d, fmt.Errorf("error retrieving inline volume %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 			}
 			volumePath := fmt.Sprintf("volume.%d.", i)
 			entry := serverutil.SetServerVolumeProperties(volume)
@@ -757,7 +757,7 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 	if err != nil {
 		requestLocation, _ := apiResponse.Location()
-		return diagutil.ToDiags(d, fmt.Errorf("error occurred while updating server: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
+		return diagutil.ToDiags(d, fmt.Errorf("error occurred while updating server: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
@@ -789,7 +789,7 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 				logApiRequestTime(apiResponse)
 				if err != nil {
 					requestLocation, _ := apiResponse.Location()
-					return diagutil.ToDiags(d, fmt.Errorf("an error occurred while getting a volume dcId: %s ID: %s Response: %w", dcId, volumeId, err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
+					return diagutil.ToDiags(d, fmt.Errorf("an error occurred while getting a volume dcId: %s ID: %s Response: %w", dcId, volumeId, err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 				}
 				if v, ok := d.GetOk(volumePath + "name"); ok {
 					vStr := v.(string)
@@ -817,7 +817,7 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 				if err != nil {
 					requestLocation, _ := apiResponse.Location()
-					return diagutil.ToDiags(d, fmt.Errorf("error patching volume: (%w)", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
+					return diagutil.ToDiags(d, fmt.Errorf("error patching volume: (%w)", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 				}
 
 				if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
@@ -922,7 +922,7 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 			logApiRequestTime(apiResponse)
 			if err != nil {
 				requestLocation, _ := apiResponse.Location()
-				return diagutil.ToDiags(d, fmt.Errorf("an error occurred while running firewall rule dcId: %s server_id: %s nic_id %s ID: %s Response: %w", dcId, *server.Id, *nic.Id, firewallId, err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.StatusCode})
+				return diagutil.ToDiags(d, fmt.Errorf("an error occurred while running firewall rule dcId: %s server_id: %s nic_id %s ID: %s Response: %w", dcId, *server.Id, *nic.Id, firewallId, err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 			}
 
 			if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
