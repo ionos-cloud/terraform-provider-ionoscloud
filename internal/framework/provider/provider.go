@@ -223,7 +223,7 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 	cleanedEndpoint := utils.CleanURL(endpoint)
 	configlog.LogEndpoint(cleanedEndpoint)
 	configlog.LogS3Region(region)
-	configlog.LogTLSConfig(insecureBool, fileConfig)
+	configlog.LogTLSConfig(insecureBool)
 
 	if insecureBool == true {
 		resp.Diagnostics.AddWarning("insecure mode enabled", "This is not recommended for production environments.")

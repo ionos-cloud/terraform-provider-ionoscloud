@@ -214,7 +214,7 @@ func TestLogFileConfigEndpoints_WithTLSAndCertPerEndpoint(t *testing.T) {
 		logFileConfigEndpoints(cfg)
 	})
 
-	assertContains(t, output, `"skipTLS":true`)
+	assertContains(t, output, `"skipTlsVerify":true`)
 	assertContains(t, output, `"certAuthDataBytes":19`)
 	assertContains(t, output, `"location":"de/fra"`)
 	assertContains(t, output, `"url":"https://api.staging.example.com"`)
@@ -243,7 +243,7 @@ func TestLogTLSConfig_InsecureSet(t *testing.T) {
 	t.Setenv("IONOS_ALLOW_INSECURE", "true")
 
 	output := captureLog(func() {
-		LogTLSConfig(true, nil)
+		LogTLSConfig(true)
 	})
 
 	assertContains(t, output, "TLS:")
@@ -255,29 +255,10 @@ func TestLogTLSConfig_Secure(t *testing.T) {
 	t.Setenv("IONOS_ALLOW_INSECURE", "")
 
 	output := captureLog(func() {
-		LogTLSConfig(false, nil)
+		LogTLSConfig(false)
 	})
 
 	assertNotContains(t, output, "TLS")
-}
-
-func TestLogTLSConfig_WithCertificateAuthData(t *testing.T) {
-	t.Setenv("IONOS_ALLOW_INSECURE", "")
-
-	cfg := &fileconfiguration.FileConfig{
-		CurrentProfile: "prod",
-		Profiles:       []fileconfiguration.Profile{{Name: "prod", Environment: "staging"}},
-		Environments: []fileconfiguration.Environment{
-			{Name: "staging", CertificateAuthData: "my-custom-ca-cert-data"},
-		},
-	}
-
-	output := captureLog(func() {
-		LogTLSConfig(false, cfg)
-	})
-
-	assertContains(t, output, `certificateAuthData in environment "staging"`)
-	assertContains(t, output, "22 bytes")
 }
 
 func TestLogTLSConfig_WithPinnedCert(t *testing.T) {
@@ -285,7 +266,7 @@ func TestLogTLSConfig_WithPinnedCert(t *testing.T) {
 	t.Setenv("IONOS_PINNED_CERT", "sha256-fingerprint-here")
 
 	output := captureLog(func() {
-		LogTLSConfig(false, nil)
+		LogTLSConfig(false)
 	})
 
 	assertContains(t, output, "IONOS_PINNED_CERT is set")

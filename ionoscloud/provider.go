@@ -305,7 +305,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	if insecureSet {
 		insecureBool = insecure.(bool)
 	}
-	configlog.LogTLSConfig(insecureBool, fileConfig)
+	configlog.LogTLSConfig(insecureBool)
 
 	clientOptions := clientoptions.TerraformClientOptions{
 		ClientOptions: shared.ClientOptions{
