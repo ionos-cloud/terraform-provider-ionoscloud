@@ -119,7 +119,7 @@ func resourceIPBlockCreate(ctx context.Context, d *schema.ResourceData, meta int
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		requestLocation, _ := apiResponse.Location()
+		requestLocation, _ := apiResponse.SafeLocation()
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while reserving an ip block: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 	d.SetId(*ipblock.Id)
@@ -128,7 +128,7 @@ func resourceIPBlockCreate(ctx context.Context, d *schema.ResourceData, meta int
 		if bundleclient.IsRequestFailed(errState) {
 			d.SetId("")
 		}
-		requestLocation, _ := apiResponse.Location()
+		requestLocation, _ := apiResponse.SafeLocation()
 		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
@@ -182,7 +182,7 @@ func resourceIPBlockUpdate(ctx context.Context, d *schema.ResourceData, meta int
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		requestLocation, _ := apiResponse.Location()
+		requestLocation, _ := apiResponse.SafeLocation()
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating an ip block: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
@@ -201,12 +201,12 @@ func resourceIPBlockDelete(ctx context.Context, d *schema.ResourceData, meta int
 	apiResponse, err := client.IPBlocksApi.IpblocksDelete(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		requestLocation, _ := apiResponse.Location()
+		requestLocation, _ := apiResponse.SafeLocation()
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while releasing an ipblock: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		requestLocation, _ := apiResponse.Location()
+		requestLocation, _ := apiResponse.SafeLocation()
 		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 

@@ -244,7 +244,7 @@ func resourcePrivateCrossConnectDelete(ctx context.Context, d *schema.ResourceDa
 		pccDeleted, dsErr := privateCrossConnectDeleted(ctx, client, d)
 
 		if dsErr != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("error while deleting PCC: %w", err), nil)
+			return diagutil.ToDiags(d, fmt.Errorf("error while deleting PCC: %w", dsErr), nil)
 		}
 
 		if pccDeleted {

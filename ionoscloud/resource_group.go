@@ -310,7 +310,7 @@ func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta inter
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		requestLocation, _ := apiResponse.Location()
+		requestLocation, _ := apiResponse.SafeLocation()
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating a group: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
@@ -322,7 +322,7 @@ func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta inter
 		if bundleclient.IsRequestFailed(errState) {
 			d.SetId("")
 		}
-		requestLocation, _ := apiResponse.Location()
+		requestLocation, _ := apiResponse.SafeLocation()
 		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
@@ -444,12 +444,12 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 	_, apiResponse, err := client.UserManagementApi.UmGroupsPut(ctx, d.Id()).Group(groupReq).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		requestLocation, _ := apiResponse.Location()
+		requestLocation, _ := apiResponse.SafeLocation()
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while patching a group: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		requestLocation, _ := apiResponse.Location()
+		requestLocation, _ := apiResponse.SafeLocation()
 		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
@@ -514,12 +514,12 @@ func resourceGroupDelete(ctx context.Context, d *schema.ResourceData, meta inter
 	apiResponse, err := client.UserManagementApi.UmGroupsDelete(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		requestLocation, _ := apiResponse.Location()
+		requestLocation, _ := apiResponse.SafeLocation()
 		return diagutil.ToDiags(d, err, &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		requestLocation, _ := apiResponse.Location()
+		requestLocation, _ := apiResponse.SafeLocation()
 		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 

@@ -389,7 +389,7 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta i
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		requestLocation, _ := apiResponse.Location()
+		requestLocation, _ := apiResponse.SafeLocation()
 		return diagutil.ToDiags(d, fmt.Errorf("error creating server: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 	d.SetId(*createdServer.Id)
@@ -399,7 +399,7 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta i
 			log.Printf("[DEBUG] failed to create createdServer resource")
 			d.SetId("")
 		}
-		requestLocation, _ := apiResponse.Location()
+		requestLocation, _ := apiResponse.SafeLocation()
 		return diagutil.ToDiags(d, fmt.Errorf("error waiting for state change for server creation %w", errState), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
@@ -408,7 +408,7 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta i
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		requestLocation, _ := apiResponse.Location()
+		requestLocation, _ := apiResponse.SafeLocation()
 		return diagutil.ToDiags(d, fmt.Errorf("error fetching server: (%w)", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 	if v, ok := d.GetOk("security_groups_ids"); ok {
@@ -424,7 +424,7 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta i
 			*createdServer.Id, *(*createdServer.Entities.Nics.Items)[0].Id).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			requestLocation, _ := apiResponse.Location()
+			requestLocation, _ := apiResponse.SafeLocation()
 			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching firewall rules: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 		}
 

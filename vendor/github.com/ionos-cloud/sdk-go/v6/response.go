@@ -13,6 +13,7 @@ package ionoscloud
 import (
 	"log"
 	"net/http"
+	"net/url"
 	"time"
 )
 
@@ -63,10 +64,19 @@ func (resp *APIResponse) HttpNotFound() bool {
 // SafeStatusCode returns the HTTP status code from the embedded *http.Response.
 // Returns 0 if the receiver or the embedded response is nil.
 func (resp *APIResponse) SafeStatusCode() int {
-	if resp != nil && resp.Response != nil {
-		return resp.StatusCode
+	if resp == nil || resp.Response == nil {
+		return 0
 	}
-	return 0
+	return resp.Response.StatusCode
+}
+
+// SafeLocation returns the Location header as a *url.URL.
+// Returns nil, nil if the receiver or the embedded response is nil.
+func (resp *APIResponse) SafeLocation() (*url.URL, error) {
+	if resp == nil || resp.Response == nil {
+		return nil, nil
+	}
+	return resp.Response.Location()
 }
 
 // LogInfo - logs APIResponse values like RequestTime, Operation and StatusCode

@@ -583,7 +583,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	postServer, apiResponse, err := client.ServersApi.DatacentersServersPost(ctx, datacenterId).Server(serverReq).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		requestLocation, _ := apiResponse.Location()
+		requestLocation, _ := apiResponse.SafeLocation()
 		return diagutil.ToDiags(d, fmt.Errorf("error creating server: (%w)", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
@@ -596,7 +596,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 			log.Printf("[DEBUG] failed to create server resource")
 			d.SetId("")
 		}
-		requestLocation, _ := apiResponse.Location()
+		requestLocation, _ := apiResponse.SafeLocation()
 		return diagutil.ToDiags(d, fmt.Errorf("error waiting for state change for server creation %w", errState), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 	if v, ok := d.GetOk("security_groups_ids"); ok {
@@ -618,7 +618,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		requestLocation, _ := apiResponse.Location()
+		requestLocation, _ := apiResponse.SafeLocation()
 		return diagutil.ToDiags(d, fmt.Errorf("error fetching server: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 	if foundServer.Entities.Nics.Items != nil {
@@ -872,12 +872,12 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		requestLocation, _ := apiResponse.Location()
+		requestLocation, _ := apiResponse.SafeLocation()
 		return diagutil.ToDiags(d, fmt.Errorf("error occurred while updating server: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		requestLocation, _ := apiResponse.Location()
+		requestLocation, _ := apiResponse.SafeLocation()
 		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
@@ -903,7 +903,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 				_, apiResponse, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, dcId, d.Id(), volumeIdStr).Execute()
 				logApiRequestTime(apiResponse)
 				if err != nil {
-					requestLocation, _ := apiResponse.Location()
+					requestLocation, _ := apiResponse.SafeLocation()
 					return diagutil.ToDiags(d, fmt.Errorf("an error occurred while getting a volume dcId: %s ID: %s Response: %w", dcId, volumeId, err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 				}
 				if v, ok := d.GetOk(volumePath + "name"); ok {
@@ -933,12 +933,12 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 				logApiRequestTime(apiResponse)
 
 				if err != nil {
-					requestLocation, _ := apiResponse.Location()
+					requestLocation, _ := apiResponse.SafeLocation()
 					return diagutil.ToDiags(d, fmt.Errorf("error patching volume: (%w)", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 				}
 
 				if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-					requestLocation, _ := apiResponse.Location()
+					requestLocation, _ := apiResponse.SafeLocation()
 					return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 				}
 			}
@@ -1056,7 +1056,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 			}
 			logApiRequestTime(apiResponse)
 			if err != nil {
-				requestLocation, _ := apiResponse.Location()
+				requestLocation, _ := apiResponse.SafeLocation()
 				return diagutil.ToDiags(d, fmt.Errorf("error nic (%w)", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 			}
 
@@ -1143,12 +1143,12 @@ func deleteInlineVolumes(ctx context.Context, d *schema.ResourceData, meta inter
 				log.Printf("[INFO] volume with ID: %v was not found during the deletion process, datacenter ID: %v, server ID: %v", volumeId.(string), dcId, d.Id())
 				continue
 			}
-			requestLocation, _ := apiResponse.Location()
+			requestLocation, _ := apiResponse.SafeLocation()
 			return diagutil.ToDiags(d, fmt.Errorf("error occurred while deleting volume with ID: %s %w", volumeId.(string), err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 		}
 
 		if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-			requestLocation, _ := apiResponse.Location()
+			requestLocation, _ := apiResponse.SafeLocation()
 			return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 		}
 
@@ -1168,7 +1168,7 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta inte
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		requestLocation, _ := apiResponse.Location()
+		requestLocation, _ := apiResponse.SafeLocation()
 		return diagutil.ToDiags(d, fmt.Errorf("error occurred while fetching a server: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
@@ -1182,13 +1182,13 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta inte
 	apiResponse, err = client.ServersApi.DatacentersServersDelete(ctx, dcId, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		requestLocation, _ := apiResponse.Location()
+		requestLocation, _ := apiResponse.SafeLocation()
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while deleting a server: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		requestLocation, _ := apiResponse.Location()
+		requestLocation, _ := apiResponse.SafeLocation()
 		return diagutil.ToDiags(d, fmt.Errorf("error getting state change for datacenter delete %w", errState), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 

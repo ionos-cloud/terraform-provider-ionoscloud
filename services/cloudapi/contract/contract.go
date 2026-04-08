@@ -3,6 +3,7 @@ package contract
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 )
@@ -14,7 +15,9 @@ func GetContractNumber(client *bundleclient.SdkBundle) string {
 	if err != nil {
 		return ""
 	}
-	contracts, _, err := apiClient.ContractResourcesApi.ContractsGet(context.Background()).Execute()
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	contracts, _, err := apiClient.ContractResourcesApi.ContractsGet(ctx).Execute()
 	if err != nil {
 		return ""
 	}

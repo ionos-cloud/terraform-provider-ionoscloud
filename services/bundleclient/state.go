@@ -94,7 +94,7 @@ func WaitForStateChange(ctx context.Context, meta interface{}, d *schema.Resourc
 		return fmt.Errorf("cannot track resource state change, apiResponse was nil")
 	}
 
-	if loc, err = apiResponse.Location(); err != nil {
+	if loc, err = apiResponse.SafeLocation(); err != nil {
 		return fmt.Errorf("error retrieving 'location' header: %w", err)
 	}
 	_, errState := GetStateChangeConf(meta, d, loc.String(), opTimeout).WaitForStateContext(ctx)

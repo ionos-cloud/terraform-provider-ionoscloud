@@ -107,4 +107,4 @@ require (
 
 replace github.com/ionos-cloud/sdk-go-bundle/shared => ../sdk-go-bundle/shared
 
-replace github.com/ionos-cloud/sdk-go/v6 => /home/rmocanu/work/sdk-resources/dist/sdk-clouadapi-go
+replace github.com/ionos-cloud/sdk-go/v6 => /home/rmocanu/work/sdk-resources/dist/sdk-cloudapi-v6-go
