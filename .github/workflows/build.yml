@@ -33,6 +33,7 @@ jobs:
           go mod tidy
           if [ -n "$(git diff -- go.mod go.sum)" ]; then
             echo "::error::go.mod or go.sum are not tidy. Please run 'go mod tidy' and commit the changes."
+            echo "git diff -- go.mod go.sum:"
             git diff -- go.mod go.sum
             exit 1
           fi
