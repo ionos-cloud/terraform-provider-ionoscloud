@@ -47,12 +47,6 @@ resource "ionoscloud_server" "example" {
   }
 }
 
-locals {
- prefix                   = format("%s/%s", ionoscloud_server.example.nic[0].ips[0], "24")
- database_ip              = cidrhost(local.prefix, 1)
- database_ip_cidr         = format("%s/%s", local.database_ip, "24")
-}
-
 resource "ionoscloud_inmemorydb_replicaset" "example" {
   location = ionoscloud_datacenter.example.location
   display_name = "ExampleReplicaSet"
@@ -67,7 +61,7 @@ resource "ionoscloud_inmemorydb_replicaset" "example" {
   connections   {
     datacenter_id         =  ionoscloud_datacenter.example.id
     lan_id                =  ionoscloud_lan.example.id
-    cidr                  =  local.database_ip_cidr
+    cidr                  =  "database_ip_cidr_from_nic"
   }
   maintenance_window {
     day_of_the_week       = "Monday"

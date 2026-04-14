@@ -77,7 +77,7 @@ resource "ionoscloud_lan" "example" {
   datacenter_id     = ionoscloud_datacenter.example.id
   public            = true
   name              = "Lan Example"
-  ipv6_cidr_block = cidrsubnet(ionoscloud_datacenter.example.ipv6_cidr_block,8,10)
+  ipv6_cidr_block   = "ipv6_cidr_block_from_dc"
 }
 resource "ionoscloud_cube_server" "example" {
   name              = "Server Example"
@@ -98,11 +98,11 @@ resource "ionoscloud_cube_server" "example" {
     ips             = [ ionoscloud_ipblock.webserver_ipblock.ips[0], ionoscloud_ipblock.webserver_ipblock.ips[1]]
     
     dhcpv6          = false
-    ipv6_cidr_block = cidrsubnet(ionoscloud_lan.example.ipv6_cidr_block,16,5)
+    ipv6_cidr_block = "ipv6_cidr_block_from_lan"
     ipv6_ips        = [ 
-                        cidrhost(cidrsubnet(ionoscloud_lan.example.ipv6_cidr_block,16,5),1),
-                        cidrhost(cidrsubnet(ionoscloud_lan.example.ipv6_cidr_block,16,5),2),
-                        cidrhost(cidrsubnet(ionoscloud_lan.example.ipv6_cidr_block,16,5),3)
+                        "ipv6_ip1",
+                        "ipv6_ip2",
+                        "ipv6_ip3",
                       ]
 
     firewall_active = true

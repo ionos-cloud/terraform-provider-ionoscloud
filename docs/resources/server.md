@@ -111,7 +111,7 @@ resource "ionoscloud_lan" "example" {
   datacenter_id = ionoscloud_datacenter.example.id
   public = true
   name = "public"
-  ipv6_cidr_block = cidrsubnet(ionoscloud_datacenter.example.ipv6_cidr_block,8,10)
+  ipv6_cidr_block = "ipv6_cidr_block_from_lan"
 }
 resource "ionoscloud_server" "example" {
   name = "Resource Server Test"
@@ -140,11 +140,11 @@ resource "ionoscloud_server" "example" {
     ips = [ ionoscloud_ipblock.webserver_ipblock.ips[0], ionoscloud_ipblock.webserver_ipblock.ips[1] ]
 
     dhcpv6 = true
-    ipv6_cidr_block = cidrsubnet(ionoscloud_lan.example.ipv6_cidr_block,16,24)
+    ipv6_cidr_block = "ipv6_cidr_block_from_lan"
     ipv6_ips        = [ 
-                        cidrhost(cidrsubnet(ionoscloud_lan.example.ipv6_cidr_block,16,24),10),
-                        cidrhost(cidrsubnet(ionoscloud_lan.example.ipv6_cidr_block,16,24),20),
-                        cidrhost(cidrsubnet(ionoscloud_lan.example.ipv6_cidr_block,16,24),30)
+                        "ipv6_ip1",
+                        "ipv6_ip2",
+                        "ipv6_ip3"
                       ]
 
     firewall {
@@ -312,7 +312,7 @@ Resource Server can be imported using the `resource id` and the `datacenter id`,
 ```shell
 terraform import ionoscloud_server.myserver datacenter uuid/server uuid
 ```
-Optionally, you can pass `primary_nic` and `firewallrule_id` so terraform will know to import also the first nic and firewall rule (if it exists on the server):
+Optionally, you can pass `primary_nic` and `firewallrule_id` so pulumi will know to import also the first nic and firewall rule (if it exists on the server):
 ```shell
 terraform import ionoscloud_server.myserver datacenter uuid/server uuid/primary nic id/firewall rule id
 ```
@@ -322,7 +322,4 @@ terraform import ionoscloud_server.myserver datacenter uuid/server uuid/primary 
 Please note that for any secondary volume, you need to set the **licence_type** property to **UNKNOWN**
 
 ⚠️ **Note:** Important for deleting an `firewall` rule from within a list of inline resources defined on the same nic. There is one limitation to removing one firewall rule
-from the middle of the list of `firewall` rules. Terraform will actually modify the existing rules and delete the last one.
-More details [here](https://github.com/hashicorp/terraform/issues/14275). There is a workaround described in the issue 
-that involves moving the resources in the list prior to deletion.
-`terraform state mv <resource-name>.<resource-id>[<i>] <resource-name>.<resource-id>[<j>]`
+from the middle of the list of `firewall` rules. The existing rules will be modified and the last one will be deleted.

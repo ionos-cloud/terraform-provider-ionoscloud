@@ -47,12 +47,6 @@ resource "ionoscloud_server" "example" {
   }
 }
 
-locals {
- prefix                   = format("%s/%s", ionoscloud_server.example.nic[0].ips[0], "24")
- database_ip              = cidrhost(local.prefix, 1)
- database_ip_cidr         = format("%s/%s", local.database_ip, "24")
-}
-
 resource "ionoscloud_mariadb_cluster" "example" {
   mariadb_version         = "10.6"
   location                = "de/txl"
@@ -63,7 +57,7 @@ resource "ionoscloud_mariadb_cluster" "example" {
   connections   {
     datacenter_id         =  ionoscloud_datacenter.example.id 
     lan_id                =  ionoscloud_lan.example.id 
-    cidr                  =  local.database_ip_cidr
+    cidr                  =  "database_ip_cidr_from_nic"
   }
   display_name            = "MariaDB_cluster"
   maintenance_window {

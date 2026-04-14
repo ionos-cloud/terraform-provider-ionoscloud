@@ -16,24 +16,9 @@ Manages a **Certificate** on IonosCloud.
 ```hcl
 resource "ionoscloud_certificate" "cert" {
   name = "add_name_here"
-  certificate = "${file("path_to_cert")}"
-  certificate_chain = "${file("path_to_cert_chain")}"
-  private_key = "${file("path_to_private_key")}"
-}
-```
-
-**NOTE**: You can also provide the values as multiline strings, as seen below:
-
-```hcl
-resource "ionoscloud_certificate" "cert" {
-  name = "add_name_here"
-  certificate = <<EOT
------BEGIN CERTIFICATE-----
-cert_body_here
------END CERTIFICATE-----
-EOT
-  certificate_chain = "${file("path_to_cert_chain")}"
-  private_key = "${file("path_to_private_key")}"
+  certificate = "tour_certificate"
+  certificate_chain = "your_certificate_chain"
+  private_key = "your_private_key"
 }
 ```
 

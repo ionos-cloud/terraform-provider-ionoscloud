@@ -101,14 +101,6 @@ resource "random_password" "server_image_password" {
   special          = false
 }
 
-locals {
-  lan_ipv6_cidr_block_parts = split("/", ionoscloud_datacenter.test_datacenter.ipv6_cidr_block)
-  lan_ipv6_cidr_block = format("%s/%s", local.lan_ipv6_cidr_block_parts[0], "64")
-
-  ipv4_cidr_block = format("%s/%s", ionoscloud_server.test_server.nic[0].ips[0], "24")
-  ipv6_cidr_block = format("%s/%s", local.lan_ipv6_cidr_block_parts[0], "80")
-}
-
 resource "ionoscloud_vpn_ipsec_gateway" "example" {
 	name = "ipsec-gateway"
 	location = "de/fra"
@@ -119,8 +111,8 @@ resource "ionoscloud_vpn_ipsec_gateway" "example" {
 	connections {
 		datacenter_id = ionoscloud_datacenter.test_datacenter.id
 		lan_id = ionoscloud_lan.test_lan.id
-		ipv4_cidr = local.ipv4_cidr_block
-		ipv6_cidr = local.ipv6_cidr_block
+    ipv4_cidr = "ipv4_cidr_block_from_nic"
+    ipv6_cidr = "ipv6_cidr_block_from_dc"
 	}
     maintenance_window {
         day_of_the_week       = "Monday"

@@ -15,11 +15,11 @@ When this happens, please refine your search string so that it is specific enoug
 
 ## Example Usage
 
-### By display_name
+### By username
 ```hcl
 data "ionoscloud_mongo_user" "example" {
   cluster_id	= "cluster_id"
-  display_name	= "display_name"
+  username	= "username"
 }
 ```
 

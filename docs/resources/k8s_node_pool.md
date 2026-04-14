@@ -25,9 +25,6 @@ resource "ionoscloud_lan" "example" {
   datacenter_id         = ionoscloud_datacenter.example.id
   public                = false
   name                  = "Lan Example"
-  lifecycle {
-    create_before_destroy = true
-  }
 }
 
 resource "ionoscloud_ipblock" "example" {
@@ -131,15 +128,8 @@ Immutable fields list: name, cpu_family, availability_zone, cores_count, ram_siz
 ⚠️ **Note**:
 
 Be careful when using `auto_scaling` since the number of nodes can change. Because of that, when running
-`terraform plan`, Terraform will think that an update is required (since `node_count` from the `tf` plan will be different
-from the number of nodes set by the scheduler). To avoid that, you can use:
-```hcl
-lifecycle {
-    ignore_changes = [
-      node_count
-    ]
-  }
-```
+`terraform plan`, An update will be considered required (since `node_count` from the `tf` plan will be different
+from the number of nodes set by the scheduler). To avoid that, you can use `ignore_changes`.
 This will also ignore the manual changes for `node_count` made in the `tf` plan.
 You can read more details about the `ignore_changes` attribute [here](https://developer.hashicorp.com/terraform/language/meta-arguments/lifecycle).
 ## Import
@@ -150,9 +140,9 @@ A Kubernetes Node Pool resource can be imported using its Kubernetes cluster's u
 terraform import ionoscloud_k8s_node_pool.demo k8s_cluster_uuid/k8s_nodepool_id
 ```
 
-This can be helpful when you want to import kubernetes node pools which you have already created manually or using other means, outside of terraform, towards the goal of managing them via Terraform
+This can be helpful when you want to import kubernetes node pools which you have already created manually or using other means, outside of pulumi, towards the goal of managing them via Pulumi
 
 ⚠️ **_Warning: **During a maintenance window, k8s can update your `k8s_version` if the old one reaches end of life. This upgrade will not be shown in the plan, as we prevent 
-terraform from doing a downgrade, as downgrading `k8s_version` is not supported._**
+pulumi from doing a downgrade, as downgrading `k8s_version` is not supported._**
 
 ⚠️ **_Warning: **If you are upgrading from v5.x.x to v6.x.x**: You have to modify you plan for lans to match the new structure, by putting the ids from the old slice in lans.id fields. This is not backwards compatible._**

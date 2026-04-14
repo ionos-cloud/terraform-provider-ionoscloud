@@ -136,22 +136,3 @@ provider "kubernetes" {
   token =  data.ionoscloud_dataplatform_cluster.example.config[0].users[0].user.token
 }
 ```
-
-
-## Example of dumping the kube_config raw data into a yaml file
-
-**NOTE**: Dumping `kube_config` data into files poses a security risk.
-
-**NOTE**: Using `sensitive_content` for `local_file` does not show the data written to the file during the plan phase.
-
-```
-data "ionoscloud_dataplatform_cluster" "example" {
-  name = "Dataplatform_Cluster_Example"
-}
-
-resource "local_file" "kubeconfig" {
-    sensitive_content     = yamlencode(jsondecode(data.ionoscloud_dataplatform_cluster.example.kube_config))
-    filename              = "kubeconfig.yaml"
-}
-
-```
