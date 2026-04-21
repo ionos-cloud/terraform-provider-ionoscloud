@@ -117,7 +117,7 @@ func (d *accessKeyDataSource) Read(ctx context.Context, req datasource.ReadReque
 			return
 		}
 		if err != nil {
-			resp.Diagnostics.AddError("an error occurred while fetching the accesskey with", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceID: id, StatusCode: apiResponse.SafeStatusCode()}).Error())
+			resp.Diagnostics.AddError("an error occurred while fetching the accesskey", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceID: id, StatusCode: apiResponse.SafeStatusCode()}).Error())
 			return
 		}
 		if !data.AccessKey.IsNull() && accessKey.Properties.AccessKey != accessKeyID {
