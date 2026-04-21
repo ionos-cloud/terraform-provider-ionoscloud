@@ -1,6 +1,7 @@
 package configlog
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -100,11 +101,36 @@ func logFileConfigEndpoints(fileConfig *fileconfiguration.FileConfig) {
 
 	for _, env := range fileConfig.Environments {
 		if env.Name == envName {
-			var products []string
-			for _, product := range env.Products {
-				products = append(products, fmt.Sprintf("%s(%d)", product.Name, len(product.Endpoints)))
+			type endpointJSON struct {
+				URL           string `json:"url"`
+				Location      string `json:"location,omitempty"`
+				SkipTLSVerify bool   `json:"skipTlsVerify,omitempty"`
+				CertAuthBytes int    `json:"certAuthDataBytes,omitempty"`
 			}
-			log.Printf("[DEBUG] Environment %q: %d product(s): %s", env.Name, len(env.Products), strings.Join(products, ", "))
+			type productJSON struct {
+				Name      string         `json:"name"`
+				Endpoints []endpointJSON `json:"endpoints"`
+			}
+
+			products := make([]productJSON, 0, len(env.Products))
+			for _, product := range env.Products {
+				p := productJSON{Name: product.Name}
+				for _, ep := range product.Endpoints {
+					e := endpointJSON{URL: ep.Name, Location: ep.Location, SkipTLSVerify: ep.SkipTLSVerify}
+					if ep.CertificateAuthData != "" {
+						e.CertAuthBytes = len(ep.CertificateAuthData)
+					}
+					p.Endpoints = append(p.Endpoints, e)
+				}
+				products = append(products, p)
+			}
+
+			jsonBytes, err := json.Marshal(products)
+			if err != nil {
+				log.Printf("[DEBUG] Environment %q: %d product(s) (failed to marshal: %s)", env.Name, len(env.Products), err)
+			} else {
+				log.Printf("[DEBUG] Environment %q: %d product(s): %s", env.Name, len(env.Products), string(jsonBytes))
+			}
 			return
 		}
 	}
@@ -190,6 +216,9 @@ func LogTLSConfig(insecureBool bool) {
 	}
 	if insecureBool {
 		parts = append(parts, "TLS verification disabled")
+	}
+	if pinnedCert := os.Getenv(shared.IonosPinnedCertEnvVar); pinnedCert != "" {
+		parts = append(parts, fmt.Sprintf("%s is set (%d bytes) — cert pinning active for all products", shared.IonosPinnedCertEnvVar, len(pinnedCert)))
 	}
 	if len(parts) > 0 {
 		log.Printf("[DEBUG] TLS: %s", strings.Join(parts, ", "))

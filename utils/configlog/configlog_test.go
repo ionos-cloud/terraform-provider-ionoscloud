@@ -182,8 +182,43 @@ func TestLogFileConfigEndpoints_WithEnvironment(t *testing.T) {
 	})
 
 	assertContains(t, output, `Environment "production": 2 product(s):`)
-	assertContains(t, output, "cloud(1)")
-	assertContains(t, output, "dns(2)")
+	assertContains(t, output, `"name":"cloud"`)
+	assertContains(t, output, `"url":"https://api.example.com"`)
+	assertContains(t, output, `"name":"dns"`)
+	assertContains(t, output, `"url":"https://dns1.example.com"`)
+	assertContains(t, output, `"url":"https://dns2.example.com"`)
+}
+
+func TestLogFileConfigEndpoints_WithTLSAndCertPerEndpoint(t *testing.T) {
+	cfg := &fileconfiguration.FileConfig{
+		CurrentProfile: "prod",
+		Profiles: []fileconfiguration.Profile{
+			{Name: "prod", Environment: "staging"},
+		},
+		Environments: []fileconfiguration.Environment{
+			{
+				Name: "staging",
+				Products: []fileconfiguration.Product{
+					{Name: "cloud", Endpoints: []fileconfiguration.Endpoint{
+						{Name: "https://api.staging.example.com", SkipTLSVerify: true, CertificateAuthData: "some-cert-data-here"},
+					}},
+					{Name: "dns", Endpoints: []fileconfiguration.Endpoint{
+						{Name: "https://dns.staging.example.com", Location: "de/fra"},
+					}},
+				},
+			},
+		},
+	}
+
+	output := captureLog(func() {
+		logFileConfigEndpoints(cfg)
+	})
+
+	assertContains(t, output, `"skipTlsVerify":true`)
+	assertContains(t, output, `"certAuthDataBytes":19`)
+	assertContains(t, output, `"location":"de/fra"`)
+	assertContains(t, output, `"url":"https://api.staging.example.com"`)
+	assertContains(t, output, `"url":"https://dns.staging.example.com"`)
 }
 
 func TestLogFileConfigEndpoints_NoMatchingEnvironment(t *testing.T) {
@@ -224,6 +259,18 @@ func TestLogTLSConfig_Secure(t *testing.T) {
 	})
 
 	assertNotContains(t, output, "TLS")
+}
+
+func TestLogTLSConfig_WithPinnedCert(t *testing.T) {
+	t.Setenv("IONOS_ALLOW_INSECURE", "")
+	t.Setenv("IONOS_PINNED_CERT", "sha256-fingerprint-here")
+
+	output := captureLog(func() {
+		LogTLSConfig(false)
+	})
+
+	assertContains(t, output, "IONOS_PINNED_CERT is set")
+	assertContains(t, output, "23 bytes")
 }
 
 func TestLogEndpoint_Set(t *testing.T) {
