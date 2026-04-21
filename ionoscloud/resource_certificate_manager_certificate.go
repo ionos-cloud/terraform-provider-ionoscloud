@@ -145,7 +145,7 @@ func resourceCertificateManagerUpdate(ctx context.Context, d *schema.ResourceDat
 
 	_, apiResponse, err := client.UpdateCertificate(ctx, d.Id(), *certPatchDto)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating certificate with, %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating certificate: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if err = utils.WaitForResourceToBeReady(ctx, d, client.IsCertReady); err != nil {

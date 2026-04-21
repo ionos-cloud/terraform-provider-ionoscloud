@@ -461,7 +461,7 @@ func resourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData, m
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while retrieving Autoscaling Group with, %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return diagutil.ToDiags(d, fmt.Errorf("error while retrieving Autoscaling Group: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	log.Printf("[INFO] successfully retrieved Autoscaling Group %s: %+v", d.Id(), group)

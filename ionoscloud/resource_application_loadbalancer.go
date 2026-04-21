@@ -201,7 +201,7 @@ func resourceApplicationLoadBalancerCreate(ctx context.Context, d *schema.Resour
 						if diags != nil {
 							log.Printf("[ERROR] could not delete alb %v", diags)
 						}
-						diags = diagutil.ToDiags(d, fmt.Errorf("error creating flowlog for application loadbalancer: %w, %s", err, responseBody(apiResponse)), nil)
+						diags = diagutil.ToDiags(d, fmt.Errorf("error creating flowlog for application loadbalancer: %w", err), nil)
 						return diags
 					}
 				}
@@ -438,7 +438,7 @@ func resourceApplicationLoadBalancerImport(ctx context.Context, d *schema.Resour
 	flowLog, apiResponse, err := fw.GetFlowLogForALB(ctx, datacenterId, albId, 0)
 	if err != nil {
 		if !apiResponse.HttpNotFound() {
-			return nil, diagutil.ToError(d, fmt.Errorf("error finding flowlog for application loadbalancer: %w, %s", err, responseBody(apiResponse)), nil)
+			return nil, diagutil.ToError(d, fmt.Errorf("error finding flowlog for application loadbalancer: %w, %s", err, responseBody(apiResponse)), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 	}
 	if err := setApplicationLoadBalancerData(d, &alb, flowLog); err != nil {
