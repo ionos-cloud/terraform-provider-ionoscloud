@@ -103,10 +103,7 @@ func logApiRequestTime(resp *ionoscloud.APIResponse) {
 }
 
 func httpNotFound(resp *ionoscloud.APIResponse) bool {
-	if resp.SafeStatusCode() == http.StatusNotFound {
-		return true
-	}
-	return false
+	return resp.SafeStatusCode() == http.StatusNotFound
 }
 
 // splitImportID splits the import ID into location and a slice of resource identifiers. The import ID
