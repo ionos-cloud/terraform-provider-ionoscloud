@@ -148,9 +148,9 @@ func dataSourceTemplateRead(ctx context.Context, d *schema.ResourceData, meta in
 	var template ionoscloud.Template
 
 	if results == nil || len(results) == 0 {
-		return diagutil.ToDiags(d, fmt.Errorf("no template found with the specified criteria: name = %s, cores = %v, ram = %v, storage_size = %v", name.(string), cores.(float64), ram.(float64), storageSize.(float64)), nil)
+		return diagutil.ToDiags(d, fmt.Errorf("no template found with the specified criteria: name = %v, cores = %v, ram = %v, storage_size = %v", name, cores, ram, storageSize), nil)
 	} else if len(results) > 1 {
-		return diagutil.ToDiags(d, fmt.Errorf("more than one template found with the specified criteria: name = %s, cores = %v, ram = %v, storage_size = %v", name.(string), cores.(float64), ram.(float64), storageSize.(float64)), nil)
+		return diagutil.ToDiags(d, fmt.Errorf("more than one template found with the specified criteria: name = %v, cores = %v, ram = %v, storage_size = %v", name, cores, ram, storageSize), nil)
 	} else {
 		template = results[0]
 	}
