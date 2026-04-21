@@ -4,21 +4,35 @@
 - Add validation error when update-only attributes are set during snapshot creation
 - Add more information to error messages
 
+## 6.7.27
 ### Features
 - Add `nic_multi_queue` attribute to the `ionoscloud_servers` data source.
+- Add DBaaS PostgreSQL v2 support:
+  - New resource: `ionoscloud_pg_cluster_v2`
+  - New data sources: `ionoscloud_pg_cluster_v2`, `ionoscloud_pg_clusters_v2`, `ionoscloud_pg_backups_v2`, `ionoscloud_pg_versions_v2`, `ionoscloud_pg_backup_location_v2`
 
 ### Testing
-- Add import tests for CUBE servers.
 - Add checks for the `nic_multi_queue` attribute inside VCPU servers tests.
 - Modify `ionoscloud_servers` data source test to include a check for the `nic_multi_queue` attribute.
 
+## 6.7.26
 ### Fixes
- * The ionoscloud_s3_bucket_policy resource now correctly handles all standard S3 Principal representations:
+- The ionoscloud_s3_bucket_policy resource now correctly handles all standard S3 Principal representations:
   - "Principal": "*" — wildcard string
   - "Principal": ["arn:...", "*"] — flat array
   - "Principal": {"AWS": "arn:..."} — object with single string
   - "Principal": {"AWS": ["arn:...", "arn:..."]} — object with array
- - Improved error message when `image_name` matches an image that has a non-HDD type (e.g. CDROM) or is in a different location. The error now reports the found image's type and location.
+- Make DNS Record name immutable, fixes [#953](https://github.com/ionos-cloud/terraform-provider-ionoscloud/pull/953)
+- Improved error message when `image_name` matches an image that has a non-HDD type (e.g. CDROM) or is in a different location. The error now reports the found image's type and location.
+
+### Testing
+- Add import tests for CUBE servers.
+
+### Docs
+- Update documentation for `ionoscloud_nsg_firewallrule`, `ionoscloud_natgateway` and `ionoscloud_ipfailover` resources
+
+### Enhancements
+- Add `sbom` to `release` workflow
 
 ## 6.7.25
 ### Features

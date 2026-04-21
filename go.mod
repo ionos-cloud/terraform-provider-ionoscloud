@@ -22,6 +22,7 @@ require (
 	github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb/v2 v2.1.0
 	github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2 v2.1.1
 	github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2 v2.0.5
+	github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v3 v3.0.1
 	github.com/ionos-cloud/sdk-go-bundle/products/dns/v2 v2.2.2
 	github.com/ionos-cloud/sdk-go-bundle/products/kafka/v2 v2.1.0
 	github.com/ionos-cloud/sdk-go-bundle/products/logging/v2 v2.2.0
@@ -31,11 +32,11 @@ require (
 	github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2 v2.0.1
 	github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2 v2.0.1
 	github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.2
-	github.com/ionos-cloud/sdk-go-bundle/shared v0.1.8
+	github.com/ionos-cloud/sdk-go-bundle/shared v0.1.10
 	github.com/ionos-cloud/sdk-go/v6 v6.3.6
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/stretchr/testify v1.10.0
-	golang.org/x/crypto v0.39.0
+	golang.org/x/crypto v0.49.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -47,8 +48,8 @@ require (
 	github.com/kr/pretty v0.3.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rogpeppe/go-internal v1.12.0 // indirect
-	golang.org/x/sync v0.15.0 // indirect
-	golang.org/x/tools v0.33.0 // indirect
+	golang.org/x/sync v0.20.0 // indirect
+	golang.org/x/tools v0.42.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 )
@@ -78,7 +79,7 @@ require (
 	github.com/hashicorp/terraform-exec v0.23.0 // indirect
 	github.com/hashicorp/terraform-json v0.25.0 // indirect
 	github.com/hashicorp/terraform-plugin-go v0.28.0
-	github.com/hashicorp/terraform-plugin-log v0.9.0 // indirect
+	github.com/hashicorp/terraform-plugin-log v0.9.0
 	github.com/hashicorp/terraform-registry-address v0.2.5 // indirect
 	github.com/hashicorp/terraform-svchost v0.1.1 // indirect
 	github.com/hashicorp/yamux v0.1.1 // indirect
@@ -94,17 +95,15 @@ require (
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	github.com/zclconf/go-cty v1.16.3 // indirect
-	golang.org/x/mod v0.25.0 // indirect
-	golang.org/x/net v0.40.0 // indirect
+	golang.org/x/mod v0.33.0 // indirect
+	golang.org/x/net v0.51.0 // indirect
 	golang.org/x/oauth2 v0.34.0 // indirect
-	golang.org/x/sys v0.33.0 // indirect
-	golang.org/x/text v0.26.0 // indirect
+	golang.org/x/sys v0.42.0 // indirect
+	golang.org/x/text v0.35.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250218202821-56aae31c358a // indirect
 	google.golang.org/grpc v1.72.1 // indirect
 	google.golang.org/protobuf v1.36.6 // indirect
 )
-
-replace github.com/ionos-cloud/sdk-go-bundle/shared => ../sdk-go-bundle/shared
 
 replace github.com/ionos-cloud/sdk-go/v6 => /home/rmocanu/work/sdk-resources/dist/sdk-cloudapi-v6-go

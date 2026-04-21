@@ -2,6 +2,7 @@ package monitoring
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"runtime"
 	"strings"
@@ -13,6 +14,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/configlog"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
@@ -63,15 +65,18 @@ var (
 func (c *Client) ChangeConfigURL(location string) {
 	config := c.sdkClient.GetConfig()
 	if location == "" && os.Getenv(ionosAPIURLMonitoring) != "" {
+		url := utils.CleanURL(os.Getenv(ionosAPIURLMonitoring))
+		log.Printf("[DEBUG] Monitoring: endpoint from %s: %s", ionosAPIURLMonitoring, url)
 		config.Servers = shared.ServerConfigurations{
 			{
-				URL: utils.CleanURL(os.Getenv(ionosAPIURLMonitoring)),
+				URL: url,
 			},
 		}
 		return
 	}
 	for _, server := range config.Servers {
 		if strings.EqualFold(server.Description, shared.EndpointOverridden+location) || strings.EqualFold(server.URL, locationToURL[location]) {
+			log.Printf("[DEBUG] Monitoring: endpoint for location %s: %s", configlog.FormatLocation(location), server.URL)
 			config.Servers = shared.ServerConfigurations{
 				{
 					URL:         server.URL,
@@ -81,4 +86,5 @@ func (c *Client) ChangeConfigURL(location string) {
 			return
 		}
 	}
+	log.Printf("[DEBUG] Monitoring: endpoint for location %s: %s", configlog.FormatLocation(location), locationToURL[location])
 }

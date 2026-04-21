@@ -30,6 +30,9 @@ const (
 // DefaultTier is the default tier value for Wireguard & IPSec gateways
 const DefaultTier = "STANDARD"
 
+// Object Storage Constants
+const DefaultS3Region = "eu-central-3"
+
 // Group Constants
 const DefaultGetUsersData = true
 
@@ -293,6 +296,14 @@ const (
 	PsqlBackupsTest              = "test_dbaas_backups"
 	PsqlVersionsResource         = "ionoscloud_pg_versions"
 	PsqlVersionsTest             = "test_dbaas_versions"
+
+	// PgSql v2 constants
+	PsqlV2ClusterResource          = "ionoscloud_pg_cluster_v2"
+	PsqlV2ClusterDataSource        = "ionoscloud_pg_cluster_v2"
+	PsqlV2ClustersDataSource       = "ionoscloud_pg_clusters_v2"
+	PsqlV2BackupLocationDataSource = "ionoscloud_pg_backup_location_v2"
+	PsqlV2BackupsDataSource        = "ionoscloud_pg_backups_v2"
+	PsqlV2VersionsDataSource       = "ionoscloud_pg_versions_v2"
 
 	// MariaDB constants
 	DBaaSMariaDBClusterResource       = "ionoscloud_mariadb_cluster"

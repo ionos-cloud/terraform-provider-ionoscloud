@@ -6,11 +6,13 @@ import (
 	"net/http"
 	"os"
 	"runtime"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	cr "github.com/ionos-cloud/sdk-go-bundle/products/containerregistry/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2"
+	pgsqlv2sdk "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v3"
 	"github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/failover"
@@ -25,6 +27,7 @@ import (
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/inmemorydb"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/mariadb"
+	pgsqlv2Service "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/pgsqlv2"
 	dnsService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dns"
 	kafkaService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/kafka"
 	loggingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/logging"
@@ -33,6 +36,7 @@ import (
 	objectStorageService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstorage"
 	objectStorageManagementService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstoragemanagement"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/vpn"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/configlog"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
@@ -92,18 +96,19 @@ func (c SdkBundle) newBundleClientConfig(userAgent string) *shared.Configuration
 // or false if the client should be returned immediately using the provided config (e.g. env var provided as parameter or default).
 func (c SdkBundle) shouldApplyOverridesCustomEnv(product, productEnvVar string) bool {
 	if os.Getenv(shared.IonosApiUrlEnvVar) != "" {
-		log.Printf("[DEBUG] Using custom endpoint from %s env variable", shared.IonosApiUrlEnvVar)
+		log.Printf("[DEBUG] %s: using endpoint from %s: %s", product, shared.IonosApiUrlEnvVar, os.Getenv(shared.IonosApiUrlEnvVar))
 		return false
 	}
 	if productEnvVar != "" && os.Getenv(productEnvVar) != "" {
-		log.Printf("[DEBUG] Using custom endpoint from %s env variable", productEnvVar)
+		log.Printf("[DEBUG] %s: using endpoint from %s: %s", product, productEnvVar, os.Getenv(productEnvVar))
 		return false
 	}
 	if c.fileConfig == nil {
+		log.Printf("[DEBUG] No file config available for %s", product)
 		return false
 	}
 	if c.fileConfig.GetProductOverrides(product) == nil {
-		log.Printf("[DEBUG] Missing config for %s product in file config, using SDK defaults", product)
+		log.Printf("[DEBUG] %s: no config in file config, using SDK defaults", product)
 		return false
 	}
 	return true
@@ -143,6 +148,7 @@ func (c SdkBundle) NewContainerRegistryClient(location string) (*crService.Clien
 			fileconfiguration.ContainerRegistry, location,
 		)
 	}
+	log.Printf("[DEBUG] Container Registry: endpoint for location %s: %s", configlog.FormatLocation(location), endpoint.Name)
 	config.Servers = shared.ServerConfigurations{
 		{
 			URL:         endpoint.Name,
@@ -181,6 +187,7 @@ func (c SdkBundle) NewMongoClient(location string) (*dbaasService.MongoClient, e
 			fileconfiguration.Mongo, location,
 		)
 	}
+	log.Printf("[DEBUG] Mongo: endpoint for location %s: %s", configlog.FormatLocation(location), endpoint.Name)
 	config.Servers = shared.ServerConfigurations{
 		{
 			URL:         endpoint.Name,
@@ -219,6 +226,7 @@ func (c SdkBundle) NewPsqlClient(location string) (*dbaasService.PsqlClient, err
 			fileconfiguration.PSQL, location,
 		)
 	}
+	log.Printf("[DEBUG] PostgreSQL: endpoint for location %s: %s", configlog.FormatLocation(location), endpoint.Name)
 	config.Servers = shared.ServerConfigurations{
 		{
 			URL:         endpoint.Name,
@@ -228,6 +236,45 @@ func (c SdkBundle) NewPsqlClient(location string) (*dbaasService.PsqlClient, err
 	config.HTTPClient = &http.Client{}
 	config.HTTPClient.Transport = shared.CreateTransport(endpoint.SkipTLSVerify, endpoint.CertificateAuthData)
 	return dbaasService.NewPsqlClientFromConfig(config), nil
+}
+
+// NewPgSQLV2Client creates a new PostgreSQL v2 client for a specific location.
+func (c SdkBundle) NewPgSQLV2Client(location string) (*pgsqlv2Service.Client, error) {
+	config := c.newBundleClientConfig(fmt.Sprintf(
+		"terraform-provider/%s_ionos-cloud-sdk-go-dbaas-pgsqlv2/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
+		c.clientOptions.Version, pgsqlv2sdk.Version, c.clientOptions.TerraformVersion,
+		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
+	))
+
+	if c.fileConfig != nil {
+		endpoint := c.fileConfig.GetProductLocationOverrides(fileconfiguration.PSQLV2, location)
+		if endpoint == nil {
+			log.Printf("[WARN] product %q is missing from config file or location %q is not defined for product %q, using internal locations map to configure the endpoint", fileconfiguration.PSQLV2, location, fileconfiguration.PSQLV2)
+		} else {
+			config.Servers = shared.ServerConfigurations{
+				{
+					URL:         endpoint.Name,
+					Description: shared.EndpointOverridden + location,
+				},
+			}
+			config.HTTPClient = &http.Client{}
+			config.HTTPClient.Transport = shared.CreateTransport(endpoint.SkipTLSVerify, endpoint.CertificateAuthData)
+			return pgsqlv2Service.NewClientFromConfig(config), nil
+		}
+	}
+
+	endpoint := pgsqlv2Service.LocationToURL[location]
+	if endpoint == "" {
+		return nil, fmt.Errorf("can't configure endpoint for location %q, available locations: %s", location, strings.Join(pgsqlv2Service.AvailableLocations(), ", "))
+	}
+	config.Servers = shared.ServerConfigurations{
+		{
+			URL:         endpoint,
+			Description: "endpoint from the internal locations map, location: " + location,
+		},
+	}
+
+	return pgsqlv2Service.NewClientFromConfig(config), nil
 }
 
 // newCloudAPIClientConfig creates a new *ionoscloud.Configuration using the client options defined in the SdkBundle struct.
@@ -273,6 +320,7 @@ func (c SdkBundle) NewCloudAPIClient(location string) (*ionoscloud.APIClient, er
 			fileconfiguration.Cloud, location,
 		)
 	}
+	log.Printf("[DEBUG] Cloud API: endpoint for location %s: %s", configlog.FormatLocation(location), endpoint.Name)
 	config.Servers = ionoscloud.ServerConfigurations{
 		{
 			URL:         endpoint.Name,
@@ -323,7 +371,11 @@ func (c SdkBundle) NewCloudAPIClientWithFailover() (*ionoscloud.APIClient, error
 		})
 		log.Printf("[DEBUG] Adding global override endpoint %s (skipTLSVerify=%t) for %s product from file config",
 			ep.Name, ep.SkipTLSVerify, fileconfiguration.Cloud)
+		if ep.CertificateAuthData != "" {
+			log.Printf("[DEBUG] %s: certificateAuthData present (len=%d) for endpoint %s", fileconfiguration.Cloud, len(ep.CertificateAuthData), ep.Name)
+		}
 	}
+	log.Printf("[DEBUG] Failover for %s: strategy=%q, endpoints=%d", fileconfiguration.Cloud, failoverOptions.Strategy, len(failoverEndpoints))
 	if len(failoverEndpoints) == 0 {
 		return nil, fmt.Errorf("no global failover endpoints configured for %q", fileconfiguration.Cloud)
 	}
@@ -380,7 +432,11 @@ func (c SdkBundle) NewObjectStorageManagementClient() (*objectStorageManagementS
 		})
 		log.Printf("[DEBUG] Adding global override endpoint %s (skipTLSVerify=%t) for %s product from file config",
 			ep.Name, ep.SkipTLSVerify, fileconfiguration.ObjectStorageManagement)
+		if ep.CertificateAuthData != "" {
+			log.Printf("[DEBUG] %s: certificateAuthData present (len=%d) for endpoint %s", fileconfiguration.ObjectStorageManagement, len(ep.CertificateAuthData), ep.Name)
+		}
 	}
+	log.Printf("[DEBUG] Failover for %s: strategy=%q, endpoints=%d", fileconfiguration.ObjectStorageManagement, failoverOptions.Strategy, len(failoverEndpoints))
 
 	if len(failoverEndpoints) == 0 {
 		return nil, fmt.Errorf("no global failover endpoints configured for %q", fileconfiguration.ObjectStorageManagement)

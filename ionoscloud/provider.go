@@ -10,13 +10,13 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
 	contractService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/contract"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/configlog"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
@@ -78,7 +78,7 @@ func Provider() *schema.Provider {
 			"s3_region": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Default:     "eu-central-3",
+				Default:     constant.DefaultS3Region,
 				DefaultFunc: schema.EnvDefaultFunc("IONOS_S3_REGION", nil),
 				Description: "Region for IONOS Object Storage operations.",
 			},
@@ -267,10 +267,11 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	insecure, insecureSet := d.GetOk("insecure")
 	insecureBool := false
 
-	fileConfig, readFileErr := fileconfiguration.NewFromEnv()
-	if readFileErr != nil {
-		log.Printf("[DEBUG] Error reading file configuration: %s", readFileErr.Error())
-	}
+	fileConfig, readFileErr := configlog.LoadFileConfigWithLogging()
+	configlog.LogEndpointEnvVars()
+
+	fileConfigUsed := false
+	profileName := ""
 	if !tokenOk {
 		if !usernameOk || !passwordOk {
 			if readFileErr != nil {
@@ -283,12 +284,18 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 			token = profile.Credentials.Token
 			username = profile.Credentials.Username
 			password = profile.Credentials.Password
+			fileConfigUsed = true
+			profileName = profile.Name
 		}
 		if token == "" && (username == "" || password == "") {
 			return nil, diag.Errorf("missing credentials, either token or username and password must be set")
 		}
 	}
+
+	configlog.LogCredentialResolution(shared.Credentials{Token: token, Username: username, Password: password}, fileConfigUsed, profileName)
+
 	endpoint := utils.CleanURL(d.Get("endpoint").(string))
+	configlog.LogEndpoint(endpoint)
 
 	if contractNumber, contractOk := d.GetOk("contract_number"); contractOk {
 		// will inject x-contract-number to sdks
@@ -300,6 +307,8 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	if insecureSet {
 		insecureBool = insecure.(bool)
 	}
+	configlog.LogTLSConfig(insecureBool)
+
 	clientOptions := clientoptions.TerraformClientOptions{
 		ClientOptions: shared.ClientOptions{
 			Endpoint:      endpoint,
