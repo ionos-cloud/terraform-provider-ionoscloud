@@ -13,6 +13,7 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 func dataSourceNSGFirewallRuleSchema() map[string]*schema.Schema {
@@ -114,10 +115,10 @@ func dataSourceNSGRead(ctx context.Context, d *schema.ResourceData, meta interfa
 	name, nameOk := d.GetOk("name")
 
 	if idOk && nameOk {
-		return diag.FromErr(fmt.Errorf("id and name cannot be both specified at the same time"))
+		return diagutil.ToDiags(d, fmt.Errorf("id and name cannot be both specified at the same time"), nil)
 	}
 	if !idOk && !nameOk {
-		return diag.FromErr(fmt.Errorf("please provide either the network security group id or name"))
+		return diagutil.ToDiags(d, fmt.Errorf("please provide either the network security group id or name"), nil)
 	}
 
 	location := d.Get("location").(string)
@@ -131,15 +132,15 @@ func dataSourceNSGRead(ctx context.Context, d *schema.ResourceData, meta interfa
 		securityGroup, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsFindById(ctx, datacenterID, id.(string)).Depth(3).Execute()
 		apiResponse.LogInfo()
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while retrieving network security group with ID: %s, %w", id.(string), err))
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while retrieving network security group with ID: %s, %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
-		return diag.FromErr(setNSGDataSource(d, &securityGroup))
+		return diagutil.ToDiags(d, setNSGDataSource(d, &securityGroup), nil)
 	}
 
 	securityGroups, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsGet(ctx, datacenterID).Depth(3).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occurred while retrieving network security groups: %w", err))
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while retrieving network security groups: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	var results []ionoscloud.SecurityGroup
 	if securityGroups.Items != nil {
@@ -151,13 +152,13 @@ func dataSourceNSGRead(ctx context.Context, d *schema.ResourceData, meta interfa
 	}
 
 	if len(results) == 0 {
-		return diag.FromErr(fmt.Errorf("no network security group found with the specified name = %s", name))
+		return diagutil.ToDiags(d, fmt.Errorf("no network security group found with the specified name = %s", name), nil)
 	} else if len(results) > 1 {
-		return diag.FromErr(fmt.Errorf("more than one network security group found with the specified name = %s", name))
+		return diagutil.ToDiags(d, fmt.Errorf("more than one network security group found with the specified name = %s", name), nil)
 	}
 	securityGroup := results[0]
 	if err := setNSGDataSource(d, &securityGroup); err != nil {
-		return diag.FromErr(err)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	return nil

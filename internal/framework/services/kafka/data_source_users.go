@@ -15,6 +15,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	kafkaService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/kafka"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 var _ datasource.DataSourceWithConfigure = (*usersDataSource)(nil)
@@ -117,9 +118,12 @@ func (d *usersDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 
 	clusterID := data.ClusterID.ValueString()
 	location := data.Location.ValueString()
-	users, _, err := d.client.GetUsers(ctx, clusterID, location)
+	users, apiResponse, err := d.client.GetUsers(ctx, clusterID, location)
 	if err != nil {
-		resp.Diagnostics.AddError("API Error Reading Kafka Users", fmt.Sprintf("Failed to retrieve the list of Kafka users for cluster with ID: %s, error: %s", clusterID, err))
+		resp.Diagnostics.AddError("API Error Reading Kafka Users", diagutil.WrapError(err, &diagutil.ErrorContext{
+			StatusCode:     apiResponse.SafeStatusCode(),
+			AdditionalInfo: map[string]string{"Cluster ID": clusterID},
+		}).Error())
 		return
 	}
 

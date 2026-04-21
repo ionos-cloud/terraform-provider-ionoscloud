@@ -8,11 +8,13 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	cloudapiflowlog "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/flowlog"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	autoscaling "github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	as "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/autoscaling"
 )
@@ -371,27 +373,28 @@ func dataSourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData,
 	name, nameOk := d.GetOk("name")
 
 	if err := validateIDAndName(idOk, nameOk); err != nil {
-		return diag.FromErr(err)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	var (
-		group *autoscaling.Group
-		err   error
+		group       *autoscaling.Group
+		apiResponse *shared.APIResponse
+		err         error
 	)
 
 	if idOk {
-		group, err = fetchGroupByID(ctx, client, id.(string))
+		group, apiResponse, err = fetchGroupByID(ctx, client, id.(string))
 	} else {
-		group, err = fetchGroupByName(ctx, client, name.(string))
+		group, apiResponse, err = fetchGroupByName(ctx, client, name.(string))
 	}
 
 	if err != nil {
-		return diag.FromErr(err)
+		return diagutil.ToDiags(d, err, &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	d.SetId(group.Id)
 	if err = setAutoscalingGroupData(d, &group.Properties); err != nil {
-		return diag.FromErr(err)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	return nil
@@ -407,34 +410,34 @@ func validateIDAndName(idOk, nameOk bool) error {
 	return nil
 }
 
-func fetchGroupByID(ctx context.Context, client *as.Client, id string) (*autoscaling.Group, error) {
-	group, _, err := client.GetGroup(ctx, id, 2)
+func fetchGroupByID(ctx context.Context, client *as.Client, id string) (*autoscaling.Group, *shared.APIResponse, error) {
+	group, apiResponse, err := client.GetGroup(ctx, id, 2)
 	if err != nil {
-		return nil, fmt.Errorf("an error occurred while fetching group with ID %s: %w", id, err)
+		return nil, apiResponse, fmt.Errorf("an error occurred while fetching group with ID %s: %w", id, err)
 	}
-	return &group, nil
+	return &group, apiResponse, nil
 }
 
-func fetchGroupByName(ctx context.Context, client *as.Client, name string) (*autoscaling.Group, error) {
-	groups, _, err := client.ListGroups(ctx)
+func fetchGroupByName(ctx context.Context, client *as.Client, name string) (*autoscaling.Group, *shared.APIResponse, error) {
+	groups, apiResponse, err := client.ListGroups(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("an error occurred while getting groups: %w", err)
+		return nil, apiResponse, fmt.Errorf("an error occurred while getting groups: %w", err)
 	}
 
 	if groups.Items == nil {
-		return nil, fmt.Errorf("no group found")
+		return nil, apiResponse, fmt.Errorf("no group found")
 	}
 
 	for _, g := range groups.Items {
-		tmpGroup, _, err := client.GetGroup(ctx, g.Id, 2)
+		tmpGroup, apiResponse, err := client.GetGroup(ctx, g.Id, 2)
 		if err != nil {
-			return nil, fmt.Errorf("an error occurred while fetching group %s: %w", g.Id, err)
+			return nil, apiResponse, fmt.Errorf("an error occurred while fetching group %s: %w", g.Id, err)
 		}
 
 		if tmpGroup.Properties.Name != nil && strings.EqualFold(*tmpGroup.Properties.Name, name) {
-			return &tmpGroup, nil
+			return &tmpGroup, apiResponse, nil
 		}
 	}
 
-	return nil, fmt.Errorf("no group found with the specified criteria: name = %s", name)
+	return nil, apiResponse, fmt.Errorf("no group found with the specified criteria: name = %s", name)
 }

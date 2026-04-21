@@ -201,5 +201,5 @@ func tryDisableLegalHold(ctx context.Context, client *objstorage.APIClient, buck
 }
 
 func httpForbidden(response *shared.APIResponse) bool {
-	return response != nil && response.Response != nil && response.StatusCode == http.StatusForbidden
+	return response.SafeStatusCode() == http.StatusForbidden
 }

@@ -47,6 +47,15 @@ func (resp *APIResponse) HttpNotFound() bool {
 	return false
 }
 
+// SafeStatusCode returns the HTTP status code from the embedded *http.Response.
+// Returns 0 if the receiver or the embedded response is nil.
+func (resp *APIResponse) SafeStatusCode() int {
+	if resp != nil && resp.Response != nil {
+		return resp.StatusCode
+	}
+	return 0
+}
+
 // LogInfo - logs APIResponse values like RequestTime, Operation and StatusCode
 // does not print anything for nil APIResponse values
 func (resp *APIResponse) LogInfo() {

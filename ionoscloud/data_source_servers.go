@@ -2,7 +2,6 @@ package ionoscloud
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log"
 
@@ -14,6 +13,7 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/serverutil"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapinic"
@@ -262,7 +262,7 @@ func dataSourceServersRead(ctx context.Context, d *schema.ResourceData, meta int
 
 	datacenterId, dcIdOk := d.GetOk("datacenter_id")
 	if !dcIdOk {
-		return diag.FromErr(errors.New("no datacenter_id was specified"))
+		return diagutil.ToDiags(d, fmt.Errorf("no datacenter_id was specified"), nil)
 	}
 	req := client.ServersApi.DatacentersServersGet(ctx, datacenterId.(string)).Depth(5)
 	filters, filtersOk := d.GetOk("filter")
@@ -282,7 +282,7 @@ func dataSourceServersRead(ctx context.Context, d *schema.ResourceData, meta int
 	servers, apiResponse, err := req.Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occurred while fetching servers: %w", err))
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching servers: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	serverEntry := make(map[string]interface{})
 	var serversIntf []interface{}
@@ -327,25 +327,24 @@ func dataSourceServersRead(ctx context.Context, d *schema.ResourceData, meta int
 			}
 
 			if server.Id == nil {
-				return diag.FromErr(fmt.Errorf("expected a valid server ID from the API but received nil instead"))
+				return diagutil.ToDiags(d, fmt.Errorf("expected a valid server ID from the API but received nil instead"), nil)
 			}
 			// Labels logic
 			ls := LabelsService{ctx: ctx, client: client}
 			labels, err := ls.datacentersServersLabelsGet(datacenterId.(string), *server.Id, true)
 			if err != nil {
-				return diag.FromErr(err)
+				return diagutil.ToDiags(d, err, nil)
 			}
 			serverEntry["labels"] = labels
 		}
 		serversIntf = append(serversIntf, serverEntry)
 	}
 	if serversIntf == nil || len(serversIntf) == 0 {
-		return diag.FromErr(fmt.Errorf("no servers found for criteria, please check your filter configuration"))
+		return diagutil.ToDiags(d, fmt.Errorf("no servers found for criteria, please check your filter configuration"), nil)
 	}
 	err = d.Set("servers", &serversIntf)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error while setting servers: %w", err))
-		return diags
+		return diagutil.ToDiags(d, fmt.Errorf("error while setting servers: %w", err), nil)
 	}
 
 	return nil

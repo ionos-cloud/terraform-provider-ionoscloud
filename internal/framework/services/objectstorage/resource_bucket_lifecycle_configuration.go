@@ -6,6 +6,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstorage"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/objectvalidator"
@@ -178,7 +179,7 @@ func (r *bucketLifecycleConfiguration) Create(ctx context.Context, req resource.
 
 	err := r.client.CreateBucketLifecycle(ctx, data)
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to create resource", err.Error())
+		resp.Diagnostics.AddError("Failed to create resource", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
 		return
 	}
 
@@ -200,7 +201,7 @@ func (r *bucketLifecycleConfiguration) Read(ctx context.Context, req resource.Re
 
 	result, found, err := r.client.GetBucketLifecycle(ctx, data.Bucket)
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to read resource", err.Error())
+		resp.Diagnostics.AddError("Failed to read resource", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
 		return
 	}
 
@@ -232,7 +233,7 @@ func (r *bucketLifecycleConfiguration) Update(ctx context.Context, req resource.
 	}
 
 	if err := r.client.UpdateBucketLifecycle(ctx, data); err != nil {
-		resp.Diagnostics.AddError("Failed to update resource", err.Error())
+		resp.Diagnostics.AddError("Failed to update resource", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
 		return
 	}
 
@@ -253,7 +254,7 @@ func (r *bucketLifecycleConfiguration) Delete(ctx context.Context, req resource.
 	}
 
 	if err := r.client.DeleteBucketLifecycle(ctx, data.Bucket); err != nil {
-		resp.Diagnostics.AddError("Failed to delete resource", err.Error())
+		resp.Diagnostics.AddError("Failed to delete resource", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
 		return
 	}
 }

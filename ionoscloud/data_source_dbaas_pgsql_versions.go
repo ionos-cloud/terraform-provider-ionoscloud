@@ -7,9 +7,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	psql "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 func dataSourceDbaasPgSqlVersions() *schema.Resource {
@@ -42,19 +44,18 @@ func dataSourceDbaasPgSqlReadVersions(ctx context.Context, d *schema.ResourceDat
 	id, idOk := d.GetOk("cluster_id")
 
 	var postgresVersions psql.PostgresVersionList
+	var apiResponse *shared.APIResponse
 
 	if idOk {
 		/* search by ID */
-		postgresVersions, _, err = client.GetClusterVersions(ctx, id.(string))
+		postgresVersions, apiResponse, err = client.GetClusterVersions(ctx, id.(string))
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching postgres versions for cluster with ID %s: %w", id.(string), err))
-			return diags
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching postgres versions for cluster with ID %s: %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 	} else {
-		postgresVersions, _, err = client.GetAllVersions(ctx)
+		postgresVersions, apiResponse, err = client.GetAllVersions(ctx)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching postgres versions: %w", err))
-			return diags
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching postgres versions: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 	}
 

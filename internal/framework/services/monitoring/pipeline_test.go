@@ -177,7 +177,7 @@ func checkPipelineDestroy(s *terraform.State) error {
 		}
 		_, apiResponse, err := client.GetPipelineByID(context.Background(), rs.Primary.ID, rs.Primary.Attributes["location"])
 		if err != nil {
-			if apiResponse == nil || apiResponse.StatusCode != 404 {
+			if apiResponse == nil || apiResponse.SafeStatusCode() != 404 {
 				return fmt.Errorf("an error occured while checking the destruction of Monitoring pipeline with ID: %v, error: %w", rs.Primary.ID, err)
 			}
 		} else {

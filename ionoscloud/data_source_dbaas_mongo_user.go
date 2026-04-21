@@ -2,7 +2,6 @@ package ionoscloud
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 
@@ -13,6 +12,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 func dataSourceDbaasMongoUser() *schema.Resource {
@@ -84,19 +84,17 @@ func dataSourceDbaasMongoReadUser(ctx context.Context, d *schema.ResourceData, m
 	usernameIf, nameOk := d.GetOk("username")
 
 	if !idOk || !nameOk {
-		diags := diag.FromErr(errors.New("please provide cluster_id and username"))
-		return diags
+		return diagutil.ToDiags(d, fmt.Errorf("please provide cluster_id and username"), nil)
 	}
 
 	username := usernameIf.(string)
 	clusterId := clusterIdIf.(string)
 	var user mongo.User
 
-	users, _, err := client.GetUsers(ctx, clusterId)
+	users, apiResponse, err := client.GetUsers(ctx, clusterId)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while fetching dbaas mongo users: %w", err))
-		return diags
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching dbaas mongo users: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	var results []mongo.User
@@ -111,15 +109,15 @@ func dataSourceDbaasMongoReadUser(ctx context.Context, d *schema.ResourceData, m
 
 	switch {
 	case len(results) == 0:
-		return diag.FromErr(fmt.Errorf("no DBaaS mongo user found with the specified username = %s and cluster_id = %s", username, clusterId))
+		return diagutil.ToDiags(d, fmt.Errorf("no DBaaS mongo user found with the specified username = %s and cluster_id = %s", username, clusterId), nil)
 	case len(results) > 1:
-		return diag.FromErr(fmt.Errorf("more than one DBaaS mongo user found with the specified criteria username = %s and cluster_id = %s", username, clusterId))
+		return diagutil.ToDiags(d, fmt.Errorf("more than one DBaaS mongo user found with the specified criteria username = %s and cluster_id = %s", username, clusterId), nil)
 	default:
 		user = results[0]
 	}
 
 	if err := dbaas.SetUserMongoData(d, &user); err != nil {
-		return diag.FromErr(err)
+		return diagutil.ToDiags(d, err, nil)
 	}
 	if user.Properties != nil {
 		d.SetId(clusterId + user.Properties.Username)

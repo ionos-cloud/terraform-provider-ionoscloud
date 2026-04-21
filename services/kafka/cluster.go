@@ -17,7 +17,7 @@ import (
 
 // CreateCluster creates a new Kafka Cluster
 func (c *Client) CreateCluster(ctx context.Context, d *schema.ResourceData) (
-	kafka.ClusterRead, utils.ApiResponseInfo,
+	kafka.ClusterRead, *shared.APIResponse,
 	error,
 ) {
 	location := d.Get("location").(string)
@@ -41,7 +41,7 @@ func (c *Client) IsClusterAvailable(ctx context.Context, d *schema.ResourceData)
 }
 
 // DeleteCluster deletes a Kafka Cluster
-func (c *Client) DeleteCluster(ctx context.Context, id string, location string) (utils.ApiResponseInfo, error) {
+func (c *Client) DeleteCluster(ctx context.Context, id string, location string) (*shared.APIResponse, error) {
 	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Kafka, location)
 
 	apiResponse, err := c.sdkClient.ClustersApi.ClustersDelete(ctx, id).Execute()
@@ -61,7 +61,7 @@ func (c *Client) IsClusterDeleted(ctx context.Context, d *schema.ResourceData) (
 
 // GetClusterByID retrieves a Kafka Cluster by its ID
 func (c *Client) GetClusterByID(ctx context.Context, id string, location string) (
-	kafka.ClusterRead, utils.ApiResponseInfo, error,
+	kafka.ClusterRead, *shared.APIResponse, error,
 ) {
 	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Kafka, location)
 

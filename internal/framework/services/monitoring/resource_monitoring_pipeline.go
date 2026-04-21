@@ -18,6 +18,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	monitoringService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/monitoring"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 var (
@@ -132,9 +133,9 @@ func (r *pipelineResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
-	pipelineResponse, _, err := r.client.CreatePipeline(ctx, createReq, location)
+	pipelineResponse, apiResponse, err := r.client.CreatePipeline(ctx, createReq, location)
 	if err != nil {
-		resp.Diagnostics.AddError("failed to create Monitoring pipeline", err.Error())
+		resp.Diagnostics.AddError("failed to create Monitoring pipeline", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Name.ValueString(), StatusCode: apiResponse.SafeStatusCode()}).Error())
 		return
 	}
 	pipelineID := pipelineResponse.Id
@@ -144,14 +145,14 @@ func (r *pipelineResource) Create(ctx context.Context, req resource.CreateReques
 		return r.client.IsPipelineReady(ctx, pipelineID, location)
 	}, backoff.NewExponentialBackOff(backoff.WithMaxElapsedTime(createTimeout)))
 	if err != nil {
-		resp.Diagnostics.AddError("error occurred while waiting for the Monitoring pipeline to become available", err.Error())
+		resp.Diagnostics.AddError("error occurred while waiting for the Monitoring pipeline to become available", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Name.ValueString(), Timeout: createTimeout.String()}).Error())
 	}
 
 	// Make another `GET` request after the pipeline becomes 'AVAILABLE' in order to retrieve some
 	// attributes that are not set in the `POST` response.
-	retrievedPipeline, _, err := r.client.GetPipelineByID(ctx, pipelineID, location)
+	retrievedPipeline, apiResponse, err := r.client.GetPipelineByID(ctx, pipelineID, location)
 	if err != nil {
-		resp.Diagnostics.AddError("error while fetching Monitoring pipeline after creation", (fmt.Errorf("pipeline ID: %v, error: %w", pipelineID, err)).Error())
+		resp.Diagnostics.AddError("error while fetching Monitoring pipeline after creation", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceID: pipelineID, ResourceName: data.Name.ValueString(), StatusCode: apiResponse.SafeStatusCode()}).Error())
 		return
 	}
 
@@ -185,7 +186,7 @@ func (r *pipelineResource) Read(ctx context.Context, req resource.ReadRequest, r
 			resp.State.RemoveResource(ctx)
 			return
 		}
-		resp.Diagnostics.AddError("error while fetching Monitoring pipeline", (fmt.Errorf("pipeline ID: %v, error: %w", pipelineID, err)).Error())
+		resp.Diagnostics.AddError("error while fetching Monitoring pipeline", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceID: pipelineID, ResourceName: data.Name.ValueString(), StatusCode: apiResponse.SafeStatusCode()}).Error())
 		return
 	}
 
@@ -214,7 +215,7 @@ func (r *pipelineResource) Delete(ctx context.Context, req resource.DeleteReques
 
 	_, err := r.client.DeletePipeline(ctx, pipelineID, location)
 	if err != nil {
-		resp.Diagnostics.AddError("error occurred while deleting Monitoring pipeline", (fmt.Errorf("pipeline ID: %v, error: %w", pipelineID, err)).Error())
+		resp.Diagnostics.AddError("error occurred while deleting Monitoring pipeline", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceID: pipelineID, Timeout: deleteTimeout.String()}).Error())
 		return
 	}
 
@@ -222,7 +223,7 @@ func (r *pipelineResource) Delete(ctx context.Context, req resource.DeleteReques
 		return r.client.IsPipelineDeleted(ctx, pipelineID, location)
 	}, backoff.NewExponentialBackOff(backoff.WithMaxElapsedTime(deleteTimeout)))
 	if err != nil {
-		resp.Diagnostics.AddError("error occurred while waiting for the Monitoring pipeline to be deleted", (fmt.Errorf("pipeline ID: %v, error: %w", pipelineID, err)).Error())
+		resp.Diagnostics.AddError("error occurred while waiting for the Monitoring pipeline to be deleted", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceID: pipelineID, Timeout: deleteTimeout.String()}).Error())
 		return
 	}
 }
@@ -250,16 +251,16 @@ func (r *pipelineResource) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
-	pipelineResponse, _, err := r.client.UpdatePipeline(ctx, updateReq, pipelineID, location)
+	pipelineResponse, apiResponse, err := r.client.UpdatePipeline(ctx, updateReq, pipelineID, location)
 	if err != nil {
-		resp.Diagnostics.AddError("error while updating Monitoring pipeline", (fmt.Errorf("pipeline ID: %v, error: %w", pipelineID, err)).Error())
+		resp.Diagnostics.AddError("error while updating Monitoring pipeline", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceID: pipelineID, ResourceName: plan.Name.ValueString(), StatusCode: apiResponse.SafeStatusCode()}).Error())
 		return
 	}
 	err = backoff.Retry(func() error {
 		return r.client.IsPipelineReady(ctx, pipelineID, location)
 	}, backoff.NewExponentialBackOff(backoff.WithMaxElapsedTime(updateTimeout)))
 	if err != nil {
-		resp.Diagnostics.AddError("error while waiting for the Monitoring pipeline to become AVAILABLE after update", (fmt.Errorf("pipeline ID: %v, error: %w", pipelineID, err)).Error())
+		resp.Diagnostics.AddError("error while waiting for the Monitoring pipeline to become AVAILABLE after update", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceID: pipelineID, ResourceName: plan.Name.ValueString(), Timeout: updateTimeout.String()}).Error())
 		return
 	}
 

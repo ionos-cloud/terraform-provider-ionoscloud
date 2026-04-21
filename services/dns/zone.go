@@ -17,7 +17,7 @@ import (
 var zoneResourceName = "DNS Zone"
 
 // CreateZone creates a new DNS Zone
-func (c *Client) CreateZone(ctx context.Context, d *schema.ResourceData) (zoneResponse dns.ZoneRead, responseInfo utils.ApiResponseInfo, err error) {
+func (c *Client) CreateZone(ctx context.Context, d *schema.ResourceData) (zoneResponse dns.ZoneRead, responseInfo *shared.APIResponse, err error) {
 	zoneUuid := uuidgen.ResourceUuid()
 	request := setZonePutRequest(d)
 	responseData, apiResponse, err := c.sdkClient.ZonesApi.ZonesPut(ctx, zoneUuid.String()).ZoneEnsure(*request).Execute()
@@ -84,7 +84,7 @@ func (c *Client) SetZoneData(d *schema.ResourceData, zone dns.ZoneRead) error {
 }
 
 // UpdateZone updates a zone
-func (c *Client) UpdateZone(ctx context.Context, id string, d *schema.ResourceData) (dns.ZoneRead, utils.ApiResponseInfo, error) {
+func (c *Client) UpdateZone(ctx context.Context, id string, d *schema.ResourceData) (dns.ZoneRead, *shared.APIResponse, error) {
 	request := setZonePutRequest(d)
 	zoneResponse, apiResponse, err := c.sdkClient.ZonesApi.ZonesPut(ctx, id).ZoneEnsure(*request).Execute()
 	apiResponse.LogInfo()
@@ -92,7 +92,7 @@ func (c *Client) UpdateZone(ctx context.Context, id string, d *schema.ResourceDa
 }
 
 // DeleteZone deletes a zone
-func (c *Client) DeleteZone(ctx context.Context, id string) (utils.ApiResponseInfo, error) {
+func (c *Client) DeleteZone(ctx context.Context, id string) (*shared.APIResponse, error) {
 	_, apiResponse, err := c.sdkClient.ZonesApi.ZonesDelete(ctx, id).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err

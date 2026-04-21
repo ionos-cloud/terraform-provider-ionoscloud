@@ -12,6 +12,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -133,8 +134,8 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	if err != nil {
 		d.SetId("")
-		diags := diag.FromErr(fmt.Errorf("an error occurred while creating LAN: %w", err))
-		return diags
+		requestLocation, _ := apiResponse.SafeLocation()
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating LAN: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	d.SetId(*rsp.Id)
@@ -147,7 +148,8 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 				d.SetId("")
 			}
 		}
-		return diag.FromErr(errState)
+		requestLocation, _ := apiResponse.SafeLocation()
+		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	for {
@@ -156,8 +158,7 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 		lanReady, rsErr := lanAvailable(ctx, client, d)
 
 		if rsErr != nil {
-			diags := diag.FromErr(fmt.Errorf("error while checking readiness status of LAN %s: %w", *rsp.Id, rsErr))
-			return diags
+			return diagutil.ToDiags(d, fmt.Errorf("error while checking readiness status of LAN %s: %w", *rsp.Id, rsErr), nil)
 		}
 
 		if lanReady {
@@ -170,8 +171,7 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 			log.Printf("[INFO] trying again ...")
 		case <-ctx.Done():
 			log.Printf("[INFO] lan creation timed out")
-			diags := diag.FromErr(fmt.Errorf("lan creation timed out! WARNING: your lan will still probably be created after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"))
-			return diags
+			return diagutil.ToDiags(d, fmt.Errorf("lan creation timed out! WARNING: your lan will still probably be created after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"), nil)
 		}
 	}
 
@@ -197,14 +197,13 @@ func resourceLanRead(ctx context.Context, d *schema.ResourceData, meta interface
 			return nil
 		}
 
-		diags := diag.FromErr(fmt.Errorf("an error occurred while fetching a LAN %s: %w", d.Id(), err))
-		return diags
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching a LAN: %w", err), nil)
 	}
 
 	log.Printf("[INFO] LAN %s found: %+v", d.Id(), lan)
 
 	if err := setLanData(d, &lan); err != nil {
-		return diag.FromErr(err)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	return nil
@@ -255,12 +254,13 @@ func resourceLanUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while patching a lan ID %s %w", d.Id(), err))
-		return diags
+		requestLocation, _ := apiResponse.SafeLocation()
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while patching a lan: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		return diag.FromErr(errState)
+		requestLocation, _ := apiResponse.SafeLocation()
+		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	return resourceLanRead(ctx, d, meta)
@@ -275,7 +275,7 @@ func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 	}
 
 	if err := waitForLanNicsDeletion(ctx, client, d); err != nil {
-		return diag.FromErr(err)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	err = retry.RetryContext(ctx, d.Timeout(schema.TimeoutDelete), func() *retry.RetryError {
@@ -295,18 +295,18 @@ func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 		return nil
 	})
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occurred while deleting lan dcId %s ID %s %w", dcId, d.Id(), err))
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while deleting lan dcId %s %w", dcId, err), nil)
 	}
 
 	if err := waitForLanDeletion(ctx, client, d); err != nil {
-		return diag.FromErr(err)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	d.SetId("")
 	return nil
 }
 func isDeleteProtected(apiResponse *ionoscloud.APIResponse, errMessage string) bool {
-	if apiResponse != nil && apiResponse.Response != nil && apiResponse.StatusCode == 403 {
+	if apiResponse.SafeStatusCode() == 403 {
 		if strings.Contains(errMessage, "is delete-protected by") {
 			return true
 		}
@@ -326,7 +326,7 @@ func resourceLanImport(ctx context.Context, d *schema.ResourceData, meta interfa
 	}
 
 	if err := validateImportIDParts(parts); err != nil {
-		return nil, fmt.Errorf("failed validating import identifier %q: %w", importID, err)
+		return nil, diagutil.ToError(d, fmt.Errorf("failed validating import identifier %q: %w", importID, err), nil)
 	}
 
 	datacenterId := parts[0]
@@ -343,22 +343,22 @@ func resourceLanImport(ctx context.Context, d *schema.ResourceData, meta interfa
 	if err != nil {
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, fmt.Errorf("unable to find lan %q", lanId)
+			return nil, diagutil.ToError(d, fmt.Errorf("unable to find lan %q", lanId), nil)
 		}
-		return nil, fmt.Errorf("an error occurred while retrieving the lan %q, %w", lanId, err)
+		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while retrieving the lan %q, %w", lanId, err), nil)
 	}
 
 	log.Printf("[INFO] LAN %s found: %+v", d.Id(), lan)
 
 	if err := d.Set("datacenter_id", datacenterId); err != nil {
-		return nil, fmt.Errorf("error while setting datacenter_id property for lan %q: %w", lanId, err)
+		return nil, diagutil.ToError(d, fmt.Errorf("error while setting datacenter_id property for lan %q: %w", lanId, err), nil)
 	}
 	if err := d.Set("location", location); err != nil {
 		return nil, err
 	}
 
 	if err := setLanData(d, &lan); err != nil {
-		return nil, err
+		return nil, diagutil.ToError(d, err, nil)
 	}
 	return []*schema.ResourceData{d}, nil
 }

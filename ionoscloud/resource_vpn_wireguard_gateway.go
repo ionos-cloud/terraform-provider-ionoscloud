@@ -15,6 +15,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/vpn"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 func resourceVpnWireguardGateway() *schema.Resource {
@@ -146,14 +147,14 @@ func resourceVpnWireguardGateway() *schema.Resource {
 func resourceVpnWireguardGatewayCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).VPNClient
 
-	gateway, _, err := client.CreateWireguardGateway(ctx, d)
+	gateway, apiResponse, err := client.CreateWireguardGateway(ctx, d)
 	if err != nil {
-		return diag.FromErr(err)
+		return diagutil.ToDiags(d, err, &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	d.SetId(gateway.Id)
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsWireguardGatewayReady)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("creating %w ", err))
+		return diagutil.ToDiags(d, fmt.Errorf("creating %w ", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String()})
 	}
 	return resourceVpnWireguardGatewayRead(ctx, d, meta)
 }
@@ -161,25 +162,25 @@ func resourceVpnWireguardGatewayCreate(ctx context.Context, d *schema.ResourceDa
 func resourceVpnWireguardGatewayRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).VPNClient
 	location := d.Get("location").(string)
-	wireguard, _, err := client.GetWireguardGatewayByID(ctx, d.Id(), location)
+	wireguard, apiResponse, err := client.GetWireguardGatewayByID(ctx, d.Id(), location)
 	if err != nil {
-		return diag.FromErr(err)
+		return diagutil.ToDiags(d, err, &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
-	return diag.FromErr(vpn.SetWireguardGWData(d, wireguard))
+	return diagutil.ToDiags(d, vpn.SetWireguardGWData(d, wireguard), nil)
 }
 func resourceVpnWireguardGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).VPNClient
 
-	wireguard, _, err := client.UpdateWireguardGateway(ctx, d.Id(), d)
+	wireguard, apiResponse, err := client.UpdateWireguardGateway(ctx, d.Id(), d)
 	if err != nil {
-		return diag.FromErr(err)
+		return diagutil.ToDiags(d, err, &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsWireguardGatewayReady)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("creating %w ", err))
+		return diagutil.ToDiags(d, fmt.Errorf("creating %w ", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String()})
 	}
 
-	return diag.FromErr(vpn.SetWireguardGWData(d, wireguard))
+	return diagutil.ToDiags(d, vpn.SetWireguardGWData(d, wireguard), nil)
 }
 
 func resourceVpnWireguardGatewayDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -191,15 +192,14 @@ func resourceVpnWireguardGatewayDelete(ctx context.Context, d *schema.ResourceDa
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while deleting WireGuard Gateway %s: %w", d.Id(), err))
-		return diags
+		return diagutil.ToDiags(d, fmt.Errorf("error while deleting WireGuard Gateway: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	//todo: for now we need to keep this because otherwise we get an internal server error on the first find after the delete
 	// remove when no longer necessary
 	time.Sleep(5 * time.Second)
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsWireguardGatewayDeleted)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("while waiting for the WireGuard Gateway to be deleted %s : %w", d.Id(), err))
+		return diagutil.ToDiags(d, fmt.Errorf("while waiting for the WireGuard Gateway to be deleted: %w", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String()})
 	}
 
 	log.Printf("[INFO] Successfully deleted Wireguard Gateway %s", d.Id())
@@ -212,19 +212,19 @@ func resourceVpnWireguardGatewayImport(ctx context.Context, d *schema.ResourceDa
 	client := m.(bundleclient.SdkBundle).VPNClient
 	parts := strings.Split(d.Id(), ":")
 	if len(parts) != 2 {
-		return nil, fmt.Errorf("invalid import format: %s, expecting the following format: location:id", d.Id())
+		return nil, diagutil.ToError(d, fmt.Errorf("invalid import format:, expecting the following format: location:id"), nil)
 	}
 	location := parts[0]
 	ID := parts[1]
-	gateway, _, err := client.GetWireguardGatewayByID(ctx, ID, location)
+	gateway, apiResponse, err := client.GetWireguardGatewayByID(ctx, ID, location)
 	if err != nil {
-		return nil, err
+		return nil, diagutil.ToError(d, err, &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	if err := d.Set("location", location); err != nil {
-		return nil, err
+		return nil, diagutil.ToError(d, err, nil)
 	}
 	if err := vpn.SetWireguardGWData(d, gateway); err != nil {
-		return nil, err
+		return nil, diagutil.ToError(d, err, nil)
 	}
 	return []*schema.ResourceData{d}, nil
 }

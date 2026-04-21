@@ -58,7 +58,7 @@ func (c *Client) ListIPSecTunnel(ctx context.Context, gatewayID string, location
 }
 
 // DeleteIPSecTunnel deletes a VPN IPSec Tunnel using its ID and location
-func (c *Client) DeleteIPSecTunnel(ctx context.Context, id string, gatewayID string, location string) (utils.ApiResponseInfo, error) {
+func (c *Client) DeleteIPSecTunnel(ctx context.Context, id string, gatewayID string, location string) (*shared.APIResponse, error) {
 	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.VPN, location)
 	apiResponse, err := c.sdkClient.IPSecTunnelsApi.IpsecgatewaysTunnelsDelete(ctx, gatewayID, id).Execute()
 	apiResponse.LogInfo()

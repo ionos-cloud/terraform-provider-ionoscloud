@@ -7,6 +7,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstoragemanagement"
 	objectStorageManagementService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstoragemanagement"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -116,7 +117,7 @@ func (d *accessKeyDataSource) Read(ctx context.Context, req datasource.ReadReque
 			return
 		}
 		if err != nil {
-			resp.Diagnostics.AddError("an error occurred while fetching the accesskey with", err.Error())
+			resp.Diagnostics.AddError("an error occurred while fetching the accesskey", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceID: id, StatusCode: apiResponse.SafeStatusCode()}).Error())
 			return
 		}
 		if !data.AccessKey.IsNull() && accessKey.Properties.AccessKey != accessKeyID {
@@ -131,7 +132,7 @@ func (d *accessKeyDataSource) Read(ctx context.Context, req datasource.ReadReque
 		}
 		if !data.Description.IsNull() && accessKey.Properties.Description != description {
 			resp.Diagnostics.AddError(
-				"accesskeyID does not match",
+				"accesskey description does not match",
 				fmt.Sprintf(
 					"description of Accesskey (UUID=%s, description=%s) does not match expected description: %s",
 					accessKey.Id, accessKey.Properties.Description, description,
@@ -140,9 +141,9 @@ func (d *accessKeyDataSource) Read(ctx context.Context, req datasource.ReadReque
 			return
 		}
 	case !data.AccessKey.IsNull():
-		accessKeys, _, err = d.client.ListAccessKeysFilter(ctx, accessKeyID)
+		accessKeys, apiResponse, err := d.client.ListAccessKeysFilter(ctx, accessKeyID)
 		if err != nil {
-			resp.Diagnostics.AddError("an error occurred while fetching the accesskeys", err.Error())
+			resp.Diagnostics.AddError("an error occurred while fetching the accesskeys", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: accessKeyID, StatusCode: apiResponse.SafeStatusCode()}).Error())
 			return
 		}
 		if len(accessKeys.Items) != 0 {
@@ -162,9 +163,9 @@ func (d *accessKeyDataSource) Read(ctx context.Context, req datasource.ReadReque
 			return
 		}
 	case !data.Description.IsNull():
-		accessKeys, _, err = d.client.ListAccessKeys(ctx)
+		accessKeys, apiResponse, err = d.client.ListAccessKeys(ctx)
 		if err != nil {
-			resp.Diagnostics.AddError("an error occurred while fetching the accesskeys", err.Error())
+			resp.Diagnostics.AddError("an error occurred while fetching the accesskeys", diagutil.WrapError(err, &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()}).Error())
 			return
 		}
 		found := false

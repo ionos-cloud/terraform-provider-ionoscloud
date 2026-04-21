@@ -10,6 +10,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 func dataSourceDbaasPgSqlBackups() *schema.Resource {
@@ -101,26 +102,21 @@ func dataSourceDbaasPgSqlReadBackups(ctx context.Context, d *schema.ResourceData
 	id, idOk := d.GetOk("cluster_id")
 	idStr := id.(string)
 	if !idOk {
-		diags := diag.FromErr(fmt.Errorf("cluster_id has to be provided in order to search for backups"))
-		return diags
+		return diagutil.ToDiags(d, fmt.Errorf("cluster_id has to be provided in order to search for backups"), nil)
 	}
 
 	/* search by ID */
 	clusterBackups, resp, err := client.GetClusterBackups(ctx, idStr)
 	if resp != nil {
 		log.Printf("operation %s", resp.Operation)
-		if resp.Response != nil {
-			log.Printf("[DEBUG] response status code : %d\n", resp.StatusCode)
-		}
+		log.Printf("[DEBUG] response status code : %d\n", resp.SafeStatusCode())
 	}
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while fetching backup for cluster with ID %s: %w", idStr, err))
-		return diags
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching backup for cluster with ID %s: %w", idStr, err), &diagutil.ErrorContext{StatusCode: resp.SafeStatusCode()})
 	}
 	if len(clusterBackups.Items) == 0 {
-		diags := diag.FromErr(fmt.Errorf("could not find backups for cluster with ID %s: %w", idStr, err))
-		return diags
+		return diagutil.ToDiags(d, fmt.Errorf("could not find backups for cluster with ID %s", idStr), nil)
 	}
 
 	if diags := dbaasService.SetPgSqlClusterBackupData(d, &clusterBackups); diags != nil {

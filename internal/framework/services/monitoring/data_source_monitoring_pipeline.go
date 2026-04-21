@@ -11,9 +11,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	monitoringSDK "github.com/ionos-cloud/sdk-go-bundle/products/monitoring/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	monitoringService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/monitoring"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 var _ datasource.DataSourceWithConfigure = (*pipelineDataSource)(nil)
@@ -119,13 +121,14 @@ func (d *pipelineDataSource) Read(ctx context.Context, req datasource.ReadReques
 	var pipeline monitoringSDK.PipelineRead
 	var pipelines []monitoringSDK.PipelineRead
 	var err error
+	var apiResponse *shared.APIResponse
 
 	// Search using the ID
 	if pipelineID != "" {
-		pipeline, _, err = d.client.GetPipelineByID(ctx, pipelineID, location)
+		pipeline, apiResponse, err = d.client.GetPipelineByID(ctx, pipelineID, location)
 
 		if err != nil {
-			resp.Diagnostics.AddError("failed to get Monitoring pipeline", err.Error())
+			resp.Diagnostics.AddError("failed to get Monitoring pipeline", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceID: pipelineID, StatusCode: apiResponse.SafeStatusCode()}).Error())
 			return
 		}
 	}
@@ -133,9 +136,9 @@ func (d *pipelineDataSource) Read(ctx context.Context, req datasource.ReadReques
 	// Search using the name
 	if pipelineName != "" {
 		// Retrieve ALL pipelines.
-		retrievedPipelines, _, err := d.client.GetPipelines(ctx, location)
+		retrievedPipelines, apiResponse, err := d.client.GetPipelines(ctx, location)
 		if err != nil {
-			resp.Diagnostics.AddError(fmt.Sprintf("failed to get Monitoring pipelines from location: %s", location), err.Error())
+			resp.Diagnostics.AddError(fmt.Sprintf("failed to get Monitoring pipelines from location: %s", location), diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: pipelineName, StatusCode: apiResponse.SafeStatusCode()}).Error())
 			return
 		}
 

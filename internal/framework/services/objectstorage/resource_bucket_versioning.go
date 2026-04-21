@@ -6,6 +6,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstorage"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -103,7 +104,7 @@ func (r *bucketVersioningResource) Create(ctx context.Context, req resource.Crea
 	}
 
 	if err := r.client.CreateBucketVersioning(ctx, data); err != nil {
-		resp.Diagnostics.AddError("Failed to create bucket versioning", err.Error())
+		resp.Diagnostics.AddError("Failed to create bucket versioning", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
 		return
 	}
 
@@ -125,7 +126,7 @@ func (r *bucketVersioningResource) Read(ctx context.Context, req resource.ReadRe
 
 	result, found, err := r.client.GetBucketVersioning(ctx, data.Bucket)
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to read bucket versioning", err.Error())
+		resp.Diagnostics.AddError("Failed to read bucket versioning", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
 		return
 	}
 
@@ -157,7 +158,7 @@ func (r *bucketVersioningResource) Update(ctx context.Context, req resource.Upda
 	}
 
 	if err := r.client.UpdateBucketVersioning(ctx, data); err != nil {
-		resp.Diagnostics.AddError("Failed to update bucket versioning", err.Error())
+		resp.Diagnostics.AddError("Failed to update bucket versioning", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
 		return
 	}
 
@@ -178,7 +179,7 @@ func (r *bucketVersioningResource) Delete(ctx context.Context, req resource.Dele
 	}
 
 	if err := r.client.DeleteBucketVersioning(ctx, data); err != nil {
-		resp.Diagnostics.AddError("Failed to create bucket versioning", err.Error())
+		resp.Diagnostics.AddError("Failed to create bucket versioning", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
 		return
 	}
 }

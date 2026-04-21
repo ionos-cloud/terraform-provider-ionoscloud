@@ -11,6 +11,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 func SetServerVolumeProperties(volume ionoscloud.Volume) map[string]interface{} {
@@ -50,18 +51,17 @@ func ResourceCommonServerDelete(ctx context.Context, d *schema.ResourceData, met
 	if apiResponse != nil {
 		log.Printf("[DEBUG] Request time : %s for operation : %s",
 			apiResponse.RequestTime, apiResponse.Operation)
-		if apiResponse.Response != nil {
-			log.Printf("[DEBUG] response status code : %d\n", apiResponse.StatusCode)
-		}
+		log.Printf("[DEBUG] response status code : %d\n", apiResponse.SafeStatusCode())
 	}
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while deleting a server ID %s %w", d.Id(), err))
-		return diags
+		requestLocation, _ := apiResponse.SafeLocation()
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while deleting a server: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		return diag.FromErr(fmt.Errorf("error getting state change for server delete %w", errState))
+		requestLocation, _ := apiResponse.SafeLocation()
+		return diagutil.ToDiags(d, fmt.Errorf("error getting state change for server delete %w", errState), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	d.SetId("")

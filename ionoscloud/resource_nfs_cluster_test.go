@@ -79,7 +79,7 @@ func testAccCheckNFSClusterDestroy(s *terraform.State) error {
 		}
 
 		_, resp, err := client.GetNFSClusterByID(context.Background(), rs.Primary.ID, rs.Primary.Attributes["location"])
-		if resp != nil && resp.StatusCode != 404 {
+		if resp.SafeStatusCode() != 404 {
 			return fmt.Errorf("NFS Cluster still exists: %s", rs.Primary.ID)
 		}
 		if err != nil {

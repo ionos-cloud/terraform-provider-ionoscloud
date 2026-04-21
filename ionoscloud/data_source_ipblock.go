@@ -7,6 +7,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -119,24 +120,24 @@ func datasourceIpBlockRead(ctx context.Context, d *schema.ResourceData, meta int
 	}
 
 	if !idOk && !nameOk && !locationOk {
-		return diag.FromErr(fmt.Errorf("either id, location or name must be set"))
+		return diagutil.ToDiags(d, fmt.Errorf("either id, location or name must be set"), nil)
 	}
 	if idOk {
 		ipBlock, apiResponse, err = client.IPBlocksApi.IpblocksFindById(ctx, id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("error getting ip block with id %s %w", id.(string), err))
+			return diagutil.ToDiags(d, fmt.Errorf("error getting ip block with id %s %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 		if nameOk {
 			if ipBlock.Properties != nil && *ipBlock.Properties.Name != name {
-				return diag.FromErr(fmt.Errorf("name of ip block (UUID=%s, name=%s) does not match expected name: %s",
-					*ipBlock.Id, *ipBlock.Properties.Name, name))
+				return diagutil.ToDiags(d, fmt.Errorf("name of ip block (UUID=%s, name=%s) does not match expected name: %s",
+					*ipBlock.Id, *ipBlock.Properties.Name, name), nil)
 			}
 		}
 		if locationOk {
 			if ipBlock.Properties != nil && *ipBlock.Properties.Location != location {
-				return diag.FromErr(fmt.Errorf("location of ip block (UUID=%s, location=%s) does not match expected location: %s",
-					*ipBlock.Id, *ipBlock.Properties.Location, location))
+				return diagutil.ToDiags(d, fmt.Errorf("location of ip block (UUID=%s, location=%s) does not match expected location: %s",
+					*ipBlock.Id, *ipBlock.Properties.Location, location), nil)
 			}
 		}
 		log.Printf("[INFO] Got ip block [Name=%s, Location=%s]", *ipBlock.Properties.Name, *ipBlock.Properties.Location)
@@ -146,7 +147,7 @@ func datasourceIpBlockRead(ctx context.Context, d *schema.ResourceData, meta int
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("an error occurred while fetching ipBlocks: %w ", err))
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching ipBlocks: %w ", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 
 		var results []ionoscloud.IpBlock
@@ -159,7 +160,7 @@ func datasourceIpBlockRead(ctx context.Context, d *schema.ResourceData, meta int
 			}
 
 			if results == nil {
-				return diag.FromErr(fmt.Errorf("no ip block found with the specified criteria name %s", name))
+				return diagutil.ToDiags(d, fmt.Errorf("no ip block found with the specified criteria name %s", name), nil)
 			}
 		}
 
@@ -183,9 +184,9 @@ func datasourceIpBlockRead(ctx context.Context, d *schema.ResourceData, meta int
 		}
 
 		if results == nil || len(results) == 0 {
-			return diag.FromErr(fmt.Errorf("no ip block found with the specified criteria name = %s, location = %s", name, location))
+			return diagutil.ToDiags(d, fmt.Errorf("no ip block found with the specified criteria name = %s, location = %s", name, location), nil)
 		} else if len(results) > 1 {
-			return diag.FromErr(fmt.Errorf("more than one ip block found with the specified criteria name = %s, location = %s", name, location))
+			return diagutil.ToDiags(d, fmt.Errorf("more than one ip block found with the specified criteria name = %s, location = %s", name, location), nil)
 		} else {
 			ipBlock = results[0]
 		}
@@ -193,7 +194,7 @@ func datasourceIpBlockRead(ctx context.Context, d *schema.ResourceData, meta int
 	}
 
 	if err := IpBlockSetData(d, &ipBlock); err != nil {
-		return diag.FromErr(err)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	return nil

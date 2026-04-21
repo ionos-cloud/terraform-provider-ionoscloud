@@ -2,7 +2,6 @@ package ionoscloud
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -10,9 +9,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	cr "github.com/ionos-cloud/sdk-go-bundle/products/containerregistry/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 func dataSourceContainerRegistry() *schema.Resource {
@@ -136,30 +137,27 @@ func dataSourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData
 	}
 
 	if idOk && (nameOk || locationOk) {
-		diags := diag.FromErr(errors.New("id and name or location cannot be both specified in the same time"))
-		return diags
+		return diagutil.ToDiags(d, fmt.Errorf("id and name or location cannot be both specified in the same time"), nil)
 	}
 	if !idOk && !nameOk && !locationOk {
-		diags := diag.FromErr(errors.New("please provide the registry id, name or location"))
-		return diags
+		return diagutil.ToDiags(d, fmt.Errorf("please provide the registry id, name or location"), nil)
 	}
 
 	var registry cr.RegistryResponse
+	var apiResponse *shared.APIResponse
 
 	if idOk {
 		/* search by ID */
-		registry, _, err = client.GetRegistry(ctx, id)
+		registry, apiResponse, err = client.GetRegistry(ctx, id)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching the registry with ID %s: %w", id, err))
-			return diags
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the registry with ID %s: %w", id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 	} else {
 		var results []cr.RegistryResponse
 
-		registries, _, err := client.ListRegistries(ctx)
+		registries, apiResponse, err := client.ListRegistries(ctx)
 		if err != nil {
-			diags := diag.FromErr(fmt.Errorf("an error occurred while fetching container registries: %w", err))
-			return diags
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching container registries: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 
 		results = registries.Items
@@ -179,7 +177,7 @@ func dataSourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData
 				if len(registriesByName) > 0 {
 					results = registriesByName
 				} else {
-					return diag.FromErr(fmt.Errorf("no registry found with the specified criteria: name = %v", name))
+					return diagutil.ToDiags(d, fmt.Errorf("no registry found with the specified criteria: name = %v", name), nil)
 				}
 			}
 		}
@@ -194,22 +192,22 @@ func dataSourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData
 			if len(registriesByLocation) > 0 {
 				results = registriesByLocation
 			} else {
-				return diag.FromErr(fmt.Errorf("no registry found with the specified criteria: location = %v", location))
+				return diagutil.ToDiags(d, fmt.Errorf("no registry found with the specified criteria: location = %v", location), nil)
 			}
 		}
 
 		switch {
 		case len(results) == 0:
-			return diag.FromErr(fmt.Errorf("no registry found with the specified criteria: name = %s location = %s", name, location))
+			return diagutil.ToDiags(d, fmt.Errorf("no registry found with the specified criteria: name = %s location = %s", name, location), nil)
 		case len(results) > 1:
-			return diag.FromErr(fmt.Errorf("more than one registry found with the specified criteria: name = %s location = %s", name, location))
+			return diagutil.ToDiags(d, fmt.Errorf("more than one registry found with the specified criteria: name = %s location = %s", name, location), nil)
 		default:
 			registry = results[0]
 		}
 	}
 
 	if err := crService.SetRegistryData(d, registry); err != nil {
-		return diag.FromErr(err)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	return nil

@@ -370,13 +370,13 @@ github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2
 # github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.2
 ## explicit; go 1.22
 github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2
-# github.com/ionos-cloud/sdk-go-bundle/shared v0.1.9
+# github.com/ionos-cloud/sdk-go-bundle/shared v0.1.10
 ## explicit; go 1.24
 github.com/ionos-cloud/sdk-go-bundle/shared
 github.com/ionos-cloud/sdk-go-bundle/shared/failover
 github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration
 github.com/ionos-cloud/sdk-go-bundle/shared/retry
-# github.com/ionos-cloud/sdk-go/v6 v6.3.6
+# github.com/ionos-cloud/sdk-go/v6 v6.3.7
 ## explicit; go 1.24
 github.com/ionos-cloud/sdk-go/v6
 # github.com/jmespath/go-jmespath v0.4.0

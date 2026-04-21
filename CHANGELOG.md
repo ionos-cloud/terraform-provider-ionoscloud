@@ -1,3 +1,9 @@
+## Upcoming
+
+### Enhancements
+- Add validation error when update-only attributes are set during snapshot creation
+- Add more information to error messages
+
 ## 6.7.28
 ### Fixes
 - Fix possible type assertion panic in `location` and `template` data sources.

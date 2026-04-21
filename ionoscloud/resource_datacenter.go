@@ -12,6 +12,7 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 func resourceDatacenter() *schema.Resource {
@@ -118,8 +119,8 @@ func resourceDatacenterCreate(ctx context.Context, d *schema.ResourceData, meta 
 	createdDatacenter, apiResponse, err := client.DataCentersApi.DatacentersPost(ctx).Datacenter(datacenter).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("error creating data center (%s) (%w)", d.Id(), err))
-		return diags
+		requestLocation, _ := apiResponse.SafeLocation()
+		return diagutil.ToDiags(d, err, &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 	d.SetId(*createdDatacenter.Id)
 
@@ -129,7 +130,8 @@ func resourceDatacenterCreate(ctx context.Context, d *schema.ResourceData, meta 
 		if bundleclient.IsRequestFailed(errState) {
 			d.SetId("")
 		}
-		return diag.FromErr(errState)
+		requestLocation, _ := apiResponse.SafeLocation()
+		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	return resourceDatacenterRead(ctx, d, meta)
@@ -151,12 +153,11 @@ func resourceDatacenterRead(ctx context.Context, d *schema.ResourceData, meta in
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("error while fetching a data center ID %s %w", d.Id(), err))
-		return diags
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	if err := setDatacenterData(d, &datacenter); err != nil {
-		return diag.FromErr(err)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	return nil
@@ -186,8 +187,8 @@ func resourceDatacenterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 	if d.HasChange("location") {
 		oldLocation, newLocation := d.GetChange("location")
-		diags := diag.FromErr(fmt.Errorf("data center is created in %s location. You can not change location of the data center to %s; it requires recreation of the data center", oldLocation, newLocation))
-		return diags
+
+		return diagutil.ToDiags(d, fmt.Errorf("data center is created in %s location. You can not change location of the data center to %s; it requires recreation of the data center", oldLocation, newLocation), nil)
 	}
 
 	if d.HasChange("sec_auth_protection") {
@@ -200,12 +201,13 @@ func resourceDatacenterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while update the data center ID %s %w", d.Id(), err))
-		return diags
+		requestLocation, _ := apiResponse.SafeLocation()
+		return diagutil.ToDiags(d, err, &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		return diag.FromErr(errState)
+		requestLocation, _ := apiResponse.SafeLocation()
+		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	return resourceDatacenterRead(ctx, d, meta)
@@ -223,12 +225,13 @@ func resourceDatacenterDelete(ctx context.Context, d *schema.ResourceData, meta 
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(err)
-		return diags
+		requestLocation, _ := apiResponse.SafeLocation()
+		return diagutil.ToDiags(d, err, &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		return diag.FromErr(errState)
+		requestLocation, _ := apiResponse.SafeLocation()
+		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	d.SetId("")
@@ -259,15 +262,15 @@ func resourceDatacenterImport(ctx context.Context, d *schema.ResourceData, meta 
 	if err != nil {
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, fmt.Errorf("unable to find datacenter %q", dcId)
+			return nil, diagutil.ToError(d, fmt.Errorf("unable to find datacenter %q", dcId), nil)
 		}
-		return nil, fmt.Errorf("an error occurred while retrieving the datacenter %q, error:%w", dcId, err)
+		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while retrieving the datacenter: %w", err), nil)
 	}
 
 	log.Printf("[INFO] Datacenter found: %+v", datacenter)
 
 	if err := setDatacenterData(d, &datacenter); err != nil {
-		return nil, err
+		return nil, diagutil.ToError(d, err, nil)
 	}
 
 	return []*schema.ResourceData{d}, nil

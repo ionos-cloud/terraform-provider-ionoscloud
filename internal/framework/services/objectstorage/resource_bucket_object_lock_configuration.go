@@ -6,6 +6,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstorage"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/resourcevalidator"
@@ -129,7 +130,7 @@ func (r *objectLockConfiguration) Create(ctx context.Context, req resource.Creat
 	}
 
 	if err := r.client.CreateObjectLock(ctx, data); err != nil {
-		resp.Diagnostics.AddError("Failed to create resource", err.Error())
+		resp.Diagnostics.AddError("Failed to create resource", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
 		return
 	}
 
@@ -151,7 +152,7 @@ func (r *objectLockConfiguration) Read(ctx context.Context, req resource.ReadReq
 
 	result, found, err := r.client.GetObjectLock(ctx, data.Bucket)
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to read resource", err.Error())
+		resp.Diagnostics.AddError("Failed to read resource", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
 		return
 	}
 
@@ -183,7 +184,7 @@ func (r *objectLockConfiguration) Update(ctx context.Context, req resource.Updat
 	}
 
 	if err := r.client.UpdateObjectLock(ctx, data); err != nil {
-		resp.Diagnostics.AddError("Failed to update resource", err.Error())
+		resp.Diagnostics.AddError("Failed to update resource", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
 		return
 	}
 

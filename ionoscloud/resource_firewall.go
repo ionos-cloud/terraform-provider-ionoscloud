@@ -8,6 +8,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -119,8 +120,8 @@ func resourceFirewallCreate(ctx context.Context, d *schema.ResourceData, meta in
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while creating a firewall rule: %w", err))
-		return diags
+		requestLocation, _ := apiResponse.SafeLocation()
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating a firewall rule: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 	d.SetId(*fw.Id)
 
@@ -130,8 +131,9 @@ func resourceFirewallCreate(ctx context.Context, d *schema.ResourceData, meta in
 			log.Printf("[DEBUG] firewall resource failed to be created")
 			d.SetId("")
 		}
-		return diag.FromErr(fmt.Errorf("an error occurred while creating a firewall rule dcId: %s server_id: %s  "+
-			"nic_id: %s %w", d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string), errState))
+		requestLocation, _ := apiResponse.SafeLocation()
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating a firewall rule dcId: %s server_id: %s  "+
+			"nic_id: %s %s", d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string), errState), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	return resourceFirewallRead(ctx, d, meta)
@@ -154,13 +156,12 @@ func resourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta inte
 			d.SetId("")
 			return nil
 		}
-		diags := diag.FromErr(fmt.Errorf("an error occurred while fetching a firewall rule dcId: %s server_id: %s  nic_id: %s ID: %s %s",
-			d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string), d.Id(), err))
-		return diags
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching a firewall rule dcId: %s server_id: %s  nic_id: %s ID: %s %w",
+			d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string), d.Id(), err), nil)
 	}
 
 	if err := setFirewallData(d, &fw); err != nil {
-		return diag.FromErr(err)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	return nil
@@ -181,12 +182,13 @@ func resourceFirewallUpdate(ctx context.Context, d *schema.ResourceData, meta in
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while updating a firewall rule ID %s %w", d.Id(), err))
-		return diags
+		requestLocation, _ := apiResponse.SafeLocation()
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating a firewall rule: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		return diag.FromErr(fmt.Errorf("error getting state change for firewall patch %w", errState))
+		requestLocation, _ := apiResponse.SafeLocation()
+		return diagutil.ToDiags(d, fmt.Errorf("error getting state change for firewall patch %w", errState), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	return resourceFirewallRead(ctx, d, meta)
@@ -206,12 +208,13 @@ func resourceFirewallDelete(ctx context.Context, d *schema.ResourceData, meta in
 		Execute()
 
 	if err != nil {
-		diags := diag.FromErr(fmt.Errorf("an error occurred while deleting a firewall rule ID %s %w", d.Id(), err))
-		return diags
+		requestLocation, _ := apiResponse.SafeLocation()
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while deleting a firewall rule: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		return diag.FromErr(fmt.Errorf("error getting state change for firewall delete %w", errState))
+		requestLocation, _ := apiResponse.SafeLocation()
+		return diagutil.ToDiags(d, fmt.Errorf("error getting state change for firewall delete %w", errState), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	d.SetId("")
@@ -231,7 +234,7 @@ func resourceFirewallImport(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	if err := validateImportIDParts(parts); err != nil {
-		return nil, fmt.Errorf("failed validating import identifier %q: %w", importID, err)
+		return nil, diagutil.ToError(d, fmt.Errorf("failed validating import identifier %q: %w", importID, err), nil)
 	}
 
 	dcId := parts[0]
@@ -251,26 +254,26 @@ func resourceFirewallImport(ctx context.Context, d *schema.ResourceData, meta in
 	if err != nil {
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, fmt.Errorf("unable to find firewall rule %q", firewallId)
+			return nil, diagutil.ToError(d, fmt.Errorf("unable to find firewall rule %q", firewallId), nil)
 		}
-		return nil, fmt.Errorf("an error occurred while retrieving firewall rule %q: %w ", firewallId, err)
+		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while retrieving firewall rule %q: %w ", firewallId, err), nil)
 	}
 
 	if err := d.Set("datacenter_id", dcId); err != nil {
-		return nil, err
+		return nil, diagutil.ToError(d, err, nil)
 	}
 	if err := d.Set("server_id", serverId); err != nil {
-		return nil, err
+		return nil, diagutil.ToError(d, err, nil)
 	}
 	if err := d.Set("nic_id", nicId); err != nil {
-		return nil, err
+		return nil, diagutil.ToError(d, err, nil)
 	}
 	if err := d.Set("location", location); err != nil {
 		return nil, err
 	}
 
 	if err := setFirewallData(d, &fw); err != nil {
-		return nil, err
+		return nil, diagutil.ToError(d, err, nil)
 	}
 
 	return []*schema.ResourceData{d}, nil
@@ -322,7 +325,7 @@ func getFirewallData(d *schema.ResourceData, path string, update bool) (ionosclo
 	if v, ok := d.GetOk(path + "icmp_type"); ok {
 		intIcmpType, err := strconv.Atoi(v.(string))
 		if err != nil {
-			return firewall, diag.FromErr(fmt.Errorf("could not parse icmpTpye %s: %w", v.(string), err))
+			return firewall, diagutil.ToDiags(d, fmt.Errorf("could not parse icmpTpye %s: %w", v.(string), err), nil)
 		}
 		tempIcmpType := int32(intIcmpType)
 		firewall.Properties.IcmpType = &tempIcmpType
@@ -331,7 +334,7 @@ func getFirewallData(d *schema.ResourceData, path string, update bool) (ionosclo
 	if v, ok := d.GetOk(path + "icmp_code"); ok {
 		intIcmpCode, err := strconv.Atoi(v.(string))
 		if err != nil {
-			return firewall, diag.FromErr(fmt.Errorf("could not parse icmpCode %s: %w", v.(string), err))
+			return firewall, diagutil.ToDiags(d, fmt.Errorf("could not parse icmpCode %s: %w", v.(string), err), nil)
 		}
 		tempIcmpCode := int32(intIcmpCode)
 		firewall.Properties.IcmpCode = &tempIcmpCode

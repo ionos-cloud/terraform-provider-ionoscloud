@@ -13,6 +13,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/vpn"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 func resourceVpnWireguardPeer() *schema.Resource {
@@ -98,14 +99,14 @@ func resourceVpnWireguardPeer() *schema.Resource {
 func resourceVpnWireguardPeerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).VPNClient
 	gatewayID := d.Get("gateway_id").(string)
-	peer, _, err := client.CreateWireguardGatewayPeers(ctx, d, gatewayID)
+	peer, apiResponse, err := client.CreateWireguardGatewayPeers(ctx, d, gatewayID)
 	if err != nil {
 		d.SetId("")
-		return diag.FromErr(fmt.Errorf("error creating WireGuard Peer: %w", err))
+		return diagutil.ToDiags(d, fmt.Errorf("error creating WireGuard Peer: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	if err := vpn.SetWireguardPeerData(d, peer); err != nil {
 		d.SetId("")
-		return diag.FromErr(err)
+		return diagutil.ToDiags(d, err, nil)
 	}
 	return nil
 }
@@ -123,7 +124,7 @@ func resourceVpnWireguardPeerRead(ctx context.Context, d *schema.ResourceData, m
 		}
 	}
 	if err := vpn.SetWireguardPeerData(d, peer); err != nil {
-		return diag.FromErr(err)
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	return nil
@@ -132,9 +133,9 @@ func resourceVpnWireguardPeerRead(ctx context.Context, d *schema.ResourceData, m
 func resourceVpnWireguardPeerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).VPNClient
 	gatewayID := d.Get("gateway_id").(string)
-	_, _, err := client.UpdateWireguardPeer(ctx, gatewayID, d.Id(), d)
+	_, apiResponse, err := client.UpdateWireguardPeer(ctx, gatewayID, d.Id(), d)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("error updating WireGuard Peer: %w", err))
+		return diagutil.ToDiags(d, fmt.Errorf("error updating WireGuard Peer: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	return nil
 }
@@ -148,12 +149,12 @@ func resourceVpnWireguardPeerDelete(ctx context.Context, d *schema.ResourceData,
 		if apiResponse.HttpNotFound() {
 			return nil
 		}
-		return diag.FromErr(fmt.Errorf("error deleting WireGuard Peer: %w", err))
+		return diagutil.ToDiags(d, fmt.Errorf("error deleting WireGuard Peer: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsWireguardPeerDeleted)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("deleting %w", err))
+		return diagutil.ToDiags(d, fmt.Errorf("deleting %w", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String()})
 	}
 
 	log.Printf("[INFO] Successfully deleted WireGuard Peer: %s", d.Id())
@@ -166,23 +167,23 @@ func resourceVpnWireguardPeerImport(ctx context.Context, d *schema.ResourceData,
 	client := m.(bundleclient.SdkBundle).VPNClient
 	parts := strings.Split(d.Id(), ":")
 	if len(parts) != 3 {
-		return nil, fmt.Errorf("invalid import format: %s, expecting the following format: location:gateway_id:id", d.Id())
+		return nil, diagutil.ToError(d, fmt.Errorf("invalid import format:, expecting the following format: location:gateway_id:id"), nil)
 	}
 	location := parts[0]
 	gatewayID := parts[1]
 	peerID := parts[2]
-	peer, _, err := client.GetWireguardPeerByID(ctx, gatewayID, peerID, location)
+	peer, apiResponse, err := client.GetWireguardPeerByID(ctx, gatewayID, peerID, location)
 	if err != nil {
-		return nil, err
+		return nil, diagutil.ToError(d, err, &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	if err := d.Set("gateway_id", gatewayID); err != nil {
-		return nil, err
+		return nil, diagutil.ToError(d, err, nil)
 	}
 	if err := d.Set("location", location); err != nil {
-		return nil, err
+		return nil, diagutil.ToError(d, err, nil)
 	}
 	if err := vpn.SetWireguardPeerData(d, peer); err != nil {
-		return nil, err
+		return nil, diagutil.ToError(d, err, nil)
 	}
 	return []*schema.ResourceData{d}, nil
 }

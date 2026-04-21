@@ -29,6 +29,10 @@ func TestAccSnapshotBasic(t *testing.T) {
 		CheckDestroy:             testAccCheckSnapshotDestroyCheck,
 		Steps: []resource.TestStep{
 			{
+				Config:      testAccCheckSnapshotConfigUpdateOnlyAttrs,
+				ExpectError: regexp.MustCompile(`can only be updated`),
+			},
+			{
 				Config: testAccCheckSnapshotConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSnapshotExists(constant.SnapshotResource+"."+constant.SnapshotTestResource, &snapshot),
@@ -247,4 +251,12 @@ data ` + constant.SnapshotResource + ` ` + constant.SnapshotDataSourceByName + `
     name = ` + constant.SnapshotResource + `.` + constant.SnapshotTestResource + `.name
     location = ` + constant.SnapshotResource + `.` + constant.SnapshotTestResource + `.location
     size = 1234
+}`
+
+const testAccCheckSnapshotConfigUpdateOnlyAttrs = testSnapshotServer + `
+resource ` + constant.SnapshotResource + ` ` + constant.SnapshotTestResource + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  volume_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.boot_volume
+  name = "` + constant.SnapshotTestResource + `"
+  cpu_hot_plug = true
 }`
