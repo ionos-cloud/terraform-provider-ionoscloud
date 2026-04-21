@@ -376,7 +376,7 @@ github.com/ionos-cloud/sdk-go-bundle/shared
 github.com/ionos-cloud/sdk-go-bundle/shared/failover
 github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration
 github.com/ionos-cloud/sdk-go-bundle/shared/retry
-# github.com/ionos-cloud/sdk-go/v6 v6.3.6 => /home/rmocanu/work/sdk-resources/dist/sdk-cloudapi-v6-go
+# github.com/ionos-cloud/sdk-go/v6 v6.3.7
 ## explicit; go 1.24
 github.com/ionos-cloud/sdk-go/v6
 # github.com/jmespath/go-jmespath v0.4.0
@@ -646,4 +646,3 @@ google.golang.org/protobuf/types/known/timestamppb
 # gopkg.in/yaml.v3 v3.0.1
 ## explicit
 gopkg.in/yaml.v3
-# github.com/ionos-cloud/sdk-go/v6 => /home/rmocanu/work/sdk-resources/dist/sdk-cloudapi-v6-go
