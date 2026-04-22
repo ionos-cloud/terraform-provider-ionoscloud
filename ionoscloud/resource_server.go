@@ -39,13 +39,15 @@ func resourceServer() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"template_uuid": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "The UUID of the template for creating a CUBE server; the available templates for CUBE servers can be found on the templates resource.",
 			},
 			"name": {
 				Type:             schema.TypeString,
 				Required:         true,
+				Description:      "The name of the server.",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"hostname": {
@@ -56,25 +58,29 @@ func resourceServer() *schema.Resource {
 				ValidateDiagFunc: validation.ToDiagFunc(validation.All(validation.StringIsNotWhiteSpace, validation.StringLenBetween(1, 63))),
 			},
 			"cores": {
-				Type:     schema.TypeInt,
-				Optional: true, // this should be required when the deprecated version will be removed
-				Computed: true,
+				Type:        schema.TypeInt,
+				Optional:    true, // this should be required when the deprecated version will be removed
+				Computed:    true,
+				Description: "Number of server CPU cores.",
 			},
 			"ram": {
-				Type:     schema.TypeInt,
-				Optional: true, // this should be required when the deprecated version will be removed
-				Computed: true,
+				Type:        schema.TypeInt,
+				Optional:    true, // this should be required when the deprecated version will be removed
+				Computed:    true,
+				Description: "The amount of memory for the server in MB.",
 			},
 			"availability_zone": {
 				Type:             schema.TypeString,
 				Optional:         true,
 				Computed:         true,
 				ForceNew:         true,
+				Description:      "The availability zone in which the server should exist. E.g: AUTO, ZONE_1, ZONE_2. This property is immutable.",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"AUTO", "ZONE_1", "ZONE_2"}, true)),
 			},
 			"boot_volume": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The associated boot volume.",
 			},
 			"boot_cdrom": {
 				Type:             schema.TypeString,
@@ -85,9 +91,10 @@ func resourceServer() *schema.Resource {
 				Description:      "The associated boot drive, if any. Must be the UUID of a bootable CDROM image that you can retrieve using the image data source",
 			},
 			"cpu_family": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "CPU architecture on which server gets provisioned; not all CPU architectures are available in all datacenter regions. E.g.: INTEL_SKYLAKE or INTEL_XEON.",
 			},
 			"type": {
 				Type:             schema.TypeString,
@@ -98,9 +105,10 @@ func resourceServer() *schema.Resource {
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"CUBE", "ENTERPRISE"}, true)),
 			},
 			"boot_image": {
-				Type:     schema.TypeString,
-				Computed: true,
-				Optional: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Optional:    true,
+				Description: "The image or snapshot UUID / name. May also be an image alias. It is required if licence_type is not provided.",
 			},
 			"primary_nic": {
 				Type:        schema.TypeString,
@@ -108,18 +116,21 @@ func resourceServer() *schema.Resource {
 				Description: "Id of the primary network interface",
 			},
 			"primary_ip": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The associated primary IP address.",
 			},
 			"firewallrule_id": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The associated firewall rule.",
 			},
 			"firewallrule_ids": {
-				Type:       schema.TypeList,
-				Optional:   true,
-				Computed:   true,
-				ConfigMode: schema.SchemaConfigModeAttr,
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				ConfigMode:  schema.SchemaConfigModeAttr,
+				Description: "The associated firewall rules.",
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -128,6 +139,7 @@ func resourceServer() *schema.Resource {
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
+				Description:      "The ID of a Virtual Data Center.",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"location": {
@@ -141,13 +153,15 @@ func resourceServer() *schema.Resource {
 				Optional:      true,
 				Sensitive:     true,
 				Computed:      true,
+				Description:   "Required if ssh_key_path is not provided.",
 				ConflictsWith: []string{"volume.0.image_password"},
 			},
 			"image_name": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				ForceNew:    true,
+				Description: "The name, ID or alias of the image. May also be a snapshot ID. It is required if licence_type is not provided. Attribute is immutable.",
 			},
 			"ssh_key_path": {
 				Type:          schema.TypeList,
