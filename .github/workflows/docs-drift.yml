@@ -1,0 +1,33 @@
+name: Documentation Drift Check
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types: [opened, synchronize, reopened]
+jobs:
+  docs-drift:
+    name: "Check docs are up-to-date with schema"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # ratchet:actions/checkout@v6
+      - name: Set up Go
+        uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # ratchet:actions/setup-go@v6
+        with:
+          go-version-file: 'go.mod'
+      - name: Generate docs
+        run: go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs generate
+      - name: Check for drift
+        run: |
+          if [ -n "$(git diff --name-only -- docs/)" ]; then
+            echo "::error::Documentation is out of sync with schema. Please run 'make generate-docs' and commit the changes."
+            echo ""
+            echo "Changed files:"
+            git diff --name-only -- docs/
+            echo ""
+            echo "Diff:"
+            git diff -- docs/
+            exit 1
+          fi
+          echo "Documentation is up-to-date."
