@@ -333,7 +333,7 @@ func errorOnMongoVersionDowngrade(_ context.Context, diff *schema.ResourceDiff, 
 }
 
 func resourceDbaasMongoClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(d.Get("location").(string))
+	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(ctx, d.Get("location").(string))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -363,7 +363,7 @@ func resourceDbaasMongoClusterCreate(ctx context.Context, d *schema.ResourceData
 }
 
 func resourceDbaasMongoClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(d.Get("location").(string))
+	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(ctx, d.Get("location").(string))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -388,7 +388,7 @@ func resourceDbaasMongoClusterUpdate(ctx context.Context, d *schema.ResourceData
 }
 
 func resourceDbaasMongoClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(d.Get("location").(string))
+	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(ctx, d.Get("location").(string))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -413,7 +413,7 @@ func resourceDbaasMongoClusterRead(ctx context.Context, d *schema.ResourceData, 
 }
 
 func resourceDbaasMongoClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(d.Get("location").(string))
+	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(ctx, d.Get("location").(string))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -448,7 +448,7 @@ func resourceDbaasMongoClusterImport(ctx context.Context, d *schema.ResourceData
 	if err := validateImportIDParts(parts); err != nil {
 		return nil, fmt.Errorf("failed validating import identifier %q: %w", importID, err)
 	}
-	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(ctx, location)
 	if err != nil {
 		return nil, err
 	}

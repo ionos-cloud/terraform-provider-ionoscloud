@@ -171,7 +171,7 @@ func resourceTargetGroup() *schema.Resource {
 }
 
 func resourceTargetGroupCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -231,7 +231,7 @@ func resourceTargetGroupCreate(ctx context.Context, d *schema.ResourceData, meta
 }
 
 func resourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -255,7 +255,7 @@ func resourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta i
 }
 
 func resourceTargetGroupUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -313,7 +313,7 @@ func resourceTargetGroupUpdate(ctx context.Context, d *schema.ResourceData, meta
 }
 
 func resourceTargetGroupDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -337,7 +337,7 @@ func resourceTargetGroupDelete(ctx context.Context, d *schema.ResourceData, meta
 }
 
 func resourceTargetGroupImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return nil, err
 	}

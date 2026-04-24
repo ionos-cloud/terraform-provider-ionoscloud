@@ -111,7 +111,7 @@ func resourceContainerRegistry() *schema.Resource {
 
 func resourceContainerRegistryCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -138,7 +138,7 @@ func resourceContainerRegistryCreate(ctx context.Context, d *schema.ResourceData
 
 func resourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -163,7 +163,7 @@ func resourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData, 
 
 func resourceContainerRegistryUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -195,7 +195,7 @@ func resourceContainerRegistryUpdate(ctx context.Context, d *schema.ResourceData
 
 func resourceContainerRegistryDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -225,7 +225,7 @@ func resourceContainerRegistryImport(ctx context.Context, d *schema.ResourceData
 	if err := validateImportIDParts(parts); err != nil {
 		return nil, fmt.Errorf("failed validating import identifier %q: %w", importID, err)
 	}
-	client, err := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(ctx, location)
 	if err != nil {
 		return nil, err
 	}

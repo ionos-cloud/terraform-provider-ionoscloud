@@ -54,7 +54,7 @@ func resourceDbaasPgSqlDatabase() *schema.Resource {
 }
 
 func resourceDbaasPgSqlDatabaseCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
+	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(ctx, d.Get("location").(string))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -75,7 +75,7 @@ func resourceDbaasPgSqlDatabaseCreate(ctx context.Context, d *schema.ResourceDat
 }
 
 func resourceDbaasPgSqlDatabaseRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
+	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(ctx, d.Get("location").(string))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -97,7 +97,7 @@ func resourceDbaasPgSqlDatabaseRead(ctx context.Context, d *schema.ResourceData,
 }
 
 func resourceDbaasPgSqlDatabaseDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
+	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(ctx, d.Get("location").(string))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -122,7 +122,7 @@ func resourceDbaasPgSqlDatabaseImporter(ctx context.Context, d *schema.ResourceD
 		return nil, diagutil.ToError(d, fmt.Errorf("failed validating import identifier %q: %w", importID, err), nil)
 	}
 
-	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(ctx, location)
 	if err != nil {
 		return nil, err
 	}

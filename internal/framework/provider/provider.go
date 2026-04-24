@@ -249,13 +249,13 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 		},
 	}
 
-	client := bundleclient.New(clientOptions, fileConfig)
+	client := bundleclient.New(ctx, clientOptions, fileConfig)
 	resp.DataSourceData = client
 	resp.EphemeralResourceData = client
 	resp.ResourceData = client
 
 	diagutil.SetupContractNumberResolver(clientOpts.ContractNumber.ValueString(), token, func() string { //nolint:contextcheck
-		return contractService.GetContractNumber(client)
+		return contractService.GetContractNumber(ctx, client)
 	})
 }
 

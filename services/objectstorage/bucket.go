@@ -133,7 +133,7 @@ func (c *Client) DeleteBucket(ctx context.Context, name types.String, objectLock
 		return nil
 	}
 
-	if isBucketNotEmptyError(err) && forceDestroy.ValueBool() {
+	if isBucketNotEmptyError(ctx, err) && forceDestroy.ValueBool() {
 		if _, err = c.EmptyBucket(ctx, name.ValueString(), objectLockEnabled.ValueBool()); err != nil {
 			return fmt.Errorf("failed to empty bucket: %w", err)
 		}

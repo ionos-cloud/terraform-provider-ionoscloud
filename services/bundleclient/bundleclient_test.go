@@ -1,6 +1,7 @@
 package bundleclient_test
 
 import (
+	"context"
 	"strings"
 	"testing"
 
@@ -16,7 +17,7 @@ import (
 
 // newBundle creates an SdkBundle with empty credentials, suitable for unit tests.
 func newBundle(fileConfig *fileconfiguration.FileConfig) *bundleclient.SdkBundle {
-	return bundleclient.New(clientoptions.TerraformClientOptions{}, fileConfig)
+	return bundleclient.New(context.Background(), clientoptions.TerraformClientOptions{}, fileConfig)
 }
 
 // newCloudFileConfig builds a minimal FileConfig with a Cloud product entry and the given failover options.
@@ -164,7 +165,7 @@ func TestNewCloudAPIClientWithFailover(t *testing.T) {
 			}
 
 			bundle := newBundle(tt.fileConfig)
-			client, err := bundle.NewCloudAPIClientWithFailover()
+			client, err := bundle.NewCloudAPIClientWithFailover(context.Background())
 
 			if tt.wantErr {
 				if err == nil {

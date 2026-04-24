@@ -1,6 +1,7 @@
 package cert
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"runtime"
@@ -32,8 +33,8 @@ func (c *Client) GetConfig() *shared.Configuration {
 }
 
 // NewClient todo cert has both location(auto-cert) and no location on certificate. How do we override?
-func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *fileconfiguration.FileConfig) *Client {
-	loadedconfig.SetGlobalClientOptionsFromFileConfig(&clientOptions, fileConfig, fileconfiguration.Cert)
+func NewClient(ctx context.Context, clientOptions clientoptions.TerraformClientOptions, fileConfig *fileconfiguration.FileConfig) *Client {
+	loadedconfig.SetGlobalClientOptionsFromFileConfig(ctx, &clientOptions, fileConfig, fileconfiguration.Cert)
 	config := shared.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
 	config.MaxRetries = constant.MaxRetries
 	config.MaxWaitTime = constant.MaxWaitTime

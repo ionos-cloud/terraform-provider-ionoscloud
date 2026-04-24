@@ -96,7 +96,7 @@ func dataSourceContainerRegistryToken() *schema.Resource {
 
 func dataSourceContainerRegistryTokenRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}

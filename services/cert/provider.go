@@ -23,7 +23,7 @@ var ionosAPIURLCert = "IONOS_API_URL_CERT"
 
 // ChangeConfigURL modifies the URL inside the client configuration.
 // This function is required in order to make requests to different endpoints based on location.
-func (c *Client) ChangeConfigURL(location string) {
+func (c *Client) ChangeConfigURL(ctx context.Context, location string) {
 	clientConfig := c.sdkClient.GetConfig()
 	if location == "" && os.Getenv(ionosAPIURLCert) != "" {
 		clientConfig.Servers = shared.ServerConfigurations{
@@ -44,7 +44,7 @@ func (c *Client) ChangeConfigURL(location string) {
 
 // GetProvider gets a provider
 func (c *Client) GetProvider(ctx context.Context, providerID, location string) (certmanager.ProviderRead, *shared.APIResponse, error) {
-	c.ChangeConfigURL(location)
+	c.ChangeConfigURL(ctx, location)
 	provider, apiResponse, err := c.sdkClient.ProviderApi.ProvidersFindById(ctx, providerID).Execute()
 	apiResponse.LogInfo()
 	return provider, apiResponse, err
@@ -52,7 +52,7 @@ func (c *Client) GetProvider(ctx context.Context, providerID, location string) (
 
 // ListProviders lists all providers
 func (c *Client) ListProviders(ctx context.Context, location string) (certmanager.ProviderReadList, *shared.APIResponse, error) {
-	c.ChangeConfigURL(location)
+	c.ChangeConfigURL(ctx, location)
 	providers, apiResponse, err := c.sdkClient.ProviderApi.ProvidersGet(ctx).Execute()
 	apiResponse.LogInfo()
 	return providers, apiResponse, err
@@ -60,7 +60,7 @@ func (c *Client) ListProviders(ctx context.Context, location string) (certmanage
 
 // CreateProvider creates a provider
 func (c *Client) CreateProvider(ctx context.Context, providerPostData certmanager.ProviderCreate, location string) (certmanager.ProviderRead, *shared.APIResponse, error) {
-	c.ChangeConfigURL(location)
+	c.ChangeConfigURL(ctx, location)
 	provider, apiResponse, err := c.sdkClient.ProviderApi.ProvidersPost(ctx).ProviderCreate(providerPostData).Execute()
 	apiResponse.LogInfo()
 	return provider, apiResponse, err
@@ -68,7 +68,7 @@ func (c *Client) CreateProvider(ctx context.Context, providerPostData certmanage
 
 // UpdateProvider updates a provider
 func (c *Client) UpdateProvider(ctx context.Context, providerID, location string, providerPatchData certmanager.ProviderPatch) (certmanager.ProviderRead, *shared.APIResponse, error) {
-	c.ChangeConfigURL(location)
+	c.ChangeConfigURL(ctx, location)
 	provider, apiResponse, err := c.sdkClient.ProviderApi.ProvidersPatch(ctx, providerID).ProviderPatch(providerPatchData).Execute()
 	apiResponse.LogInfo()
 	return provider, apiResponse, err
@@ -76,7 +76,7 @@ func (c *Client) UpdateProvider(ctx context.Context, providerID, location string
 
 // DeleteProvider deletes a provider
 func (c *Client) DeleteProvider(ctx context.Context, providerID, location string) (*shared.APIResponse, error) {
-	c.ChangeConfigURL(location)
+	c.ChangeConfigURL(ctx, location)
 	apiResponse, err := c.sdkClient.ProviderApi.ProvidersDelete(ctx, providerID).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err

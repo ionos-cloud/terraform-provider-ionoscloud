@@ -158,7 +158,7 @@ func testAccCheckNicDestroyCheck(s *terraform.State) error {
 		dcId := rs.Primary.Attributes["datacenter_id"]
 		serverId := rs.Primary.Attributes["server_id"]
 		location := rs.Primary.Attributes["location"]
-		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 		if err != nil {
 			return err
 		}
@@ -197,7 +197,7 @@ func testAccCheckNICExists(n string, nic *ionoscloud.Nic) resource.TestCheckFunc
 		dcId := rs.Primary.Attributes["datacenter_id"]
 		serverId := rs.Primary.Attributes["server_id"]
 		location := rs.Primary.Attributes["location"]
-		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 		if err != nil {
 			return err
 		}

@@ -65,7 +65,7 @@ func dataSourceDbassMongoTemplate() *schema.Resource {
 }
 
 func dataSourceDbassMongoTemplateRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewMongoClient("")
+	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(ctx, "")
 	if err != nil {
 		return diag.FromErr(err)
 	}

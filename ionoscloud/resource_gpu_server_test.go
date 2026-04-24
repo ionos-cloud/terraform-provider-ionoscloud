@@ -168,7 +168,7 @@ func testAccCheckGpuServerDestroyCheck(s *terraform.State) error {
 
 		dcId := rs.Primary.Attributes["datacenter_id"]
 		location := rs.Primary.Attributes["location"]
-		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 		if err != nil {
 			return err
 		}
@@ -205,7 +205,7 @@ func testAccCheckGpuServerExists(n string, server *ionoscloud.Server) resource.T
 		}
 
 		location := rs.Primary.Attributes["location"]
-		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 		if err != nil {
 			return err
 		}

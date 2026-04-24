@@ -2,9 +2,9 @@ package logging
 
 import (
 	"context"
-	"log"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/ionos-cloud/sdk-go-bundle/products/logging/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
@@ -20,7 +20,7 @@ var pipelineResourceName = "Logging Pipeline"
 // CreatePipeline creates a new pipeline
 func (c *Client) CreatePipeline(ctx context.Context, d *schema.ResourceData) (logging.PipelineRead, *shared.APIResponse, error) {
 	location := d.Get("location").(string)
-	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Logging, location)
+	loadedconfig.SetClientOptionsFromConfig(ctx, c, fileconfiguration.Logging, location)
 	request := setPipelinePostRequest(d)
 	pipeline, apiResponse, err := c.sdkClient.PipelinesApi.PipelinesPost(ctx).PipelineCreate(*request).Execute()
 	apiResponse.LogInfo()
@@ -35,13 +35,13 @@ func (c *Client) IsPipelineAvailable(ctx context.Context, d *schema.ResourceData
 	if err != nil {
 		return false, err
 	}
-	log.Printf("[DEBUG] pipeline status: %s", pipeline.Metadata.State)
+	tflog.Debug(ctx, "logging pipeline status", map[string]interface{}{"state": pipeline.Metadata.State})
 	return strings.EqualFold(pipeline.Metadata.State, constant.Available), nil
 }
 
 // UpdatePipeline updates a pipeline
 func (c *Client) UpdatePipeline(ctx context.Context, id string, d *schema.ResourceData) (logging.PipelineRead, *shared.APIResponse, error) {
-	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Logging, d.Get("location").(string))
+	loadedconfig.SetClientOptionsFromConfig(ctx, c, fileconfiguration.Logging, d.Get("location").(string))
 	request := setPipelinePatchRequest(d)
 	pipelineResponse, apiResponse, err := c.sdkClient.PipelinesApi.PipelinesPatch(ctx, id).PipelinePatch(*request).Execute()
 	apiResponse.LogInfo()
@@ -50,7 +50,7 @@ func (c *Client) UpdatePipeline(ctx context.Context, id string, d *schema.Resour
 
 // DeletePipeline deletes a pipeline
 func (c *Client) DeletePipeline(ctx context.Context, location, id string) (*shared.APIResponse, error) {
-	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Logging, location)
+	loadedconfig.SetClientOptionsFromConfig(ctx, c, fileconfiguration.Logging, location)
 	apiResponse, err := c.sdkClient.PipelinesApi.PipelinesDelete(ctx, id).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
@@ -58,7 +58,7 @@ func (c *Client) DeletePipeline(ctx context.Context, location, id string) (*shar
 
 // IsPipelineDeleted checks if the pipeline is deleted
 func (c *Client) IsPipelineDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
-	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Logging, d.Get("location").(string))
+	loadedconfig.SetClientOptionsFromConfig(ctx, c, fileconfiguration.Logging, d.Get("location").(string))
 	_, apiResponse, err := c.sdkClient.PipelinesApi.PipelinesFindById(ctx, d.Id()).Execute()
 	apiResponse.LogInfo()
 	return apiResponse.HttpNotFound(), err
@@ -66,7 +66,7 @@ func (c *Client) IsPipelineDeleted(ctx context.Context, d *schema.ResourceData) 
 
 // GetPipelineByID returns a pipeline by its ID
 func (c *Client) GetPipelineByID(ctx context.Context, location, id string) (logging.PipelineRead, *shared.APIResponse, error) {
-	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Logging, location)
+	loadedconfig.SetClientOptionsFromConfig(ctx, c, fileconfiguration.Logging, location)
 	pipeline, apiResponse, err := c.sdkClient.PipelinesApi.PipelinesFindById(ctx, id).Execute()
 	apiResponse.LogInfo()
 	return pipeline, apiResponse, err
@@ -74,7 +74,7 @@ func (c *Client) GetPipelineByID(ctx context.Context, location, id string) (logg
 
 // ListPipelines returns a list of all pipelines
 func (c *Client) ListPipelines(ctx context.Context, location string) (logging.PipelineReadList, *shared.APIResponse, error) {
-	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Logging, location)
+	loadedconfig.SetClientOptionsFromConfig(ctx, c, fileconfiguration.Logging, location)
 	pipelines, apiResponse, err := c.sdkClient.PipelinesApi.PipelinesGet(ctx).Execute()
 	apiResponse.LogInfo()
 	return pipelines, apiResponse, err

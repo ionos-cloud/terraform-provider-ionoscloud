@@ -3,10 +3,10 @@ package cloudapifirewall
 import (
 	"context"
 	"fmt"
-	"log"
 	"reflect"
 	"strconv"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
@@ -30,7 +30,7 @@ func (fs *Service) Get(ctx context.Context, datacenterId, serverId, nicId string
 		return nil, err
 	}
 	if apiResponse.HttpNotFound() || firewallRules.Items == nil || len(*firewallRules.Items) == 0 {
-		log.Printf("[DEBUG] no firewalls found for datacenter %s, server %s, nic %s", datacenterId, serverId, nicId)
+		tflog.Debug(ctx, "no firewalls found", map[string]interface{}{"datacenter_id": datacenterId, "server_id": serverId, "nic_id": nicId})
 		return nil, nil
 	}
 	return *firewallRules.Items, nil
@@ -43,7 +43,7 @@ func (fs *Service) FindById(ctx context.Context, datacenterId, serverId, nicId, 
 		return nil, apiResponse, err
 	}
 	if apiResponse.HttpNotFound() {
-		log.Printf("[DEBUG] no firewall rule found for datacenter %s, server %s, nic %s", datacenterId, serverId, nicId)
+		tflog.Debug(ctx, "no firewall rule found", map[string]interface{}{"datacenter_id": datacenterId, "server_id": serverId, "nic_id": nicId})
 		return nil, apiResponse, nil
 	}
 	return &firewallRule, apiResponse, nil
@@ -231,7 +231,7 @@ func SetNullableFields(prop ionoscloud.FirewallruleProperties) ionoscloud.Firewa
 func (fs *Service) AddToMapIfRuleExists(ctx context.Context, datacenterId, serverId, nicId, ruleId string) (map[string]interface{}, error) {
 	var firewallEntry map[string]interface{}
 	if datacenterId == "" || serverId == "" || nicId == "" || ruleId == "" {
-		log.Printf("[DEBUG] Cannot search for firewall rules without dcId %s, serverId %s, nicId %s, ruleId %s", datacenterId, serverId, nicId, ruleId)
+		tflog.Debug(ctx, "cannot search for firewall rules: missing IDs", map[string]interface{}{"datacenter_id": datacenterId, "server_id": serverId, "nic_id": nicId, "rule_id": ruleId})
 		return firewallEntry, nil
 	}
 
@@ -245,7 +245,7 @@ func (fs *Service) AddToMapIfRuleExists(ctx context.Context, datacenterId, serve
 		return firewallEntry, nil
 	}
 	if firewall.Properties != nil && firewall.Properties.Name != nil {
-		log.Printf("[DEBUG] found firewall rule with name %s", *firewall.Properties.Name)
+		tflog.Debug(ctx, "found firewall rule", map[string]interface{}{"name": *firewall.Properties.Name})
 	}
 	firewallEntry = SetProperties(*firewall)
 	firewallEntry["id"] = *firewall.Id

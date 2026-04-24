@@ -1,13 +1,14 @@
 package bundleclient
 
 import (
+	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"runtime"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	cr "github.com/ionos-cloud/sdk-go-bundle/products/containerregistry/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2"
@@ -41,19 +42,19 @@ import (
 )
 
 // New creates a new SdkBundle client
-func New(clientOptions clientoptions.TerraformClientOptions, fileConfig *fileconfiguration.FileConfig) *SdkBundle {
+func New(ctx context.Context, clientOptions clientoptions.TerraformClientOptions, fileConfig *fileconfiguration.FileConfig) *SdkBundle {
 	return &SdkBundle{
-		CDNClient:         cdnService.NewClient(clientOptions, fileConfig),
-		AutoscalingClient: autoscalingService.NewClient(clientOptions, fileConfig),
-		CertManagerClient: cert.NewClient(clientOptions, fileConfig),
-		DNSClient:         dnsService.NewClient(clientOptions, fileConfig),
+		CDNClient:         cdnService.NewClient(ctx, clientOptions, fileConfig),
+		AutoscalingClient: autoscalingService.NewClient(ctx, clientOptions, fileConfig),
+		CertManagerClient: cert.NewClient(ctx, clientOptions, fileConfig),
+		DNSClient:         dnsService.NewClient(ctx, clientOptions, fileConfig),
 		LoggingClient:     loggingService.NewClient(clientOptions, fileConfig),
 		MariaDBClient:     mariadb.NewClient(clientOptions, fileConfig),
 		NFSClient:         nfsService.NewClient(clientOptions, fileConfig),
 		KafkaClient:       kafkaService.NewClient(clientOptions, fileConfig),
 		VPNClient:         vpn.NewClient(clientOptions, fileConfig),
 		InMemoryDBClient:  inmemorydb.NewClient(clientOptions, fileConfig),
-		S3Client:          objectStorageService.NewClient(clientOptions, fileConfig),
+		S3Client:          objectStorageService.NewClient(ctx, clientOptions, fileConfig),
 		MonitoringClient:  monitoringService.NewClient(clientOptions, fileConfig),
 
 		clientOptions: clientOptions,
@@ -94,21 +95,21 @@ func (c SdkBundle) newBundleClientConfig(userAgent string) *shared.Configuration
 // shouldApplyOverridesCustomEnv handles the early-exit checks common to all client constructors.
 // It returns true when the caller should proceed with custom location or failover configuration,
 // or false if the client should be returned immediately using the provided config (e.g. env var provided as parameter or default).
-func (c SdkBundle) shouldApplyOverridesCustomEnv(product, productEnvVar string) bool {
+func (c SdkBundle) shouldApplyOverridesCustomEnv(ctx context.Context, product, productEnvVar string) bool {
 	if os.Getenv(shared.IonosApiUrlEnvVar) != "" {
-		log.Printf("[DEBUG] %s: using endpoint from %s: %s", product, shared.IonosApiUrlEnvVar, os.Getenv(shared.IonosApiUrlEnvVar))
+		tflog.Debug(ctx, "using endpoint from env", map[string]interface{}{"product": product, "env": shared.IonosApiUrlEnvVar, "url": os.Getenv(shared.IonosApiUrlEnvVar)})
 		return false
 	}
 	if productEnvVar != "" && os.Getenv(productEnvVar) != "" {
-		log.Printf("[DEBUG] %s: using endpoint from %s: %s", product, productEnvVar, os.Getenv(productEnvVar))
+		tflog.Debug(ctx, "using endpoint from env", map[string]interface{}{"product": product, "env": productEnvVar, "url": os.Getenv(productEnvVar)})
 		return false
 	}
 	if c.fileConfig == nil {
-		log.Printf("[DEBUG] No file config available for %s", product)
+		tflog.Debug(ctx, "no file config available", map[string]interface{}{"product": product})
 		return false
 	}
 	if c.fileConfig.GetProductOverrides(product) == nil {
-		log.Printf("[DEBUG] %s: no config in file config, using SDK defaults", product)
+		tflog.Debug(ctx, "no config in file config, using SDK defaults", map[string]interface{}{"product": product})
 		return false
 	}
 	return true
@@ -117,19 +118,19 @@ func (c SdkBundle) shouldApplyOverridesCustomEnv(product, productEnvVar string) 
 // shouldApplyOverrides handles the early-exit checks common to all client constructors.
 // It returns true when the caller should proceed with custom location or failover configuration,
 // or false if the client should be returned immediately using the provided config (e.g. IONOS_API_URL env var or default).
-func (c SdkBundle) shouldApplyOverrides(product string) bool {
-	return c.shouldApplyOverridesCustomEnv(product, "")
+func (c SdkBundle) shouldApplyOverrides(ctx context.Context, product string) bool {
+	return c.shouldApplyOverridesCustomEnv(ctx, product, "")
 }
 
 // NewContainerRegistryClient creates a new Container Registry client for a specific location
-func (c SdkBundle) NewContainerRegistryClient(location string) (*crService.Client, error) {
+func (c SdkBundle) NewContainerRegistryClient(ctx context.Context, location string) (*crService.Client, error) {
 	config := c.newBundleClientConfig(fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go-container-cr/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		c.clientOptions.Version, cr.Version, c.clientOptions.TerraformVersion,
 		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
 	))
 
-	if !c.shouldApplyOverrides(fileconfiguration.ContainerRegistry) {
+	if !c.shouldApplyOverrides(ctx, fileconfiguration.ContainerRegistry) {
 		return crService.NewClientFromConfig(config), nil
 	}
 
@@ -148,7 +149,7 @@ func (c SdkBundle) NewContainerRegistryClient(location string) (*crService.Clien
 			fileconfiguration.ContainerRegistry, location,
 		)
 	}
-	log.Printf("[DEBUG] Container Registry: endpoint for location %s: %s", configlog.FormatLocation(location), endpoint.Name)
+	tflog.Debug(ctx, "Container Registry: endpoint for location", map[string]interface{}{"location": configlog.FormatLocation(location), "url": endpoint.Name})
 	config.Servers = shared.ServerConfigurations{
 		{
 			URL:         endpoint.Name,
@@ -161,14 +162,14 @@ func (c SdkBundle) NewContainerRegistryClient(location string) (*crService.Clien
 }
 
 // NewMongoClient creates a new MongoDB client for a specific location
-func (c SdkBundle) NewMongoClient(location string) (*dbaasService.MongoClient, error) {
+func (c SdkBundle) NewMongoClient(ctx context.Context, location string) (*dbaasService.MongoClient, error) {
 	config := c.newBundleClientConfig(fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go-dbaas-mongo/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		c.clientOptions.Version, mongo.Version, c.clientOptions.TerraformVersion,
 		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
 	))
 
-	if !c.shouldApplyOverrides(fileconfiguration.Mongo) {
+	if !c.shouldApplyOverrides(ctx, fileconfiguration.Mongo) {
 		return dbaasService.NewMongoClientFromConfig(config), nil
 	}
 
@@ -187,7 +188,7 @@ func (c SdkBundle) NewMongoClient(location string) (*dbaasService.MongoClient, e
 			fileconfiguration.Mongo, location,
 		)
 	}
-	log.Printf("[DEBUG] Mongo: endpoint for location %s: %s", configlog.FormatLocation(location), endpoint.Name)
+	tflog.Debug(ctx, "Mongo: endpoint for location", map[string]interface{}{"location": configlog.FormatLocation(location), "url": endpoint.Name})
 	config.Servers = shared.ServerConfigurations{
 		{
 			URL:         endpoint.Name,
@@ -200,14 +201,14 @@ func (c SdkBundle) NewMongoClient(location string) (*dbaasService.MongoClient, e
 }
 
 // NewPsqlClient creates a new PostgreSQL client for a specific location
-func (c SdkBundle) NewPsqlClient(location string) (*dbaasService.PsqlClient, error) {
+func (c SdkBundle) NewPsqlClient(ctx context.Context, location string) (*dbaasService.PsqlClient, error) {
 	config := c.newBundleClientConfig(fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go-dbaas-postgres/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		c.clientOptions.Version, psql.Version, c.clientOptions.TerraformVersion,
 		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
 	))
 
-	if !c.shouldApplyOverrides(fileconfiguration.PSQL) {
+	if !c.shouldApplyOverrides(ctx, fileconfiguration.PSQL) {
 		return dbaasService.NewPsqlClientFromConfig(config), nil
 	}
 
@@ -226,7 +227,7 @@ func (c SdkBundle) NewPsqlClient(location string) (*dbaasService.PsqlClient, err
 			fileconfiguration.PSQL, location,
 		)
 	}
-	log.Printf("[DEBUG] PostgreSQL: endpoint for location %s: %s", configlog.FormatLocation(location), endpoint.Name)
+	tflog.Debug(ctx, "PostgreSQL: endpoint for location", map[string]interface{}{"location": configlog.FormatLocation(location), "url": endpoint.Name})
 	config.Servers = shared.ServerConfigurations{
 		{
 			URL:         endpoint.Name,
@@ -239,7 +240,7 @@ func (c SdkBundle) NewPsqlClient(location string) (*dbaasService.PsqlClient, err
 }
 
 // NewPgSQLV2Client creates a new PostgreSQL v2 client for a specific location.
-func (c SdkBundle) NewPgSQLV2Client(location string) (*pgsqlv2Service.Client, error) {
+func (c SdkBundle) NewPgSQLV2Client(ctx context.Context, location string) (*pgsqlv2Service.Client, error) {
 	config := c.newBundleClientConfig(fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go-dbaas-pgsqlv2/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		c.clientOptions.Version, pgsqlv2sdk.Version, c.clientOptions.TerraformVersion,
@@ -249,7 +250,7 @@ func (c SdkBundle) NewPgSQLV2Client(location string) (*pgsqlv2Service.Client, er
 	if c.fileConfig != nil {
 		endpoint := c.fileConfig.GetProductLocationOverrides(fileconfiguration.PSQLV2, location)
 		if endpoint == nil {
-			log.Printf("[WARN] product %q is missing from config file or location %q is not defined for product %q, using internal locations map to configure the endpoint", fileconfiguration.PSQLV2, location, fileconfiguration.PSQLV2)
+			tflog.Warn(ctx, "product missing from config file or location not defined, using internal locations map to configure endpoint", map[string]interface{}{"product": fileconfiguration.PSQLV2, "location": location})
 		} else {
 			config.Servers = shared.ServerConfigurations{
 				{
@@ -306,9 +307,9 @@ func (c SdkBundle) newCloudAPIClientConfig() *ionoscloud.Configuration {
 //     a. If a location override is found for the provided location, use that endpoint
 //     b. If no location override is found but a global override exists, use the global endpoint as fallback
 //     c. If neither is found, return an error
-func (c SdkBundle) NewCloudAPIClient(location string) (*ionoscloud.APIClient, error) {
+func (c SdkBundle) NewCloudAPIClient(ctx context.Context, location string) (*ionoscloud.APIClient, error) {
 	config := c.newCloudAPIClientConfig()
-	if !c.shouldApplyOverrides(fileconfiguration.Cloud) {
+	if !c.shouldApplyOverrides(ctx, fileconfiguration.Cloud) {
 		return ionoscloud.NewAPIClient(config), nil
 	}
 
@@ -320,7 +321,7 @@ func (c SdkBundle) NewCloudAPIClient(location string) (*ionoscloud.APIClient, er
 			fileconfiguration.Cloud, location,
 		)
 	}
-	log.Printf("[DEBUG] Cloud API: endpoint for location %s: %s", configlog.FormatLocation(location), endpoint.Name)
+	tflog.Debug(ctx, "Cloud API: endpoint for location", map[string]interface{}{"location": configlog.FormatLocation(location), "url": endpoint.Name})
 	config.Servers = ionoscloud.ServerConfigurations{
 		{
 			URL:         endpoint.Name,
@@ -345,9 +346,9 @@ func (c SdkBundle) NewCloudAPIClient(location string) (*ionoscloud.APIClient, er
 //     b. If the strategy is "roundRobin", configure failover across all global endpoints in the file configuration
 //     c. If no global endpoints are found, return an error
 //     d. Any other strategy value is an error
-func (c SdkBundle) NewCloudAPIClientWithFailover() (*ionoscloud.APIClient, error) {
+func (c SdkBundle) NewCloudAPIClientWithFailover(ctx context.Context) (*ionoscloud.APIClient, error) {
 	config := c.newCloudAPIClientConfig()
-	if !c.shouldApplyOverrides(fileconfiguration.Cloud) {
+	if !c.shouldApplyOverrides(ctx, fileconfiguration.Cloud) {
 		return ionoscloud.NewAPIClient(config), nil
 	}
 
@@ -369,13 +370,12 @@ func (c SdkBundle) NewCloudAPIClientWithFailover() (*ionoscloud.APIClient, error
 			URL:         ep.Name,
 			Description: shared.EndpointOverridden + "global",
 		})
-		log.Printf("[DEBUG] Adding global override endpoint %s (skipTLSVerify=%t) for %s product from file config",
-			ep.Name, ep.SkipTLSVerify, fileconfiguration.Cloud)
+		tflog.Debug(ctx, "adding global override endpoint from file config", map[string]interface{}{"url": ep.Name, "skip_tls_verify": ep.SkipTLSVerify, "product": fileconfiguration.Cloud})
 		if ep.CertificateAuthData != "" {
-			log.Printf("[DEBUG] %s: certificateAuthData present (len=%d) for endpoint %s", fileconfiguration.Cloud, len(ep.CertificateAuthData), ep.Name)
+			tflog.Debug(ctx, "certificateAuthData present", map[string]interface{}{"product": fileconfiguration.Cloud, "cert_auth_data_len": len(ep.CertificateAuthData), "url": ep.Name})
 		}
 	}
-	log.Printf("[DEBUG] Failover for %s: strategy=%q, endpoints=%d", fileconfiguration.Cloud, failoverOptions.Strategy, len(failoverEndpoints))
+	tflog.Debug(ctx, "failover config", map[string]interface{}{"product": fileconfiguration.Cloud, "strategy": failoverOptions.Strategy, "endpoints": len(failoverEndpoints)})
 	if len(failoverEndpoints) == 0 {
 		return nil, fmt.Errorf("no global failover endpoints configured for %q", fileconfiguration.Cloud)
 	}
@@ -400,14 +400,14 @@ func (c SdkBundle) NewCloudAPIClientWithFailover() (*ionoscloud.APIClient, error
 // NewObjectStorageManagementClient creates a new Object Storage Management client that distributes requests
 // across all global endpoints configured for this product using the failover strategy
 // defined in the file config.
-func (c SdkBundle) NewObjectStorageManagementClient() (*objectStorageManagementService.Client, error) {
+func (c SdkBundle) NewObjectStorageManagementClient(ctx context.Context) (*objectStorageManagementService.Client, error) {
 	config := c.newBundleClientConfig(fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go-object-storage-management/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		c.clientOptions.Version, objectstoragemanagement.Version, c.clientOptions.TerraformVersion,
 		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
 	))
 
-	if !c.shouldApplyOverridesCustomEnv(fileconfiguration.ObjectStorageManagement, objectStorageManagementService.IonosAPIURLObjectStorageManagement) {
+	if !c.shouldApplyOverridesCustomEnv(ctx, fileconfiguration.ObjectStorageManagement, objectStorageManagementService.IonosAPIURLObjectStorageManagement) {
 		return objectStorageManagementService.NewClientFromConfig(config), nil
 	}
 
@@ -430,13 +430,12 @@ func (c SdkBundle) NewObjectStorageManagementClient() (*objectStorageManagementS
 			URL:         ep.Name,
 			Description: shared.EndpointOverridden + "global",
 		})
-		log.Printf("[DEBUG] Adding global override endpoint %s (skipTLSVerify=%t) for %s product from file config",
-			ep.Name, ep.SkipTLSVerify, fileconfiguration.ObjectStorageManagement)
+		tflog.Debug(ctx, "adding global override endpoint from file config", map[string]interface{}{"url": ep.Name, "skip_tls_verify": ep.SkipTLSVerify, "product": fileconfiguration.ObjectStorageManagement})
 		if ep.CertificateAuthData != "" {
-			log.Printf("[DEBUG] %s: certificateAuthData present (len=%d) for endpoint %s", fileconfiguration.ObjectStorageManagement, len(ep.CertificateAuthData), ep.Name)
+			tflog.Debug(ctx, "certificateAuthData present", map[string]interface{}{"product": fileconfiguration.ObjectStorageManagement, "cert_auth_data_len": len(ep.CertificateAuthData), "url": ep.Name})
 		}
 	}
-	log.Printf("[DEBUG] Failover for %s: strategy=%q, endpoints=%d", fileconfiguration.ObjectStorageManagement, failoverOptions.Strategy, len(failoverEndpoints))
+	tflog.Debug(ctx, "failover config", map[string]interface{}{"product": fileconfiguration.ObjectStorageManagement, "strategy": failoverOptions.Strategy, "endpoints": len(failoverEndpoints)})
 
 	if len(failoverEndpoints) == 0 {
 		return nil, fmt.Errorf("no global failover endpoints configured for %q", fileconfiguration.ObjectStorageManagement)

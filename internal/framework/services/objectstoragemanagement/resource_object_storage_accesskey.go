@@ -78,7 +78,7 @@ func (r *accesskeyResource) Schema(ctx context.Context, req resource.SchemaReque
 }
 
 // Configure configures the accesskey resource.
-func (r *accesskeyResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *accesskeyResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -94,7 +94,7 @@ func (r *accesskeyResource) Configure(_ context.Context, req resource.ConfigureR
 	}
 
 	var err error
-	r.client, err = clientBundle.NewObjectStorageManagementClient()
+	r.client, err = clientBundle.NewObjectStorageManagementClient(ctx)
 	if err != nil {
 		resp.Diagnostics.AddError("initialization error for Object Storage Management client", err.Error())
 	}

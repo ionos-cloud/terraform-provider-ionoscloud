@@ -12,7 +12,7 @@ import (
 
 // GetNFSShareByID returns a share given an ID
 func (c *Client) GetNFSShareByID(ctx context.Context, clusterID, shareID string, location string) (nfs.ShareRead, *shared.APIResponse, error) {
-	c.overrideClientEndpoint(fileconfiguration.NFS, location)
+	c.overrideClientEndpoint(ctx, fileconfiguration.NFS, location)
 	share, apiResponse, err := c.sdkClient.SharesApi.ClustersSharesFindById(ctx, clusterID, shareID).Execute()
 	apiResponse.LogInfo()
 	return share, apiResponse, err
@@ -20,7 +20,7 @@ func (c *Client) GetNFSShareByID(ctx context.Context, clusterID, shareID string,
 
 // ListNFSShares returns a list of all shares
 func (c *Client) ListNFSShares(ctx context.Context, d *schema.ResourceData) (nfs.ShareReadList, *shared.APIResponse, error) {
-	c.overrideClientEndpoint(fileconfiguration.NFS, d.Get("location").(string))
+	c.overrideClientEndpoint(ctx, fileconfiguration.NFS, d.Get("location").(string))
 	shares, apiResponse, err := c.sdkClient.SharesApi.
 		ClustersSharesGet(ctx, d.Get("cluster_id").(string)).Execute()
 	apiResponse.LogInfo()
@@ -29,7 +29,7 @@ func (c *Client) ListNFSShares(ctx context.Context, d *schema.ResourceData) (nfs
 
 // DeleteNFSShare deletes a share given an ID
 func (c *Client) DeleteNFSShare(ctx context.Context, clusterID, shareID string, location string) (*shared.APIResponse, error) {
-	c.overrideClientEndpoint(fileconfiguration.NFS, location)
+	c.overrideClientEndpoint(ctx, fileconfiguration.NFS, location)
 	apiResponse, err := c.sdkClient.SharesApi.ClustersSharesDelete(ctx, clusterID, shareID).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
@@ -37,7 +37,7 @@ func (c *Client) DeleteNFSShare(ctx context.Context, clusterID, shareID string, 
 
 // UpdateNFSShare updates an existing share
 func (c *Client) UpdateNFSShare(ctx context.Context, d *schema.ResourceData) (nfs.ShareRead, *shared.APIResponse, error) {
-	c.overrideClientEndpoint(fileconfiguration.NFS, d.Get("location").(string))
+	c.overrideClientEndpoint(ctx, fileconfiguration.NFS, d.Get("location").(string))
 	share, apiResponse, err := c.sdkClient.SharesApi.
 		ClustersSharesPut(ctx, d.Get("cluster_id").(string), d.Id()).ShareEnsure(*setShareEnsureRequest(d)).Execute()
 	apiResponse.LogInfo()
@@ -46,7 +46,7 @@ func (c *Client) UpdateNFSShare(ctx context.Context, d *schema.ResourceData) (nf
 
 // CreateNFSShare creates a new share
 func (c *Client) CreateNFSShare(ctx context.Context, d *schema.ResourceData) (nfs.ShareRead, *shared.APIResponse, error) {
-	c.overrideClientEndpoint(fileconfiguration.NFS, d.Get("location").(string))
+	c.overrideClientEndpoint(ctx, fileconfiguration.NFS, d.Get("location").(string))
 	share, apiResponse, err := c.sdkClient.SharesApi.
 		ClustersSharesPost(ctx, d.Get("cluster_id").(string)).ShareCreate(*setShareCreateRequest(d)).Execute()
 	apiResponse.LogInfo()

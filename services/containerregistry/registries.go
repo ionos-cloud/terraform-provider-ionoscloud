@@ -3,10 +3,10 @@ package containerregistry
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	cr "github.com/ionos-cloud/sdk-go-bundle/products/containerregistry/v2"
@@ -61,7 +61,7 @@ func (c *Client) IsRegistryReady(ctx context.Context, d *schema.ResourceData) (b
 	if err != nil {
 		return true, fmt.Errorf("status check failed for container registry creg with ID: %v, error: %w", ID, err)
 	}
-	log.Printf("[INFO] state of the container registry with ID: %v is: %s ", ID, creg.Metadata.State)
+	tflog.Info(ctx, "container registry state", map[string]interface{}{"id": ID, "state": creg.Metadata.State})
 	if utils.IsStateFailed(creg.Metadata.State) {
 		return false, fmt.Errorf("container registry  %s is in a failed state", d.Id())
 	}

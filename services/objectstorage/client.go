@@ -2,10 +2,10 @@ package objectstorage
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"runtime"
@@ -14,6 +14,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	awsv4 "github.com/aws/aws-sdk-go/aws/signer/v4"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	objstorage "github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
@@ -44,7 +45,7 @@ func (c *Client) GetBaseClient() *objstorage.APIClient {
 }
 
 // NewClient creates a new Object Storage client with the given credentials and region.
-func NewClient(clientOptions clientoptions.TerraformClientOptions, config *fileconfiguration.FileConfig) *Client {
+func NewClient(ctx context.Context, clientOptions clientoptions.TerraformClientOptions, config *fileconfiguration.FileConfig) *Client {
 	var globalRegion string
 	// Check if a global region was set using the "IONOS_S3_REGION" env var or using "s3_region" provider attribute.
 	// If no global region was set, the requests will be routed according to the region set at the bucket level.
@@ -54,7 +55,7 @@ func NewClient(clientOptions clientoptions.TerraformClientOptions, config *filec
 	// Set custom endpoint if provided
 	if envValue := os.Getenv(ionosAPIURLObjectStorage); envValue != "" {
 		clientOptions.Endpoint = envValue
-		log.Printf("[DEBUG] Object Storage: endpoint from %s: %s", ionosAPIURLObjectStorage, envValue)
+		tflog.Debug(ctx, "Object Storage: endpoint from env", map[string]interface{}{"env": ionosAPIURLObjectStorage, "url": envValue})
 	}
 	certificateAuthData := ""
 	if clientOptions.Endpoint == "" {
@@ -64,7 +65,7 @@ func NewClient(clientOptions clientoptions.TerraformClientOptions, config *filec
 		}
 		if endpointOverrides := config.GetProductLocationOverrides(fileconfiguration.ObjectStorage, clientOptions.StorageOptions.Region); endpointOverrides != nil {
 			clientOptions.Endpoint = endpointOverrides.Name
-			log.Printf("[DEBUG] Object Storage: endpoint from file config for region %q: %s", region, endpointOverrides.Name)
+			tflog.Debug(ctx, "Object Storage: endpoint from file config", map[string]interface{}{"region": region, "url": endpointOverrides.Name})
 			if !clientOptions.SkipTLSVerify {
 				clientOptions.SkipTLSVerify = endpointOverrides.SkipTLSVerify
 			}
@@ -75,7 +76,7 @@ func NewClient(clientOptions clientoptions.TerraformClientOptions, config *filec
 	if clientOptions.StorageOptions.Region == "" {
 		clientOptions.StorageOptions.Region = constant.DefaultS3Region
 	}
-	log.Printf("[DEBUG] Object Storage: region=%q, endpoint=%q", clientOptions.StorageOptions.Region, clientOptions.Endpoint)
+	tflog.Debug(ctx, "Object Storage: configured", map[string]interface{}{"region": clientOptions.StorageOptions.Region, "endpoint": clientOptions.Endpoint})
 
 	// TODO -- replace with WithObjectStorage from sdk-go-bundle
 	cfg := shared.NewConfigurationFromOptions(clientOptions.ClientOptions)

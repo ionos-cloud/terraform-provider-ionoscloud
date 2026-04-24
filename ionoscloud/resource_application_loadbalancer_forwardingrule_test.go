@@ -188,7 +188,7 @@ func testAccCheckApplicationLoadBalancerForwardingRuleDestroyCheck(s *terraform.
 		ruleId := rs.Primary.ID
 		location := rs.Primary.Attributes["location"]
 
-		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 		if err != nil {
 			return err
 		}
@@ -231,7 +231,7 @@ func testAccCheckApplicationLoadBalancerForwardingRuleExists(n string, alb *iono
 		ruleId := rs.Primary.ID
 		location := rs.Primary.Attributes["location"]
 
-		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 		if err != nil {
 			return err
 		}

@@ -1,11 +1,12 @@
 package vpn
 
 import (
+	"context"
 	"fmt"
-	"log"
 	"os"
 	"runtime"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	vpn "github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
@@ -70,11 +71,11 @@ func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *f
 }
 
 // ChangeConfigURL changes the URL of the client
-func (c *Client) ChangeConfigURL(location string) {
+func (c *Client) ChangeConfigURL(ctx context.Context, location string) {
 	config := c.sdkClient.GetConfig()
 	if location == "" && os.Getenv(ionosAPIURLVPN) != "" {
 		url := utils.CleanURL(os.Getenv(ionosAPIURLVPN))
-		log.Printf("[DEBUG] VPN: endpoint from %s: %s", ionosAPIURLVPN, url)
+		tflog.Debug(ctx, "VPN: endpoint from env", map[string]interface{}{"env": ionosAPIURLVPN, "url": url})
 		config.Servers = shared.ServerConfigurations{
 			{
 				URL: url,
@@ -84,7 +85,7 @@ func (c *Client) ChangeConfigURL(location string) {
 	}
 
 	url := locationToURL[location]
-	log.Printf("[DEBUG] VPN: endpoint for location %s: %s", configlog.FormatLocation(location), url)
+	tflog.Debug(ctx, "VPN: endpoint for location", map[string]interface{}{"location": configlog.FormatLocation(location), "url": url})
 	config.Servers = shared.ServerConfigurations{
 		{
 			URL: url,

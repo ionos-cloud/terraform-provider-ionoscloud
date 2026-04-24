@@ -85,7 +85,7 @@ func testAccCheckPrivateCrossConnectDestroyCheck(s *terraform.State) error {
 		}
 
 		location := rs.Primary.Attributes["location"]
-		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 		if err != nil {
 			return err
 		}
@@ -122,7 +122,7 @@ func testAccCheckPrivateCrossConnectExists(n string, privateCrossConnect *ionosc
 		}
 
 		location := rs.Primary.Attributes["location"]
-		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 		if err != nil {
 			return err
 		}

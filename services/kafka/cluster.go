@@ -2,9 +2,9 @@ package kafka
 
 import (
 	"context"
-	"log"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	kafka "github.com/ionos-cloud/sdk-go-bundle/products/kafka/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
@@ -21,7 +21,7 @@ func (c *Client) CreateCluster(ctx context.Context, d *schema.ResourceData) (
 	error,
 ) {
 	location := d.Get("location").(string)
-	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Kafka, location)
+	loadedconfig.SetClientOptionsFromConfig(ctx, c, fileconfiguration.Kafka, location)
 
 	request := setClusterPostRequest(d)
 	cluster, apiResponse, err := c.sdkClient.ClustersApi.ClustersPost(ctx).ClusterCreate(*request).Execute()
@@ -36,13 +36,13 @@ func (c *Client) IsClusterAvailable(ctx context.Context, d *schema.ResourceData)
 	if err != nil {
 		return false, err
 	}
-	log.Printf("[DEBUG] Cluster status: %s", cluster.Metadata.State)
+	tflog.Debug(ctx, "kafka cluster status", map[string]interface{}{"state": cluster.Metadata.State})
 	return strings.EqualFold(cluster.Metadata.State, constant.Available), nil
 }
 
 // DeleteCluster deletes a Kafka Cluster
 func (c *Client) DeleteCluster(ctx context.Context, id string, location string) (*shared.APIResponse, error) {
-	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Kafka, location)
+	loadedconfig.SetClientOptionsFromConfig(ctx, c, fileconfiguration.Kafka, location)
 
 	apiResponse, err := c.sdkClient.ClustersApi.ClustersDelete(ctx, id).Execute()
 	apiResponse.LogInfo()
@@ -52,7 +52,7 @@ func (c *Client) DeleteCluster(ctx context.Context, id string, location string) 
 // IsClusterDeleted checks if the Kafka Cluster has been deleted
 func (c *Client) IsClusterDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	location := d.Get("location").(string)
-	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Kafka, location)
+	loadedconfig.SetClientOptionsFromConfig(ctx, c, fileconfiguration.Kafka, location)
 
 	_, apiResponse, err := c.sdkClient.ClustersApi.ClustersFindById(ctx, d.Id()).Execute()
 	apiResponse.LogInfo()
@@ -63,7 +63,7 @@ func (c *Client) IsClusterDeleted(ctx context.Context, d *schema.ResourceData) (
 func (c *Client) GetClusterByID(ctx context.Context, id string, location string) (
 	kafka.ClusterRead, *shared.APIResponse, error,
 ) {
-	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Kafka, location)
+	loadedconfig.SetClientOptionsFromConfig(ctx, c, fileconfiguration.Kafka, location)
 
 	Cluster, apiResponse, err := c.sdkClient.ClustersApi.ClustersFindById(ctx, id).Execute()
 	apiResponse.LogInfo()
@@ -72,7 +72,7 @@ func (c *Client) GetClusterByID(ctx context.Context, id string, location string)
 
 // ListClusters retrieves a list of Kafka Clusters
 func (c *Client) ListClusters(ctx context.Context, location string) (kafka.ClusterReadList, *shared.APIResponse, error) {
-	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Kafka, location)
+	loadedconfig.SetClientOptionsFromConfig(ctx, c, fileconfiguration.Kafka, location)
 
 	Clusters, apiResponse, err := c.sdkClient.ClustersApi.ClustersGet(ctx).Execute()
 	apiResponse.LogInfo()

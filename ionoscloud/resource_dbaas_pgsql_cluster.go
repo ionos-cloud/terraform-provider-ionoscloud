@@ -271,7 +271,7 @@ func checkDBaaSClusterImmutableFields(_ context.Context, diff *schema.ResourceDi
 }
 
 func resourceDbaasPgSqlClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
+	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(ctx, d.Get("location").(string))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -298,7 +298,7 @@ func resourceDbaasPgSqlClusterCreate(ctx context.Context, d *schema.ResourceData
 }
 
 func resourceDbaasPgSqlClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
+	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(ctx, d.Get("location").(string))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -323,7 +323,7 @@ func resourceDbaasPgSqlClusterRead(ctx context.Context, d *schema.ResourceData, 
 }
 
 func resourceDbaasPgSqlClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
+	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(ctx, d.Get("location").(string))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -352,7 +352,7 @@ func resourceDbaasPgSqlClusterUpdate(ctx context.Context, d *schema.ResourceData
 }
 
 func resourceDbaasPgSqlClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
+	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(ctx, d.Get("location").(string))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -388,7 +388,7 @@ func resourceDbaasPgSqlClusterImport(ctx context.Context, d *schema.ResourceData
 	if err := validateImportIDParts(parts); err != nil {
 		return nil, fmt.Errorf("failed validating import identifier %q: %w", importID, err)
 	}
-	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(ctx, location)
 	if err != nil {
 		return nil, err
 	}

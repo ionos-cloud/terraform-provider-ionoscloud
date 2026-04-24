@@ -101,7 +101,7 @@ func resourceNSGFirewallCreate(ctx context.Context, d *schema.ResourceData, meta
 	nsgID := d.Get("nsg_id").(string)
 	dcID := d.Get("datacenter_id").(string)
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -126,7 +126,7 @@ func resourceNSGFirewallCreate(ctx context.Context, d *schema.ResourceData, meta
 
 func resourceNSGFirewallRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -161,7 +161,7 @@ func resourceNSGFirewallUpdate(ctx context.Context, d *schema.ResourceData, meta
 	dcID := d.Get("datacenter_id").(string)
 	location := d.Get("location").(string)
 
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -187,7 +187,7 @@ func resourceNSGFirewallDelete(ctx context.Context, d *schema.ResourceData, meta
 	nsgID := d.Get("nsg_id").(string)
 	location := d.Get("location").(string)
 
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -232,7 +232,7 @@ func resourceNSGFirewallImport(ctx context.Context, d *schema.ResourceData, meta
 	nsgID := parts[1]
 	firewallID := parts[2]
 
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return nil, err
 	}

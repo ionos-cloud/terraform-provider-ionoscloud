@@ -114,7 +114,7 @@ func datasourceIpBlockRead(ctx context.Context, d *schema.ResourceData, meta int
 	var err error
 	var apiResponse *ionoscloud.APIResponse
 
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}

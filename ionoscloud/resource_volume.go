@@ -221,7 +221,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	serverId := d.Get("server_id").(string)
 	location := d.Get("location").(string)
 
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -326,7 +326,7 @@ func resourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta interf
 	volumeID := d.Id()
 	location := d.Get("location").(string)
 
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -363,7 +363,7 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	dcId := d.Get("datacenter_id").(string)
 	location := d.Get("location").(string)
 
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -442,7 +442,7 @@ func resourceVolumeDelete(ctx context.Context, d *schema.ResourceData, meta inte
 	dcId := d.Get("datacenter_id").(string)
 	location := d.Get("location").(string)
 
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -483,7 +483,7 @@ func resourceVolumeImporter(ctx context.Context, d *schema.ResourceData, meta in
 	srvId := parts[1]
 	volumeId := parts[2]
 
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return nil, err
 	}

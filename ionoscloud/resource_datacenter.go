@@ -95,7 +95,7 @@ func resourceDatacenter() *schema.Resource {
 func resourceDatacenterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	datacenterName := d.Get("name").(string)
 	datacenterLocation := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(datacenterLocation)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, datacenterLocation)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -140,7 +140,7 @@ func resourceDatacenterCreate(ctx context.Context, d *schema.ResourceData, meta 
 func resourceDatacenterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	datacenterLocation := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(datacenterLocation)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, datacenterLocation)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -168,7 +168,7 @@ func resourceDatacenterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	obj := ionoscloud.DatacenterPropertiesPut{}
 
 	datacenterLocation := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(datacenterLocation)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, datacenterLocation)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -216,7 +216,7 @@ func resourceDatacenterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 func resourceDatacenterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	datacenterLocation := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(datacenterLocation)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, datacenterLocation)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -251,7 +251,7 @@ func resourceDatacenterImport(ctx context.Context, d *schema.ResourceData, meta 
 
 	dcId := parts[0]
 
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return nil, err
 	}

@@ -52,7 +52,7 @@ func dataSourceObjectStorageKeyRead(ctx context.Context, d *schema.ResourceData,
 		return diagutil.ToDiags(d, fmt.Errorf("please provide the userID"), nil)
 	}
 	userID := userIDItf.(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return diag.FromErr(err)
 	}

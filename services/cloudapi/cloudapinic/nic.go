@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"strings"
 
 	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
@@ -31,7 +31,7 @@ func (fs *Service) List(ctx context.Context, datacenterID, serverID string, dept
 		return emptyNicList, err
 	}
 	if nics.Items == nil {
-		log.Printf("[DEBUG] empty nic list for datacenter %s, server %s", datacenterID, serverID)
+		tflog.Debug(ctx, "empty nic list", map[string]interface{}{"datacenter_id": datacenterID, "server_id": serverID})
 		return emptyNicList, nil
 	}
 	return *nics.Items, nil
@@ -42,7 +42,7 @@ func (fs *Service) Get(ctx context.Context, datacenterId, serverId, ID string, d
 	apiResponse.LogInfo()
 	if err != nil {
 		if apiResponse.HttpNotFound() {
-			log.Printf("[DEBUG] no nic found for datacenter %s, server %s", datacenterId, serverId)
+			tflog.Debug(ctx, "no nic found", map[string]interface{}{"datacenter_id": datacenterId, "server_id": serverId})
 		}
 		return nil, apiResponse, err
 	}
@@ -216,7 +216,7 @@ func GetNicFromSchemaCreate(d *schema.ResourceData, path string) (ionoscloud.Nic
 	return nic, nil
 }
 
-func NicSetData(d *schema.ResourceData, nic *ionoscloud.Nic) error {
+func NicSetData(ctx context.Context, d *schema.ResourceData, nic *ionoscloud.Nic) error {
 	if nic == nil {
 		return fmt.Errorf("nic is empty")
 	}
@@ -226,7 +226,7 @@ func NicSetData(d *schema.ResourceData, nic *ionoscloud.Nic) error {
 	}
 
 	if nic.Properties != nil {
-		log.Printf("[INFO] LAN ON NIC: %d", nic.Properties.Lan)
+		tflog.Info(ctx, "LAN on NIC", map[string]interface{}{"lan": nic.Properties.Lan})
 		if nic.Properties.Dhcp != nil {
 			if err := d.Set("dhcp", *nic.Properties.Dhcp); err != nil {
 				return fmt.Errorf("error setting dhcp %w", err)

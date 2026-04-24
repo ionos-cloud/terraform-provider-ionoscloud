@@ -122,7 +122,7 @@ func dataSourceNicRead(ctx context.Context, d *schema.ResourceData, meta interfa
 	serverId = st.(string)
 
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -176,7 +176,7 @@ func dataSourceNicRead(ctx context.Context, d *schema.ResourceData, meta interfa
 		}
 	}
 
-	if err := cloudapinic.NicSetData(d, &nic); err != nil {
+	if err := cloudapinic.NicSetData(ctx, d, &nic); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
 

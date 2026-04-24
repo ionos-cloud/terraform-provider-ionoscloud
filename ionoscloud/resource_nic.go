@@ -187,7 +187,7 @@ func ForceNewForFlowlogChanges(_ context.Context, d *schema.ResourceDiff, _ inte
 }
 func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -250,7 +250,7 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -269,7 +269,7 @@ func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface
 		return diagutil.ToDiags(d, fmt.Errorf("error occurred while fetching a nic: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	if err := cloudapinic.NicSetData(d, nic); err != nil {
+	if err := cloudapinic.NicSetData(ctx, d, nic); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
 
@@ -278,7 +278,7 @@ func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface
 
 func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -340,7 +340,7 @@ func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 func resourceNicDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -376,7 +376,7 @@ func resourceNicImport(ctx context.Context, d *schema.ResourceData, meta interfa
 	sId := parts[1]
 	nicId := parts[2]
 
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return nil, err
 	}
@@ -406,7 +406,7 @@ func resourceNicImport(ctx context.Context, d *schema.ResourceData, meta interfa
 		return nil, err
 	}
 
-	if err := cloudapinic.NicSetData(d, &nic); err != nil {
+	if err := cloudapinic.NicSetData(ctx, d, &nic); err != nil {
 		return nil, diagutil.ToError(d, err, nil)
 	}
 

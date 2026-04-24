@@ -1,13 +1,14 @@
 package mariadb
 
 import (
+	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"runtime"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	mariadb "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb/v2"
 	shared "github.com/ionos-cloud/sdk-go-bundle/shared"
@@ -57,11 +58,11 @@ func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *f
 
 // ChangeConfigURL modifies the URL inside the client configuration.
 // This function is required in order to make requests to different endpoints based on location.
-func (c *Client) ChangeConfigURL(location string) {
+func (c *Client) ChangeConfigURL(ctx context.Context, location string) {
 	clientConfig := c.sdkClient.GetConfig()
 	if location == "" && os.Getenv(ionosAPIURLMariaDB) != "" {
 		url := utils.CleanURL(os.Getenv(ionosAPIURLMariaDB))
-		log.Printf("[DEBUG] MariaDB: endpoint from %s: %s", ionosAPIURLMariaDB, url)
+		tflog.Debug(ctx, "MariaDB: endpoint from env", map[string]interface{}{"env": ionosAPIURLMariaDB, "url": url})
 		clientConfig.Servers = shared.ServerConfigurations{
 			{
 				URL: url,
@@ -71,7 +72,7 @@ func (c *Client) ChangeConfigURL(location string) {
 	}
 	for _, server := range clientConfig.Servers {
 		if strings.EqualFold(server.Description, shared.EndpointOverridden+location) || strings.EqualFold(server.URL, locationToURL[location]) {
-			log.Printf("[DEBUG] MariaDB: endpoint for location %s: %s", configlog.FormatLocation(location), server.URL)
+			tflog.Debug(ctx, "MariaDB: endpoint for location", map[string]interface{}{"location": configlog.FormatLocation(location), "url": server.URL})
 			clientConfig.Servers = shared.ServerConfigurations{
 				{
 					URL:         server.URL,
@@ -81,7 +82,7 @@ func (c *Client) ChangeConfigURL(location string) {
 			return
 		}
 	}
-	log.Printf("[DEBUG] MariaDB: endpoint for location %s: %s", configlog.FormatLocation(location), locationToURL[location])
+	tflog.Debug(ctx, "MariaDB: endpoint for location", map[string]interface{}{"location": configlog.FormatLocation(location), "url": locationToURL[location]})
 }
 
 var (

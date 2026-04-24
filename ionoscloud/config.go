@@ -1,10 +1,11 @@
 package ionoscloud
 
 import (
+	"context"
 	"fmt"
-	"log"
 	"runtime"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
@@ -31,7 +32,7 @@ func (c *Config) Client(terraformVersion string) (*ionoscloud.APIClient, error) 
 		"terraform-provider/%s_ionos-cloud-sdk-go/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		Version, ionoscloud.Version, terraformVersion, meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH)
 
-	log.Printf("[DEBUG] Terraform client UA set to %s", client.GetConfig().UserAgent)
+	tflog.Debug(context.Background(), "terraform client UA set", map[string]interface{}{"user_agent": client.GetConfig().UserAgent})
 
 	client.GetConfig().AddDefaultQueryParam("depth", "5")
 

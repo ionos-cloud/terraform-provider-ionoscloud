@@ -2,11 +2,11 @@ package dns
 
 import (
 	"context"
-	"log"
 	"strings"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/uuidgen"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	dns "github.com/ionos-cloud/sdk-go-bundle/products/dns/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
@@ -34,7 +34,7 @@ func (c *Client) IsRecordCreated(ctx context.Context, d *schema.ResourceData) (b
 		return false, err
 	}
 
-	log.Printf("[DEBUG] record state: %s", record.Metadata.State)
+	tflog.Debug(ctx, "record state", map[string]interface{}{"state": record.Metadata.State})
 
 	return strings.EqualFold((string)(record.Metadata.State), (string)(dns.PROVISIONINGSTATE_AVAILABLE)), nil
 }

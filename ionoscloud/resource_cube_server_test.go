@@ -363,7 +363,7 @@ func testAccCheckCubeServerDestroyCheck(s *terraform.State) error {
 		dcId := rs.Primary.Attributes["datacenter_id"]
 		location := rs.Primary.Attributes["location"]
 
-		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 		if err != nil {
 			return err
 		}
@@ -403,7 +403,7 @@ func testAccCheckCubeServerExists(n string, server *ionoscloud.Server) resource.
 		}
 
 		location := rs.Primary.Attributes["location"]
-		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 		if err != nil {
 			return err
 		}

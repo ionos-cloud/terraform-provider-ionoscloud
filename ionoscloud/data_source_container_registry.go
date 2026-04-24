@@ -131,7 +131,7 @@ func dataSourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData
 	name := nameValue.(string)
 	location := locationValue.(string)
 
-	client, err := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
