@@ -3,13 +3,13 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 	"strconv"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -128,7 +128,7 @@ func resourceFirewallCreate(ctx context.Context, d *schema.ResourceData, meta in
 	// Wait, catching any errors
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
 		if bundleclient.IsRequestFailed(errState) {
-			log.Printf("[DEBUG] firewall resource failed to be created")
+			tflog.Debug(ctx, "firewall resource failed to be created")
 			d.SetId("")
 		}
 		requestLocation, _ := apiResponse.SafeLocation()
@@ -152,7 +152,7 @@ func resourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta inte
 
 	if err != nil {
 		if httpNotFound(apiResponse) {
-			log.Printf("[DEBUG] could not find firewall rule datacenter_id = %s server_id = %s with id = %s", d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Id())
+			tflog.Debug(ctx, "firewall rule not found", map[string]interface{}{"datacenter_id": d.Get("datacenter_id").(string), "server_id": d.Get("server_id").(string), "rule_id": d.Id()})
 			d.SetId("")
 			return nil
 		}

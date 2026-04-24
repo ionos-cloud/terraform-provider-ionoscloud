@@ -3,9 +3,9 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -152,7 +152,7 @@ func resourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData, 
 		return diagutil.ToDiags(d, fmt.Errorf("error while fetching registry: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	log.Printf("[INFO] Successfully retrieved registry %s: %+v", d.Id(), registry)
+	tflog.Info(ctx, "retrieved container registry", map[string]interface{}{"registry_id": d.Id()})
 
 	if err := crService.SetRegistryData(d, registry); err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -242,7 +242,7 @@ func resourceContainerRegistryImport(ctx context.Context, d *schema.ResourceData
 		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the import of registry %q, error:%w", registryId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	log.Printf("[INFO] registry found: %+v", containerRegistry)
+	tflog.Info(ctx, "container registry imported", map[string]interface{}{"registry_id": registryId})
 
 	if err := crService.SetRegistryData(d, containerRegistry); err != nil {
 		return nil, diagutil.ToError(d, err, nil)

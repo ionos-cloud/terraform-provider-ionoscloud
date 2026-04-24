@@ -87,7 +87,7 @@ func dataSourceObjectStorageKeyRead(ctx context.Context, d *schema.ResourceData,
 		s3Key = (*s3Keys.Items)[0]
 	}
 
-	if err := setS3KeyIdAndProperties(&s3Key, d); err != nil {
+	if err := setS3KeyIdAndProperties(ctx, &s3Key, d); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
 

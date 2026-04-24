@@ -3,8 +3,8 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -197,7 +197,7 @@ func resourceNSGImport(ctx context.Context, d *schema.ResourceData, meta interfa
 		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while retrieving the Network Security Group, %w", err), nil)
 	}
 
-	log.Printf("[INFO] Datacenter found: %+v", nsg)
+	tflog.Info(ctx, "NSG imported", map[string]interface{}{"nsg_id": nsgID, "datacenter_id": datacenterID})
 	if err = d.Set("datacenter_id", datacenterID); err != nil {
 		return nil, diagutil.ToError(d, err, nil)
 	}

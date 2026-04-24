@@ -3,9 +3,9 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -309,7 +309,7 @@ func resourceSnapshotImport(ctx context.Context, d *schema.ResourceData, meta in
 		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while retrieving the snapshot %q, %w", snapshotID, err), nil)
 	}
 
-	log.Printf("[INFO] snapshot %s found: %+v", importID, snapshot)
+	tflog.Info(ctx, "snapshot found", map[string]interface{}{"import_id": importID})
 
 	if err = setSnapshotData(d, &snapshot); err != nil {
 		return nil, diagutil.ToError(d, err, nil)

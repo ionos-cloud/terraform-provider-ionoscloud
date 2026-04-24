@@ -3,9 +3,9 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	certmanager "github.com/ionos-cloud/sdk-go-bundle/products/cert/v2"
@@ -77,10 +77,10 @@ func dataSourceCertificateRead(ctx context.Context, d *schema.ResourceData, meta
 					certificate.Id, certificate.Properties.Name, name), nil)
 			}
 		}
-		log.Printf("[INFO] Got certificate [Name=%s]", certificate.Properties.Name)
+		tflog.Info(ctx, "got certificate", map[string]interface{}{"name": certificate.Properties.Name})
 
 	} else {
-		log.Printf("[INFO] Using data source for certificate with name: %s", name)
+		tflog.Info(ctx, "searching certificate by name", map[string]interface{}{"name": name})
 
 		certificates, apiResponse, err := client.ListCertificates(ctx)
 		if err != nil {

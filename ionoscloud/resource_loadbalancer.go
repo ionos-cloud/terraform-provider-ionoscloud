@@ -3,8 +3,8 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -203,7 +203,7 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 				if httpNotFound(apiResponse) {
 					/* 404 - nic was not found - in case the nic is removed, VDC removes the nic from load balancers
 					that contain it, behind the scenes - therefore our call will yield 404 */
-					log.Printf("[WARN] nic ID %s already removed from load balancer %s\n", o.(string), d.Id())
+					tflog.Warn(ctx, "nic already removed from load balancer", map[string]interface{}{"nic_id": o.(string), "loadbalancer_id": d.Id()})
 				} else {
 					return diagutil.ToDiags(d, fmt.Errorf("[load balancer update] an error occurred while deleting a balanced nic: %w", err), nil)
 				}
@@ -296,7 +296,7 @@ func resourceLoadbalancerImporter(ctx context.Context, d *schema.ResourceData, m
 		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the loadbalancer %q, error:%w", lbId, err), nil)
 	}
 
-	log.Printf("[INFO] loadbalancer found: %+v", loadbalancer)
+	tflog.Info(ctx, "loadbalancer found", map[string]interface{}{"loadbalancer_id": *loadbalancer.Id, "datacenter_id": dcId})
 
 	d.SetId(*loadbalancer.Id)
 

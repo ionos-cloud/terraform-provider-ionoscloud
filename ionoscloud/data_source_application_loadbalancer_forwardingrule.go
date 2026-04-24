@@ -3,9 +3,9 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -195,7 +195,7 @@ func dataSourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d 
 
 	if idOk {
 		/* search by ID */
-		log.Printf("[INFO] Using data source for application load balancer forwarding rule by id %s", id)
+		tflog.Info(ctx, "searching application load balancer forwarding rule by id", map[string]interface{}{"id": id})
 		applicationLoadBalancerForwardingRule, apiResponse, err = client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterId, albId, id).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
@@ -207,7 +207,7 @@ func dataSourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d 
 
 		partialMatch := d.Get("partial_match").(bool)
 
-		log.Printf("[INFO] Using data source for application load balancer forwarding rule by name with partial_match %t and name: %s", partialMatch, name)
+		tflog.Info(ctx, "searching application load balancer forwarding rule by name", map[string]interface{}{"partial_match": partialMatch, "name": name})
 
 		if partialMatch {
 			applicationLoadBalancersForwardingRules, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesGet(ctx, datacenterId, albId).Depth(1).Filter("name", name).Execute()

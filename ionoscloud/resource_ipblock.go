@@ -3,9 +3,9 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -154,7 +154,7 @@ func resourceIPBlockRead(ctx context.Context, d *schema.ResourceData, meta inter
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching an ip block: %w", err), nil)
 	}
 
-	log.Printf("[INFO] IPS: %s", strings.Join(*ipBlock.Properties.Ips, ","))
+	tflog.Info(ctx, "ip block fetched", map[string]interface{}{"ips": strings.Join(*ipBlock.Properties.Ips, ",")})
 
 	if err := IpBlockSetData(d, &ipBlock); err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -245,7 +245,7 @@ func resourceIpBlockImporter(ctx context.Context, d *schema.ResourceData, meta i
 
 	}
 
-	log.Printf("[INFO] ipBlock found: %+v", ipBlock)
+	tflog.Info(ctx, "ipBlock found", map[string]interface{}{"id": *ipBlock.Id})
 
 	d.SetId(*ipBlock.Id)
 

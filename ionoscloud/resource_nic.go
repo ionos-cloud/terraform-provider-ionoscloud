@@ -3,10 +3,10 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -228,7 +228,7 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 		var err error
 		foundNic, apiResponse, err = ns.Get(ctx, dcid, srvid, *createdNic.Id, 3)
 		if apiResponse.HttpNotFound() {
-			log.Printf("[INFO] Could not find nic with Id %s , retrying...", *createdNic.Id)
+			tflog.Info(ctx, "could not find nic, retrying", map[string]interface{}{"nic_id": *createdNic.Id})
 			return retry.RetryableError(fmt.Errorf("could not find nic, %w", err))
 		}
 		if err != nil {
@@ -262,7 +262,7 @@ func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface
 	nic, apiResponse, err := ns.Get(ctx, dcid, srvid, nicid, 3)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
-			log.Printf("[INFO] nic resource with id %s not found", nicid)
+			tflog.Info(ctx, "nic not found", map[string]interface{}{"nic_id": nicid})
 			d.SetId("")
 			return nil
 		}
@@ -410,7 +410,7 @@ func resourceNicImport(ctx context.Context, d *schema.ResourceData, meta interfa
 		return nil, diagutil.ToError(d, err, nil)
 	}
 
-	log.Printf("[INFO] nic found: %+v", nic)
+	tflog.Info(ctx, "nic found", map[string]interface{}{"nic_id": nicId, "server_id": sId, "datacenter_id": dcId})
 
 	return []*schema.ResourceData{d}, nil
 }

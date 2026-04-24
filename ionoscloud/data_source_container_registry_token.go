@@ -3,9 +3,9 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	cr "github.com/ionos-cloud/sdk-go-bundle/products/containerregistry/v2"
@@ -134,7 +134,7 @@ func dataSourceContainerRegistryTokenRead(ctx context.Context, d *schema.Resourc
 
 		partialMatch := d.Get("partial_match").(bool)
 
-		log.Printf("[INFO] Using data source for container token by name with partial_match %t and name: %s", partialMatch, name)
+		tflog.Info(ctx, "searching container registry token by name", map[string]interface{}{"partial_match": partialMatch, "name": name})
 
 		if tokens.Items != nil && len(tokens.Items) > 0 {
 			for _, tokenItem := range tokens.Items {

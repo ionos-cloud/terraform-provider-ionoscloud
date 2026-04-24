@@ -3,7 +3,6 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 	"regexp"
 	"strings"
 	"time"
@@ -12,6 +11,7 @@ import (
 	cloudapiflowlog "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/flowlog"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -443,7 +443,7 @@ func resourceAutoscalingGroupCreate(ctx context.Context, d *schema.ResourceData,
 	}
 
 	d.SetId(autoscalingGroup.Id)
-	log.Printf("[INFO] Autoscaling Group created. Id set to %s", autoscalingGroup.Id)
+	tflog.Info(ctx, "autoscaling group created", map[string]interface{}{"group_id": autoscalingGroup.Id})
 
 	if err := checkAction(ctx, client, d); err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -457,19 +457,19 @@ func resourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData, m
 	group, apiResponse, err := client.GetGroup(ctx, d.Id(), 2)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
-			log.Printf("[INFO] Autoscaling Group with ID: %s not found, err: %+v", d.Id(), err)
+			tflog.Info(ctx, "autoscaling group not found", map[string]interface{}{"group_id": d.Id(), "error": err.Error()})
 			d.SetId("")
 			return nil
 		}
 		return diagutil.ToDiags(d, fmt.Errorf("error while retrieving Autoscaling Group: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	log.Printf("[INFO] successfully retrieved Autoscaling Group %s: %+v", d.Id(), group)
+	tflog.Info(ctx, "retrieved autoscaling group", map[string]interface{}{"group_id": d.Id()})
 	if err := setAutoscalingGroupData(d, &group.Properties); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
 
-	log.Printf("[INFO] successfully set Autoscaling Group data %s", d.Id())
+	tflog.Info(ctx, "autoscaling group data set", map[string]interface{}{"group_id": d.Id()})
 
 	return nil
 }
@@ -503,7 +503,7 @@ func resourceAutoscalingGroupUpdate(ctx context.Context, d *schema.ResourceData,
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating Autoscaling Group: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	log.Printf("[INFO] Autoscaling Group updated.")
+	tflog.Info(ctx, "autoscaling group updated", map[string]interface{}{"group_id": d.Id()})
 
 	if err := checkAction(ctx, client, d); err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -518,7 +518,7 @@ func resourceAutoscalingGroupDelete(ctx context.Context, d *schema.ResourceData,
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while deleting an Autoscaling Group: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	log.Printf("[INFO] Autoscaling Group deleted: %s.", d.Id())
+	tflog.Info(ctx, "autoscaling group deleted", map[string]interface{}{"group_id": d.Id()})
 
 	d.SetId("")
 
@@ -539,7 +539,7 @@ func resourceAutoscalingGroupImport(ctx context.Context, d *schema.ResourceData,
 		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while retrieving Autoscaling Group %q, %w", groupID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	log.Printf("[INFO] Autoscaling Group found: %+v", group)
+	tflog.Info(ctx, "autoscaling group imported", map[string]interface{}{"group_id": groupID})
 
 	if err := setAutoscalingGroupData(d, &group.Properties); err != nil {
 		return nil, diagutil.ToError(d, err, nil)
@@ -1135,7 +1135,7 @@ func checkAction(ctx context.Context, client *autoscalingService.Client, d *sche
 
 	// wait for completion of triggered action
 	for {
-		log.Printf("[INFO] waiting for action %s to be ready...", actionID)
+		tflog.Info(ctx, "waiting for autoscaling action to be ready", map[string]interface{}{"action_id": actionID})
 
 		actionSuccessful, rsErr := actionReady(ctx, client, d, actionID)
 		if rsErr != nil {
@@ -1143,15 +1143,15 @@ func checkAction(ctx context.Context, client *autoscalingService.Client, d *sche
 		}
 
 		if actionSuccessful {
-			log.Printf("[INFO] action was ready: %s", actionID)
+			tflog.Info(ctx, "autoscaling action ready", map[string]interface{}{"action_id": actionID})
 			break
 		}
 
 		select {
 		case <-time.After(constant.SleepInterval):
-			log.Printf("[INFO] trying again ...")
+			tflog.Info(ctx, "autoscaling action not ready, retrying")
 		case <-ctx.Done():
-			log.Printf("[INFO] create timed out")
+			tflog.Info(ctx, "autoscaling action timed out")
 			return fmt.Errorf("group creation/update timed out! WARNING: your group was created/updated but the action was not yet ready. " +
 				"Check your Ionos Cloud account for updates")
 		}

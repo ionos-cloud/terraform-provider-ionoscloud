@@ -3,9 +3,9 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -90,7 +90,7 @@ func dataSourceDbassMongoTemplateRead(ctx context.Context, d *schema.ResourceDat
 		for _, retrievedTemplate := range retrievedTemplates.Items {
 			// Filter using the template ID or name.
 			if (idOk && *retrievedTemplate.Id == id.(string)) ||
-				(nameOk && matchesName(retrievedTemplate, name.(string), partialMatch)) {
+				(nameOk && matchesName(ctx, retrievedTemplate, name.(string), partialMatch)) {
 				templates = append(templates, retrievedTemplate)
 			}
 		}
@@ -111,9 +111,9 @@ func dataSourceDbassMongoTemplateRead(ctx context.Context, d *schema.ResourceDat
 }
 
 // matchesName checks if a template has a specific name. allows for partial matching if partialMatch is true
-func matchesName(template mongo.TemplateResponse, name string, partialMatch bool) bool {
+func matchesName(ctx context.Context, template mongo.TemplateResponse, name string, partialMatch bool) bool {
 	if template.Properties == nil || template.Properties.Name == nil {
-		log.Printf("[WARN] template %s missing properties, or name", *template.Id)
+		tflog.Warn(ctx, "template missing properties or name", map[string]interface{}{"template_id": *template.Id})
 		return false
 	}
 

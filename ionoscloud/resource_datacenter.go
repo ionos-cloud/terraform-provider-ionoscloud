@@ -3,8 +3,8 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -124,7 +124,7 @@ func resourceDatacenterCreate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 	d.SetId(*createdDatacenter.Id)
 
-	log.Printf("[INFO] DataCenter Id: %s", d.Id())
+	tflog.Info(ctx, "datacenter created", map[string]interface{}{"resource_id": d.Id()})
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
 		if bundleclient.IsRequestFailed(errState) {
@@ -267,7 +267,7 @@ func resourceDatacenterImport(ctx context.Context, d *schema.ResourceData, meta 
 		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while retrieving the datacenter: %w", err), nil)
 	}
 
-	log.Printf("[INFO] Datacenter found: %+v", datacenter)
+	tflog.Info(ctx, "datacenter imported", map[string]interface{}{"resource_id": d.Id()})
 
 	if err := setDatacenterData(d, &datacenter); err != nil {
 		return nil, diagutil.ToError(d, err, nil)

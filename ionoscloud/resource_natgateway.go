@@ -3,8 +3,8 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -141,7 +141,7 @@ func resourceNatGatewayCreate(ctx context.Context, d *schema.ResourceData, meta 
 			}
 
 			if updateLans == true {
-				log.Printf("[INFO] NatGateway LANs set to %+v", lans)
+				tflog.Info(ctx, "setting NatGateway LANs", map[string]interface{}{"lan_count": len(lans)})
 				natGateway.Properties.Lans = &lans
 			} else {
 				return diagutil.ToDiags(d, fmt.Errorf("you must provide lans for the nat gateway resource"), nil)
@@ -151,7 +151,7 @@ func resourceNatGatewayCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 	dcId := d.Get("datacenter_id").(string)
 
-	log.Printf("[*****] %+v\n", natGateway)
+	tflog.Debug(ctx, "creating nat gateway", map[string]interface{}{"datacenter_id": dcId})
 	natGatewayResp, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysPost(ctx, dcId).NatGateway(natGateway).Execute()
 	logApiRequestTime(apiResponse)
 
@@ -187,14 +187,14 @@ func resourceNatGatewayRead(ctx context.Context, d *schema.ResourceData, meta in
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
+		tflog.Info(ctx, "nat gateway not found", map[string]interface{}{"nat_gateway_id": d.Id(), "error": err.Error()})
 		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil
 		}
 	}
 
-	log.Printf("[INFO] Successfully retrieved nat gateway %s: %+v", d.Id(), natGateway)
+	tflog.Info(ctx, "retrieved nat gateway", map[string]interface{}{"nat_gateway_id": d.Id()})
 
 	if err := setNatGatewayData(d, &natGateway); err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -223,7 +223,7 @@ func resourceNatGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 	if d.HasChange("public_ips") {
 		oldPublicIps, newPublicIps := d.GetChange("public_ips")
-		log.Printf("[INFO] nat gateway public IPs changed from %+v to %+v", oldPublicIps, newPublicIps)
+		tflog.Info(ctx, "nat gateway public IPs changed", map[string]interface{}{"old": oldPublicIps, "new": newPublicIps})
 		publicIpsVal := newPublicIps.(*schema.Set).List()
 		if publicIpsVal != nil {
 			publicIps := make([]string, 0)
@@ -268,7 +268,7 @@ func resourceNatGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta 
 			}
 
 			if updateLans == true {
-				log.Printf("[INFO] nat gateway  LANs changed from %+v to %+v", oldLANs, newLANs)
+				tflog.Info(ctx, "nat gateway LANs changed", map[string]interface{}{"old": oldLANs, "new": newLANs})
 				request.Properties.Lans = &lans
 			}
 		}
@@ -344,7 +344,7 @@ func resourceNatGatewayImport(ctx context.Context, d *schema.ResourceData, meta 
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
+		tflog.Info(ctx, "nat gateway not found on import", map[string]interface{}{"nat_gateway_id": natGatewayId, "error": err.Error()})
 		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil, diagutil.ToError(d, fmt.Errorf("unable to find nat gateway  %q", natGatewayId), nil)

@@ -3,9 +3,9 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -189,7 +189,7 @@ func resourceShareImporter(ctx context.Context, d *schema.ResourceData, meta int
 		return nil, diagutil.ToError(d, fmt.Errorf("share does not exist of resource %q for group %q", rscId, grpId), nil)
 	}
 
-	log.Printf("[INFO] share found: %+v", share)
+	tflog.Info(ctx, "share found", map[string]interface{}{"share_id": *share.Id, "group_id": grpId, "resource_id": rscId})
 
 	d.SetId(*share.Id)
 

@@ -3,12 +3,12 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -140,7 +140,7 @@ func datasourceIpBlockRead(ctx context.Context, d *schema.ResourceData, meta int
 					*ipBlock.Id, *ipBlock.Properties.Location, location), nil)
 			}
 		}
-		log.Printf("[INFO] Got ip block [Name=%s, Location=%s]", *ipBlock.Properties.Name, *ipBlock.Properties.Location)
+		tflog.Info(ctx, "got ip block", map[string]interface{}{"name": *ipBlock.Properties.Name, "location": *ipBlock.Properties.Location})
 	} else {
 
 		ipBlocks, apiResponse, err := client.IPBlocksApi.IpblocksGet(ctx).Depth(1).Limit(constant.IPBlockLimit).Execute()
