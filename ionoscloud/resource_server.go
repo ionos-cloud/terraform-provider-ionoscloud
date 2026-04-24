@@ -563,7 +563,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 						fwRulesIntf := firewallRules.([]interface{})
 
 						fwRulesProperties := make([]ionoscloud.FirewallruleProperties, len(fwRulesIntf))
-						err = utils.DecodeInterfaceToStruct(fwRulesIntf, fwRulesProperties)
+						err = utils.DecodeInterfaceToStruct(ctx, fwRulesIntf, fwRulesProperties)
 						if err != nil {
 							return diagutil.ToDiags(d, fmt.Errorf("could not decode from %+v to slice of firewall rules %w", fwRulesIntf, err), nil)
 						}

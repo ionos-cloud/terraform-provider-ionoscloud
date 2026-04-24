@@ -90,14 +90,14 @@ func (fs *Service) Update(ctx context.Context, datacenterID, serverID, ID string
 }
 
 // DecodeTo - receives old and new values as slice of interfaces from schema, decodes and returns nic properties
-func DecodeTo(oldValues, newValues []interface{}) ([]ionoscloud.Nic, []ionoscloud.Nic, error) {
+func DecodeTo(ctx context.Context, oldValues, newValues []interface{}) ([]ionoscloud.Nic, []ionoscloud.Nic, error) {
 	oldNicProps := make([]ionoscloud.Nic, len(oldValues))
 	newNicProps := make([]ionoscloud.Nic, len(newValues))
-	err := utils.DecodeInterfaceToStruct(newValues, newNicProps)
+	err := utils.DecodeInterfaceToStruct(ctx, newValues, newNicProps)
 	if err != nil {
 		return nil, nil, fmt.Errorf("could not decode from %+v to new values of nic rules %w", newValues, err)
 	}
-	err = utils.DecodeInterfaceToStruct(oldValues, oldNicProps)
+	err = utils.DecodeInterfaceToStruct(ctx, oldValues, oldNicProps)
 	if err != nil {
 		return nil, nil, fmt.Errorf("could not decode from %+v to values of nic rules %w", oldValues, err)
 	}

@@ -1,13 +1,14 @@
 package configlog
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 	"sort"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 
@@ -16,7 +17,7 @@ import (
 
 // LoadFileConfigWithLogging wraps fileconfiguration.NewFromEnv() with pre/post logging
 // so that users can trace config file loading with TF_LOG=DEBUG.
-func LoadFileConfigWithLogging() (*fileconfiguration.FileConfig, error) {
+func LoadFileConfigWithLogging(ctx context.Context) (*fileconfiguration.FileConfig, error) {
 	// Resolve path for logging
 	filePath := os.Getenv(shared.IonosFilePathEnvVar)
 	source := shared.IonosFilePathEnvVar
@@ -24,7 +25,7 @@ func LoadFileConfigWithLogging() (*fileconfiguration.FileConfig, error) {
 		source = "default"
 		defaultPath, err := fileconfiguration.DefaultConfigFileName()
 		if err != nil {
-			log.Printf("[DEBUG] Could not determine default config file path: %s", err)
+			tflog.Debug(ctx, "could not determine default config file path", map[string]interface{}{"error": err.Error()})
 		} else {
 			filePath = defaultPath
 		}
@@ -43,24 +44,24 @@ func LoadFileConfigWithLogging() (*fileconfiguration.FileConfig, error) {
 		} else if os.IsNotExist(err) {
 			status = "not found"
 		}
-		log.Printf("[DEBUG] Config file: %s (source: %s, status: %s)", filePath, source, status)
+		tflog.Debug(ctx, "config file", map[string]interface{}{"path": filePath, "source": source, "status": status})
 	}
 
 	fileConfig, err := fileconfiguration.NewFromEnv()
 	if err != nil {
-		log.Printf("[DEBUG] Config file not loaded: %s", err)
+		tflog.Debug(ctx, "config file not loaded", map[string]interface{}{"error": err.Error()})
 		return nil, err
 	}
 
-	log.Printf("[DEBUG] Config file loaded successfully (version: %.1f)", float64(fileConfig.Version))
-	logProfileAndEnvironment(fileConfig)
-	logFileConfigEndpoints(fileConfig)
+	tflog.Debug(ctx, "config file loaded successfully", map[string]interface{}{"version": float64(fileConfig.Version)})
+	logProfileAndEnvironment(ctx, fileConfig)
+	logFileConfigEndpoints(ctx, fileConfig)
 
 	return fileConfig, nil
 }
 
 // logProfileAndEnvironment logs profile and environment resolution details.
-func logProfileAndEnvironment(fileConfig *fileconfiguration.FileConfig) {
+func logProfileAndEnvironment(ctx context.Context, fileConfig *fileconfiguration.FileConfig) {
 	var parts []string
 	parts = append(parts, fmt.Sprintf("%d profile(s), currentProfile: %q", len(fileConfig.Profiles), fileConfig.CurrentProfile))
 
@@ -82,16 +83,16 @@ func logProfileAndEnvironment(fileConfig *fileconfiguration.FileConfig) {
 		}
 	}
 
-	log.Printf("[DEBUG] Profile resolution: %s", strings.Join(parts, " | "))
+	tflog.Debug(ctx, "profile resolution", map[string]interface{}{"details": strings.Join(parts, " | ")})
 }
 
 // logFileConfigEndpoints logs product and endpoint counts from the active environment in the file config.
-func logFileConfigEndpoints(fileConfig *fileconfiguration.FileConfig) {
+func logFileConfigEndpoints(ctx context.Context, fileConfig *fileconfiguration.FileConfig) {
 	failoverOpts := fileConfig.GetFailoverOptions()
 	if failoverOpts != nil {
-		log.Printf("[DEBUG] Failover config: strategy=%q", failoverOpts.Strategy)
+		tflog.Debug(ctx, "failover config", map[string]interface{}{"strategy": failoverOpts.Strategy})
 	} else {
-		log.Printf("[DEBUG] Failover config: not set (default: none)")
+		tflog.Debug(ctx, "failover config not set (default: none)")
 	}
 
 	envName := fileConfig.GetEnvForCurrentProfile()
@@ -127,9 +128,9 @@ func logFileConfigEndpoints(fileConfig *fileconfiguration.FileConfig) {
 
 			jsonBytes, err := json.Marshal(products)
 			if err != nil {
-				log.Printf("[DEBUG] Environment %q: %d product(s) (failed to marshal: %s)", env.Name, len(env.Products), err)
+				tflog.Debug(ctx, "environment products (failed to marshal)", map[string]interface{}{"environment": env.Name, "product_count": len(env.Products), "error": err.Error()})
 			} else {
-				log.Printf("[DEBUG] Environment %q: %d product(s): %s", env.Name, len(env.Products), string(jsonBytes))
+				tflog.Debug(ctx, "environment products", map[string]interface{}{"environment": env.Name, "product_count": len(env.Products), "products": string(jsonBytes)})
 			}
 			return
 		}
@@ -137,7 +138,7 @@ func logFileConfigEndpoints(fileConfig *fileconfiguration.FileConfig) {
 }
 
 // LogCredentialResolution logs which credentials were found and from where.
-func LogCredentialResolution(creds shared.Credentials, fileConfigUsed bool, profileName string) {
+func LogCredentialResolution(ctx context.Context, creds shared.Credentials, fileConfigUsed bool, profileName string) {
 	foundStr := func(name string, found bool) string {
 		if found {
 			return name + "=found"
@@ -178,11 +179,11 @@ func LogCredentialResolution(creds shared.Credentials, fileConfigUsed bool, prof
 		line += " | authenticating via user/pass"
 	}
 
-	log.Printf("[DEBUG] %s", line)
+	tflog.Debug(ctx, line)
 }
 
 // LogEndpointEnvVars logs which product-specific endpoint env vars are set.
-func LogEndpointEnvVars() {
+func LogEndpointEnvVars(ctx context.Context) {
 	envVars := map[string]string{
 		"IONOS_API_URL":                           "global",
 		"IONOS_API_URL_VPN":                       "VPN",
@@ -204,12 +205,12 @@ func LogEndpointEnvVars() {
 	}
 	sort.Strings(set)
 	if len(set) > 0 {
-		log.Printf("[DEBUG] Endpoint env vars: %s", strings.Join(set, " | "))
+		tflog.Debug(ctx, "endpoint env vars", map[string]interface{}{"vars": strings.Join(set, " | ")})
 	}
 }
 
 // LogTLSConfig logs TLS-related configuration.
-func LogTLSConfig(insecureBool bool) {
+func LogTLSConfig(ctx context.Context, insecureBool bool) {
 	var parts []string
 	if os.Getenv("IONOS_ALLOW_INSECURE") != "" {
 		parts = append(parts, "IONOS_ALLOW_INSECURE is set")
@@ -221,25 +222,25 @@ func LogTLSConfig(insecureBool bool) {
 		parts = append(parts, fmt.Sprintf("%s is set (%d bytes) — cert pinning active for all products", shared.IonosPinnedCertEnvVar, len(pinnedCert)))
 	}
 	if len(parts) > 0 {
-		log.Printf("[DEBUG] TLS: %s", strings.Join(parts, ", "))
+		tflog.Debug(ctx, "TLS config", map[string]interface{}{"details": strings.Join(parts, ", ")})
 	}
 }
 
 // LogEndpoint logs the global endpoint configuration.
-func LogEndpoint(endpoint string) {
+func LogEndpoint(ctx context.Context, endpoint string) {
 	if endpoint != "" {
-		log.Printf("[DEBUG] Global endpoint: %s", endpoint)
+		tflog.Debug(ctx, "global endpoint", map[string]interface{}{"endpoint": endpoint})
 	} else {
-		log.Printf("[DEBUG] Global endpoint not set, using SDK defaults")
+		tflog.Debug(ctx, "global endpoint not set, using SDK defaults")
 	}
 }
 
 // LogS3Region logs the S3 region configuration.
-func LogS3Region(region string) {
+func LogS3Region(ctx context.Context, region string) {
 	if region != "" {
-		log.Printf("[DEBUG] S3 region: %s", region)
+		tflog.Debug(ctx, "S3 region", map[string]interface{}{"region": region})
 	} else {
-		log.Printf("[DEBUG] S3 region: %s (default)", constant.DefaultS3Region)
+		tflog.Debug(ctx, "S3 region (default)", map[string]interface{}{"region": constant.DefaultS3Region})
 	}
 }
 

@@ -5,7 +5,6 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net"
 	"net/http"
 	"os"
@@ -15,6 +14,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
@@ -191,12 +191,12 @@ func CheckFileExists(filePath string) bool {
 }
 
 // WriteToFile - creates the file and writes 'value' to it.
-func WriteToFile(name, value string) error {
+func WriteToFile(ctx context.Context, name, value string) error {
 	file, err := os.Create(name)
 	defer func() {
 		err = file.Close()
 		if err != nil {
-			log.Printf("[DEBUG] could not close file %v", err)
+			tflog.Debug(ctx, "could not close file", map[string]interface{}{"error": err})
 		}
 	}()
 
@@ -249,7 +249,7 @@ func WaitForResourceToBeReady(ctx context.Context, d *schema.ResourceData, fn Re
 		if err != nil {
 			return retry.NonRetryableError(err)
 		}
-		log.Printf("[DEBUG] resource with id %s not ready, still trying ", d.Id())
+		tflog.Debug(ctx, "resource not ready, still trying", map[string]interface{}{"id": d.Id()})
 		return retry.RetryableError(fmt.Errorf("resource with id %s not ready, still trying ", d.Id()))
 	})
 }
@@ -268,7 +268,7 @@ func WaitForResourceToBeDeleted(ctx context.Context, d *schema.ResourceData, fn 
 		if err != nil {
 			return retry.NonRetryableError(err)
 		}
-		log.Printf("[DEBUG] resource with id %s still has not been deleted", d.Id())
+		tflog.Debug(ctx, "resource still has not been deleted", map[string]interface{}{"id": d.Id()})
 		return retry.RetryableError(fmt.Errorf("resource with id %s found, still trying ", d.Id()))
 	})
 	return err
@@ -278,7 +278,7 @@ func WaitForResourceToBeDeleted(ctx context.Context, d *schema.ResourceData, fn 
 // will turn "" into nil values
 // takes snake_case fields and decodes them into camelCase fields of struct
 // used to decode values from TypeList and TypeSet of schema(`d`) directly into sdk structs
-func DecodeInterfaceToStruct(input, output interface{}) error {
+func DecodeInterfaceToStruct(ctx context.Context, input, output interface{}) error {
 	config := mapstructure.DecoderConfig{
 		DecodeHook:       PointerEmptyToNil(),
 		ErrorUnused:      false,
@@ -292,7 +292,7 @@ func DecodeInterfaceToStruct(input, output interface{}) error {
 	if err != nil {
 		return err
 	}
-	log.Printf("[DEBUG] rawdata to decode %s \n", input)
+	tflog.Debug(ctx, "rawdata to decode", map[string]interface{}{"input": fmt.Sprintf("%v", input)})
 	err = customDecoder.Decode(input)
 	if err != nil {
 		return err
@@ -360,12 +360,12 @@ func IsCamelCaseEqualToSnakeCase(a, b string) bool {
 }
 
 // ReadPublicKey Reads public key from file or directly provided and returns key string if valid
-func ReadPublicKey(pathOrKey string) (string, error) {
+func ReadPublicKey(ctx context.Context, pathOrKey string) (string, error) {
 	var err error
 	bytes := []byte(pathOrKey)
 
 	if CheckFileExists(pathOrKey) {
-		log.Printf("[DEBUG] ssh key has been provided in the following file: %s", pathOrKey)
+		tflog.Debug(ctx, "ssh key has been provided in a file", map[string]interface{}{"path": pathOrKey})
 		if bytes, err = os.ReadFile(pathOrKey); err != nil {
 			return "", err
 		}

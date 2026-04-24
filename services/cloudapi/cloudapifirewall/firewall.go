@@ -108,14 +108,14 @@ func SetProperties(firewall ionoscloud.FirewallRule) map[string]interface{} {
 }
 
 // DecodeTo - receives old and new values as slice of interfaces from schema, decodes and returns firewall properties
-func DecodeTo(oldValues, newValues []interface{}) ([]ionoscloud.FirewallruleProperties, []ionoscloud.FirewallruleProperties, error) {
+func DecodeTo(ctx context.Context, oldValues, newValues []interface{}) ([]ionoscloud.FirewallruleProperties, []ionoscloud.FirewallruleProperties, error) {
 	oldFirewallProperties := make([]ionoscloud.FirewallruleProperties, len(oldValues))
 	newFirewallProperties := make([]ionoscloud.FirewallruleProperties, len(newValues))
-	err := utils.DecodeInterfaceToStruct(newValues, newFirewallProperties)
+	err := utils.DecodeInterfaceToStruct(ctx, newValues, newFirewallProperties)
 	if err != nil {
 		return nil, nil, fmt.Errorf("could not decode from %+v to new values of firewall rules %w", newValues, err)
 	}
-	err = utils.DecodeInterfaceToStruct(oldValues, oldFirewallProperties)
+	err = utils.DecodeInterfaceToStruct(ctx, oldValues, oldFirewallProperties)
 	if err != nil {
 		return nil, nil, fmt.Errorf("could not decode from %+v to values of firewall rules %w", oldValues, err)
 	}
@@ -147,7 +147,7 @@ func (fs *Service) GetAndUpdateFirewalls(ctx context.Context, dcId, serverId, ni
 		newValuesIntf := newValues.([]interface{})
 		onlyOld := slice.Difference(oldValuesIntf, newValuesIntf)
 		onlyNew := slice.Difference(newValuesIntf, oldValuesIntf)
-		oldFirewalls, newFirewalls, err := DecodeTo(onlyOld, onlyNew)
+		oldFirewalls, newFirewalls, err := DecodeTo(ctx, onlyOld, onlyNew)
 		if err != nil {
 			return firewallRules, firewallRuleIds, diag.FromErr(fmt.Errorf("could not get changes for firewall rules %w", err))
 		}

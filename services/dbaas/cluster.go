@@ -566,7 +566,7 @@ func GetMongoClusterConnectionsData(d *schema.ResourceData) ([]mongo.Connection,
 				//	if len(whitelist) > 0 {
 				//
 				//		list := make([]string, len(whitelist))
-				//		err := utils.DecodeInterfaceToStruct(whitelist, list)
+				//		err := utils.DecodeInterfaceToStruct(ctx, whitelist, list)
 				//		if err != nil {
 				//			return nil, fmt.Errorf("could not decode whitelist from %+v (%w)", whitelist, err)
 				//		}

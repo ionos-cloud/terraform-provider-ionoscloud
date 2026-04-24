@@ -116,7 +116,7 @@ func resourceContainerRegistryCreate(ctx context.Context, d *schema.ResourceData
 		return diag.FromErr(err)
 	}
 
-	containerRegistry, err := crService.GetRegistryDataCreate(d)
+	containerRegistry, err := crService.GetRegistryDataCreate(ctx, d)
 	if err != nil {
 		return diagutil.ToDiags(d, fmt.Errorf("error occurred while getting container registry from schema: %w", err), nil)
 	}
@@ -168,7 +168,7 @@ func resourceContainerRegistryUpdate(ctx context.Context, d *schema.ResourceData
 		return diag.FromErr(err)
 	}
 
-	containerRegistry, err := crService.GetRegistryDataUpdate(d)
+	containerRegistry, err := crService.GetRegistryDataUpdate(ctx, d)
 	if err != nil {
 		return diagutil.ToDiags(d, fmt.Errorf("error occurred while getting container registry from schema: %w", err), nil)
 	}

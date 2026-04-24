@@ -734,7 +734,7 @@ func getVolumeData(ctx context.Context, d *schema.ResourceData, path, serverType
 			}
 
 			tflog.Debug(ctx, "reading ssh key file", map[string]interface{}{"path": path})
-			publicKey, err := utils.ReadPublicKey(path.(string))
+			publicKey, err := utils.ReadPublicKey(ctx, path.(string))
 			if err != nil {
 				return nil, err
 			}

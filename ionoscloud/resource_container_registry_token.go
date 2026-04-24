@@ -130,7 +130,7 @@ func resourceContainerRegistryTokenCreate(ctx context.Context, d *schema.Resourc
 	d.SetId(*registryTokenResponse.Id)
 
 	if fileStr != "" {
-		if err := utils.WriteToFile(fileStr, registryTokenResponse.Properties.Credentials.Password); err != nil {
+		if err := utils.WriteToFile(ctx, fileStr, registryTokenResponse.Properties.Credentials.Password); err != nil {
 			return diagutil.ToDiags(d, err, nil)
 		}
 	}

@@ -267,8 +267,8 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, terraformVer
 	insecure, insecureSet := d.GetOk("insecure")
 	insecureBool := false
 
-	fileConfig, readFileErr := configlog.LoadFileConfigWithLogging()
-	configlog.LogEndpointEnvVars()
+	fileConfig, readFileErr := configlog.LoadFileConfigWithLogging(ctx)
+	configlog.LogEndpointEnvVars(ctx)
 
 	fileConfigUsed := false
 	profileName := ""
@@ -292,10 +292,10 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, terraformVer
 		}
 	}
 
-	configlog.LogCredentialResolution(shared.Credentials{Token: token, Username: username, Password: password}, fileConfigUsed, profileName)
+	configlog.LogCredentialResolution(ctx, shared.Credentials{Token: token, Username: username, Password: password}, fileConfigUsed, profileName)
 
 	endpoint := utils.CleanURL(d.Get("endpoint").(string))
-	configlog.LogEndpoint(endpoint)
+	configlog.LogEndpoint(ctx, endpoint)
 
 	if contractNumber, contractOk := d.GetOk("contract_number"); contractOk {
 		// will inject x-contract-number to sdks
@@ -307,7 +307,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, terraformVer
 	if insecureSet {
 		insecureBool = insecure.(bool)
 	}
-	configlog.LogTLSConfig(insecureBool)
+	configlog.LogTLSConfig(ctx, insecureBool)
 
 	clientOptions := clientoptions.TerraformClientOptions{
 		ClientOptions: shared.ClientOptions{

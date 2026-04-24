@@ -432,7 +432,7 @@ func resourceAutoscalingGroupCreate(ctx context.Context, d *schema.ResourceData,
 	client := meta.(bundleclient.SdkBundle).AutoscalingClient
 
 	var group autoscaling.GroupPost
-	properties, err := expandProperties(d)
+	properties, err := expandProperties(ctx, d)
 	if err != nil {
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while expanding properties: %w", err), nil)
 	}
@@ -481,7 +481,7 @@ func resourceAutoscalingGroupUpdate(ctx context.Context, d *schema.ResourceData,
 		return diagutil.ToDiags(d, fmt.Errorf("datacenter_id property is immutable and can be used only in create requests"), nil)
 	}
 
-	replicaConfiguration, err := expandReplicaConfiguration(d.Get("replica_configuration").([]any))
+	replicaConfiguration, err := expandReplicaConfiguration(ctx, d.Get("replica_configuration").([]any))
 	if err != nil {
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while expanding replica configuration: %w", err), nil)
 	}
@@ -548,8 +548,8 @@ func resourceAutoscalingGroupImport(ctx context.Context, d *schema.ResourceData,
 	return []*schema.ResourceData{d}, nil
 }
 
-func expandProperties(d *schema.ResourceData) (*autoscaling.GroupProperties, error) {
-	replicaConfiguration, err := expandReplicaConfiguration(d.Get("replica_configuration").([]any))
+func expandProperties(ctx context.Context, d *schema.ResourceData) (*autoscaling.GroupProperties, error) {
+	replicaConfiguration, err := expandReplicaConfiguration(ctx, d.Get("replica_configuration").([]any))
 	if err != nil {
 		return nil, err
 	}
@@ -596,7 +596,7 @@ func expandPolicy(l []any) *autoscaling.GroupPolicy {
 	return out
 }
 
-func expandReplicaConfiguration(l []any) (*autoscaling.ReplicaPropertiesPost, error) {
+func expandReplicaConfiguration(ctx context.Context, l []any) (*autoscaling.ReplicaPropertiesPost, error) {
 	if len(l) == 0 || l[0] == nil {
 		return nil, nil
 	}
@@ -622,7 +622,7 @@ func expandReplicaConfiguration(l []any) (*autoscaling.ReplicaPropertiesPost, er
 	}
 
 	if v, ok := s["volume"]; ok {
-		volumes, err := expandVolumes(v.(*schema.Set).List())
+		volumes, err := expandVolumes(ctx, v.(*schema.Set).List())
 		if err != nil {
 			return nil, err
 		}
@@ -676,7 +676,7 @@ func expandScaleOutAction(l []any) *autoscaling.GroupPolicyScaleOutAction {
 	}
 }
 
-func expandVolumes(l []any) ([]autoscaling.ReplicaVolumePost, error) {
+func expandVolumes(ctx context.Context, l []any) ([]autoscaling.ReplicaVolumePost, error) {
 	volumes := make([]autoscaling.ReplicaVolumePost, len(l))
 	for i, entry := range l {
 		s := entry.(map[string]interface{})
@@ -707,7 +707,7 @@ func expandVolumes(l []any) ([]autoscaling.ReplicaVolumePost, error) {
 		}
 
 		if v, ok := s["ssh_keys"]; ok {
-			keys, err := expandSSHKeys(v.([]any))
+			keys, err := expandSSHKeys(ctx, v.([]any))
 			if err != nil {
 				return nil, err
 			}
@@ -734,10 +734,10 @@ func expandVolumes(l []any) ([]autoscaling.ReplicaVolumePost, error) {
 	return volumes, nil
 }
 
-func expandSSHKeys(l []any) ([]string, error) {
+func expandSSHKeys(ctx context.Context, l []any) ([]string, error) {
 	sshKeys := make([]string, len(l))
 	for i, entry := range l {
-		pubKey, err := utils.ReadPublicKey(entry.(string))
+		pubKey, err := utils.ReadPublicKey(ctx, entry.(string))
 		if err != nil {
 			return nil, fmt.Errorf("error reading sshkey (%s) (%w)", entry, err)
 		}
