@@ -5,7 +5,6 @@ package ionoscloud
 
 import (
 	"fmt"
-
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -15,6 +14,7 @@ import (
 )
 
 func TestAccServerVCPUImportBasic(t *testing.T) {
+	t.Parallel()
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ExternalProviders:        randomProviderVersion343(),
@@ -36,6 +36,7 @@ func TestAccServerVCPUImportBasic(t *testing.T) {
 }
 
 func TestAccServerVCPUWithLabelsImport(t *testing.T) {
+	t.Parallel()
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),

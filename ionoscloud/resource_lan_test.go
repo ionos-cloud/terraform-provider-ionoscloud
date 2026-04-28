@@ -18,6 +18,7 @@ import (
 )
 
 func TestAccLanBasic(t *testing.T) {
+	t.Parallel()
 	var lan ionoscloud.Lan
 	var privateLAN ionoscloud.Lan
 
