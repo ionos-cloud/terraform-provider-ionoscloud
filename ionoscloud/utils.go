@@ -96,7 +96,7 @@ func VerifyUnavailableIPs(val interface{}, key string) (warns []string, errs []e
 
 func logApiRequestTime(resp *ionoscloud.APIResponse) {
 	if resp != nil {
-		log.Printf("[DEBUG] api request completed Request time : %s for operation : %s",
+		log.Printf("[DEBUG] Request time : %s for operation : %s",
 			resp.RequestTime, resp.Operation)
 		log.Printf("[DEBUG] response status code : %d\n", resp.SafeStatusCode())
 	}
