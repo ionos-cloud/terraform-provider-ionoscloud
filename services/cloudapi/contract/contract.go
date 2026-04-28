@@ -10,12 +10,12 @@ import (
 
 // GetContractNumber fetches the contract number from the API.
 // Returns the contract number if exactly one contract is found, empty string otherwise.
-func GetContractNumber(client *bundleclient.SdkBundle) string {
-	apiClient, err := client.NewCloudAPIClient("")
+func GetContractNumber(ctx context.Context, client *bundleclient.SdkBundle) string {
+	apiClient, err := client.NewCloudAPIClient(ctx, "")
 	if err != nil {
 		return ""
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 	contracts, _, err := apiClient.ContractResourcesApi.ContractsGet(ctx).Execute()
 	if err != nil {

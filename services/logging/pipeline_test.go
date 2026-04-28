@@ -1,6 +1,7 @@
 package logging
 
 import (
+	"context"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	"github.com/stretchr/testify/assert"
@@ -133,7 +134,7 @@ func TestClientConfigurationFlowTable(t *testing.T) {
 			client := NewClient(tt.clientOptions, tt.fileConfig)
 
 			// Step 2: Override the client configuration from the loaded config
-			loadedconfig.SetClientOptionsFromConfig(client, tt.productName, tt.location)
+			loadedconfig.SetClientOptionsFromConfig(context.Background(), client, tt.productName, tt.location)
 
 			// Verify the override worked
 			assert.Equal(t, tt.expectedURL, client.GetConfig().Servers[0].URL)
@@ -144,14 +145,14 @@ func TestClientConfigurationFlowTable(t *testing.T) {
 			assert.True(t, expectedRootCa.Equal(configRootCA))
 
 			// Step 3: Change the config URL using ChangeConfigURL
-			client.ChangeConfigURL(tt.location)
+			client.ChangeConfigURL(context.Background(), tt.location)
 
 			// Verify the final URL after change
 			assert.Equal(t, tt.expectedURL, client.GetConfig().Servers[0].URL)
 
 			// Test changing the config URL with environment variable
 			os.Setenv("IONOS_API_URL_LOGGING", tt.envVar)
-			client.ChangeConfigURL("")
+			client.ChangeConfigURL(context.Background(), "")
 			assert.Equal(t, tt.expectedEnvURL, client.GetConfig().Servers[0].URL)
 			os.Unsetenv("IONOS_API_URL_LOGGING")
 		})

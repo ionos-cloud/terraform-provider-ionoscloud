@@ -3,10 +3,10 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -111,7 +111,7 @@ func resourceUser() *schema.Resource {
 }
 
 func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -119,7 +119,7 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 		Properties: &ionoscloud.UserPropertiesPost{},
 	}
 
-	log.Printf("[DEBUG] NAME %s", d.Get("first_name"))
+	tflog.Debug(ctx, "creating user", map[string]interface{}{"first_name": d.Get("first_name")})
 
 	if d.Get("first_name") != nil {
 		firstName := d.Get("first_name").(string)
@@ -179,7 +179,7 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 	// Add the user to the specified groups, if any.
 	if groupsVal, groupsOk := d.GetOk("group_ids"); groupsOk {
 		groupsList := groupsVal.(*schema.Set).List()
-		log.Printf("[INFO] Adding group_ids %+v ", groupsList)
+		tflog.Info(ctx, "adding user to groups", map[string]interface{}{"group_ids": groupsList, "user_id": d.Id()})
 		if groupsList != nil {
 			for _, groupsItem := range groupsList {
 				groupId := groupsItem.(string)
@@ -194,7 +194,7 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 }
 
 func resourceUserRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -219,7 +219,7 @@ func resourceUserRead(ctx context.Context, d *schema.ResourceData, meta interfac
 }
 
 func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -296,7 +296,7 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 		deletedGroups := utils.DiffSliceOneWay(oldGroupsList, newGroupsList)
 
 		if newGroups != nil && len(newGroups) > 0 {
-			log.Printf("[INFO] New groups to add: %+v", newGroups)
+			tflog.Info(ctx, "new groups to add user to", map[string]interface{}{"group_ids": newGroups, "user_id": d.Id()})
 			for _, groupId := range newGroups {
 				if err := addUserToGroup(d.Id(), groupId, ctx, d, meta); err != nil {
 					return diagutil.ToDiags(d, err, nil)
@@ -305,7 +305,7 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 		}
 
 		if deletedGroups != nil && len(deletedGroups) > 0 {
-			log.Printf("[INFO] Groups to delete: %+v", deletedGroups)
+			tflog.Info(ctx, "groups to remove user from", map[string]interface{}{"group_ids": deletedGroups, "user_id": d.Id()})
 			for _, groupId := range deletedGroups {
 				if err := deleteUserFromGroup(d.Id(), groupId, ctx, d, meta); err != nil {
 					return diagutil.ToDiags(d, err, nil)
@@ -330,7 +330,7 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 }
 
 func resourceUserDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -353,7 +353,7 @@ func resourceUserDelete(ctx context.Context, d *schema.ResourceData, meta interf
 }
 
 func resourceUserImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -380,7 +380,7 @@ func resourceUserImporter(ctx context.Context, d *schema.ResourceData, meta inte
 		return nil, diagutil.ToError(d, err, nil)
 	}
 
-	log.Printf("[INFO] user found: %+v", user)
+	tflog.Info(ctx, "user found", map[string]interface{}{"user_id": *user.Id})
 
 	return []*schema.ResourceData{d}, nil
 }

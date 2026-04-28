@@ -1,6 +1,7 @@
 package cdn
 
 import (
+	"context"
 	"fmt"
 	"runtime"
 
@@ -21,8 +22,8 @@ type Client struct {
 }
 
 // NewClient returns a new CDN client
-func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *fileconfiguration.FileConfig) *Client {
-	loadedconfig.SetGlobalClientOptionsFromFileConfig(&clientOptions, fileConfig, fileconfiguration.CDN)
+func NewClient(ctx context.Context, clientOptions clientoptions.TerraformClientOptions, fileConfig *fileconfiguration.FileConfig) *Client {
+	loadedconfig.SetGlobalClientOptionsFromFileConfig(ctx, &clientOptions, fileConfig, fileconfiguration.CDN)
 
 	config := shared.NewConfigurationFromOptions(clientOptions.ClientOptions)
 	config.MaxRetries = constant.MaxRetries

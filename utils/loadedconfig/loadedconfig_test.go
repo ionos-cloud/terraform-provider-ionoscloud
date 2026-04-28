@@ -1,6 +1,7 @@
 package loadedconfig
 
 import (
+	"context"
 	"net/http"
 	"testing"
 
@@ -141,7 +142,7 @@ func TestSetClientOptionsFromfileConfig(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			SetGlobalClientOptionsFromFileConfig(tt.args.clientOptions, tt.args.fileConfig, tt.args.productName)
+			SetGlobalClientOptionsFromFileConfig(context.Background(), tt.args.clientOptions, tt.args.fileConfig, tt.args.productName)
 			if tt.args.clientOptions != nil && tt.wantClientOptions != nil {
 				if tt.args.clientOptions.Endpoint != tt.wantClientOptions.Endpoint {
 					t.Errorf("got %v, want %v", tt.args.clientOptions.Endpoint, tt.wantClientOptions.Endpoint)
@@ -319,7 +320,7 @@ func TestOverrideClientFromfileConfig(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			SetClientOptionsFromConfig(tt.args.client, tt.args.productName, tt.args.location)
+			SetClientOptionsFromConfig(context.Background(), tt.args.client, tt.args.productName, tt.args.location)
 			config := tt.args.client.GetConfig()
 			if tt.want == nil {
 				if len(config.Servers) != 0 {
@@ -346,7 +347,7 @@ type mockConfigProviderWithLoaderAndLocation struct {
 	config     *shared.Configuration
 }
 
-func (m *mockConfigProviderWithLoaderAndLocation) ChangeConfigURL(location string) {
+func (m *mockConfigProviderWithLoaderAndLocation) ChangeConfigURL(_ context.Context, location string) {
 	// Implement the logic to change the config URL based on the location
 }
 
@@ -475,7 +476,7 @@ func TestSetClientOptionsFromfileConfigTable(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			SetGlobalClientOptionsFromFileConfig(tt.clientOptions, tt.fileConfig, tt.productName)
+			SetGlobalClientOptionsFromFileConfig(context.Background(), tt.clientOptions, tt.fileConfig, tt.productName)
 			if tt.clientOptions != nil && tt.wantClientOptions != nil {
 				if tt.clientOptions.Endpoint != tt.wantClientOptions.Endpoint {
 					t.Errorf("got %v, want %v", tt.clientOptions.Endpoint, tt.wantClientOptions.Endpoint)

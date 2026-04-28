@@ -3,10 +3,10 @@ package containerregistry
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	cr "github.com/ionos-cloud/sdk-go-bundle/products/containerregistry/v2"
@@ -61,7 +61,7 @@ func (c *Client) IsRegistryReady(ctx context.Context, d *schema.ResourceData) (b
 	if err != nil {
 		return true, fmt.Errorf("status check failed for container registry creg with ID: %v, error: %w", ID, err)
 	}
-	log.Printf("[INFO] state of the container registry with ID: %v is: %s ", ID, creg.Metadata.State)
+	tflog.Info(ctx, "container registry state", map[string]interface{}{"id": ID, "state": creg.Metadata.State})
 	if utils.IsStateFailed(creg.Metadata.State) {
 		return false, fmt.Errorf("container registry  %s is in a failed state", d.Id())
 	}
@@ -134,7 +134,7 @@ func (c *Client) PutToken(ctx context.Context, registryID, tokenID string, token
 }
 
 // GetRegistryDataCreate get registry data for create
-func GetRegistryDataCreate(d *schema.ResourceData) (*cr.PostRegistryInput, error) {
+func GetRegistryDataCreate(ctx context.Context, d *schema.ResourceData) (*cr.PostRegistryInput, error) {
 
 	registry := cr.PostRegistryInput{
 		Properties: cr.PostRegistryProperties{},
@@ -157,7 +157,7 @@ func GetRegistryDataCreate(d *schema.ResourceData) (*cr.PostRegistryInput, error
 	if v, ok := d.GetOk("api_subnet_allow_list"); ok {
 		raw := v.([]any)
 		ips := make([]string, len(raw))
-		err := utils.DecodeInterfaceToStruct(raw, ips)
+		err := utils.DecodeInterfaceToStruct(ctx, raw, ips)
 		if err != nil {
 			return nil, err
 		}
@@ -170,7 +170,7 @@ func GetRegistryDataCreate(d *schema.ResourceData) (*cr.PostRegistryInput, error
 }
 
 // GetRegistryDataUpdate get registry data for update
-func GetRegistryDataUpdate(d *schema.ResourceData) (*cr.PatchRegistryInput, error) {
+func GetRegistryDataUpdate(ctx context.Context, d *schema.ResourceData) (*cr.PatchRegistryInput, error) {
 
 	registry := cr.PatchRegistryInput{}
 
@@ -186,7 +186,7 @@ func GetRegistryDataUpdate(d *schema.ResourceData) (*cr.PatchRegistryInput, erro
 	if v, ok := d.GetOkExists("api_subnet_allow_list"); ok { //nolint:staticcheck
 		raw := v.([]any)
 		ips := make([]string, len(raw))
-		err := utils.DecodeInterfaceToStruct(raw, ips)
+		err := utils.DecodeInterfaceToStruct(ctx, raw, ips)
 		if err != nil {
 			return nil, err
 		}

@@ -3,7 +3,6 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 	"regexp"
 	"strings"
 	"time"
@@ -12,6 +11,7 @@ import (
 	cloudapiflowlog "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/flowlog"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -432,7 +432,7 @@ func resourceAutoscalingGroupCreate(ctx context.Context, d *schema.ResourceData,
 	client := meta.(bundleclient.SdkBundle).AutoscalingClient
 
 	var group autoscaling.GroupPost
-	properties, err := expandProperties(d)
+	properties, err := expandProperties(ctx, d)
 	if err != nil {
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while expanding properties: %w", err), nil)
 	}
@@ -443,7 +443,7 @@ func resourceAutoscalingGroupCreate(ctx context.Context, d *schema.ResourceData,
 	}
 
 	d.SetId(autoscalingGroup.Id)
-	log.Printf("[INFO] Autoscaling Group created. Id set to %s", autoscalingGroup.Id)
+	tflog.Info(ctx, "autoscaling group created", map[string]interface{}{"group_id": autoscalingGroup.Id})
 
 	if err := checkAction(ctx, client, d); err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -457,19 +457,19 @@ func resourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData, m
 	group, apiResponse, err := client.GetGroup(ctx, d.Id(), 2)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
-			log.Printf("[INFO] Autoscaling Group with ID: %s not found, err: %+v", d.Id(), err)
+			tflog.Info(ctx, "autoscaling group not found", map[string]interface{}{"group_id": d.Id(), "error": err.Error()})
 			d.SetId("")
 			return nil
 		}
 		return diagutil.ToDiags(d, fmt.Errorf("error while retrieving Autoscaling Group: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	log.Printf("[INFO] successfully retrieved Autoscaling Group %s: %+v", d.Id(), group)
+	tflog.Info(ctx, "retrieved autoscaling group", map[string]interface{}{"group_id": d.Id()})
 	if err := setAutoscalingGroupData(d, &group.Properties); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
 
-	log.Printf("[INFO] successfully set Autoscaling Group data %s", d.Id())
+	tflog.Info(ctx, "autoscaling group data set", map[string]interface{}{"group_id": d.Id()})
 
 	return nil
 }
@@ -481,7 +481,7 @@ func resourceAutoscalingGroupUpdate(ctx context.Context, d *schema.ResourceData,
 		return diagutil.ToDiags(d, fmt.Errorf("datacenter_id property is immutable and can be used only in create requests"), nil)
 	}
 
-	replicaConfiguration, err := expandReplicaConfiguration(d.Get("replica_configuration").([]any))
+	replicaConfiguration, err := expandReplicaConfiguration(ctx, d.Get("replica_configuration").([]any))
 	if err != nil {
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while expanding replica configuration: %w", err), nil)
 	}
@@ -503,7 +503,7 @@ func resourceAutoscalingGroupUpdate(ctx context.Context, d *schema.ResourceData,
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating Autoscaling Group: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	log.Printf("[INFO] Autoscaling Group updated.")
+	tflog.Info(ctx, "autoscaling group updated", map[string]interface{}{"group_id": d.Id()})
 
 	if err := checkAction(ctx, client, d); err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -518,7 +518,7 @@ func resourceAutoscalingGroupDelete(ctx context.Context, d *schema.ResourceData,
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while deleting an Autoscaling Group: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	log.Printf("[INFO] Autoscaling Group deleted: %s.", d.Id())
+	tflog.Info(ctx, "autoscaling group deleted", map[string]interface{}{"group_id": d.Id()})
 
 	d.SetId("")
 
@@ -539,7 +539,7 @@ func resourceAutoscalingGroupImport(ctx context.Context, d *schema.ResourceData,
 		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while retrieving Autoscaling Group %q, %w", groupID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	log.Printf("[INFO] Autoscaling Group found: %+v", group)
+	tflog.Info(ctx, "autoscaling group imported", map[string]interface{}{"group_id": groupID})
 
 	if err := setAutoscalingGroupData(d, &group.Properties); err != nil {
 		return nil, diagutil.ToError(d, err, nil)
@@ -548,8 +548,8 @@ func resourceAutoscalingGroupImport(ctx context.Context, d *schema.ResourceData,
 	return []*schema.ResourceData{d}, nil
 }
 
-func expandProperties(d *schema.ResourceData) (*autoscaling.GroupProperties, error) {
-	replicaConfiguration, err := expandReplicaConfiguration(d.Get("replica_configuration").([]any))
+func expandProperties(ctx context.Context, d *schema.ResourceData) (*autoscaling.GroupProperties, error) {
+	replicaConfiguration, err := expandReplicaConfiguration(ctx, d.Get("replica_configuration").([]any))
 	if err != nil {
 		return nil, err
 	}
@@ -596,7 +596,7 @@ func expandPolicy(l []any) *autoscaling.GroupPolicy {
 	return out
 }
 
-func expandReplicaConfiguration(l []any) (*autoscaling.ReplicaPropertiesPost, error) {
+func expandReplicaConfiguration(ctx context.Context, l []any) (*autoscaling.ReplicaPropertiesPost, error) {
 	if len(l) == 0 || l[0] == nil {
 		return nil, nil
 	}
@@ -622,7 +622,7 @@ func expandReplicaConfiguration(l []any) (*autoscaling.ReplicaPropertiesPost, er
 	}
 
 	if v, ok := s["volume"]; ok {
-		volumes, err := expandVolumes(v.(*schema.Set).List())
+		volumes, err := expandVolumes(ctx, v.(*schema.Set).List())
 		if err != nil {
 			return nil, err
 		}
@@ -676,7 +676,7 @@ func expandScaleOutAction(l []any) *autoscaling.GroupPolicyScaleOutAction {
 	}
 }
 
-func expandVolumes(l []any) ([]autoscaling.ReplicaVolumePost, error) {
+func expandVolumes(ctx context.Context, l []any) ([]autoscaling.ReplicaVolumePost, error) {
 	volumes := make([]autoscaling.ReplicaVolumePost, len(l))
 	for i, entry := range l {
 		s := entry.(map[string]interface{})
@@ -707,7 +707,7 @@ func expandVolumes(l []any) ([]autoscaling.ReplicaVolumePost, error) {
 		}
 
 		if v, ok := s["ssh_keys"]; ok {
-			keys, err := expandSSHKeys(v.([]any))
+			keys, err := expandSSHKeys(ctx, v.([]any))
 			if err != nil {
 				return nil, err
 			}
@@ -734,10 +734,10 @@ func expandVolumes(l []any) ([]autoscaling.ReplicaVolumePost, error) {
 	return volumes, nil
 }
 
-func expandSSHKeys(l []any) ([]string, error) {
+func expandSSHKeys(ctx context.Context, l []any) ([]string, error) {
 	sshKeys := make([]string, len(l))
 	for i, entry := range l {
-		pubKey, err := utils.ReadPublicKey(entry.(string))
+		pubKey, err := utils.ReadPublicKey(ctx, entry.(string))
 		if err != nil {
 			return nil, fmt.Errorf("error reading sshkey (%s) (%w)", entry, err)
 		}
@@ -1135,7 +1135,7 @@ func checkAction(ctx context.Context, client *autoscalingService.Client, d *sche
 
 	// wait for completion of triggered action
 	for {
-		log.Printf("[INFO] waiting for action %s to be ready...", actionID)
+		tflog.Info(ctx, "waiting for autoscaling action to be ready", map[string]interface{}{"action_id": actionID})
 
 		actionSuccessful, rsErr := actionReady(ctx, client, d, actionID)
 		if rsErr != nil {
@@ -1143,15 +1143,15 @@ func checkAction(ctx context.Context, client *autoscalingService.Client, d *sche
 		}
 
 		if actionSuccessful {
-			log.Printf("[INFO] action was ready: %s", actionID)
+			tflog.Info(ctx, "autoscaling action ready", map[string]interface{}{"action_id": actionID})
 			break
 		}
 
 		select {
 		case <-time.After(constant.SleepInterval):
-			log.Printf("[INFO] trying again ...")
+			tflog.Info(ctx, "autoscaling action not ready, retrying")
 		case <-ctx.Done():
-			log.Printf("[INFO] create timed out")
+			tflog.Info(ctx, "autoscaling action timed out")
 			return fmt.Errorf("group creation/update timed out! WARNING: your group was created/updated but the action was not yet ready. " +
 				"Check your Ionos Cloud account for updates")
 		}

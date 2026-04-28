@@ -270,7 +270,7 @@ func dataSourceK8sCluster() *schema.Resource {
 
 func dataSourceK8sReadCluster(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -334,7 +334,7 @@ func dataSourceK8sReadCluster(ctx context.Context, d *schema.ResourceData, meta 
 		return diagutil.ToDiags(d, err, nil)
 	}
 
-	if err = setAdditionalK8sClusterData(d, &cluster, client); err != nil {
+	if err = setAdditionalK8sClusterData(ctx, d, &cluster, client); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
 
@@ -415,7 +415,7 @@ func setK8sConfigData(d *schema.ResourceData, configStr string) error {
 	return nil
 }
 
-func setAdditionalK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.KubernetesCluster, client *ionoscloud.APIClient) error {
+func setAdditionalK8sClusterData(ctx context.Context, d *schema.ResourceData, cluster *ionoscloud.KubernetesCluster, client *ionoscloud.APIClient) error {
 
 	if cluster.Metadata != nil {
 		if cluster.Metadata.State != nil {
@@ -426,7 +426,7 @@ func setAdditionalK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.Kub
 
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+	ctx, cancel := context.WithTimeout(ctx, *resourceDefaultTimeouts.Default)
 
 	if cancel != nil {
 		defer cancel()

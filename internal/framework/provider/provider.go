@@ -188,8 +188,8 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 		insecureBool = clientOpts.Insecure.ValueBool()
 	}
 
-	fileConfig, readFileErr := configlog.LoadFileConfigWithLogging()
-	configlog.LogEndpointEnvVars()
+	fileConfig, readFileErr := configlog.LoadFileConfigWithLogging(ctx)
+	configlog.LogEndpointEnvVars(ctx)
 
 	fileConfigUsed := false
 	profileName := ""
@@ -220,12 +220,12 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 		}
 	}
 
-	configlog.LogCredentialResolution(shared.Credentials{Token: token, Username: username, Password: password, S3AccessKey: accessKey, S3SecretKey: secretKey}, fileConfigUsed, profileName)
+	configlog.LogCredentialResolution(ctx, shared.Credentials{Token: token, Username: username, Password: password, S3AccessKey: accessKey, S3SecretKey: secretKey}, fileConfigUsed, profileName)
 
 	cleanedEndpoint := utils.CleanURL(endpoint)
-	configlog.LogEndpoint(cleanedEndpoint)
-	configlog.LogS3Region(region)
-	configlog.LogTLSConfig(insecureBool)
+	configlog.LogEndpoint(ctx, cleanedEndpoint)
+	configlog.LogS3Region(ctx, region)
+	configlog.LogTLSConfig(ctx, insecureBool)
 
 	if insecureBool == true {
 		resp.Diagnostics.AddWarning("insecure mode enabled", "This is not recommended for production environments.")
@@ -249,13 +249,13 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 		},
 	}
 
-	client := bundleclient.New(clientOptions, fileConfig)
+	client := bundleclient.New(ctx, clientOptions, fileConfig)
 	resp.DataSourceData = client
 	resp.EphemeralResourceData = client
 	resp.ResourceData = client
 
 	diagutil.SetupContractNumberResolver(clientOpts.ContractNumber.ValueString(), token, func() string { //nolint:contextcheck
-		return contractService.GetContractNumber(client)
+		return contractService.GetContractNumber(ctx, client)
 	})
 }
 

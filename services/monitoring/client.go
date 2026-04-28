@@ -1,12 +1,13 @@
 package monitoring
 
 import (
+	"context"
 	"fmt"
-	"log"
 	"os"
 	"runtime"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	"github.com/ionos-cloud/sdk-go-bundle/products/monitoring/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
@@ -62,11 +63,11 @@ var (
 	}
 )
 
-func (c *Client) ChangeConfigURL(location string) {
+func (c *Client) ChangeConfigURL(ctx context.Context, location string) {
 	config := c.sdkClient.GetConfig()
 	if location == "" && os.Getenv(ionosAPIURLMonitoring) != "" {
 		url := utils.CleanURL(os.Getenv(ionosAPIURLMonitoring))
-		log.Printf("[DEBUG] Monitoring: endpoint from %s: %s", ionosAPIURLMonitoring, url)
+		tflog.Debug(ctx, "Monitoring: endpoint from env", map[string]interface{}{"env": ionosAPIURLMonitoring, "url": url})
 		config.Servers = shared.ServerConfigurations{
 			{
 				URL: url,
@@ -76,7 +77,7 @@ func (c *Client) ChangeConfigURL(location string) {
 	}
 	for _, server := range config.Servers {
 		if strings.EqualFold(server.Description, shared.EndpointOverridden+location) || strings.EqualFold(server.URL, locationToURL[location]) {
-			log.Printf("[DEBUG] Monitoring: endpoint for location %s: %s", configlog.FormatLocation(location), server.URL)
+			tflog.Debug(ctx, "Monitoring: endpoint for location", map[string]interface{}{"location": configlog.FormatLocation(location), "url": server.URL})
 			config.Servers = shared.ServerConfigurations{
 				{
 					URL:         server.URL,
@@ -86,5 +87,5 @@ func (c *Client) ChangeConfigURL(location string) {
 			return
 		}
 	}
-	log.Printf("[DEBUG] Monitoring: endpoint for location %s: %s", configlog.FormatLocation(location), locationToURL[location])
+	tflog.Debug(ctx, "Monitoring: endpoint for location", map[string]interface{}{"location": configlog.FormatLocation(location), "url": locationToURL[location]})
 }

@@ -3,9 +3,9 @@ package vpn
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	vpnsdk "github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
@@ -20,7 +20,7 @@ var wireguardResourceName = "vpnSdk wireguard gateway"
 
 // CreateWireguardGateway creates a new wireguard gateway
 func (c *Client) CreateWireguardGateway(ctx context.Context, d *schema.ResourceData) (vpnsdk.WireguardGatewayRead, *shared.APIResponse, error) {
-	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.VPN, d.Get("location").(string))
+	loadedconfig.SetClientOptionsFromConfig(ctx, c, fileconfiguration.VPN, d.Get("location").(string))
 	request := setWireguardGWPostRequest(d)
 	wireguard, apiResponse, err := c.sdkClient.WireguardGatewaysApi.WireguardgatewaysPost(ctx).WireguardGatewayCreate(*request).Execute()
 	apiResponse.LogInfo()
@@ -30,20 +30,20 @@ func (c *Client) CreateWireguardGateway(ctx context.Context, d *schema.ResourceD
 // IsWireguardAvailable checks if the wireguard is available
 func (c *Client) IsWireguardAvailable(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	location := d.Get("location").(string)
-	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.VPN, location)
+	loadedconfig.SetClientOptionsFromConfig(ctx, c, fileconfiguration.VPN, location)
 
 	wireguardID := d.Id()
 	wireguard, _, err := c.GetWireguardGatewayByID(ctx, wireguardID, location)
 	if err != nil {
 		return false, err
 	}
-	log.Printf("[DEBUG] wireguard status: %s", wireguard.Metadata.Status)
+	tflog.Debug(ctx, "wireguard status", map[string]interface{}{"status": wireguard.Metadata.Status})
 	return strings.EqualFold(wireguard.Metadata.Status, constant.Available), nil
 }
 
 // UpdateWireguardGateway updates a wireguard gateway
 func (c *Client) UpdateWireguardGateway(ctx context.Context, id string, d *schema.ResourceData) (vpnsdk.WireguardGatewayRead, *shared.APIResponse, error) {
-	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.VPN, d.Get("location").(string))
+	loadedconfig.SetClientOptionsFromConfig(ctx, c, fileconfiguration.VPN, d.Get("location").(string))
 	request := setWireguardGatewayPutRequest(d)
 	wireguardResponse, apiResponse, err := c.sdkClient.WireguardGatewaysApi.WireguardgatewaysPut(ctx, id).WireguardGatewayEnsure(*request).Execute()
 	apiResponse.LogInfo()
@@ -52,7 +52,7 @@ func (c *Client) UpdateWireguardGateway(ctx context.Context, id string, d *schem
 
 // DeleteWireguardGateway deletes a wireguard gateway
 func (c *Client) DeleteWireguardGateway(ctx context.Context, id, location string) (*shared.APIResponse, error) {
-	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.VPN, location)
+	loadedconfig.SetClientOptionsFromConfig(ctx, c, fileconfiguration.VPN, location)
 	apiResponse, err := c.sdkClient.WireguardGatewaysApi.WireguardgatewaysDelete(ctx, id).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
@@ -60,7 +60,7 @@ func (c *Client) DeleteWireguardGateway(ctx context.Context, id, location string
 
 // IsWireguardGatewayDeleted checks if the wireguard gateway is deleted
 func (c *Client) IsWireguardGatewayDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
-	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.VPN, d.Get("location").(string))
+	loadedconfig.SetClientOptionsFromConfig(ctx, c, fileconfiguration.VPN, d.Get("location").(string))
 	_, apiResponse, err := c.sdkClient.WireguardGatewaysApi.WireguardgatewaysFindById(ctx, d.Id()).Execute()
 	apiResponse.LogInfo()
 	return apiResponse.HttpNotFound(), err
@@ -68,7 +68,7 @@ func (c *Client) IsWireguardGatewayDeleted(ctx context.Context, d *schema.Resour
 
 // GetWireguardGatewayByID returns a wireguard by its ID
 func (c *Client) GetWireguardGatewayByID(ctx context.Context, id, location string) (vpnsdk.WireguardGatewayRead, *shared.APIResponse, error) {
-	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.VPN, location)
+	loadedconfig.SetClientOptionsFromConfig(ctx, c, fileconfiguration.VPN, location)
 	wireguard, apiResponse, err := c.sdkClient.WireguardGatewaysApi.WireguardgatewaysFindById(ctx, id).Execute()
 	apiResponse.LogInfo()
 	return wireguard, apiResponse, err
@@ -76,7 +76,7 @@ func (c *Client) GetWireguardGatewayByID(ctx context.Context, id, location strin
 
 // ListWireguardGateways returns a list of all wireguards
 func (c *Client) ListWireguardGateways(ctx context.Context, location string) (vpnsdk.WireguardGatewayReadList, *shared.APIResponse, error) {
-	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.VPN, location)
+	loadedconfig.SetClientOptionsFromConfig(ctx, c, fileconfiguration.VPN, location)
 	wireguards, apiResponse, err := c.sdkClient.WireguardGatewaysApi.WireguardgatewaysGet(ctx).Execute()
 	apiResponse.LogInfo()
 	return wireguards, apiResponse, err
@@ -85,12 +85,12 @@ func (c *Client) ListWireguardGateways(ctx context.Context, location string) (vp
 // IsWireguardGatewayReady checks if the wireguard gateway is ready
 func (c *Client) IsWireguardGatewayReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
 	location := d.Get("location").(string)
-	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.VPN, location)
+	loadedconfig.SetClientOptionsFromConfig(ctx, c, fileconfiguration.VPN, location)
 	cluster, _, err := c.GetWireguardGatewayByID(ctx, d.Id(), location)
 	if err != nil {
 		return false, err
 	}
-	log.Printf("[DEBUG] wierguard gateway state %s", cluster.Metadata.Status)
+	tflog.Debug(ctx, "wireguard gateway state", map[string]interface{}{"status": cluster.Metadata.Status})
 	return strings.EqualFold(cluster.Metadata.Status, constant.Available), nil
 }
 

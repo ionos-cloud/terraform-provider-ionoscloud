@@ -80,7 +80,7 @@ func testAccCheckMongoUserDestroyCheck(s *terraform.State) error {
 		if rs.Type != constant.DBaasMongoUserResource {
 			continue
 		}
-		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewMongoClient(rs.Primary.Attributes["location"])
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewMongoClient(ctx, rs.Primary.Attributes["location"])
 		if err != nil {
 			return err
 		}
@@ -112,7 +112,7 @@ func testAccCheckMongoUserExists(n string, user *mongo.User) resource.TestCheckF
 			return fmt.Errorf("no Record ID is set")
 		}
 
-		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewMongoClient(rs.Primary.Attributes["location"])
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewMongoClient(ctx, rs.Primary.Attributes["location"])
 		if err != nil {
 			return err
 		}

@@ -50,7 +50,7 @@ func (d *accessKeyDataSource) Configure(ctx context.Context, req datasource.Conf
 	}
 
 	var err error
-	d.client, err = clientBundle.NewObjectStorageManagementClient()
+	d.client, err = clientBundle.NewObjectStorageManagementClient(ctx)
 	if err != nil {
 		resp.Diagnostics.AddError("initialization error for Object Storage Management client", err.Error())
 	}

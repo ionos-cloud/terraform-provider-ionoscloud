@@ -3,10 +3,10 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -252,7 +252,7 @@ func replicaSetRead(ctx context.Context, d *schema.ResourceData, meta interface{
 		}
 		return diagutil.ToDiags(d, fmt.Errorf("error while fetching InMemoryDB replica set with ID: %v, error: %w", replicaSetID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
-	log.Printf("[INFO] Successfully retrieved InMemoryDB replica set with ID: %v, replica set info: %+v", replicaSetID, replicaSet)
+	tflog.Info(ctx, "retrieved InMemoryDB replica set", map[string]interface{}{"replica_set_id": replicaSetID})
 	if err := client.SetReplicaSetData(d, replicaSet); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
@@ -293,7 +293,7 @@ func replicaSetImport(ctx context.Context, d *schema.ResourceData, meta interfac
 		}
 		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to import InMemoryDB replica set with ID: %v, error: %w", replicaSetID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
-	log.Printf("[INFO] InMemoryDB replica set found: %+v", replicaSet)
+	tflog.Info(ctx, "InMemoryDB replica set imported", map[string]interface{}{"replica_set_id": replicaSetID})
 	if err := d.Set("location", location); err != nil {
 		return nil, utils.GenerateSetError("InMemoryDB replica set", "location", err)
 	}

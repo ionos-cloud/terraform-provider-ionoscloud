@@ -3,10 +3,10 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -202,7 +202,7 @@ func resourceVpnWireguardGatewayDelete(ctx context.Context, d *schema.ResourceDa
 		return diagutil.ToDiags(d, fmt.Errorf("while waiting for the WireGuard Gateway to be deleted: %w", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String()})
 	}
 
-	log.Printf("[INFO] Successfully deleted Wireguard Gateway %s", d.Id())
+	tflog.Info(ctx, "successfully deleted Wireguard Gateway", map[string]interface{}{"gateway_id": d.Id()})
 	d.SetId("")
 
 	return nil

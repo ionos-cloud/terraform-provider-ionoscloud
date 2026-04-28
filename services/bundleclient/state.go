@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"net/url"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
@@ -15,7 +15,7 @@ import (
 )
 
 // GetStateChangeConf gets the default configuration for tracking a request progress
-func GetStateChangeConf(meta interface{}, d *schema.ResourceData, requestLocation string, timeoutType string) *retry.StateChangeConf {
+func GetStateChangeConf(ctx context.Context, meta interface{}, d *schema.ResourceData, requestLocation string, timeoutType string) *retry.StateChangeConf {
 	var apiLocation string
 	if temp, ok := d.GetOk("location"); ok {
 		apiLocation = temp.(string)
@@ -24,7 +24,7 @@ func GetStateChangeConf(meta interface{}, d *schema.ResourceData, requestLocatio
 	stateConf := &retry.StateChangeConf{
 		Pending:        resourcePendingStates,
 		Target:         resourceTargetStates,
-		Refresh:        resourceStateRefreshFunc(meta, apiLocation, requestLocation),
+		Refresh:        resourceStateRefreshFunc(ctx, meta, apiLocation, requestLocation),
 		Timeout:        d.Timeout(timeoutType),
 		MinTimeout:     5 * time.Second,
 		Delay:          0,    // Don't delay the start
@@ -35,19 +35,19 @@ func GetStateChangeConf(meta interface{}, d *schema.ResourceData, requestLocatio
 }
 
 // resourceStateRefreshFunc tracks progress of a request
-func resourceStateRefreshFunc(meta interface{}, location, path string) retry.StateRefreshFunc {
+func resourceStateRefreshFunc(ctx context.Context, meta interface{}, location, path string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		client, err := meta.(SdkBundle).NewCloudAPIClient(location)
+		client, err := meta.(SdkBundle).NewCloudAPIClient(ctx, location)
 		if err != nil {
 			return nil, "", err
 		}
 
-		log.Printf("[INFO] Checking PATH %s\n", path)
+		tflog.Info(ctx, "checking path", map[string]interface{}{"path": path})
 		if path == "" {
 			return nil, "", fmt.Errorf("can not check a state when path is empty")
 		}
 
-		request, apiResponse, err := client.GetRequestStatus(context.Background(), path)
+		request, apiResponse, err := client.GetRequestStatus(ctx, path)
 		apiResponse.LogInfo()
 		if err != nil {
 			return nil, "", fmt.Errorf("request failed with following error: %w", err)
@@ -68,15 +68,15 @@ func resourceStateRefreshFunc(meta interface{}, location, path string) retry.Sta
 			}
 		} else {
 			if request == nil {
-				log.Printf("[DEBUG] request is nil")
+				tflog.Debug(ctx, "request is nil")
 			} else if request.Metadata == nil {
-				log.Printf("[DEBUG] request metadata is nil")
+				tflog.Debug(ctx, "request metadata is nil")
 			}
 			if request != nil && request.Metadata != nil && request.Metadata.Message != nil {
-				log.Printf("[DEBUG] request failed with following error: %s", *request.Metadata.Message)
+				tflog.Debug(ctx, "request failed", map[string]interface{}{"error": *request.Metadata.Message})
 			}
 			if apiResponse != nil {
-				log.Printf("[DEBUG] response message %s", apiResponse.Message)
+				tflog.Debug(ctx, "response message", map[string]interface{}{"message": apiResponse.Message})
 			}
 			return nil, "", RequestFailedError{fmt.Sprintf("request metadata status is nil for path %s", path)}
 		}
@@ -97,7 +97,7 @@ func WaitForStateChange(ctx context.Context, meta interface{}, d *schema.Resourc
 	if loc, err = apiResponse.SafeLocation(); err != nil {
 		return fmt.Errorf("error retrieving 'location' header: %w", err)
 	}
-	_, errState := GetStateChangeConf(meta, d, loc.String(), opTimeout).WaitForStateContext(ctx)
+	_, errState := GetStateChangeConf(ctx, meta, d, loc.String(), opTimeout).WaitForStateContext(ctx)
 	return errState
 }
 

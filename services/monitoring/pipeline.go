@@ -3,10 +3,10 @@ package monitoring
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
 
 	"github.com/cenkalti/backoff/v4"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 
@@ -18,7 +18,7 @@ import (
 
 // CreatePipeline creates a new pipeline.
 func (c *Client) CreatePipeline(ctx context.Context, createReq monitoringSDK.PipelineCreate, location string) (monitoringSDK.PipelineRead, *shared.APIResponse, error) {
-	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Monitoring, location)
+	loadedconfig.SetClientOptionsFromConfig(ctx, c, fileconfiguration.Monitoring, location)
 	pipeline, apiResponse, err := c.sdkClient.PipelinesApi.PipelinesPost(ctx).PipelineCreate(createReq).Execute()
 	apiResponse.LogInfo()
 	return pipeline, apiResponse, err
@@ -26,7 +26,7 @@ func (c *Client) CreatePipeline(ctx context.Context, createReq monitoringSDK.Pip
 
 // DeletePipeline deletes a pipeline using its ID.
 func (c *Client) DeletePipeline(ctx context.Context, pipelineID, location string) (*shared.APIResponse, error) {
-	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Monitoring, location)
+	loadedconfig.SetClientOptionsFromConfig(ctx, c, fileconfiguration.Monitoring, location)
 	apiResponse, err := c.sdkClient.PipelinesApi.PipelinesDelete(ctx, pipelineID).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
@@ -34,7 +34,7 @@ func (c *Client) DeletePipeline(ctx context.Context, pipelineID, location string
 
 // UpdatePipeline updates a pipeline using its ID.
 func (c *Client) UpdatePipeline(ctx context.Context, updateReq monitoringSDK.PipelineEnsure, pipelineID, location string) (monitoringSDK.PipelineRead, *shared.APIResponse, error) {
-	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Monitoring, location)
+	loadedconfig.SetClientOptionsFromConfig(ctx, c, fileconfiguration.Monitoring, location)
 	pipeline, apiResponse, err := c.sdkClient.PipelinesApi.PipelinesPut(ctx, pipelineID).PipelineEnsure(updateReq).Execute()
 	apiResponse.LogInfo()
 	return pipeline, apiResponse, err
@@ -42,7 +42,7 @@ func (c *Client) UpdatePipeline(ctx context.Context, updateReq monitoringSDK.Pip
 
 // GetPipelineByID retrieves a pipeline using its ID.
 func (c *Client) GetPipelineByID(ctx context.Context, pipelineID, location string) (monitoringSDK.PipelineRead, *shared.APIResponse, error) {
-	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Monitoring, location)
+	loadedconfig.SetClientOptionsFromConfig(ctx, c, fileconfiguration.Monitoring, location)
 	pipeline, apiResponse, err := c.sdkClient.PipelinesApi.PipelinesFindById(ctx, pipelineID).Execute()
 	apiResponse.LogInfo()
 	return pipeline, apiResponse, err
@@ -50,7 +50,7 @@ func (c *Client) GetPipelineByID(ctx context.Context, pipelineID, location strin
 
 // GetPipelines retrieves all pipelines from a location.
 func (c *Client) GetPipelines(ctx context.Context, location string) ([]monitoringSDK.PipelineRead, *shared.APIResponse, error) {
-	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Monitoring, location)
+	loadedconfig.SetClientOptionsFromConfig(ctx, c, fileconfiguration.Monitoring, location)
 	pipelines, apiResponse, err := c.sdkClient.PipelinesApi.PipelinesGet(ctx).Execute()
 	apiResponse.LogInfo()
 	return pipelines.Items, apiResponse, err
@@ -63,7 +63,7 @@ func (c *Client) IsPipelineReady(ctx context.Context, pipelineID, location strin
 	if err != nil {
 		return backoff.Permanent(err)
 	}
-	log.Printf("[DEBUG] Monitoring pipeline state: %s", pipeline.Metadata.Status)
+	tflog.Debug(ctx, "monitoring pipeline state", map[string]interface{}{"status": pipeline.Metadata.Status})
 
 	if strings.EqualFold(pipeline.Metadata.Status, constant.Available) {
 		return nil

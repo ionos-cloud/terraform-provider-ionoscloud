@@ -127,7 +127,7 @@ func (d *backupsDataSource) Read(ctx context.Context, req datasource.ReadRequest
 	location := data.Location.ValueString()
 	clusterID := data.ClusterID.ValueString()
 
-	client, err := d.bundle.NewPgSQLV2Client(location)
+	client, err := d.bundle.NewPgSQLV2Client(ctx, location)
 	if err != nil {
 		resp.Diagnostics.AddError("failed to create PostgreSQL v2 client", err.Error())
 		return

@@ -90,7 +90,7 @@ func testAccCheckLanIPFailoverGroupExists(n string) resource.TestCheckFunc {
 		ip := rs.Primary.Attributes["ip"]
 		location := rs.Primary.Attributes["location"]
 
-		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 		if err != nil {
 			return err
 		}
@@ -130,7 +130,7 @@ func testAccCheckLanIPFailoverDestroyCheck(s *terraform.State) error {
 		ip := rs.Primary.Attributes["ip"]
 		location := rs.Primary.Attributes["location"]
 
-		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 		if err != nil {
 			return err
 		}

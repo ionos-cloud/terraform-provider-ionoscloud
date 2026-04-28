@@ -13,7 +13,7 @@ import (
 
 // GetUsers returns the list of users for a cluster using the cluster ID and the location in which the cluster resides
 func (c *Client) GetUsers(ctx context.Context, clusterID, location string) (kafka.UserReadList, *shared.APIResponse, error) {
-	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Kafka, location)
+	loadedconfig.SetClientOptionsFromConfig(ctx, c, fileconfiguration.Kafka, location)
 	users, apiResponse, err := c.sdkClient.UsersApi.ClustersUsersGet(ctx, clusterID).Execute()
 	apiResponse.LogInfo()
 	return users, apiResponse, err
@@ -21,7 +21,7 @@ func (c *Client) GetUsers(ctx context.Context, clusterID, location string) (kafk
 
 // GetUserCredentials returns the access credentials using the cluster ID, user ID and location.
 func (c *Client) GetUserCredentialsByID(ctx context.Context, clusterID, userID, location string) (kafka.UserReadAccess, *shared.APIResponse, error) {
-	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Kafka, location)
+	loadedconfig.SetClientOptionsFromConfig(ctx, c, fileconfiguration.Kafka, location)
 	userCredentials, apiResponse, err := c.sdkClient.UsersApi.ClustersUsersAccessGet(ctx, clusterID, userID).Execute()
 	apiResponse.LogInfo()
 	return userCredentials, apiResponse, err
@@ -29,7 +29,7 @@ func (c *Client) GetUserCredentialsByID(ctx context.Context, clusterID, userID, 
 
 // GetUserCredentialsByName returns the user access credentials using the cluster ID, username and location.
 func (c *Client) GetUserCredentialsByName(ctx context.Context, clusterID, username, location string) (kafka.UserReadAccess, *shared.APIResponse, error) {
-	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Kafka, location)
+	loadedconfig.SetClientOptionsFromConfig(ctx, c, fileconfiguration.Kafka, location)
 	var userCredentials kafka.UserReadAccess
 	var temp kafka.UserRead
 

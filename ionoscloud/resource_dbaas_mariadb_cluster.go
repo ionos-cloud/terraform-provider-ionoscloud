@@ -3,11 +3,11 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
 	"time"
 
 	semversion "github.com/hashicorp/go-version"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -263,7 +263,7 @@ func mariaDBClusterImport(ctx context.Context, d *schema.ResourceData, meta inte
 		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to import MariaDB cluster with ID: %v, error: %w", clusterID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	log.Printf("[INFO] MariaDB cluster found: %+v", cluster)
+	tflog.Info(ctx, "MariaDB cluster imported", map[string]interface{}{"cluster_id": clusterID})
 
 	if err := d.Set("location", location); err != nil {
 		return nil, utils.GenerateSetError("MariaDB cluster", "location", err)
@@ -286,7 +286,7 @@ func mariaDBClusterRead(ctx context.Context, d *schema.ResourceData, meta interf
 		}
 		return diagutil.ToDiags(d, fmt.Errorf("error while fetching MariaDB cluster with ID: %v, error: %w", clusterID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
-	log.Printf("[INFO] Successfully retrieved MariaDB cluster with ID: %v, cluster info: %+v", clusterID, cluster)
+	tflog.Info(ctx, "retrieved MariaDB cluster", map[string]interface{}{"cluster_id": clusterID})
 
 	if err := client.SetMariaDBClusterData(d, cluster); err != nil {
 		return diagutil.ToDiags(d, err, nil)

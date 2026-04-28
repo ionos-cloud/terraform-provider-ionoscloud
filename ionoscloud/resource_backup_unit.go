@@ -3,11 +3,11 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -60,7 +60,7 @@ func resourceBackupUnit() *schema.Resource {
 }
 
 func resourceBackupUnitCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -86,7 +86,7 @@ func resourceBackupUnitCreate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	d.SetId(*createdBackupUnit.Id)
-	log.Printf("[INFO] Created backup unit: %s", d.Id())
+	tflog.Info(ctx, "created backup unit", map[string]interface{}{"backup_unit_id": d.Id()})
 
 	if diags := waitForUnitToBeReady(ctx, d, client); diags != nil {
 		return diags
@@ -96,7 +96,7 @@ func resourceBackupUnitCreate(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -119,19 +119,19 @@ func resourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta in
 		return diagutil.ToDiags(d, fmt.Errorf("error while fetching contract resources for backup unit: %w", cErr), &diagutil.ErrorContext{StatusCode: contractApiResponse.SafeStatusCode()})
 	}
 
-	log.Printf("[INFO] Successfully retrieved contract resource for backup unit unit %s: %+v", d.Id(), contractResources)
+	tflog.Info(ctx, "retrieved contract resource for backup unit", map[string]interface{}{"backup_unit_id": d.Id()})
 
 	if err := setBackupUnitData(d, &backupUnit, &contractResources); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
 
-	log.Printf("[INFO] Successfully retrieved backup unit %s: %+v", d.Id(), backupUnit)
+	tflog.Info(ctx, "retrieved backup unit", map[string]interface{}{"backup_unit_id": d.Id()})
 
 	return nil
 }
 
 func resourceBackupUnitUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -139,18 +139,18 @@ func resourceBackupUnitUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	request := ionoscloud.BackupUnit{}
 	request.Properties = &ionoscloud.BackupUnitProperties{}
 
-	log.Printf("[INFO] Attempting update backup unit %s", d.Id())
+	tflog.Info(ctx, "attempting backup unit update", map[string]interface{}{"backup_unit_id": d.Id()})
 	oldEmail, newEmail := d.GetChange("email")
 	emailStr := oldEmail.(string)
 	if d.HasChange("email") {
-		log.Printf("[INFO] backup unit email changed from %+v to %+v", oldEmail, newEmail)
+		tflog.Info(ctx, "backup unit email changed", map[string]interface{}{"old": oldEmail, "new": newEmail})
 		emailStr = newEmail.(string)
 	}
 	request.Properties.Email = &emailStr
 
 	if d.HasChange("password") {
 		_, newPassword := d.GetChange("password")
-		log.Printf("[INFO] backup unit password changed")
+		tflog.Info(ctx, "backup unit password changed")
 
 		newPasswordStr := newPassword.(string)
 		request.Properties.Password = &newPasswordStr
@@ -182,7 +182,7 @@ func resourceBackupUnitUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 func waitForUnitToBeReady(ctx context.Context, d *schema.ResourceData, client *ionoscloud.APIClient) diag.Diagnostics {
 	for {
-		log.Printf("[INFO] Waiting for backup unit %s to be ready...", d.Id())
+		tflog.Info(ctx, "waiting for backup unit to be ready", map[string]interface{}{"backup_unit_id": d.Id()})
 
 		backupUnitReady, rsErr := backupUnitReady(client, d, ctx)
 
@@ -191,13 +191,13 @@ func waitForUnitToBeReady(ctx context.Context, d *schema.ResourceData, client *i
 		}
 
 		if backupUnitReady {
-			log.Printf("[INFO] backup unit ready: %s", d.Id())
+			tflog.Info(ctx, "backup unit ready", map[string]interface{}{"backup_unit_id": d.Id()})
 			break
 		}
 
 		select {
 		case <-time.After(constant.SleepInterval):
-			log.Printf("[INFO] trying again ...")
+			tflog.Info(ctx, "backup unit not ready, retrying")
 		case <-ctx.Done():
 			return diagutil.ToDiags(d, fmt.Errorf("backup unit readiness check timed out! WARNING: your backup unit will still probably be created/updated "+
 				"after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"), nil)
@@ -207,7 +207,7 @@ func waitForUnitToBeReady(ctx context.Context, d *schema.ResourceData, client *i
 }
 
 func resourceBackupUnitDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -224,7 +224,7 @@ func resourceBackupUnitDelete(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	for {
-		log.Printf("[INFO] Waiting for backupUnit %s to be deleted...", d.Id())
+		tflog.Info(ctx, "waiting for backup unit to be deleted", map[string]interface{}{"backup_unit_id": d.Id()})
 
 		backupUnitDeleted, dsErr := backupUnitDeleted(client, d, ctx)
 
@@ -233,13 +233,13 @@ func resourceBackupUnitDelete(ctx context.Context, d *schema.ResourceData, meta 
 		}
 
 		if backupUnitDeleted {
-			log.Printf("[INFO] Successfully deleted backup unit: %s", d.Id())
+			tflog.Info(ctx, "successfully deleted backup unit", map[string]interface{}{"backup_unit_id": d.Id()})
 			break
 		}
 
 		select {
 		case <-time.After(constant.SleepInterval):
-			log.Printf("[INFO] trying again ...")
+			tflog.Info(ctx, "backup unit not yet deleted, retrying")
 		case <-ctx.Done():
 			return diagutil.ToDiags(d, fmt.Errorf("backup unit deletion timed out! WARNING: your backup unit will still probably be deleted "+
 				"after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"), nil)
@@ -250,7 +250,7 @@ func resourceBackupUnitDelete(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourceBackupUnitImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -268,7 +268,7 @@ func resourceBackupUnitImport(ctx context.Context, d *schema.ResourceData, meta 
 		return nil, diagutil.ToError(d, fmt.Errorf("unable to retrieve Backup Unit: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	log.Printf("[INFO] Backup Unit found: %+v", backupUnit)
+	tflog.Info(ctx, "backup unit imported", map[string]interface{}{"backup_unit_id": buId})
 
 	contractResources, apiResponse, cErr := client.ContractResourcesApi.ContractsGet(ctx).Execute()
 	logApiRequestTime(apiResponse)

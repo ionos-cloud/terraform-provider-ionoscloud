@@ -66,7 +66,7 @@ func resourceServerBootDeviceSelectionCreate(ctx context.Context, d *schema.Reso
 	serverId := d.Get("server_id").(string)
 	location := d.Get("location").(string)
 
-	ss, err := cloudapiserver.NewUnboundService(serverId, location, meta)
+	ss, err := cloudapiserver.NewUnboundService(ctx, serverId, location, meta)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -99,7 +99,7 @@ func resourceServerBootDeviceSelectionCreate(ctx context.Context, d *schema.Reso
 
 func resourceServerBootDeviceSelectionRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -129,7 +129,7 @@ func resourceServerBootDeviceSelectionUpdate(ctx context.Context, d *schema.Reso
 	serverId := d.Get("server_id").(string)
 	location := d.Get("location").(string)
 
-	ss, err := cloudapiserver.NewUnboundService(serverId, location, meta)
+	ss, err := cloudapiserver.NewUnboundService(ctx, serverId, location, meta)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -152,7 +152,7 @@ func resourceServerBootDeviceSelectionUpdate(ctx context.Context, d *schema.Reso
 
 func resourceServerBootDeviceSelectionDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}

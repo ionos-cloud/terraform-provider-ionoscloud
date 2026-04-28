@@ -3,9 +3,9 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -118,7 +118,7 @@ func resourceVpnWireguardPeerRead(ctx context.Context, d *schema.ResourceData, m
 	peer, apiResponse, err := client.GetWireguardPeerByID(ctx, gatewayID, d.Id(), location)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
-			log.Printf("[DEBUG] cannot find peer by gatewayID %s and id %s", gatewayID, d.Id())
+			tflog.Debug(ctx, "wireguard peer not found", map[string]interface{}{"gateway_id": gatewayID, "peer_id": d.Id()})
 			d.SetId("")
 			return nil
 		}
@@ -157,7 +157,7 @@ func resourceVpnWireguardPeerDelete(ctx context.Context, d *schema.ResourceData,
 		return diagutil.ToDiags(d, fmt.Errorf("deleting %w", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String()})
 	}
 
-	log.Printf("[INFO] Successfully deleted WireGuard Peer: %s", d.Id())
+	tflog.Info(ctx, "successfully deleted WireGuard Peer", map[string]interface{}{"peer_id": d.Id()})
 
 	d.SetId("")
 	return nil

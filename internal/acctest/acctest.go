@@ -123,5 +123,5 @@ func NewTestBundleClientFromEnv() *bundleclient.SdkBundle {
 			SecretKey: secretKey,
 		},
 	}
-	return bundleclient.New(clientOptions, fileConfig)
+	return bundleclient.New(context.Background(), clientOptions, fileConfig)
 }

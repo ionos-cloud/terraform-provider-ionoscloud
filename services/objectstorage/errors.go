@@ -1,21 +1,22 @@
 package objectstorage
 
 import (
+	"context"
 	"encoding/xml"
 	"errors"
-	"log"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	objstorage "github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 )
 
-func isBucketNotEmptyError(err error) bool {
+func isBucketNotEmptyError(ctx context.Context, err error) bool {
 	var apiErr shared.GenericOpenAPIError
 	if errors.As(err, &apiErr) {
 		body := apiErr.Body()
 		var objStoreErr objstorage.Error
 		if err := xml.Unmarshal(body, &objStoreErr); err != nil {
-			log.Printf("failed to unmarshal error response: %v", err)
+			tflog.Warn(ctx, "failed to unmarshal error response", map[string]interface{}{"error": err.Error()})
 			return false
 		}
 
@@ -26,13 +27,13 @@ func isBucketNotEmptyError(err error) bool {
 	return false
 }
 
-func isInvalidStateBucketWithObjectLock(err error) bool {
+func isInvalidStateBucketWithObjectLock(ctx context.Context, err error) bool {
 	var apiErr shared.GenericOpenAPIError
 	if errors.As(err, &apiErr) {
 		body := apiErr.Body()
 		var objStoreErr objstorage.Error
 		if err := xml.Unmarshal(body, &objStoreErr); err != nil {
-			log.Printf("failed to unmarshal error response: %v", err)
+			tflog.Warn(ctx, "failed to unmarshal error response", map[string]interface{}{"error": err.Error()})
 			return false
 		}
 
