@@ -17,6 +17,8 @@ import (
 )
 
 // overrideClientEndpoint todo - after move to bundle, replace with generic function from fileConfig
+//
+//nolint:unparam
 func (c *Client) overrideClientEndpoint(ctx context.Context, productName, location string) {
 	// whatever is set, at the end we need to check if the IONOS_API_URL_productname is set and use override the endpoint if yes
 	defer c.changeConfigURL(ctx, location)

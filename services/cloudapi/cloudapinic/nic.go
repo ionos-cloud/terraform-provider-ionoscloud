@@ -216,6 +216,7 @@ func GetNicFromSchemaCreate(d *schema.ResourceData, path string) (ionoscloud.Nic
 	return nic, nil
 }
 
+//nolint:gocyclo
 func NicSetData(ctx context.Context, d *schema.ResourceData, nic *ionoscloud.Nic) error {
 	if nic == nil {
 		return fmt.Errorf("nic is empty")
