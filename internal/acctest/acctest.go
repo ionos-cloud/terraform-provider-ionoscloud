@@ -12,7 +12,6 @@ import (
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-mux/tf5to6server"
 	"github.com/hashicorp/terraform-plugin-mux/tf6muxserver"
 
@@ -108,7 +107,7 @@ func NewTestBundleClientFromEnv() *bundleclient.SdkBundle {
 
 	fileConfig, readFileErr := fileconfiguration.NewFromEnv()
 	if readFileErr != nil {
-		tflog.Warn(context.Background(), "error reading config file", map[string]interface{}{"error": readFileErr.Error()})
+		log.Printf("Error reading config file: %v", readFileErr)
 	}
 	clientOptions := clientoptions.TerraformClientOptions{
 		ClientOptions: shared.ClientOptions{

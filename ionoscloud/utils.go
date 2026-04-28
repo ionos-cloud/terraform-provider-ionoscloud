@@ -1,15 +1,14 @@
 package ionoscloud
 
 import (
-	"context"
 	"fmt"
+	"log"
 	"net"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
@@ -49,7 +48,7 @@ func DiffBasedOnVersion(_, old, new string, _ *schema.ResourceData) bool {
 			// this is a downgrade of the patch version that we will ignore
 			// it may happen either manually, or after a maintenance window
 			if oldPatchInt > newPatchInt {
-				tflog.Warn(context.Background(), "downgrade is not supported on k8s", map[string]interface{}{"from": oldPatchInt, "to": newPatchInt})
+				log.Printf("[WARN] Downgrade is not supported on k8s from %d to %d", oldPatchInt, newPatchInt)
 				return true
 			}
 		}
@@ -97,11 +96,9 @@ func VerifyUnavailableIPs(val interface{}, key string) (warns []string, errs []e
 
 func logApiRequestTime(resp *ionoscloud.APIResponse) {
 	if resp != nil {
-		tflog.Debug(context.Background(), "api request completed", map[string]interface{}{
-			"request_time": resp.RequestTime.String(),
-			"operation":    resp.Operation,
-			"status_code":  resp.SafeStatusCode(),
-		})
+		log.Printf("[DEBUG] api request completed Request time : %s for operation : %s",
+			resp.RequestTime, resp.Operation)
+		log.Printf("[DEBUG] response status code : %d\n", resp.SafeStatusCode())
 	}
 }
 
