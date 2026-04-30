@@ -15,7 +15,7 @@ import (
 )
 
 // GetStateChangeConf gets the default configuration for tracking a request progress
-func GetStateChangeConf(meta interface{}, d *schema.ResourceData, requestLocation string, timeoutType string) *retry.StateChangeConf {
+func GetStateChangeConf(meta any, d *schema.ResourceData, requestLocation string, timeoutType string) *retry.StateChangeConf {
 	var apiLocation string
 	if temp, ok := d.GetOk("location"); ok {
 		apiLocation = temp.(string)
@@ -35,8 +35,8 @@ func GetStateChangeConf(meta interface{}, d *schema.ResourceData, requestLocatio
 }
 
 // resourceStateRefreshFunc tracks progress of a request
-func resourceStateRefreshFunc(meta interface{}, location, path string) retry.StateRefreshFunc {
-	return func() (interface{}, string, error) {
+func resourceStateRefreshFunc(meta any, location, path string) retry.StateRefreshFunc {
+	return func() (any, string, error) {
 		client, err := meta.(SdkBundle).NewCloudAPIClient(location)
 		if err != nil {
 			return nil, "", err
@@ -86,7 +86,7 @@ func resourceStateRefreshFunc(meta interface{}, location, path string) retry.Sta
 }
 
 // WaitForStateChange tracks state change progress of a resource
-func WaitForStateChange(ctx context.Context, meta interface{}, d *schema.ResourceData, apiResponse *ionoscloud.APIResponse, opTimeout string) error {
+func WaitForStateChange(ctx context.Context, meta any, d *schema.ResourceData, apiResponse *ionoscloud.APIResponse, opTimeout string) error {
 	var err error
 	var loc *url.URL
 

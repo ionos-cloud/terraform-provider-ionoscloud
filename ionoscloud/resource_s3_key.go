@@ -54,7 +54,7 @@ func resourceS3Key() *schema.Resource {
 	}
 }
 
-func resourceS3KeyCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceS3KeyCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
 	if err != nil {
 		return diag.FromErr(err)
@@ -137,7 +137,7 @@ func createS3KeyWithRetry(ctx context.Context, d *schema.ResourceData, meta any)
 	return s3Key, apiResponse, nil
 }
 
-func resourceS3KeyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceS3KeyRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
 	if err != nil {
 		return diag.FromErr(err)
@@ -169,7 +169,7 @@ func resourceS3KeyRead(ctx context.Context, d *schema.ResourceData, meta interfa
 	return nil
 }
 
-func resourceS3KeyUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceS3KeyUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
 	if err != nil {
 		return diag.FromErr(err)
@@ -205,7 +205,7 @@ func resourceS3KeyUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 	return resourceS3KeyRead(ctx, d, meta)
 }
 
-func resourceS3KeyDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceS3KeyDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
 	if err != nil {
 		return diag.FromErr(err)
@@ -311,7 +311,7 @@ func s3Ready(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resour
 	return *rsp.Properties.Active == active, nil
 }
 
-func resourceS3KeyImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceS3KeyImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 
 	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {

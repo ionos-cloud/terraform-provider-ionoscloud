@@ -72,7 +72,7 @@ func (c *Client) SetNFSClusterData(d *schema.ResourceData, cluster sdk.ClusterRe
 	}
 
 	if cluster.Properties.Nfs != nil {
-		nfs := []map[string]interface{}{
+		nfs := []map[string]any{
 			{
 				"min_version": *cluster.Properties.Nfs.MinVersion,
 			},
@@ -82,9 +82,9 @@ func (c *Client) SetNFSClusterData(d *schema.ResourceData, cluster sdk.ClusterRe
 		}
 	}
 
-	var connections []map[string]interface{}
+	var connections []map[string]any
 	for _, connection := range cluster.Properties.Connections {
-		connectionData := map[string]interface{}{
+		connectionData := map[string]any{
 			"datacenter_id": connection.DatacenterId,
 			"lan":           connection.Lan,
 			"ip_address":    connection.IpAddress,
@@ -144,11 +144,11 @@ func setClusterConfig(d *schema.ResourceData) sdk.Cluster {
 	name := d.Get("name").(string)
 	size := int32(d.Get("size").(int))
 
-	nfsRaw := d.Get("nfs").([]interface{})
+	nfsRaw := d.Get("nfs").([]any)
 	nfs := sdk.ClusterNfs{}
 	var minVersion string
 	if len(nfsRaw) > 0 && nfsRaw[0] != nil {
-		nfsData := nfsRaw[0].(map[string]interface{})
+		nfsData := nfsRaw[0].(map[string]any)
 		minVersion = nfsData["min_version"].(string)
 
 		nfs = sdk.ClusterNfs{
@@ -156,10 +156,10 @@ func setClusterConfig(d *schema.ResourceData) sdk.Cluster {
 		}
 	}
 
-	connectionsRaw := d.Get("connections").([]interface{})
+	connectionsRaw := d.Get("connections").([]any)
 	connections := make([]sdk.ClusterConnections, 1)
 	if len(connectionsRaw) > 0 && connectionsRaw[0] != nil {
-		connData := connectionsRaw[0].(map[string]interface{})
+		connData := connectionsRaw[0].(map[string]any)
 		datacenterID := connData["datacenter_id"].(string)
 		lan := connData["lan"].(string)
 		ipAddress := connData["ip_address"].(string)

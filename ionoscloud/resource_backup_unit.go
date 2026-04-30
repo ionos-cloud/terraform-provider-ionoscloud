@@ -59,7 +59,7 @@ func resourceBackupUnit() *schema.Resource {
 	}
 }
 
-func resourceBackupUnitCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceBackupUnitCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
 	if err != nil {
 		return diag.FromErr(err)
@@ -95,7 +95,7 @@ func resourceBackupUnitCreate(ctx context.Context, d *schema.ResourceData, meta 
 	return resourceBackupUnitRead(ctx, d, meta)
 }
 
-func resourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
 	if err != nil {
 		return diag.FromErr(err)
@@ -130,7 +130,7 @@ func resourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta in
 	return nil
 }
 
-func resourceBackupUnitUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceBackupUnitUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
 	if err != nil {
 		return diag.FromErr(err)
@@ -206,7 +206,7 @@ func waitForUnitToBeReady(ctx context.Context, d *schema.ResourceData, client *i
 	return nil
 }
 
-func resourceBackupUnitDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceBackupUnitDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
 	if err != nil {
 		return diag.FromErr(err)
@@ -249,7 +249,7 @@ func resourceBackupUnitDelete(ctx context.Context, d *schema.ResourceData, meta 
 	return nil
 }
 
-func resourceBackupUnitImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceBackupUnitImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
 	if err != nil {
 		return nil, err

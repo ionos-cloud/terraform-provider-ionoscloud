@@ -94,7 +94,7 @@ func resourceNFSCluster() *schema.Resource {
 	}
 }
 
-func resourceNFSClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNFSClusterCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).NFSClient
 
 	response, apiResponse, err := client.CreateNFSCluster(ctx, d)
@@ -113,7 +113,7 @@ func resourceNFSClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 	return nil
 }
 
-func resourceNFSClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNFSClusterUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).NFSClient
 
 	response, apiResponse, err := client.UpdateNFSCluster(ctx, d)
@@ -130,7 +130,7 @@ func resourceNFSClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	return nil
 }
 
-func resourceNFSClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNFSClusterDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).NFSClient
 	clusterID := d.Id()
 	apiResponse, err := client.DeleteNFSCluster(ctx, d)
@@ -144,7 +144,7 @@ func resourceNFSClusterDelete(ctx context.Context, d *schema.ResourceData, meta 
 	return nil
 }
 
-func resourceNFSClusterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceNFSClusterImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	client := meta.(bundleclient.SdkBundle).NFSClient
 	parts := strings.Split(d.Id(), ":")
 	if len(parts) != 2 {
@@ -172,7 +172,7 @@ func resourceNFSClusterImport(ctx context.Context, d *schema.ResourceData, meta 
 	return []*schema.ResourceData{d}, nil
 }
 
-func resourceNFSClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNFSClusterRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).NFSClient
 	cluster, err := findCluster(ctx, d, d.Id(), d.Get("location").(string), client)
 	if err != nil {

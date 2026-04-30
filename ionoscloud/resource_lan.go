@@ -95,7 +95,7 @@ func resourceLan() *schema.Resource {
 	}
 }
 
-func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
@@ -178,7 +178,7 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 	return resourceLanRead(ctx, d, meta)
 }
 
-func resourceLanRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceLanRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
@@ -209,7 +209,7 @@ func resourceLanRead(ctx context.Context, d *schema.ResourceData, meta interface
 	return nil
 }
 
-func resourceLanUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceLanUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
@@ -232,8 +232,7 @@ func resourceLanUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 		if newPCC != nil && newPCC.(string) != "" {
 			log.Printf("[INFO] Setting PCC for LAN %s to %s...", d.Id(), newPCC.(string))
-			pcc := newPCC.(string)
-			properties.Pcc = &pcc
+			properties.Pcc = new(newPCC.(string))
 		}
 	}
 
@@ -241,8 +240,7 @@ func resourceLanUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 		_, newIpv6 := d.GetChange("ipv6_cidr_block")
 		if newIpv6 != nil && newIpv6.(string) != "" {
 			log.Printf("[INFO] Setting ipv6CidrBlock for LAN %s to %s...", d.Id(), newIpv6.(string))
-			ipv6 := newIpv6.(string)
-			properties.Ipv6CidrBlock = &ipv6
+			properties.Ipv6CidrBlock = new(newIpv6.(string))
 		} else {
 			properties.SetIpv6CidrBlockNil()
 		}
@@ -266,7 +264,7 @@ func resourceLanUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 	return resourceLanRead(ctx, d, meta)
 }
 
-func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	dcId := d.Get("datacenter_id").(string)
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
@@ -314,7 +312,7 @@ func isDeleteProtected(apiResponse *ionoscloud.APIResponse, errMessage string) b
 	return false
 }
 
-func resourceLanImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceLanImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	importID := d.Id()
 
 	location, parts := splitImportID(importID, "/")

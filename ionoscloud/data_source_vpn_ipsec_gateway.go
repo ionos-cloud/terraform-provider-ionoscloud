@@ -107,7 +107,7 @@ func dataSourceVpnIPSecGateway() *schema.Resource {
 	}
 }
 
-func dataSourceVpnIPSecGatewayRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceVpnIPSecGatewayRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).VPNClient
 	idValue, idOk := d.GetOk("id")
 	nameValue, nameOk := d.GetOk("name")

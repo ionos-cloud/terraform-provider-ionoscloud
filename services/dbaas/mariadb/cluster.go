@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	mariadb "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb/v2"
-	shared "github.com/ionos-cloud/sdk-go-bundle/shared"
+	"github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
@@ -151,38 +151,32 @@ func GetMariaDBClusterDataUpdate(d *schema.ResourceData) (*mariadb.PatchClusterR
 
 	if d.HasChange("mariadb_version") {
 		_, newValue := d.GetChange("mariadb_version")
-		newVersion := newValue.(string)
-		cluster.Properties.MariadbVersion = (*mariadb.MariadbVersion)(&newVersion)
+		cluster.Properties.MariadbVersion = (*mariadb.MariadbVersion)(new(newValue.(string)))
 	}
 
 	if d.HasChange("instances") {
 		_, n := d.GetChange("instances")
-		nInt := int32(n.(int))
-		cluster.Properties.Instances = &nInt
+		cluster.Properties.Instances = new(int32(n.(int)))
 	}
 
 	if d.HasChange("cores") {
 		_, n := d.GetChange("cores")
-		nInt := int32(n.(int))
-		cluster.Properties.Cores = &nInt
+		cluster.Properties.Cores = new(int32(n.(int)))
 	}
 
 	if d.HasChange("ram") {
 		_, n := d.GetChange("ram")
-		nInt := int32(n.(int))
-		cluster.Properties.Ram = &nInt
+		cluster.Properties.Ram = new(int32(n.(int)))
 	}
 
 	if d.HasChange("storage_size") {
 		_, n := d.GetChange("storage_size")
-		nInt := int32(n.(int))
-		cluster.Properties.StorageSize = &nInt
+		cluster.Properties.StorageSize = new(int32(n.(int)))
 	}
 
 	if d.HasChange("display_name") {
 		_, n := d.GetChange("display_name")
-		nString := n.(string)
-		cluster.Properties.DisplayName = &nString
+		cluster.Properties.DisplayName = new(n.(string))
 	}
 
 	if d.HasChange("maintenance_window") {
@@ -197,7 +191,7 @@ func GetMariaClusterConnectionsData(d *schema.ResourceData) []mariadb.Connection
 	connections := make([]mariadb.Connection, 0)
 
 	if connectionsIntf, ok := d.GetOk("connections"); ok {
-		connectionsValues := connectionsIntf.([]interface{})
+		connectionsValues := connectionsIntf.([]any)
 		for connectionIdx := range connectionsValues {
 			connection := mariadb.Connection{}
 
@@ -310,7 +304,7 @@ func (c *Client) SetMariaDBClusterData(d *schema.ResourceData, cluster mariadb.C
 	}
 
 	if len(cluster.Properties.Connections) > 0 {
-		var connections []interface{}
+		var connections []any
 		for _, connection := range cluster.Properties.Connections {
 			connectionEntry := c.SetConnectionProperties(connection)
 			connections = append(connections, connectionEntry)
@@ -327,7 +321,7 @@ func (c *Client) SetMariaDBClusterData(d *schema.ResourceData, cluster mariadb.C
 	}
 
 	if cluster.Properties.MaintenanceWindow != nil {
-		var maintenanceWindow []interface{}
+		var maintenanceWindow []any
 		maintenanceWindowEntry := c.SetMaintenanceWindowProperties(*cluster.Properties.MaintenanceWindow)
 		maintenanceWindow = append(maintenanceWindow, maintenanceWindowEntry)
 		if err := d.Set("maintenance_window", maintenanceWindow); err != nil {
@@ -353,8 +347,8 @@ func (c *Client) SetMariaDBClusterData(d *schema.ResourceData, cluster mariadb.C
 	return nil
 }
 
-func (c *Client) SetConnectionProperties(connection mariadb.Connection) map[string]interface{} {
-	connectionMap := map[string]interface{}{}
+func (c *Client) SetConnectionProperties(connection mariadb.Connection) map[string]any {
+	connectionMap := map[string]any{}
 
 	utils.SetPropWithNilCheck(connectionMap, "datacenter_id", connection.DatacenterId)
 	utils.SetPropWithNilCheck(connectionMap, "lan_id", connection.LanId)
@@ -363,8 +357,8 @@ func (c *Client) SetConnectionProperties(connection mariadb.Connection) map[stri
 	return connectionMap
 }
 
-func (c *Client) SetMaintenanceWindowProperties(maintenanceWindow mariadb.MaintenanceWindow) map[string]interface{} {
-	maintenance := map[string]interface{}{}
+func (c *Client) SetMaintenanceWindowProperties(maintenanceWindow mariadb.MaintenanceWindow) map[string]any {
+	maintenance := map[string]any{}
 
 	utils.SetPropWithNilCheck(maintenance, "time", maintenanceWindow.Time)
 	utils.SetPropWithNilCheck(maintenance, "day_of_the_week", maintenanceWindow.DayOfTheWeek)

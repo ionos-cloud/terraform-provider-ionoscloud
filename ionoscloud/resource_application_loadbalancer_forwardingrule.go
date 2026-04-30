@@ -182,7 +182,7 @@ func resourceApplicationLoadBalancerForwardingRule() *schema.Resource {
 	}
 }
 
-func resourceApplicationLoadBalancerForwardingRuleCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceApplicationLoadBalancerForwardingRuleCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
@@ -264,7 +264,7 @@ func resourceApplicationLoadBalancerForwardingRuleCreate(ctx context.Context, d 
 	return resourceApplicationLoadBalancerForwardingRuleRead(ctx, d, meta)
 }
 
-func resourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
@@ -294,7 +294,7 @@ func resourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d *s
 	return nil
 }
 
-func resourceApplicationLoadBalancerForwardingRuleUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceApplicationLoadBalancerForwardingRuleUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
@@ -375,7 +375,7 @@ func resourceApplicationLoadBalancerForwardingRuleUpdate(ctx context.Context, d 
 	return resourceApplicationLoadBalancerForwardingRuleRead(ctx, d, meta)
 }
 
-func resourceApplicationLoadBalancerForwardingRuleDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceApplicationLoadBalancerForwardingRuleDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
@@ -403,7 +403,7 @@ func resourceApplicationLoadBalancerForwardingRuleDelete(ctx context.Context, d 
 	return nil
 }
 
-func resourceApplicationLoadBalancerForwardingRuleImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceApplicationLoadBalancerForwardingRuleImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	importID := d.Id()
 
 	location, parts := splitImportID(importID, "/")
@@ -504,11 +504,11 @@ func setApplicationLoadBalancerForwardingRuleData(d *schema.ResourceData, applic
 			}
 		}
 
-		httpRules := make([]interface{}, 0)
+		httpRules := make([]any, 0)
 		if applicationLoadBalancerForwardingRule.Properties.HttpRules != nil && len(*applicationLoadBalancerForwardingRule.Properties.HttpRules) > 0 {
-			httpRules = make([]interface{}, 0)
+			httpRules = make([]any, 0)
 			for _, rule := range *applicationLoadBalancerForwardingRule.Properties.HttpRules {
-				ruleEntry := make(map[string]interface{})
+				ruleEntry := make(map[string]any)
 
 				if rule.Name != nil {
 					ruleEntry["name"] = *rule.Name
@@ -543,9 +543,9 @@ func setApplicationLoadBalancerForwardingRuleData(d *schema.ResourceData, applic
 				}
 
 				if rule.Conditions != nil {
-					conditions := make([]interface{}, 0)
+					conditions := make([]any, 0)
 					for _, condition := range *rule.Conditions {
-						conditionEntry := make(map[string]interface{})
+						conditionEntry := make(map[string]any)
 
 						if condition.Type != nil {
 							conditionEntry["type"] = *condition.Type
@@ -589,7 +589,7 @@ func setApplicationLoadBalancerForwardingRuleData(d *schema.ResourceData, applic
 func getAlbHttpRulesData(d *schema.ResourceData) (*[]ionoscloud.ApplicationLoadBalancerHttpRule, error) {
 	var httpRules []ionoscloud.ApplicationLoadBalancerHttpRule
 
-	httpRulesVal := d.Get("http_rules").([]interface{})
+	httpRulesVal := d.Get("http_rules").([]any)
 
 	for httpRuleIndex := range httpRulesVal {
 
@@ -636,11 +636,11 @@ func getAlbHttpRulesData(d *schema.ResourceData) (*[]ionoscloud.ApplicationLoadB
 		}
 
 		if conditionsVal, conditionsOk := d.GetOk(fmt.Sprintf("http_rules.%d.conditions", httpRuleIndex)); conditionsOk {
-			if conditionsVal.([]interface{}) != nil {
+			if conditionsVal.([]any) != nil {
 
 				var conditions []ionoscloud.ApplicationLoadBalancerHttpRuleCondition
 
-				for conditionIndex := range conditionsVal.([]interface{}) {
+				for conditionIndex := range conditionsVal.([]any) {
 
 					condition := ionoscloud.ApplicationLoadBalancerHttpRuleCondition{}
 

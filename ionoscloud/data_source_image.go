@@ -126,7 +126,7 @@ func dataSourceImage() *schema.Resource {
 	}
 }
 
-func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	nameValue, nameOk := d.GetOk("name")
 	imageTypeValue, imageTypeOk := d.GetOk("type")
 	locationValue, locationOk := d.GetOk("location")

@@ -352,10 +352,10 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 		}
 	}
 
-	var volumes []interface{}
+	var volumes []any
 	if server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil && len(*server.Entities.Volumes.Items) > 0 {
 		for _, volume := range *server.Entities.Volumes.Items {
-			entry := make(map[string]interface{})
+			entry := make(map[string]any)
 
 			entry["id"] = ionoscloud.ToValueDefault(volume.Id)
 			entry["name"] = ionoscloud.ToValueDefault(volume.Properties.Name)
@@ -367,7 +367,7 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 			entry["expose_serial"] = boolOrDefault(volume.Properties.ExposeSerial, false)
 
 			if volume.Properties.SshKeys != nil && len(*volume.Properties.SshKeys) > 0 {
-				var sshKeys []interface{}
+				var sshKeys []any
 				for _, sshKey := range *volume.Properties.SshKeys {
 					sshKeys = append(sshKeys, sshKey)
 				}
@@ -398,17 +398,17 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 		}
 	}
 
-	var nics []interface{}
+	var nics []any
 	if server.Entities.Nics != nil && server.Entities.Nics.Items != nil && len(*server.Entities.Nics.Items) > 0 {
 		for _, nic := range *server.Entities.Nics.Items {
-			entry := make(map[string]interface{})
+			entry := make(map[string]any)
 
 			entry["id"] = ionoscloud.ToValueDefault(nic.Id)
 			entry["name"] = ionoscloud.ToValueDefault(nic.Properties.Name)
 			entry["mac"] = ionoscloud.ToValueDefault(nic.Properties.Mac)
 
 			if nic.Properties.Ips != nil {
-				var ips []interface{}
+				var ips []any
 				for _, ip := range *nic.Properties.Ips {
 					ips = append(ips, ip)
 				}
@@ -416,7 +416,7 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 			}
 
 			if nic.Properties.Ipv6Ips != nil {
-				var ipv6Ips []interface{}
+				var ipv6Ips []any
 				for _, ip := range *nic.Properties.Ipv6Ips {
 					ipv6Ips = append(ipv6Ips, ip)
 				}
@@ -433,9 +433,9 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 			entry["pci_slot"] = int32OrDefault(nic.Properties.PciSlot, 0)
 
 			if nic.Entities != nil && nic.Entities.Firewallrules != nil && nic.Entities.Firewallrules.Items != nil {
-				var firewallRules []interface{}
+				var firewallRules []any
 				for _, rule := range *nic.Entities.Firewallrules.Items {
-					ruleEntry := make(map[string]interface{})
+					ruleEntry := make(map[string]any)
 
 					ruleEntry["id"] = ionoscloud.ToValueDefault(rule.Id)
 					if rule.Properties != nil {
@@ -489,7 +489,7 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 	return nil
 }
 
-func dataSourceServerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceServerRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {

@@ -128,7 +128,7 @@ func dataSourceDBaaSMariaDBCluster() *schema.Resource {
 	}
 }
 
-func dataSourceMariaDBClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceMariaDBClusterRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).MariaDBClient
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("display_name")

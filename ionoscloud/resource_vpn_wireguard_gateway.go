@@ -144,7 +144,7 @@ func resourceVpnWireguardGateway() *schema.Resource {
 	}
 }
 
-func resourceVpnWireguardGatewayCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVpnWireguardGatewayCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).VPNClient
 
 	gateway, apiResponse, err := client.CreateWireguardGateway(ctx, d)
@@ -159,7 +159,7 @@ func resourceVpnWireguardGatewayCreate(ctx context.Context, d *schema.ResourceDa
 	return resourceVpnWireguardGatewayRead(ctx, d, meta)
 }
 
-func resourceVpnWireguardGatewayRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVpnWireguardGatewayRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).VPNClient
 	location := d.Get("location").(string)
 	wireguard, apiResponse, err := client.GetWireguardGatewayByID(ctx, d.Id(), location)
@@ -168,7 +168,7 @@ func resourceVpnWireguardGatewayRead(ctx context.Context, d *schema.ResourceData
 	}
 	return diagutil.ToDiags(d, vpn.SetWireguardGWData(d, wireguard), nil)
 }
-func resourceVpnWireguardGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVpnWireguardGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).VPNClient
 
 	wireguard, apiResponse, err := client.UpdateWireguardGateway(ctx, d.Id(), d)
@@ -183,7 +183,7 @@ func resourceVpnWireguardGatewayUpdate(ctx context.Context, d *schema.ResourceDa
 	return diagutil.ToDiags(d, vpn.SetWireguardGWData(d, wireguard), nil)
 }
 
-func resourceVpnWireguardGatewayDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVpnWireguardGatewayDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).VPNClient
 	location := d.Get("location").(string)
 	apiResponse, err := client.DeleteWireguardGateway(ctx, d.Id(), location)
@@ -208,7 +208,7 @@ func resourceVpnWireguardGatewayDelete(ctx context.Context, d *schema.ResourceDa
 	return nil
 }
 
-func resourceVpnWireguardGatewayImport(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+func resourceVpnWireguardGatewayImport(ctx context.Context, d *schema.ResourceData, m any) ([]*schema.ResourceData, error) {
 	client := m.(bundleclient.SdkBundle).VPNClient
 	parts := strings.Split(d.Id(), ":")
 	if len(parts) != 2 {

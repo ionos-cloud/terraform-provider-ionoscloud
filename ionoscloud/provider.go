@@ -226,7 +226,7 @@ func Provider() *schema.Provider {
 		},
 	}
 
-	provider.ConfigureContextFunc = func(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
+	provider.ConfigureContextFunc = func(ctx context.Context, d *schema.ResourceData) (any, diag.Diagnostics) {
 
 		terraformVersion := provider.TerraformVersion
 
@@ -244,7 +244,7 @@ func Provider() *schema.Provider {
 	return provider
 }
 
-func providerConfigure(d *schema.ResourceData, terraformVersion string) (interface{}, diag.Diagnostics) {
+func providerConfigure(d *schema.ResourceData, terraformVersion string) (any, diag.Diagnostics) {
 	usernameItf, usernameOk := d.GetOk("username")
 	passwordItf, passwordOk := d.GetOk("password")
 	tokenItf, tokenOk := d.GetOk("token")

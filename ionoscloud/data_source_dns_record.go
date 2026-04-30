@@ -75,7 +75,7 @@ func dataSourceDNSRecord() *schema.Resource {
 	}
 }
 
-func dataSourceRecordRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceRecordRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).DNSClient
 	partialMatch := d.Get("partial_match").(bool)
 	zoneId := d.Get("zone_id").(string)

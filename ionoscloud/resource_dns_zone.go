@@ -51,7 +51,7 @@ func resourceDNSZone() *schema.Resource {
 	}
 }
 
-func zoneCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func zoneCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).DNSClient
 	zoneResponse, apiResponse, err := client.CreateZone(ctx, d)
 
@@ -67,7 +67,7 @@ func zoneCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) d
 	return zoneRead(ctx, d, meta)
 }
 
-func zoneRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func zoneRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).DNSClient
 	zoneId := d.Id()
 	zone, apiResponse, err := client.GetZoneById(ctx, zoneId)
@@ -89,7 +89,7 @@ func zoneRead(ctx context.Context, d *schema.ResourceData, meta interface{}) dia
 	return nil
 }
 
-func zoneUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func zoneUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).DNSClient
 	zoneId := d.Id()
 
@@ -105,7 +105,7 @@ func zoneUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) d
 	return nil
 }
 
-func zoneDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func zoneDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).DNSClient
 	zoneId := d.Id()
 
@@ -125,7 +125,7 @@ func zoneDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) d
 	return nil
 }
 
-func zoneImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func zoneImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	client := meta.(bundleclient.SdkBundle).DNSClient
 	zoneId := d.Id()
 

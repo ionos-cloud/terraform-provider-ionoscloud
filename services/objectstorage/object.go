@@ -593,9 +593,9 @@ func getMetadataFromAPIResponse(ctx context.Context, apiResponse *shared.APIResp
 func getMetadataMapFromHeaders(apiResponse *shared.APIResponse, prefix string) map[string]string {
 	metaHeaders := map[string]string{}
 	for name, values := range apiResponse.Header {
-		if strings.HasPrefix(strings.ToLower(name), strings.ToLower(prefix)) {
+		if after, ok := strings.CutPrefix(strings.ToLower(name), strings.ToLower(prefix)); ok {
 			if len(values) > 0 {
-				metaKey := strings.TrimPrefix(strings.ToLower(name), strings.ToLower(prefix))
+				metaKey := after
 				metaHeaders[metaKey] = values[0]
 			}
 		}
@@ -621,7 +621,7 @@ func (c *Client) getContentType(ctx context.Context, data *objectFindRequest) (s
 	return apiResponse.Header.Get("Content-Type"), nil
 }
 
-func deleteObjectByModel(ctx context.Context, client *objstorage.APIClient, data *ObjectResourceModel) (map[string]interface{}, *shared.APIResponse, error) {
+func deleteObjectByModel(ctx context.Context, client *objstorage.APIClient, data *ObjectResourceModel) (map[string]any, *shared.APIResponse, error) {
 	req := client.ObjectsApi.DeleteObject(ctx, data.Bucket.ValueString(), data.Key.ValueString())
 	if !data.VersionID.IsNull() {
 		req = req.VersionId(data.VersionID.ValueString())

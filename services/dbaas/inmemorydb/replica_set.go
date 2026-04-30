@@ -236,7 +236,7 @@ func (c *Client) SetReplicaSetData(d *schema.ResourceData, replicaSet inmemorydb
 		return utils.GenerateSetError(resourceName, "dns_name", err)
 	}
 
-	var resources []interface{}
+	var resources []any
 	resourceEntry := setResourceProperties(replicaSet.Properties.Resources)
 	resources = append(resources, resourceEntry)
 	if err := d.Set("resources", resources); err != nil {
@@ -244,7 +244,7 @@ func (c *Client) SetReplicaSetData(d *schema.ResourceData, replicaSet inmemorydb
 	}
 
 	if replicaSet.Properties.Connections != nil {
-		var connections []interface{}
+		var connections []any
 		for _, connection := range replicaSet.Properties.Connections {
 			connectionEntry := setConnectionProperties(connection)
 			connections = append(connections, connectionEntry)
@@ -255,7 +255,7 @@ func (c *Client) SetReplicaSetData(d *schema.ResourceData, replicaSet inmemorydb
 	}
 
 	if replicaSet.Properties.MaintenanceWindow != nil {
-		var maintenanceWindow []interface{}
+		var maintenanceWindow []any
 		maintenanceWindowEntry := setMaintenanceWindowProperties(*replicaSet.Properties.MaintenanceWindow)
 		maintenanceWindow = append(maintenanceWindow, maintenanceWindowEntry)
 		if err := d.Set("maintenance_window", maintenanceWindow); err != nil {
@@ -275,8 +275,8 @@ func (c *Client) SetSnapshotData(d *schema.ResourceData, snapshot inmemorydb.Sna
 
 	d.SetId(snapshot.Id)
 
-	var metadata []interface{}
-	metadataEntry := make(map[string]interface{})
+	var metadata []any
+	metadataEntry := make(map[string]any)
 	if snapshot.Metadata.CreatedDate != nil {
 		metadataEntry["created_date"] = (snapshot.Metadata.CreatedDate).Time.Format(constant.DatetimeZLayout)
 	}
@@ -381,8 +381,8 @@ func getMaintenanceWindow(d *schema.ResourceData) *inmemorydb.MaintenanceWindow 
 	return &maintenanceWindow
 }
 
-func setConnectionProperties(connection inmemorydb.Connection) map[string]interface{} {
-	connectionMap := make(map[string]interface{})
+func setConnectionProperties(connection inmemorydb.Connection) map[string]any {
+	connectionMap := make(map[string]any)
 
 	utils.SetPropWithNilCheck(connectionMap, "datacenter_id", connection.DatacenterId)
 	utils.SetPropWithNilCheck(connectionMap, "lan_id", connection.LanId)
@@ -391,8 +391,8 @@ func setConnectionProperties(connection inmemorydb.Connection) map[string]interf
 	return connectionMap
 }
 
-func setResourceProperties(resource inmemorydb.Resources) map[string]interface{} {
-	resourceMap := make(map[string]interface{})
+func setResourceProperties(resource inmemorydb.Resources) map[string]any {
+	resourceMap := make(map[string]any)
 
 	utils.SetPropWithNilCheck(resourceMap, "cores", resource.Cores)
 	utils.SetPropWithNilCheck(resourceMap, "ram", resource.Ram)
@@ -401,8 +401,8 @@ func setResourceProperties(resource inmemorydb.Resources) map[string]interface{}
 	return resourceMap
 }
 
-func setMaintenanceWindowProperties(maintenanceWindow inmemorydb.MaintenanceWindow) map[string]interface{} {
-	maintenanceWindowMap := make(map[string]interface{})
+func setMaintenanceWindowProperties(maintenanceWindow inmemorydb.MaintenanceWindow) map[string]any {
+	maintenanceWindowMap := make(map[string]any)
 
 	utils.SetPropWithNilCheck(maintenanceWindowMap, "day_of_the_week", maintenanceWindow.DayOfTheWeek)
 	utils.SetPropWithNilCheck(maintenanceWindowMap, "time", maintenanceWindow.Time)

@@ -76,7 +76,7 @@ func resourceCertificateManagerProvider() *schema.Resource {
 	}
 }
 
-func providerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func providerCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).CertManagerClient
 	location := d.Get("location").(string)
 
@@ -98,7 +98,7 @@ func providerCreate(ctx context.Context, d *schema.ResourceData, meta interface{
 	return nil
 }
 
-func providerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func providerRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).CertManagerClient
 	providerID := d.Id()
 	location := d.Get("location").(string)
@@ -117,7 +117,7 @@ func providerRead(ctx context.Context, d *schema.ResourceData, meta interface{})
 	return nil
 }
 
-func providerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func providerUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).CertManagerClient
 	providerID := d.Id()
 	location := d.Get("location").(string)
@@ -136,7 +136,7 @@ func providerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{
 	return nil
 }
 
-func providerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func providerDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).CertManagerClient
 	providerID := d.Id()
 	location := d.Get("location").(string)
@@ -155,7 +155,7 @@ func providerDelete(ctx context.Context, d *schema.ResourceData, meta interface{
 	return nil
 }
 
-func providerImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func providerImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	client := meta.(bundleclient.SdkBundle).CertManagerClient
 	parts := strings.Split(d.Id(), ":")
 	if len(parts) != 2 {

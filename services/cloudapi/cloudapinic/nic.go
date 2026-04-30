@@ -19,7 +19,7 @@ import (
 
 type Service struct {
 	Client *ionoscloud.APIClient
-	Meta   interface{}
+	Meta   any
 	D      *schema.ResourceData
 }
 
@@ -90,7 +90,7 @@ func (fs *Service) Update(ctx context.Context, datacenterID, serverID, ID string
 }
 
 // DecodeTo - receives old and new values as slice of interfaces from schema, decodes and returns nic properties
-func DecodeTo(oldValues, newValues []interface{}) ([]ionoscloud.Nic, []ionoscloud.Nic, error) {
+func DecodeTo(oldValues, newValues []any) ([]ionoscloud.Nic, []ionoscloud.Nic, error) {
 	oldNicProps := make([]ionoscloud.Nic, len(oldValues))
 	newNicProps := make([]ionoscloud.Nic, len(newValues))
 	err := utils.DecodeInterfaceToStruct(newValues, newNicProps)
@@ -104,8 +104,8 @@ func DecodeTo(oldValues, newValues []interface{}) ([]ionoscloud.Nic, []ionosclou
 	return oldNicProps, newNicProps, nil
 }
 
-func SetNetworkProperties(nic ionoscloud.Nic) map[string]interface{} {
-	network := map[string]interface{}{}
+func SetNetworkProperties(nic ionoscloud.Nic) map[string]any {
+	network := map[string]any{}
 	if nic.Properties != nil {
 		utils.SetPropWithNilCheck(network, "dhcp", nic.Properties.Dhcp)
 		utils.SetPropWithNilCheck(network, "dhcpv6", nic.Properties.Dhcpv6)
@@ -140,29 +140,23 @@ func GetNicFromSchema(d *schema.ResourceData, path string) (ionoscloud.Nic, erro
 		Properties: &ionoscloud.NicProperties{},
 	}
 
-	lanInt := int32(d.Get(path + "lan").(int))
-	nic.Properties.Lan = &lanInt
+	nic.Properties.Lan = new(int32(d.Get(path + "lan").(int)))
 
 	if v, ok := d.GetOk(path + "name"); ok {
-		vStr := v.(string)
-		nic.Properties.Name = &vStr
+		nic.Properties.Name = new(v.(string))
 	}
 
-	dhcp := d.Get(path + "dhcp").(bool)
 	if dhcpv6, ok := d.GetOkExists(path + "dhcpv6"); ok {
-		dhcpv6 := dhcpv6.(bool)
-		nic.Properties.Dhcpv6 = &dhcpv6
+		nic.Properties.Dhcpv6 = new(dhcpv6.(bool))
 	} else {
 		nic.Properties.SetDhcpv6Nil()
 	}
 
-	fwActive := d.Get(path + "firewall_active").(bool)
-	nic.Properties.Dhcp = &dhcp
-	nic.Properties.FirewallActive = &fwActive
+	nic.Properties.Dhcp = new(d.Get(path + "dhcp").(bool))
+	nic.Properties.FirewallActive = new(d.Get(path + "firewall_active").(bool))
 
 	if _, ok := d.GetOk(path + "firewall_type"); ok {
-		raw := d.Get(path + "firewall_type").(string)
-		nic.Properties.FirewallType = &raw
+		nic.Properties.FirewallType = new(d.Get(path + "firewall_type").(string))
 	}
 
 	ips, err := GetNicIPsFromSchema(d, path+"ips")
@@ -182,8 +176,7 @@ func GetNicFromSchema(d *schema.ResourceData, path string) (ionoscloud.Nic, erro
 	}
 
 	if v, ok := d.GetOk(path + "ipv6_cidr_block"); ok {
-		ipv6Block := v.(string)
-		nic.Properties.Ipv6CidrBlock = &ipv6Block
+		nic.Properties.Ipv6CidrBlock = new(v.(string))
 	}
 	if flowLogs, ok := d.GetOk("flowlog"); ok {
 		nic.Entities = &ionoscloud.NicEntities{
@@ -209,8 +202,7 @@ func GetNicFromSchemaCreate(d *schema.ResourceData, path string) (ionoscloud.Nic
 		return nic, err
 	}
 	if v, ok := d.GetOk(path + "mac"); ok {
-		vStr := v.(string)
-		nic.Properties.Mac = &vStr
+		nic.Properties.Mac = new(v.(string))
 	}
 
 	return nic, nil

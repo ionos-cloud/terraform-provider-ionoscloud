@@ -77,7 +77,7 @@ func dataSourceUser() *schema.Resource {
 	}
 }
 
-func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
 	if err != nil {
 		return diag.FromErr(err)
@@ -147,11 +147,11 @@ func setUsersForGroup(ctx context.Context, d *schema.ResourceData, user *ionoscl
 		return fmt.Errorf("an error occurred while executing UmUsersGroupsGet %s (%w)", *user.Id, err)
 	}
 
-	groupEntries := make([]interface{}, 0)
+	groupEntries := make([]any, 0)
 	if groups.Items != nil && len(*groups.Items) > 0 {
-		groupEntries = make([]interface{}, len(*groups.Items))
+		groupEntries = make([]any, len(*groups.Items))
 		for groupIndex, group := range *groups.Items {
-			groupEntry := make(map[string]interface{})
+			groupEntry := make(map[string]any)
 
 			if group.Id != nil {
 				groupEntry["id"] = *group.Id

@@ -14,8 +14,8 @@ import (
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
-func SetServerVolumeProperties(volume ionoscloud.Volume) map[string]interface{} {
-	volumeMap := map[string]interface{}{}
+func SetServerVolumeProperties(volume ionoscloud.Volume) map[string]any {
+	volumeMap := map[string]any{}
 	if volume.Properties != nil {
 		utils.SetPropWithNilCheck(volumeMap, "name", volume.Properties.Name)
 		utils.SetPropWithNilCheck(volumeMap, "disk_type", volume.Properties.Type)
@@ -39,7 +39,7 @@ func SetServerVolumeProperties(volume ionoscloud.Volume) map[string]interface{} 
 	return volumeMap
 }
 
-func ResourceCommonServerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func ResourceCommonServerDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {

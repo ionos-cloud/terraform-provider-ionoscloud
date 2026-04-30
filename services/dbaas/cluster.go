@@ -214,8 +214,7 @@ func GetPgSqlClusterDataCreate(d *schema.ResourceData) (*psql.CreateClusterReque
 	}
 
 	if backupLocation, ok := d.GetOk("backup_location"); ok {
-		backupLocation := backupLocation.(string)
-		dbaasCluster.Properties.BackupLocation = &backupLocation
+		dbaasCluster.Properties.BackupLocation = new(backupLocation.(string))
 	}
 
 	if displayName, ok := d.GetOk("display_name"); ok {
@@ -252,8 +251,7 @@ func SetMongoClusterCreateProperties(d *schema.ResourceData) (*mongo.CreateClust
 	}
 
 	if templateId, ok := d.GetOk("template_id"); ok {
-		templateId := templateId.(string)
-		mongoCluster.Properties.TemplateID = &templateId
+		mongoCluster.Properties.TemplateID = new(templateId.(string))
 	}
 
 	if mongoVersion, ok := d.GetOk("mongodb_version"); ok {
@@ -289,13 +287,11 @@ func SetMongoClusterCreateProperties(d *schema.ResourceData) (*mongo.CreateClust
 
 	// enterprise settings below
 	if clusterType, ok := d.GetOk("type"); ok {
-		clusterType := clusterType.(string)
-		mongoCluster.Properties.Type = &clusterType
+		mongoCluster.Properties.Type = new(clusterType.(string))
 	}
 
 	if shards, ok := d.GetOk("shards"); ok {
-		shards := (int32)(shards.(int))
-		mongoCluster.Properties.Shards = &shards
+		mongoCluster.Properties.Shards = new((int32)(shards.(int)))
 	}
 
 	if _, ok := d.GetOk("bi_connector"); ok {
@@ -304,30 +300,25 @@ func SetMongoClusterCreateProperties(d *schema.ResourceData) (*mongo.CreateClust
 
 	if ram, ok := d.GetOk("ram"); ok {
 		val := ram.(int)
-		ram := (int32)(val)
-		mongoCluster.Properties.Ram = &ram
+		mongoCluster.Properties.Ram = new((int32)(val))
 	}
 
 	if storageSize, ok := d.GetOk("storage_size"); ok {
 		val := storageSize.(int)
-		storageSize := (int32)(val)
-		mongoCluster.Properties.StorageSize = &storageSize
+		mongoCluster.Properties.StorageSize = new((int32)(val))
 	}
 
 	if storageType, ok := d.GetOk("storage_type"); ok {
-		storageType := mongo.StorageType(storageType.(string))
-		mongoCluster.Properties.StorageType = &storageType
+		mongoCluster.Properties.StorageType = new(mongo.StorageType(storageType.(string)))
 	}
 
 	if cores, ok := d.GetOk("cores"); ok {
 		val := cores.(int)
-		cores := (int32)(val)
-		mongoCluster.Properties.Cores = &cores
+		mongoCluster.Properties.Cores = new((int32)(val))
 	}
 
 	if edition, ok := d.GetOk("edition"); ok {
-		edition := edition.(string)
-		mongoCluster.Properties.Edition = &edition
+		mongoCluster.Properties.Edition = new(edition.(string))
 	}
 	// to be added when there is api support
 	// if _, ok := d.GetOk("from_backup"); ok {
@@ -356,26 +347,22 @@ func SetMongoClusterPatchProperties(d *schema.ResourceData) *mongo.PatchClusterR
 
 	if d.HasChange("display_name") {
 		_, name := d.GetChange("display_name")
-		nameStr := name.(string)
-		patchRequest.Properties.DisplayName = &nameStr
+		patchRequest.Properties.DisplayName = new(name.(string))
 	}
 
 	if d.HasChange("instances") {
 		_, instances := d.GetChange("instances")
-		instancesInt := int32(instances.(int))
-		patchRequest.Properties.Instances = &instancesInt
+		patchRequest.Properties.Instances = new(int32(instances.(int)))
 	}
 
 	if d.HasChange("template_id") {
 		_, template := d.GetChange("template_id")
-		templateStr := template.(string)
-		patchRequest.Properties.TemplateID = &templateStr
+		patchRequest.Properties.TemplateID = new(template.(string))
 	}
 
 	if d.HasChange("mongodb_version") {
 		_, mongodbVersion := d.GetChange("mongodb_version")
-		mongodbVersionStr := mongodbVersion.(string)
-		patchRequest.Properties.MongoDBVersion = &mongodbVersionStr
+		patchRequest.Properties.MongoDBVersion = new(mongodbVersion.(string))
 	}
 
 	if d.HasChange("connections") {
@@ -393,45 +380,38 @@ func SetMongoClusterPatchProperties(d *schema.ResourceData) *mongo.PatchClusterR
 	// enterprise settings below
 	if d.HasChange("type") {
 		_, val := d.GetChange("type")
-		clusterStr := val.(string)
-		patchRequest.Properties.Type = &clusterStr
+		patchRequest.Properties.Type = new(val.(string))
 	}
 
 	if d.HasChange("shards") {
 		_, val := d.GetChange("shards")
-		shards := int32(val.(int))
-		patchRequest.Properties.Shards = &shards
+		patchRequest.Properties.Shards = new(int32(val.(int)))
 	}
 
 	if d.HasChange("ram") {
 		_, val := d.GetChange("ram")
-		ram := int32(val.(int))
-		patchRequest.Properties.Ram = &ram
+		patchRequest.Properties.Ram = new(int32(val.(int)))
 	}
 
 	if d.HasChange("storage_size") {
 		_, val := d.GetChange("storage_size")
-		storageSize := int32(val.(int))
-		patchRequest.Properties.StorageSize = &storageSize
+		patchRequest.Properties.StorageSize = new(int32(val.(int)))
 	}
 
 	if d.HasChange("storage_type") {
 		_, val := d.GetChange("storage_type")
-		storageType := mongo.StorageType(val.(string))
-		patchRequest.Properties.StorageType = &storageType
+		patchRequest.Properties.StorageType = new(mongo.StorageType(val.(string)))
 	}
 
 	if d.HasChange("cores") {
 		_, val := d.GetChange("cores")
-		cores := int32(val.(int))
-		patchRequest.Properties.Cores = &cores
+		patchRequest.Properties.Cores = new(int32(val.(int)))
 	}
 
 	// must always be sent for enterprise, will be taken from template_id if playground or business
 	_, val := d.GetChange("edition")
 	if val.(string) == "enterprise" {
-		edition := val.(string)
-		patchRequest.Properties.Edition = &edition
+		patchRequest.Properties.Edition = new(val.(string))
 	}
 
 	if d.HasChange("bi_connector") {
@@ -458,28 +438,23 @@ func GetPgSqlClusterDataUpdate(d *schema.ResourceData) (*psql.PatchClusterReques
 	}
 
 	if postgresVersion, ok := d.GetOk("postgres_version"); ok {
-		postgresVersion := postgresVersion.(string)
-		dbaasCluster.Properties.PostgresVersion = &postgresVersion
+		dbaasCluster.Properties.PostgresVersion = new(postgresVersion.(string))
 	}
 
 	if instances, ok := d.GetOk("instances"); ok {
-		instances := int32(instances.(int))
-		dbaasCluster.Properties.Instances = &instances
+		dbaasCluster.Properties.Instances = new(int32(instances.(int)))
 	}
 
 	if cores, ok := d.GetOk("cores"); ok {
-		cores := int32(cores.(int))
-		dbaasCluster.Properties.Cores = &cores
+		dbaasCluster.Properties.Cores = new(int32(cores.(int)))
 	}
 
 	if ram, ok := d.GetOk("ram"); ok {
-		ram := int32(ram.(int))
-		dbaasCluster.Properties.Ram = &ram
+		dbaasCluster.Properties.Ram = new(int32(ram.(int)))
 	}
 
 	if storageSize, ok := d.GetOk("storage_size"); ok {
-		storageSize := int32(storageSize.(int))
-		dbaasCluster.Properties.StorageSize = &storageSize
+		dbaasCluster.Properties.StorageSize = new(int32(storageSize.(int)))
 	}
 
 	if _, ok := d.GetOk("connection_pooler"); ok {
@@ -489,8 +464,7 @@ func GetPgSqlClusterDataUpdate(d *schema.ResourceData) (*psql.PatchClusterReques
 	dbaasCluster.Properties.Connections = GetPsqlClusterConnectionsData(d)
 
 	if displayName, ok := d.GetOk("display_name"); ok {
-		displayName := displayName.(string)
-		dbaasCluster.Properties.DisplayName = &displayName
+		dbaasCluster.Properties.DisplayName = new(displayName.(string))
 	}
 
 	dbaasCluster.Properties.MaintenanceWindow = GetPsqlClusterMaintenanceWindowData(d)
@@ -502,7 +476,7 @@ func GetPsqlClusterConnectionsData(d *schema.ResourceData) []psql.Connection {
 	connections := make([]psql.Connection, 0)
 
 	if vdcValue, ok := d.GetOk("connections"); ok {
-		vdcValue := vdcValue.([]interface{})
+		vdcValue := vdcValue.([]any)
 		if vdcValue != nil {
 			for vdcIndex := range vdcValue {
 
@@ -537,7 +511,7 @@ func GetMongoClusterConnectionsData(d *schema.ResourceData) ([]mongo.Connection,
 	connections := make([]mongo.Connection, 0)
 
 	if vdcValue, ok := d.GetOk("connections"); ok {
-		vdcValue := vdcValue.([]interface{})
+		vdcValue := vdcValue.([]any)
 		if vdcValue != nil {
 			for vdcIndex := range vdcValue {
 
@@ -553,7 +527,7 @@ func GetMongoClusterConnectionsData(d *schema.ResourceData) ([]mongo.Connection,
 				}
 
 				if cidrList, ok := d.GetOk(fmt.Sprintf("connections.%d.cidr_list", vdcIndex)); ok {
-					cidrList := cidrList.([]interface{})
+					cidrList := cidrList.([]any)
 					var list []string
 					for _, cidr := range cidrList {
 						list = append(list, cidr.(string))
@@ -619,18 +593,15 @@ func GetMongoBiConnectorData(d *schema.ResourceData) *mongo.BiConnectorPropertie
 	var biConnector mongo.BiConnectorProperties
 
 	if enabled, ok := d.GetOk("bi_connector.0.enabled"); ok {
-		timeV := enabled.(bool)
-		biConnector.Enabled = &timeV
+		biConnector.Enabled = new(enabled.(bool))
 	}
 
 	if port, ok := d.GetOk("bi_connector.0.host"); ok {
-		port := port.(string)
-		biConnector.Port = &port
+		biConnector.Port = new(port.(string))
 	}
 
 	if host, ok := d.GetOk("bi_connector.0.host"); ok {
-		host := host.(string)
-		biConnector.Host = &host
+		biConnector.Host = new(host.(string))
 	}
 
 	return &biConnector
@@ -680,8 +651,7 @@ func GetMongoClusterFromBackupData(d *schema.ResourceData) (*mongo.CreateRestore
 	var restore mongo.CreateRestoreRequest
 
 	if val, ok := d.GetOk("from_backup.0.snapshot_id"); ok {
-		snapshotId := val.(string)
-		restore.SnapshotId = &snapshotId
+		restore.SnapshotId = new(val.(string))
 	}
 
 	if targetTime, ok := d.GetOk("from_backup.0.recovery_target_time"); ok {
@@ -714,8 +684,7 @@ func GetMongoClusterBackupData(d *schema.ResourceData) *mongo.BackupProperties {
 	// }
 
 	if val, ok := d.GetOk("backup.0.location"); ok {
-		location := val.(string)
-		backup.Location = &location
+		backup.Location = new(val.(string))
 	}
 	// to be added at a later date
 	// if _, ok := d.GetOk("backup.0.backup_retention"); ok {
@@ -803,7 +772,7 @@ func SetPgSqlClusterData(d *schema.ResourceData, cluster psql.ClusterResponse, i
 	}
 
 	if cluster.Properties.ConnectionPooler != nil {
-		var connectionPooler []interface{}
+		var connectionPooler []any
 		connectionPoolerEntry := setConnectionPoolerProperties(*cluster.Properties.ConnectionPooler)
 		connectionPooler = append(connectionPooler, connectionPoolerEntry)
 		if err := d.Set("connection_pooler", connectionPooler); err != nil {
@@ -812,7 +781,7 @@ func SetPgSqlClusterData(d *schema.ResourceData, cluster psql.ClusterResponse, i
 	}
 
 	if len(cluster.Properties.Connections) > 0 {
-		var connections []interface{}
+		var connections []any
 		for _, connection := range cluster.Properties.Connections {
 			connectionEntry := SetConnectionProperties(connection)
 			connections = append(connections, connectionEntry)
@@ -841,7 +810,7 @@ func SetPgSqlClusterData(d *schema.ResourceData, cluster psql.ClusterResponse, i
 	}
 
 	if cluster.Properties.MaintenanceWindow != nil {
-		var maintenanceWindow []interface{}
+		var maintenanceWindow []any
 		maintenanceWindowEntry := SetMaintenanceWindowProperties(*cluster.Properties.MaintenanceWindow)
 		maintenanceWindow = append(maintenanceWindow, maintenanceWindowEntry)
 		if err := d.Set("maintenance_window", maintenanceWindow); err != nil {
@@ -900,7 +869,7 @@ func SetMongoDBClusterData(d *schema.ResourceData, cluster mongo.ClusterResponse
 			}
 		}
 		if len(cluster.Properties.Connections) > 0 {
-			var connections []interface{}
+			var connections []any
 			for _, connection := range cluster.Properties.Connections {
 				connectionEntry := SetMongoConnectionProperties(connection)
 				connections = append(connections, connectionEntry)
@@ -928,7 +897,7 @@ func SetMongoDBClusterData(d *schema.ResourceData, cluster mongo.ClusterResponse
 		}
 
 		if cluster.Properties.MaintenanceWindow != nil {
-			var maintenanceWindow []interface{}
+			var maintenanceWindow []any
 			maintenanceWindowEntry := SetMongoMaintenanceWindowProperties(*cluster.Properties.MaintenanceWindow)
 			maintenanceWindow = append(maintenanceWindow, maintenanceWindowEntry)
 			if err := d.Set("maintenance_window", maintenanceWindow); err != nil {
@@ -979,7 +948,7 @@ func SetMongoDBClusterData(d *schema.ResourceData, cluster mongo.ClusterResponse
 		}
 
 		if cluster.Properties.BiConnector != nil {
-			var biConnector []interface{}
+			var biConnector []any
 			conEntry := SetMongoBiConnectorProperties(*cluster.Properties.BiConnector)
 			biConnector = append(biConnector, conEntry)
 			if err := d.Set("bi_connector", biConnector); err != nil {
@@ -991,9 +960,9 @@ func SetMongoDBClusterData(d *schema.ResourceData, cluster mongo.ClusterResponse
 	return nil
 }
 
-func SetConnectionProperties(vdcConnection psql.Connection) map[string]interface{} {
+func SetConnectionProperties(vdcConnection psql.Connection) map[string]any {
 
-	connection := map[string]interface{}{}
+	connection := map[string]any{}
 
 	utils.SetPropWithNilCheck(connection, "datacenter_id", vdcConnection.DatacenterId)
 	utils.SetPropWithNilCheck(connection, "lan_id", vdcConnection.LanId)
@@ -1002,9 +971,9 @@ func SetConnectionProperties(vdcConnection psql.Connection) map[string]interface
 	return connection
 }
 
-func SetMaintenanceWindowProperties(maintenanceWindow psql.MaintenanceWindow) map[string]interface{} {
+func SetMaintenanceWindowProperties(maintenanceWindow psql.MaintenanceWindow) map[string]any {
 
-	maintenance := map[string]interface{}{}
+	maintenance := map[string]any{}
 
 	utils.SetPropWithNilCheck(maintenance, "time", maintenanceWindow.Time)
 	utils.SetPropWithNilCheck(maintenance, "day_of_the_week", maintenanceWindow.DayOfTheWeek)
@@ -1012,8 +981,8 @@ func SetMaintenanceWindowProperties(maintenanceWindow psql.MaintenanceWindow) ma
 	return maintenance
 }
 
-func SetMongoConnectionProperties(vdcConnection mongo.Connection) map[string]interface{} {
-	connection := map[string]interface{}{}
+func SetMongoConnectionProperties(vdcConnection mongo.Connection) map[string]any {
+	connection := map[string]any{}
 
 	utils.SetPropWithNilCheck(connection, "datacenter_id", vdcConnection.DatacenterId)
 	utils.SetPropWithNilCheck(connection, "lan_id", vdcConnection.LanId)
@@ -1026,8 +995,8 @@ func SetMongoConnectionProperties(vdcConnection mongo.Connection) map[string]int
 	return connection
 }
 
-func SetMongoMaintenanceWindowProperties(maintenanceWindow mongo.MaintenanceWindow) map[string]interface{} {
-	maintenance := map[string]interface{}{}
+func SetMongoMaintenanceWindowProperties(maintenanceWindow mongo.MaintenanceWindow) map[string]any {
+	maintenance := map[string]any{}
 
 	utils.SetPropWithNilCheck(maintenance, "time", maintenanceWindow.Time)
 	utils.SetPropWithNilCheck(maintenance, "day_of_the_week", maintenanceWindow.DayOfTheWeek)
@@ -1035,8 +1004,8 @@ func SetMongoMaintenanceWindowProperties(maintenanceWindow mongo.MaintenanceWind
 	return maintenance
 }
 
-func SetMongoBiConnectorProperties(biConnectorProperties mongo.BiConnectorProperties) map[string]interface{} {
-	biCon := map[string]interface{}{}
+func SetMongoBiConnectorProperties(biConnectorProperties mongo.BiConnectorProperties) map[string]any {
+	biCon := map[string]any{}
 	if biConnectorProperties.Enabled != nil {
 		utils.SetPropWithNilCheck(biCon, "enabled", *biConnectorProperties.Enabled)
 	}
@@ -1130,18 +1099,16 @@ func getConnectionPoolerData(d *schema.ResourceData) *psql.ConnectionPooler {
 	var connectionPooler psql.ConnectionPooler
 
 	enabledIntf := d.Get("connection_pooler.0.enabled")
-	enabledValue := enabledIntf.(bool)
-	connectionPooler.Enabled = &enabledValue
+	connectionPooler.Enabled = new(enabledIntf.(bool))
 
 	poolModeIntf := d.Get("connection_pooler.0.pool_mode")
-	poolModeValue := psql.PoolMode(poolModeIntf.(string))
-	connectionPooler.PoolMode = &poolModeValue
+	connectionPooler.PoolMode = new(psql.PoolMode(poolModeIntf.(string)))
 
 	return &connectionPooler
 }
 
-func setConnectionPoolerProperties(connectionPoolerProperties psql.ConnectionPooler) map[string]interface{} {
-	connectionPoolerMap := map[string]interface{}{}
+func setConnectionPoolerProperties(connectionPoolerProperties psql.ConnectionPooler) map[string]any {
+	connectionPoolerMap := map[string]any{}
 
 	utils.SetPropWithNilCheck(connectionPoolerMap, "enabled", *connectionPoolerProperties.Enabled)
 	utils.SetPropWithNilCheck(connectionPoolerMap, "pool_mode", *connectionPoolerProperties.PoolMode)

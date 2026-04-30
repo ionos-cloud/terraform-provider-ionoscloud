@@ -85,7 +85,7 @@ func setClusterPostRequest(d *schema.ResourceData) *kafka.ClusterCreate {
 	size := d.Get("size").(string)
 	datacenterID := d.Get("connections.0.datacenter_id").(string)
 	lanID := d.Get("connections.0.lan_id").(string)
-	brokerAddressesRaw := d.Get("connections.0.broker_addresses").([]interface{})
+	brokerAddressesRaw := d.Get("connections.0.broker_addresses").([]any)
 
 	brokerAddresses := make([]string, 0)
 	for _, v := range brokerAddressesRaw {
@@ -116,7 +116,7 @@ func (c *Client) SetKafkaClusterData(d *schema.ResourceData, cluster *kafka.Clus
 	}
 
 	if len(cluster.Properties.Connections) > 0 {
-		var connections []interface{}
+		var connections []any
 
 		for _, connection := range cluster.Properties.Connections {
 			connectionEntry := c.setConnectionProperties(connection)
@@ -135,8 +135,8 @@ func (c *Client) SetKafkaClusterData(d *schema.ResourceData, cluster *kafka.Clus
 	return nil
 }
 
-func (c *Client) setConnectionProperties(connection kafka.KafkaClusterConnection) map[string]interface{} {
-	connectionMap := map[string]interface{}{}
+func (c *Client) setConnectionProperties(connection kafka.KafkaClusterConnection) map[string]any {
+	connectionMap := map[string]any{}
 
 	utils.SetPropWithNilCheck(connectionMap, "datacenter_id", connection.DatacenterId)
 	utils.SetPropWithNilCheck(connectionMap, "lan_id", connection.LanId)

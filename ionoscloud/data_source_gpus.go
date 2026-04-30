@@ -64,7 +64,7 @@ func dataSourceGpus() *schema.Resource {
 	}
 }
 
-func dataSourceGpusRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceGpusRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
@@ -82,10 +82,10 @@ func dataSourceGpusRead(ctx context.Context, d *schema.ResourceData, meta interf
 
 	d.SetId(fmt.Sprintf("%s/gpus", serverID))
 
-	var gpuList []map[string]interface{}
+	var gpuList []map[string]any
 	if gpus.Items != nil {
 		for _, gpu := range *gpus.Items {
-			gpuMap := make(map[string]interface{})
+			gpuMap := make(map[string]any)
 			if gpu.Id != nil {
 				gpuMap["id"] = *gpu.Id
 			}

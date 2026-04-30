@@ -84,7 +84,7 @@ func dataSourceDataCenter() *schema.Resource {
 	}
 }
 
-func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 
 	var name, location string
 	id, idOk := d.GetOk("id")

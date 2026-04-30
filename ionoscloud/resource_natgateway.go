@@ -80,7 +80,7 @@ func resourceNatGateway() *schema.Resource {
 	}
 }
 
-func resourceNatGatewayCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNatGatewayCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
@@ -109,11 +109,11 @@ func resourceNatGatewayCreate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	if lansVal, lansOK := d.GetOk("lans"); lansOK {
-		if lansVal.([]interface{}) != nil {
+		if lansVal.([]any) != nil {
 			updateLans := false
 			var lans []ionoscloud.NatGatewayLanProperties
 
-			for lanIndex := range lansVal.([]interface{}) {
+			for lanIndex := range lansVal.([]any) {
 				lan := ionoscloud.NatGatewayLanProperties{}
 				addLan := false
 				if lanID, lanIdOk := d.GetOk(fmt.Sprintf("lans.%d.id", lanIndex)); lanIdOk {
@@ -122,7 +122,7 @@ func resourceNatGatewayCreate(ctx context.Context, d *schema.ResourceData, meta 
 					addLan = true
 				}
 				if lanGatewayIps, lanGatewayIpsOk := d.GetOk(fmt.Sprintf("lans.%d.gateway_ips", lanIndex)); lanGatewayIpsOk {
-					lanGatewayIps := lanGatewayIps.([]interface{})
+					lanGatewayIps := lanGatewayIps.([]any)
 					if lanGatewayIps != nil {
 						gatewayIps := make([]string, len(lanGatewayIps), len(lanGatewayIps))
 						for idx := range lanGatewayIps {
@@ -174,7 +174,7 @@ func resourceNatGatewayCreate(ctx context.Context, d *schema.ResourceData, meta 
 	return resourceNatGatewayRead(ctx, d, meta)
 }
 
-func resourceNatGatewayRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNatGatewayRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
@@ -203,7 +203,7 @@ func resourceNatGatewayRead(ctx context.Context, d *schema.ResourceData, meta in
 	return nil
 }
 
-func resourceNatGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNatGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
@@ -236,11 +236,11 @@ func resourceNatGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 	if d.HasChange("lans") {
 		oldLANs, newLANs := d.GetChange("lans")
-		if newLANs.([]interface{}) != nil {
+		if newLANs.([]any) != nil {
 			updateLans := false
 			var lans []ionoscloud.NatGatewayLanProperties
 
-			for lanIndex := range newLANs.([]interface{}) {
+			for lanIndex := range newLANs.([]any) {
 				lan := ionoscloud.NatGatewayLanProperties{}
 				addLan := false
 				if lanID, lanIdOk := d.GetOk(fmt.Sprintf("lans.%d.id", lanIndex)); lanIdOk {
@@ -249,7 +249,7 @@ func resourceNatGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta 
 					addLan = true
 				}
 				if lanGatewayIps, lanGatewayIpsOk := d.GetOk(fmt.Sprintf("lans.%d.gateway_ips", lanIndex)); lanGatewayIpsOk {
-					lanGatewayIps := lanGatewayIps.([]interface{})
+					lanGatewayIps := lanGatewayIps.([]any)
 					if lanGatewayIps != nil {
 						gatewayIps := make([]string, 0)
 						for _, lanGatewayIp := range lanGatewayIps {
@@ -290,7 +290,7 @@ func resourceNatGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	return resourceNatGatewayRead(ctx, d, meta)
 }
 
-func resourceNatGatewayDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNatGatewayDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
@@ -317,7 +317,7 @@ func resourceNatGatewayDelete(ctx context.Context, d *schema.ResourceData, meta 
 	return nil
 }
 
-func resourceNatGatewayImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceNatGatewayImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	importID := d.Id()
 
 	location, parts := splitImportID(importID, "/")
@@ -388,16 +388,16 @@ func setNatGatewayData(d *schema.ResourceData, natGateway *ionoscloud.NatGateway
 		}
 
 		if natGateway.Properties.Lans != nil && len(*natGateway.Properties.Lans) > 0 {
-			var natGatewayLans []interface{}
+			var natGatewayLans []any
 			for _, lan := range *natGateway.Properties.Lans {
-				lanEntry := make(map[string]interface{})
+				lanEntry := make(map[string]any)
 
 				if lan.Id != nil {
 					lanEntry["id"] = *lan.Id
 				}
 
 				if len(*lan.GatewayIps) > 0 {
-					var gatewayIps []interface{}
+					var gatewayIps []any
 					for _, gatewayIp := range *lan.GatewayIps {
 						gatewayIps = append(gatewayIps, gatewayIp)
 					}

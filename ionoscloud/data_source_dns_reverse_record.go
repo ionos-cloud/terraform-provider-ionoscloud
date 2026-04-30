@@ -54,7 +54,7 @@ func dataSourceDNSReverseRecord() *schema.Resource {
 	}
 }
 
-func dataSourceReverseRecordRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceReverseRecordRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).DNSClient
 	partialMatch := d.Get("partial_match").(bool)
 	idValue, idOk := d.GetOk("id")

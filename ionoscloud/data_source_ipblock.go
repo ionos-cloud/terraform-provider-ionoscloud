@@ -96,7 +96,7 @@ func dataSourceIpBlock() *schema.Resource {
 }
 
 //nolint:gocyclo
-func datasourceIpBlockRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func datasourceIpBlockRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	id, idOk := d.GetOk("id")
 
 	var name, location string

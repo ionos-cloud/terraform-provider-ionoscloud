@@ -155,7 +155,7 @@ func dataSourceTargetGroup() *schema.Resource {
 	}
 }
 
-func dataSourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
 	if err != nil {
 		return diag.FromErr(err)

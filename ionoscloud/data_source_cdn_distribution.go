@@ -135,7 +135,7 @@ func dataSourceCDNDistribution() *schema.Resource {
 	}
 }
 
-func dataSourceCDNDistributionRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceCDNDistributionRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).CDNClient
 
 	idValue, idOk := d.GetOk("id")

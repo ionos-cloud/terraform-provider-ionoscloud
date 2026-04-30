@@ -84,7 +84,7 @@ func resourceKafkaTopic() *schema.Resource {
 		Timeouts: &resourceDefaultTimeouts,
 	}
 }
-func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).KafkaClient
 
 	createdTopic, apiResponse, err := client.CreateTopic(ctx, d)
@@ -107,7 +107,7 @@ func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, meta 
 	return resourceKafkaTopicRead(ctx, d, meta)
 }
 
-func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).KafkaClient
 	topicID := d.Id()
 	clusterID := d.Get("cluster_id").(string)
@@ -131,7 +131,7 @@ func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, meta in
 	return nil
 }
 
-func resourceKafkaTopicDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceKafkaTopicDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).KafkaClient
 	topicID := d.Id()
 	clusterID := d.Get("cluster_id").(string)
@@ -156,7 +156,7 @@ func resourceKafkaTopicDelete(ctx context.Context, d *schema.ResourceData, meta 
 	return nil
 }
 
-func resourceKafkaTopicImport(ctx context.Context, d *schema.ResourceData, meta interface{}) (
+func resourceKafkaTopicImport(ctx context.Context, d *schema.ResourceData, meta any) (
 	[]*schema.ResourceData, error,
 ) {
 	parts := strings.Split(d.Id(), ":")

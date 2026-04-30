@@ -61,7 +61,7 @@ func resourceServerBootDeviceSelection() *schema.Resource {
 	}
 }
 
-func resourceServerBootDeviceSelectionCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceServerBootDeviceSelectionCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	dcId := d.Get("datacenter_id").(string)
 	serverId := d.Get("server_id").(string)
 	location := d.Get("location").(string)
@@ -97,7 +97,7 @@ func resourceServerBootDeviceSelectionCreate(ctx context.Context, d *schema.Reso
 	return resourceServerBootDeviceSelectionRead(ctx, d, meta)
 }
 
-func resourceServerBootDeviceSelectionRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceServerBootDeviceSelectionRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
@@ -124,7 +124,7 @@ func resourceServerBootDeviceSelectionRead(ctx context.Context, d *schema.Resour
 	return nil
 }
 
-func resourceServerBootDeviceSelectionUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceServerBootDeviceSelectionUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	dcId := d.Get("datacenter_id").(string)
 	serverId := d.Get("server_id").(string)
 	location := d.Get("location").(string)
@@ -150,7 +150,7 @@ func resourceServerBootDeviceSelectionUpdate(ctx context.Context, d *schema.Reso
 	return resourceServerBootDeviceSelectionRead(ctx, d, meta)
 }
 
-func resourceServerBootDeviceSelectionDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceServerBootDeviceSelectionDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {

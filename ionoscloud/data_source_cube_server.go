@@ -110,10 +110,10 @@ func setCubeServerData(d *schema.ResourceData, server *ionoscloud.Server, token 
 		}
 	}
 
-	var volumes []interface{}
+	var volumes []any
 	if server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil && len(*server.Entities.Volumes.Items) > 0 {
 		for _, volume := range *server.Entities.Volumes.Items {
-			entry := make(map[string]interface{})
+			entry := make(map[string]any)
 
 			entry["id"] = shared.ToValueDefault(volume.Id)
 			entry["name"] = shared.ToValueDefault(volume.Properties.Name)
@@ -123,7 +123,7 @@ func setCubeServerData(d *schema.ResourceData, server *ionoscloud.Server, token 
 			entry["image_password"] = shared.ToValueDefault(volume.Properties.ImagePassword)
 
 			if volume.Properties.SshKeys != nil && len(*volume.Properties.SshKeys) > 0 {
-				var sshKeys []interface{}
+				var sshKeys []any
 				for _, sshKey := range *volume.Properties.SshKeys {
 					sshKeys = append(sshKeys, sshKey)
 				}
@@ -154,12 +154,12 @@ func setCubeServerData(d *schema.ResourceData, server *ionoscloud.Server, token 
 		}
 	}
 
-	var nicsIntf []interface{}
+	var nicsIntf []any
 	if server.Entities != nil {
 		if server.Entities.Nics != nil && server.Entities.Nics.Items != nil {
 			nicItems := server.Entities.Nics.Items
 			if nicItems != nil && len(*nicItems) > 0 {
-				var nics []interface{}
+				var nics []any
 				for _, nic := range *server.Entities.Nics.Items {
 					nicMap := cloudapinic.SetNetworkProperties(nic)
 					fw := setFirewallRules(nic)
@@ -195,7 +195,7 @@ func setCubeServerData(d *schema.ResourceData, server *ionoscloud.Server, token 
 	return nil
 }
 
-func dataSourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {

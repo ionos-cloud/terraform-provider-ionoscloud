@@ -170,7 +170,7 @@ func resourceTargetGroup() *schema.Resource {
 	}
 }
 
-func resourceTargetGroupCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceTargetGroupCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
 	if err != nil {
 		return diag.FromErr(err)
@@ -230,7 +230,7 @@ func resourceTargetGroupCreate(ctx context.Context, d *schema.ResourceData, meta
 	return resourceTargetGroupRead(ctx, d, meta)
 }
 
-func resourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
 	if err != nil {
 		return diag.FromErr(err)
@@ -254,7 +254,7 @@ func resourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta i
 	return nil
 }
 
-func resourceTargetGroupUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceTargetGroupUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
 	if err != nil {
 		return diag.FromErr(err)
@@ -312,7 +312,7 @@ func resourceTargetGroupUpdate(ctx context.Context, d *schema.ResourceData, meta
 	return resourceTargetGroupRead(ctx, d, meta)
 }
 
-func resourceTargetGroupDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceTargetGroupDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
 	if err != nil {
 		return diag.FromErr(err)
@@ -336,7 +336,7 @@ func resourceTargetGroupDelete(ctx context.Context, d *schema.ResourceData, meta
 	return nil
 }
 
-func resourceTargetGroupImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceTargetGroupImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
 	if err != nil {
 		return nil, err
@@ -397,11 +397,11 @@ func setTargetGroupData(d *schema.ResourceData, targetGroup *ionoscloud.TargetGr
 			}
 		}
 
-		forwardingRuleTargets := make([]interface{}, 0)
+		forwardingRuleTargets := make([]any, 0)
 		if targetGroup.Properties.Targets != nil && len(*targetGroup.Properties.Targets) > 0 {
-			forwardingRuleTargets = make([]interface{}, 0)
+			forwardingRuleTargets = make([]any, 0)
 			for _, target := range *targetGroup.Properties.Targets {
-				targetEntry := make(map[string]interface{})
+				targetEntry := make(map[string]any)
 
 				if target.Ip != nil {
 					targetEntry["ip"] = *target.Ip
@@ -438,9 +438,9 @@ func setTargetGroupData(d *schema.ResourceData, targetGroup *ionoscloud.TargetGr
 		}
 
 		if targetGroup.Properties.HealthCheck != nil {
-			healthCheck := make([]interface{}, 1)
+			healthCheck := make([]any, 1)
 
-			healthCheckEntry := make(map[string]interface{})
+			healthCheckEntry := make(map[string]any)
 
 			if targetGroup.Properties.HealthCheck.CheckTimeout != nil {
 				healthCheckEntry["check_timeout"] = *targetGroup.Properties.HealthCheck.CheckTimeout
@@ -462,9 +462,9 @@ func setTargetGroupData(d *schema.ResourceData, targetGroup *ionoscloud.TargetGr
 		}
 
 		if targetGroup.Properties.HttpHealthCheck != nil {
-			httpHealthCheck := make([]interface{}, 1)
+			httpHealthCheck := make([]any, 1)
 
-			httpHealthCheckEntry := make(map[string]interface{})
+			httpHealthCheckEntry := make(map[string]any)
 
 			if targetGroup.Properties.HttpHealthCheck.Path != nil {
 				httpHealthCheckEntry["path"] = *targetGroup.Properties.HttpHealthCheck.Path
@@ -506,9 +506,9 @@ func getTargetGroupTargetData(d *schema.ResourceData) *[]ionoscloud.TargetGroupT
 
 	if targetsVal, targetsOk := d.GetOk("targets"); targetsOk {
 
-		if targetsVal.([]interface{}) != nil {
+		if targetsVal.([]any) != nil {
 
-			for targetIndex := range targetsVal.([]interface{}) {
+			for targetIndex := range targetsVal.([]any) {
 				target := ionoscloud.TargetGroupTarget{}
 				if ip, ipOk := d.GetOk(fmt.Sprintf("targets.%d.ip", targetIndex)); ipOk {
 					ip := ip.(string)

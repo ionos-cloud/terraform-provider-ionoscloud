@@ -64,10 +64,10 @@ func (ls *LabelsService) datacentersServersLabelsGet(datacenterId, serverId stri
 	return labels, nil
 }
 
-func (ls *LabelsService) datacentersServersLabelsCreate(datacenterId, serverId string, labelsData interface{}) error {
+func (ls *LabelsService) datacentersServersLabelsCreate(datacenterId, serverId string, labelsData any) error {
 	if labelsData, ok := labelsData.(*schema.Set); ok {
 		for _, labelData := range labelsData.List() {
-			if label, ok := labelData.(map[string]interface{}); ok {
+			if label, ok := labelData.(map[string]any); ok {
 				labelKey := label["key"].(string)
 				labelValue := label["value"].(string)
 				labelResource := ionoscloud.LabelResource{
@@ -84,10 +84,10 @@ func (ls *LabelsService) datacentersServersLabelsCreate(datacenterId, serverId s
 	return nil
 }
 
-func (ls *LabelsService) datacentersServersLabelsDelete(datacenterId, serverId string, labelsData interface{}) error {
+func (ls *LabelsService) datacentersServersLabelsDelete(datacenterId, serverId string, labelsData any) error {
 	if labelsData, ok := labelsData.(*schema.Set); ok {
 		for _, labelData := range labelsData.List() {
-			if label, ok := labelData.(map[string]interface{}); ok {
+			if label, ok := labelData.(map[string]any); ok {
 				labelKey := label["key"].(string)
 				apiResponse, err := ls.client.LabelsApi.DatacentersServersLabelsDelete(ls.ctx, datacenterId, serverId, labelKey).Execute()
 				apiResponse.LogInfo()

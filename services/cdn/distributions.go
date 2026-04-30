@@ -44,29 +44,29 @@ func SetDistributionData(d *schema.ResourceData, distribution cdn.Distribution) 
 		return utils.GenerateSetError(resourceName, "certificate_id", err)
 	}
 
-	routingRules := make([]interface{}, 0)
+	routingRules := make([]any, 0)
 	if len(distribution.Properties.RoutingRules) > 0 {
-		routingRules = make([]interface{}, 0)
+		routingRules = make([]any, 0)
 		for _, rule := range distribution.Properties.RoutingRules {
-			ruleEntry := make(map[string]interface{})
+			ruleEntry := make(map[string]any)
 			ruleEntry["scheme"] = rule.Scheme
 			ruleEntry["prefix"] = rule.Prefix
 
-			upstreamEntry := make(map[string]interface{})
+			upstreamEntry := make(map[string]any)
 			upstreamEntry["caching"] = rule.Upstream.Caching
 			upstreamEntry["waf"] = rule.Upstream.Waf
 			upstreamEntry["host"] = rule.Upstream.Host
 			upstreamEntry["sni_mode"] = rule.Upstream.SniMode
 			upstreamEntry["rate_limit_class"] = rule.Upstream.RateLimitClass
 			if rule.Upstream.GeoRestrictions != nil {
-				geoRestrictionsEntry := make(map[string]interface{})
+				geoRestrictionsEntry := make(map[string]any)
 				geoRestrictionsEntry["allow_list"] = rule.Upstream.GeoRestrictions.AllowList
 				geoRestrictionsEntry["block_list"] = rule.Upstream.GeoRestrictions.BlockList
-				geoRestrictionsList := make([]interface{}, 0)
+				geoRestrictionsList := make([]any, 0)
 				geoRestrictionsList = append(geoRestrictionsList, geoRestrictionsEntry)
 				upstreamEntry["geo_restrictions"] = geoRestrictionsList
 			}
-			upstreamList := make([]interface{}, 0)
+			upstreamList := make([]any, 0)
 			upstreamList = append(upstreamList, upstreamEntry)
 			ruleEntry["upstream"] = upstreamList
 
@@ -86,7 +86,7 @@ func SetDistributionData(d *schema.ResourceData, distribution cdn.Distribution) 
 // GetRoutingRulesData gets distribution routing rules data from terraform
 func GetRoutingRulesData(d *schema.ResourceData) (*[]cdn.RoutingRule, error) {
 
-	routingRulesVal := d.Get("routing_rules").([]interface{})
+	routingRulesVal := d.Get("routing_rules").([]any)
 	routingRules := make([]cdn.RoutingRule, 0)
 	for routingRuleIndex := range routingRulesVal {
 
@@ -117,7 +117,7 @@ func GetRoutingRulesData(d *schema.ResourceData) (*[]cdn.RoutingRule, error) {
 			if _, geoRestrictionsOk := d.GetOk(fmt.Sprintf("routing_rules.%d.upstream.0.geo_restrictions", routingRuleIndex)); geoRestrictionsOk {
 				routingRule.Upstream.GeoRestrictions = &cdn.UpstreamGeoRestrictions{}
 				if allowList, allowListOk := d.GetOk(fmt.Sprintf("routing_rules.%d.upstream.0.geo_restrictions.0.allow_list", routingRuleIndex)); allowListOk {
-					raw := allowList.([]interface{})
+					raw := allowList.([]any)
 					if len(raw) > 0 {
 						countries := make([]string, 0)
 						for _, rawCountry := range raw {
@@ -132,7 +132,7 @@ func GetRoutingRulesData(d *schema.ResourceData) (*[]cdn.RoutingRule, error) {
 					}
 				}
 				if blockList, blockListOk := d.GetOk(fmt.Sprintf("routing_rules.%d.upstream.0.geo_restrictions.0.block_list", routingRuleIndex)); blockListOk {
-					raw := blockList.([]interface{})
+					raw := blockList.([]any)
 					if len(raw) > 0 {
 						countries := make([]string, 0)
 						for _, rawCountry := range raw {

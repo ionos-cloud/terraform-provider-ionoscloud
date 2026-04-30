@@ -108,7 +108,7 @@ func resourceContainerRegistryToken() *schema.Resource {
 	}
 }
 
-func resourceContainerRegistryTokenCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceContainerRegistryTokenCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(location)
 	if err != nil {
@@ -148,7 +148,7 @@ func resourceContainerRegistryTokenCreate(ctx context.Context, d *schema.Resourc
 	return nil
 }
 
-func resourceContainerRegistryTokenRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceContainerRegistryTokenRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(location)
 	if err != nil {
@@ -176,7 +176,7 @@ func resourceContainerRegistryTokenRead(ctx context.Context, d *schema.ResourceD
 	return nil
 }
 
-func resourceContainerRegistryTokenUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceContainerRegistryTokenUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(location)
 	if err != nil {
@@ -198,7 +198,7 @@ func resourceContainerRegistryTokenUpdate(ctx context.Context, d *schema.Resourc
 	return resourceContainerRegistryTokenRead(ctx, d, meta)
 }
 
-func resourceContainerRegistryTokenDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceContainerRegistryTokenDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(location)
 	if err != nil {
@@ -221,7 +221,7 @@ func resourceContainerRegistryTokenDelete(ctx context.Context, d *schema.Resourc
 	return nil
 }
 
-func resourceContainerRegistryTokenImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceContainerRegistryTokenImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	importID := d.Id()
 	location, parts := splitImportID(importID, "/")
 	if len(parts) != 2 {

@@ -73,7 +73,7 @@ func dataSourceK8sNodePoolNodes() *schema.Resource {
 	}
 }
 
-func dataSourceK8sReadNodePoolNodes(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceK8sReadNodePoolNodes(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
@@ -96,7 +96,7 @@ func dataSourceK8sReadNodePoolNodes(ctx context.Context, d *schema.ResourceData,
 		return diagutil.ToDiags(d, fmt.Errorf("nodes list is empty for of nodepool with id %s", nodePoolIdStr), nil)
 	}
 	if len(*nodesList.Items) > 0 {
-		var nodes []interface{}
+		var nodes []any
 		for _, node := range *nodesList.Items {
 			nodeMap := setK8sNodesDataToMap(node)
 			nodes = append(nodes, nodeMap)
@@ -109,8 +109,8 @@ func dataSourceK8sReadNodePoolNodes(ctx context.Context, d *schema.ResourceData,
 	return nil
 }
 
-func setK8sNodesDataToMap(node ionoscloud.KubernetesNode) map[string]interface{} {
-	nodeEntry := make(map[string]interface{})
+func setK8sNodesDataToMap(node ionoscloud.KubernetesNode) map[string]any {
+	nodeEntry := make(map[string]any)
 	if node.Id != nil {
 		nodeEntry["id"] = shared.ToValueDefault(node.Id)
 	}

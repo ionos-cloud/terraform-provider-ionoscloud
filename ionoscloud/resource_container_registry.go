@@ -109,7 +109,7 @@ func resourceContainerRegistry() *schema.Resource {
 	}
 }
 
-func resourceContainerRegistryCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceContainerRegistryCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(location)
 	if err != nil {
@@ -136,7 +136,7 @@ func resourceContainerRegistryCreate(ctx context.Context, d *schema.ResourceData
 	return append(warnings, resourceContainerRegistryRead(ctx, d, meta)...)
 }
 
-func resourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(location)
 	if err != nil {
@@ -161,7 +161,7 @@ func resourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData, 
 	return nil
 }
 
-func resourceContainerRegistryUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceContainerRegistryUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(location)
 	if err != nil {
@@ -193,7 +193,7 @@ func resourceContainerRegistryUpdate(ctx context.Context, d *schema.ResourceData
 	return append(warnings, resourceContainerRegistryRead(ctx, d, meta)...)
 }
 
-func resourceContainerRegistryDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceContainerRegistryDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(location)
 	if err != nil {
@@ -215,7 +215,7 @@ func resourceContainerRegistryDelete(ctx context.Context, d *schema.ResourceData
 	return diagutil.ToDiags(d, utils.WaitForResourceToBeDeleted(ctx, d, client.IsRegistryDeleted), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String()})
 }
 
-func resourceContainerRegistryImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceContainerRegistryImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	importID := d.Id()
 	location, parts := splitImportID(importID, "/")
 	if len(parts) != 1 {

@@ -61,7 +61,7 @@ func resourceCertificateManager() *schema.Resource {
 	}
 }
 
-func checkCertImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
+func checkCertImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ any) error {
 
 	// we do not want to check in case of resource creation
 	if diff.Id() == "" {
@@ -95,7 +95,7 @@ func checkCertImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ in
 
 }
 
-func resourceCertificateManagerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCertificateManagerCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).CertManagerClient
 
 	certPostDto, err := cert.GetCertPostDto(d)
@@ -117,7 +117,7 @@ func resourceCertificateManagerCreate(ctx context.Context, d *schema.ResourceDat
 	return resourceCertificateManagerRead(ctx, d, meta)
 }
 
-func resourceCertificateManagerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCertificateManagerRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).CertManagerClient
 
 	certDto, apiResponse, err := client.GetCertificate(ctx, d.Id())
@@ -138,7 +138,7 @@ func resourceCertificateManagerRead(ctx context.Context, d *schema.ResourceData,
 	return nil
 }
 
-func resourceCertificateManagerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCertificateManagerUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).CertManagerClient
 
 	certPatchDto := cert.GetCertPatchDto(d)
@@ -155,7 +155,7 @@ func resourceCertificateManagerUpdate(ctx context.Context, d *schema.ResourceDat
 	return resourceCertificateManagerRead(ctx, d, meta)
 }
 
-func resourceCertificateManagerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCertificateManagerDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).CertManagerClient
 
 	apiResponse, err := client.DeleteCertificate(ctx, d.Id())
@@ -175,7 +175,7 @@ func resourceCertificateManagerDelete(ctx context.Context, d *schema.ResourceDat
 	return nil
 }
 
-func resourceCertificateManagerImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceCertificateManagerImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	client := meta.(bundleclient.SdkBundle).CertManagerClient
 
 	certId := d.Id()

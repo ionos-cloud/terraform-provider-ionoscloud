@@ -1,5 +1,7 @@
 package slice
 
+import "slices"
+
 import "reflect"
 
 func ToAnyList[T any](input []T) []any {
@@ -77,15 +79,9 @@ func DiffString(slice1 []string, slice2 []string) []string {
 
 	// Loop two times, first to find slice1 strings not in slice2,
 	// second loop to find slice2 strings not in slice1
-	for i := 0; i < 2; i++ {
+	for i := range 2 {
 		for _, s1 := range slice1 {
-			found := false
-			for _, s2 := range slice2 {
-				if s1 == s2 {
-					found = true
-					break
-				}
-			}
+			found := slices.Contains(slice2, s1)
 			// String not found. We add it to return slice
 			if !found {
 				diff = append(diff, s1)

@@ -90,8 +90,8 @@ func setPipelinePostRequest(d *schema.ResourceData) *logging.PipelineCreate {
 
 	var logs []logging.PipelineNoAddrLogs
 	if logsValue, ok := d.GetOk("log"); ok {
-		for _, logData := range logsValue.([]interface{}) {
-			if logElem, ok := logData.(map[string]interface{}); ok {
+		for _, logData := range logsValue.([]any) {
+			if logElem, ok := logData.(map[string]any); ok {
 				// Populate the logElem entry.
 				logSource := logElem["source"].(string)
 				logTag := logElem["tag"].(string)
@@ -99,8 +99,8 @@ func setPipelinePostRequest(d *schema.ResourceData) *logging.PipelineCreate {
 
 				// Logic for destinations.
 				var destinations []logging.PipelineNoAddrLogsDestinations
-				for _, destinationData := range logElem["destinations"].([]interface{}) {
-					if destination, ok := destinationData.(map[string]interface{}); ok {
+				for _, destinationData := range logElem["destinations"].([]any) {
+					if destination, ok := destinationData.(map[string]any); ok {
 						destinationType := destination["type"].(string)
 						retentionInDays := int32(destination["retention_in_days"].(int))
 						newDestination := *logging.NewPipelineNoAddrLogsDestinations(destinationType, retentionInDays)
@@ -129,8 +129,8 @@ func setPipelinePatchRequest(d *schema.ResourceData) *logging.PipelinePatch {
 
 	var logs []logging.PipelineNoAddrLogs
 	if logsValue, ok := d.GetOk("log"); ok {
-		for _, logData := range logsValue.([]interface{}) {
-			if logElem, ok := logData.(map[string]interface{}); ok {
+		for _, logData := range logsValue.([]any) {
+			if logElem, ok := logData.(map[string]any); ok {
 				// Populate the logElem entry.
 				logSource := logElem["source"].(string)
 				logTag := logElem["tag"].(string)
@@ -138,8 +138,8 @@ func setPipelinePatchRequest(d *schema.ResourceData) *logging.PipelinePatch {
 
 				// Logic for destinations.
 				var destinations []logging.PipelineNoAddrLogsDestinations
-				for _, destinationData := range logElem["destinations"].([]interface{}) {
-					if destination, ok := destinationData.(map[string]interface{}); ok {
+				for _, destinationData := range logElem["destinations"].([]any) {
+					if destination, ok := destinationData.(map[string]any); ok {
 						destinationType := destination["type"].(string)
 						retentionInDays := int32(destination["retention_in_days"].(int))
 						newDestination := *logging.NewPipelineNoAddrLogsDestinations(destinationType, retentionInDays)
@@ -182,17 +182,17 @@ func (c *Client) SetPipelineData(d *schema.ResourceData, pipeline logging.Pipeli
 	}
 
 	if pipeline.Properties.Logs != nil {
-		logs := make([]interface{}, len(pipeline.Properties.Logs))
+		logs := make([]any, len(pipeline.Properties.Logs))
 		for i, logElem := range pipeline.Properties.Logs {
 			// Populate the logElem entry.
-			logEntry := make(map[string]interface{})
+			logEntry := make(map[string]any)
 			utils.SetPropWithNilCheck(logEntry, "source", logElem.Source)
 			utils.SetPropWithNilCheck(logEntry, "tag", logElem.Tag)
 			utils.SetPropWithNilCheck(logEntry, "protocol", logElem.Protocol)
 			// Logic for destinations
-			destinations := make([]interface{}, len(logElem.Destinations))
+			destinations := make([]any, len(logElem.Destinations))
 			for i, destination := range logElem.Destinations {
-				destinationEntry := make(map[string]interface{})
+				destinationEntry := make(map[string]any)
 				utils.SetPropWithNilCheck(destinationEntry, "type", destination.Type)
 				utils.SetPropWithNilCheck(destinationEntry, "retention_in_days", destination.RetentionInDays)
 				destinations[i] = destinationEntry
