@@ -78,7 +78,7 @@ var FlowlogSchemaDatasource = &schema.Resource{
 
 type Service struct {
 	Client *ionoscloud.APIClient
-	Meta   interface{}
+	Meta   any
 	D      *schema.ResourceData
 }
 

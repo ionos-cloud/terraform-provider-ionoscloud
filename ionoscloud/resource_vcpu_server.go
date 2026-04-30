@@ -288,7 +288,7 @@ func resourceVCPUServer() *schema.Resource {
 	}
 }
 
-func resourceVCPUServerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVCPUServerCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	if err := d.Set("type", constant.VCPUType); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}

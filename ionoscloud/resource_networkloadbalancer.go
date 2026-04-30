@@ -105,7 +105,7 @@ and log the extent to which your instances are being accessed.`,
 	}
 }
 
-func resourceNetworkLoadBalancerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkLoadBalancerCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
@@ -148,7 +148,7 @@ func resourceNetworkLoadBalancerCreate(ctx context.Context, d *schema.ResourceDa
 	}
 
 	if ipsVal, ipsOk := d.GetOk("ips"); ipsOk {
-		ipsVal := ipsVal.([]interface{})
+		ipsVal := ipsVal.([]any)
 		if ipsVal != nil {
 			ips := make([]string, len(ipsVal), len(ipsVal))
 			for idx := range ipsVal {
@@ -159,7 +159,7 @@ func resourceNetworkLoadBalancerCreate(ctx context.Context, d *schema.ResourceDa
 	}
 
 	if lbPrivateIpsVal, lbPrivateIpsOk := d.GetOk("lb_private_ips"); lbPrivateIpsOk {
-		lbPrivateIpsVal := lbPrivateIpsVal.([]interface{})
+		lbPrivateIpsVal := lbPrivateIpsVal.([]any)
 		if lbPrivateIpsVal != nil {
 			lbPrivateIps := make([]string, len(lbPrivateIpsVal), len(lbPrivateIpsVal))
 			for idx := range lbPrivateIpsVal {
@@ -177,7 +177,7 @@ func resourceNetworkLoadBalancerCreate(ctx context.Context, d *schema.ResourceDa
 		}
 		if flowLogList, ok := flowLogs.([]any); ok {
 			for _, flowLogData := range flowLogList {
-				if flowLog, ok := flowLogData.(map[string]interface{}); ok {
+				if flowLog, ok := flowLogData.(map[string]any); ok {
 					*networkLoadBalancer.Entities.Flowlogs.Items = append(*networkLoadBalancer.Entities.Flowlogs.Items, cloudapiflowlog.GetFlowlogFromMap(flowLog))
 				}
 			}
@@ -207,7 +207,7 @@ func resourceNetworkLoadBalancerCreate(ctx context.Context, d *schema.ResourceDa
 	return resourceNetworkLoadBalancerRead(ctx, d, meta)
 }
 
-func resourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
@@ -236,7 +236,7 @@ func resourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceData
 	return nil
 }
 
-func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
@@ -281,7 +281,7 @@ func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceDa
 	if d.HasChange("ips") {
 		oldIps, newIps := d.GetChange("ips")
 		log.Printf("[INFO] network loadbalancer ips changed from %+v to %+v", oldIps, newIps)
-		ipsVal := newIps.([]interface{})
+		ipsVal := newIps.([]any)
 		ips := make([]string, 0)
 		if ipsVal != nil {
 			for _, ip := range ipsVal {
@@ -298,7 +298,7 @@ func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceDa
 	if d.HasChange("lb_private_ips") {
 		oldLbPrivateIps, newLbPrivateIps := d.GetChange("lb_private_ips")
 		log.Printf("[INFO] network loadbalancer lb_private_ips changed from %+v to %+v", oldLbPrivateIps, newLbPrivateIps)
-		lbPrivateIpsVal := newLbPrivateIps.([]interface{})
+		lbPrivateIpsVal := newLbPrivateIps.([]any)
 		lbPrivateIps := make([]string, 0)
 		if lbPrivateIpsVal != nil {
 			for _, privateIp := range lbPrivateIpsVal {
@@ -356,7 +356,7 @@ func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceDa
 	return resourceNetworkLoadBalancerRead(ctx, d, meta)
 }
 
-func resourceNetworkLoadBalancerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkLoadBalancerDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
@@ -383,7 +383,7 @@ func resourceNetworkLoadBalancerDelete(ctx context.Context, d *schema.ResourceDa
 	return nil
 }
 
-func resourceNetworkLoadBalancerImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceNetworkLoadBalancerImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	importID := d.Id()
 
 	location, parts := splitImportID(importID, "/")

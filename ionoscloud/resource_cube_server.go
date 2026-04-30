@@ -170,8 +170,8 @@ func resourceCubeServer() *schema.Resource {
 									}
 								}
 
-								sshKeyPath := d.Get("volume.0.ssh_key_path").([]interface{})
-								oldSshKeyPath := d.Get("ssh_key_path").([]interface{})
+								sshKeyPath := d.Get("volume.0.ssh_key_path").([]any)
+								oldSshKeyPath := d.Get("ssh_key_path").([]any)
 
 								if len(slice.DiffString(slice.AnyToString(sshKeyPath), slice.AnyToString(oldSshKeyPath))) == 0 {
 									return true
@@ -297,7 +297,7 @@ func resourceCubeServer() *schema.Resource {
 	}
 }
 
-func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
@@ -542,7 +542,7 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 	return resourceCubeServerRead(ctx, d, meta)
 }
 
-func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
@@ -652,10 +652,10 @@ func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta in
 
 			fw := cloudapifirewall.SetProperties(firewall)
 
-			network["firewall"] = []map[string]interface{}{fw}
+			network["firewall"] = []map[string]any{fw}
 		}
 
-		networks := []map[string]interface{}{network}
+		networks := []map[string]any{network}
 		if err := d.Set("nic", networks); err != nil {
 			return diagutil.ToDiags(d, fmt.Errorf("[ERROR] unable to save nic to state IonosCloud Server (%s): %w", serverId, err), nil)
 		}
@@ -695,7 +695,7 @@ func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta in
 	return nil
 }
 
-func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
@@ -781,7 +781,7 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		inlineVolumeIds := d.Get("inline_volume_ids")
 
 		if inlineVolumeIds != nil {
-			inlineVolumeIds := inlineVolumeIds.([]interface{})
+			inlineVolumeIds := inlineVolumeIds.([]any)
 			for i, volumeId := range inlineVolumeIds {
 				volumeIdStr := volumeId.(string)
 				volumePath := fmt.Sprintf("volume.%d.", i)
@@ -980,7 +980,7 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	return resourceCubeServerRead(ctx, d, meta)
 }
 
-func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	importID := d.Id()
 
 	location, parts := splitImportID(importID, "/")
@@ -1114,10 +1114,10 @@ func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta 
 
 			fw := cloudapifirewall.SetProperties(firewall)
 
-			network["firewall"] = []map[string]interface{}{fw}
+			network["firewall"] = []map[string]any{fw}
 		}
 
-		networks := []map[string]interface{}{network}
+		networks := []map[string]any{network}
 		if err := d.Set("nic", networks); err != nil {
 			return nil, diagutil.ToError(d, fmt.Errorf("error setting nic %w", err), nil)
 		}
@@ -1132,7 +1132,7 @@ func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta 
 		volumeObj, apiResponse, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, datacenterId, serverId, *server.Properties.BootVolume.Id).Execute()
 		logApiRequestTime(apiResponse)
 		if err == nil {
-			volumeItem := map[string]interface{}{}
+			volumeItem := map[string]any{}
 			if volumeObj.Properties != nil {
 				utils.SetPropWithNilCheck(volumeItem, "name", volumeObj.Properties.Name)
 				utils.SetPropWithNilCheck(volumeItem, "disk_type", volumeObj.Properties.Type)
@@ -1142,7 +1142,7 @@ func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta 
 				utils.SetPropWithNilCheck(volumeItem, "availability_zone", volumeObj.Properties.AvailabilityZone)
 			}
 
-			volumesList := []map[string]interface{}{volumeItem}
+			volumesList := []map[string]any{volumeItem}
 			if err := d.Set("volume", volumesList); err != nil {
 				return nil, diagutil.ToError(d, fmt.Errorf("error setting volume %w", err), nil)
 			}

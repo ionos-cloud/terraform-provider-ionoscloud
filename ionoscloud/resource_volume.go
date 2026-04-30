@@ -180,7 +180,7 @@ func resourceVolume() *schema.Resource {
 	}
 }
 
-func checkVolumeImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
+func checkVolumeImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ any) error {
 
 	// we do not want to check in case of resource creation
 	if diff.Id() == "" {
@@ -214,7 +214,7 @@ func checkVolumeImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ 
 
 }
 
-func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	var image, imageAlias string
 
 	dcId := d.Get("datacenter_id").(string)
@@ -320,7 +320,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	return resourceVolumeRead(ctx, d, meta)
 }
 
-func resourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	dcId := d.Get("datacenter_id").(string)
 	serverID := d.Get("server_id").(string)
 	volumeID := d.Id()
@@ -358,7 +358,7 @@ func resourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta interf
 	return nil
 }
 
-func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	properties := ionoscloud.VolumeProperties{}
 	dcId := d.Get("datacenter_id").(string)
 	location := d.Get("location").(string)
@@ -438,7 +438,7 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	return resourceVolumeRead(ctx, d, meta)
 }
 
-func resourceVolumeDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVolumeDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	dcId := d.Get("datacenter_id").(string)
 	location := d.Get("location").(string)
 
@@ -464,7 +464,7 @@ func resourceVolumeDelete(ctx context.Context, d *schema.ResourceData, meta inte
 	return nil
 }
 
-func resourceVolumeImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceVolumeImporter(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	importID := d.Id()
 
 	location, parts := splitImportID(importID, "/")
@@ -706,13 +706,13 @@ func getVolumeData(d *schema.ResourceData, path, serverType string) (*ionoscloud
 		volume.Name = &vStr
 	}
 
-	var sshKeys []interface{}
+	var sshKeys []any
 
 	if serverType != constant.VCPUType {
 		if v, ok := d.GetOk(path + "ssh_key_path"); ok {
-			sshKeys = v.([]interface{})
+			sshKeys = v.([]any)
 		} else if v, ok := d.GetOk("ssh_key_path"); ok {
-			sshKeys = v.([]interface{})
+			sshKeys = v.([]any)
 		} else {
 			if err := d.Set("ssh_key_path", [][]string{}); err != nil {
 				return nil, err
@@ -721,9 +721,9 @@ func getVolumeData(d *schema.ResourceData, path, serverType string) (*ionoscloud
 	}
 
 	if v, ok := d.GetOk(path + "ssh_keys"); ok {
-		sshKeys = v.([]interface{})
+		sshKeys = v.([]any)
 	} else if v, ok := d.GetOk("ssh_keys"); ok {
-		sshKeys = v.([]interface{})
+		sshKeys = v.([]any)
 	}
 
 	if len(sshKeys) != 0 {

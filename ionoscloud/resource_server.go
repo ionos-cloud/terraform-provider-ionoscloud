@@ -239,8 +239,8 @@ func resourceServer() *schema.Resource {
 									}
 								}
 
-								sshKeyPath := d.Get("volume.0.ssh_key_path").([]interface{})
-								oldSshKeyPath := d.Get("ssh_key_path").([]interface{})
+								sshKeyPath := d.Get("volume.0.ssh_key_path").([]any)
+								oldSshKeyPath := d.Get("ssh_key_path").([]any)
 
 								difKeypath := slice.DiffString(slice.AnyToString(sshKeyPath), slice.AnyToString(oldSshKeyPath))
 								if len(difKeypath) == 0 {
@@ -265,8 +265,8 @@ func resourceServer() *schema.Resource {
 									}
 								}
 
-								sshKeys := d.Get("volume.0.ssh_keys").([]interface{})
-								oldSshKeys := d.Get("ssh_keys").([]interface{})
+								sshKeys := d.Get("volume.0.ssh_keys").([]any)
+								oldSshKeys := d.Get("ssh_keys").([]any)
 
 								if len(slice.DiffString(slice.AnyToString(sshKeys), slice.AnyToString(oldSshKeys))) == 0 {
 									return true
@@ -411,7 +411,7 @@ func resourceServer() *schema.Resource {
 	}
 }
 
-func checkServerImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
+func checkServerImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ any) error {
 	allowReplace := diff.Get("allow_replace").(bool)
 	// allows the immutable fields to be updated
 	if allowReplace {
@@ -464,7 +464,7 @@ func checkServerImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ 
 
 }
 
-func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
@@ -541,8 +541,8 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 		serverReq.Entities.Nics = &ionoscloud.Nics{
 			Items: &[]ionoscloud.Nic{},
 		}
-		if nics.([]interface{}) != nil {
-			for nicIndex := range nics.([]interface{}) {
+		if nics.([]any) != nil {
+			for nicIndex := range nics.([]any) {
 				nicPath := fmt.Sprintf("nic.%d.", nicIndex)
 				nic, err := cloudapinic.GetNicFromSchemaCreate(d, nicPath)
 				if err != nil {
@@ -558,8 +558,8 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 						},
 					}
 
-					if firewallRules.([]interface{}) != nil && len(firewallRules.([]interface{})) > 0 {
-						fwRulesIntf := firewallRules.([]interface{})
+					if firewallRules.([]any) != nil && len(firewallRules.([]any)) > 0 {
+						fwRulesIntf := firewallRules.([]any)
 
 						fwRulesProperties := make([]ionoscloud.FirewallruleProperties, len(fwRulesIntf))
 						err = utils.DecodeInterfaceToStruct(fwRulesIntf, fwRulesProperties)
@@ -730,7 +730,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	return resourceServerRead(ctx, d, meta)
 }
 
-func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
@@ -757,12 +757,12 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta interf
 	return nil
 }
 
-func SetVolumeProperties(volume ionoscloud.Volume) map[string]interface{} {
+func SetVolumeProperties(volume ionoscloud.Volume) map[string]any {
 
-	volumeMap := map[string]interface{}{}
+	volumeMap := map[string]any{}
 	if volume.Properties != nil {
 		if volume.Properties.SshKeys != nil && len(*volume.Properties.SshKeys) > 0 {
-			var sshKeys []interface{}
+			var sshKeys []any
 			for _, sshKey := range *volume.Properties.SshKeys {
 				sshKeys = append(sshKeys, sshKey)
 			}
@@ -793,7 +793,7 @@ func SetVolumeProperties(volume ionoscloud.Volume) map[string]interface{} {
 	return volumeMap
 }
 
-func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
@@ -896,7 +896,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 		inlineVolumeIds := d.Get("inline_volume_ids")
 
 		if inlineVolumeIds != nil {
-			inlineVolumeIds := inlineVolumeIds.([]interface{})
+			inlineVolumeIds := inlineVolumeIds.([]any)
 			for i, volumeId := range inlineVolumeIds {
 				volumeIdStr := volumeId.(string)
 				volumePath := fmt.Sprintf("volume.%d.", i)
@@ -1131,10 +1131,10 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	return resourceServerRead(ctx, d, meta)
 }
 
-func deleteInlineVolumes(ctx context.Context, d *schema.ResourceData, meta interface{}, client *ionoscloud.APIClient) diag.Diagnostics {
+func deleteInlineVolumes(ctx context.Context, d *schema.ResourceData, meta any, client *ionoscloud.APIClient) diag.Diagnostics {
 	dcId := d.Get("datacenter_id").(string)
 
-	volumeIds := d.Get("inline_volume_ids").([]interface{})
+	volumeIds := d.Get("inline_volume_ids").([]any)
 	for _, volumeId := range volumeIds {
 		apiResponse, err := client.VolumesApi.DatacentersVolumesDelete(ctx, dcId, volumeId.(string)).Execute()
 		logApiRequestTime(apiResponse)
@@ -1156,7 +1156,7 @@ func deleteInlineVolumes(ctx context.Context, d *schema.ResourceData, meta inter
 	return nil
 }
 
-func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
@@ -1197,7 +1197,7 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta inte
 }
 
 // resourceServerImport can be either ionoscloud_server.myserver {datacenter uuid}/{server uuid} or  ionoscloud_server.myserver {datacenter uuid}/{server uuid}/{primary nic id}/{firewall rule id}
-func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	importID := d.Id()
 	location, parts := splitImportID(importID, "/")
 
@@ -1284,9 +1284,9 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta inte
 	return []*schema.ResourceData{d}, nil
 }
 
-func SetCdromProperties(image ionoscloud.Image) map[string]interface{} {
+func SetCdromProperties(image ionoscloud.Image) map[string]any {
 
-	cdrom := make(map[string]interface{})
+	cdrom := make(map[string]any)
 	if image.Properties != nil {
 		utils.SetPropWithNilCheck(cdrom, "name", image.Properties.Name)
 		utils.SetPropWithNilCheck(cdrom, "description", image.Properties.Description)
@@ -1553,7 +1553,7 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 
 	// take nic and firewall from schema if set is used in resource read, else take it from entities
 	var nicId string
-	firewallRuleIds := d.Get("firewallrule_ids").([]interface{})
+	firewallRuleIds := d.Get("firewallrule_ids").([]any)
 
 	if nicIntf, primaryNicOk := d.GetOk("primary_nic"); primaryNicOk {
 		nicId = nicIntf.(string)
@@ -1576,8 +1576,8 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 				return err
 			}
 		}
-		var nicEntry map[string]interface{}
-		var fwRulesEntries []map[string]interface{}
+		var nicEntry map[string]any
+		var fwRulesEntries []map[string]any
 
 		if nic != nil && nic.Properties != nil {
 			// fixes #467
@@ -1610,12 +1610,12 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 			}
 			utils.SetPropWithNilCheck(nicEntry, "security_groups_ids", nsgIDs)
 		}
-		nics := []map[string]interface{}{}
+		nics := []map[string]any{}
 		if fwRulesEntries != nil {
 			nicEntry["firewall"] = fwRulesEntries
 		}
 		if len(nicEntry) > 0 {
-			nics = []map[string]interface{}{nicEntry}
+			nics = []map[string]any{nicEntry}
 		}
 		if err := d.Set("nic", nics); err != nil {
 			return fmt.Errorf("error settings nics %w", err)

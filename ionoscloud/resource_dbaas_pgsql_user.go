@@ -57,7 +57,7 @@ func resourceDbaasPgSqlUser() *schema.Resource {
 	}
 }
 
-func resourceDbaasPgSqlUserCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDbaasPgSqlUserCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
 	if err != nil {
 		return diag.FromErr(err)
@@ -87,7 +87,7 @@ func resourceDbaasPgSqlUserCreate(ctx context.Context, d *schema.ResourceData, m
 	return diagutil.ToDiags(d, dbaas.SetUserPgSqlData(d, &user), nil)
 }
 
-func resourceDbaasPgSqlUserUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDbaasPgSqlUserUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
 	if err != nil {
 		return diag.FromErr(err)
@@ -119,7 +119,7 @@ func resourceDbaasPgSqlUserUpdate(ctx context.Context, d *schema.ResourceData, m
 	return diagutil.ToDiags(d, dbaas.SetUserPgSqlData(d, &user), nil)
 }
 
-func resourceDbaasPgSqlUserRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDbaasPgSqlUserRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
 	if err != nil {
 		return diag.FromErr(err)
@@ -143,7 +143,7 @@ func resourceDbaasPgSqlUserRead(ctx context.Context, d *schema.ResourceData, met
 	return nil
 }
 
-func resourceDbaaSPgSqlUserDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDbaaSPgSqlUserDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
 	if err != nil {
 		return diag.FromErr(err)
@@ -162,7 +162,7 @@ func resourceDbaaSPgSqlUserDelete(ctx context.Context, d *schema.ResourceData, m
 	return nil
 }
 
-func resourceDbaasPgSqlUserImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceDbaasPgSqlUserImporter(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	importID := d.Id()
 	location, parts := splitImportID(importID, "/")
 	if len(parts) != 2 {

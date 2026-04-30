@@ -140,7 +140,7 @@ and log the extent to which your instances are being accessed.`,
 // ForceNewForFlowlogChanges - sets ForceNew either on `flowlog` if it is being deleted, or
 // on the field that changes. This is needed because the API does not support PATCH for all flowlog fields except name.
 // The API also does not support DELETE on the flowlog, so the whole resource needs to be re-created.
-func ForceNewForFlowlogChanges(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+func ForceNewForFlowlogChanges(_ context.Context, d *schema.ResourceDiff, _ any) error {
 	// we do not want to check in case of resource creation
 	if d.Id() == "" {
 		return nil
@@ -185,7 +185,7 @@ func ForceNewForFlowlogChanges(_ context.Context, d *schema.ResourceDiff, _ inte
 	}
 	return nil
 }
-func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
@@ -248,7 +248,7 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 	return resourceNicRead(ctx, d, meta)
 }
 
-func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
@@ -276,7 +276,7 @@ func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta interface
 	return nil
 }
 
-func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
@@ -338,7 +338,7 @@ func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 	return resourceNicRead(ctx, d, meta)
 }
 
-func resourceNicDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNicDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
@@ -357,7 +357,7 @@ func resourceNicDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 	return nil
 }
 
-func resourceNicImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceNicImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	importID := d.Id()
 
 	location, parts := splitImportID(importID, "/")

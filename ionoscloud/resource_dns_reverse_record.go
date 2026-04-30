@@ -40,7 +40,7 @@ func resourceDNSReverseRecord() *schema.Resource {
 	}
 }
 
-func reverseRecordCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func reverseRecordCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).DNSClient
 
 	recordResponse, apiResponse, err := client.CreateReverseRecord(ctx, d)
@@ -52,7 +52,7 @@ func reverseRecordCreate(ctx context.Context, d *schema.ResourceData, meta inter
 	return reverseRecordRead(ctx, d, meta)
 }
 
-func reverseRecordRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func reverseRecordRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).DNSClient
 	recordId := d.Id()
 
@@ -71,7 +71,7 @@ func reverseRecordRead(ctx context.Context, d *schema.ResourceData, meta interfa
 	return nil
 }
 
-func reverseRecordUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func reverseRecordUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).DNSClient
 	recordId := d.Id()
 
@@ -82,7 +82,7 @@ func reverseRecordUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 	return reverseRecordRead(ctx, d, meta)
 }
 
-func reverseRecordDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func reverseRecordDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).DNSClient
 	recordId := d.Id()
 
@@ -101,7 +101,7 @@ func reverseRecordDelete(ctx context.Context, d *schema.ResourceData, meta inter
 	return nil
 }
 
-func reverseRecordImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func reverseRecordImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	client := meta.(bundleclient.SdkBundle).DNSClient
 
 	recordId := d.Id()

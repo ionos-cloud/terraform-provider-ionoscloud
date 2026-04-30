@@ -1,5 +1,4 @@
 //go:build all || kafka
-// +build all kafka
 
 package ionoscloud
 

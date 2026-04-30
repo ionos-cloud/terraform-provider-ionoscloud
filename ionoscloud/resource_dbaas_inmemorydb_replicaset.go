@@ -202,7 +202,7 @@ func resourceDBaaSInMemoryDBReplicaSet() *schema.Resource {
 	}
 }
 
-func replicaSetCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func replicaSetCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).InMemoryDBClient
 
 	replicaSet := inmemorydb.GetReplicaSetDataCreate(d)
@@ -220,7 +220,7 @@ func replicaSetCreate(ctx context.Context, d *schema.ResourceData, meta interfac
 	return replicaSetRead(ctx, d, meta)
 }
 
-func replicaSetDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func replicaSetDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).InMemoryDBClient
 	replicaSetID := d.Id()
 	apiResponse, err := client.DeleteReplicaSet(ctx, replicaSetID, d.Get("location").(string))
@@ -241,7 +241,7 @@ func replicaSetDelete(ctx context.Context, d *schema.ResourceData, meta interfac
 	return nil
 }
 
-func replicaSetRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func replicaSetRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).InMemoryDBClient
 	replicaSetID := d.Id()
 	replicaSet, apiResponse, err := client.GetReplicaSet(ctx, replicaSetID, d.Get("location").(string))
@@ -259,7 +259,7 @@ func replicaSetRead(ctx context.Context, d *schema.ResourceData, meta interface{
 	return nil
 }
 
-func replicaSetUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func replicaSetUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).InMemoryDBClient
 	replicaSetID := d.Id()
 	replicaSet := inmemorydb.GetReplicaSetDataUpdate(d)
@@ -277,7 +277,7 @@ func replicaSetUpdate(ctx context.Context, d *schema.ResourceData, meta interfac
 	return nil
 }
 
-func replicaSetImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func replicaSetImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	client := meta.(bundleclient.SdkBundle).InMemoryDBClient
 	parts := strings.Split(d.Id(), ":")
 	if len(parts) != 2 {

@@ -121,7 +121,7 @@ func resourceLoggingPipeline() *schema.Resource {
 	}
 }
 
-func pipelineCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func pipelineCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).LoggingClient
 	pipelineResponse, apiResponse, err := client.CreatePipeline(ctx, d)
 	if err != nil {
@@ -143,7 +143,7 @@ func pipelineCreate(ctx context.Context, d *schema.ResourceData, meta interface{
 	return pipelineRead(ctx, d, meta)
 }
 
-func pipelineRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func pipelineRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).LoggingClient
 	pipelineID := d.Id()
 	location := ""
@@ -168,7 +168,7 @@ func pipelineRead(ctx context.Context, d *schema.ResourceData, meta interface{})
 	return nil
 }
 
-func pipelineDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func pipelineDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).LoggingClient
 	pipelineID := d.Id()
 	location := d.Get("location").(string)
@@ -188,7 +188,7 @@ func pipelineDelete(ctx context.Context, d *schema.ResourceData, meta interface{
 	return nil
 }
 
-func pipelineUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func pipelineUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).LoggingClient
 	pipelineID := d.Id()
 
@@ -206,7 +206,7 @@ func pipelineUpdate(ctx context.Context, d *schema.ResourceData, meta interface{
 	return nil
 }
 
-func pipelineImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func pipelineImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), ":")
 	if len(parts) != 2 {
 		return nil, diagutil.ToError(d, fmt.Errorf("expected ID in the format location:id"), nil)

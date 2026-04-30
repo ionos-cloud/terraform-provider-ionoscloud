@@ -1,5 +1,4 @@
 //go:build all || autoscaling
-// +build all autoscaling
 
 package ionoscloud
 

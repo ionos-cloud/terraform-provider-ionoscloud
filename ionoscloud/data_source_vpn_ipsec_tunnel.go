@@ -143,7 +143,7 @@ func dataSourceVpnIPSecTunnel() *schema.Resource {
 	}
 }
 
-func dataSourceVpnIPSecTunnelRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceVpnIPSecTunnelRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).VPNClient
 	idValue, idOk := d.GetOk("id")
 	nameValue, nameOk := d.GetOk("name")

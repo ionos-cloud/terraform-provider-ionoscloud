@@ -19,7 +19,7 @@ import (
 
 type Service struct {
 	Client *ionoscloud.APIClient
-	Meta   interface{}
+	Meta   any
 	D      *schema.ResourceData
 }
 
@@ -85,9 +85,9 @@ func (fs *Service) Update(ctx context.Context, datacenterId, serverId, nicId, id
 	return &firewall, apiResponse, nil
 }
 
-func SetProperties(firewall ionoscloud.FirewallRule) map[string]interface{} {
+func SetProperties(firewall ionoscloud.FirewallRule) map[string]any {
 
-	fw := map[string]interface{}{}
+	fw := map[string]any{}
 	if firewall.Properties != nil {
 		utils.SetPropWithNilCheck(fw, "protocol", firewall.Properties.Protocol)
 		utils.SetPropWithNilCheck(fw, "name", firewall.Properties.Name)
@@ -108,7 +108,7 @@ func SetProperties(firewall ionoscloud.FirewallRule) map[string]interface{} {
 }
 
 // DecodeTo - receives old and new values as slice of interfaces from schema, decodes and returns firewall properties
-func DecodeTo(oldValues, newValues []interface{}) ([]ionoscloud.FirewallruleProperties, []ionoscloud.FirewallruleProperties, error) {
+func DecodeTo(oldValues, newValues []any) ([]ionoscloud.FirewallruleProperties, []ionoscloud.FirewallruleProperties, error) {
 	oldFirewallProperties := make([]ionoscloud.FirewallruleProperties, len(oldValues))
 	newFirewallProperties := make([]ionoscloud.FirewallruleProperties, len(newValues))
 	err := utils.DecodeInterfaceToStruct(newValues, newFirewallProperties)
@@ -143,8 +143,8 @@ func (fs *Service) GetAndUpdateFirewalls(ctx context.Context, dcId, serverId, ni
 	firewallRuleIds = []string{}
 	if fs.D.HasChange(path) {
 		oldValues, newValues := fs.D.GetChange(path)
-		oldValuesIntf := oldValues.([]interface{})
-		newValuesIntf := newValues.([]interface{})
+		oldValuesIntf := oldValues.([]any)
+		newValuesIntf := newValues.([]any)
 		onlyOld := slice.Difference(oldValuesIntf, newValuesIntf)
 		onlyNew := slice.Difference(newValuesIntf, oldValuesIntf)
 		oldFirewalls, newFirewalls, err := DecodeTo(onlyOld, onlyNew)
@@ -152,14 +152,14 @@ func (fs *Service) GetAndUpdateFirewalls(ctx context.Context, dcId, serverId, ni
 			return firewallRules, firewallRuleIds, diag.FromErr(fmt.Errorf("could not get changes for firewall rules %w", err))
 		}
 
-		firewallRuleIdsIntf := fs.D.Get("firewallrule_ids").([]interface{})
+		firewallRuleIdsIntf := fs.D.Get("firewallrule_ids").([]any)
 		firewallRuleIds = slice.AnyToString(firewallRuleIdsIntf)
 
 		if nicId != "" {
 			// delete old rules
 			for idx := range oldFirewalls {
 				// we need the id, but we can't get it from oldFirewalls because it's only the property
-				oldId := onlyOld[idx].(map[string]interface{})["id"].(string)
+				oldId := onlyOld[idx].(map[string]any)["id"].(string)
 
 				if deleteRule := !utils.IsValueInSliceOfMap(onlyNew, "id", oldId); deleteRule {
 					_, err = fs.Delete(ctx, dcId, serverId, nicId, oldId)
@@ -184,7 +184,7 @@ func (fs *Service) GetAndUpdateFirewalls(ctx context.Context, dcId, serverId, ni
 			}
 			var firewall *ionoscloud.FirewallRule
 			if nicId != "" {
-				if id, ok := onlyNew[idx].(map[string]interface{})["id"]; ok && id != "" {
+				if id, ok := onlyNew[idx].(map[string]any)["id"]; ok && id != "" {
 					// do not send protocol, it's an update
 					*fwRule.Properties = SetNullableFields(*fwRule.Properties)
 					fwRule.Properties.Protocol = nil
@@ -228,8 +228,8 @@ func SetNullableFields(prop ionoscloud.FirewallruleProperties) ionoscloud.Firewa
 	return prop
 }
 
-func (fs *Service) AddToMapIfRuleExists(ctx context.Context, datacenterId, serverId, nicId, ruleId string) (map[string]interface{}, error) {
-	var firewallEntry map[string]interface{}
+func (fs *Service) AddToMapIfRuleExists(ctx context.Context, datacenterId, serverId, nicId, ruleId string) (map[string]any, error) {
+	var firewallEntry map[string]any
 	if datacenterId == "" || serverId == "" || nicId == "" || ruleId == "" {
 		log.Printf("[DEBUG] Cannot search for firewall rules without dcId %s, serverId %s, nicId %s, ruleId %s", datacenterId, serverId, nicId, ruleId)
 		return firewallEntry, nil

@@ -68,7 +68,7 @@ func resourceDNSRecord() *schema.Resource {
 	}
 }
 
-func recordCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func recordCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).DNSClient
 	zoneId := d.Get("zone_id").(string)
 
@@ -86,7 +86,7 @@ func recordCreate(ctx context.Context, d *schema.ResourceData, meta interface{})
 	return recordRead(ctx, d, meta)
 }
 
-func recordRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func recordRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).DNSClient
 	zoneId := d.Get("zone_id").(string)
 	recordId := d.Id()
@@ -106,7 +106,7 @@ func recordRead(ctx context.Context, d *schema.ResourceData, meta interface{}) d
 	return nil
 }
 
-func recordUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func recordUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).DNSClient
 	zoneId := d.Get("zone_id").(string)
 	recordId := d.Id()
@@ -123,7 +123,7 @@ func recordUpdate(ctx context.Context, d *schema.ResourceData, meta interface{})
 	return recordRead(ctx, d, meta)
 }
 
-func recordDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func recordDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).DNSClient
 	zoneId := d.Get("zone_id").(string)
 	recordId := d.Id()
@@ -143,7 +143,7 @@ func recordDelete(ctx context.Context, d *schema.ResourceData, meta interface{})
 	return nil
 }
 
-func recordImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func recordImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	client := meta.(bundleclient.SdkBundle).DNSClient
 
 	// Split the string provided in order to get the IDs for both zone and record.

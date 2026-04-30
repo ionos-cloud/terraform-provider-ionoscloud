@@ -115,7 +115,7 @@ func setWireguardPeersPostRequest(d *schema.ResourceData) (*vpn.WireguardPeerCre
 		request.Properties.Endpoint = getEndpointData(d)
 	}
 	if v, ok := d.GetOk("allowed_ips"); ok {
-		raw := v.([]interface{})
+		raw := v.([]any)
 		ips := make([]string, len(raw))
 		err := utils.DecodeInterfaceToStruct(raw, ips)
 		if err != nil {
@@ -143,7 +143,7 @@ func getEndpointData(d *schema.ResourceData) *vpn.WireguardEndpoint {
 			}
 			if port, ok := d.GetOk("endpoint.0.port"); ok {
 				port := port.(int)
-				endpoint.Port = shared.ToPtr(int32(port))
+				endpoint.Port = new(int32(port))
 			}
 		}
 	}
@@ -159,14 +159,14 @@ func setWireguardPeerPatchRequest(d *schema.ResourceData) (vpn.WireguardPeerEnsu
 	request.Properties.PublicKey = d.Get("public_key").(string)
 
 	if v, ok := d.GetOk("description"); ok {
-		request.Properties.Description = shared.ToPtr(v.(string))
+		request.Properties.Description = new(v.(string))
 	}
 	if _, ok := d.GetOk("endpoint"); ok {
 		request.Properties.Endpoint = getEndpointData(d)
 	}
 
 	if v, ok := d.GetOk("allowed_ips"); ok {
-		raw := v.([]interface{})
+		raw := v.([]any)
 		ips := make([]string, len(raw))
 		err := utils.DecodeInterfaceToStruct(raw, ips)
 		if err != nil {

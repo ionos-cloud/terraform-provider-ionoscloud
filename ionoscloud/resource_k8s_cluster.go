@@ -136,7 +136,7 @@ func resourcek8sCluster() *schema.Resource {
 		Timeouts: &resourceDefaultTimeouts,
 	}
 }
-func checkClusterImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
+func checkClusterImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ any) error {
 
 	allowReplace := diff.Get("allow_replace").(bool)
 	if allowReplace {
@@ -161,7 +161,7 @@ func checkClusterImmutableFields(_ context.Context, diff *schema.ResourceDiff, _
 	return nil
 
 }
-func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
@@ -217,7 +217,7 @@ func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	if apiSubnet, apiSubnetOk := d.GetOk("api_subnet_allow_list"); apiSubnetOk {
-		apiSubnet := apiSubnet.([]interface{})
+		apiSubnet := apiSubnet.([]any)
 		if apiSubnet != nil && len(apiSubnet) > 0 {
 			apiSubnets := make([]string, 0)
 			for _, value := range apiSubnet {
@@ -231,7 +231,7 @@ func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	if s3Bucket, s3BucketOk := d.GetOk("s3_buckets"); s3BucketOk {
-		s3BucketValues := s3Bucket.([]interface{})
+		s3BucketValues := s3Bucket.([]any)
 		if s3BucketValues != nil && len(s3BucketValues) > 0 {
 			var s3Buckets []ionoscloud.S3Bucket
 			for index := range s3BucketValues {
@@ -292,7 +292,7 @@ func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 	return resourcek8sClusterRead(ctx, d, meta)
 }
 
-func resourcek8sClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourcek8sClusterRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
@@ -319,7 +319,7 @@ func resourcek8sClusterRead(ctx context.Context, d *schema.ResourceData, meta in
 	return nil
 }
 
-func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
@@ -355,7 +355,7 @@ func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 		_, newMw := d.GetChange("maintenance_window.0")
 
-		if newMw.(map[string]interface{}) != nil {
+		if newMw.(map[string]any) != nil {
 
 			updateMaintenanceWindow := false
 			dayofTheWeek := d.Get("maintenance_window.0.day_of_the_week").(string)
@@ -394,7 +394,7 @@ func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 	if d.HasChange("api_subnet_allow_list") {
 		_, newApiSubnet := d.GetChange("api_subnet_allow_list")
-		apiSubnet := newApiSubnet.([]interface{})
+		apiSubnet := newApiSubnet.([]any)
 		apiSubnets := make([]string, 0)
 		if apiSubnet != nil && len(apiSubnet) > 0 {
 			for _, value := range apiSubnet {
@@ -407,7 +407,7 @@ func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 	if d.HasChange("s3_buckets") {
 		_, newS3Buckets := d.GetChange("s3_buckets")
-		s3BucketValues := newS3Buckets.([]interface{})
+		s3BucketValues := newS3Buckets.([]any)
 		s3Buckets := make([]ionoscloud.S3Bucket, 0)
 		if s3BucketValues != nil && len(s3BucketValues) > 0 {
 			for index := range s3BucketValues {
@@ -425,7 +425,6 @@ func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		}
 		request.Properties.S3Buckets = &s3Buckets
 	}
-
 	_, apiResponse, err := client.KubernetesApi.K8sPut(ctx, d.Id()).KubernetesCluster(request).Execute()
 	logApiRequestTime(apiResponse)
 
@@ -463,7 +462,7 @@ func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	return resourcek8sClusterRead(ctx, d, meta)
 }
 
-func resourcek8sClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourcek8sClusterDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
@@ -508,7 +507,7 @@ func resourcek8sClusterDelete(ctx context.Context, d *schema.ResourceData, meta 
 	return nil
 }
 
-func resourceK8sClusterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceK8sClusterImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	importID := d.Id()
 
 	location, parts := splitImportID(importID, ":")
@@ -579,7 +578,7 @@ func setK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.KubernetesClu
 		}
 
 		if cluster.Properties.ViableNodePoolVersions != nil && len(*cluster.Properties.ViableNodePoolVersions) > 0 {
-			var viableNodePoolVersions []interface{}
+			var viableNodePoolVersions []any
 			for _, viableNodePoolVersion := range *cluster.Properties.ViableNodePoolVersions {
 				viableNodePoolVersions = append(viableNodePoolVersions, viableNodePoolVersion)
 			}
@@ -613,7 +612,7 @@ func setK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.KubernetesClu
 		}
 
 		if cluster.Properties.ApiSubnetAllowList != nil {
-			apiSubnetAllowLists := make([]interface{}, len(*cluster.Properties.ApiSubnetAllowList), len(*cluster.Properties.ApiSubnetAllowList))
+			apiSubnetAllowLists := make([]any, len(*cluster.Properties.ApiSubnetAllowList), len(*cluster.Properties.ApiSubnetAllowList))
 			for i, apiSubnetAllowList := range *cluster.Properties.ApiSubnetAllowList {
 				apiSubnetAllowLists[i] = apiSubnetAllowList
 			}
@@ -621,16 +620,16 @@ func setK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.KubernetesClu
 				return fmt.Errorf("error while setting api_subnet_allow_list property for cluster with ID: %s, error: %w", d.Id(), err)
 			}
 		} else {
-			var emptySlice []interface{}
+			var emptySlice []any
 			if err := d.Set("api_subnet_allow_list", emptySlice); err != nil {
 				return fmt.Errorf("error while setting api_subnet_allow_list property for cluster with ID: %s, error: %w", d.Id(), err)
 			}
 		}
 
 		if cluster.Properties.S3Buckets != nil {
-			s3Buckets := make([]interface{}, len(*cluster.Properties.S3Buckets), len(*cluster.Properties.S3Buckets))
+			s3Buckets := make([]any, len(*cluster.Properties.S3Buckets), len(*cluster.Properties.S3Buckets))
 			for i, s3Bucket := range *cluster.Properties.S3Buckets {
-				s3BucketEntry := make(map[string]interface{})
+				s3BucketEntry := make(map[string]any)
 				s3BucketEntry["name"] = *s3Bucket.Name
 				s3Buckets[i] = s3BucketEntry
 			}

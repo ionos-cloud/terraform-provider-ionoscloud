@@ -96,7 +96,7 @@ func resourceVpnWireguardPeer() *schema.Resource {
 	}
 }
 
-func resourceVpnWireguardPeerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVpnWireguardPeerCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).VPNClient
 	gatewayID := d.Get("gateway_id").(string)
 	peer, apiResponse, err := client.CreateWireguardGatewayPeers(ctx, d, gatewayID)
@@ -111,7 +111,7 @@ func resourceVpnWireguardPeerCreate(ctx context.Context, d *schema.ResourceData,
 	return nil
 }
 
-func resourceVpnWireguardPeerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVpnWireguardPeerRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).VPNClient
 	gatewayID := d.Get("gateway_id").(string)
 	location := d.Get("location").(string)
@@ -130,7 +130,7 @@ func resourceVpnWireguardPeerRead(ctx context.Context, d *schema.ResourceData, m
 	return nil
 }
 
-func resourceVpnWireguardPeerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVpnWireguardPeerUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).VPNClient
 	gatewayID := d.Get("gateway_id").(string)
 	_, apiResponse, err := client.UpdateWireguardPeer(ctx, gatewayID, d.Id(), d)
@@ -140,7 +140,7 @@ func resourceVpnWireguardPeerUpdate(ctx context.Context, d *schema.ResourceData,
 	return nil
 }
 
-func resourceVpnWireguardPeerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVpnWireguardPeerDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).VPNClient
 	gatewayID := d.Get("gateway_id").(string)
 	location := d.Get("location").(string)
@@ -163,7 +163,7 @@ func resourceVpnWireguardPeerDelete(ctx context.Context, d *schema.ResourceData,
 	return nil
 }
 
-func resourceVpnWireguardPeerImport(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+func resourceVpnWireguardPeerImport(ctx context.Context, d *schema.ResourceData, m any) ([]*schema.ResourceData, error) {
 	client := m.(bundleclient.SdkBundle).VPNClient
 	parts := strings.Split(d.Id(), ":")
 	if len(parts) != 3 {

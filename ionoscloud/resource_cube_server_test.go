@@ -1,5 +1,4 @@
 //go:build compute || all || server || cube
-// +build compute all server cube
 
 package ionoscloud
 

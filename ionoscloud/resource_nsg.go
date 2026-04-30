@@ -88,7 +88,7 @@ func resourceNSGCreate(ctx context.Context, d *schema.ResourceData, meta any) di
 	return diagutil.ToDiags(d, setNSGData(d, &securityGroup), nil)
 }
 
-func resourceNSGRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNSGRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	datacenterID := d.Get("datacenter_id").(string)
 	location := d.Get("location").(string)
 
@@ -109,7 +109,7 @@ func resourceNSGRead(ctx context.Context, d *schema.ResourceData, meta interface
 	return nil
 }
 
-func resourceNSGUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNSGUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	datacenterID := d.Get("datacenter_id").(string)
 	sgName := d.Get("name").(string)
 	sgDescription := d.Get("description").(string)
@@ -142,7 +142,7 @@ func resourceNSGUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 	return resourceNSGRead(ctx, d, meta)
 }
 
-func resourceNSGDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNSGDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	datacenterID := d.Get("datacenter_id").(string)
 	location := d.Get("location").(string)
 
@@ -166,7 +166,7 @@ func resourceNSGDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 	return nil
 }
 
-func resourceNSGImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceNSGImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	importID := d.Id()
 
 	location, parts := splitImportID(importID, "/")

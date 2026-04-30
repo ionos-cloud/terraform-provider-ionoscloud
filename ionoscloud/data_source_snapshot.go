@@ -104,7 +104,7 @@ func dataSourceSnapshot() *schema.Resource {
 	}
 }
 
-func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")
 	location, locationOk := d.GetOk("location")

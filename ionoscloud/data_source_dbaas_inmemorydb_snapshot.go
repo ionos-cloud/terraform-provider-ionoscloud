@@ -64,7 +64,7 @@ func dataSourceDBaaSInMemoryDBSnapshot() *schema.Resource {
 	}
 }
 
-func dataSourceInMemoryDBSnapshotRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceInMemoryDBSnapshotRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).InMemoryDBClient
 	id := d.Get("id").(string)
 	location := d.Get("location").(string)

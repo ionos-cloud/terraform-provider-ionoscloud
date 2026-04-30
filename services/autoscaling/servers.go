@@ -26,9 +26,9 @@ func (c *Client) GetAllGroupServers(ctx context.Context, groupId string) (autosc
 func SetAutoscalingServersData(d *schema.ResourceData, groupServers autoscaling.ServerCollection) diag.Diagnostics {
 
 	if groupServers.Items != nil {
-		var servers []interface{}
+		var servers []any
 		for _, groupServer := range groupServers.Items {
-			serverEntry := make(map[string]interface{})
+			serverEntry := make(map[string]any)
 			serverEntry["id"] = groupServer.Id
 			servers = append(servers, serverEntry)
 		}

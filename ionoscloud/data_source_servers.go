@@ -253,7 +253,7 @@ func dataSourceFiltersSchema() *schema.Schema {
 	}
 }
 
-func dataSourceServersRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceServersRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
@@ -268,7 +268,7 @@ func dataSourceServersRead(ctx context.Context, d *schema.ResourceData, meta int
 	filters, filtersOk := d.GetOk("filter")
 	if filtersOk {
 		for _, v := range filters.(*schema.Set).List() {
-			filter := v.(map[string]interface{})
+			filter := v.(map[string]any)
 			// we want to convert for example cpu_family to cpuFamily
 			name := strcase.ToLowerCamel(filter["name"].(string))
 			value := filter["value"].(string)
@@ -284,8 +284,8 @@ func dataSourceServersRead(ctx context.Context, d *schema.ResourceData, meta int
 	if err != nil {
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching servers: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
-	serverEntry := make(map[string]interface{})
-	var serversIntf []interface{}
+	serverEntry := make(map[string]any)
+	var serversIntf []any
 
 	if d.Id() == "" {
 		d.SetId(datacenterId.(string))
@@ -298,7 +298,7 @@ func dataSourceServersRead(ctx context.Context, d *schema.ResourceData, meta int
 			if server.Entities.Nics != nil && server.Entities.Nics.Items != nil {
 				nicItems := server.Entities.Nics.Items
 				if nicItems != nil && len(*nicItems) > 0 {
-					var nics []interface{}
+					var nics []any
 					for _, nic := range *server.Entities.Nics.Items {
 						nicMap := cloudapinic.SetNetworkProperties(nic)
 						fw := setFirewallRules(nic)
@@ -351,8 +351,8 @@ func dataSourceServersRead(ctx context.Context, d *schema.ResourceData, meta int
 }
 
 // setVolumePropertiesToSlice returns a slice of volumes
-func setVolumePropertiesToSlice(volumesList []ionoscloud.Volume) []interface{} {
-	var volumes []interface{}
+func setVolumePropertiesToSlice(volumesList []ionoscloud.Volume) []any {
+	var volumes []any
 	if volumesList != nil && len(volumesList) > 0 {
 		for _, volume := range volumesList {
 			volumeItemMap := SetVolumeProperties(volume)
@@ -362,8 +362,8 @@ func setVolumePropertiesToSlice(volumesList []ionoscloud.Volume) []interface{} {
 	}
 	return volumes
 }
-func setFirewallRules(nic ionoscloud.Nic) []interface{} {
-	var firewallRules []interface{}
+func setFirewallRules(nic ionoscloud.Nic) []any {
+	var firewallRules []any
 	if nic.Entities != nil && nic.Entities.Firewallrules != nil && nic.Entities.Firewallrules.Items != nil {
 		for _, rule := range *nic.Entities.Firewallrules.Items {
 			ruleEntry := setFirewallRuleProperties(rule)
@@ -373,8 +373,8 @@ func setFirewallRules(nic ionoscloud.Nic) []interface{} {
 	return firewallRules
 }
 
-func setFirewallRuleProperties(rule ionoscloud.FirewallRule) map[string]interface{} {
-	ruleEntry := make(map[string]interface{})
+func setFirewallRuleProperties(rule ionoscloud.FirewallRule) map[string]any {
+	ruleEntry := make(map[string]any)
 	ruleEntry["id"] = shared.ToValueDefault(rule.Id)
 	if rule.Properties != nil {
 		ruleEntry["name"] = shared.ToValueDefault(rule.Properties.Name)
@@ -391,8 +391,8 @@ func setFirewallRuleProperties(rule ionoscloud.FirewallRule) map[string]interfac
 	return ruleEntry
 }
 
-func SetServerProperties(server ionoscloud.Server) map[string]interface{} {
-	serverMap := map[string]interface{}{}
+func SetServerProperties(server ionoscloud.Server) map[string]any {
+	serverMap := map[string]any{}
 	if server.Properties != nil {
 		utils.SetPropWithNilCheck(serverMap, "template_uuid", server.Properties.TemplateUuid)
 		utils.SetPropWithNilCheck(serverMap, "name", server.Properties.Name)
@@ -419,10 +419,10 @@ func SetServerProperties(server ionoscloud.Server) map[string]interface{} {
 	return serverMap
 }
 
-func setServerCDRoms(images *[]ionoscloud.Image) []interface{} {
-	var cdroms []interface{}
+func setServerCDRoms(images *[]ionoscloud.Image) []any {
+	var cdroms []any
 	for _, image := range *images {
-		entry := make(map[string]interface{})
+		entry := make(map[string]any)
 
 		entry["id"] = shared.ToValueDefault(image.Id)
 		entry["name"] = shared.ToValueDefault(image.Properties.Name)
@@ -444,7 +444,7 @@ func setServerCDRoms(images *[]ionoscloud.Image) []interface{} {
 		entry["public"] = boolOrDefault(image.Properties.Public, false)
 
 		if image.Properties.ImageAliases != nil {
-			var imageAliases []interface{}
+			var imageAliases []any
 			for _, imageAlias := range *image.Properties.ImageAliases {
 				imageAliases = append(imageAliases, imageAlias)
 			}

@@ -64,14 +64,14 @@ func resourceLoadbalancer() *schema.Resource {
 	}
 }
 
-func resourceLoadbalancerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceLoadbalancerCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	rawIds := d.Get("nic_ids").([]interface{})
+	rawIds := d.Get("nic_ids").([]any)
 	var nicIds []ionoscloud.Nic
 
 	for _, id := range rawIds {
@@ -114,7 +114,7 @@ func resourceLoadbalancerCreate(ctx context.Context, d *schema.ResourceData, met
 	return resourceLoadbalancerRead(ctx, d, meta)
 }
 
-func resourceLoadbalancerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceLoadbalancerRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
@@ -152,7 +152,7 @@ func resourceLoadbalancerRead(ctx context.Context, d *schema.ResourceData, meta 
 	return nil
 }
 
-func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
@@ -193,7 +193,7 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 	if d.HasChange("nic_ids") {
 		oldNicIds, newNicIds := d.GetChange("nic_ids")
 
-		oldList := oldNicIds.([]interface{})
+		oldList := oldNicIds.([]any)
 
 		for _, o := range oldList {
 			apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersBalancednicsDelete(context.TODO(),
@@ -215,7 +215,7 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 			}
 		}
 
-		newList := newNicIds.([]interface{})
+		newList := newNicIds.([]any)
 
 		for _, o := range newList {
 			id := o.(string)
@@ -237,7 +237,7 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 	return resourceLoadbalancerRead(ctx, d, meta)
 }
 
-func resourceLoadbalancerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceLoadbalancerDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
@@ -262,7 +262,7 @@ func resourceLoadbalancerDelete(ctx context.Context, d *schema.ResourceData, met
 	return nil
 }
 
-func resourceLoadbalancerImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceLoadbalancerImporter(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	importID := d.Id()
 
 	location, parts := splitImportID(importID, "/")

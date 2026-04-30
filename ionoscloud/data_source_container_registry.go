@@ -122,7 +122,7 @@ func dataSourceContainerRegistry() *schema.Resource {
 }
 
 //nolint:gocyclo
-func dataSourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	idValue, idOk := d.GetOk("id")
 	nameValue, nameOk := d.GetOk("name")
 	locationValue, locationOk := d.GetOk("location")

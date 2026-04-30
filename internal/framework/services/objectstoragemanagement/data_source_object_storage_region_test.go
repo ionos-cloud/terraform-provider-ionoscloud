@@ -1,5 +1,4 @@
 //go:build all || objectstorage || objectstoragemanagement
-// +build all objectstorage objectstoragemanagement
 
 package objectstoragemanagement_test
 

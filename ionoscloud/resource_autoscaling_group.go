@@ -16,7 +16,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	autoscaling "github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2"
-	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	autoscalingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/autoscaling"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
@@ -555,9 +554,9 @@ func expandProperties(d *schema.ResourceData) (*autoscaling.GroupProperties, err
 	}
 
 	return &autoscaling.GroupProperties{
-		MaxReplicaCount:      shared.ToPtr(int64(d.Get("max_replica_count").(int))),
-		MinReplicaCount:      shared.ToPtr(int64(d.Get("min_replica_count").(int))),
-		Name:                 shared.ToPtr(d.Get("name").(string)),
+		MaxReplicaCount:      new(int64(d.Get("max_replica_count").(int))),
+		MinReplicaCount:      new(int64(d.Get("min_replica_count").(int))),
+		Name:                 new(d.Get("name").(string)),
 		Policy:               expandPolicy(d.Get("policy").([]any)),
 		ReplicaConfiguration: replicaConfiguration,
 		Datacenter: autoscaling.GroupPropertiesDatacenter{
@@ -570,7 +569,7 @@ func expandPolicy(l []any) *autoscaling.GroupPolicy {
 	if len(l) == 0 || l[0] == nil {
 		return nil
 	}
-	s := l[0].(map[string]interface{})
+	s := l[0].(map[string]any)
 
 	// required fields
 	metric := autoscaling.Metric(s["metric"].(string))
@@ -600,7 +599,7 @@ func expandReplicaConfiguration(l []any) (*autoscaling.ReplicaPropertiesPost, er
 	if len(l) == 0 || l[0] == nil {
 		return nil, nil
 	}
-	s := l[0].(map[string]interface{})
+	s := l[0].(map[string]any)
 
 	// required fields
 	availabilityZone := autoscaling.AvailabilityZone(s["availability_zone"].(string))
@@ -636,7 +635,7 @@ func expandScaleInAction(l []any) *autoscaling.GroupPolicyScaleInAction {
 	if len(l) == 0 || l[0] == nil {
 		return nil
 	}
-	s := l[0].(map[string]interface{})
+	s := l[0].(map[string]any)
 
 	// required fields
 	amount := float32(s["amount"].(int))
@@ -662,7 +661,7 @@ func expandScaleOutAction(l []any) *autoscaling.GroupPolicyScaleOutAction {
 	if len(l) == 0 || l[0] == nil {
 		return nil
 	}
-	s := l[0].(map[string]interface{})
+	s := l[0].(map[string]any)
 
 	// required fields
 	amount := float32(s["amount"].(int))
@@ -679,7 +678,7 @@ func expandScaleOutAction(l []any) *autoscaling.GroupPolicyScaleOutAction {
 func expandVolumes(l []any) ([]autoscaling.ReplicaVolumePost, error) {
 	volumes := make([]autoscaling.ReplicaVolumePost, len(l))
 	for i, entry := range l {
-		s := entry.(map[string]interface{})
+		s := entry.(map[string]any)
 
 		// required fields
 		name := s["name"].(string)
@@ -695,11 +694,11 @@ func expandVolumes(l []any) ([]autoscaling.ReplicaVolumePost, error) {
 
 		// optional fields
 		if v, ok := s["image"]; ok {
-			volumes[i].Image = shared.ToPtr(v.(string))
+			volumes[i].Image = new(v.(string))
 		}
 
 		if v, ok := s["image_alias"]; ok {
-			volumes[i].ImageAlias = shared.ToPtr(v.(string))
+			volumes[i].ImageAlias = new(v.(string))
 		}
 
 		if *volumes[i].Image == "" && *volumes[i].ImageAlias == "" {
@@ -715,11 +714,11 @@ func expandVolumes(l []any) ([]autoscaling.ReplicaVolumePost, error) {
 		}
 
 		if v, ok := s["user_data"]; ok {
-			volumes[i].UserData = shared.ToPtr(v.(string))
+			volumes[i].UserData = new(v.(string))
 		}
 
 		if v, ok := s["image_password"]; ok {
-			volumes[i].ImagePassword = shared.ToPtr(v.(string))
+			volumes[i].ImagePassword = new(v.(string))
 		}
 
 		if v, ok := s["bus"]; ok {
@@ -727,7 +726,7 @@ func expandVolumes(l []any) ([]autoscaling.ReplicaVolumePost, error) {
 		}
 
 		if v, ok := s["backup_unit_id"]; ok {
-			volumes[i].BackupunitId = shared.ToPtr(v.(string))
+			volumes[i].BackupunitId = new(v.(string))
 		}
 	}
 
@@ -751,7 +750,7 @@ func expandSSHKeys(l []any) ([]string, error) {
 func expandNICs(l []any) []autoscaling.ReplicaNic {
 	nics := make([]autoscaling.ReplicaNic, len(l))
 	for i, entry := range l {
-		s := entry.(map[string]interface{})
+		s := entry.(map[string]any)
 
 		// required fields
 		lan := int32(s["lan"].(int))
@@ -793,7 +792,7 @@ func expandNICs(l []any) []autoscaling.ReplicaNic {
 func expandFlowLogs(l []any) []autoscaling.NicFlowLog {
 	flowLogs := make([]autoscaling.NicFlowLog, len(l))
 	for i, entry := range l {
-		s := entry.(map[string]interface{})
+		s := entry.(map[string]any)
 
 		// all fields are required
 		flowLogs[i] = autoscaling.NicFlowLog{
@@ -811,7 +810,7 @@ func expandTargetGroup(l []any) *autoscaling.TargetGroup {
 	if len(l) == 0 || l[0] == nil {
 		return nil
 	}
-	s := l[0].(map[string]interface{})
+	s := l[0].(map[string]any)
 
 	// required fields
 	targetGroupID := s["target_group_id"].(string)
@@ -827,7 +826,7 @@ func expandTargetGroup(l []any) *autoscaling.TargetGroup {
 func expandFirewallRules(l []any) []autoscaling.NicFirewallRule {
 	rules := make([]autoscaling.NicFirewallRule, len(l))
 	for i, entry := range l {
-		s := entry.(map[string]interface{})
+		s := entry.(map[string]any)
 
 		// required fields
 		rules[i] = autoscaling.NicFirewallRule{

@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/ionos-cloud/sdk-go-bundle/shared"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -110,7 +108,7 @@ func resourceUser() *schema.Resource {
 	}
 }
 
-func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
 	if err != nil {
 		return diag.FromErr(err)
@@ -142,7 +140,7 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 		if err != nil {
 			return diagutil.ToDiags(d, err, nil)
 		}
-		request.Properties.Password = shared.ToPtr(passwordWO)
+		request.Properties.Password = new(passwordWO)
 	}
 
 	administrator := d.Get("administrator").(bool)
@@ -193,7 +191,7 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 	return resourceUserRead(ctx, d, meta)
 }
 
-func resourceUserRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceUserRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
 	if err != nil {
 		return diag.FromErr(err)
@@ -218,7 +216,7 @@ func resourceUserRead(ctx context.Context, d *schema.ResourceData, meta interfac
 	return nil
 }
 
-func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
 	if err != nil {
 		return diag.FromErr(err)
@@ -284,7 +282,7 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 		if err != nil {
 			return diagutil.ToDiags(d, err, nil)
 		}
-		userReq.Properties.Password = shared.ToPtr(passwordWO)
+		userReq.Properties.Password = new(passwordWO)
 	}
 
 	if d.HasChange("group_ids") {
@@ -329,7 +327,7 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 	return resourceUserRead(ctx, d, meta)
 }
 
-func resourceUserDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceUserDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
 	if err != nil {
 		return diag.FromErr(err)
@@ -352,7 +350,7 @@ func resourceUserDelete(ctx context.Context, d *schema.ResourceData, meta interf
 
 }
 
-func resourceUserImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceUserImporter(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
 	if err != nil {
 		return nil, err

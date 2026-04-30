@@ -13,32 +13,68 @@ Manages **Shares** and list shares permissions granted to the group members for 
 
 ## Example Usage
 
+### Share a Datacenter with a Group
+
 ```hcl
 resource "ionoscloud_datacenter" "example" {
-	name                = "Datacenter Example"
-	location            = "us/las"
-	description         = "Datacenter Description"
-	sec_auth_protection = false
+  name                = "Datacenter Example"
+  location            = "us/las"
+  description         = "Datacenter Description"
+  sec_auth_protection = false
 }
 
 resource "ionoscloud_group" "example" {
-  name                    = "Group Example"
-  create_datacenter       = true
-  create_snapshot         = true
-  reserve_ip              = true
-  access_activity_log     = true
-  create_pcc              = true
-  s3_privilege            = true
-  create_backup_unit      = true
-  create_internet_access  = true
-  create_k8s_cluster      = true
+  name                   = "Group Example"
+  create_datacenter      = true
+  create_snapshot        = true
+  reserve_ip             = true
+  access_activity_log    = true
+  create_pcc             = true
+  s3_privilege           = true
+  create_backup_unit     = true
+  create_internet_access = true
+  create_k8s_cluster     = true
 }
 
 resource "ionoscloud_share" "example" {
-  group_id                = ionoscloud_group.example.id
-  resource_id             = ionoscloud_datacenter.example.id
-  edit_privilege          = true
-  share_privilege         = false
+  group_id        = ionoscloud_group.example.id
+  resource_id     = ionoscloud_datacenter.example.id
+  edit_privilege  = true
+  share_privilege = false
+}
+```
+
+### Share a Kubernetes Cluster with Multiple Groups
+
+```hcl
+resource "ionoscloud_k8s_cluster" "example" {
+  name = "k8s-example"
+}
+
+resource "ionoscloud_group" "group1" {
+  name               = "Group 1"
+  create_k8s_cluster = true
+}
+
+resource "ionoscloud_group" "group2" {
+  name               = "Group 2"
+  create_k8s_cluster = true
+}
+
+resource "ionoscloud_share" "k8s_share_group1" {
+  group_id        = ionoscloud_group.group1.id
+  resource_id     = ionoscloud_k8s_cluster.example.id
+  edit_privilege  = true
+  share_privilege = false
+}
+
+resource "ionoscloud_share" "k8s_share_group2" {
+  group_id        = ionoscloud_group.group2.id
+  resource_id     = ionoscloud_k8s_cluster.example.id
+  edit_privilege  = true
+  share_privilege = true
+
+  depends_on = [ionoscloud_share.k8s_share_group1]
 }
 ```
 

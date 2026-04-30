@@ -95,7 +95,7 @@ and log the extent to which your instances are being accessed.`,
 	}
 }
 
-func resourceApplicationLoadBalancerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceApplicationLoadBalancerCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
@@ -191,7 +191,7 @@ func resourceApplicationLoadBalancerCreate(ctx context.Context, d *schema.Resour
 		}
 		if flowLogList, ok := flowLogs.([]any); ok {
 			for _, flowLogData := range flowLogList {
-				if flowLogMap, ok := flowLogData.(map[string]interface{}); ok {
+				if flowLogMap, ok := flowLogData.(map[string]any); ok {
 					flowLog := cloudapiflowlog.GetFlowlogFromMap(flowLogMap)
 					err := fw.CreateOrPatchForALB(ctx, dcId, d.Id(), "", flowLog)
 					if err != nil {
@@ -212,7 +212,7 @@ func resourceApplicationLoadBalancerCreate(ctx context.Context, d *schema.Resour
 	return resourceApplicationLoadBalancerRead(ctx, d, meta)
 }
 
-func resourceApplicationLoadBalancerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceApplicationLoadBalancerRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
@@ -248,7 +248,7 @@ func resourceApplicationLoadBalancerRead(ctx context.Context, d *schema.Resource
 	return diagutil.ToDiags(d, setApplicationLoadBalancerData(d, &applicationLoadBalancer, flowLog), nil)
 }
 
-func resourceApplicationLoadBalancerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceApplicationLoadBalancerUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
@@ -360,7 +360,7 @@ func resourceApplicationLoadBalancerUpdate(ctx context.Context, d *schema.Resour
 	return resourceApplicationLoadBalancerRead(ctx, d, meta)
 }
 
-func resourceApplicationLoadBalancerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceApplicationLoadBalancerDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
@@ -387,7 +387,7 @@ func resourceApplicationLoadBalancerDelete(ctx context.Context, d *schema.Resour
 	return nil
 }
 
-func resourceApplicationLoadBalancerImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceApplicationLoadBalancerImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	importID := d.Id()
 
 	location, parts := splitImportID(importID, "/")

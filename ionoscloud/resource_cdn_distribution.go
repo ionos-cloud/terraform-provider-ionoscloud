@@ -137,7 +137,7 @@ func resourceCDNDistribution() *schema.Resource {
 	}
 }
 
-func resourceCDNDistributionCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCDNDistributionCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 
 	client := meta.(bundleclient.SdkBundle).CDNClient
 
@@ -175,7 +175,7 @@ func resourceCDNDistributionCreate(ctx context.Context, d *schema.ResourceData, 
 	return resourceCDNDistributionRead(ctx, d, meta)
 }
 
-func resourceCDNDistributionRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCDNDistributionRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).CDNClient
 
 	distribution, apiResponse, err := client.SdkClient.DistributionsApi.DistributionsFindById(ctx, d.Id()).Execute()
@@ -197,7 +197,7 @@ func resourceCDNDistributionRead(ctx context.Context, d *schema.ResourceData, me
 	return nil
 }
 
-func resourceCDNDistributionUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCDNDistributionUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).CDNClient
 
 	distributionDomain := d.Get("domain").(string)
@@ -234,7 +234,7 @@ func resourceCDNDistributionUpdate(ctx context.Context, d *schema.ResourceData, 
 	return resourceCDNDistributionRead(ctx, d, meta)
 }
 
-func resourceCDNDistributionDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCDNDistributionDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).CDNClient
 
 	apiResponse, err := client.SdkClient.DistributionsApi.DistributionsDelete(ctx, d.Id()).Execute()
@@ -247,7 +247,7 @@ func resourceCDNDistributionDelete(ctx context.Context, d *schema.ResourceData, 
 	return nil
 }
 
-func resourceCDNDistributionImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceCDNDistributionImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	client := *meta.(bundleclient.SdkBundle).CDNClient
 
 	distributionID := d.Id()

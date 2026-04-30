@@ -114,7 +114,7 @@ func resourceNatGatewayRule() *schema.Resource {
 	}
 }
 
-func resourceNatGatewayRuleCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNatGatewayRuleCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
@@ -212,7 +212,7 @@ func resourceNatGatewayRuleCreate(ctx context.Context, d *schema.ResourceData, m
 	return resourceNatGatewayRuleRead(ctx, d, meta)
 }
 
-func resourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
@@ -241,7 +241,7 @@ func resourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, met
 
 	return nil
 }
-func resourceNatGatewayRuleUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNatGatewayRuleUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
@@ -292,7 +292,7 @@ func resourceNatGatewayRuleUpdate(ctx context.Context, d *schema.ResourceData, m
 
 	if d.HasChange("target_port_range.0") {
 		_, v := d.GetChange("target_port_range.0")
-		if v.(map[string]interface{}) != nil {
+		if v.(map[string]any) != nil {
 			updateTargetPortRange := false
 			start := int32(d.Get("target_port_range.0.start").(int))
 			end := int32(d.Get("target_port_range.0.end").(int))
@@ -343,7 +343,7 @@ func resourceNatGatewayRuleUpdate(ctx context.Context, d *schema.ResourceData, m
 	return resourceNatGatewayRuleRead(ctx, d, meta)
 }
 
-func resourceNatGatewayRuleDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNatGatewayRuleDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
 	if err != nil {
@@ -371,7 +371,7 @@ func resourceNatGatewayRuleDelete(ctx context.Context, d *schema.ResourceData, m
 	return nil
 }
 
-func resourceNatGatewayRuleImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceNatGatewayRuleImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	importID := d.Id()
 
 	location, parts := splitImportID(importID, "/")

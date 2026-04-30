@@ -29,7 +29,7 @@ func dataSourceContainerRegistryLocations() *schema.Resource {
 	}
 }
 
-func dataSourceContainerRegistryLocationsRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceContainerRegistryLocationsRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewContainerRegistryClient("")
 	if err != nil {
 		return diag.FromErr(err)

@@ -308,7 +308,7 @@ func resourceDbaasMongoDBCluster() *schema.Resource {
 	}
 }
 
-func errorOnMongoVersionDowngrade(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
+func errorOnMongoVersionDowngrade(_ context.Context, diff *schema.ResourceDiff, _ any) error {
 	// we do not want to check in case of resource creation
 	if diff.Id() == "" {
 		return nil
@@ -332,7 +332,7 @@ func errorOnMongoVersionDowngrade(_ context.Context, diff *schema.ResourceDiff, 
 	return nil
 }
 
-func resourceDbaasMongoClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDbaasMongoClusterCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(d.Get("location").(string))
 	if err != nil {
 		return diag.FromErr(err)
@@ -362,7 +362,7 @@ func resourceDbaasMongoClusterCreate(ctx context.Context, d *schema.ResourceData
 	return resourceDbaasMongoClusterRead(ctx, d, meta)
 }
 
-func resourceDbaasMongoClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDbaasMongoClusterUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(d.Get("location").(string))
 	if err != nil {
 		return diag.FromErr(err)
@@ -387,7 +387,7 @@ func resourceDbaasMongoClusterUpdate(ctx context.Context, d *schema.ResourceData
 	return resourceDbaasMongoClusterRead(ctx, d, meta)
 }
 
-func resourceDbaasMongoClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDbaasMongoClusterRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(d.Get("location").(string))
 	if err != nil {
 		return diag.FromErr(err)
@@ -412,7 +412,7 @@ func resourceDbaasMongoClusterRead(ctx context.Context, d *schema.ResourceData, 
 	return nil
 }
 
-func resourceDbaasMongoClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDbaasMongoClusterDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(d.Get("location").(string))
 	if err != nil {
 		return diag.FromErr(err)
@@ -438,7 +438,7 @@ func resourceDbaasMongoClusterDelete(ctx context.Context, d *schema.ResourceData
 	return nil
 }
 
-func resourceDbaasMongoClusterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceDbaasMongoClusterImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	importID := d.Id()
 	location, parts := splitImportID(importID, "/")
 	if len(parts) != 1 {

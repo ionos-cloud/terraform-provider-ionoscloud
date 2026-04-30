@@ -229,7 +229,7 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 		Timeouts: &resourceDefaultTimeouts,
 	}
 }
-func checkDBaaSClusterImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
+func checkDBaaSClusterImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ any) error {
 
 	allowReplace := diff.Get("allow_replace").(bool)
 	if allowReplace {
@@ -270,7 +270,7 @@ func checkDBaaSClusterImmutableFields(_ context.Context, diff *schema.ResourceDi
 
 }
 
-func resourceDbaasPgSqlClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDbaasPgSqlClusterCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
 	if err != nil {
 		return diag.FromErr(err)
@@ -297,7 +297,7 @@ func resourceDbaasPgSqlClusterCreate(ctx context.Context, d *schema.ResourceData
 	return resourceDbaasPgSqlClusterRead(ctx, d, meta)
 }
 
-func resourceDbaasPgSqlClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDbaasPgSqlClusterRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
 	if err != nil {
 		return diag.FromErr(err)
@@ -322,7 +322,7 @@ func resourceDbaasPgSqlClusterRead(ctx context.Context, d *schema.ResourceData, 
 	return nil
 }
 
-func resourceDbaasPgSqlClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDbaasPgSqlClusterUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
 	if err != nil {
 		return diag.FromErr(err)
@@ -351,7 +351,7 @@ func resourceDbaasPgSqlClusterUpdate(ctx context.Context, d *schema.ResourceData
 	return resourceDbaasPgSqlClusterRead(ctx, d, meta)
 }
 
-func resourceDbaasPgSqlClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDbaasPgSqlClusterDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
 	if err != nil {
 		return diag.FromErr(err)
@@ -378,7 +378,7 @@ func resourceDbaasPgSqlClusterDelete(ctx context.Context, d *schema.ResourceData
 	return nil
 }
 
-func resourceDbaasPgSqlClusterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceDbaasPgSqlClusterImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	importID := d.Id()
 	location, parts := splitImportID(importID, "/")
 	if len(parts) != 1 {

@@ -69,7 +69,7 @@ func resourceDbaasMongoUser() *schema.Resource {
 	}
 }
 
-func resourceDbaasMongoUserCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDbaasMongoUserCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(d.Get("location").(string))
 	if err != nil {
 		return diag.FromErr(err)
@@ -93,10 +93,10 @@ func resourceDbaasMongoUserCreate(ctx context.Context, d *schema.ResourceData, m
 	}
 	if rolesValue, ok := d.GetOk("roles"); ok {
 		roles := make([]mongo.UserRoles, 0)
-		rolesValue := rolesValue.([]interface{})
+		rolesValue := rolesValue.([]any)
 		if rolesValue != nil {
 			for _, role := range rolesValue {
-				roleVal := role.(map[string]interface{})
+				roleVal := role.(map[string]any)
 				roleStr := roleVal["role"].(string)
 				roleDb := roleVal["database"].(string)
 				mongoRole := mongo.UserRoles{
@@ -126,7 +126,7 @@ func resourceDbaasMongoUserCreate(ctx context.Context, d *schema.ResourceData, m
 	return diagutil.ToDiags(d, dbaas.SetUserMongoData(d, &user), nil)
 }
 
-func resourceDbaasMongoUserUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDbaasMongoUserUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(d.Get("location").(string))
 	if err != nil {
 		return diag.FromErr(err)
@@ -147,10 +147,10 @@ func resourceDbaasMongoUserUpdate(ctx context.Context, d *schema.ResourceData, m
 	if d.HasChange("roles") {
 		_, rolesIntf := d.GetChange("roles")
 		roles := make([]mongo.UserRoles, 0)
-		rolesValue := rolesIntf.([]interface{})
+		rolesValue := rolesIntf.([]any)
 		if rolesValue != nil {
 			for _, role := range rolesValue {
-				roleVal := role.(map[string]interface{})
+				roleVal := role.(map[string]any)
 				roleStr := roleVal["role"].(string)
 				roleDb := roleVal["database"].(string)
 				mongoRole := mongo.UserRoles{
@@ -176,7 +176,7 @@ func resourceDbaasMongoUserUpdate(ctx context.Context, d *schema.ResourceData, m
 	return diagutil.ToDiags(d, dbaas.SetUserMongoData(d, &user), nil)
 }
 
-func resourceDbaasMongoUserRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDbaasMongoUserRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(d.Get("location").(string))
 	if err != nil {
 		return diag.FromErr(err)
@@ -202,7 +202,7 @@ func resourceDbaasMongoUserRead(ctx context.Context, d *schema.ResourceData, met
 	return nil
 }
 
-func resourceDbaasMongoUserDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDbaasMongoUserDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(d.Get("location").(string))
 	if err != nil {
 		return diag.FromErr(err)
@@ -226,7 +226,7 @@ func resourceDbaasMongoUserDelete(ctx context.Context, d *schema.ResourceData, m
 
 }
 
-func resourceDbaasMongoUserImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceDbaasMongoUserImporter(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	importID := d.Id()
 	location, parts := splitImportID(importID, "/")
 	if len(parts) != 2 {

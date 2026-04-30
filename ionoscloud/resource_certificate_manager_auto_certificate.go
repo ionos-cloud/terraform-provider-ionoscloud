@@ -73,7 +73,7 @@ func resourceCertificateManagerAutoCertificate() *schema.Resource {
 	}
 }
 
-func autoCertificateCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func autoCertificateCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).CertManagerClient
 	location := d.Get("location").(string)
 
@@ -94,7 +94,7 @@ func autoCertificateCreate(ctx context.Context, d *schema.ResourceData, meta int
 	return autoCertificateRead(ctx, d, meta)
 }
 
-func autoCertificateRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func autoCertificateRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).CertManagerClient
 	autoCertificateID := d.Id()
 	location := d.Get("location").(string)
@@ -113,7 +113,7 @@ func autoCertificateRead(ctx context.Context, d *schema.ResourceData, meta inter
 	return nil
 }
 
-func autoCertificateUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func autoCertificateUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).CertManagerClient
 	autoCertificateID := d.Id()
 	location := d.Get("location").(string)
@@ -132,7 +132,7 @@ func autoCertificateUpdate(ctx context.Context, d *schema.ResourceData, meta int
 	return nil
 }
 
-func autoCertificateDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func autoCertificateDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).CertManagerClient
 	autoCertificateID := d.Id()
 	location := d.Get("location").(string)
@@ -151,7 +151,7 @@ func autoCertificateDelete(ctx context.Context, d *schema.ResourceData, meta int
 	return nil
 }
 
-func autoCertificateImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func autoCertificateImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	client := meta.(bundleclient.SdkBundle).CertManagerClient
 	parts := strings.Split(d.Id(), ":")
 	if len(parts) != 2 {
