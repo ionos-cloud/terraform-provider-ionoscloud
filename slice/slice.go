@@ -1,8 +1,9 @@
 package slice
 
-import "slices"
-
-import "reflect"
+import (
+	"reflect"
+	"slices"
+)
 
 func ToAnyList[T any](input []T) []any {
 	list := make([]any, len(input))
