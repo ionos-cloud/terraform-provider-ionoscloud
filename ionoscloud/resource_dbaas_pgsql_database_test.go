@@ -75,7 +75,7 @@ func pgSqlDatabaseExistsCheck(path string, database *pgsql.DatabaseResource) res
 		if rs.Primary.ID == "" {
 			return fmt.Errorf("no ID is set for the PgSql database")
 		}
-		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewPsqlClient(rs.Primary.Attributes["location"])
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewPsqlClient(ctx, rs.Primary.Attributes["location"])
 		if err != nil {
 			return err
 		}
@@ -101,7 +101,7 @@ func pgSqlDatabaseDestroyCheck(s *terraform.State) error {
 		if rs.Type != constant.PsqlDatabaseResource {
 			continue
 		}
-		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewPsqlClient(rs.Primary.Attributes["location"])
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewPsqlClient(ctx, rs.Primary.Attributes["location"])
 		if err != nil {
 			return err
 		}

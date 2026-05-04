@@ -2,9 +2,9 @@ package kafka
 
 import (
 	"context"
-	"log"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	kafka "github.com/ionos-cloud/sdk-go-bundle/products/kafka/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
@@ -18,7 +18,7 @@ import (
 func (c *Client) CreateTopic(ctx context.Context, d *schema.ResourceData) (
 	kafka.TopicRead, *shared.APIResponse, error,
 ) {
-	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Kafka, d.Get("location").(string))
+	loadedconfig.SetClientOptionsFromConfig(ctx, c, fileconfiguration.Kafka, d.Get("location").(string))
 
 	topic := setTopicPostRequest(d)
 	clusterID := d.Get("cluster_id").(string)
@@ -33,7 +33,7 @@ func (c *Client) CreateTopic(ctx context.Context, d *schema.ResourceData) (
 func (c *Client) GetTopicByID(ctx context.Context, clusterID string, topicID string, location string) (
 	kafka.TopicRead, *shared.APIResponse, error,
 ) {
-	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Kafka, location)
+	loadedconfig.SetClientOptionsFromConfig(ctx, c, fileconfiguration.Kafka, location)
 
 	topic, apiResponse, err := c.sdkClient.TopicsApi.ClustersTopicsFindById(ctx, clusterID, topicID).Execute()
 	apiResponse.LogInfo()
@@ -45,7 +45,7 @@ func (c *Client) GetTopicByID(ctx context.Context, clusterID string, topicID str
 func (c *Client) ListTopics(ctx context.Context, clusterID string, location string) (
 	kafka.TopicReadList, *shared.APIResponse, error,
 ) {
-	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Kafka, location)
+	loadedconfig.SetClientOptionsFromConfig(ctx, c, fileconfiguration.Kafka, location)
 
 	topics, apiResponse, err := c.sdkClient.TopicsApi.ClustersTopicsGet(ctx, clusterID).Execute()
 	apiResponse.LogInfo()
@@ -55,7 +55,7 @@ func (c *Client) ListTopics(ctx context.Context, clusterID string, location stri
 
 // DeleteTopic deletes a Kafka Cluster Topic
 func (c *Client) DeleteTopic(ctx context.Context, clusterID string, topicID string, location string) (*shared.APIResponse, error) {
-	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Kafka, location)
+	loadedconfig.SetClientOptionsFromConfig(ctx, c, fileconfiguration.Kafka, location)
 
 	apiResponse, err := c.sdkClient.TopicsApi.ClustersTopicsDelete(ctx, clusterID, topicID).Execute()
 	apiResponse.LogInfo()
@@ -72,7 +72,7 @@ func (c *Client) IsTopicAvailable(ctx context.Context, d *schema.ResourceData) (
 	if err != nil {
 		return false, err
 	}
-	log.Printf("[DEBUG] Topic status: %s", topic.Metadata.State)
+	tflog.Debug(ctx, "topic status", map[string]interface{}{"state": topic.Metadata.State})
 	return strings.EqualFold(topic.Metadata.State, constant.Available), nil
 }
 
@@ -82,7 +82,7 @@ func (c *Client) IsTopicDeleted(ctx context.Context, d *schema.ResourceData) (bo
 	topicID := d.Id()
 	location := d.Get("location").(string)
 
-	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Kafka, location)
+	loadedconfig.SetClientOptionsFromConfig(ctx, c, fileconfiguration.Kafka, location)
 
 	_, apiResponse, err := c.sdkClient.TopicsApi.ClustersTopicsFindById(ctx, clusterID, topicID).Execute()
 	apiResponse.LogInfo()

@@ -170,8 +170,8 @@ func resourceTargetGroup() *schema.Resource {
 	}
 }
 
-func resourceTargetGroupCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
+func resourceTargetGroupCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -230,8 +230,8 @@ func resourceTargetGroupCreate(ctx context.Context, d *schema.ResourceData, meta
 	return resourceTargetGroupRead(ctx, d, meta)
 }
 
-func resourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
+func resourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -254,8 +254,8 @@ func resourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta a
 	return nil
 }
 
-func resourceTargetGroupUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
+func resourceTargetGroupUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -312,8 +312,8 @@ func resourceTargetGroupUpdate(ctx context.Context, d *schema.ResourceData, meta
 	return resourceTargetGroupRead(ctx, d, meta)
 }
 
-func resourceTargetGroupDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
+func resourceTargetGroupDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -336,8 +336,8 @@ func resourceTargetGroupDelete(ctx context.Context, d *schema.ResourceData, meta
 	return nil
 }
 
-func resourceTargetGroupImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
+func resourceTargetGroupImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -397,11 +397,11 @@ func setTargetGroupData(d *schema.ResourceData, targetGroup *ionoscloud.TargetGr
 			}
 		}
 
-		forwardingRuleTargets := make([]any, 0)
+		forwardingRuleTargets := make([]interface{}, 0)
 		if targetGroup.Properties.Targets != nil && len(*targetGroup.Properties.Targets) > 0 {
-			forwardingRuleTargets = make([]any, 0)
+			forwardingRuleTargets = make([]interface{}, 0)
 			for _, target := range *targetGroup.Properties.Targets {
-				targetEntry := make(map[string]any)
+				targetEntry := make(map[string]interface{})
 
 				if target.Ip != nil {
 					targetEntry["ip"] = *target.Ip
@@ -438,9 +438,9 @@ func setTargetGroupData(d *schema.ResourceData, targetGroup *ionoscloud.TargetGr
 		}
 
 		if targetGroup.Properties.HealthCheck != nil {
-			healthCheck := make([]any, 1)
+			healthCheck := make([]interface{}, 1)
 
-			healthCheckEntry := make(map[string]any)
+			healthCheckEntry := make(map[string]interface{})
 
 			if targetGroup.Properties.HealthCheck.CheckTimeout != nil {
 				healthCheckEntry["check_timeout"] = *targetGroup.Properties.HealthCheck.CheckTimeout
@@ -462,9 +462,9 @@ func setTargetGroupData(d *schema.ResourceData, targetGroup *ionoscloud.TargetGr
 		}
 
 		if targetGroup.Properties.HttpHealthCheck != nil {
-			httpHealthCheck := make([]any, 1)
+			httpHealthCheck := make([]interface{}, 1)
 
-			httpHealthCheckEntry := make(map[string]any)
+			httpHealthCheckEntry := make(map[string]interface{})
 
 			if targetGroup.Properties.HttpHealthCheck.Path != nil {
 				httpHealthCheckEntry["path"] = *targetGroup.Properties.HttpHealthCheck.Path
@@ -506,9 +506,9 @@ func getTargetGroupTargetData(d *schema.ResourceData) *[]ionoscloud.TargetGroupT
 
 	if targetsVal, targetsOk := d.GetOk("targets"); targetsOk {
 
-		if targetsVal.([]any) != nil {
+		if targetsVal.([]interface{}) != nil {
 
-			for targetIndex := range targetsVal.([]any) {
+			for targetIndex := range targetsVal.([]interface{}) {
 				target := ionoscloud.TargetGroupTarget{}
 				if ip, ipOk := d.GetOk(fmt.Sprintf("targets.%d.ip", targetIndex)); ipOk {
 					ip := ip.(string)

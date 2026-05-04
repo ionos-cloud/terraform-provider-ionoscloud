@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"reflect"
 	"strings"
 	"time"
@@ -14,6 +13,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -345,7 +345,7 @@ func resourceK8sNodePoolUpgradeV0(_ context.Context, state map[string]any, _ any
 	return state, nil
 }
 
-func getLanResourceData(lansList *schema.Set) []ionoscloud.KubernetesNodePoolLan {
+func getLanResourceData(ctx context.Context, lansList *schema.Set) []ionoscloud.KubernetesNodePoolLan {
 	lans := make([]ionoscloud.KubernetesNodePoolLan, 0)
 	if lansList.List() != nil {
 		for _, lanItem := range lansList.List() {
@@ -353,20 +353,20 @@ func getLanResourceData(lansList *schema.Set) []ionoscloud.KubernetesNodePoolLan
 			lan := ionoscloud.KubernetesNodePoolLan{}
 
 			if lanID, lanIdOk := lanContent["id"].(int); lanIdOk {
-				log.Printf("[INFO] Adding LAN %v to node pool...", lanID)
+				tflog.Info(ctx, "adding LAN to node pool", map[string]interface{}{"lan_id": lanID})
 				lanID := int32(lanID)
 				lan.Id = &lanID
 			}
 
 			if lanDhcp, lanDhcpOk := lanContent["dhcp"].(bool); lanDhcpOk {
-				log.Printf("[INFO] Adding dhcp %v to node pool...", lanDhcp)
+				tflog.Info(ctx, "adding dhcp to node pool", map[string]interface{}{"dhcp": lanDhcp})
 				lan.Dhcp = &lanDhcp
 			}
 
 			routes := make([]ionoscloud.KubernetesNodePoolLanRoutes, 0)
 
 			if lanRoutes, lanRoutesOk := lanContent["routes"].(*schema.Set); lanRoutesOk {
-				log.Printf("[INFO] Adding routes %v to node pool...", lanRoutes)
+				tflog.Info(ctx, "adding routes to node pool", map[string]interface{}{"route_count": lanRoutes.Len()})
 				if lanRoutes.List() != nil {
 					for _, routeItem := range lanRoutes.List() {
 						routeContent := routeItem.(map[string]any)
@@ -384,7 +384,7 @@ func getLanResourceData(lansList *schema.Set) []ionoscloud.KubernetesNodePoolLan
 
 					}
 				}
-				log.Printf("[INFO] k8s node pool LanRoutes set to %+v", routes)
+				tflog.Info(ctx, "node pool LAN routes set", map[string]interface{}{"route_count": len(routes)})
 			}
 
 			lan.Routes = &routes
@@ -394,7 +394,7 @@ func getLanResourceData(lansList *schema.Set) []ionoscloud.KubernetesNodePoolLan
 	return lans
 }
 
-func getAutoscalingData(d *schema.ResourceData) (*ionoscloud.KubernetesAutoScaling, error) {
+func getAutoscalingData(ctx context.Context, d *schema.ResourceData) (*ionoscloud.KubernetesAutoScaling, error) {
 	var autoscaling ionoscloud.KubernetesAutoScaling
 
 	asmnVal, asmnOk := d.GetOk("auto_scaling.0.min_node_count")
@@ -411,9 +411,9 @@ func getAutoscalingData(d *schema.ResourceData) (*ionoscloud.KubernetesAutoScali
 			return &autoscaling, fmt.Errorf("error creating k8s node pool: max_node_count cannot be lower than min_node_count")
 		}
 
-		log.Printf("[INFO] Setting Autoscaling minimum node count to : %d", asmnVal)
+		tflog.Info(ctx, "setting autoscaling min node count", map[string]interface{}{"min_node_count": asmnVal})
 		autoscaling.MinNodeCount = &asmnVal
-		log.Printf("[INFO] Setting Autoscaling maximum node count to : %d", asmxnVal)
+		tflog.Info(ctx, "setting autoscaling max node count", map[string]interface{}{"max_node_count": asmxnVal})
 		autoscaling.MaxNodeCount = &asmxnVal
 	}
 
@@ -422,7 +422,7 @@ func getAutoscalingData(d *schema.ResourceData) (*ionoscloud.KubernetesAutoScali
 
 func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -466,7 +466,7 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	if mtVal, mtOk := d.GetOk("maintenance_window.0.time"); mtOk {
-		log.Printf("[INFO] Setting Maintenance Window Time to : %s", mtVal.(string))
+		tflog.Info(ctx, "setting maintenance window time", map[string]interface{}{"time": mtVal.(string)})
 		mtVal := mtVal.(string)
 		k8sNodepool.Properties.MaintenanceWindow.Time = &mtVal
 	}
@@ -476,7 +476,7 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 		k8sNodepool.Properties.MaintenanceWindow.DayOfTheWeek = &mdVal
 	}
 
-	if autoscaling, err := getAutoscalingData(d); err != nil {
+	if autoscaling, err := getAutoscalingData(ctx, d); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	} else {
 		k8sNodepool.Properties.AutoScaling = autoscaling
@@ -489,7 +489,7 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 
 	if lansVal, lansOK := d.GetOk("lans"); lansOK {
 		lansList := lansVal.(*schema.Set)
-		lans := getLanResourceData(lansList)
+		lans := getLanResourceData(ctx, lansList)
 		k8sNodepool.Properties.Lans = &lans
 	}
 
@@ -544,10 +544,10 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 
 	d.SetId(*createdNodepool.Id)
 
-	log.Printf("[INFO] Successfully created k8s node pool: %s", d.Id())
+	tflog.Info(ctx, "created k8s node pool", map[string]interface{}{"node_pool_id": d.Id()})
 
 	for {
-		log.Printf("[INFO] Waiting for k8s node pool %s to be ready...", d.Id())
+		tflog.Info(ctx, "waiting for k8s node pool to be ready", map[string]interface{}{"node_pool_id": d.Id()})
 
 		nodepoolReady, rsErr := k8sNodepoolReady(ctx, client, d)
 		if rsErr != nil {
@@ -555,15 +555,15 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 		}
 
 		if nodepoolReady {
-			log.Printf("[INFO] k8s node pool ready: %s", d.Id())
+			tflog.Info(ctx, "k8s node pool ready", map[string]interface{}{"node_pool_id": d.Id()})
 			break
 		}
 
 		select {
 		case <-time.After(constant.SleepInterval):
-			log.Printf("[INFO] trying again ...")
+			tflog.Info(ctx, "k8s node pool not ready, retrying")
 		case <-ctx.Done():
-			log.Printf("[INFO] timed out")
+			tflog.Info(ctx, "k8s node pool creation timed out")
 			return diagutil.ToDiags(d, fmt.Errorf("k8s creation timed out"), nil)
 		}
 	}
@@ -573,7 +573,7 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 
 func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -582,7 +582,7 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta a
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
+		tflog.Info(ctx, "k8s node pool not found", map[string]interface{}{"node_pool_id": d.Id(), "error": err.Error()})
 		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil
@@ -590,7 +590,7 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta a
 		return diagutil.ToDiags(d, err, &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	log.Printf("[INFO] Successfully retrieved k8s node pool %s: %+v", d.Id(), k8sNodepool)
+	tflog.Info(ctx, "retrieved k8s node pool", map[string]interface{}{"node_pool_id": d.Id()})
 
 	if err := setK8sNodePoolData(d, &k8sNodepool); err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -601,7 +601,7 @@ func resourcek8sNodePoolRead(ctx context.Context, d *schema.ResourceData, meta a
 
 func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -616,17 +616,17 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 
 	if d.HasChange("node_count") {
 		oldNc, newNc := d.GetChange("node_count")
-		log.Printf("[INFO] k8s node pool node_count changed from %+v to %+v", oldNc, newNc)
+		tflog.Info(ctx, "node pool node_count changed", map[string]interface{}{"old": oldNc, "new": newNc})
 	}
 
 	k8sVersion := d.Get("k8s_version").(string)
 	request.Properties.K8sVersion = &k8sVersion
 	if d.HasChange("k8s_version") {
 		oldk8sVersion, newk8sVersion := d.GetChange("k8s_version")
-		log.Printf("[INFO] k8s pool k8s version changed from %+v to %+v", oldk8sVersion, newk8sVersion)
+		tflog.Info(ctx, "node pool k8s version changed", map[string]interface{}{"old": oldk8sVersion, "new": newk8sVersion})
 	}
 
-	if autoscaling, err := getAutoscalingData(d); err != nil {
+	if autoscaling, err := getAutoscalingData(ctx, d); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	} else {
 		request.Properties.AutoScaling = autoscaling
@@ -639,19 +639,19 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 
 	if d.HasChange("auto_scaling.0.min_node_count") {
 		oldMinNodes, newMinNodes := d.GetChange("auto_scaling.0.min_node_count")
-		log.Printf("[INFO] k8s node pool autoscaling min # of nodes changed from %+v to %+v", oldMinNodes, newMinNodes)
+		tflog.Info(ctx, "node pool autoscaling min node count changed", map[string]interface{}{"old": oldMinNodes, "new": newMinNodes})
 	}
 
 	if d.HasChange("auto_scaling.0.max_node_count") {
 		oldMaxNodes, newMaxNodes := d.GetChange("auto_scaling.0.max_node_count")
-		log.Printf("[INFO] k8s node pool autoscaling max # of nodes changed from %+v to %+v", oldMaxNodes, newMaxNodes)
+		tflog.Info(ctx, "node pool autoscaling max node count changed", map[string]interface{}{"old": oldMaxNodes, "new": newMaxNodes})
 	}
 
 	if d.HasChange("lans") {
 		oldLANs, newLANs := d.GetChange("lans")
 		lansList := newLANs.(*schema.Set)
-		lans := getLanResourceData(lansList)
-		log.Printf("[INFO] k8s node pool LANs changed from %+v to %+v", oldLANs, newLANs)
+		lans := getLanResourceData(ctx, lansList)
+		tflog.Info(ctx, "node pool LANs changed", map[string]interface{}{"old": oldLANs, "new": newLANs})
 		request.Properties.Lans = &lans
 	}
 
@@ -673,7 +673,7 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 
 				oldMd, newMd := d.GetChange("maintenance_window.0.day_of_the_week")
 				if newMd.(string) != "" {
-					log.Printf("[INFO] k8s node pool maintenance window DOW changed from %+v to %+v", oldMd, newMd)
+					tflog.Info(ctx, "node pool maintenance window DOW changed", map[string]interface{}{"old": oldMd, "new": newMd})
 					updateMaintenanceWindow = true
 					newMd := newMd.(string)
 					maintenanceWindow.DayOfTheWeek = &newMd
@@ -683,7 +683,7 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 			if d.HasChange("maintenance_window.0.time") {
 				oldMt, newMt := d.GetChange("maintenance_window.0.time")
 				if newMt.(string) != "" {
-					log.Printf("[INFO] k8s node pool maintenance window time changed from %+v to %+v", oldMt, newMt)
+					tflog.Info(ctx, "node pool maintenance window time changed", map[string]interface{}{"old": oldMt, "new": newMt})
 					updateMaintenanceWindow = true
 					newMt := newMt.(string)
 					maintenanceWindow.Time = &newMt
@@ -698,7 +698,7 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 
 	if d.HasChange("server_type") {
 		oldServerType, newServerType := d.GetChange("server_type")
-		log.Printf("[INFO] k8s pool server type changed from %+v to %+v", oldServerType, newServerType)
+		tflog.Info(ctx, "node pool server type changed", map[string]interface{}{"old": oldServerType, "new": newServerType})
 
 		serverType := ionoscloud.KubernetesNodePoolServerType(newServerType.(string))
 		request.Properties.ServerType = &serverType
@@ -706,7 +706,7 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 
 	if d.HasChange("public_ips") {
 		oldPublicIps, newPublicIps := d.GetChange("public_ips")
-		log.Printf("[INFO] k8s pool public IPs changed from %+v to %+v", oldPublicIps, newPublicIps)
+		tflog.Info(ctx, "node pool public IPs changed", map[string]interface{}{"old": oldPublicIps, "new": newPublicIps})
 		requestPublicIps := make([]string, 0)
 
 		if newPublicIps != nil {
@@ -733,7 +733,7 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 
 	if d.HasChange("labels") {
 		oldLabels, newLabels := d.GetChange("labels")
-		log.Printf("[INFO] k8s pool labels changed from %+v to %+v", oldLabels, newLabels)
+		tflog.Info(ctx, "node pool labels changed", map[string]interface{}{"old": oldLabels, "new": newLabels})
 		labels := make(map[string]string)
 		if newLabels != nil {
 			for k, v := range newLabels.(map[string]any) {
@@ -745,7 +745,7 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 
 	if d.HasChange("annotations") {
 		oldAnnotations, newAnnotations := d.GetChange("annotations")
-		log.Printf("[INFO] k8s pool annotations changed from %+v to %+v", oldAnnotations, newAnnotations)
+		tflog.Info(ctx, "node pool annotations changed", map[string]interface{}{"old": oldAnnotations, "new": newAnnotations})
 		annotations := make(map[string]string)
 		if newAnnotations != nil {
 			for k, v := range newAnnotations.(map[string]any) {
@@ -758,7 +758,7 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 	b, jErr := json.Marshal(request)
 
 	if jErr == nil {
-		log.Printf("[INFO] Update req: %s", string(b))
+		tflog.Info(ctx, "node pool update request", map[string]interface{}{"request": string(b)})
 	}
 
 	_, apiResponse, err := client.KubernetesApi.K8sNodepoolsPut(ctx, d.Get("k8s_cluster_id").(string), d.Id()).KubernetesNodePool(request).Execute()
@@ -773,7 +773,7 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	for {
-		log.Printf("[INFO] Waiting for k8s node pool %s to be ready...", d.Id())
+		tflog.Info(ctx, "waiting for k8s node pool to be ready", map[string]interface{}{"node_pool_id": d.Id()})
 
 		nodepoolReady, rsErr := k8sNodepoolReady(ctx, client, d)
 
@@ -782,13 +782,13 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 		}
 
 		if nodepoolReady {
-			log.Printf("[INFO] k8s node pool ready: %s", d.Id())
+			tflog.Info(ctx, "k8s node pool ready", map[string]interface{}{"node_pool_id": d.Id()})
 			break
 		}
 
 		select {
 		case <-time.After(constant.SleepInterval):
-			log.Printf("[DEBUG] retrying ...")
+			tflog.Debug(ctx, "k8s node pool not ready, retrying")
 		case <-ctx.Done():
 			return diagutil.ToDiags(d, fmt.Errorf("k8s node pool update timed out! WARNING: your k8s node pool will still probably be updated after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"), nil)
 		}
@@ -799,7 +799,7 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 
 func resourcek8sNodePoolDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -816,7 +816,7 @@ func resourcek8sNodePoolDelete(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	for {
-		log.Printf("[INFO] Waiting for k8s node pool %s to be deleted...", d.Id())
+		tflog.Info(ctx, "waiting for k8s node pool to be deleted", map[string]interface{}{"node_pool_id": d.Id()})
 
 		nodepoolDeleted, dsErr := k8sNodepoolDeleted(ctx, client, d)
 		if dsErr != nil {
@@ -824,13 +824,13 @@ func resourcek8sNodePoolDelete(ctx context.Context, d *schema.ResourceData, meta
 		}
 
 		if nodepoolDeleted {
-			log.Printf("[INFO] Successfully deleted k8s node pool: %s", d.Id())
+			tflog.Info(ctx, "successfully deleted k8s node pool", map[string]interface{}{"node_pool_id": d.Id()})
 			break
 		}
 
 		select {
 		case <-time.After(constant.SleepInterval):
-			log.Printf("[DEBUG] retrying ...")
+			tflog.Debug(ctx, "k8s node pool not yet deleted, retrying")
 		case <-ctx.Done():
 			return diagutil.ToDiags(d, fmt.Errorf("k8s node pool deletion timed out! WARNING: your k8s node pool will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"), nil)
 		}
@@ -858,7 +858,7 @@ func resourceK8sNodepoolImport(ctx context.Context, d *schema.ResourceData, meta
 	clusterId := parts[0]
 	npId := parts[1]
 
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return nil, err
 	}
@@ -875,7 +875,7 @@ func resourceK8sNodepoolImport(ctx context.Context, d *schema.ResourceData, meta
 		return nil, diagutil.ToError(d, fmt.Errorf("unable to retrieve k8s node pool %q, error:%w", npId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	log.Printf("[INFO] K8s node pool found: %+v", k8sNodepool)
+	tflog.Info(ctx, "k8s node pool imported", map[string]interface{}{"node_pool_id": npId, "cluster_id": clusterId})
 
 	if err := d.Set("k8s_cluster_id", clusterId); err != nil {
 		return nil, diagutil.ToError(d, fmt.Errorf("error while setting k8s_cluster_id property for k8s node pool %q: %w", npId, err), nil)
@@ -887,7 +887,7 @@ func resourceK8sNodepoolImport(ctx context.Context, d *schema.ResourceData, meta
 	if err := setK8sNodePoolData(d, &k8sNodepool); err != nil {
 		return nil, diagutil.ToError(d, err, nil)
 	}
-	log.Printf("[INFO] Importing k8s node pool %q...", d.Id())
+	tflog.Info(ctx, "importing k8s node pool", map[string]interface{}{"node_pool_id": d.Id()})
 
 	return []*schema.ResourceData{d}, nil
 }
@@ -1051,7 +1051,7 @@ func k8sNodepoolReady(ctx context.Context, client *ionoscloud.APIClient, d *sche
 	if utils.IsStateFailed(*resource.Metadata.State) {
 		return false, fmt.Errorf("error while checking if k8s nodepool is ready %s, state %s", *resource.Id, *resource.Metadata.State)
 	}
-	log.Printf("[INFO] k8s nodepool state: %s", *resource.Metadata.State)
+	tflog.Info(ctx, "k8s node pool state", map[string]interface{}{"state": *resource.Metadata.State})
 	// k8s is the only resource that has a state of ACTIVE when it is ready
 	return strings.EqualFold(*resource.Metadata.State, ionoscloud.Active), nil
 }

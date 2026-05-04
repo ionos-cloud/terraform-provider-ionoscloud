@@ -105,7 +105,7 @@ func (c *Client) DeleteBucketVersioning(ctx context.Context, data *BucketVersion
 		PutBucketVersioningRequest(objstorage.PutBucketVersioningRequest{
 			Status: objstorage.BUCKETVERSIONINGSTATUS_SUSPENDED.Ptr(),
 		}).Execute()
-	if isInvalidStateBucketWithObjectLock(err) {
+	if isInvalidStateBucketWithObjectLock(ctx, err) {
 		return nil
 	}
 

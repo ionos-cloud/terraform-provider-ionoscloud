@@ -44,8 +44,8 @@ func dataSourceDbaasPgSqlDatabase() *schema.Resource {
 	}
 }
 
-func dataSourceDbaasPgSqlReadDatabase(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
+func dataSourceDbaasPgSqlReadDatabase(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(ctx, d.Get("location").(string))
 	if err != nil {
 		return diag.FromErr(err)
 	}

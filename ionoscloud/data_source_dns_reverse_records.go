@@ -3,9 +3,9 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	dns "github.com/ionos-cloud/sdk-go-bundle/products/dns/v2"
@@ -94,7 +94,7 @@ func dataSourceReverseRecordReads(ctx context.Context, d *schema.ResourceData, m
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching DNS Reverse Records: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	if nameOk {
-		log.Printf("[INFO] Filtering Reverse Records in data source for DNS Reverse Records using name: %s and partial_match: %t", recordName, partialMatch)
+		tflog.Info(ctx, "filtering DNS reverse records", map[string]interface{}{"name": recordName, "partial_match": partialMatch})
 		if partialMatch {
 			for _, recordItem := range records.Items {
 				if strings.Contains(recordItem.Properties.Name, recordName) {

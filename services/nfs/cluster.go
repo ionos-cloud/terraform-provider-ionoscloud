@@ -3,9 +3,9 @@ package nfs
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	sdk "github.com/ionos-cloud/sdk-go-bundle/products/nfs/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
@@ -17,7 +17,7 @@ import (
 
 // GetNFSClusterByID returns a cluster given an ID
 func (c *Client) GetNFSClusterByID(ctx context.Context, id string, location string) (sdk.ClusterRead, *shared.APIResponse, error) {
-	c.overrideClientEndpoint(fileconfiguration.NFS, location)
+	c.overrideClientEndpoint(ctx, fileconfiguration.NFS, location)
 	cluster, apiResponse, err := c.sdkClient.ClustersApi.ClustersFindById(ctx, id).Execute()
 	apiResponse.LogInfo()
 	return cluster, apiResponse, err
@@ -25,7 +25,7 @@ func (c *Client) GetNFSClusterByID(ctx context.Context, id string, location stri
 
 // ListNFSClusters returns a list of all clusters
 func (c *Client) ListNFSClusters(ctx context.Context, d *schema.ResourceData) (sdk.ClusterReadList, *shared.APIResponse, error) {
-	c.overrideClientEndpoint(fileconfiguration.NFS, d.Get("location").(string))
+	c.overrideClientEndpoint(ctx, fileconfiguration.NFS, d.Get("location").(string))
 	clusters, apiResponse, err := c.sdkClient.ClustersApi.ClustersGet(ctx).Execute()
 	apiResponse.LogInfo()
 	return clusters, apiResponse, err
@@ -33,7 +33,7 @@ func (c *Client) ListNFSClusters(ctx context.Context, d *schema.ResourceData) (s
 
 // DeleteNFSCluster deletes a cluster given an ID
 func (c *Client) DeleteNFSCluster(ctx context.Context, d *schema.ResourceData) (*shared.APIResponse, error) {
-	c.overrideClientEndpoint(fileconfiguration.NFS, d.Get("location").(string))
+	c.overrideClientEndpoint(ctx, fileconfiguration.NFS, d.Get("location").(string))
 	apiResponse, err := c.sdkClient.ClustersApi.ClustersDelete(ctx, d.Id()).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
@@ -41,7 +41,7 @@ func (c *Client) DeleteNFSCluster(ctx context.Context, d *schema.ResourceData) (
 
 // UpdateNFSCluster updates a cluster given an ID or creates a new one if it doesn't exist
 func (c *Client) UpdateNFSCluster(ctx context.Context, d *schema.ResourceData) (sdk.ClusterRead, *shared.APIResponse, error) {
-	c.overrideClientEndpoint(fileconfiguration.NFS, d.Get("location").(string))
+	c.overrideClientEndpoint(ctx, fileconfiguration.NFS, d.Get("location").(string))
 	cluster, apiResponse, err := c.sdkClient.ClustersApi.ClustersPut(ctx, d.Id()).
 		ClusterEnsure(*setClusterPutRequest(d)).Execute()
 	apiResponse.LogInfo()
@@ -50,7 +50,7 @@ func (c *Client) UpdateNFSCluster(ctx context.Context, d *schema.ResourceData) (
 
 // CreateNFSCluster creates a new cluster
 func (c *Client) CreateNFSCluster(ctx context.Context, d *schema.ResourceData) (sdk.ClusterRead, *shared.APIResponse, error) {
-	c.overrideClientEndpoint(fileconfiguration.NFS, d.Get("location").(string))
+	c.overrideClientEndpoint(ctx, fileconfiguration.NFS, d.Get("location").(string))
 	cluster, apiResponse, err := c.sdkClient.ClustersApi.ClustersPost(ctx).
 		ClusterCreate(*setClusterPostRequest(d)).Execute()
 	apiResponse.LogInfo()
@@ -108,7 +108,7 @@ func (c *Client) IsClusterReady(ctx context.Context, d *schema.ResourceData) (bo
 		return false, fmt.Errorf("failed checking if Cluster %s from %s is ready: %w", clusterID, location, err)
 	}
 
-	log.Printf("[INFO] state of the cluster with ID %s is: %s", clusterID, cluster.Metadata.Status)
+	tflog.Info(ctx, "cluster state", map[string]interface{}{"cluster_id": clusterID, "status": cluster.Metadata.Status})
 	if utils.IsStateFailed(cluster.Metadata.Status) {
 		return false, fmt.Errorf("cluster %s is in a failed state", d.Id())
 	}

@@ -131,7 +131,7 @@ func testAccCheckApplicationLoadBalancerDestroyCheck(s *terraform.State) error {
 		albId := rs.Primary.ID
 		location := rs.Primary.Attributes["location"]
 
-		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 		if err != nil {
 			return err
 		}
@@ -173,7 +173,7 @@ func testAccCheckApplicationLoadBalancerExists(n string, alb *ionoscloud.Applica
 		albId := rs.Primary.ID
 		location := rs.Primary.Attributes["location"]
 
-		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(location)
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 		if err != nil {
 			return err
 		}

@@ -3,8 +3,8 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
@@ -63,8 +63,8 @@ func dataSourceLocation() *schema.Resource {
 	}
 }
 
-func dataSourceLocationRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
+func dataSourceLocationRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -98,7 +98,7 @@ func dataSourceLocationRead(ctx context.Context, d *schema.ResourceData, meta an
 		}
 	}
 
-	log.Printf("[INFO] Results length %d *************", len(results))
+	tflog.Info(ctx, "filtered locations", map[string]interface{}{"results_length": len(results)})
 
 	var location ionoscloud.Location
 
@@ -122,9 +122,9 @@ func setLocationData(d *schema.ResourceData, location *ionoscloud.Location) erro
 	}
 
 	if location.Properties != nil {
-		var cpuArchitectures []any
+		var cpuArchitectures []interface{}
 		for _, cpuArchitecture := range *location.Properties.CpuArchitecture {
-			architectureEntry := make(map[string]any)
+			architectureEntry := make(map[string]interface{})
 
 			if cpuArchitecture.CpuFamily != nil {
 				architectureEntry["cpu_family"] = *cpuArchitecture.CpuFamily

@@ -3,9 +3,9 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -100,7 +100,7 @@ func dataSourceReverseRecordRead(ctx context.Context, d *schema.ResourceData, me
 
 		var results []dns.ReverseRecordRead
 		if nameOk {
-			log.Printf("[INFO] Populating data source for DNS Reverse Record using name: %s and partial_match: %t", recordName, partialMatch)
+			tflog.Info(ctx, "searching DNS reverse record by name", map[string]interface{}{"name": recordName, "partial_match": partialMatch})
 			if partialMatch {
 				// In order to have an exact name match, we must retrieve all the DNS Reverse Records and then
 				// build a list of partial matches based on the response

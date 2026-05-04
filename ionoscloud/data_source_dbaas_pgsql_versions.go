@@ -35,8 +35,8 @@ func dataSourceDbaasPgSqlVersions() *schema.Resource {
 	}
 }
 
-func dataSourceDbaasPgSqlReadVersions(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient("")
+func dataSourceDbaasPgSqlReadVersions(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(ctx, "")
 	if err != nil {
 		return diag.FromErr(err)
 	}

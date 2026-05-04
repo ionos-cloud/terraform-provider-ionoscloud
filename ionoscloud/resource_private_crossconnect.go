@@ -3,10 +3,10 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -111,7 +111,7 @@ func resourcePrivateCrossConnect() *schema.Resource {
 
 func resourcePrivateCrossConnectCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -124,7 +124,7 @@ func resourcePrivateCrossConnectCreate(ctx context.Context, d *schema.ResourceDa
 	}
 
 	if descVal, descOk := d.GetOk("description"); descOk {
-		log.Printf("[INFO] Setting PCC description to : %s", descVal.(string))
+		tflog.Info(ctx, "setting PCC description", map[string]interface{}{"description": descVal.(string)})
 		description := descVal.(string)
 		pcc.Properties.Description = &description
 	}
@@ -138,7 +138,7 @@ func resourcePrivateCrossConnectCreate(ctx context.Context, d *schema.ResourceDa
 	}
 
 	d.SetId(*rsp.Id)
-	log.Printf("[INFO] Created PCC: %s", d.Id())
+	tflog.Info(ctx, "created PCC", map[string]interface{}{"pcc_id": d.Id()})
 
 	if diags := waitForPCCToBeReady(ctx, d, client); diags != nil {
 		return diags
@@ -148,7 +148,7 @@ func resourcePrivateCrossConnectCreate(ctx context.Context, d *schema.ResourceDa
 
 func resourcePrivateCrossConnectRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -164,7 +164,7 @@ func resourcePrivateCrossConnectRead(ctx context.Context, d *schema.ResourceData
 		return diagutil.ToDiags(d, fmt.Errorf("error while fetching PCC: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	log.Printf("[INFO] Successfully retrieved PCC %s: %+v", d.Id(), pcc)
+	tflog.Info(ctx, "retrieved PCC", map[string]interface{}{"pcc_id": d.Id()})
 
 	if err = setPccDataSource(d, &pcc); err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -174,7 +174,7 @@ func resourcePrivateCrossConnectRead(ctx context.Context, d *schema.ResourceData
 
 func resourcePrivateCrossConnectUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -187,16 +187,16 @@ func resourcePrivateCrossConnectUpdate(ctx context.Context, d *schema.ResourceDa
 
 	if d.HasChange("name") {
 		oldName, newName := d.GetChange("name")
-		log.Printf("[INFO] PCC name changed from %+v to %+v", oldName, newName)
+		tflog.Info(ctx, "PCC name changed", map[string]interface{}{"old_name": oldName, "new_name": newName})
 		name := newName.(string)
 		request.Properties.Name = &name
 	}
 
-	log.Printf("[INFO] Attempting update PCC %s", d.Id())
+	tflog.Info(ctx, "attempting update PCC", map[string]interface{}{"pcc_id": d.Id()})
 
 	if d.HasChange("description") {
 		oldDesc, newDesc := d.GetChange("description")
-		log.Printf("[INFO] PCC description changed from %+v to %+v", oldDesc, newDesc)
+		tflog.Info(ctx, "PCC description changed", map[string]interface{}{"old_description": oldDesc, "new_description": newDesc})
 		descriprion := newDesc.(string)
 		if newDesc != nil {
 			request.Properties.Description = &descriprion
@@ -222,7 +222,7 @@ func resourcePrivateCrossConnectUpdate(ctx context.Context, d *schema.ResourceDa
 
 func resourcePrivateCrossConnectDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -239,7 +239,7 @@ func resourcePrivateCrossConnectDelete(ctx context.Context, d *schema.ResourceDa
 	}
 
 	for {
-		log.Printf("[INFO] Waiting for PCC %s to be deleted...", d.Id())
+		tflog.Info(ctx, "waiting for PCC to be deleted", map[string]interface{}{"pcc_id": d.Id()})
 
 		pccDeleted, dsErr := privateCrossConnectDeleted(ctx, client, d)
 
@@ -248,15 +248,15 @@ func resourcePrivateCrossConnectDelete(ctx context.Context, d *schema.ResourceDa
 		}
 
 		if pccDeleted {
-			log.Printf("[INFO] Successfully deleted PCC: %s", d.Id())
+			tflog.Info(ctx, "successfully deleted PCC", map[string]interface{}{"pcc_id": d.Id()})
 			break
 		}
 
 		select {
 		case <-time.After(constant.SleepInterval):
-			log.Printf("[INFO] trying again ...")
+			tflog.Info(ctx, "PCC not yet deleted, retrying")
 		case <-ctx.Done():
-			log.Printf("[INFO] delete timed out")
+			tflog.Info(ctx, "PCC delete timed out")
 			return diagutil.ToDiags(d, fmt.Errorf("pcc removal timed out! WARNING: your pcc will still probably be removed after some time but the terraform state wont reflect that; check the updates in your Ionos Cloud account"), nil)
 		}
 	}
@@ -277,7 +277,7 @@ func resourcePrivateCrossConnectImport(ctx context.Context, d *schema.ResourceDa
 
 	pccId := parts[0]
 
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return nil, err
 	}
@@ -293,7 +293,7 @@ func resourcePrivateCrossConnectImport(ctx context.Context, d *schema.ResourceDa
 		return nil, diagutil.ToError(d, fmt.Errorf("unable to retrieve PCC, error: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	log.Printf("[INFO] PCC found: %+v", pcc)
+	tflog.Info(ctx, "PCC found", map[string]interface{}{"pcc_id": *pcc.Id})
 
 	d.SetId(*pcc.Id)
 	if err := d.Set("name", *pcc.Properties.Name); err != nil {
@@ -310,7 +310,7 @@ func resourcePrivateCrossConnectImport(ctx context.Context, d *schema.ResourceDa
 		return nil, diagutil.ToError(d, err, nil)
 	}
 
-	log.Printf("[INFO] Importing PCC %q...", d.Id())
+	tflog.Info(ctx, "importing PCC", map[string]interface{}{"pcc_id": d.Id()})
 
 	return []*schema.ResourceData{d}, nil
 }
@@ -340,7 +340,7 @@ func privateCrossConnectDeleted(ctx context.Context, client *ionoscloud.APIClien
 
 func waitForPCCToBeReady(ctx context.Context, d *schema.ResourceData, client *ionoscloud.APIClient) diag.Diagnostics {
 	for {
-		log.Printf("[INFO] Waiting for PCC %s to be ready...", d.Id())
+		tflog.Info(ctx, "waiting for PCC to be ready", map[string]interface{}{"pcc_id": d.Id()})
 
 		pccReady, rsErr := privateCrossConnectReady(ctx, client, d)
 
@@ -349,15 +349,15 @@ func waitForPCCToBeReady(ctx context.Context, d *schema.ResourceData, client *io
 		}
 
 		if pccReady {
-			log.Printf("[INFO] PCC ready: %s", d.Id())
+			tflog.Info(ctx, "PCC ready", map[string]interface{}{"pcc_id": d.Id()})
 			break
 		}
 
 		select {
 		case <-time.After(constant.SleepInterval):
-			log.Printf("[INFO] trying again ...")
+			tflog.Info(ctx, "PCC not ready, retrying")
 		case <-ctx.Done():
-			log.Printf("[INFO] update timed out")
+			tflog.Info(ctx, "PCC update timed out")
 			return diagutil.ToDiags(d, fmt.Errorf("pcc readiness check timed out! WARNING: your pcc will still probably be created/updated after some time "+
 				"but the terraform state wont reflect that; check your Ionos Cloud account to see the updates"), nil)
 		}

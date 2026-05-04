@@ -3,8 +3,8 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -95,7 +95,7 @@ func resourceDatacenter() *schema.Resource {
 func resourceDatacenterCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	datacenterName := d.Get("name").(string)
 	datacenterLocation := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(datacenterLocation)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, datacenterLocation)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -124,7 +124,7 @@ func resourceDatacenterCreate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 	d.SetId(*createdDatacenter.Id)
 
-	log.Printf("[INFO] DataCenter Id: %s", d.Id())
+	tflog.Info(ctx, "datacenter created", map[string]interface{}{"resource_id": d.Id()})
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
 		if bundleclient.IsRequestFailed(errState) {
@@ -140,7 +140,7 @@ func resourceDatacenterCreate(ctx context.Context, d *schema.ResourceData, meta 
 func resourceDatacenterRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 
 	datacenterLocation := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(datacenterLocation)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, datacenterLocation)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -168,7 +168,7 @@ func resourceDatacenterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	obj := ionoscloud.DatacenterPropertiesPut{}
 
 	datacenterLocation := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(datacenterLocation)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, datacenterLocation)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -216,7 +216,7 @@ func resourceDatacenterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 func resourceDatacenterDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 
 	datacenterLocation := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(datacenterLocation)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, datacenterLocation)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -251,7 +251,7 @@ func resourceDatacenterImport(ctx context.Context, d *schema.ResourceData, meta 
 
 	dcId := parts[0]
 
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return nil, err
 	}
@@ -267,7 +267,7 @@ func resourceDatacenterImport(ctx context.Context, d *schema.ResourceData, meta 
 		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while retrieving the datacenter: %w", err), nil)
 	}
 
-	log.Printf("[INFO] Datacenter found: %+v", datacenter)
+	tflog.Info(ctx, "datacenter imported", map[string]interface{}{"resource_id": d.Id()})
 
 	if err := setDatacenterData(d, &datacenter); err != nil {
 		return nil, diagutil.ToError(d, err, nil)

@@ -3,8 +3,8 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	dns "github.com/ionos-cloud/sdk-go-bundle/products/dns/v2"
@@ -74,14 +74,14 @@ func zoneRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagno
 
 	if err != nil {
 		if apiResponse.HttpNotFound() {
-			log.Printf("[INFO] Could not find zone with ID: %s", zoneId)
+			tflog.Info(ctx, "DNS zone not found", map[string]interface{}{"zone_id": zoneId})
 			d.SetId("")
 			return nil
 		}
 		return diagutil.ToDiags(d, fmt.Errorf("error while fetching DNS Zone with ID: %s, error: %w", zoneId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	log.Printf("[INFO] Successfully retrieved DNS Zone with ID: %s: %+v", zoneId, zone)
+	tflog.Info(ctx, "retrieved DNS zone", map[string]interface{}{"zone_id": zoneId})
 
 	if err := client.SetZoneData(d, zone); err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -137,7 +137,7 @@ func zoneImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schem
 		}
 		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to import the DNS Zone with ID: %s, error: %w", zoneId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
-	log.Printf("[INFO DNS Zone with ID: %s found: %+v", zoneId, zone)
+	tflog.Info(ctx, "DNS zone imported", map[string]interface{}{"zone_id": zoneId})
 
 	if err := client.SetZoneData(d, zone); err != nil {
 		return nil, diagutil.ToError(d, err, nil)

@@ -3,8 +3,8 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -77,8 +77,8 @@ func dataSourceUser() *schema.Resource {
 	}
 }
 
-func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
+func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -99,7 +99,7 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta any) d
 		if email == "" {
 			return diagutil.ToDiags(d, fmt.Errorf("please provide either the user id or email"), nil)
 		}
-		log.Printf("[INFO] email got from provider configuration since none was provided")
+		tflog.Info(ctx, "email taken from provider configuration since none was provided")
 	}
 	var user ionoscloud.User
 	var apiResponse *ionoscloud.APIResponse
@@ -147,11 +147,11 @@ func setUsersForGroup(ctx context.Context, d *schema.ResourceData, user *ionoscl
 		return fmt.Errorf("an error occurred while executing UmUsersGroupsGet %s (%w)", *user.Id, err)
 	}
 
-	groupEntries := make([]any, 0)
+	groupEntries := make([]interface{}, 0)
 	if groups.Items != nil && len(*groups.Items) > 0 {
-		groupEntries = make([]any, len(*groups.Items))
+		groupEntries = make([]interface{}, len(*groups.Items))
 		for groupIndex, group := range *groups.Items {
-			groupEntry := make(map[string]any)
+			groupEntry := make(map[string]interface{})
 
 			if group.Id != nil {
 				groupEntry["id"] = *group.Id

@@ -3,10 +3,10 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -187,7 +187,7 @@ func ForceNewForFlowlogChanges(_ context.Context, d *schema.ResourceDiff, _ any)
 }
 func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -228,7 +228,7 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta any) di
 		var err error
 		foundNic, apiResponse, err = ns.Get(ctx, dcid, srvid, *createdNic.Id, 3)
 		if apiResponse.HttpNotFound() {
-			log.Printf("[INFO] Could not find nic with Id %s , retrying...", *createdNic.Id)
+			tflog.Info(ctx, "could not find nic, retrying", map[string]interface{}{"nic_id": *createdNic.Id})
 			return retry.RetryableError(fmt.Errorf("could not find nic, %w", err))
 		}
 		if err != nil {
@@ -250,7 +250,7 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta any) di
 
 func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -262,14 +262,14 @@ func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta any) diag
 	nic, apiResponse, err := ns.Get(ctx, dcid, srvid, nicid, 3)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
-			log.Printf("[INFO] nic resource with id %s not found", nicid)
+			tflog.Info(ctx, "nic not found", map[string]interface{}{"nic_id": nicid})
 			d.SetId("")
 			return nil
 		}
 		return diagutil.ToDiags(d, fmt.Errorf("error occurred while fetching a nic: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	if err := cloudapinic.NicSetData(d, nic); err != nil {
+	if err := cloudapinic.NicSetData(ctx, d, nic); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
 
@@ -278,7 +278,7 @@ func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta any) diag
 
 func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -340,7 +340,7 @@ func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta any) di
 
 func resourceNicDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -376,7 +376,7 @@ func resourceNicImport(ctx context.Context, d *schema.ResourceData, meta any) ([
 	sId := parts[1]
 	nicId := parts[2]
 
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return nil, err
 	}
@@ -406,11 +406,11 @@ func resourceNicImport(ctx context.Context, d *schema.ResourceData, meta any) ([
 		return nil, err
 	}
 
-	if err := cloudapinic.NicSetData(d, &nic); err != nil {
+	if err := cloudapinic.NicSetData(ctx, d, &nic); err != nil {
 		return nil, diagutil.ToError(d, err, nil)
 	}
 
-	log.Printf("[INFO] nic found: %+v", nic)
+	tflog.Info(ctx, "nic found", map[string]interface{}{"nic_id": nicId, "server_id": sId, "datacenter_id": dcId})
 
 	return []*schema.ResourceData{d}, nil
 }

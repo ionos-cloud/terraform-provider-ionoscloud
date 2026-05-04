@@ -3,9 +3,9 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -123,14 +123,14 @@ func resourceCertificateManagerRead(ctx context.Context, d *schema.ResourceData,
 	certDto, apiResponse, err := client.GetCertificate(ctx, d.Id())
 	if err != nil {
 		if apiResponse.HttpNotFound() {
-			log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
+			tflog.Info(ctx, "certificate not found", map[string]interface{}{"certificate_id": d.Id(), "error": err.Error()})
 			d.SetId("")
 			return nil
 		}
 		return diagutil.ToDiags(d, err, &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	log.Printf("[INFO] Successfully retrieved certificate %s: %+v", d.Id(), certDto)
+	tflog.Info(ctx, "retrieved certificate", map[string]interface{}{"certificate_id": d.Id()})
 
 	if err := cert.SetCertificateData(d, &certDto); err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -168,7 +168,7 @@ func resourceCertificateManagerDelete(ctx context.Context, d *schema.ResourceDat
 		return diagutil.ToDiags(d, fmt.Errorf("deleting %w", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String()})
 	}
 
-	log.Printf("[INFO] Successfully deleted certificate: %s", d.Id())
+	tflog.Info(ctx, "successfully deleted certificate", map[string]interface{}{"certificate_id": d.Id()})
 
 	d.SetId("")
 

@@ -3,12 +3,12 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -177,7 +177,7 @@ func resourceNetworkLoadBalancerForwardingRule() *schema.Resource {
 
 func resourceNetworkLoadBalancerForwardingRuleCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -252,7 +252,7 @@ func resourceNetworkLoadBalancerForwardingRuleCreate(ctx context.Context, d *sch
 			return diags
 		}
 		if len(targets) > 0 {
-			log.Printf("[INFO] Network load balancer forwarding rule targets set to %+v", targets)
+			tflog.Info(ctx, "setting nlb forwarding rule targets", map[string]interface{}{"target_count": len(targets)})
 			networkLoadBalancerForwardingRule.Properties.Targets = &targets
 		}
 	}
@@ -353,7 +353,7 @@ func getTargetsData(targets any) ([]ionoscloud.NetworkLoadBalancerForwardingRule
 func resourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -366,14 +366,14 @@ func resourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *schem
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
+		tflog.Info(ctx, "nlb forwarding rule not found", map[string]interface{}{"rule_id": d.Id(), "error": err.Error()})
 		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil
 		}
 	}
 
-	log.Printf("[INFO] Successfully retrieved network load balancer forwarding rule %s: %+v", d.Id(), networkLoadBalancerForwardingRule)
+	tflog.Info(ctx, "retrieved nlb forwarding rule", map[string]interface{}{"rule_id": d.Id()})
 
 	if err := setNetworkLoadBalancerForwardingRuleData(d, &networkLoadBalancerForwardingRule); err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -384,7 +384,7 @@ func resourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *schem
 
 func resourceNetworkLoadBalancerForwardingRuleUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -474,7 +474,7 @@ func resourceNetworkLoadBalancerForwardingRuleUpdate(ctx context.Context, d *sch
 		if diags != nil {
 			return diags
 		}
-		log.Printf("[INFO] Network load balancer forwarding rule targets changed from %+v to %+v", oldTargets, newTargets)
+		tflog.Info(ctx, "nlb forwarding rule targets changed", map[string]interface{}{"old": oldTargets, "new": newTargets})
 		request.Properties.Targets = &targets
 	}
 	_, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesPatch(ctx, dcId, nlbID, d.Id()).NetworkLoadBalancerForwardingRuleProperties(*request.Properties).Execute()
@@ -496,7 +496,7 @@ func resourceNetworkLoadBalancerForwardingRuleUpdate(ctx context.Context, d *sch
 
 func resourceNetworkLoadBalancerForwardingRuleDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -541,7 +541,7 @@ func resourceNetworLoadBalancerForwardingRuleImport(ctx context.Context, d *sche
 	networkLoadBalancerId := parts[1]
 	networkLoadBalancerRuleId := parts[2]
 
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return nil, err
 	}
@@ -550,7 +550,7 @@ func resourceNetworLoadBalancerForwardingRuleImport(ctx context.Context, d *sche
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
+		tflog.Info(ctx, "nlb forwarding rule not found on import", map[string]interface{}{"rule_id": networkLoadBalancerRuleId, "error": err.Error()})
 		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil, diagutil.ToError(d, fmt.Errorf("unable to find network load balancer rule %q", networkLoadBalancerRuleId), nil)

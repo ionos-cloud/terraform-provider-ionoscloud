@@ -145,7 +145,7 @@ func dataSourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta any)
 	var apiResponse *ionoscloud.APIResponse
 
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}

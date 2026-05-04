@@ -1,13 +1,14 @@
 package inmemorydb
 
 import (
+	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"runtime"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 	inMemoryDB "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/inmemorydb/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
@@ -74,11 +75,11 @@ var (
 
 // changeConfigURL modifies the URL inside the client configuration.
 // This function is required in order to make requests to different endpoints based on location.
-func (c *Client) changeConfigURL(location string) {
+func (c *Client) changeConfigURL(ctx context.Context, location string) {
 	clientConfig := c.sdkClient.GetConfig()
 	if location == "" && os.Getenv(ionosAPIURLInMemoryDB) != "" {
 		url := utils.CleanURL(os.Getenv(ionosAPIURLInMemoryDB))
-		log.Printf("[DEBUG] InMemoryDB: endpoint from %s: %s", ionosAPIURLInMemoryDB, url)
+		tflog.Debug(ctx, "InMemoryDB: endpoint from env", map[string]interface{}{"env": ionosAPIURLInMemoryDB, "url": url})
 		clientConfig.Servers = shared.ServerConfigurations{
 			{
 				URL: url,
@@ -88,7 +89,7 @@ func (c *Client) changeConfigURL(location string) {
 	}
 	for _, server := range clientConfig.Servers {
 		if strings.EqualFold(server.Description, shared.EndpointOverridden+location) || strings.EqualFold(server.URL, locationToURL[location]) {
-			log.Printf("[DEBUG] InMemoryDB: endpoint for location %s: %s", configlog.FormatLocation(location), server.URL)
+			tflog.Debug(ctx, "InMemoryDB: endpoint for location", map[string]interface{}{"location": configlog.FormatLocation(location), "url": server.URL})
 			clientConfig.Servers = shared.ServerConfigurations{
 				{
 					URL:         server.URL,
@@ -98,5 +99,5 @@ func (c *Client) changeConfigURL(location string) {
 			return
 		}
 	}
-	log.Printf("[DEBUG] InMemoryDB: endpoint for location %s: %s", configlog.FormatLocation(location), locationToURL[location])
+	tflog.Debug(ctx, "InMemoryDB: endpoint for location", map[string]interface{}{"location": configlog.FormatLocation(location), "url": locationToURL[location]})
 }

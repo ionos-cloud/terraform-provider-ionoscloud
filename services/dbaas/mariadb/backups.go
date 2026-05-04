@@ -15,7 +15,7 @@ import (
 
 // GetClusterBackups retrieves a list of backups for a given cluster ID and the location in which the cluster is created.
 func (c *Client) GetClusterBackups(ctx context.Context, clusterID, location string) (mariadb.BackupList, *shared.APIResponse, error) {
-	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Mariadb, location)
+	loadedconfig.SetClientOptionsFromConfig(ctx, c, fileconfiguration.Mariadb, location)
 	backups, apiResponse, err := c.sdkClient.BackupsApi.ClusterBackupsGet(ctx, clusterID).Execute()
 	apiResponse.LogInfo()
 	return backups, apiResponse, err
@@ -23,7 +23,7 @@ func (c *Client) GetClusterBackups(ctx context.Context, clusterID, location stri
 
 // FindBackupByID retrieves a backup by its ID and the location in which the cluster is created.
 func (c *Client) FindBackupByID(ctx context.Context, backupID, location string) (mariadb.BackupResponse, *shared.APIResponse, error) {
-	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Mariadb, location)
+	loadedconfig.SetClientOptionsFromConfig(ctx, c, fileconfiguration.Mariadb, location)
 	backups, apiResponse, err := c.sdkClient.BackupsApi.BackupsFindById(ctx, backupID).Execute()
 	apiResponse.LogInfo()
 	return backups, apiResponse, err

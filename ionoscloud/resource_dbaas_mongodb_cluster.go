@@ -3,7 +3,6 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 	"time"
 
 	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2"
@@ -13,6 +12,7 @@ import (
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 
 	semversion "github.com/hashicorp/go-version"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -308,7 +308,7 @@ func resourceDbaasMongoDBCluster() *schema.Resource {
 	}
 }
 
-func errorOnMongoVersionDowngrade(_ context.Context, diff *schema.ResourceDiff, _ any) error {
+func errorOnMongoVersionDowngrade(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
 	// we do not want to check in case of resource creation
 	if diff.Id() == "" {
 		return nil
@@ -332,8 +332,8 @@ func errorOnMongoVersionDowngrade(_ context.Context, diff *schema.ResourceDiff, 
 	return nil
 }
 
-func resourceDbaasMongoClusterCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(d.Get("location").(string))
+func resourceDbaasMongoClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(ctx, d.Get("location").(string))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -362,8 +362,8 @@ func resourceDbaasMongoClusterCreate(ctx context.Context, d *schema.ResourceData
 	return resourceDbaasMongoClusterRead(ctx, d, meta)
 }
 
-func resourceDbaasMongoClusterUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(d.Get("location").(string))
+func resourceDbaasMongoClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(ctx, d.Get("location").(string))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -387,8 +387,8 @@ func resourceDbaasMongoClusterUpdate(ctx context.Context, d *schema.ResourceData
 	return resourceDbaasMongoClusterRead(ctx, d, meta)
 }
 
-func resourceDbaasMongoClusterRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(d.Get("location").(string))
+func resourceDbaasMongoClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(ctx, d.Get("location").(string))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -403,7 +403,7 @@ func resourceDbaasMongoClusterRead(ctx context.Context, d *schema.ResourceData, 
 		return diagutil.ToDiags(d, fmt.Errorf("read error while fetching dbaas mongo cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	log.Printf("[INFO] Successfully retrieved cluster %s: %+v", d.Id(), cluster)
+	tflog.Info(ctx, "retrieved MongoDB cluster", map[string]interface{}{"cluster_id": d.Id()})
 
 	if err := dbaas.SetMongoDBClusterData(d, cluster); err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -412,8 +412,8 @@ func resourceDbaasMongoClusterRead(ctx context.Context, d *schema.ResourceData, 
 	return nil
 }
 
-func resourceDbaasMongoClusterDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(d.Get("location").(string))
+func resourceDbaasMongoClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(ctx, d.Get("location").(string))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -438,7 +438,7 @@ func resourceDbaasMongoClusterDelete(ctx context.Context, d *schema.ResourceData
 	return nil
 }
 
-func resourceDbaasMongoClusterImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
+func resourceDbaasMongoClusterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	importID := d.Id()
 	location, parts := splitImportID(importID, "/")
 	if len(parts) != 1 {
@@ -448,7 +448,7 @@ func resourceDbaasMongoClusterImport(ctx context.Context, d *schema.ResourceData
 	if err := validateImportIDParts(parts); err != nil {
 		return nil, fmt.Errorf("failed validating import identifier %q: %w", importID, err)
 	}
-	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(ctx, location)
 	if err != nil {
 		return nil, err
 	}
@@ -465,7 +465,7 @@ func resourceDbaasMongoClusterImport(ctx context.Context, d *schema.ResourceData
 		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the import of dbaas cluster %q, error:%w", clusterId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	log.Printf("[INFO] dbaas cluster found: %+v", dbaasCluster)
+	tflog.Info(ctx, "MongoDB cluster imported", map[string]interface{}{"cluster_id": clusterId})
 
 	if err := dbaas.SetMongoDBClusterData(d, dbaasCluster); err != nil {
 		return nil, diagutil.ToError(d, err, nil)

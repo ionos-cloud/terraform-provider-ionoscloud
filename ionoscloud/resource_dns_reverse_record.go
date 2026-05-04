@@ -3,8 +3,8 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -64,7 +64,7 @@ func reverseRecordRead(ctx context.Context, d *schema.ResourceData, meta any) di
 		}
 		return diagutil.ToDiags(d, fmt.Errorf("error while fetching the DNS Reverse Record: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
-	log.Printf("[INFO] Successfully retrieved DNS Reverse Record %s: %+v", recordId, record)
+	tflog.Info(ctx, "retrieved DNS reverse record", map[string]interface{}{"record_id": recordId})
 	if err := client.SetReverseRecordData(d, record); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
@@ -114,7 +114,7 @@ func reverseRecordImport(ctx context.Context, d *schema.ResourceData, meta any) 
 		}
 		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to import the DNS Reverse Record: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
-	log.Printf("[INFO] DNS Reverse Record found: %+v", record)
+	tflog.Info(ctx, "DNS reverse record imported", map[string]interface{}{"record_id": recordId})
 	if err := client.SetReverseRecordData(d, record); err != nil {
 		return nil, diagutil.ToError(d, err, nil)
 	}

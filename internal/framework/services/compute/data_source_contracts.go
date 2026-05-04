@@ -169,7 +169,7 @@ func (d *contractsDataSource) Schema(_ context.Context, req datasource.SchemaReq
 }
 
 // Configure configures the data source.
-func (d *contractsDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *contractsDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -183,7 +183,7 @@ func (d *contractsDataSource) Configure(_ context.Context, req datasource.Config
 		return
 	}
 
-	apiClient, err := client.NewCloudAPIClientWithFailover()
+	apiClient, err := client.NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		resp.Diagnostics.AddError("Cloud API Client Error", err.Error())
 		return

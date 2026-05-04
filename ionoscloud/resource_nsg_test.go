@@ -238,7 +238,7 @@ func testAccCheckNSGDestroyCheck(s *terraform.State) error {
 			continue
 		}
 
-		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(rs.Primary.Attributes["location"])
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(ctx, rs.Primary.Attributes["location"])
 		if err != nil {
 			return err
 		}
@@ -275,7 +275,7 @@ func testAccCheckNSGExists(n string, nsg *ionoscloud.SecurityGroup) resource.Tes
 			defer cancel()
 		}
 
-		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(rs.Primary.Attributes["location"])
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(ctx, rs.Primary.Attributes["location"])
 		if err != nil {
 			return err
 		}
@@ -304,7 +304,7 @@ func testAccCheckNSGRuleDestroyCheck(s *terraform.State) error {
 			continue
 		}
 
-		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(rs.Primary.Attributes["location"])
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(ctx, rs.Primary.Attributes["location"])
 		if err != nil {
 			return err
 		}
@@ -341,7 +341,7 @@ func testAccCheckNSGFirewallRuleExists(n string, rule *ionoscloud.FirewallRule) 
 			defer cancel()
 		}
 
-		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(rs.Primary.Attributes["location"])
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(ctx, rs.Primary.Attributes["location"])
 		if err != nil {
 			return err
 		}

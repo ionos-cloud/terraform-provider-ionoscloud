@@ -58,8 +58,8 @@ func dataSourceDbaasPgSqlDatabases() *schema.Resource {
 	}
 }
 
-func dataSourceDbaasPgSqlReadDatabases(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
+func dataSourceDbaasPgSqlReadDatabases(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(ctx, d.Get("location").(string))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -74,9 +74,9 @@ func dataSourceDbaasPgSqlReadDatabases(ctx context.Context, d *schema.ResourceDa
 	if retrievedDatabases.Items == nil {
 		return diagutil.ToDiags(d, fmt.Errorf("expected a list of PgSql databases, but received 'nil' instead, cluster ID: %s", clusterId), nil)
 	}
-	var databases []any
+	var databases []interface{}
 	for _, retrievedDatabase := range retrievedDatabases.Items {
-		database := make(map[string]any)
+		database := make(map[string]interface{})
 		utils.SetPropWithNilCheck(database, "name", retrievedDatabase.Properties.Name)
 		utils.SetPropWithNilCheck(database, "owner", retrievedDatabase.Properties.Owner)
 		utils.SetPropWithNilCheck(database, "id", retrievedDatabase.Id)

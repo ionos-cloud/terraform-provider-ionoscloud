@@ -74,8 +74,8 @@ func dataSourceDbaasMongoUser() *schema.Resource {
 	}
 }
 
-func dataSourceDbaasMongoReadUser(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(d.Get("location").(string))
+func dataSourceDbaasMongoReadUser(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(ctx, d.Get("location").(string))
 	if err != nil {
 		return diag.FromErr(err)
 	}

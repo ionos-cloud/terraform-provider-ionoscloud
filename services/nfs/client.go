@@ -1,13 +1,14 @@
 package nfs
 
 import (
+	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"runtime"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
@@ -55,12 +56,12 @@ func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *f
 // changeConfigURL sets the location of the NFS client which modifies the Host URL:
 //   - de/fra:    https://nfs.de-fra.ionos.com
 //   - de/txl:    https://nfs.de-txl.ionos.com
-func (c *Client) changeConfigURL(location string) {
+func (c *Client) changeConfigURL(ctx context.Context, location string) {
 	config := c.sdkClient.GetConfig()
 	// if there is no location set, return the client as is. allows to overwrite the url with IONOS_API_URL
 	if location == "" && os.Getenv(ionosAPIURLNFS) != "" {
 		url := utils.CleanURL(os.Getenv(ionosAPIURLNFS))
-		log.Printf("[DEBUG] NFS: endpoint from %s: %s", ionosAPIURLNFS, url)
+		tflog.Debug(ctx, "NFS: endpoint from env", map[string]interface{}{"env": ionosAPIURLNFS, "url": url})
 		config.Servers = shared.ServerConfigurations{
 			{
 				URL: url,
@@ -71,7 +72,7 @@ func (c *Client) changeConfigURL(location string) {
 
 	for _, server := range config.Servers {
 		if strings.EqualFold(server.Description, shared.EndpointOverridden+location) || strings.EqualFold(server.URL, locationToURL[location]) {
-			log.Printf("[DEBUG] NFS: endpoint for location %s: %s", configlog.FormatLocation(location), server.URL)
+			tflog.Debug(ctx, "NFS: endpoint for location", map[string]interface{}{"location": configlog.FormatLocation(location), "url": server.URL})
 			config.Servers = shared.ServerConfigurations{
 				{
 					URL:         server.URL,
@@ -81,15 +82,17 @@ func (c *Client) changeConfigURL(location string) {
 			return
 		}
 	}
-	log.Printf("[DEBUG] NFS: endpoint for location %s: %s", configlog.FormatLocation(location), locationToURL[location])
+	tflog.Debug(ctx, "NFS: endpoint for location", map[string]interface{}{"location": configlog.FormatLocation(location), "url": locationToURL[location]})
 }
 
 // overrideClientEndpoint todo - after move to bundle, replace with generic function from fileConfig
-func (c *Client) overrideClientEndpoint(productName, location string) {
+//
+//nolint:unparam
+func (c *Client) overrideClientEndpoint(ctx context.Context, productName, location string) {
 	// whatever is set, at the end we need to check if the IONOS_API_URL_productname is set and use override the endpoint if yes
-	defer c.changeConfigURL(location)
+	defer c.changeConfigURL(ctx, location)
 	if os.Getenv(shared.IonosApiUrlEnvVar) != "" {
-		log.Printf("[DEBUG] NFS: endpoint from %s: %s", shared.IonosApiUrlEnvVar, os.Getenv(shared.IonosApiUrlEnvVar))
+		tflog.Debug(ctx, "NFS: endpoint from env", map[string]interface{}{"env": shared.IonosApiUrlEnvVar, "url": os.Getenv(shared.IonosApiUrlEnvVar)})
 		return
 	}
 	fileConfig := c.GetFileConfig()
@@ -102,7 +105,7 @@ func (c *Client) overrideClientEndpoint(productName, location string) {
 	}
 	endpoint := fileConfig.GetProductLocationOverrides(productName, location)
 	if endpoint == nil {
-		log.Printf("[WARN] Missing endpoint for %s in location %s", productName, location)
+		tflog.Warn(ctx, "missing endpoint", map[string]interface{}{"product": productName, "location": location})
 		return
 	}
 	config.Servers = shared.ServerConfigurations{

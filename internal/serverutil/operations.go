@@ -3,8 +3,8 @@ package serverutil
 import (
 	"context"
 	"fmt"
-	"log"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
@@ -41,7 +41,7 @@ func SetServerVolumeProperties(volume ionoscloud.Volume) map[string]any {
 
 func ResourceCommonServerDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -49,9 +49,11 @@ func ResourceCommonServerDelete(ctx context.Context, d *schema.ResourceData, met
 
 	apiResponse, err := client.ServersApi.DatacentersServersDelete(ctx, dcId, d.Id()).Execute()
 	if apiResponse != nil {
-		log.Printf("[DEBUG] Request time : %s for operation : %s",
-			apiResponse.RequestTime, apiResponse.Operation)
-		log.Printf("[DEBUG] response status code : %d\n", apiResponse.SafeStatusCode())
+		tflog.Debug(ctx, "api request completed", map[string]interface{}{
+			"request_time": apiResponse.RequestTime.String(),
+			"operation":    apiResponse.Operation,
+			"status_code":  apiResponse.SafeStatusCode(),
+		})
 	}
 	if err != nil {
 		requestLocation, _ := apiResponse.SafeLocation()

@@ -29,8 +29,8 @@ func dataSourceResource() *schema.Resource {
 	}
 }
 
-func dataSourceResourceRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
+func dataSourceResourceRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -40,7 +40,7 @@ func dataSourceResourceRead(ctx context.Context, d *schema.ResourceData, meta an
 	resourceType := d.Get("resource_type").(string)
 	resourceId := d.Get("resource_id").(string)
 
-	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+	ctx, cancel := context.WithTimeout(ctx, *resourceDefaultTimeouts.Default)
 	if cancel != nil {
 		defer cancel()
 	}

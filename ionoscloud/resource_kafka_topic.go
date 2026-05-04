@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -94,7 +94,7 @@ func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	d.SetId(createdTopic.Id)
-	log.Printf("[INFO] Created Kafka Cluster Topic: %s", d.Id())
+	tflog.Info(ctx, "created Kafka cluster topic", map[string]interface{}{"topic_id": d.Id()})
 
 	// Sleep for 5 second to avoid 500 error from the API
 	time.Sleep(5 * time.Second)
@@ -122,7 +122,7 @@ func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, meta an
 		return diagutil.ToDiags(d, fmt.Errorf("error while fetching Kafka Cluster Topic: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	log.Printf("[INFO] Successfully retreived Kafka Cluster Topic %s: %+v", d.Id(), topic)
+	tflog.Info(ctx, "retrieved Kafka cluster topic", map[string]interface{}{"topic_id": d.Id()})
 
 	if err := client.SetKafkaTopicData(d, &topic); err != nil {
 		return diagutil.ToDiags(d, err, nil)

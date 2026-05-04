@@ -3,9 +3,9 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	dns "github.com/ionos-cloud/sdk-go-bundle/products/dns/v2"
@@ -99,7 +99,7 @@ func recordRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diag
 		}
 		return diagutil.ToDiags(d, fmt.Errorf("error while fetching the DNS Record, zone ID: %s, error: %w", zoneId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
-	log.Printf("[INFO] Successfully retrieved DNS Record %s: %+v", recordId, record)
+	tflog.Info(ctx, "retrieved DNS record", map[string]interface{}{"record_id": recordId, "zone_id": zoneId})
 	if err := client.SetRecordData(d, record); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
@@ -162,7 +162,7 @@ func recordImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*sch
 		}
 		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to import the DNS Record with ID: %s, zone ID: %s, error: %w", recordId, zoneId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
-	log.Printf("[INFO] DNS Record found: %+v", record)
+	tflog.Info(ctx, "DNS record imported", map[string]interface{}{"record_id": recordId, "zone_id": zoneId})
 	if err := client.SetRecordData(d, record); err != nil {
 		return nil, diagutil.ToError(d, err, nil)
 	}

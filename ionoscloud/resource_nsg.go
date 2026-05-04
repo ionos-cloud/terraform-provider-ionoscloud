@@ -3,8 +3,8 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -61,7 +61,7 @@ func resourceNSGCreate(ctx context.Context, d *schema.ResourceData, meta any) di
 	sgDescription := d.Get("description").(string)
 	location := d.Get("location").(string)
 
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -92,7 +92,7 @@ func resourceNSGRead(ctx context.Context, d *schema.ResourceData, meta any) diag
 	datacenterID := d.Get("datacenter_id").(string)
 	location := d.Get("location").(string)
 
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -115,7 +115,7 @@ func resourceNSGUpdate(ctx context.Context, d *schema.ResourceData, meta any) di
 	sgDescription := d.Get("description").(string)
 	location := d.Get("location").(string)
 
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -146,7 +146,7 @@ func resourceNSGDelete(ctx context.Context, d *schema.ResourceData, meta any) di
 	datacenterID := d.Get("datacenter_id").(string)
 	location := d.Get("location").(string)
 
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -181,7 +181,7 @@ func resourceNSGImport(ctx context.Context, d *schema.ResourceData, meta any) ([
 	datacenterID := parts[0]
 	nsgID := parts[1]
 
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return nil, err
 	}
@@ -197,7 +197,7 @@ func resourceNSGImport(ctx context.Context, d *schema.ResourceData, meta any) ([
 		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while retrieving the Network Security Group, %w", err), nil)
 	}
 
-	log.Printf("[INFO] Datacenter found: %+v", nsg)
+	tflog.Info(ctx, "NSG imported", map[string]interface{}{"nsg_id": nsgID, "datacenter_id": datacenterID})
 	if err = d.Set("datacenter_id", datacenterID); err != nil {
 		return nil, diagutil.ToError(d, err, nil)
 	}

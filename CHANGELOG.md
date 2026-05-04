@@ -9,6 +9,7 @@
 ### Enhancements
 - Add validation error when update-only attributes are set during snapshot creation
 - Add more information to error messages
+- Use tflog instead of print
 
 ## 6.7.28
 ### Fixes

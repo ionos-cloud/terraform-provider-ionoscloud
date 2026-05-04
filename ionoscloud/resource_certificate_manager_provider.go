@@ -3,9 +3,9 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -110,7 +110,7 @@ func providerRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Di
 		}
 		return diagutil.ToDiags(d, fmt.Errorf("error while fetching auto-certificate provider with ID: %v, error: %w", providerID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
-	log.Printf("[INFO] Successfully retrieved auto-certificate provider with ID: %v, provider info: %+v", providerID, provider)
+	tflog.Info(ctx, "retrieved auto-certificate provider", map[string]interface{}{"provider_id": providerID})
 	if err := cert.SetProviderData(d, provider); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
@@ -171,7 +171,7 @@ func providerImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*s
 		}
 		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to import auto-certificate provider with ID: %v, error: %w", providerID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
-	log.Printf("[INFO] auto-certificate provider found: %+v", provider)
+	tflog.Info(ctx, "auto-certificate provider imported", map[string]interface{}{"provider_id": providerID})
 	if err := d.Set("location", location); err != nil {
 		return nil, utils.GenerateSetError("Auto-certificate provider", "location", err)
 	}

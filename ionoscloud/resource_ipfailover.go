@@ -3,7 +3,6 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapilan"
@@ -14,6 +13,7 @@ import (
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/uuidgen"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -67,7 +67,7 @@ func resourceLanIPFailover() *schema.Resource {
 
 func resourceLanIPFailoverCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -115,7 +115,7 @@ func resourceLanIPFailoverCreate(ctx context.Context, d *schema.ResourceData, me
 
 func resourceLanIPFailoverRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -156,7 +156,7 @@ func resourceLanIPFailoverRead(ctx context.Context, d *schema.ResourceData, meta
 	// If the IP failover group was not found, set the ID to the empty string in order to remove the
 	// resource from the state.
 	if !ipFailoverGroupFound {
-		log.Printf("[INFO] IP Failover Group with IP: %s was not found in LAN with ID: %s, datacenter ID: %s", ip, lanId, dcId)
+		tflog.Info(ctx, "IP Failover Group not found in LAN", map[string]interface{}{"ip": ip, "lan_id": lanId, "datacenter_id": dcId})
 		d.SetId("")
 	}
 
@@ -165,7 +165,7 @@ func resourceLanIPFailoverRead(ctx context.Context, d *schema.ResourceData, meta
 
 func resourceLanIPFailoverUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -220,7 +220,7 @@ func resourceLanIPFailoverUpdate(ctx context.Context, d *schema.ResourceData, me
 
 func resourceLanIPFailoverDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -283,7 +283,7 @@ func resourceIpFailoverImporter(ctx context.Context, d *schema.ResourceData, met
 	lanId := parts[1]
 	ip := parts[2]
 
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return nil, err
 	}
@@ -299,7 +299,7 @@ func resourceIpFailoverImporter(ctx context.Context, d *schema.ResourceData, met
 		return nil, diagutil.ToError(d, fmt.Errorf("error while fetching LAN with ID: %s, datacenter ID: %s, err: %w", lanId, dcId, err), nil)
 	}
 
-	log.Printf("[INFO] lan found: %+v", lan)
+	tflog.Info(ctx, "lan found", map[string]interface{}{"lan_id": lanId, "datacenter_id": dcId})
 
 	if err := d.Set("location", location); err != nil {
 		return nil, err

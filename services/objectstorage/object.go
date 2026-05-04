@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io"
-	"log"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -14,6 +13,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	objstorage "github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/mitchellh/go-homedir"
@@ -116,13 +116,13 @@ func (c *Client) UploadObject(ctx context.Context, data *ObjectResourceModel) (*
 		if !data.Content.IsNull() {
 			err = os.Remove(body.Name())
 			if err != nil {
-				log.Printf("failed to remove temp file: %s", err.Error())
+				tflog.Warn(ctx, "failed to remove temp file", map[string]interface{}{"error": err.Error()})
 			}
 		}
 		// Close the file
 		err = body.Close()
 		if err != nil {
-			log.Printf("failed to close body: %s", err.Error())
+			tflog.Warn(ctx, "failed to close body", map[string]interface{}{"error": err.Error()})
 		}
 	}()
 

@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -153,14 +153,14 @@ func pipelineRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Di
 	pipeline, apiResponse, err := client.GetPipelineByID(ctx, location, pipelineID)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
-			log.Printf("[INFO] Could not find Logging pipeline with ID: %s", pipelineID)
+			tflog.Info(ctx, "logging pipeline not found", map[string]interface{}{"pipeline_id": pipelineID})
 			d.SetId("")
 			return nil
 		}
 		return diagutil.ToDiags(d, fmt.Errorf("error while fetching Logging pipeline: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	log.Printf("[INFO] Successfully retrieved Logging pipeline with ID: %s: %+v", pipelineID, pipeline)
+	tflog.Info(ctx, "retrieved logging pipeline", map[string]interface{}{"pipeline_id": pipelineID})
 	if err := client.SetPipelineData(d, pipeline); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}

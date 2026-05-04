@@ -3,13 +3,13 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	cloudapiflowlog "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/flowlog"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -105,9 +105,9 @@ and log the extent to which your instances are being accessed.`,
 	}
 }
 
-func resourceNetworkLoadBalancerCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
+func resourceNetworkLoadBalancerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -148,7 +148,7 @@ func resourceNetworkLoadBalancerCreate(ctx context.Context, d *schema.ResourceDa
 	}
 
 	if ipsVal, ipsOk := d.GetOk("ips"); ipsOk {
-		ipsVal := ipsVal.([]any)
+		ipsVal := ipsVal.([]interface{})
 		if ipsVal != nil {
 			ips := make([]string, len(ipsVal), len(ipsVal))
 			for idx := range ipsVal {
@@ -159,7 +159,7 @@ func resourceNetworkLoadBalancerCreate(ctx context.Context, d *schema.ResourceDa
 	}
 
 	if lbPrivateIpsVal, lbPrivateIpsOk := d.GetOk("lb_private_ips"); lbPrivateIpsOk {
-		lbPrivateIpsVal := lbPrivateIpsVal.([]any)
+		lbPrivateIpsVal := lbPrivateIpsVal.([]interface{})
 		if lbPrivateIpsVal != nil {
 			lbPrivateIps := make([]string, len(lbPrivateIpsVal), len(lbPrivateIpsVal))
 			for idx := range lbPrivateIpsVal {
@@ -177,7 +177,7 @@ func resourceNetworkLoadBalancerCreate(ctx context.Context, d *schema.ResourceDa
 		}
 		if flowLogList, ok := flowLogs.([]any); ok {
 			for _, flowLogData := range flowLogList {
-				if flowLog, ok := flowLogData.(map[string]any); ok {
+				if flowLog, ok := flowLogData.(map[string]interface{}); ok {
 					*networkLoadBalancer.Entities.Flowlogs.Items = append(*networkLoadBalancer.Entities.Flowlogs.Items, cloudapiflowlog.GetFlowlogFromMap(flowLog))
 				}
 			}
@@ -207,9 +207,9 @@ func resourceNetworkLoadBalancerCreate(ctx context.Context, d *schema.ResourceDa
 	return resourceNetworkLoadBalancerRead(ctx, d, meta)
 }
 
-func resourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
+func resourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -220,14 +220,14 @@ func resourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceData
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
+		tflog.Info(ctx, "network load balancer not found", map[string]interface{}{"nlb_id": d.Id(), "error": err.Error()})
 		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil
 		}
 	}
 
-	log.Printf("[INFO] Successfully retrieved network load balancer %s: %+v", d.Id(), networkLoadBalancer)
+	tflog.Info(ctx, "retrieved network load balancer", map[string]interface{}{"nlb_id": d.Id()})
 
 	if err := setNetworkLoadBalancerData(d, &networkLoadBalancer); err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -236,9 +236,9 @@ func resourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceData
 	return nil
 }
 
-func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
+func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -280,8 +280,8 @@ func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceDa
 
 	if d.HasChange("ips") {
 		oldIps, newIps := d.GetChange("ips")
-		log.Printf("[INFO] network loadbalancer ips changed from %+v to %+v", oldIps, newIps)
-		ipsVal := newIps.([]any)
+		tflog.Info(ctx, "network load balancer ips changed", map[string]interface{}{"old": oldIps, "new": newIps})
+		ipsVal := newIps.([]interface{})
 		ips := make([]string, 0)
 		if ipsVal != nil {
 			for _, ip := range ipsVal {
@@ -297,8 +297,8 @@ func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceDa
 
 	if d.HasChange("lb_private_ips") {
 		oldLbPrivateIps, newLbPrivateIps := d.GetChange("lb_private_ips")
-		log.Printf("[INFO] network loadbalancer lb_private_ips changed from %+v to %+v", oldLbPrivateIps, newLbPrivateIps)
-		lbPrivateIpsVal := newLbPrivateIps.([]any)
+		tflog.Info(ctx, "network load balancer lb_private_ips changed", map[string]interface{}{"old": oldLbPrivateIps, "new": newLbPrivateIps})
+		lbPrivateIpsVal := newLbPrivateIps.([]interface{})
 		lbPrivateIps := make([]string, 0)
 		if lbPrivateIpsVal != nil {
 			for _, privateIp := range lbPrivateIpsVal {
@@ -356,9 +356,9 @@ func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceDa
 	return resourceNetworkLoadBalancerRead(ctx, d, meta)
 }
 
-func resourceNetworkLoadBalancerDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
+func resourceNetworkLoadBalancerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -383,7 +383,7 @@ func resourceNetworkLoadBalancerDelete(ctx context.Context, d *schema.ResourceDa
 	return nil
 }
 
-func resourceNetworkLoadBalancerImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
+func resourceNetworkLoadBalancerImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	importID := d.Id()
 
 	location, parts := splitImportID(importID, "/")
@@ -401,7 +401,7 @@ func resourceNetworkLoadBalancerImport(ctx context.Context, d *schema.ResourceDa
 	dcId := parts[0]
 	networkLoadBalancerId := parts[1]
 
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return nil, err
 	}
@@ -410,7 +410,7 @@ func resourceNetworkLoadBalancerImport(ctx context.Context, d *schema.ResourceDa
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
+		tflog.Info(ctx, "network load balancer not found on import", map[string]interface{}{"nlb_id": networkLoadBalancerId, "error": err.Error()})
 		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil, diagutil.ToError(d, fmt.Errorf("unable to find network load balancer %q", networkLoadBalancerId), nil)

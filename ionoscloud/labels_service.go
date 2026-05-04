@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
@@ -93,7 +93,7 @@ func (ls *LabelsService) datacentersServersLabelsDelete(datacenterId, serverId s
 				apiResponse.LogInfo()
 				if err != nil {
 					if httpNotFound(apiResponse) {
-						log.Printf("[WARN] label with key %s has been already removed from server %s\n", labelKey, serverId)
+						tflog.Warn(ls.ctx, "label has been already removed from server", map[string]interface{}{"key": labelKey, "server_id": serverId})
 					} else {
 						return fmt.Errorf("[label update] an error occurred while deleting label with key: %s, server ID: %s, error: %w", labelKey, serverId, err)
 					}

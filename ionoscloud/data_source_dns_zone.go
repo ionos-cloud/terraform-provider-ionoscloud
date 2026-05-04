@@ -3,9 +3,9 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -89,7 +89,7 @@ func dataSourceZoneRead(ctx context.Context, d *schema.ResourceData, meta any) d
 		}
 	} else {
 		var results []dns.ZoneRead
-		log.Printf("[INFO] Populating data source for DNS Zone using name %s and partial_match %t", name, partialMatch)
+		tflog.Info(ctx, "searching DNS zone by name", map[string]interface{}{"name": name, "partial_match": partialMatch})
 
 		if partialMatch {
 			// By default, when providing the name as a filter, for the GET requests, partial match

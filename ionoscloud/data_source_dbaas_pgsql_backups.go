@@ -3,8 +3,8 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -93,8 +93,8 @@ func dataSourceDbaasPgSqlBackups() *schema.Resource {
 	}
 }
 
-func dataSourceDbaasPgSqlReadBackups(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
+func dataSourceDbaasPgSqlReadBackups(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(ctx, d.Get("location").(string))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -108,8 +108,7 @@ func dataSourceDbaasPgSqlReadBackups(ctx context.Context, d *schema.ResourceData
 	/* search by ID */
 	clusterBackups, resp, err := client.GetClusterBackups(ctx, idStr)
 	if resp != nil {
-		log.Printf("operation %s", resp.Operation)
-		log.Printf("[DEBUG] response status code : %d\n", resp.SafeStatusCode())
+		tflog.Debug(ctx, "fetched cluster backups", map[string]interface{}{"operation": resp.Operation, "status_code": resp.SafeStatusCode()})
 	}
 
 	if err != nil {

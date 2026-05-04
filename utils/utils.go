@@ -5,17 +5,16 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net"
 	"net/http"
 	"os"
 	"reflect"
 	"regexp"
-	"slices"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
@@ -54,9 +53,15 @@ func DiffSlice(slice1 []string, slice2 []string) []string {
 
 	// Loop two times, first to find slice1 strings not in slice2,
 	// second loop to find slice2 strings not in slice1
-	for i := range 2 {
+	for i := 0; i < 2; i++ {
 		for _, s1 := range slice1 {
-			found := slices.Contains(slice2, s1)
+			found := false
+			for _, s2 := range slice2 {
+				if s1 == s2 {
+					found = true
+					break
+				}
+			}
 			// String not found. We add it to return slice
 			if !found {
 				diff = append(diff, s1)
@@ -94,10 +99,10 @@ func GenerateImmutableError(resource, field string) error {
 	return fmt.Errorf("%s property is immutable for %s", field, resource)
 }
 
-func SetPropWithNilCheck(m map[string]any, prop string, v any) {
+func SetPropWithNilCheck(m map[string]interface{}, prop string, v interface{}) {
 
 	rVal := reflect.ValueOf(v)
-	if rVal.Kind() == reflect.Pointer {
+	if rVal.Kind() == reflect.Ptr {
 		if !rVal.IsNil() {
 			m[prop] = rVal.Elem().Interface()
 		}
@@ -147,7 +152,7 @@ func TestValueInSlice(resource, attribute, value string) resource.TestCheckFunc 
 			} else if lengthOfSlice <= 0 {
 				return fmt.Errorf("returned %s slice is empty", attribute)
 			} else {
-				for i := range lengthOfSlice {
+				for i := 0; i < lengthOfSlice; i++ {
 					attribute = attribute[:len(attribute)-1] + strconv.Itoa(i)
 					if rs.Primary.Attributes[attribute] == value {
 						return nil
@@ -186,12 +191,12 @@ func CheckFileExists(filePath string) bool {
 }
 
 // WriteToFile - creates the file and writes 'value' to it.
-func WriteToFile(name, value string) error {
+func WriteToFile(ctx context.Context, name, value string) error {
 	file, err := os.Create(name)
 	defer func() {
 		err = file.Close()
 		if err != nil {
-			log.Printf("[DEBUG] could not close file %v", err)
+			tflog.Debug(ctx, "could not close file", map[string]interface{}{"error": err})
 		}
 	}()
 
@@ -244,7 +249,7 @@ func WaitForResourceToBeReady(ctx context.Context, d *schema.ResourceData, fn Re
 		if err != nil {
 			return retry.NonRetryableError(err)
 		}
-		log.Printf("[DEBUG] resource with id %s not ready, still trying ", d.Id())
+		tflog.Debug(ctx, "resource not ready, still trying", map[string]interface{}{"id": d.Id()})
 		return retry.RetryableError(fmt.Errorf("resource with id %s not ready, still trying ", d.Id()))
 	})
 }
@@ -263,7 +268,7 @@ func WaitForResourceToBeDeleted(ctx context.Context, d *schema.ResourceData, fn 
 		if err != nil {
 			return retry.NonRetryableError(err)
 		}
-		log.Printf("[DEBUG] resource with id %s still has not been deleted", d.Id())
+		tflog.Debug(ctx, "resource still has not been deleted", map[string]interface{}{"id": d.Id()})
 		return retry.RetryableError(fmt.Errorf("resource with id %s found, still trying ", d.Id()))
 	})
 	return err
@@ -273,7 +278,7 @@ func WaitForResourceToBeDeleted(ctx context.Context, d *schema.ResourceData, fn 
 // will turn "" into nil values
 // takes snake_case fields and decodes them into camelCase fields of struct
 // used to decode values from TypeList and TypeSet of schema(`d`) directly into sdk structs
-func DecodeInterfaceToStruct(input, output any) error {
+func DecodeInterfaceToStruct(ctx context.Context, input, output interface{}) error {
 	config := mapstructure.DecoderConfig{
 		DecodeHook:       PointerEmptyToNil(),
 		ErrorUnused:      false,
@@ -287,7 +292,7 @@ func DecodeInterfaceToStruct(input, output any) error {
 	if err != nil {
 		return err
 	}
-	log.Printf("[DEBUG] rawdata to decode %s \n", input)
+	tflog.Debug(ctx, "rawdata to decode", map[string]interface{}{"input": fmt.Sprintf("%v", input)})
 	err = customDecoder.Decode(input)
 	if err != nil {
 		return err
@@ -300,7 +305,7 @@ func IsSnakeEqualToCamelCase(a, b string) bool {
 }
 
 func PointerEmptyToNil() mapstructure.DecodeHookFuncType {
-	return func(f reflect.Type, t reflect.Type, data any) (any, error) {
+	return func(f reflect.Type, t reflect.Type, data interface{}) (interface{}, error) {
 		if f.Kind() == reflect.String && data == "" {
 			return nil, nil
 		}
@@ -309,10 +314,10 @@ func PointerEmptyToNil() mapstructure.DecodeHookFuncType {
 }
 
 // checks if value['1'] of key[`id`] is present inside a slice of maps[string]interface{}
-func IsValueInSliceOfMap[T comparable](sliceOfMaps []any, key string, value T) bool {
+func IsValueInSliceOfMap[T comparable](sliceOfMaps []interface{}, key string, value T) bool {
 	for _, mmap := range sliceOfMaps {
 		// do not delete if the id in the old rule is present in the new rules to be updated
-		if value == mmap.(map[string]any)[key] {
+		if value == mmap.(map[string]interface{})[key] {
 			return true
 		}
 	}
@@ -320,8 +325,8 @@ func IsValueInSliceOfMap[T comparable](sliceOfMaps []any, key string, value T) b
 }
 
 // DecodeStructToMap SDK struct to map[string]interface{}
-func DecodeStructToMap(input any) (map[string]any, error) {
-	var result map[string]any
+func DecodeStructToMap(input interface{}) (map[string]interface{}, error) {
+	var result map[string]interface{}
 	config := &mapstructure.DecoderConfig{
 		Metadata:         nil,
 		TagName:          "json",
@@ -342,7 +347,7 @@ func DecodeStructToMap(input any) (map[string]any, error) {
 		return nil, err
 	}
 
-	newResult := make(map[string]any)
+	newResult := make(map[string]interface{})
 	for k, v := range result {
 		newResult[xstrings.ToSnakeCase(k)] = v
 	}
@@ -355,12 +360,12 @@ func IsCamelCaseEqualToSnakeCase(a, b string) bool {
 }
 
 // ReadPublicKey Reads public key from file or directly provided and returns key string if valid
-func ReadPublicKey(pathOrKey string) (string, error) {
+func ReadPublicKey(ctx context.Context, pathOrKey string) (string, error) {
 	var err error
 	bytes := []byte(pathOrKey)
 
 	if CheckFileExists(pathOrKey) {
-		log.Printf("[DEBUG] ssh key has been provided in the following file: %s", pathOrKey)
+		tflog.Debug(ctx, "ssh key has been provided in a file", map[string]interface{}{"path": pathOrKey})
 		if bytes, err = os.ReadFile(pathOrKey); err != nil {
 			return "", err
 		}
@@ -419,8 +424,8 @@ func CleanURL(url string) string {
 }
 
 // ToInterfaceSlice converts any slice of type T into a slice of interfaces.
-func ToInterfaceSlice[T any](slice []T) []any {
-	r := make([]any, len(slice))
+func ToInterfaceSlice[T any](slice []T) []interface{} {
+	r := make([]interface{}, len(slice))
 	for i, v := range slice {
 		r[i] = v
 	}

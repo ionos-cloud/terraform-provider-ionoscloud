@@ -277,7 +277,7 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 	}
 
 	location := plan.Location.ValueString()
-	client, err := r.bundle.NewPgSQLV2Client(location)
+	client, err := r.bundle.NewPgSQLV2Client(ctx, location)
 	if err != nil {
 		resp.Diagnostics.AddError("failed to create PostgreSQL v2 client", err.Error())
 		return
@@ -339,7 +339,7 @@ func (r *clusterResource) Read(ctx context.Context, req resource.ReadRequest, re
 	clusterID := state.ID.ValueString()
 	location := state.Location.ValueString()
 
-	client, err := r.bundle.NewPgSQLV2Client(location)
+	client, err := r.bundle.NewPgSQLV2Client(ctx, location)
 	if err != nil {
 		resp.Diagnostics.AddError("failed to create PostgreSQL v2 client", err.Error())
 		return
@@ -373,7 +373,7 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 	clusterID := state.ID.ValueString()
 	location := plan.Location.ValueString()
 
-	client, err := r.bundle.NewPgSQLV2Client(location)
+	client, err := r.bundle.NewPgSQLV2Client(ctx, location)
 	if err != nil {
 		resp.Diagnostics.AddError("failed to create PostgreSQL v2 client", err.Error())
 		return
@@ -434,7 +434,7 @@ func (r *clusterResource) Delete(ctx context.Context, req resource.DeleteRequest
 	clusterID := state.ID.ValueString()
 	location := state.Location.ValueString()
 
-	client, err := r.bundle.NewPgSQLV2Client(location)
+	client, err := r.bundle.NewPgSQLV2Client(ctx, location)
 	if err != nil {
 		resp.Diagnostics.AddError("failed to create PostgreSQL v2 client", err.Error())
 		return

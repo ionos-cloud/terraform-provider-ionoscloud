@@ -3,13 +3,13 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
@@ -155,8 +155,8 @@ func dataSourceTargetGroup() *schema.Resource {
 	}
 }
 
-func dataSourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
+func dataSourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -178,7 +178,7 @@ func dataSourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta
 
 	if idOk {
 		/* search by ID */
-		log.Printf("[INFO] Using data source for target group by id %s", id)
+		tflog.Info(ctx, "searching target group by id", map[string]interface{}{"id": id})
 		targetGroup, apiResponse, err = client.TargetGroupsApi.TargetgroupsFindByTargetGroupId(ctx, id).Execute()
 		logApiRequestTime(apiResponse)
 
@@ -191,7 +191,7 @@ func dataSourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta
 
 		partialMatch := d.Get("partial_match").(bool)
 
-		log.Printf("[INFO] Using data source for target group by name with partial_match %t and name: %s", partialMatch, name)
+		tflog.Info(ctx, "searching target group by name", map[string]interface{}{"partial_match": partialMatch, "name": name})
 
 		if partialMatch {
 			targetGroups, apiResponse, err := client.TargetGroupsApi.TargetgroupsGet(ctx).Depth(1).Filter("name", name).Limit(constant.TargetGroupLimit).Execute()

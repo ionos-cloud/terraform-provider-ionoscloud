@@ -57,8 +57,8 @@ func resourceDbaasPgSqlUser() *schema.Resource {
 	}
 }
 
-func resourceDbaasPgSqlUserCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
+func resourceDbaasPgSqlUserCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(ctx, d.Get("location").(string))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -87,8 +87,8 @@ func resourceDbaasPgSqlUserCreate(ctx context.Context, d *schema.ResourceData, m
 	return diagutil.ToDiags(d, dbaas.SetUserPgSqlData(d, &user), nil)
 }
 
-func resourceDbaasPgSqlUserUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
+func resourceDbaasPgSqlUserUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(ctx, d.Get("location").(string))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -119,8 +119,8 @@ func resourceDbaasPgSqlUserUpdate(ctx context.Context, d *schema.ResourceData, m
 	return diagutil.ToDiags(d, dbaas.SetUserPgSqlData(d, &user), nil)
 }
 
-func resourceDbaasPgSqlUserRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
+func resourceDbaasPgSqlUserRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(ctx, d.Get("location").(string))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -143,8 +143,8 @@ func resourceDbaasPgSqlUserRead(ctx context.Context, d *schema.ResourceData, met
 	return nil
 }
 
-func resourceDbaaSPgSqlUserDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
+func resourceDbaaSPgSqlUserDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(ctx, d.Get("location").(string))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -162,7 +162,7 @@ func resourceDbaaSPgSqlUserDelete(ctx context.Context, d *schema.ResourceData, m
 	return nil
 }
 
-func resourceDbaasPgSqlUserImporter(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
+func resourceDbaasPgSqlUserImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	importID := d.Id()
 	location, parts := splitImportID(importID, "/")
 	if len(parts) != 2 {
@@ -173,7 +173,7 @@ func resourceDbaasPgSqlUserImporter(ctx context.Context, d *schema.ResourceData,
 		return nil, diagutil.ToError(d, fmt.Errorf("failed validating import identifier %q: %w", importID, err), nil)
 	}
 
-	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(ctx, location)
 	if err != nil {
 		return nil, err
 	}

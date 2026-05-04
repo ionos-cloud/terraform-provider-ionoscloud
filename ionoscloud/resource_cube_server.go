@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -299,7 +299,7 @@ func resourceCubeServer() *schema.Resource {
 
 func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -345,7 +345,7 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	var volume *ionoscloud.VolumeProperties
-	volume, err = getVolumeData(d, "volume.0.", constant.CubeType)
+	volume, err = getVolumeData(ctx, d, "volume.0.", constant.CubeType)
 	if err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
@@ -408,8 +408,7 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 		},
 	}
 	primaryNic = &(*server.Entities.Nics.Items)[0]
-	log.Printf("[DEBUG] dhcp nic after %t", *nic.Properties.Dhcp)
-	log.Printf("[DEBUG] primaryNic dhcp %t", *primaryNic.Properties.Dhcp)
+	tflog.Debug(ctx, "nic dhcp", map[string]interface{}{"nic_dhcp": *nic.Properties.Dhcp, "primary_nic_dhcp": *primaryNic.Properties.Dhcp})
 
 	firewall := ionoscloud.FirewallRule{
 		Properties: &ionoscloud.FirewallruleProperties{},
@@ -446,7 +445,7 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
 		if bundleclient.IsRequestFailed(errState) {
-			log.Printf("[DEBUG] failed to create createdServer resource")
+			tflog.Debug(ctx, "failed to create cube server resource")
 			d.SetId("")
 		}
 		requestLocation, _ := apiResponse.SafeLocation()
@@ -544,7 +543,7 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -556,7 +555,7 @@ func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta an
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		if httpNotFound(apiResponse) {
-			log.Printf("[DEBUG] cannot find server by id \n")
+			tflog.Debug(ctx, "cannot find cube server by id", map[string]interface{}{"server_id": serverId})
 			d.SetId("")
 			return nil
 		}
@@ -697,7 +696,7 @@ func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta an
 
 func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -947,7 +946,7 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		}
 		mProp, _ := json.Marshal(properties)
 
-		log.Printf("[DEBUG] Updating props: %s", string(mProp))
+		tflog.Debug(ctx, "updating cube nic properties", map[string]interface{}{"properties": string(mProp)})
 		ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
 		_, apiResponse, err = ns.Update(ctx, d.Get("datacenter_id").(string), *server.Id, *nic.Id, properties)
 		if err != nil {
@@ -998,7 +997,7 @@ func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta 
 	datacenterId := parts[0]
 	serverId := parts[1]
 
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return nil, err
 	}
@@ -1020,7 +1019,7 @@ func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta 
 	if server.Entities != nil && server.Entities.Nics != nil && firstNicItem.Properties != nil &&
 		firstNicItem.Properties.Ips != nil &&
 		len(*firstNicItem.Properties.Ips) > 0 {
-		log.Printf("[DEBUG] set primary_ip to %s", (*firstNicItem.Properties.Ips)[0])
+		tflog.Debug(ctx, "setting primary_ip", map[string]interface{}{"primary_ip": (*firstNicItem.Properties.Ips)[0]})
 		if err := d.Set("primary_ip", (*firstNicItem.Properties.Ips)[0]); err != nil {
 			return nil, diagutil.ToError(d, fmt.Errorf("error while setting primary ip: %w", err), nil)
 		}
