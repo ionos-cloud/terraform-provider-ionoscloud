@@ -34,12 +34,12 @@ func SetMariaDBClusterBackupsData(d *schema.ResourceData, retrievedBackups []mar
 	resourceId := uuid.New()
 	d.SetId(resourceId.String())
 
-	var backupsToBeSet []interface{}
+	var backupsToBeSet []any
 	for _, retrievedBackup := range retrievedBackups {
 		if retrievedBackup.Properties == nil {
 			return diag.FromErr(fmt.Errorf("expected valid properties in the API response for backup, but received 'nil' instead, backup ID: %s", *retrievedBackup.Id))
 		}
-		backupEntry := make(map[string]interface{})
+		backupEntry := make(map[string]any)
 		if retrievedBackup.Properties.ClusterId != nil {
 			backupEntry["cluster_id"] = *retrievedBackup.Properties.ClusterId
 		}
@@ -49,9 +49,9 @@ func SetMariaDBClusterBackupsData(d *schema.ResourceData, retrievedBackups []mar
 		if retrievedBackup.Properties.Size != nil {
 			backupEntry["size"] = *retrievedBackup.Properties.Size
 		}
-		var baseBackupsToBeSet []interface{}
+		var baseBackupsToBeSet []any
 		for _, baseBackup := range retrievedBackup.Properties.BaseBackups {
-			baseBackupEntry := make(map[string]interface{})
+			baseBackupEntry := make(map[string]any)
 			if baseBackup.Size != nil {
 				baseBackupEntry["size"] = *baseBackup.Size
 			}

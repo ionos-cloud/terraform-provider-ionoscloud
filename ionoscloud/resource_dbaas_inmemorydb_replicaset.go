@@ -202,7 +202,7 @@ func resourceDBaaSInMemoryDBReplicaSet() *schema.Resource {
 	}
 }
 
-func replicaSetCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func replicaSetCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).InMemoryDBClient
 
 	replicaSet := inmemorydb.GetReplicaSetDataCreate(d)
@@ -220,7 +220,7 @@ func replicaSetCreate(ctx context.Context, d *schema.ResourceData, meta interfac
 	return replicaSetRead(ctx, d, meta)
 }
 
-func replicaSetDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func replicaSetDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).InMemoryDBClient
 	replicaSetID := d.Id()
 	apiResponse, err := client.DeleteReplicaSet(ctx, replicaSetID, d.Get("location").(string))
@@ -241,7 +241,7 @@ func replicaSetDelete(ctx context.Context, d *schema.ResourceData, meta interfac
 	return nil
 }
 
-func replicaSetRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func replicaSetRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).InMemoryDBClient
 	replicaSetID := d.Id()
 	replicaSet, apiResponse, err := client.GetReplicaSet(ctx, replicaSetID, d.Get("location").(string))
@@ -252,14 +252,14 @@ func replicaSetRead(ctx context.Context, d *schema.ResourceData, meta interface{
 		}
 		return diagutil.ToDiags(d, fmt.Errorf("error while fetching InMemoryDB replica set with ID: %v, error: %w", replicaSetID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
-	tflog.Info(ctx, "retrieved InMemoryDB replica set", map[string]interface{}{"replica_set_id": replicaSetID})
+	tflog.Info(ctx, "retrieved InMemoryDB replica set", map[string]any{"replica_set_id": replicaSetID})
 	if err := client.SetReplicaSetData(d, replicaSet); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
 	return nil
 }
 
-func replicaSetUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func replicaSetUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).InMemoryDBClient
 	replicaSetID := d.Id()
 	replicaSet := inmemorydb.GetReplicaSetDataUpdate(d)
@@ -277,7 +277,7 @@ func replicaSetUpdate(ctx context.Context, d *schema.ResourceData, meta interfac
 	return nil
 }
 
-func replicaSetImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func replicaSetImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	client := meta.(bundleclient.SdkBundle).InMemoryDBClient
 	parts := strings.Split(d.Id(), ":")
 	if len(parts) != 2 {
@@ -293,7 +293,7 @@ func replicaSetImport(ctx context.Context, d *schema.ResourceData, meta interfac
 		}
 		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to import InMemoryDB replica set with ID: %v, error: %w", replicaSetID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
-	tflog.Info(ctx, "InMemoryDB replica set imported", map[string]interface{}{"replica_set_id": replicaSetID})
+	tflog.Info(ctx, "InMemoryDB replica set imported", map[string]any{"replica_set_id": replicaSetID})
 	if err := d.Set("location", location); err != nil {
 		return nil, utils.GenerateSetError("InMemoryDB replica set", "location", err)
 	}

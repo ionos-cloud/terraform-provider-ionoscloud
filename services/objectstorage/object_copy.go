@@ -207,7 +207,7 @@ func (c *Client) setObjectCopyComputedAttributes(ctx context.Context, data *Obje
 	return nil
 }
 
-func deleteObjectCopyByModel(ctx context.Context, client *objstorage.APIClient, data *ObjectCopyResourceModel) (map[string]interface{}, *shared.APIResponse, error) {
+func deleteObjectCopyByModel(ctx context.Context, client *objstorage.APIClient, data *ObjectCopyResourceModel) (map[string]any, *shared.APIResponse, error) {
 	req := client.ObjectsApi.DeleteObject(ctx, data.Bucket.ValueString(), data.Key.ValueString())
 	if !data.VersionID.IsNull() {
 		req = req.VersionId(data.VersionID.ValueString())

@@ -97,19 +97,19 @@ func (c SdkBundle) newBundleClientConfig(userAgent string) *shared.Configuration
 // or false if the client should be returned immediately using the provided config (e.g. env var provided as parameter or default).
 func (c SdkBundle) shouldApplyOverridesCustomEnv(ctx context.Context, product, productEnvVar string) bool {
 	if os.Getenv(shared.IonosApiUrlEnvVar) != "" {
-		tflog.Debug(ctx, "using endpoint from env", map[string]interface{}{"product": product, "env": shared.IonosApiUrlEnvVar, "url": os.Getenv(shared.IonosApiUrlEnvVar)})
+		tflog.Debug(ctx, "using endpoint from env", map[string]any{"product": product, "env": shared.IonosApiUrlEnvVar, "url": os.Getenv(shared.IonosApiUrlEnvVar)})
 		return false
 	}
 	if productEnvVar != "" && os.Getenv(productEnvVar) != "" {
-		tflog.Debug(ctx, "using endpoint from env", map[string]interface{}{"product": product, "env": productEnvVar, "url": os.Getenv(productEnvVar)})
+		tflog.Debug(ctx, "using endpoint from env", map[string]any{"product": product, "env": productEnvVar, "url": os.Getenv(productEnvVar)})
 		return false
 	}
 	if c.fileConfig == nil {
-		tflog.Debug(ctx, "no file config available", map[string]interface{}{"product": product})
+		tflog.Debug(ctx, "no file config available", map[string]any{"product": product})
 		return false
 	}
 	if c.fileConfig.GetProductOverrides(product) == nil {
-		tflog.Debug(ctx, "no config in file config, using SDK defaults", map[string]interface{}{"product": product})
+		tflog.Debug(ctx, "no config in file config, using SDK defaults", map[string]any{"product": product})
 		return false
 	}
 	return true
@@ -149,7 +149,7 @@ func (c SdkBundle) NewContainerRegistryClient(ctx context.Context, location stri
 			fileconfiguration.ContainerRegistry, location,
 		)
 	}
-	tflog.Debug(ctx, "Container Registry: endpoint for location", map[string]interface{}{"location": configlog.FormatLocation(location), "url": endpoint.Name})
+	tflog.Debug(ctx, "Container Registry: endpoint for location", map[string]any{"location": configlog.FormatLocation(location), "url": endpoint.Name})
 	config.Servers = shared.ServerConfigurations{
 		{
 			URL:         endpoint.Name,
@@ -188,7 +188,7 @@ func (c SdkBundle) NewMongoClient(ctx context.Context, location string) (*dbaasS
 			fileconfiguration.Mongo, location,
 		)
 	}
-	tflog.Debug(ctx, "Mongo: endpoint for location", map[string]interface{}{"location": configlog.FormatLocation(location), "url": endpoint.Name})
+	tflog.Debug(ctx, "Mongo: endpoint for location", map[string]any{"location": configlog.FormatLocation(location), "url": endpoint.Name})
 	config.Servers = shared.ServerConfigurations{
 		{
 			URL:         endpoint.Name,
@@ -227,7 +227,7 @@ func (c SdkBundle) NewPsqlClient(ctx context.Context, location string) (*dbaasSe
 			fileconfiguration.PSQL, location,
 		)
 	}
-	tflog.Debug(ctx, "PostgreSQL: endpoint for location", map[string]interface{}{"location": configlog.FormatLocation(location), "url": endpoint.Name})
+	tflog.Debug(ctx, "PostgreSQL: endpoint for location", map[string]any{"location": configlog.FormatLocation(location), "url": endpoint.Name})
 	config.Servers = shared.ServerConfigurations{
 		{
 			URL:         endpoint.Name,
@@ -250,7 +250,7 @@ func (c SdkBundle) NewPgSQLV2Client(ctx context.Context, location string) (*pgsq
 	if c.fileConfig != nil {
 		endpoint := c.fileConfig.GetProductLocationOverrides(fileconfiguration.PSQLV2, location)
 		if endpoint == nil {
-			tflog.Warn(ctx, "product missing from config file or location not defined, using internal locations map to configure endpoint", map[string]interface{}{"product": fileconfiguration.PSQLV2, "location": location})
+			tflog.Warn(ctx, "product missing from config file or location not defined, using internal locations map to configure endpoint", map[string]any{"product": fileconfiguration.PSQLV2, "location": location})
 		} else {
 			config.Servers = shared.ServerConfigurations{
 				{
@@ -321,7 +321,7 @@ func (c SdkBundle) NewCloudAPIClient(ctx context.Context, location string) (*ion
 			fileconfiguration.Cloud, location,
 		)
 	}
-	tflog.Debug(ctx, "Cloud API: endpoint for location", map[string]interface{}{"location": configlog.FormatLocation(location), "url": endpoint.Name})
+	tflog.Debug(ctx, "Cloud API: endpoint for location", map[string]any{"location": configlog.FormatLocation(location), "url": endpoint.Name})
 	config.Servers = ionoscloud.ServerConfigurations{
 		{
 			URL:         endpoint.Name,
@@ -370,12 +370,12 @@ func (c SdkBundle) NewCloudAPIClientWithFailover(ctx context.Context) (*ionosclo
 			URL:         ep.Name,
 			Description: shared.EndpointOverridden + "global",
 		})
-		tflog.Debug(ctx, "adding global override endpoint from file config", map[string]interface{}{"url": ep.Name, "skip_tls_verify": ep.SkipTLSVerify, "product": fileconfiguration.Cloud})
+		tflog.Debug(ctx, "adding global override endpoint from file config", map[string]any{"url": ep.Name, "skip_tls_verify": ep.SkipTLSVerify, "product": fileconfiguration.Cloud})
 		if ep.CertificateAuthData != "" {
-			tflog.Debug(ctx, "certificateAuthData present", map[string]interface{}{"product": fileconfiguration.Cloud, "cert_auth_data_len": len(ep.CertificateAuthData), "url": ep.Name})
+			tflog.Debug(ctx, "certificateAuthData present", map[string]any{"product": fileconfiguration.Cloud, "cert_auth_data_len": len(ep.CertificateAuthData), "url": ep.Name})
 		}
 	}
-	tflog.Debug(ctx, "failover config", map[string]interface{}{"product": fileconfiguration.Cloud, "strategy": failoverOptions.Strategy, "endpoints": len(failoverEndpoints)})
+	tflog.Debug(ctx, "failover config", map[string]any{"product": fileconfiguration.Cloud, "strategy": failoverOptions.Strategy, "endpoints": len(failoverEndpoints)})
 	if len(failoverEndpoints) == 0 {
 		return nil, fmt.Errorf("no global failover endpoints configured for %q", fileconfiguration.Cloud)
 	}
@@ -430,12 +430,12 @@ func (c SdkBundle) NewObjectStorageManagementClient(ctx context.Context) (*objec
 			URL:         ep.Name,
 			Description: shared.EndpointOverridden + "global",
 		})
-		tflog.Debug(ctx, "adding global override endpoint from file config", map[string]interface{}{"url": ep.Name, "skip_tls_verify": ep.SkipTLSVerify, "product": fileconfiguration.ObjectStorageManagement})
+		tflog.Debug(ctx, "adding global override endpoint from file config", map[string]any{"url": ep.Name, "skip_tls_verify": ep.SkipTLSVerify, "product": fileconfiguration.ObjectStorageManagement})
 		if ep.CertificateAuthData != "" {
-			tflog.Debug(ctx, "certificateAuthData present", map[string]interface{}{"product": fileconfiguration.ObjectStorageManagement, "cert_auth_data_len": len(ep.CertificateAuthData), "url": ep.Name})
+			tflog.Debug(ctx, "certificateAuthData present", map[string]any{"product": fileconfiguration.ObjectStorageManagement, "cert_auth_data_len": len(ep.CertificateAuthData), "url": ep.Name})
 		}
 	}
-	tflog.Debug(ctx, "failover config", map[string]interface{}{"product": fileconfiguration.ObjectStorageManagement, "strategy": failoverOptions.Strategy, "endpoints": len(failoverEndpoints)})
+	tflog.Debug(ctx, "failover config", map[string]any{"product": fileconfiguration.ObjectStorageManagement, "strategy": failoverOptions.Strategy, "endpoints": len(failoverEndpoints)})
 
 	if len(failoverEndpoints) == 0 {
 		return nil, fmt.Errorf("no global failover endpoints configured for %q", fileconfiguration.ObjectStorageManagement)

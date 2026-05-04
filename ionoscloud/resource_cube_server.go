@@ -170,8 +170,8 @@ func resourceCubeServer() *schema.Resource {
 									}
 								}
 
-								sshKeyPath := d.Get("volume.0.ssh_key_path").([]interface{})
-								oldSshKeyPath := d.Get("ssh_key_path").([]interface{})
+								sshKeyPath := d.Get("volume.0.ssh_key_path").([]any)
+								oldSshKeyPath := d.Get("ssh_key_path").([]any)
 
 								if len(slice.DiffString(slice.AnyToString(sshKeyPath), slice.AnyToString(oldSshKeyPath))) == 0 {
 									return true
@@ -297,7 +297,7 @@ func resourceCubeServer() *schema.Resource {
 	}
 }
 
-func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
@@ -408,7 +408,7 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 		},
 	}
 	primaryNic = &(*server.Entities.Nics.Items)[0]
-	tflog.Debug(ctx, "nic dhcp", map[string]interface{}{"nic_dhcp": *nic.Properties.Dhcp, "primary_nic_dhcp": *primaryNic.Properties.Dhcp})
+	tflog.Debug(ctx, "nic dhcp", map[string]any{"nic_dhcp": *nic.Properties.Dhcp, "primary_nic_dhcp": *primaryNic.Properties.Dhcp})
 
 	firewall := ionoscloud.FirewallRule{
 		Properties: &ionoscloud.FirewallruleProperties{},
@@ -541,7 +541,7 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 	return resourceCubeServerRead(ctx, d, meta)
 }
 
-func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
@@ -555,7 +555,7 @@ func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta in
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		if httpNotFound(apiResponse) {
-			tflog.Debug(ctx, "cannot find cube server by id", map[string]interface{}{"server_id": serverId})
+			tflog.Debug(ctx, "cannot find cube server by id", map[string]any{"server_id": serverId})
 			d.SetId("")
 			return nil
 		}
@@ -651,10 +651,10 @@ func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta in
 
 			fw := cloudapifirewall.SetProperties(firewall)
 
-			network["firewall"] = []map[string]interface{}{fw}
+			network["firewall"] = []map[string]any{fw}
 		}
 
-		networks := []map[string]interface{}{network}
+		networks := []map[string]any{network}
 		if err := d.Set("nic", networks); err != nil {
 			return diagutil.ToDiags(d, fmt.Errorf("[ERROR] unable to save nic to state IonosCloud Server (%s): %w", serverId, err), nil)
 		}
@@ -694,7 +694,7 @@ func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta in
 	return nil
 }
 
-func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
@@ -780,7 +780,7 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		inlineVolumeIds := d.Get("inline_volume_ids")
 
 		if inlineVolumeIds != nil {
-			inlineVolumeIds := inlineVolumeIds.([]interface{})
+			inlineVolumeIds := inlineVolumeIds.([]any)
 			for i, volumeId := range inlineVolumeIds {
 				volumeIdStr := volumeId.(string)
 				volumePath := fmt.Sprintf("volume.%d.", i)
@@ -946,7 +946,7 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		}
 		mProp, _ := json.Marshal(properties)
 
-		tflog.Debug(ctx, "updating cube nic properties", map[string]interface{}{"properties": string(mProp)})
+		tflog.Debug(ctx, "updating cube nic properties", map[string]any{"properties": string(mProp)})
 		ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
 		_, apiResponse, err = ns.Update(ctx, d.Get("datacenter_id").(string), *server.Id, *nic.Id, properties)
 		if err != nil {
@@ -979,7 +979,7 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	return resourceCubeServerRead(ctx, d, meta)
 }
 
-func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	importID := d.Id()
 
 	location, parts := splitImportID(importID, "/")
@@ -1019,7 +1019,7 @@ func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta 
 	if server.Entities != nil && server.Entities.Nics != nil && firstNicItem.Properties != nil &&
 		firstNicItem.Properties.Ips != nil &&
 		len(*firstNicItem.Properties.Ips) > 0 {
-		tflog.Debug(ctx, "setting primary_ip", map[string]interface{}{"primary_ip": (*firstNicItem.Properties.Ips)[0]})
+		tflog.Debug(ctx, "setting primary_ip", map[string]any{"primary_ip": (*firstNicItem.Properties.Ips)[0]})
 		if err := d.Set("primary_ip", (*firstNicItem.Properties.Ips)[0]); err != nil {
 			return nil, diagutil.ToError(d, fmt.Errorf("error while setting primary ip: %w", err), nil)
 		}
@@ -1113,10 +1113,10 @@ func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta 
 
 			fw := cloudapifirewall.SetProperties(firewall)
 
-			network["firewall"] = []map[string]interface{}{fw}
+			network["firewall"] = []map[string]any{fw}
 		}
 
-		networks := []map[string]interface{}{network}
+		networks := []map[string]any{network}
 		if err := d.Set("nic", networks); err != nil {
 			return nil, diagutil.ToError(d, fmt.Errorf("error setting nic %w", err), nil)
 		}
@@ -1131,7 +1131,7 @@ func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta 
 		volumeObj, apiResponse, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, datacenterId, serverId, *server.Properties.BootVolume.Id).Execute()
 		logApiRequestTime(apiResponse)
 		if err == nil {
-			volumeItem := map[string]interface{}{}
+			volumeItem := map[string]any{}
 			if volumeObj.Properties != nil {
 				utils.SetPropWithNilCheck(volumeItem, "name", volumeObj.Properties.Name)
 				utils.SetPropWithNilCheck(volumeItem, "disk_type", volumeObj.Properties.Type)
@@ -1141,7 +1141,7 @@ func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta 
 				utils.SetPropWithNilCheck(volumeItem, "availability_zone", volumeObj.Properties.AvailabilityZone)
 			}
 
-			volumesList := []map[string]interface{}{volumeItem}
+			volumesList := []map[string]any{volumeItem}
 			if err := d.Set("volume", volumesList); err != nil {
 				return nil, diagutil.ToError(d, fmt.Errorf("error setting volume %w", err), nil)
 			}

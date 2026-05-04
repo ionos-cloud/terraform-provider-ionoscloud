@@ -99,7 +99,7 @@ func GetAutoCertificateDataCreate(d *schema.ResourceData) *certmanager.AutoCerti
 	keyAlgorithm := d.Get("key_algorithm").(string)
 	autoCertificate.Properties.KeyAlgorithm = keyAlgorithm
 	if subjectAlternativeNames, subjectAlternativeNamesOk := d.GetOk("subject_alternative_names"); subjectAlternativeNamesOk {
-		subjectAlternativeNames := subjectAlternativeNames.([]interface{})
+		subjectAlternativeNames := subjectAlternativeNames.([]any)
 		var subjectAlternativeNamesList []string
 		for _, subjectAlternativeName := range subjectAlternativeNames {
 			subjectAlternativeName := subjectAlternativeName.(string)

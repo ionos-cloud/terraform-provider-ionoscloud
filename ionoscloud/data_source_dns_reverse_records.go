@@ -69,7 +69,7 @@ func dataSourceDNSReverseRecords() *schema.Resource {
 	}
 }
 
-func dataSourceReverseRecordReads(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceReverseRecordReads(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).DNSClient
 	partialMatch := d.Get("partial_match").(bool)
 	nameValue, nameOk := d.GetOk("name")
@@ -77,7 +77,7 @@ func dataSourceReverseRecordReads(ctx context.Context, d *schema.ResourceData, m
 	recordName := nameValue.(string)
 	var filterIps []string
 	if ipsOk {
-		rawIps := ipsValue.([]interface{})
+		rawIps := ipsValue.([]any)
 
 		for _, item := range rawIps {
 			filterIps = append(filterIps, item.(string))
@@ -94,7 +94,7 @@ func dataSourceReverseRecordReads(ctx context.Context, d *schema.ResourceData, m
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching DNS Reverse Records: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	if nameOk {
-		tflog.Info(ctx, "filtering DNS reverse records", map[string]interface{}{"name": recordName, "partial_match": partialMatch})
+		tflog.Info(ctx, "filtering DNS reverse records", map[string]any{"name": recordName, "partial_match": partialMatch})
 		if partialMatch {
 			for _, recordItem := range records.Items {
 				if strings.Contains(recordItem.Properties.Name, recordName) {
@@ -120,11 +120,11 @@ func dataSourceReverseRecordReads(ctx context.Context, d *schema.ResourceData, m
 }
 
 // reverseRecordsObjToIntf converts a list of reverse records api objects to an interface list
-func reverseRecordsObjToIntf(reverseRecordsObjects []dns.ReverseRecordRead) []interface{} {
-	reverseRecordList := make([]interface{}, len(reverseRecordsObjects))
+func reverseRecordsObjToIntf(reverseRecordsObjects []dns.ReverseRecordRead) []any {
+	reverseRecordList := make([]any, len(reverseRecordsObjects))
 
 	for i, record := range reverseRecordsObjects {
-		item := make(map[string]interface{})
+		item := make(map[string]any)
 
 		item["id"] = record.Id
 		item["name"] = record.Properties.Name

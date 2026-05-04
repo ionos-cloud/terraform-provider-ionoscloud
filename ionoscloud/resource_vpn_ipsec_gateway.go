@@ -123,7 +123,7 @@ func resourceVpnIPSecGateway() *schema.Resource {
 	}
 }
 
-func resourceVpnIPSecGatewayCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVpnIPSecGatewayCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).VPNClient
 
 	gateway, apiResponse, err := client.CreateIPSecGateway(ctx, d)
@@ -140,7 +140,7 @@ func resourceVpnIPSecGatewayCreate(ctx context.Context, d *schema.ResourceData, 
 	return resourceVpnIPSecGatewayRead(ctx, d, meta)
 }
 
-func resourceVpnIPSecGatewayRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVpnIPSecGatewayRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).VPNClient
 	id := d.Id()
 	location := d.Get("location").(string)
@@ -157,7 +157,7 @@ func resourceVpnIPSecGatewayRead(ctx context.Context, d *schema.ResourceData, me
 
 	return diagutil.ToDiags(d, vpn.SetIPSecGatewayData(d, gateway), nil)
 }
-func resourceVpnIPSecGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVpnIPSecGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).VPNClient
 
 	gateway, apiResponse, err := client.UpdateIPSecGateway(ctx, d)
@@ -173,7 +173,7 @@ func resourceVpnIPSecGatewayUpdate(ctx context.Context, d *schema.ResourceData, 
 	return diagutil.ToDiags(d, vpn.SetIPSecGatewayData(d, gateway), nil)
 }
 
-func resourceVpnIPSecGatewayDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVpnIPSecGatewayDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).VPNClient
 	id := d.Id()
 	location := d.Get("location").(string)
@@ -197,7 +197,7 @@ func resourceVpnIPSecGatewayDelete(ctx context.Context, d *schema.ResourceData, 
 	return nil
 }
 
-func resourceVpnIPSecGatewayImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceVpnIPSecGatewayImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), ":")
 	location := parts[0]
 	id := parts[1]

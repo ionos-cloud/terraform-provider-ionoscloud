@@ -1,5 +1,11 @@
 ## Upcoming
 
+### Documentation
+- Improve share docs
+
+### Chore
+- Modernize to 1.26 standards `go fix`
+
 ### Enhancements
 - Add validation error when update-only attributes are set during snapshot creation
 - Add more information to error messages

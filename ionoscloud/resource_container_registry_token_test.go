@@ -1,5 +1,4 @@
 //go:build all || cr
-// +build all cr
 
 package ionoscloud
 

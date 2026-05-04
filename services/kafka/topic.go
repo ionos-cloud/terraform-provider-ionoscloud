@@ -72,7 +72,7 @@ func (c *Client) IsTopicAvailable(ctx context.Context, d *schema.ResourceData) (
 	if err != nil {
 		return false, err
 	}
-	tflog.Debug(ctx, "topic status", map[string]interface{}{"state": topic.Metadata.State})
+	tflog.Debug(ctx, "topic status", map[string]any{"state": topic.Metadata.State})
 	return strings.EqualFold(topic.Metadata.State, constant.Available), nil
 }
 

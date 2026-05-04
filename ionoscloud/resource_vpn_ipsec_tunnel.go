@@ -181,7 +181,7 @@ func resourceVpnIPSecTunnel() *schema.Resource {
 	}
 }
 
-func resourceVpnIPSecTunnelCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVpnIPSecTunnelCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).VPNClient
 	pskKey := ""
 
@@ -208,8 +208,8 @@ func resourceVpnIPSecTunnelCreate(ctx context.Context, d *schema.ResourceData, m
 		return diagutil.ToDiags(d, fmt.Errorf("creating %w ", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String()})
 	}
 
-	auth := d.Get("auth").([]interface{})
-	auth[0].(map[string]interface{})["psk_key"] = pskKey
+	auth := d.Get("auth").([]any)
+	auth[0].(map[string]any)["psk_key"] = pskKey
 	if err = d.Set("auth", auth); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
@@ -222,7 +222,7 @@ func resourceVpnIPSecTunnelCreate(ctx context.Context, d *schema.ResourceData, m
 	return nil
 }
 
-func resourceVpnIPSecTunnelRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVpnIPSecTunnelRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).VPNClient
 	id := d.Id()
 	location := d.Get("location").(string)
@@ -244,15 +244,15 @@ func resourceVpnIPSecTunnelRead(ctx context.Context, d *schema.ResourceData, met
 		return diagutil.ToDiags(d, err, nil)
 	}
 
-	auth := d.Get("auth").([]interface{})
-	auth[0].(map[string]interface{})["psk_key"] = pskKey
+	auth := d.Get("auth").([]any)
+	auth[0].(map[string]any)["psk_key"] = pskKey
 	if err = d.Set("auth", auth); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
 
 	return nil
 }
-func resourceVpnIPSecTunnelUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVpnIPSecTunnelUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).VPNClient
 	pskKey := ""
 
@@ -283,8 +283,8 @@ func resourceVpnIPSecTunnelUpdate(ctx context.Context, d *schema.ResourceData, m
 		return diagutil.ToDiags(d, err, nil)
 	}
 
-	auth := d.Get("auth").([]interface{})
-	auth[0].(map[string]interface{})["psk_key"] = pskKey
+	auth := d.Get("auth").([]any)
+	auth[0].(map[string]any)["psk_key"] = pskKey
 	if err = d.Set("auth", auth); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
@@ -292,7 +292,7 @@ func resourceVpnIPSecTunnelUpdate(ctx context.Context, d *schema.ResourceData, m
 	return nil
 }
 
-func resourceVpnIPSecTunnelDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVpnIPSecTunnelDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).VPNClient
 	id := d.Id()
 	location := d.Get("location").(string)
@@ -317,7 +317,7 @@ func resourceVpnIPSecTunnelDelete(ctx context.Context, d *schema.ResourceData, m
 	return nil
 }
 
-func resourceVpnIPSecTunnelImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceVpnIPSecTunnelImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), ":")
 	location := parts[0]
 	gatewayID := parts[1]

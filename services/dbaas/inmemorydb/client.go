@@ -79,7 +79,7 @@ func (c *Client) changeConfigURL(ctx context.Context, location string) {
 	clientConfig := c.sdkClient.GetConfig()
 	if location == "" && os.Getenv(ionosAPIURLInMemoryDB) != "" {
 		url := utils.CleanURL(os.Getenv(ionosAPIURLInMemoryDB))
-		tflog.Debug(ctx, "InMemoryDB: endpoint from env", map[string]interface{}{"env": ionosAPIURLInMemoryDB, "url": url})
+		tflog.Debug(ctx, "InMemoryDB: endpoint from env", map[string]any{"env": ionosAPIURLInMemoryDB, "url": url})
 		clientConfig.Servers = shared.ServerConfigurations{
 			{
 				URL: url,
@@ -89,7 +89,7 @@ func (c *Client) changeConfigURL(ctx context.Context, location string) {
 	}
 	for _, server := range clientConfig.Servers {
 		if strings.EqualFold(server.Description, shared.EndpointOverridden+location) || strings.EqualFold(server.URL, locationToURL[location]) {
-			tflog.Debug(ctx, "InMemoryDB: endpoint for location", map[string]interface{}{"location": configlog.FormatLocation(location), "url": server.URL})
+			tflog.Debug(ctx, "InMemoryDB: endpoint for location", map[string]any{"location": configlog.FormatLocation(location), "url": server.URL})
 			clientConfig.Servers = shared.ServerConfigurations{
 				{
 					URL:         server.URL,
@@ -99,5 +99,5 @@ func (c *Client) changeConfigURL(ctx context.Context, location string) {
 			return
 		}
 	}
-	tflog.Debug(ctx, "InMemoryDB: endpoint for location", map[string]interface{}{"location": configlog.FormatLocation(location), "url": locationToURL[location]})
+	tflog.Debug(ctx, "InMemoryDB: endpoint for location", map[string]any{"location": configlog.FormatLocation(location), "url": locationToURL[location]})
 }

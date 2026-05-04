@@ -268,7 +268,7 @@ func dataSourceK8sCluster() *schema.Resource {
 	}
 }
 
-func dataSourceK8sReadCluster(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceK8sReadCluster(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
@@ -350,7 +350,7 @@ func setK8sConfigData(d *schema.ResourceData, configStr string) error {
 
 	var server, caCrt string
 	userTokens := map[string]string{}
-	configMap := make(map[string]interface{})
+	configMap := make(map[string]any)
 
 	configMap["api_version"] = kubeConfig.ApiVersion
 	configMap["current_context"] = kubeConfig.CurrentContext
@@ -365,14 +365,14 @@ func setK8sConfigData(d *schema.ResourceData, configStr string) error {
 		}
 		caCrt = string(decodedCrt)
 		server = kubeConfig.Clusters[0].Cluster.Server
-		configMap["clusters"] = []map[string]interface{}{
+		configMap["clusters"] = []map[string]any{
 			{"name": kubeConfig.Clusters[0].Name, "cluster": map[string]string{"server": server, "certificate_authority_data": caCrt}},
 		}
 	}
 
-	contextsList := make([]map[string]interface{}, len(kubeConfig.Contexts))
+	contextsList := make([]map[string]any, len(kubeConfig.Contexts))
 	for i, contextVal := range kubeConfig.Contexts {
-		contextsList[i] = map[string]interface{}{
+		contextsList[i] = map[string]any{
 			"name": contextVal.Name,
 			"context": map[string]string{
 				"cluster": contextVal.Context.Cluster,
@@ -383,11 +383,11 @@ func setK8sConfigData(d *schema.ResourceData, configStr string) error {
 
 	configMap["contexts"] = contextsList
 
-	userList := make([]map[string]interface{}, len(kubeConfig.Users))
+	userList := make([]map[string]any, len(kubeConfig.Users))
 	for i, user := range kubeConfig.Users {
-		userList[i] = map[string]interface{}{
+		userList[i] = map[string]any{
 			"name": user.Name,
-			"user": map[string]interface{}{
+			"user": map[string]any{
 				"token": user.User.Token,
 			},
 		}
@@ -397,7 +397,7 @@ func setK8sConfigData(d *schema.ResourceData, configStr string) error {
 
 	configMap["users"] = userList
 
-	configList := []map[string]interface{}{configMap}
+	configList := []map[string]any{configMap}
 
 	if err := d.Set("config", configList); err != nil {
 		return err
@@ -456,7 +456,7 @@ func setAdditionalK8sClusterData(ctx context.Context, d *schema.ResourceData, cl
 		}
 
 		if clusterNodePools.Items != nil && len(*clusterNodePools.Items) > 0 {
-			var nodePools []interface{}
+			var nodePools []any
 			for _, nodePool := range *clusterNodePools.Items {
 				nodePools = append(nodePools, *nodePool.Id)
 			}
@@ -466,7 +466,7 @@ func setAdditionalK8sClusterData(ctx context.Context, d *schema.ResourceData, cl
 		}
 
 		if cluster.Properties != nil && cluster.Properties.AvailableUpgradeVersions != nil {
-			availableUpgradeVersions := make([]interface{}, len(*cluster.Properties.AvailableUpgradeVersions), len(*cluster.Properties.AvailableUpgradeVersions))
+			availableUpgradeVersions := make([]any, len(*cluster.Properties.AvailableUpgradeVersions), len(*cluster.Properties.AvailableUpgradeVersions))
 			for i, availableUpgradeVersion := range *cluster.Properties.AvailableUpgradeVersions {
 				availableUpgradeVersions[i] = availableUpgradeVersion
 			}

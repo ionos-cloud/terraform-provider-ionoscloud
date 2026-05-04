@@ -125,7 +125,7 @@ func dataSourceVolume() *schema.Resource {
 	}
 }
 
-func dataSourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	datacenterId, dcIdOk := d.GetOk("datacenter_id")
 	if !dcIdOk {
 		return diagutil.ToDiags(d, fmt.Errorf("no datacenter_id was specified"), nil)

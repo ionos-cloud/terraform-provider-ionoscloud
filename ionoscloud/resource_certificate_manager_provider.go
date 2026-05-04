@@ -76,7 +76,7 @@ func resourceCertificateManagerProvider() *schema.Resource {
 	}
 }
 
-func providerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func providerCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).CertManagerClient
 	location := d.Get("location").(string)
 
@@ -98,7 +98,7 @@ func providerCreate(ctx context.Context, d *schema.ResourceData, meta interface{
 	return nil
 }
 
-func providerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func providerRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).CertManagerClient
 	providerID := d.Id()
 	location := d.Get("location").(string)
@@ -110,14 +110,14 @@ func providerRead(ctx context.Context, d *schema.ResourceData, meta interface{})
 		}
 		return diagutil.ToDiags(d, fmt.Errorf("error while fetching auto-certificate provider with ID: %v, error: %w", providerID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
-	tflog.Info(ctx, "retrieved auto-certificate provider", map[string]interface{}{"provider_id": providerID})
+	tflog.Info(ctx, "retrieved auto-certificate provider", map[string]any{"provider_id": providerID})
 	if err := cert.SetProviderData(d, provider); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
 	return nil
 }
 
-func providerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func providerUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).CertManagerClient
 	providerID := d.Id()
 	location := d.Get("location").(string)
@@ -136,7 +136,7 @@ func providerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{
 	return nil
 }
 
-func providerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func providerDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).CertManagerClient
 	providerID := d.Id()
 	location := d.Get("location").(string)
@@ -155,7 +155,7 @@ func providerDelete(ctx context.Context, d *schema.ResourceData, meta interface{
 	return nil
 }
 
-func providerImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func providerImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	client := meta.(bundleclient.SdkBundle).CertManagerClient
 	parts := strings.Split(d.Id(), ":")
 	if len(parts) != 2 {
@@ -171,7 +171,7 @@ func providerImport(ctx context.Context, d *schema.ResourceData, meta interface{
 		}
 		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to import auto-certificate provider with ID: %v, error: %w", providerID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
-	tflog.Info(ctx, "auto-certificate provider imported", map[string]interface{}{"provider_id": providerID})
+	tflog.Info(ctx, "auto-certificate provider imported", map[string]any{"provider_id": providerID})
 	if err := d.Set("location", location); err != nil {
 		return nil, utils.GenerateSetError("Auto-certificate provider", "location", err)
 	}

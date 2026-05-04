@@ -125,7 +125,7 @@ func resourceNFSShare() *schema.Resource {
 	}
 }
 
-func resourceNFSShareCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNFSShareCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).NFSClient
 	response, apiResponse, err := client.CreateNFSShare(ctx, d)
 	if err != nil {
@@ -140,7 +140,7 @@ func resourceNFSShareCreate(ctx context.Context, d *schema.ResourceData, meta in
 	return nil
 }
 
-func resourceNFSShareRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNFSShareRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).NFSClient
 	clusterID := d.Get("cluster_id").(string)
 	location := d.Get("location").(string)
@@ -157,7 +157,7 @@ func resourceNFSShareRead(ctx context.Context, d *schema.ResourceData, meta inte
 	return nil
 }
 
-func resourceNFSShareUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNFSShareUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).NFSClient
 	response, apiResponse, err := client.UpdateNFSShare(ctx, d)
 	if err != nil {
@@ -170,7 +170,7 @@ func resourceNFSShareUpdate(ctx context.Context, d *schema.ResourceData, meta in
 	return nil
 }
 
-func resourceNFSShareDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNFSShareDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).NFSClient
 	clusterID := d.Get("cluster_id").(string)
 	location := d.Get("location").(string)
@@ -183,7 +183,7 @@ func resourceNFSShareDelete(ctx context.Context, d *schema.ResourceData, meta in
 	return nil
 }
 
-func resourceNFSShareImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceNFSShareImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	client := meta.(bundleclient.SdkBundle).NFSClient
 	parts := strings.Split(d.Id(), ":")
 	if len(parts) != 3 {

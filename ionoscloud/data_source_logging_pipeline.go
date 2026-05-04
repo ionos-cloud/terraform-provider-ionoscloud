@@ -112,7 +112,7 @@ func dataSourceLoggingPipeline() *schema.Resource {
 	}
 }
 
-func dataSourcePipelineRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourcePipelineRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).LoggingClient
 	location := d.Get("location").(string)
 	idValue, idOk := d.GetOk("id")

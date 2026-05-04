@@ -95,7 +95,7 @@ and log the extent to which your instances are being accessed.`,
 	}
 }
 
-func resourceApplicationLoadBalancerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceApplicationLoadBalancerCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
@@ -191,7 +191,7 @@ func resourceApplicationLoadBalancerCreate(ctx context.Context, d *schema.Resour
 		}
 		if flowLogList, ok := flowLogs.([]any); ok {
 			for _, flowLogData := range flowLogList {
-				if flowLogMap, ok := flowLogData.(map[string]interface{}); ok {
+				if flowLogMap, ok := flowLogData.(map[string]any); ok {
 					flowLog := cloudapiflowlog.GetFlowlogFromMap(flowLogMap)
 					err := fw.CreateOrPatchForALB(ctx, dcId, d.Id(), "", flowLog)
 					if err != nil {
@@ -199,7 +199,7 @@ func resourceApplicationLoadBalancerCreate(ctx context.Context, d *schema.Resour
 						// flowlog creation failed, delete the alb
 						diags := resourceApplicationLoadBalancerDelete(ctx, d, meta)
 						if diags != nil {
-							tflog.Error(ctx, "could not delete alb after flowlog failure", map[string]interface{}{"diags": diags})
+							tflog.Error(ctx, "could not delete alb after flowlog failure", map[string]any{"diags": diags})
 						}
 						diags = diagutil.ToDiags(d, fmt.Errorf("error creating flowlog for application loadbalancer: %w", err), nil)
 						return diags
@@ -212,7 +212,7 @@ func resourceApplicationLoadBalancerCreate(ctx context.Context, d *schema.Resour
 	return resourceApplicationLoadBalancerRead(ctx, d, meta)
 }
 
-func resourceApplicationLoadBalancerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceApplicationLoadBalancerRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
@@ -225,14 +225,14 @@ func resourceApplicationLoadBalancerRead(ctx context.Context, d *schema.Resource
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		tflog.Info(ctx, "application loadbalancer not found", map[string]interface{}{"alb_id": d.Id(), "error": err.Error()})
+		tflog.Info(ctx, "application loadbalancer not found", map[string]any{"alb_id": d.Id(), "error": err.Error()})
 		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil
 		}
 	}
 
-	tflog.Info(ctx, "retrieved application loadbalancer", map[string]interface{}{"alb_id": d.Id()})
+	tflog.Info(ctx, "retrieved application loadbalancer", map[string]any{"alb_id": d.Id()})
 	fw := cloudapiflowlog.Service{
 		Client: client,
 		Meta:   meta,
@@ -248,7 +248,7 @@ func resourceApplicationLoadBalancerRead(ctx context.Context, d *schema.Resource
 	return diagutil.ToDiags(d, setApplicationLoadBalancerData(d, &applicationLoadBalancer, flowLog), nil)
 }
 
-func resourceApplicationLoadBalancerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceApplicationLoadBalancerUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
@@ -360,7 +360,7 @@ func resourceApplicationLoadBalancerUpdate(ctx context.Context, d *schema.Resour
 	return resourceApplicationLoadBalancerRead(ctx, d, meta)
 }
 
-func resourceApplicationLoadBalancerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceApplicationLoadBalancerDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
@@ -387,7 +387,7 @@ func resourceApplicationLoadBalancerDelete(ctx context.Context, d *schema.Resour
 	return nil
 }
 
-func resourceApplicationLoadBalancerImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceApplicationLoadBalancerImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	importID := d.Id()
 
 	location, parts := splitImportID(importID, "/")

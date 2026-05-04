@@ -49,7 +49,7 @@ func resourceShare() *schema.Resource {
 	}
 }
 
-func resourceShareCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceShareCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return diag.FromErr(err)
@@ -83,7 +83,7 @@ func resourceShareCreate(ctx context.Context, d *schema.ResourceData, meta inter
 	return resourceShareRead(ctx, d, meta)
 }
 
-func resourceShareRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceShareRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return diag.FromErr(err)
@@ -108,7 +108,7 @@ func resourceShareRead(ctx context.Context, d *schema.ResourceData, meta interfa
 	return nil
 }
 
-func resourceShareUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceShareUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return diag.FromErr(err)
@@ -140,7 +140,7 @@ func resourceShareUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 	return resourceShareRead(ctx, d, meta)
 }
 
-func resourceShareDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceShareDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return diag.FromErr(err)
@@ -165,7 +165,7 @@ func resourceShareDelete(ctx context.Context, d *schema.ResourceData, meta inter
 	return nil
 }
 
-func resourceShareImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceShareImporter(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
 		return nil, diagutil.ToError(d, fmt.Errorf("invalid import. Expecting {group}/{resource}"), nil)
@@ -189,7 +189,7 @@ func resourceShareImporter(ctx context.Context, d *schema.ResourceData, meta int
 		return nil, diagutil.ToError(d, fmt.Errorf("share does not exist of resource %q for group %q", rscId, grpId), nil)
 	}
 
-	tflog.Info(ctx, "share found", map[string]interface{}{"share_id": *share.Id, "group_id": grpId, "resource_id": rscId})
+	tflog.Info(ctx, "share found", map[string]any{"share_id": *share.Id, "group_id": grpId, "resource_id": rscId})
 
 	d.SetId(*share.Id)
 

@@ -7,7 +7,7 @@ import (
 )
 
 func TestSetPropWithNilCheck(t *testing.T) {
-	m := map[string]interface{}{}
+	m := map[string]any{}
 
 	var pBnil *bool
 	var pSnil *string

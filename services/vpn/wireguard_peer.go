@@ -38,7 +38,7 @@ func (c *Client) IsWireguardPeerAvailable(ctx context.Context, d *schema.Resourc
 	if err != nil {
 		return false, err
 	}
-	tflog.Debug(ctx, "wireguard peer status", map[string]interface{}{"status": wireguard.Metadata.Status})
+	tflog.Debug(ctx, "wireguard peer status", map[string]any{"status": wireguard.Metadata.Status})
 	return strings.EqualFold(wireguard.Metadata.Status, constant.Available), nil
 }
 
@@ -96,7 +96,7 @@ func (c *Client) IsWireguardPeerReady(ctx context.Context, d *schema.ResourceDat
 	if err != nil {
 		return false, err
 	}
-	tflog.Debug(ctx, "wireguard peer state", map[string]interface{}{"status": cluster.Metadata.Status})
+	tflog.Debug(ctx, "wireguard peer state", map[string]any{"status": cluster.Metadata.Status})
 	return strings.EqualFold(cluster.Metadata.Status, constant.Available), nil
 }
 
@@ -115,7 +115,7 @@ func setWireguardPeersPostRequest(ctx context.Context, d *schema.ResourceData) (
 		request.Properties.Endpoint = getEndpointData(d)
 	}
 	if v, ok := d.GetOk("allowed_ips"); ok {
-		raw := v.([]interface{})
+		raw := v.([]any)
 		ips := make([]string, len(raw))
 		err := utils.DecodeInterfaceToStruct(ctx, raw, ips)
 		if err != nil {
@@ -143,7 +143,7 @@ func getEndpointData(d *schema.ResourceData) *vpn.WireguardEndpoint {
 			}
 			if port, ok := d.GetOk("endpoint.0.port"); ok {
 				port := port.(int)
-				endpoint.Port = shared.ToPtr(int32(port))
+				endpoint.Port = new(int32(port))
 			}
 		}
 	}
@@ -159,14 +159,14 @@ func setWireguardPeerPatchRequest(ctx context.Context, d *schema.ResourceData) (
 	request.Properties.PublicKey = d.Get("public_key").(string)
 
 	if v, ok := d.GetOk("description"); ok {
-		request.Properties.Description = shared.ToPtr(v.(string))
+		request.Properties.Description = new(v.(string))
 	}
 	if _, ok := d.GetOk("endpoint"); ok {
 		request.Properties.Endpoint = getEndpointData(d)
 	}
 
 	if v, ok := d.GetOk("allowed_ips"); ok {
-		raw := v.([]interface{})
+		raw := v.([]any)
 		ips := make([]string, len(raw))
 		err := utils.DecodeInterfaceToStruct(ctx, raw, ips)
 		if err != nil {

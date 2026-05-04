@@ -167,7 +167,7 @@ func dataSourceApplicationLoadBalancerForwardingRule() *schema.Resource {
 	}
 }
 
-func dataSourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
@@ -195,7 +195,7 @@ func dataSourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d 
 
 	if idOk {
 		/* search by ID */
-		tflog.Info(ctx, "searching application load balancer forwarding rule by id", map[string]interface{}{"id": id})
+		tflog.Info(ctx, "searching application load balancer forwarding rule by id", map[string]any{"id": id})
 		applicationLoadBalancerForwardingRule, apiResponse, err = client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterId, albId, id).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
@@ -207,7 +207,7 @@ func dataSourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d 
 
 		partialMatch := d.Get("partial_match").(bool)
 
-		tflog.Info(ctx, "searching application load balancer forwarding rule by name", map[string]interface{}{"partial_match": partialMatch, "name": name})
+		tflog.Info(ctx, "searching application load balancer forwarding rule by name", map[string]any{"partial_match": partialMatch, "name": name})
 
 		if partialMatch {
 			applicationLoadBalancersForwardingRules, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesGet(ctx, datacenterId, albId).Depth(1).Filter("name", name).Execute()

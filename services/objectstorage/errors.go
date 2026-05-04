@@ -16,7 +16,7 @@ func isBucketNotEmptyError(ctx context.Context, err error) bool {
 		body := apiErr.Body()
 		var objStoreErr objstorage.Error
 		if err := xml.Unmarshal(body, &objStoreErr); err != nil {
-			tflog.Warn(ctx, "failed to unmarshal error response", map[string]interface{}{"error": err.Error()})
+			tflog.Warn(ctx, "failed to unmarshal error response", map[string]any{"error": err.Error()})
 			return false
 		}
 
@@ -33,7 +33,7 @@ func isInvalidStateBucketWithObjectLock(ctx context.Context, err error) bool {
 		body := apiErr.Body()
 		var objStoreErr objstorage.Error
 		if err := xml.Unmarshal(body, &objStoreErr); err != nil {
-			tflog.Warn(ctx, "failed to unmarshal error response", map[string]interface{}{"error": err.Error()})
+			tflog.Warn(ctx, "failed to unmarshal error response", map[string]any{"error": err.Error()})
 			return false
 		}
 

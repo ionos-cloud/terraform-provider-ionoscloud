@@ -175,7 +175,7 @@ func resourceNetworkLoadBalancerForwardingRule() *schema.Resource {
 	}
 }
 
-func resourceNetworkLoadBalancerForwardingRuleCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkLoadBalancerForwardingRuleCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
@@ -252,7 +252,7 @@ func resourceNetworkLoadBalancerForwardingRuleCreate(ctx context.Context, d *sch
 			return diags
 		}
 		if len(targets) > 0 {
-			tflog.Info(ctx, "setting nlb forwarding rule targets", map[string]interface{}{"target_count": len(targets)})
+			tflog.Info(ctx, "setting nlb forwarding rule targets", map[string]any{"target_count": len(targets)})
 			networkLoadBalancerForwardingRule.Properties.Targets = &targets
 		}
 	}
@@ -282,13 +282,13 @@ func resourceNetworkLoadBalancerForwardingRuleCreate(ctx context.Context, d *sch
 	return resourceNetworkLoadBalancerForwardingRuleRead(ctx, d, meta)
 }
 
-func getTargetsData(targets interface{}) ([]ionoscloud.NetworkLoadBalancerForwardingRuleTarget, diag.Diagnostics) {
+func getTargetsData(targets any) ([]ionoscloud.NetworkLoadBalancerForwardingRuleTarget, diag.Diagnostics) {
 	if targets.(*schema.Set) != nil {
 		targetsList := targets.(*schema.Set).List()
 		var targets []ionoscloud.NetworkLoadBalancerForwardingRuleTarget
 		target := ionoscloud.NetworkLoadBalancerForwardingRuleTarget{}
 		for _, targetItem := range targetsList {
-			targetMap := targetItem.(map[string]interface{})
+			targetMap := targetItem.(map[string]any)
 
 			addTarget := false
 			if ip, ipOk := targetMap["ip"].(string); ipOk {
@@ -319,9 +319,9 @@ func getTargetsData(targets interface{}) ([]ionoscloud.NetworkLoadBalancerForwar
 				target.ProxyProtocol = &proxy
 			}
 
-			if healthCheck, healthCheckOk := targetMap["health_check"].([]interface{}); healthCheckOk {
+			if healthCheck, healthCheckOk := targetMap["health_check"].([]any); healthCheckOk {
 				if len(healthCheck) > 0 {
-					healthCheckMap := healthCheck[0].(map[string]interface{})
+					healthCheckMap := healthCheck[0].(map[string]any)
 					target.HealthCheck = &ionoscloud.NetworkLoadBalancerForwardingRuleTargetHealthCheck{}
 
 					if check, checkOk := healthCheckMap["check"].(bool); checkOk {
@@ -350,7 +350,7 @@ func getTargetsData(targets interface{}) ([]ionoscloud.NetworkLoadBalancerForwar
 	}
 }
 
-func resourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
@@ -366,14 +366,14 @@ func resourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *schem
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		tflog.Info(ctx, "nlb forwarding rule not found", map[string]interface{}{"rule_id": d.Id(), "error": err.Error()})
+		tflog.Info(ctx, "nlb forwarding rule not found", map[string]any{"rule_id": d.Id(), "error": err.Error()})
 		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil
 		}
 	}
 
-	tflog.Info(ctx, "retrieved nlb forwarding rule", map[string]interface{}{"rule_id": d.Id()})
+	tflog.Info(ctx, "retrieved nlb forwarding rule", map[string]any{"rule_id": d.Id()})
 
 	if err := setNetworkLoadBalancerForwardingRuleData(d, &networkLoadBalancerForwardingRule); err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -382,7 +382,7 @@ func resourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *schem
 	return nil
 }
 
-func resourceNetworkLoadBalancerForwardingRuleUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkLoadBalancerForwardingRuleUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
@@ -428,7 +428,7 @@ func resourceNetworkLoadBalancerForwardingRuleUpdate(ctx context.Context, d *sch
 
 	if d.HasChange("health_check.0") {
 		_, v := d.GetChange("health_check.0")
-		if v.(map[string]interface{}) != nil {
+		if v.(map[string]any) != nil {
 
 			healthCheck := &ionoscloud.NetworkLoadBalancerForwardingRuleHealthCheck{}
 
@@ -474,7 +474,7 @@ func resourceNetworkLoadBalancerForwardingRuleUpdate(ctx context.Context, d *sch
 		if diags != nil {
 			return diags
 		}
-		tflog.Info(ctx, "nlb forwarding rule targets changed", map[string]interface{}{"old": oldTargets, "new": newTargets})
+		tflog.Info(ctx, "nlb forwarding rule targets changed", map[string]any{"old": oldTargets, "new": newTargets})
 		request.Properties.Targets = &targets
 	}
 	_, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesPatch(ctx, dcId, nlbID, d.Id()).NetworkLoadBalancerForwardingRuleProperties(*request.Properties).Execute()
@@ -494,7 +494,7 @@ func resourceNetworkLoadBalancerForwardingRuleUpdate(ctx context.Context, d *sch
 	return resourceNetworkLoadBalancerForwardingRuleRead(ctx, d, meta)
 }
 
-func resourceNetworkLoadBalancerForwardingRuleDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkLoadBalancerForwardingRuleDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
@@ -522,7 +522,7 @@ func resourceNetworkLoadBalancerForwardingRuleDelete(ctx context.Context, d *sch
 	return nil
 }
 
-func resourceNetworLoadBalancerForwardingRuleImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceNetworLoadBalancerForwardingRuleImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	importID := d.Id()
 
 	location, parts := splitImportID(importID, "/")
@@ -550,7 +550,7 @@ func resourceNetworLoadBalancerForwardingRuleImport(ctx context.Context, d *sche
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		tflog.Info(ctx, "nlb forwarding rule not found on import", map[string]interface{}{"rule_id": networkLoadBalancerRuleId, "error": err.Error()})
+		tflog.Info(ctx, "nlb forwarding rule not found on import", map[string]any{"rule_id": networkLoadBalancerRuleId, "error": err.Error()})
 		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil, diagutil.ToError(d, fmt.Errorf("unable to find network load balancer rule %q", networkLoadBalancerRuleId), nil)
@@ -619,9 +619,9 @@ func setNetworkLoadBalancerForwardingRuleData(d *schema.ResourceData, networkLoa
 		}
 
 		if networkLoadBalancerForwardingRule.Properties.HealthCheck != nil {
-			var healthCheck []interface{}
+			var healthCheck []any
 
-			healthCheckEntry := make(map[string]interface{})
+			healthCheckEntry := make(map[string]any)
 			if networkLoadBalancerForwardingRule.Properties.HealthCheck.ClientTimeout != nil {
 				healthCheckEntry["client_timeout"] = *networkLoadBalancerForwardingRule.Properties.HealthCheck.ClientTimeout
 			}
@@ -648,9 +648,9 @@ func setNetworkLoadBalancerForwardingRuleData(d *schema.ResourceData, networkLoa
 		}
 
 		if networkLoadBalancerForwardingRule.Properties.Targets != nil && len(*networkLoadBalancerForwardingRule.Properties.Targets) > 0 {
-			var forwardingRuleTargets []interface{}
+			var forwardingRuleTargets []any
 			for _, target := range *networkLoadBalancerForwardingRule.Properties.Targets {
-				targetEntry := make(map[string]interface{})
+				targetEntry := make(map[string]any)
 
 				if target.Ip != nil {
 					targetEntry["ip"] = *target.Ip
@@ -669,9 +669,9 @@ func setNetworkLoadBalancerForwardingRuleData(d *schema.ResourceData, networkLoa
 				}
 
 				if target.HealthCheck != nil {
-					var healthCheck []interface{}
+					var healthCheck []any
 
-					healthCheckEntry := make(map[string]interface{})
+					healthCheckEntry := make(map[string]any)
 
 					if target.HealthCheck.Check != nil {
 						healthCheckEntry["check"] = *target.HealthCheck.Check

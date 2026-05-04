@@ -16,7 +16,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	autoscaling "github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2"
-	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	autoscalingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/autoscaling"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
@@ -443,7 +442,7 @@ func resourceAutoscalingGroupCreate(ctx context.Context, d *schema.ResourceData,
 	}
 
 	d.SetId(autoscalingGroup.Id)
-	tflog.Info(ctx, "autoscaling group created", map[string]interface{}{"group_id": autoscalingGroup.Id})
+	tflog.Info(ctx, "autoscaling group created", map[string]any{"group_id": autoscalingGroup.Id})
 
 	if err := checkAction(ctx, client, d); err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -457,19 +456,19 @@ func resourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData, m
 	group, apiResponse, err := client.GetGroup(ctx, d.Id(), 2)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
-			tflog.Info(ctx, "autoscaling group not found", map[string]interface{}{"group_id": d.Id(), "error": err.Error()})
+			tflog.Info(ctx, "autoscaling group not found", map[string]any{"group_id": d.Id(), "error": err.Error()})
 			d.SetId("")
 			return nil
 		}
 		return diagutil.ToDiags(d, fmt.Errorf("error while retrieving Autoscaling Group: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	tflog.Info(ctx, "retrieved autoscaling group", map[string]interface{}{"group_id": d.Id()})
+	tflog.Info(ctx, "retrieved autoscaling group", map[string]any{"group_id": d.Id()})
 	if err := setAutoscalingGroupData(d, &group.Properties); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
 
-	tflog.Info(ctx, "autoscaling group data set", map[string]interface{}{"group_id": d.Id()})
+	tflog.Info(ctx, "autoscaling group data set", map[string]any{"group_id": d.Id()})
 
 	return nil
 }
@@ -503,7 +502,7 @@ func resourceAutoscalingGroupUpdate(ctx context.Context, d *schema.ResourceData,
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating Autoscaling Group: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	tflog.Info(ctx, "autoscaling group updated", map[string]interface{}{"group_id": d.Id()})
+	tflog.Info(ctx, "autoscaling group updated", map[string]any{"group_id": d.Id()})
 
 	if err := checkAction(ctx, client, d); err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -518,7 +517,7 @@ func resourceAutoscalingGroupDelete(ctx context.Context, d *schema.ResourceData,
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while deleting an Autoscaling Group: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	tflog.Info(ctx, "autoscaling group deleted", map[string]interface{}{"group_id": d.Id()})
+	tflog.Info(ctx, "autoscaling group deleted", map[string]any{"group_id": d.Id()})
 
 	d.SetId("")
 
@@ -539,7 +538,7 @@ func resourceAutoscalingGroupImport(ctx context.Context, d *schema.ResourceData,
 		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while retrieving Autoscaling Group %q, %w", groupID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	tflog.Info(ctx, "autoscaling group imported", map[string]interface{}{"group_id": groupID})
+	tflog.Info(ctx, "autoscaling group imported", map[string]any{"group_id": groupID})
 
 	if err := setAutoscalingGroupData(d, &group.Properties); err != nil {
 		return nil, diagutil.ToError(d, err, nil)
@@ -555,9 +554,9 @@ func expandProperties(ctx context.Context, d *schema.ResourceData) (*autoscaling
 	}
 
 	return &autoscaling.GroupProperties{
-		MaxReplicaCount:      shared.ToPtr(int64(d.Get("max_replica_count").(int))),
-		MinReplicaCount:      shared.ToPtr(int64(d.Get("min_replica_count").(int))),
-		Name:                 shared.ToPtr(d.Get("name").(string)),
+		MaxReplicaCount:      new(int64(d.Get("max_replica_count").(int))),
+		MinReplicaCount:      new(int64(d.Get("min_replica_count").(int))),
+		Name:                 new(d.Get("name").(string)),
 		Policy:               expandPolicy(d.Get("policy").([]any)),
 		ReplicaConfiguration: replicaConfiguration,
 		Datacenter: autoscaling.GroupPropertiesDatacenter{
@@ -570,7 +569,7 @@ func expandPolicy(l []any) *autoscaling.GroupPolicy {
 	if len(l) == 0 || l[0] == nil {
 		return nil
 	}
-	s := l[0].(map[string]interface{})
+	s := l[0].(map[string]any)
 
 	// required fields
 	metric := autoscaling.Metric(s["metric"].(string))
@@ -600,7 +599,7 @@ func expandReplicaConfiguration(ctx context.Context, l []any) (*autoscaling.Repl
 	if len(l) == 0 || l[0] == nil {
 		return nil, nil
 	}
-	s := l[0].(map[string]interface{})
+	s := l[0].(map[string]any)
 
 	// required fields
 	availabilityZone := autoscaling.AvailabilityZone(s["availability_zone"].(string))
@@ -636,7 +635,7 @@ func expandScaleInAction(l []any) *autoscaling.GroupPolicyScaleInAction {
 	if len(l) == 0 || l[0] == nil {
 		return nil
 	}
-	s := l[0].(map[string]interface{})
+	s := l[0].(map[string]any)
 
 	// required fields
 	amount := float32(s["amount"].(int))
@@ -662,7 +661,7 @@ func expandScaleOutAction(l []any) *autoscaling.GroupPolicyScaleOutAction {
 	if len(l) == 0 || l[0] == nil {
 		return nil
 	}
-	s := l[0].(map[string]interface{})
+	s := l[0].(map[string]any)
 
 	// required fields
 	amount := float32(s["amount"].(int))
@@ -679,7 +678,7 @@ func expandScaleOutAction(l []any) *autoscaling.GroupPolicyScaleOutAction {
 func expandVolumes(ctx context.Context, l []any) ([]autoscaling.ReplicaVolumePost, error) {
 	volumes := make([]autoscaling.ReplicaVolumePost, len(l))
 	for i, entry := range l {
-		s := entry.(map[string]interface{})
+		s := entry.(map[string]any)
 
 		// required fields
 		name := s["name"].(string)
@@ -695,11 +694,11 @@ func expandVolumes(ctx context.Context, l []any) ([]autoscaling.ReplicaVolumePos
 
 		// optional fields
 		if v, ok := s["image"]; ok {
-			volumes[i].Image = shared.ToPtr(v.(string))
+			volumes[i].Image = new(v.(string))
 		}
 
 		if v, ok := s["image_alias"]; ok {
-			volumes[i].ImageAlias = shared.ToPtr(v.(string))
+			volumes[i].ImageAlias = new(v.(string))
 		}
 
 		if *volumes[i].Image == "" && *volumes[i].ImageAlias == "" {
@@ -715,11 +714,11 @@ func expandVolumes(ctx context.Context, l []any) ([]autoscaling.ReplicaVolumePos
 		}
 
 		if v, ok := s["user_data"]; ok {
-			volumes[i].UserData = shared.ToPtr(v.(string))
+			volumes[i].UserData = new(v.(string))
 		}
 
 		if v, ok := s["image_password"]; ok {
-			volumes[i].ImagePassword = shared.ToPtr(v.(string))
+			volumes[i].ImagePassword = new(v.(string))
 		}
 
 		if v, ok := s["bus"]; ok {
@@ -727,7 +726,7 @@ func expandVolumes(ctx context.Context, l []any) ([]autoscaling.ReplicaVolumePos
 		}
 
 		if v, ok := s["backup_unit_id"]; ok {
-			volumes[i].BackupunitId = shared.ToPtr(v.(string))
+			volumes[i].BackupunitId = new(v.(string))
 		}
 	}
 
@@ -751,7 +750,7 @@ func expandSSHKeys(ctx context.Context, l []any) ([]string, error) {
 func expandNICs(l []any) []autoscaling.ReplicaNic {
 	nics := make([]autoscaling.ReplicaNic, len(l))
 	for i, entry := range l {
-		s := entry.(map[string]interface{})
+		s := entry.(map[string]any)
 
 		// required fields
 		lan := int32(s["lan"].(int))
@@ -793,7 +792,7 @@ func expandNICs(l []any) []autoscaling.ReplicaNic {
 func expandFlowLogs(l []any) []autoscaling.NicFlowLog {
 	flowLogs := make([]autoscaling.NicFlowLog, len(l))
 	for i, entry := range l {
-		s := entry.(map[string]interface{})
+		s := entry.(map[string]any)
 
 		// all fields are required
 		flowLogs[i] = autoscaling.NicFlowLog{
@@ -811,7 +810,7 @@ func expandTargetGroup(l []any) *autoscaling.TargetGroup {
 	if len(l) == 0 || l[0] == nil {
 		return nil
 	}
-	s := l[0].(map[string]interface{})
+	s := l[0].(map[string]any)
 
 	// required fields
 	targetGroupID := s["target_group_id"].(string)
@@ -827,7 +826,7 @@ func expandTargetGroup(l []any) *autoscaling.TargetGroup {
 func expandFirewallRules(l []any) []autoscaling.NicFirewallRule {
 	rules := make([]autoscaling.NicFirewallRule, len(l))
 	for i, entry := range l {
-		s := entry.(map[string]interface{})
+		s := entry.(map[string]any)
 
 		// required fields
 		rules[i] = autoscaling.NicFirewallRule{
@@ -1135,7 +1134,7 @@ func checkAction(ctx context.Context, client *autoscalingService.Client, d *sche
 
 	// wait for completion of triggered action
 	for {
-		tflog.Info(ctx, "waiting for autoscaling action to be ready", map[string]interface{}{"action_id": actionID})
+		tflog.Info(ctx, "waiting for autoscaling action to be ready", map[string]any{"action_id": actionID})
 
 		actionSuccessful, rsErr := actionReady(ctx, client, d, actionID)
 		if rsErr != nil {
@@ -1143,7 +1142,7 @@ func checkAction(ctx context.Context, client *autoscalingService.Client, d *sche
 		}
 
 		if actionSuccessful {
-			tflog.Info(ctx, "autoscaling action ready", map[string]interface{}{"action_id": actionID})
+			tflog.Info(ctx, "autoscaling action ready", map[string]any{"action_id": actionID})
 			break
 		}
 

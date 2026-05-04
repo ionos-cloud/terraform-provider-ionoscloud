@@ -34,7 +34,7 @@ func (c *Client) IsRecordCreated(ctx context.Context, d *schema.ResourceData) (b
 		return false, err
 	}
 
-	tflog.Debug(ctx, "record state", map[string]interface{}{"state": record.Metadata.State})
+	tflog.Debug(ctx, "record state", map[string]any{"state": record.Metadata.State})
 
 	return strings.EqualFold((string)(record.Metadata.State), (string)(dns.PROVISIONINGSTATE_AVAILABLE)), nil
 }

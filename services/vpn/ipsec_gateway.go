@@ -70,7 +70,7 @@ func (c *Client) IsIPSecGatewayReady(ctx context.Context, d *schema.ResourceData
 	if err != nil {
 		return false, err
 	}
-	tflog.Debug(ctx, "VPN IPSec Gateway state", map[string]interface{}{"status": gateway.Metadata.Status})
+	tflog.Debug(ctx, "VPN IPSec Gateway state", map[string]any{"status": gateway.Metadata.Status})
 
 	return strings.EqualFold(gateway.Metadata.Status, constant.Available), nil
 }
@@ -106,9 +106,9 @@ func SetIPSecGatewayData(d *schema.ResourceData, gateway vpn.IPSecGatewayRead) e
 		return utils.GenerateSetError(ipsecGatewayResourceName, "gateway_ip", err)
 	}
 
-	connections := make([]map[string]interface{}, len(gateway.Properties.Connections))
+	connections := make([]map[string]any, len(gateway.Properties.Connections))
 	for i, connection := range gateway.Properties.Connections {
-		connectionData := map[string]interface{}{
+		connectionData := map[string]any{
 			"datacenter_id": connection.DatacenterId,
 			"lan_id":        connection.LanId,
 			"ipv4_cidr":     connection.Ipv4CIDR,
@@ -154,15 +154,15 @@ func setIPSecGatewayProperties(d *schema.ResourceData) vpn.IPSecGateway {
 	properties.GatewayIP = d.Get("gateway_ip").(string)
 
 	if v, ok := d.GetOk("description"); ok {
-		properties.Description = shared.ToPtr(v.(string))
+		properties.Description = new(v.(string))
 	}
 
 	if v, ok := d.GetOk("version"); ok {
-		properties.Version = shared.ToPtr(v.(string))
+		properties.Version = new(v.(string))
 	}
 
-	connections := make([]vpn.Connection, len(d.Get("connections").([]interface{})))
-	for i := range d.Get("connections").([]interface{}) {
+	connections := make([]vpn.Connection, len(d.Get("connections").([]any)))
+	for i := range d.Get("connections").([]any) {
 		connections[i] = setConnectionData(d, i)
 	}
 	properties.Connections = connections
@@ -171,7 +171,7 @@ func setIPSecGatewayProperties(d *schema.ResourceData) vpn.IPSecGateway {
 		properties.MaintenanceWindow = GetMaintenanceWindowData(d)
 	}
 	if v, ok := d.GetOk("tier"); ok {
-		properties.Tier = shared.ToPtr(v.(string))
+		properties.Tier = new(v.(string))
 	}
 
 	return properties
@@ -184,15 +184,15 @@ func setConnectionData(d *schema.ResourceData, index int) vpn.Connection {
 	conn.LanId = d.Get(fmt.Sprintf("connections.%d.lan_id", index)).(string)
 	conn.Ipv4CIDR = d.Get(fmt.Sprintf("connections.%d.ipv4_cidr", index)).(string)
 	if v, ok := d.GetOk(fmt.Sprintf("connections.%d.ipv6_cidr", index)); ok {
-		conn.Ipv6CIDR = shared.ToPtr(v.(string))
+		conn.Ipv6CIDR = new(v.(string))
 	}
 
 	return conn
 }
 
-func setIPSecMaintenanceWindowData(ipSecGateway vpn.IPSecGateway) []interface{} {
-	var maintenanceWindows []interface{}
-	maintenanceWindow := map[string]interface{}{}
+func setIPSecMaintenanceWindowData(ipSecGateway vpn.IPSecGateway) []any {
+	var maintenanceWindows []any
+	maintenanceWindow := map[string]any{}
 	utils.SetPropWithNilCheck(maintenanceWindow, "time", ipSecGateway.MaintenanceWindow.Time)
 	utils.SetPropWithNilCheck(maintenanceWindow, "day_of_the_week", ipSecGateway.MaintenanceWindow.DayOfTheWeek)
 

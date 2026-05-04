@@ -155,7 +155,7 @@ func dataSourceTargetGroup() *schema.Resource {
 	}
 }
 
-func dataSourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return diag.FromErr(err)
@@ -178,7 +178,7 @@ func dataSourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta
 
 	if idOk {
 		/* search by ID */
-		tflog.Info(ctx, "searching target group by id", map[string]interface{}{"id": id})
+		tflog.Info(ctx, "searching target group by id", map[string]any{"id": id})
 		targetGroup, apiResponse, err = client.TargetGroupsApi.TargetgroupsFindByTargetGroupId(ctx, id).Execute()
 		logApiRequestTime(apiResponse)
 
@@ -191,7 +191,7 @@ func dataSourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta
 
 		partialMatch := d.Get("partial_match").(bool)
 
-		tflog.Info(ctx, "searching target group by name", map[string]interface{}{"partial_match": partialMatch, "name": name})
+		tflog.Info(ctx, "searching target group by name", map[string]any{"partial_match": partialMatch, "name": name})
 
 		if partialMatch {
 			targetGroups, apiResponse, err := client.TargetGroupsApi.TargetgroupsGet(ctx).Depth(1).Filter("name", name).Limit(constant.TargetGroupLimit).Execute()

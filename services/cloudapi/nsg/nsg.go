@@ -15,7 +15,7 @@ import (
 // Service implements utility methods for the Network Security Group
 type Service struct {
 	Client *ionoscloud.APIClient
-	Meta   interface{}
+	Meta   any
 	D      *schema.ResourceData
 }
 

@@ -75,7 +75,7 @@ func dataSourceDNSRecord() *schema.Resource {
 	}
 }
 
-func dataSourceRecordRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceRecordRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).DNSClient
 	partialMatch := d.Get("partial_match").(bool)
 	zoneId := d.Get("zone_id").(string)
@@ -105,7 +105,7 @@ func dataSourceRecordRead(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 	} else {
 		var results []dns.RecordRead
-		tflog.Info(ctx, "searching DNS record by name", map[string]interface{}{"name": recordName, "partial_match": partialMatch})
+		tflog.Info(ctx, "searching DNS record by name", map[string]any{"name": recordName, "partial_match": partialMatch})
 		if partialMatch {
 			// By default, when providing the name as a filter, for the GET requests, partial match
 			// is true.

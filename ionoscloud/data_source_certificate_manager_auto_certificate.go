@@ -71,7 +71,7 @@ func dataSourceCertificateManagerAutoCertificate() *schema.Resource {
 	}
 }
 
-func dataSourceAutoCertificateRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceAutoCertificateRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).CertManagerClient
 	location := d.Get("location").(string)
 	id, idOk := d.GetOk("id")

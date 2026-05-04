@@ -76,7 +76,7 @@ func dataSourceTemplate() *schema.Resource {
 	}
 }
 
-func dataSourceTemplateRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceTemplateRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return diag.FromErr(err)
@@ -196,9 +196,9 @@ func setTemplateData(d *schema.ResourceData, template *ionoscloud.Template) erro
 		}
 
 		if template.Properties.Gpus != nil {
-			var gpus []map[string]interface{}
+			var gpus []map[string]any
 			for _, gpu := range *template.Properties.Gpus {
-				gpuMap := map[string]interface{}{
+				gpuMap := map[string]any{
 					"count":  gpu.Count,
 					"model":  gpu.Model,
 					"type":   gpu.Type,

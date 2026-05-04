@@ -50,7 +50,7 @@ func SetClientOptionsFromConfig(ctx context.Context, client ConfigProviderWithLo
 	defer client.ChangeConfigURL(ctx, location)
 	// do not set from config if we use IONOS_API_URL
 	if os.Getenv(shared.IonosApiUrlEnvVar) != "" {
-		tflog.Debug(ctx, "using endpoint from env", map[string]interface{}{"product": productName, "env": shared.IonosApiUrlEnvVar, "url": os.Getenv(shared.IonosApiUrlEnvVar)})
+		tflog.Debug(ctx, "using endpoint from env", map[string]any{"product": productName, "env": shared.IonosApiUrlEnvVar, "url": os.Getenv(shared.IonosApiUrlEnvVar)})
 		return
 	}
 	fileConfig := client.GetFileConfig()
@@ -63,7 +63,7 @@ func SetClientOptionsFromConfig(ctx context.Context, client ConfigProviderWithLo
 	}
 	endpoint := fileConfig.GetProductLocationOverrides(productName, location)
 	if endpoint == nil {
-		tflog.Warn(ctx, "missing endpoint", map[string]interface{}{"product": productName, "location": location})
+		tflog.Warn(ctx, "missing endpoint", map[string]any{"product": productName, "location": location})
 		return
 	}
 	config.Servers = shared.ServerConfigurations{
@@ -75,7 +75,7 @@ func SetClientOptionsFromConfig(ctx context.Context, client ConfigProviderWithLo
 	config.HTTPClient = &http.Client{}
 	config.HTTPClient.Transport = shared.CreateTransport(endpoint.SkipTLSVerify, endpoint.CertificateAuthData)
 	if endpoint.SkipTLSVerify || endpoint.CertificateAuthData != "" {
-		tflog.Debug(ctx, "endpoint TLS config", map[string]interface{}{"product": productName, "skip_tls_verify": endpoint.SkipTLSVerify, "has_cert_auth_data": endpoint.CertificateAuthData != "", "cert_auth_data_len": len(endpoint.CertificateAuthData)})
+		tflog.Debug(ctx, "endpoint TLS config", map[string]any{"product": productName, "skip_tls_verify": endpoint.SkipTLSVerify, "has_cert_auth_data": endpoint.CertificateAuthData != "", "cert_auth_data_len": len(endpoint.CertificateAuthData)})
 	}
 }
 
@@ -87,25 +87,25 @@ func SetGlobalClientOptionsFromFileConfig(ctx context.Context, clientOptions *cl
 	}
 	productOverrides := fileConfig.GetProductOverrides(productName)
 	if productOverrides == nil || len(productOverrides.Endpoints) == 0 {
-		tflog.Warn(ctx, "missing config for product", map[string]interface{}{"product": productName})
+		tflog.Warn(ctx, "missing config for product", map[string]any{"product": productName})
 		return
 	}
 	if len(productOverrides.Endpoints) > 1 {
-		tflog.Warn(ctx, "multiple endpoints found for product, using the first one", map[string]interface{}{"product": productOverrides.Name})
+		tflog.Warn(ctx, "multiple endpoints found for product, using the first one", map[string]any{"product": productOverrides.Name})
 	}
 
 	if !clientOptions.SkipTLSVerify {
 		clientOptions.SkipTLSVerify = productOverrides.Endpoints[0].SkipTLSVerify
 		if clientOptions.SkipTLSVerify {
-			tflog.Debug(ctx, "file config TLS", map[string]interface{}{"product": productName, "skip_tls_verify": clientOptions.SkipTLSVerify})
+			tflog.Debug(ctx, "file config TLS", map[string]any{"product": productName, "skip_tls_verify": clientOptions.SkipTLSVerify})
 		}
 	}
 	if clientOptions.Endpoint == "" {
 		clientOptions.Endpoint = productOverrides.Endpoints[0].Name
-		tflog.Debug(ctx, "file config global endpoint", map[string]interface{}{"product": productName, "endpoint": clientOptions.Endpoint})
+		tflog.Debug(ctx, "file config global endpoint", map[string]any{"product": productName, "endpoint": clientOptions.Endpoint})
 	}
 	if productOverrides.Endpoints[0].CertificateAuthData != "" {
-		tflog.Debug(ctx, "file config certificateAuthData present", map[string]interface{}{"product": productName, "cert_auth_data_len": len(productOverrides.Endpoints[0].CertificateAuthData)})
+		tflog.Debug(ctx, "file config certificateAuthData present", map[string]any{"product": productName, "cert_auth_data_len": len(productOverrides.Endpoints[0].CertificateAuthData)})
 	}
 	clientOptions.Certificate = productOverrides.Endpoints[0].CertificateAuthData
 }

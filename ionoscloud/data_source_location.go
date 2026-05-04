@@ -63,7 +63,7 @@ func dataSourceLocation() *schema.Resource {
 	}
 }
 
-func dataSourceLocationRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceLocationRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return diag.FromErr(err)
@@ -98,7 +98,7 @@ func dataSourceLocationRead(ctx context.Context, d *schema.ResourceData, meta in
 		}
 	}
 
-	tflog.Info(ctx, "filtered locations", map[string]interface{}{"results_length": len(results)})
+	tflog.Info(ctx, "filtered locations", map[string]any{"results_length": len(results)})
 
 	var location ionoscloud.Location
 
@@ -122,9 +122,9 @@ func setLocationData(d *schema.ResourceData, location *ionoscloud.Location) erro
 	}
 
 	if location.Properties != nil {
-		var cpuArchitectures []interface{}
+		var cpuArchitectures []any
 		for _, cpuArchitecture := range *location.Properties.CpuArchitecture {
-			architectureEntry := make(map[string]interface{})
+			architectureEntry := make(map[string]any)
 
 			if cpuArchitecture.CpuFamily != nil {
 				architectureEntry["cpu_family"] = *cpuArchitecture.CpuFamily

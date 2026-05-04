@@ -56,7 +56,7 @@ func (c *Client) IsClusterReady(ctx context.Context, clusterID string) error {
 		return backoff.Permanent(err)
 	}
 	if cluster.Metadata.State != nil {
-		tflog.Debug(ctx, "PostgreSQL v2 cluster state", map[string]interface{}{"state": *cluster.Metadata.State})
+		tflog.Debug(ctx, "PostgreSQL v2 cluster state", map[string]any{"state": *cluster.Metadata.State})
 		if *cluster.Metadata.State == pgsqlv2.POSTGRESCLUSTERSTATES_AVAILABLE {
 			return nil
 		}
@@ -75,7 +75,7 @@ func (c *Client) IsClusterDeleted(ctx context.Context, clusterID string) error {
 		return backoff.Permanent(err)
 	}
 	if cluster.Metadata.State != nil {
-		tflog.Debug(ctx, "PostgreSQL v2 cluster state", map[string]interface{}{"state": *cluster.Metadata.State})
+		tflog.Debug(ctx, "PostgreSQL v2 cluster state", map[string]any{"state": *cluster.Metadata.State})
 	}
 	return fmt.Errorf("cluster with ID: %s is not deleted yet", clusterID)
 }

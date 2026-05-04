@@ -122,7 +122,7 @@ func dataSourceContainerRegistry() *schema.Resource {
 }
 
 //nolint:gocyclo
-func dataSourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	idValue, idOk := d.GetOk("id")
 	nameValue, nameOk := d.GetOk("name")
 	locationValue, locationOk := d.GetOk("location")
@@ -164,7 +164,7 @@ func dataSourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData
 		if nameOk {
 			partialMatch := d.Get("partial_match").(bool)
 
-			tflog.Info(ctx, "searching container registry by name", map[string]interface{}{"partial_match": partialMatch, "name": name})
+			tflog.Info(ctx, "searching container registry by name", map[string]any{"partial_match": partialMatch, "name": name})
 
 			if registries.Items != nil && len(registries.Items) > 0 {
 				var registriesByName []cr.RegistryResponse

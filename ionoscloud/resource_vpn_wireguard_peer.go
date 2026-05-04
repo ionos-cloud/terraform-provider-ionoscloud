@@ -96,7 +96,7 @@ func resourceVpnWireguardPeer() *schema.Resource {
 	}
 }
 
-func resourceVpnWireguardPeerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVpnWireguardPeerCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).VPNClient
 	gatewayID := d.Get("gateway_id").(string)
 	peer, apiResponse, err := client.CreateWireguardGatewayPeers(ctx, d, gatewayID)
@@ -111,14 +111,14 @@ func resourceVpnWireguardPeerCreate(ctx context.Context, d *schema.ResourceData,
 	return nil
 }
 
-func resourceVpnWireguardPeerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVpnWireguardPeerRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).VPNClient
 	gatewayID := d.Get("gateway_id").(string)
 	location := d.Get("location").(string)
 	peer, apiResponse, err := client.GetWireguardPeerByID(ctx, gatewayID, d.Id(), location)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
-			tflog.Debug(ctx, "wireguard peer not found", map[string]interface{}{"gateway_id": gatewayID, "peer_id": d.Id()})
+			tflog.Debug(ctx, "wireguard peer not found", map[string]any{"gateway_id": gatewayID, "peer_id": d.Id()})
 			d.SetId("")
 			return nil
 		}
@@ -130,7 +130,7 @@ func resourceVpnWireguardPeerRead(ctx context.Context, d *schema.ResourceData, m
 	return nil
 }
 
-func resourceVpnWireguardPeerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVpnWireguardPeerUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).VPNClient
 	gatewayID := d.Get("gateway_id").(string)
 	_, apiResponse, err := client.UpdateWireguardPeer(ctx, gatewayID, d.Id(), d)
@@ -140,7 +140,7 @@ func resourceVpnWireguardPeerUpdate(ctx context.Context, d *schema.ResourceData,
 	return nil
 }
 
-func resourceVpnWireguardPeerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVpnWireguardPeerDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).VPNClient
 	gatewayID := d.Get("gateway_id").(string)
 	location := d.Get("location").(string)
@@ -157,13 +157,13 @@ func resourceVpnWireguardPeerDelete(ctx context.Context, d *schema.ResourceData,
 		return diagutil.ToDiags(d, fmt.Errorf("deleting %w", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String()})
 	}
 
-	tflog.Info(ctx, "successfully deleted WireGuard Peer", map[string]interface{}{"peer_id": d.Id()})
+	tflog.Info(ctx, "successfully deleted WireGuard Peer", map[string]any{"peer_id": d.Id()})
 
 	d.SetId("")
 	return nil
 }
 
-func resourceVpnWireguardPeerImport(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+func resourceVpnWireguardPeerImport(ctx context.Context, d *schema.ResourceData, m any) ([]*schema.ResourceData, error) {
 	client := m.(bundleclient.SdkBundle).VPNClient
 	parts := strings.Split(d.Id(), ":")
 	if len(parts) != 3 {

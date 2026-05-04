@@ -84,7 +84,7 @@ func dataSourceDataCenter() *schema.Resource {
 	}
 }
 
-func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 
 	var name, location string
 	id, idOk := d.GetOk("id")
@@ -130,7 +130,7 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 			}
 		}
 		if datacenter.Properties != nil {
-			tflog.Info(ctx, "got datacenter", map[string]interface{}{"name": *datacenter.Properties.Name, "location": *datacenter.Properties.Location})
+			tflog.Info(ctx, "got datacenter", map[string]any{"name": *datacenter.Properties.Name, "location": *datacenter.Properties.Location})
 		}
 
 	} else {
