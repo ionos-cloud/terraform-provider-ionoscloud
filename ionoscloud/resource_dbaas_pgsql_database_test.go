@@ -76,12 +76,12 @@ func pgSqlDatabaseExistsCheck(path string, database *pgsql.DatabaseResource) res
 		if rs.Primary.ID == "" {
 			return fmt.Errorf("no ID is set for the PgSql database")
 		}
+		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+		defer cancel()
 		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewPsqlClient(ctx, rs.Primary.Attributes["location"])
 		if err != nil {
 			return err
 		}
-		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-		defer cancel()
 		clusterId := rs.Primary.Attributes["cluster_id"]
 		name := rs.Primary.Attributes["name"]
 		foundDatabase, apiResponse, err := client.FindDatabaseByName(ctx, clusterId, name)

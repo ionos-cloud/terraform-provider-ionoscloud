@@ -165,15 +165,15 @@ func testAccCheckContainerRegistryExists(n string, registry *cr.RegistryResponse
 			return fmt.Errorf("no Record ID is set")
 		}
 
-		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewContainerRegistryClient(ctx, rs.Primary.Attributes["location"])
-		if err != nil {
-			return err
-		}
-
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
 		if cancel != nil {
 			defer cancel()
+		}
+
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewContainerRegistryClient(ctx, rs.Primary.Attributes["location"])
+		if err != nil {
+			return err
 		}
 
 		foundRegistry, _, err := client.GetRegistry(ctx, rs.Primary.ID)
