@@ -274,14 +274,14 @@ func testAccCheckDbaasPgSqlClusterExists(n string, cluster *psql.ClusterResponse
 			return fmt.Errorf("no Record ID is set")
 		}
 
+		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+
+		defer cancel()
+
 		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewPsqlClient(ctx, rs.Primary.Attributes["location"])
 		if err != nil {
 			return err
 		}
-
-		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-
-		defer cancel()
 
 		foundCluster, _, err := client.GetCluster(ctx, rs.Primary.ID)
 

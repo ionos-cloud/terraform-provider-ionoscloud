@@ -196,15 +196,15 @@ func TestAccTargetGroupBasic(t *testing.T) {
 }
 
 func testAccCheckTargetGroupDestroyCheck(s *terraform.State) error {
-	client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
-	if err != nil {
-		return err
-	}
-
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 
 	if cancel != nil {
 		defer cancel()
+	}
+
+	client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
+	if err != nil {
+		return err
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -229,10 +229,6 @@ func testAccCheckTargetGroupDestroyCheck(s *terraform.State) error {
 
 func testAccCheckTargetGroupExists(n string, targetGroup *ionoscloud.TargetGroup) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
-		if err != nil {
-			return err
-		}
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
@@ -247,6 +243,11 @@ func testAccCheckTargetGroupExists(n string, targetGroup *ionoscloud.TargetGroup
 
 		if cancel != nil {
 			defer cancel()
+		}
+
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
+		if err != nil {
+			return err
 		}
 
 		foundTargetGroup, apiResponse, err := client.TargetGroupsApi.TargetgroupsFindByTargetGroupId(ctx, rs.Primary.ID).Execute()
