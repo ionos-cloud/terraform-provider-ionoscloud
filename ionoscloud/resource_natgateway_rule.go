@@ -3,9 +3,9 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -117,7 +117,7 @@ func resourceNatGatewayRule() *schema.Resource {
 func resourceNatGatewayRuleCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -214,7 +214,7 @@ func resourceNatGatewayRuleCreate(ctx context.Context, d *schema.ResourceData, m
 
 func resourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -226,14 +226,14 @@ func resourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, met
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
+		tflog.Info(ctx, "nat gateway rule not found", map[string]interface{}{"rule_id": d.Id(), "error": err.Error()})
 		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil
 		}
 	}
 
-	log.Printf("[INFO] Successfully retrieved nat gateway rule %s: %+v", d.Id(), natGatewayRule)
+	tflog.Info(ctx, "retrieved nat gateway rule", map[string]interface{}{"rule_id": d.Id()})
 
 	if err := setNatGatewayRuleData(d, &natGatewayRule); err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -243,7 +243,7 @@ func resourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, met
 }
 func resourceNatGatewayRuleUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -345,7 +345,7 @@ func resourceNatGatewayRuleUpdate(ctx context.Context, d *schema.ResourceData, m
 
 func resourceNatGatewayRuleDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -390,7 +390,7 @@ func resourceNatGatewayRuleImport(ctx context.Context, d *schema.ResourceData, m
 	natGatewayId := parts[1]
 	natGatewayRuleId := parts[2]
 
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return nil, err
 	}
@@ -399,7 +399,7 @@ func resourceNatGatewayRuleImport(ctx context.Context, d *schema.ResourceData, m
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
+		tflog.Info(ctx, "nat gateway rule not found on import", map[string]interface{}{"rule_id": natGatewayRuleId, "error": err.Error()})
 		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil, diagutil.ToError(d, fmt.Errorf("unable to find nat gateway rule %q", natGatewayRuleId), nil)

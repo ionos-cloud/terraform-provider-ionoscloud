@@ -1,10 +1,11 @@
 package loadedconfig
 
 import (
-	"log"
+	"context"
 	"net/http"
 	"os"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 
@@ -38,18 +39,18 @@ type ConfigProviderWithLoader interface {
 // and also need to change the config URL based on location
 type ConfigProviderWithLoaderAndLocation interface {
 	ConfigProviderWithLoader
-	ChangeConfigURL(location string)
+	ChangeConfigURL(ctx context.Context, location string)
 }
 
 // SetClientOptionsFromConfig overrides the client configuration with the loaded config
 // if the product and location are found in the loaded config
 // Any changes here should be reflected in the service overrideClientEndpoint functions for the sdks not using bundle
-func SetClientOptionsFromConfig(client ConfigProviderWithLoaderAndLocation, productName, location string) {
+func SetClientOptionsFromConfig(ctx context.Context, client ConfigProviderWithLoaderAndLocation, productName, location string) {
 	// whatever is set, at the end we need to check if the IONOS_API_URL_productname is set and override the endpoint
-	defer client.ChangeConfigURL(location)
+	defer client.ChangeConfigURL(ctx, location)
 	// do not set from config if we use IONOS_API_URL
 	if os.Getenv(shared.IonosApiUrlEnvVar) != "" {
-		log.Printf("[DEBUG] %s: using endpoint from %s: %s", productName, shared.IonosApiUrlEnvVar, os.Getenv(shared.IonosApiUrlEnvVar))
+		tflog.Debug(ctx, "using endpoint from env", map[string]interface{}{"product": productName, "env": shared.IonosApiUrlEnvVar, "url": os.Getenv(shared.IonosApiUrlEnvVar)})
 		return
 	}
 	fileConfig := client.GetFileConfig()
@@ -62,7 +63,7 @@ func SetClientOptionsFromConfig(client ConfigProviderWithLoaderAndLocation, prod
 	}
 	endpoint := fileConfig.GetProductLocationOverrides(productName, location)
 	if endpoint == nil {
-		log.Printf("[WARN] Missing endpoint for %s in location %s", productName, location)
+		tflog.Warn(ctx, "missing endpoint", map[string]interface{}{"product": productName, "location": location})
 		return
 	}
 	config.Servers = shared.ServerConfigurations{
@@ -74,37 +75,37 @@ func SetClientOptionsFromConfig(client ConfigProviderWithLoaderAndLocation, prod
 	config.HTTPClient = &http.Client{}
 	config.HTTPClient.Transport = shared.CreateTransport(endpoint.SkipTLSVerify, endpoint.CertificateAuthData)
 	if endpoint.SkipTLSVerify || endpoint.CertificateAuthData != "" {
-		log.Printf("[DEBUG] %s: skipTlsVerify=%t, certificateAuthData=%t (len=%d)", productName, endpoint.SkipTLSVerify, endpoint.CertificateAuthData != "", len(endpoint.CertificateAuthData))
+		tflog.Debug(ctx, "endpoint TLS config", map[string]interface{}{"product": productName, "skip_tls_verify": endpoint.SkipTLSVerify, "has_cert_auth_data": endpoint.CertificateAuthData != "", "cert_auth_data_len": len(endpoint.CertificateAuthData)})
 	}
 }
 
 // SetGlobalClientOptionsFromFileConfig sets the client options from the loaded config if not already set
 // mutates clientOptions. Should only be used if the product does not have location overrides
-func SetGlobalClientOptionsFromFileConfig(clientOptions *clientoptions.TerraformClientOptions, fileConfig *fileconfiguration.FileConfig, productName string) {
+func SetGlobalClientOptionsFromFileConfig(ctx context.Context, clientOptions *clientoptions.TerraformClientOptions, fileConfig *fileconfiguration.FileConfig, productName string) {
 	if clientOptions == nil || fileConfig == nil {
 		return
 	}
 	productOverrides := fileConfig.GetProductOverrides(productName)
 	if productOverrides == nil || len(productOverrides.Endpoints) == 0 {
-		log.Printf("[WARN] Missing config for %s", productName)
+		tflog.Warn(ctx, "missing config for product", map[string]interface{}{"product": productName})
 		return
 	}
 	if len(productOverrides.Endpoints) > 1 {
-		log.Printf("[WARN] Multiple endpoints found for product %s, using the first one", productOverrides.Name)
+		tflog.Warn(ctx, "multiple endpoints found for product, using the first one", map[string]interface{}{"product": productOverrides.Name})
 	}
 
 	if !clientOptions.SkipTLSVerify {
 		clientOptions.SkipTLSVerify = productOverrides.Endpoints[0].SkipTLSVerify
 		if clientOptions.SkipTLSVerify {
-			log.Printf("[DEBUG] File config TLS for %s: skipTlsVerify=%t", productName, clientOptions.SkipTLSVerify)
+			tflog.Debug(ctx, "file config TLS", map[string]interface{}{"product": productName, "skip_tls_verify": clientOptions.SkipTLSVerify})
 		}
 	}
 	if clientOptions.Endpoint == "" {
 		clientOptions.Endpoint = productOverrides.Endpoints[0].Name
-		log.Printf("[DEBUG] File config global endpoint for %s: %s", productName, clientOptions.Endpoint)
+		tflog.Debug(ctx, "file config global endpoint", map[string]interface{}{"product": productName, "endpoint": clientOptions.Endpoint})
 	}
 	if productOverrides.Endpoints[0].CertificateAuthData != "" {
-		log.Printf("[DEBUG] File config certificateAuthData for %s: present (len=%d)", productName, len(productOverrides.Endpoints[0].CertificateAuthData))
+		tflog.Debug(ctx, "file config certificateAuthData present", map[string]interface{}{"product": productName, "cert_auth_data_len": len(productOverrides.Endpoints[0].CertificateAuthData)})
 	}
 	clientOptions.Certificate = productOverrides.Endpoints[0].CertificateAuthData
 }

@@ -3,8 +3,8 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -97,7 +97,7 @@ and log the extent to which your instances are being accessed.`,
 
 func resourceApplicationLoadBalancerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -199,7 +199,7 @@ func resourceApplicationLoadBalancerCreate(ctx context.Context, d *schema.Resour
 						// flowlog creation failed, delete the alb
 						diags := resourceApplicationLoadBalancerDelete(ctx, d, meta)
 						if diags != nil {
-							log.Printf("[ERROR] could not delete alb %v", diags)
+							tflog.Error(ctx, "could not delete alb after flowlog failure", map[string]interface{}{"diags": diags})
 						}
 						diags = diagutil.ToDiags(d, fmt.Errorf("error creating flowlog for application loadbalancer: %w", err), nil)
 						return diags
@@ -214,7 +214,7 @@ func resourceApplicationLoadBalancerCreate(ctx context.Context, d *schema.Resour
 
 func resourceApplicationLoadBalancerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -225,14 +225,14 @@ func resourceApplicationLoadBalancerRead(ctx context.Context, d *schema.Resource
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		log.Printf("[INFO] Resource %s not found: %+v", d.Id(), err)
+		tflog.Info(ctx, "application loadbalancer not found", map[string]interface{}{"alb_id": d.Id(), "error": err.Error()})
 		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil
 		}
 	}
 
-	log.Printf("[INFO] Successfully retrieved application loadbalancer %s: %+v", d.Id(), applicationLoadBalancer)
+	tflog.Info(ctx, "retrieved application loadbalancer", map[string]interface{}{"alb_id": d.Id()})
 	fw := cloudapiflowlog.Service{
 		Client: client,
 		Meta:   meta,
@@ -250,7 +250,7 @@ func resourceApplicationLoadBalancerRead(ctx context.Context, d *schema.Resource
 
 func resourceApplicationLoadBalancerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -362,7 +362,7 @@ func resourceApplicationLoadBalancerUpdate(ctx context.Context, d *schema.Resour
 
 func resourceApplicationLoadBalancerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -406,7 +406,7 @@ func resourceApplicationLoadBalancerImport(ctx context.Context, d *schema.Resour
 	datacenterId := parts[0]
 	albId := parts[1]
 
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return nil, err
 	}

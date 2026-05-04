@@ -3,9 +3,9 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2"
@@ -173,7 +173,7 @@ func dataSourceCDNDistributionRead(ctx context.Context, d *schema.ResourceData, 
 		if domainOk {
 			partialMatch := d.Get("partial_match").(bool)
 
-			log.Printf("[INFO] Using data source for container registry by domain with partial_match %t and domain: %s", partialMatch, domain)
+			tflog.Info(ctx, "searching CDN distributions by domain", map[string]interface{}{"partial_match": partialMatch, "domain": domain})
 
 			if len(distributions.Items) > 0 {
 				var distributionsByDomain []cdn.Distribution

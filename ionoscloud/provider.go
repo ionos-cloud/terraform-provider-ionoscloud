@@ -2,12 +2,12 @@ package ionoscloud
 
 import (
 	"context"
-	"log"
 	"os"
 	"runtime/debug"
 
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
@@ -236,15 +236,15 @@ func Provider() *schema.Provider {
 			terraformVersion = "0.11+compatible"
 		}
 
-		log.Printf("[DEBUG] Setting terraformVersion to %s", terraformVersion)
+		tflog.Debug(ctx, "setting terraformVersion", map[string]interface{}{"terraform_version": terraformVersion})
 
-		return providerConfigure(d, terraformVersion)
+		return providerConfigure(ctx, d, terraformVersion)
 	}
 
 	return provider
 }
 
-func providerConfigure(d *schema.ResourceData, terraformVersion string) (interface{}, diag.Diagnostics) {
+func providerConfigure(ctx context.Context, d *schema.ResourceData, terraformVersion string) (interface{}, diag.Diagnostics) {
 	usernameItf, usernameOk := d.GetOk("username")
 	passwordItf, passwordOk := d.GetOk("password")
 	tokenItf, tokenOk := d.GetOk("token")
@@ -267,8 +267,8 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	insecure, insecureSet := d.GetOk("insecure")
 	insecureBool := false
 
-	fileConfig, readFileErr := configlog.LoadFileConfigWithLogging()
-	configlog.LogEndpointEnvVars()
+	fileConfig, readFileErr := configlog.LoadFileConfigWithLogging(ctx)
+	configlog.LogEndpointEnvVars(ctx)
 
 	fileConfigUsed := false
 	profileName := ""
@@ -292,10 +292,10 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		}
 	}
 
-	configlog.LogCredentialResolution(shared.Credentials{Token: token, Username: username, Password: password}, fileConfigUsed, profileName)
+	configlog.LogCredentialResolution(ctx, shared.Credentials{Token: token, Username: username, Password: password}, fileConfigUsed, profileName)
 
 	endpoint := utils.CleanURL(d.Get("endpoint").(string))
-	configlog.LogEndpoint(endpoint)
+	configlog.LogEndpoint(ctx, endpoint)
 
 	if contractNumber, contractOk := d.GetOk("contract_number"); contractOk {
 		// will inject x-contract-number to sdks
@@ -307,7 +307,7 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 	if insecureSet {
 		insecureBool = insecure.(bool)
 	}
-	configlog.LogTLSConfig(insecureBool)
+	configlog.LogTLSConfig(ctx, insecureBool)
 
 	clientOptions := clientoptions.TerraformClientOptions{
 		ClientOptions: shared.ClientOptions{
@@ -329,10 +329,10 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		clientOptions.Version = info.Main.Version
 	}
 
-	client := bundleclient.New(clientOptions, fileConfig)
+	client := bundleclient.New(ctx, clientOptions, fileConfig)
 
 	diagutil.SetupContractNumberResolver(d.Get("contract_number").(string), token, func() string {
-		return contractService.GetContractNumber(client)
+		return contractService.GetContractNumber(ctx, client)
 	})
 
 	return *client, nil

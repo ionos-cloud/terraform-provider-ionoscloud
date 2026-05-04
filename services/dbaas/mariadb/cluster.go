@@ -3,9 +3,9 @@ package mariadb
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	mariadb "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb/v2"
 	shared "github.com/ionos-cloud/sdk-go-bundle/shared"
@@ -18,7 +18,7 @@ import (
 
 // GetCluster retrieves a cluster by its ID and the location in which the cluster is created.
 func (c *Client) GetCluster(ctx context.Context, clusterID, location string) (mariadb.ClusterResponse, *shared.APIResponse, error) {
-	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Mariadb, location)
+	loadedconfig.SetClientOptionsFromConfig(ctx, c, fileconfiguration.Mariadb, location)
 	cluster, apiResponse, err := c.sdkClient.ClustersApi.ClustersFindById(ctx, clusterID).Execute()
 	apiResponse.LogInfo()
 	return cluster, apiResponse, err
@@ -26,7 +26,7 @@ func (c *Client) GetCluster(ctx context.Context, clusterID, location string) (ma
 
 // ListClusters retrieves a list of clusters based on the location. Filters can be used.
 func (c *Client) ListClusters(ctx context.Context, filterName, location string) (mariadb.ClusterList, *shared.APIResponse, error) {
-	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Mariadb, location)
+	loadedconfig.SetClientOptionsFromConfig(ctx, c, fileconfiguration.Mariadb, location)
 	request := c.sdkClient.ClustersApi.ClustersGet(ctx)
 	if filterName != "" {
 		request = request.FilterName(filterName)
@@ -38,7 +38,7 @@ func (c *Client) ListClusters(ctx context.Context, filterName, location string) 
 
 // CreateCluster creates a new cluster using the provided data in the request and the location.
 func (c *Client) CreateCluster(ctx context.Context, cluster mariadb.CreateClusterRequest, location string) (mariadb.ClusterResponse, *shared.APIResponse, error) {
-	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Mariadb, location)
+	loadedconfig.SetClientOptionsFromConfig(ctx, c, fileconfiguration.Mariadb, location)
 	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersPost(ctx).CreateClusterRequest(cluster).Execute()
 	apiResponse.LogInfo()
 	return clusterResponse, apiResponse, err
@@ -46,7 +46,7 @@ func (c *Client) CreateCluster(ctx context.Context, cluster mariadb.CreateCluste
 
 // UpdateCluster updates a cluster by its ID and the location in which the cluster is created.
 func (c *Client) UpdateCluster(ctx context.Context, cluster mariadb.PatchClusterRequest, clusterID, location string) (mariadb.ClusterResponse, *shared.APIResponse, error) {
-	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Mariadb, location)
+	loadedconfig.SetClientOptionsFromConfig(ctx, c, fileconfiguration.Mariadb, location)
 	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersPatch(ctx, clusterID).PatchClusterRequest(cluster).Execute()
 	apiResponse.LogInfo()
 	return clusterResponse, apiResponse, err
@@ -54,7 +54,7 @@ func (c *Client) UpdateCluster(ctx context.Context, cluster mariadb.PatchCluster
 
 // DeleteCluster deletes a cluster by its ID and the location in which the cluster is created.
 func (c *Client) DeleteCluster(ctx context.Context, clusterID, location string) (mariadb.ClusterResponse, *shared.APIResponse, error) {
-	loadedconfig.SetClientOptionsFromConfig(c, fileconfiguration.Mariadb, location)
+	loadedconfig.SetClientOptionsFromConfig(ctx, c, fileconfiguration.Mariadb, location)
 	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersDelete(ctx, clusterID).Execute()
 	apiResponse.LogInfo()
 	return clusterResponse, apiResponse, err
@@ -75,7 +75,7 @@ func (c *Client) IsClusterReady(ctx context.Context, d *schema.ResourceData) (bo
 	if utils.IsStateFailed(string(*cluster.Metadata.State)) {
 		return false, fmt.Errorf("cluster %s is in a failed state", d.Id())
 	}
-	log.Printf("[INFO] state of the MariaDB cluster with ID: %v is: %s ", clusterID, string(*cluster.Metadata.State))
+	tflog.Info(ctx, "MariaDB cluster state", map[string]interface{}{"cluster_id": clusterID, "state": string(*cluster.Metadata.State)})
 	return strings.EqualFold(string(*cluster.Metadata.State), constant.Available), nil
 }
 

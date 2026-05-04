@@ -75,7 +75,7 @@ func dataSourceK8sNodePoolNodes() *schema.Resource {
 
 func dataSourceK8sReadNodePoolNodes(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}

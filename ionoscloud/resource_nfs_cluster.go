@@ -3,9 +3,9 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/nfs/v2"
@@ -195,6 +195,6 @@ func findCluster(ctx context.Context, d *schema.ResourceData, id, location strin
 		return ionoscloud.ClusterRead{},
 			fmt.Errorf("couldn't find NFS Cluster %s in %s: %w", id, location, err)
 	}
-	log.Printf("[INFO] Cluster found: %+v", cluster)
+	tflog.Info(ctx, "NFS cluster found", map[string]interface{}{"cluster_id": id, "location": location})
 	return cluster, nil
 }

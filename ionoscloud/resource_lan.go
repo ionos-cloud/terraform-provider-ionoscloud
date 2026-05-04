@@ -3,10 +3,10 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
@@ -97,7 +97,7 @@ func resourceLan() *schema.Resource {
 
 func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -116,13 +116,13 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	if d.Get("pcc") != nil && d.Get("pcc").(string) != "" {
 		pccID := d.Get("pcc").(string)
-		log.Printf("[INFO] Setting PCC for LAN %s to %s...", d.Id(), pccID)
+		tflog.Info(ctx, "setting PCC for LAN", map[string]interface{}{"lan_id": d.Id(), "pcc_id": pccID})
 		request.Properties.Pcc = &pccID
 	}
 
 	if d.Get("ipv6_cidr_block") != nil {
 		ipv6 := d.Get("ipv6_cidr_block").(string)
-		log.Printf("[INFO] Setting ipv6CidrBlock for LAN %s to %s...", d.Id(), ipv6)
+		tflog.Info(ctx, "setting ipv6CidrBlock for LAN", map[string]interface{}{"lan_id": d.Id(), "ipv6_cidr_block": ipv6})
 		request.Properties.Ipv6CidrBlock = &ipv6
 	} else {
 		request.Properties.SetIpv6CidrBlockNil()
@@ -140,7 +140,7 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	d.SetId(*rsp.Id)
 
-	log.Printf("[INFO] LAN ID: %s", d.Id())
+	tflog.Info(ctx, "LAN created", map[string]interface{}{"lan_id": d.Id()})
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
 		if errState != nil {
@@ -153,7 +153,7 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 	}
 
 	for {
-		log.Printf("[INFO] Waiting for LAN %s to be available...", *rsp.Id)
+		tflog.Info(ctx, "waiting for LAN to be available", map[string]interface{}{"lan_id": *rsp.Id})
 
 		lanReady, rsErr := lanAvailable(ctx, client, d)
 
@@ -162,15 +162,15 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 		}
 
 		if lanReady {
-			log.Printf("[INFO] LAN ready: %s", d.Id())
+			tflog.Info(ctx, "LAN ready", map[string]interface{}{"lan_id": d.Id()})
 			break
 		}
 
 		select {
 		case <-time.After(constant.SleepInterval):
-			log.Printf("[INFO] trying again ...")
+			tflog.Info(ctx, "LAN not yet ready, retrying")
 		case <-ctx.Done():
-			log.Printf("[INFO] lan creation timed out")
+			tflog.Info(ctx, "LAN creation timed out")
 			return diagutil.ToDiags(d, fmt.Errorf("lan creation timed out! WARNING: your lan will still probably be created after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"), nil)
 		}
 	}
@@ -180,7 +180,7 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta interfa
 
 func resourceLanRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -192,7 +192,7 @@ func resourceLanRead(ctx context.Context, d *schema.ResourceData, meta interface
 
 	if err != nil {
 		if httpNotFound(apiResponse) {
-			log.Printf("[INFO] LAN %s not found", d.Id())
+			tflog.Info(ctx, "LAN not found", map[string]interface{}{"lan_id": d.Id()})
 			d.SetId("")
 			return nil
 		}
@@ -200,7 +200,7 @@ func resourceLanRead(ctx context.Context, d *schema.ResourceData, meta interface
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching a LAN: %w", err), nil)
 	}
 
-	log.Printf("[INFO] LAN %s found: %+v", d.Id(), lan)
+	tflog.Info(ctx, "LAN found", map[string]interface{}{"lan_id": d.Id()})
 
 	if err := setLanData(d, &lan); err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -211,7 +211,7 @@ func resourceLanRead(ctx context.Context, d *schema.ResourceData, meta interface
 
 func resourceLanUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -231,7 +231,7 @@ func resourceLanUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 		_, newPCC := d.GetChange("pcc")
 
 		if newPCC != nil && newPCC.(string) != "" {
-			log.Printf("[INFO] Setting PCC for LAN %s to %s...", d.Id(), newPCC.(string))
+			tflog.Info(ctx, "setting PCC for LAN", map[string]interface{}{"lan_id": d.Id(), "pcc_id": newPCC.(string)})
 			pcc := newPCC.(string)
 			properties.Pcc = &pcc
 		}
@@ -240,7 +240,7 @@ func resourceLanUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 	if d.HasChange("ipv6_cidr_block") {
 		_, newIpv6 := d.GetChange("ipv6_cidr_block")
 		if newIpv6 != nil && newIpv6.(string) != "" {
-			log.Printf("[INFO] Setting ipv6CidrBlock for LAN %s to %s...", d.Id(), newIpv6.(string))
+			tflog.Info(ctx, "setting ipv6CidrBlock for LAN", map[string]interface{}{"lan_id": d.Id(), "ipv6_cidr_block": newIpv6.(string)})
 			ipv6 := newIpv6.(string)
 			properties.Ipv6CidrBlock = &ipv6
 		} else {
@@ -269,7 +269,7 @@ func resourceLanUpdate(ctx context.Context, d *schema.ResourceData, meta interfa
 func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	dcId := d.Get("datacenter_id").(string)
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -282,16 +282,16 @@ func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta interfa
 		apiResponse, err := client.LANsApi.DatacentersLansDelete(ctx, dcId, d.Id()).Execute()
 		if err != nil {
 			if isDeleteProtected(apiResponse, err.Error()) {
-				log.Printf("[INFO] LAN %s is delete-protected, keep trying", d.Id())
+				tflog.Info(ctx, "LAN is delete-protected, keep trying", map[string]interface{}{"lan_id": d.Id()})
 				return retry.RetryableError(fmt.Errorf("lan %s is delete-protected, keep trying %w", d.Id(), err))
 			}
 			if httpNotFound(apiResponse) {
-				log.Printf("[INFO] LAN already deleted %s", d.Id())
+				tflog.Info(ctx, "LAN already deleted", map[string]interface{}{"lan_id": d.Id()})
 				return nil
 			}
 			return retry.NonRetryableError(fmt.Errorf("an error occurred while deleting lan dcId %s ID %s %w", dcId, d.Id(), err))
 		}
-		log.Printf("[DEBUG] deletion started for LAN with ID: %v", d.Id())
+		tflog.Debug(ctx, "deletion started for LAN", map[string]interface{}{"lan_id": d.Id()})
 		return nil
 	})
 	if err != nil {
@@ -332,7 +332,7 @@ func resourceLanImport(ctx context.Context, d *schema.ResourceData, meta interfa
 	datacenterId := parts[0]
 	lanId := parts[1]
 
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return nil, err
 	}
@@ -348,7 +348,7 @@ func resourceLanImport(ctx context.Context, d *schema.ResourceData, meta interfa
 		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while retrieving the lan %q, %w", lanId, err), nil)
 	}
 
-	log.Printf("[INFO] LAN %s found: %+v", d.Id(), lan)
+	tflog.Info(ctx, "LAN imported", map[string]interface{}{"lan_id": d.Id(), "datacenter_id": datacenterId})
 
 	if err := d.Set("datacenter_id", datacenterId); err != nil {
 		return nil, diagutil.ToError(d, fmt.Errorf("error while setting datacenter_id property for lan %q: %w", lanId, err), nil)
@@ -428,24 +428,24 @@ func lanDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.Res
 
 	if err != nil {
 		if isDeleteProtected(apiResponse, err.Error()) {
-			log.Printf("[INFO] LAN %s is delete-protected, keep trying", d.Id())
+			tflog.Info(ctx, "LAN is delete-protected, keep trying", map[string]interface{}{"lan_id": d.Id()})
 			return false, nil
 		}
 		if httpNotFound(apiResponse) {
-			log.Printf("[INFO] LAN deleted %s", d.Id())
+			tflog.Info(ctx, "LAN deleted", map[string]interface{}{"lan_id": d.Id()})
 			return true, nil
 		}
 		return false, fmt.Errorf("error checking LAN deletion status: %w", err)
 	}
 
-	log.Printf("[INFO] LAN %s not yet deleted from the datacenter %s", d.Id(), dcId)
+	tflog.Info(ctx, "LAN not yet deleted from the datacenter", map[string]interface{}{"lan_id": d.Id(), "datacenter_id": dcId})
 
 	return false, nil
 }
 
 func waitForLanDeletion(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) error {
 	for {
-		log.Printf("[INFO] waiting for LAN %s to be deleted...", d.Id())
+		tflog.Info(ctx, "waiting for LAN to be deleted", map[string]interface{}{"lan_id": d.Id()})
 
 		lDeleted, dsErr := lanDeleted(ctx, client, d)
 
@@ -454,15 +454,15 @@ func waitForLanDeletion(ctx context.Context, client *ionoscloud.APIClient, d *sc
 		}
 
 		if lDeleted {
-			log.Printf("[INFO] successfully deleted LAN: %s", d.Id())
+			tflog.Info(ctx, "successfully deleted LAN", map[string]interface{}{"lan_id": d.Id()})
 			break
 		}
 
 		select {
 		case <-time.After(constant.SleepInterval):
-			log.Printf("[INFO] trying again ...")
+			tflog.Info(ctx, "LAN not yet deleted, retrying")
 		case <-ctx.Done():
-			log.Printf("[INFO] lan deletion timed out")
+			tflog.Info(ctx, "LAN deletion timed out")
 			return fmt.Errorf("lan deletion timed out! WARNING: your lan will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates")
 		}
 	}
@@ -480,7 +480,7 @@ func lanNicsDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema
 	}
 
 	if nics.Items != nil && len(*nics.Items) > 0 {
-		log.Printf("[INFO] there are still nics under LAN  with id %s", d.Id())
+		tflog.Info(ctx, "nics still present under LAN", map[string]interface{}{"lan_id": d.Id()})
 		return false, nil
 	}
 
@@ -489,7 +489,7 @@ func lanNicsDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema
 
 func waitForLanNicsDeletion(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) error {
 	for {
-		log.Printf("[INFO] waiting for nics under LAN %s to be deleted...", d.Id())
+		tflog.Info(ctx, "waiting for nics under LAN to be deleted", map[string]interface{}{"lan_id": d.Id()})
 
 		nicsDeleted, dsErr := lanNicsDeleted(ctx, client, d)
 
@@ -498,15 +498,15 @@ func waitForLanNicsDeletion(ctx context.Context, client *ionoscloud.APIClient, d
 		}
 
 		if nicsDeleted {
-			log.Printf("[INFO] no nics under LAN: %s", d.Id())
+			tflog.Info(ctx, "no nics under LAN", map[string]interface{}{"lan_id": d.Id()})
 			break
 		}
 
 		select {
 		case <-time.After(constant.SleepInterval):
-			log.Printf("[INFO] trying again ...")
+			tflog.Info(ctx, "nics still present under LAN, retrying")
 		case <-ctx.Done():
-			log.Printf("[INFO] nics deletion check timed out")
+			tflog.Info(ctx, "nics deletion check timed out")
 			return fmt.Errorf("nics deletion check timed out! WARNING: your lan nics may still be deleted; check your Ionos Cloud account for updates and perform again a destroy for remaining resources")
 		}
 	}

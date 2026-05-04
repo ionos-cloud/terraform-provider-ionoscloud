@@ -3,8 +3,8 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
@@ -64,7 +64,7 @@ func dataSourceLocation() *schema.Resource {
 }
 
 func dataSourceLocationRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -98,7 +98,7 @@ func dataSourceLocationRead(ctx context.Context, d *schema.ResourceData, meta in
 		}
 	}
 
-	log.Printf("[INFO] Results length %d *************", len(results))
+	tflog.Info(ctx, "filtered locations", map[string]interface{}{"results_length": len(results)})
 
 	var location ionoscloud.Location
 

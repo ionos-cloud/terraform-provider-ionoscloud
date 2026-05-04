@@ -1,6 +1,7 @@
 package autoscaling
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"runtime"
@@ -21,8 +22,8 @@ type Client struct {
 }
 
 // NewClient - returns a new autoscaling client
-func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *fileconfiguration.FileConfig) *Client {
-	loadedconfig.SetGlobalClientOptionsFromFileConfig(&clientOptions, fileConfig, fileconfiguration.Autoscaling)
+func NewClient(ctx context.Context, clientOptions clientoptions.TerraformClientOptions, fileConfig *fileconfiguration.FileConfig) *Client {
+	loadedconfig.SetGlobalClientOptionsFromFileConfig(ctx, &clientOptions, fileConfig, fileconfiguration.Autoscaling)
 	config := shared.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
 	config.UserAgent = fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go-vm-autoscaling/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",

@@ -1,6 +1,7 @@
 package dns
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"runtime"
@@ -20,8 +21,8 @@ type Client struct {
 	sdkClient dns.APIClient
 }
 
-func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *fileconfiguration.FileConfig) *Client {
-	loadedconfig.SetGlobalClientOptionsFromFileConfig(&clientOptions, fileConfig, fileconfiguration.DNS)
+func NewClient(ctx context.Context, clientOptions clientoptions.TerraformClientOptions, fileConfig *fileconfiguration.FileConfig) *Client {
+	loadedconfig.SetGlobalClientOptionsFromFileConfig(ctx, &clientOptions, fileConfig, fileconfiguration.DNS)
 	config := shared.NewConfiguration(clientOptions.Credentials.Username, clientOptions.Credentials.Password, clientOptions.Credentials.Token, clientOptions.Endpoint)
 
 	config.MaxRetries = constant.MaxRetries

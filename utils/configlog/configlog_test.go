@@ -2,6 +2,7 @@ package configlog
 
 import (
 	"bytes"
+	"context"
 	"log"
 	"os"
 	"strings"
@@ -38,7 +39,7 @@ func TestLogProfileAndEnvironment_WithProfiles(t *testing.T) {
 	}
 
 	output := captureLog(func() {
-		logProfileAndEnvironment(cfg)
+		logProfileAndEnvironment(context.Background(), cfg)
 	})
 
 	assertContains(t, output, "Profile resolution:")
@@ -57,7 +58,7 @@ func TestLogProfileAndEnvironment_NoMatchingProfile(t *testing.T) {
 	}
 
 	output := captureLog(func() {
-		logProfileAndEnvironment(cfg)
+		logProfileAndEnvironment(context.Background(), cfg)
 	})
 
 	assertContains(t, output, `no matching profile for "staging"`)
@@ -75,7 +76,7 @@ func TestLogProfileAndEnvironment_EnvOverride(t *testing.T) {
 	}
 
 	output := captureLog(func() {
-		logProfileAndEnvironment(cfg)
+		logProfileAndEnvironment(context.Background(), cfg)
 	})
 
 	assertContains(t, output, `overrides to "override-profile"`)
@@ -83,7 +84,7 @@ func TestLogProfileAndEnvironment_EnvOverride(t *testing.T) {
 
 func TestLogCredentialResolution_TokenOnly(t *testing.T) {
 	output := captureLog(func() {
-		LogCredentialResolution(shared.Credentials{Token: "my-token"}, false, "")
+		LogCredentialResolution(context.Background(), shared.Credentials{Token: "my-token"}, false, "")
 	})
 
 	assertContains(t, output, "token=found")
@@ -95,7 +96,7 @@ func TestLogCredentialResolution_TokenOnly(t *testing.T) {
 
 func TestLogCredentialResolution_UsernamePassword(t *testing.T) {
 	output := captureLog(func() {
-		LogCredentialResolution(shared.Credentials{Username: "user", Password: "pass"}, false, "")
+		LogCredentialResolution(context.Background(), shared.Credentials{Username: "user", Password: "pass"}, false, "")
 	})
 
 	assertContains(t, output, "token=not found")
@@ -105,7 +106,7 @@ func TestLogCredentialResolution_UsernamePassword(t *testing.T) {
 
 func TestLogCredentialResolution_BothTokenAndUserPass(t *testing.T) {
 	output := captureLog(func() {
-		LogCredentialResolution(shared.Credentials{Token: "tok", Username: "user", Password: "pass"}, false, "")
+		LogCredentialResolution(context.Background(), shared.Credentials{Token: "tok", Username: "user", Password: "pass"}, false, "")
 	})
 
 	assertContains(t, output, "both token and user/pass provided; token takes precedence")
@@ -114,7 +115,7 @@ func TestLogCredentialResolution_BothTokenAndUserPass(t *testing.T) {
 
 func TestLogCredentialResolution_FileConfigProfile(t *testing.T) {
 	output := captureLog(func() {
-		LogCredentialResolution(shared.Credentials{Token: "tok", S3AccessKey: "ak", S3SecretKey: "sk"}, true, "myprofile")
+		LogCredentialResolution(context.Background(), shared.Credentials{Token: "tok", S3AccessKey: "ak", S3SecretKey: "sk"}, true, "myprofile")
 	})
 
 	assertContains(t, output, `file config profile "myprofile": token, S3 keys`)
@@ -122,7 +123,7 @@ func TestLogCredentialResolution_FileConfigProfile(t *testing.T) {
 
 func TestLogCredentialResolution_FileConfigNoCredentials(t *testing.T) {
 	output := captureLog(func() {
-		LogCredentialResolution(shared.Credentials{}, true, "empty")
+		LogCredentialResolution(context.Background(), shared.Credentials{}, true, "empty")
 	})
 
 	assertContains(t, output, `file config profile "empty": none`)
@@ -139,7 +140,7 @@ func TestLogEndpointEnvVars_NoneSet(t *testing.T) {
 	}
 
 	output := captureLog(func() {
-		LogEndpointEnvVars()
+		LogEndpointEnvVars(context.Background())
 	})
 
 	if strings.Contains(output, "Endpoint env var") {
@@ -152,7 +153,7 @@ func TestLogEndpointEnvVars_SomeSet(t *testing.T) {
 	t.Setenv("IONOS_API_URL_KAFKA", "https://kafka.custom.example.com")
 
 	output := captureLog(func() {
-		LogEndpointEnvVars()
+		LogEndpointEnvVars(context.Background())
 	})
 
 	assertContains(t, output, "Endpoint env vars:")
@@ -178,7 +179,7 @@ func TestLogFileConfigEndpoints_WithEnvironment(t *testing.T) {
 	}
 
 	output := captureLog(func() {
-		logFileConfigEndpoints(cfg)
+		logFileConfigEndpoints(context.Background(), cfg)
 	})
 
 	assertContains(t, output, `Environment "production": 2 product(s):`)
@@ -211,7 +212,7 @@ func TestLogFileConfigEndpoints_WithTLSAndCertPerEndpoint(t *testing.T) {
 	}
 
 	output := captureLog(func() {
-		logFileConfigEndpoints(cfg)
+		logFileConfigEndpoints(context.Background(), cfg)
 	})
 
 	assertContains(t, output, `"skipTlsVerify":true`)
@@ -233,7 +234,7 @@ func TestLogFileConfigEndpoints_NoMatchingEnvironment(t *testing.T) {
 	}
 
 	output := captureLog(func() {
-		logFileConfigEndpoints(cfg)
+		logFileConfigEndpoints(context.Background(), cfg)
 	})
 
 	assertNotContains(t, output, "product(s)")
@@ -243,7 +244,7 @@ func TestLogTLSConfig_InsecureSet(t *testing.T) {
 	t.Setenv("IONOS_ALLOW_INSECURE", "true")
 
 	output := captureLog(func() {
-		LogTLSConfig(true)
+		LogTLSConfig(context.Background(), true)
 	})
 
 	assertContains(t, output, "TLS:")
@@ -255,7 +256,7 @@ func TestLogTLSConfig_Secure(t *testing.T) {
 	t.Setenv("IONOS_ALLOW_INSECURE", "")
 
 	output := captureLog(func() {
-		LogTLSConfig(false)
+		LogTLSConfig(context.Background(), false)
 	})
 
 	assertNotContains(t, output, "TLS")
@@ -266,7 +267,7 @@ func TestLogTLSConfig_WithPinnedCert(t *testing.T) {
 	t.Setenv("IONOS_PINNED_CERT", "sha256-fingerprint-here")
 
 	output := captureLog(func() {
-		LogTLSConfig(false)
+		LogTLSConfig(context.Background(), false)
 	})
 
 	assertContains(t, output, "IONOS_PINNED_CERT is set")
@@ -275,28 +276,28 @@ func TestLogTLSConfig_WithPinnedCert(t *testing.T) {
 
 func TestLogEndpoint_Set(t *testing.T) {
 	output := captureLog(func() {
-		LogEndpoint("https://api.ionos.com")
+		LogEndpoint(context.Background(), "https://api.ionos.com")
 	})
 	assertContains(t, output, "Global endpoint: https://api.ionos.com")
 }
 
 func TestLogEndpoint_Empty(t *testing.T) {
 	output := captureLog(func() {
-		LogEndpoint("")
+		LogEndpoint(context.Background(), "")
 	})
 	assertContains(t, output, "Global endpoint not set, using SDK defaults")
 }
 
 func TestLogS3Region_Explicit(t *testing.T) {
 	output := captureLog(func() {
-		LogS3Region("us-central-1")
+		LogS3Region(context.Background(), "us-central-1")
 	})
 	assertContains(t, output, "S3 region: us-central-1")
 }
 
 func TestLogS3Region_Default(t *testing.T) {
 	output := captureLog(func() {
-		LogS3Region("")
+		LogS3Region(context.Background(), "")
 	})
 	assertContains(t, output, "S3 region: "+constant.DefaultS3Region+" (default)")
 }
@@ -328,7 +329,7 @@ func TestLoadFileConfigWithLogging_UnreadableFile(t *testing.T) {
 	t.Setenv(shared.IonosFilePathEnvVar, tmpFile.Name())
 
 	output := captureLog(func() {
-		cfg, loadErr := LoadFileConfigWithLogging()
+		cfg, loadErr := LoadFileConfigWithLogging(context.Background())
 		if loadErr == nil {
 			t.Error("expected error for unreadable file")
 		}
@@ -346,7 +347,7 @@ func TestLoadFileConfigWithLogging_NoFile(t *testing.T) {
 	t.Setenv(shared.IonosFilePathEnvVar, "/tmp/nonexistent-ionos-config-test-file")
 
 	output := captureLog(func() {
-		cfg, err := LoadFileConfigWithLogging()
+		cfg, err := LoadFileConfigWithLogging(context.Background())
 		if err == nil {
 			t.Error("expected error for nonexistent file")
 		}
@@ -387,7 +388,7 @@ environments:
 	t.Setenv(shared.IonosFilePathEnvVar, tmpFile.Name())
 
 	output := captureLog(func() {
-		cfg, loadErr := LoadFileConfigWithLogging()
+		cfg, loadErr := LoadFileConfigWithLogging(context.Background())
 		if loadErr != nil {
 			t.Errorf("unexpected error: %s", loadErr)
 		}

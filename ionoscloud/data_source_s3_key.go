@@ -52,7 +52,7 @@ func dataSourceObjectStorageKeyRead(ctx context.Context, d *schema.ResourceData,
 		return diagutil.ToDiags(d, fmt.Errorf("please provide the userID"), nil)
 	}
 	userID := userIDItf.(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover()
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -87,7 +87,7 @@ func dataSourceObjectStorageKeyRead(ctx context.Context, d *schema.ResourceData,
 		s3Key = (*s3Keys.Items)[0]
 	}
 
-	if err := setS3KeyIdAndProperties(&s3Key, d); err != nil {
+	if err := setS3KeyIdAndProperties(ctx, &s3Key, d); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
 

@@ -3,10 +3,10 @@ package inmemorydb
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/ionos-cloud/sdk-go-bundle/products/dbaas/inmemorydb/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
@@ -17,11 +17,13 @@ import (
 )
 
 // overrideClientEndpoint todo - after move to bundle, replace with generic function from fileConfig
-func (c *Client) overrideClientEndpoint(productName, location string) {
+//
+//nolint:unparam
+func (c *Client) overrideClientEndpoint(ctx context.Context, productName, location string) {
 	// whatever is set, at the end we need to check if the IONOS_API_URL_productname is set and use override the endpoint if yes
-	defer c.changeConfigURL(location)
+	defer c.changeConfigURL(ctx, location)
 	if os.Getenv(shared.IonosApiUrlEnvVar) != "" {
-		log.Printf("[DEBUG] InMemoryDB: endpoint from %s: %s", shared.IonosApiUrlEnvVar, os.Getenv(shared.IonosApiUrlEnvVar))
+		tflog.Debug(ctx, "InMemoryDB: endpoint from env", map[string]interface{}{"env": shared.IonosApiUrlEnvVar, "url": os.Getenv(shared.IonosApiUrlEnvVar)})
 		return
 	}
 	fileConfig := c.GetFileConfig()
@@ -34,7 +36,7 @@ func (c *Client) overrideClientEndpoint(productName, location string) {
 	}
 	endpoint := fileConfig.GetProductLocationOverrides(productName, location)
 	if endpoint == nil {
-		log.Printf("[WARN] Missing endpoint for %s in location %s", productName, location)
+		tflog.Warn(ctx, "missing endpoint", map[string]interface{}{"product": productName, "location": location})
 		return
 	}
 	config.Servers = shared.ServerConfigurations{
@@ -48,7 +50,7 @@ func (c *Client) overrideClientEndpoint(productName, location string) {
 
 // CreateReplicaSet sends a 'POST' request to the API to create a replica set.
 func (c *Client) CreateReplicaSet(ctx context.Context, replicaSet inmemorydb.ReplicaSetCreate, location string) (inmemorydb.ReplicaSetRead, *shared.APIResponse, error) {
-	c.overrideClientEndpoint(fileconfiguration.InMemoryDB, location)
+	c.overrideClientEndpoint(ctx, fileconfiguration.InMemoryDB, location)
 	replicaSetResponse, apiResponse, err := c.sdkClient.ReplicaSetApi.ReplicasetsPost(ctx).ReplicaSetCreate(replicaSet).Execute()
 	apiResponse.LogInfo()
 	return replicaSetResponse, apiResponse, err
@@ -63,7 +65,7 @@ func (c *Client) IsReplicaSetReady(ctx context.Context, d *schema.ResourceData) 
 		return false, fmt.Errorf("status check failed for InMemoryDB replica set with ID: %v, error: %w", replicaSetID, err)
 	}
 
-	log.Printf("[INFO] state of the InMemoryDB replica set with ID: %v is: %v", replicaSetID, replicaSet.Metadata.State)
+	tflog.Info(ctx, "InMemoryDB replica set state", map[string]interface{}{"replica_set_id": replicaSetID, "state": replicaSet.Metadata.State})
 	if utils.IsStateFailed(replicaSet.Metadata.State) {
 		return false, fmt.Errorf("replica set with ID: %v is in FAILED state", replicaSetID)
 	}
@@ -73,7 +75,7 @@ func (c *Client) IsReplicaSetReady(ctx context.Context, d *schema.ResourceData) 
 
 // DeleteReplicaSet sends a 'DELETE' request to the API to delete a replica set.
 func (c *Client) DeleteReplicaSet(ctx context.Context, replicaSetID, location string) (*shared.APIResponse, error) {
-	c.overrideClientEndpoint(fileconfiguration.InMemoryDB, location)
+	c.overrideClientEndpoint(ctx, fileconfiguration.InMemoryDB, location)
 	apiResponse, err := c.sdkClient.ReplicaSetApi.ReplicasetsDelete(ctx, replicaSetID).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
@@ -81,7 +83,7 @@ func (c *Client) DeleteReplicaSet(ctx context.Context, replicaSetID, location st
 
 // UpdateReplicaSet sends a 'PUT' request to the API to update a replica set.
 func (c *Client) UpdateReplicaSet(ctx context.Context, replicaSetID, location string, replicaSet inmemorydb.ReplicaSetEnsure) (inmemorydb.ReplicaSetRead, *shared.APIResponse, error) {
-	c.overrideClientEndpoint(fileconfiguration.InMemoryDB, location)
+	c.overrideClientEndpoint(ctx, fileconfiguration.InMemoryDB, location)
 	replicaSetResponse, apiResponse, err := c.sdkClient.ReplicaSetApi.ReplicasetsPut(ctx, replicaSetID).ReplicaSetEnsure(replicaSet).Execute()
 	apiResponse.LogInfo()
 	return replicaSetResponse, apiResponse, err
@@ -102,7 +104,7 @@ func (c *Client) IsReplicaSetDeleted(ctx context.Context, d *schema.ResourceData
 
 // GetReplicaSet sends a 'GET' request to the API to get a replica set.
 func (c *Client) GetReplicaSet(ctx context.Context, replicaSetID, location string) (inmemorydb.ReplicaSetRead, *shared.APIResponse, error) {
-	c.overrideClientEndpoint(fileconfiguration.InMemoryDB, location)
+	c.overrideClientEndpoint(ctx, fileconfiguration.InMemoryDB, location)
 	replicaSet, apiResponse, err := c.sdkClient.ReplicaSetApi.ReplicasetsFindById(ctx, replicaSetID).Execute()
 	apiResponse.LogInfo()
 	return replicaSet, apiResponse, err
@@ -110,7 +112,7 @@ func (c *Client) GetReplicaSet(ctx context.Context, replicaSetID, location strin
 
 // GetSnapshot sends a 'GET' request to the API to get a snapshot.
 func (c *Client) GetSnapshot(ctx context.Context, snapshotID, location string) (inmemorydb.SnapshotRead, *shared.APIResponse, error) {
-	c.overrideClientEndpoint(fileconfiguration.InMemoryDB, location)
+	c.overrideClientEndpoint(ctx, fileconfiguration.InMemoryDB, location)
 	snapshot, apiResponse, err := c.sdkClient.SnapshotApi.SnapshotsFindById(ctx, snapshotID).Execute()
 	apiResponse.LogInfo()
 	return snapshot, apiResponse, err
@@ -118,7 +120,7 @@ func (c *Client) GetSnapshot(ctx context.Context, snapshotID, location string) (
 
 // ListReplicaSets sends a 'GET' request to the API to get a list of replica sets.
 func (c *Client) ListReplicaSets(ctx context.Context, filterName, location string) (inmemorydb.ReplicaSetReadList, *shared.APIResponse, error) {
-	c.overrideClientEndpoint(fileconfiguration.InMemoryDB, location)
+	c.overrideClientEndpoint(ctx, fileconfiguration.InMemoryDB, location)
 	request := c.sdkClient.ReplicaSetApi.ReplicasetsGet(ctx)
 	if filterName != "" {
 		request = request.FilterName(filterName)

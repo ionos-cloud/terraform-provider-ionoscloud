@@ -3,9 +3,9 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -259,7 +259,7 @@ func resourceGPUServer() *schema.Resource {
 //nolint:gocyclo
 func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -299,7 +299,7 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta i
 
 	var volume *ionoscloud.VolumeProperties
 	if _, ok := d.GetOk("volume"); ok {
-		volume, err = getVolumeData(d, "volume.0.", constant.GpuType)
+		volume, err = getVolumeData(ctx, d, "volume.0.", constant.GpuType)
 		if err != nil {
 			return diagutil.ToDiags(d, err, nil)
 		}
@@ -359,8 +359,7 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta i
 			},
 		}
 		primaryNic = &(*server.Entities.Nics.Items)[0]
-		log.Printf("[DEBUG] dhcp nic after %t", *nic.Properties.Dhcp)
-		log.Printf("[DEBUG] primaryNic dhcp %t", *primaryNic.Properties.Dhcp)
+		tflog.Debug(ctx, "nic dhcp", map[string]interface{}{"nic_dhcp": *nic.Properties.Dhcp, "primary_nic_dhcp": *primaryNic.Properties.Dhcp})
 
 		var firewall ionoscloud.FirewallRule
 		if _, ok := d.GetOk("nic.0.firewall"); ok {
@@ -396,7 +395,7 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta i
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
 		if bundleclient.IsRequestFailed(errState) {
-			log.Printf("[DEBUG] failed to create createdServer resource")
+			tflog.Debug(ctx, "failed to create gpu server resource")
 			d.SetId("")
 		}
 		requestLocation, _ := apiResponse.SafeLocation()

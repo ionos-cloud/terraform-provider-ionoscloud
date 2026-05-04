@@ -3,13 +3,13 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -271,7 +271,7 @@ func checkDBaaSClusterImmutableFields(_ context.Context, diff *schema.ResourceDi
 }
 
 func resourceDbaasPgSqlClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
+	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(ctx, d.Get("location").(string))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -298,7 +298,7 @@ func resourceDbaasPgSqlClusterCreate(ctx context.Context, d *schema.ResourceData
 }
 
 func resourceDbaasPgSqlClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
+	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(ctx, d.Get("location").(string))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -313,7 +313,7 @@ func resourceDbaasPgSqlClusterRead(ctx context.Context, d *schema.ResourceData, 
 		return diagutil.ToDiags(d, fmt.Errorf("error while fetching dbaas cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	log.Printf("[INFO] Successfully retrieved cluster %s: %+v", d.Id(), cluster)
+	tflog.Info(ctx, "retrieved PgSQL cluster", map[string]interface{}{"cluster_id": d.Id()})
 
 	if err := dbaasService.SetPgSqlClusterData(d, cluster, false); err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -323,7 +323,7 @@ func resourceDbaasPgSqlClusterRead(ctx context.Context, d *schema.ResourceData, 
 }
 
 func resourceDbaasPgSqlClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
+	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(ctx, d.Get("location").(string))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -352,7 +352,7 @@ func resourceDbaasPgSqlClusterUpdate(ctx context.Context, d *schema.ResourceData
 }
 
 func resourceDbaasPgSqlClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(d.Get("location").(string))
+	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(ctx, d.Get("location").(string))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -388,7 +388,7 @@ func resourceDbaasPgSqlClusterImport(ctx context.Context, d *schema.ResourceData
 	if err := validateImportIDParts(parts); err != nil {
 		return nil, fmt.Errorf("failed validating import identifier %q: %w", importID, err)
 	}
-	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(ctx, location)
 	if err != nil {
 		return nil, err
 	}
@@ -405,7 +405,7 @@ func resourceDbaasPgSqlClusterImport(ctx context.Context, d *schema.ResourceData
 		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the import of dbaas cluster %q, error:%w", clusterId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	log.Printf("[INFO] dbaas cluster found: %+v", dbaasCluster)
+	tflog.Info(ctx, "PgSQL cluster imported", map[string]interface{}{"cluster_id": clusterId})
 
 	if err := dbaasService.SetPgSqlClusterData(d, dbaasCluster, false); err != nil {
 		return nil, diagutil.ToError(d, err, nil)

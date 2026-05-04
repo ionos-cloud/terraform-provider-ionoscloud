@@ -51,7 +51,7 @@ func resourceDatacenterNSGSelectionCreate(ctx context.Context, d *schema.Resourc
 	nsgID := d.Get("nsg_id").(string)
 	location := d.Get("location").(string)
 
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -70,7 +70,7 @@ func resourceDatacenterNSGSelectionRead(ctx context.Context, d *schema.ResourceD
 	nsgID := d.Get("nsg_id").(string)
 	location := d.Get("location").(string)
 
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -95,7 +95,7 @@ func resourceDatacenterNSGSelectionUpdate(ctx context.Context, d *schema.Resourc
 	dcID := d.Get("datacenter_id").(string)
 	location := d.Get("location").(string)
 
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -116,7 +116,7 @@ func resourceDatacenterNSGSelectionDelete(ctx context.Context, d *schema.Resourc
 	dcID := d.Get("datacenter_id").(string)
 	location := d.Get("location").(string)
 
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}

@@ -3,12 +3,12 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -101,7 +101,7 @@ func resourceNSGFirewallCreate(ctx context.Context, d *schema.ResourceData, meta
 	nsgID := d.Get("nsg_id").(string)
 	dcID := d.Get("datacenter_id").(string)
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -126,7 +126,7 @@ func resourceNSGFirewallCreate(ctx context.Context, d *schema.ResourceData, meta
 
 func resourceNSGFirewallRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	location := d.Get("location").(string)
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -137,7 +137,7 @@ func resourceNSGFirewallRead(ctx context.Context, d *schema.ResourceData, meta i
 
 	if err != nil {
 		if httpNotFound(apiResponse) {
-			log.Printf("[DEBUG] could not find firewall rule datacenter_id = %s nsg_id = %s with id = %s", d.Get("datacenter_id").(string), d.Get("nsg_id").(string), d.Id())
+			tflog.Debug(ctx, "nsg firewall rule not found", map[string]interface{}{"datacenter_id": d.Get("datacenter_id").(string), "nsg_id": d.Get("nsg_id").(string), "rule_id": d.Id()})
 			d.SetId("")
 			return nil
 		}
@@ -161,7 +161,7 @@ func resourceNSGFirewallUpdate(ctx context.Context, d *schema.ResourceData, meta
 	dcID := d.Get("datacenter_id").(string)
 	location := d.Get("location").(string)
 
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -187,7 +187,7 @@ func resourceNSGFirewallDelete(ctx context.Context, d *schema.ResourceData, meta
 	nsgID := d.Get("nsg_id").(string)
 	location := d.Get("location").(string)
 
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -232,7 +232,7 @@ func resourceNSGFirewallImport(ctx context.Context, d *schema.ResourceData, meta
 	nsgID := parts[1]
 	firewallID := parts[2]
 
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return nil, err
 	}

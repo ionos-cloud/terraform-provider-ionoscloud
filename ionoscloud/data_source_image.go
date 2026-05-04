@@ -3,9 +3,9 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
@@ -142,7 +142,7 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 	imgAlias := imgAliasVal.(string)
 	var results []ionoscloud.Image
 
-	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(location)
+	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -243,7 +243,7 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 	} else if len(results) > 1 {
 		for _, result := range results {
 			if result.Properties != nil {
-				log.Printf("[DEBUG] found image %s in location %s", *result.Properties.Name, *result.Properties.Location)
+				tflog.Debug(ctx, "found candidate image", map[string]interface{}{"name": *result.Properties.Name, "location": *result.Properties.Location})
 			}
 		}
 		return diagutil.ToDiags(d, fmt.Errorf("more than one image found, enable debug to learn more. Criteria used name = %s, type = %s, location = %s, version = %s, cloudInit = %s, imageAlias = %s", name, imageType, location, version, cloudInit, imgAlias), nil)
