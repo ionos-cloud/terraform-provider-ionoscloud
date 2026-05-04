@@ -154,7 +154,7 @@ func resourceIPBlockRead(ctx context.Context, d *schema.ResourceData, meta any) 
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching an ip block: %w", err), nil)
 	}
 
-	tflog.Info(ctx, "ip block fetched", map[string]interface{}{"ips": strings.Join(*ipBlock.Properties.Ips, ",")})
+	tflog.Info(ctx, "ip block fetched", map[string]any{"ips": strings.Join(*ipBlock.Properties.Ips, ",")})
 
 	if err := IpBlockSetData(d, &ipBlock); err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -245,7 +245,7 @@ func resourceIpBlockImporter(ctx context.Context, d *schema.ResourceData, meta a
 
 	}
 
-	tflog.Info(ctx, "ipBlock found", map[string]interface{}{"id": *ipBlock.Id})
+	tflog.Info(ctx, "ipBlock found", map[string]any{"id": *ipBlock.Id})
 
 	d.SetId(*ipBlock.Id)
 

@@ -152,7 +152,7 @@ func resourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta any)
 
 	if err != nil {
 		if httpNotFound(apiResponse) {
-			tflog.Debug(ctx, "firewall rule not found", map[string]interface{}{"datacenter_id": d.Get("datacenter_id").(string), "server_id": d.Get("server_id").(string), "rule_id": d.Id()})
+			tflog.Debug(ctx, "firewall rule not found", map[string]any{"datacenter_id": d.Get("datacenter_id").(string), "server_id": d.Get("server_id").(string), "rule_id": d.Id()})
 			d.SetId("")
 			return nil
 		}

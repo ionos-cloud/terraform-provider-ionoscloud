@@ -124,7 +124,7 @@ func resourceDatacenterCreate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 	d.SetId(*createdDatacenter.Id)
 
-	tflog.Info(ctx, "datacenter created", map[string]interface{}{"resource_id": d.Id()})
+	tflog.Info(ctx, "datacenter created", map[string]any{"resource_id": d.Id()})
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
 		if bundleclient.IsRequestFailed(errState) {
@@ -267,7 +267,7 @@ func resourceDatacenterImport(ctx context.Context, d *schema.ResourceData, meta 
 		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while retrieving the datacenter: %w", err), nil)
 	}
 
-	tflog.Info(ctx, "datacenter imported", map[string]interface{}{"resource_id": d.Id()})
+	tflog.Info(ctx, "datacenter imported", map[string]any{"resource_id": d.Id()})
 
 	if err := setDatacenterData(d, &datacenter); err != nil {
 		return nil, diagutil.ToError(d, err, nil)

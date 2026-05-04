@@ -263,7 +263,7 @@ func mariaDBClusterImport(ctx context.Context, d *schema.ResourceData, meta any)
 		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to import MariaDB cluster with ID: %v, error: %w", clusterID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	tflog.Info(ctx, "MariaDB cluster imported", map[string]interface{}{"cluster_id": clusterID})
+	tflog.Info(ctx, "MariaDB cluster imported", map[string]any{"cluster_id": clusterID})
 
 	if err := d.Set("location", location); err != nil {
 		return nil, utils.GenerateSetError("MariaDB cluster", "location", err)
@@ -286,7 +286,7 @@ func mariaDBClusterRead(ctx context.Context, d *schema.ResourceData, meta any) d
 		}
 		return diagutil.ToDiags(d, fmt.Errorf("error while fetching MariaDB cluster with ID: %v, error: %w", clusterID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
-	tflog.Info(ctx, "retrieved MariaDB cluster", map[string]interface{}{"cluster_id": clusterID})
+	tflog.Info(ctx, "retrieved MariaDB cluster", map[string]any{"cluster_id": clusterID})
 
 	if err := client.SetMariaDBClusterData(d, cluster); err != nil {
 		return diagutil.ToDiags(d, err, nil)

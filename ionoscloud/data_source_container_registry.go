@@ -164,7 +164,7 @@ func dataSourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData
 		if nameOk {
 			partialMatch := d.Get("partial_match").(bool)
 
-			tflog.Info(ctx, "searching container registry by name", map[string]interface{}{"partial_match": partialMatch, "name": name})
+			tflog.Info(ctx, "searching container registry by name", map[string]any{"partial_match": partialMatch, "name": name})
 
 			if registries.Items != nil && len(registries.Items) > 0 {
 				var registriesByName []cr.RegistryResponse

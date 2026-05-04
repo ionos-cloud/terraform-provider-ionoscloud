@@ -116,13 +116,13 @@ func (c *Client) UploadObject(ctx context.Context, data *ObjectResourceModel) (*
 		if !data.Content.IsNull() {
 			err = os.Remove(body.Name())
 			if err != nil {
-				tflog.Warn(ctx, "failed to remove temp file", map[string]interface{}{"error": err.Error()})
+				tflog.Warn(ctx, "failed to remove temp file", map[string]any{"error": err.Error()})
 			}
 		}
 		// Close the file
 		err = body.Close()
 		if err != nil {
-			tflog.Warn(ctx, "failed to close body", map[string]interface{}{"error": err.Error()})
+			tflog.Warn(ctx, "failed to close body", map[string]any{"error": err.Error()})
 		}
 	}()
 

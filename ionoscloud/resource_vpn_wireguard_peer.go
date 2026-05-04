@@ -118,7 +118,7 @@ func resourceVpnWireguardPeerRead(ctx context.Context, d *schema.ResourceData, m
 	peer, apiResponse, err := client.GetWireguardPeerByID(ctx, gatewayID, d.Id(), location)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
-			tflog.Debug(ctx, "wireguard peer not found", map[string]interface{}{"gateway_id": gatewayID, "peer_id": d.Id()})
+			tflog.Debug(ctx, "wireguard peer not found", map[string]any{"gateway_id": gatewayID, "peer_id": d.Id()})
 			d.SetId("")
 			return nil
 		}
@@ -157,7 +157,7 @@ func resourceVpnWireguardPeerDelete(ctx context.Context, d *schema.ResourceData,
 		return diagutil.ToDiags(d, fmt.Errorf("deleting %w", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String()})
 	}
 
-	tflog.Info(ctx, "successfully deleted WireGuard Peer", map[string]interface{}{"peer_id": d.Id()})
+	tflog.Info(ctx, "successfully deleted WireGuard Peer", map[string]any{"peer_id": d.Id()})
 
 	d.SetId("")
 	return nil

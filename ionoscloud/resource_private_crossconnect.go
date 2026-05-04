@@ -124,7 +124,7 @@ func resourcePrivateCrossConnectCreate(ctx context.Context, d *schema.ResourceDa
 	}
 
 	if descVal, descOk := d.GetOk("description"); descOk {
-		tflog.Info(ctx, "setting PCC description", map[string]interface{}{"description": descVal.(string)})
+		tflog.Info(ctx, "setting PCC description", map[string]any{"description": descVal.(string)})
 		description := descVal.(string)
 		pcc.Properties.Description = &description
 	}
@@ -138,7 +138,7 @@ func resourcePrivateCrossConnectCreate(ctx context.Context, d *schema.ResourceDa
 	}
 
 	d.SetId(*rsp.Id)
-	tflog.Info(ctx, "created PCC", map[string]interface{}{"pcc_id": d.Id()})
+	tflog.Info(ctx, "created PCC", map[string]any{"pcc_id": d.Id()})
 
 	if diags := waitForPCCToBeReady(ctx, d, client); diags != nil {
 		return diags
@@ -164,7 +164,7 @@ func resourcePrivateCrossConnectRead(ctx context.Context, d *schema.ResourceData
 		return diagutil.ToDiags(d, fmt.Errorf("error while fetching PCC: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	tflog.Info(ctx, "retrieved PCC", map[string]interface{}{"pcc_id": d.Id()})
+	tflog.Info(ctx, "retrieved PCC", map[string]any{"pcc_id": d.Id()})
 
 	if err = setPccDataSource(d, &pcc); err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -187,16 +187,16 @@ func resourcePrivateCrossConnectUpdate(ctx context.Context, d *schema.ResourceDa
 
 	if d.HasChange("name") {
 		oldName, newName := d.GetChange("name")
-		tflog.Info(ctx, "PCC name changed", map[string]interface{}{"old_name": oldName, "new_name": newName})
+		tflog.Info(ctx, "PCC name changed", map[string]any{"old_name": oldName, "new_name": newName})
 		name := newName.(string)
 		request.Properties.Name = &name
 	}
 
-	tflog.Info(ctx, "attempting update PCC", map[string]interface{}{"pcc_id": d.Id()})
+	tflog.Info(ctx, "attempting update PCC", map[string]any{"pcc_id": d.Id()})
 
 	if d.HasChange("description") {
 		oldDesc, newDesc := d.GetChange("description")
-		tflog.Info(ctx, "PCC description changed", map[string]interface{}{"old_description": oldDesc, "new_description": newDesc})
+		tflog.Info(ctx, "PCC description changed", map[string]any{"old_description": oldDesc, "new_description": newDesc})
 		descriprion := newDesc.(string)
 		if newDesc != nil {
 			request.Properties.Description = &descriprion
@@ -239,7 +239,7 @@ func resourcePrivateCrossConnectDelete(ctx context.Context, d *schema.ResourceDa
 	}
 
 	for {
-		tflog.Info(ctx, "waiting for PCC to be deleted", map[string]interface{}{"pcc_id": d.Id()})
+		tflog.Info(ctx, "waiting for PCC to be deleted", map[string]any{"pcc_id": d.Id()})
 
 		pccDeleted, dsErr := privateCrossConnectDeleted(ctx, client, d)
 
@@ -248,7 +248,7 @@ func resourcePrivateCrossConnectDelete(ctx context.Context, d *schema.ResourceDa
 		}
 
 		if pccDeleted {
-			tflog.Info(ctx, "successfully deleted PCC", map[string]interface{}{"pcc_id": d.Id()})
+			tflog.Info(ctx, "successfully deleted PCC", map[string]any{"pcc_id": d.Id()})
 			break
 		}
 
@@ -293,7 +293,7 @@ func resourcePrivateCrossConnectImport(ctx context.Context, d *schema.ResourceDa
 		return nil, diagutil.ToError(d, fmt.Errorf("unable to retrieve PCC, error: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	tflog.Info(ctx, "PCC found", map[string]interface{}{"pcc_id": *pcc.Id})
+	tflog.Info(ctx, "PCC found", map[string]any{"pcc_id": *pcc.Id})
 
 	d.SetId(*pcc.Id)
 	if err := d.Set("name", *pcc.Properties.Name); err != nil {
@@ -310,7 +310,7 @@ func resourcePrivateCrossConnectImport(ctx context.Context, d *schema.ResourceDa
 		return nil, diagutil.ToError(d, err, nil)
 	}
 
-	tflog.Info(ctx, "importing PCC", map[string]interface{}{"pcc_id": d.Id()})
+	tflog.Info(ctx, "importing PCC", map[string]any{"pcc_id": d.Id()})
 
 	return []*schema.ResourceData{d}, nil
 }
@@ -340,7 +340,7 @@ func privateCrossConnectDeleted(ctx context.Context, client *ionoscloud.APIClien
 
 func waitForPCCToBeReady(ctx context.Context, d *schema.ResourceData, client *ionoscloud.APIClient) diag.Diagnostics {
 	for {
-		tflog.Info(ctx, "waiting for PCC to be ready", map[string]interface{}{"pcc_id": d.Id()})
+		tflog.Info(ctx, "waiting for PCC to be ready", map[string]any{"pcc_id": d.Id()})
 
 		pccReady, rsErr := privateCrossConnectReady(ctx, client, d)
 
@@ -349,7 +349,7 @@ func waitForPCCToBeReady(ctx context.Context, d *schema.ResourceData, client *io
 		}
 
 		if pccReady {
-			tflog.Info(ctx, "PCC ready", map[string]interface{}{"pcc_id": d.Id()})
+			tflog.Info(ctx, "PCC ready", map[string]any{"pcc_id": d.Id()})
 			break
 		}
 

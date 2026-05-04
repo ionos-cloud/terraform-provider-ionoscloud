@@ -115,7 +115,7 @@ func (c *PsqlClient) IsClusterReady(ctx context.Context, d *schema.ResourceData)
 	if cluster.Metadata == nil || cluster.Metadata.State == nil {
 		return false, fmt.Errorf("cluster metadata or state is empty for id %s", clusterId)
 	}
-	tflog.Info(ctx, "psql cluster state", map[string]interface{}{"cluster_id": clusterId, "state": string(*cluster.Metadata.State)})
+	tflog.Info(ctx, "psql cluster state", map[string]any{"cluster_id": clusterId, "state": string(*cluster.Metadata.State)})
 	// todo - add back after DB-4696 is fixed
 	// if utils.IsStateFailed(string(*cluster.Metadata.State)) {
 	// 	return false, fmt.Errorf("cluster %s is in a failed state", d.Id())
@@ -144,7 +144,7 @@ func (c *MongoClient) IsClusterReady(ctx context.Context, d *schema.ResourceData
 		return false, fmt.Errorf("cluster metadata or state is empty for id %s", d.Id())
 	}
 
-	tflog.Info(ctx, "mongo cluster state", map[string]interface{}{"cluster_id": d.Id(), "state": string(*cluster.Metadata.State)})
+	tflog.Info(ctx, "mongo cluster state", map[string]any{"cluster_id": d.Id(), "state": string(*cluster.Metadata.State)})
 	if utils.IsStateFailed(string(*cluster.Metadata.State)) {
 		return false, fmt.Errorf("cluster %s is in a failed state", d.Id())
 	}

@@ -202,7 +202,7 @@ func resourceVpnWireguardGatewayDelete(ctx context.Context, d *schema.ResourceDa
 		return diagutil.ToDiags(d, fmt.Errorf("while waiting for the WireGuard Gateway to be deleted: %w", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String()})
 	}
 
-	tflog.Info(ctx, "successfully deleted Wireguard Gateway", map[string]interface{}{"gateway_id": d.Id()})
+	tflog.Info(ctx, "successfully deleted Wireguard Gateway", map[string]any{"gateway_id": d.Id()})
 	d.SetId("")
 
 	return nil

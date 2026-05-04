@@ -252,7 +252,7 @@ func resourceNetworkLoadBalancerForwardingRuleCreate(ctx context.Context, d *sch
 			return diags
 		}
 		if len(targets) > 0 {
-			tflog.Info(ctx, "setting nlb forwarding rule targets", map[string]interface{}{"target_count": len(targets)})
+			tflog.Info(ctx, "setting nlb forwarding rule targets", map[string]any{"target_count": len(targets)})
 			networkLoadBalancerForwardingRule.Properties.Targets = &targets
 		}
 	}
@@ -366,14 +366,14 @@ func resourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *schem
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		tflog.Info(ctx, "nlb forwarding rule not found", map[string]interface{}{"rule_id": d.Id(), "error": err.Error()})
+		tflog.Info(ctx, "nlb forwarding rule not found", map[string]any{"rule_id": d.Id(), "error": err.Error()})
 		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil
 		}
 	}
 
-	tflog.Info(ctx, "retrieved nlb forwarding rule", map[string]interface{}{"rule_id": d.Id()})
+	tflog.Info(ctx, "retrieved nlb forwarding rule", map[string]any{"rule_id": d.Id()})
 
 	if err := setNetworkLoadBalancerForwardingRuleData(d, &networkLoadBalancerForwardingRule); err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -474,7 +474,7 @@ func resourceNetworkLoadBalancerForwardingRuleUpdate(ctx context.Context, d *sch
 		if diags != nil {
 			return diags
 		}
-		tflog.Info(ctx, "nlb forwarding rule targets changed", map[string]interface{}{"old": oldTargets, "new": newTargets})
+		tflog.Info(ctx, "nlb forwarding rule targets changed", map[string]any{"old": oldTargets, "new": newTargets})
 		request.Properties.Targets = &targets
 	}
 	_, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesPatch(ctx, dcId, nlbID, d.Id()).NetworkLoadBalancerForwardingRuleProperties(*request.Properties).Execute()
@@ -550,7 +550,7 @@ func resourceNetworLoadBalancerForwardingRuleImport(ctx context.Context, d *sche
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		tflog.Info(ctx, "nlb forwarding rule not found on import", map[string]interface{}{"rule_id": networkLoadBalancerRuleId, "error": err.Error()})
+		tflog.Info(ctx, "nlb forwarding rule not found on import", map[string]any{"rule_id": networkLoadBalancerRuleId, "error": err.Error()})
 		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil, diagutil.ToError(d, fmt.Errorf("unable to find network load balancer rule %q", networkLoadBalancerRuleId), nil)

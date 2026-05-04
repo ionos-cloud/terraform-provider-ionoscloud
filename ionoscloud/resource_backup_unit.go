@@ -59,7 +59,7 @@ func resourceBackupUnit() *schema.Resource {
 	}
 }
 
-func resourceBackupUnitCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceBackupUnitCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return diag.FromErr(err)
@@ -86,7 +86,7 @@ func resourceBackupUnitCreate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	d.SetId(*createdBackupUnit.Id)
-	tflog.Info(ctx, "created backup unit", map[string]interface{}{"backup_unit_id": d.Id()})
+	tflog.Info(ctx, "created backup unit", map[string]any{"backup_unit_id": d.Id()})
 
 	if diags := waitForUnitToBeReady(ctx, d, client); diags != nil {
 		return diags
@@ -95,7 +95,7 @@ func resourceBackupUnitCreate(ctx context.Context, d *schema.ResourceData, meta 
 	return resourceBackupUnitRead(ctx, d, meta)
 }
 
-func resourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return diag.FromErr(err)
@@ -119,18 +119,18 @@ func resourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta in
 		return diagutil.ToDiags(d, fmt.Errorf("error while fetching contract resources for backup unit: %w", cErr), &diagutil.ErrorContext{StatusCode: contractApiResponse.SafeStatusCode()})
 	}
 
-	tflog.Info(ctx, "retrieved contract resource for backup unit", map[string]interface{}{"backup_unit_id": d.Id()})
+	tflog.Info(ctx, "retrieved contract resource for backup unit", map[string]any{"backup_unit_id": d.Id()})
 
 	if err := setBackupUnitData(d, &backupUnit, &contractResources); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
 
-	tflog.Info(ctx, "retrieved backup unit", map[string]interface{}{"backup_unit_id": d.Id()})
+	tflog.Info(ctx, "retrieved backup unit", map[string]any{"backup_unit_id": d.Id()})
 
 	return nil
 }
 
-func resourceBackupUnitUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceBackupUnitUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return diag.FromErr(err)
@@ -139,11 +139,11 @@ func resourceBackupUnitUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	request := ionoscloud.BackupUnit{}
 	request.Properties = &ionoscloud.BackupUnitProperties{}
 
-	tflog.Info(ctx, "attempting backup unit update", map[string]interface{}{"backup_unit_id": d.Id()})
+	tflog.Info(ctx, "attempting backup unit update", map[string]any{"backup_unit_id": d.Id()})
 	oldEmail, newEmail := d.GetChange("email")
 	emailStr := oldEmail.(string)
 	if d.HasChange("email") {
-		tflog.Info(ctx, "backup unit email changed", map[string]interface{}{"old": oldEmail, "new": newEmail})
+		tflog.Info(ctx, "backup unit email changed", map[string]any{"old": oldEmail, "new": newEmail})
 		emailStr = newEmail.(string)
 	}
 	request.Properties.Email = &emailStr
@@ -182,7 +182,7 @@ func resourceBackupUnitUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 func waitForUnitToBeReady(ctx context.Context, d *schema.ResourceData, client *ionoscloud.APIClient) diag.Diagnostics {
 	for {
-		tflog.Info(ctx, "waiting for backup unit to be ready", map[string]interface{}{"backup_unit_id": d.Id()})
+		tflog.Info(ctx, "waiting for backup unit to be ready", map[string]any{"backup_unit_id": d.Id()})
 
 		backupUnitReady, rsErr := backupUnitReady(client, d, ctx)
 
@@ -191,7 +191,7 @@ func waitForUnitToBeReady(ctx context.Context, d *schema.ResourceData, client *i
 		}
 
 		if backupUnitReady {
-			tflog.Info(ctx, "backup unit ready", map[string]interface{}{"backup_unit_id": d.Id()})
+			tflog.Info(ctx, "backup unit ready", map[string]any{"backup_unit_id": d.Id()})
 			break
 		}
 
@@ -206,7 +206,7 @@ func waitForUnitToBeReady(ctx context.Context, d *schema.ResourceData, client *i
 	return nil
 }
 
-func resourceBackupUnitDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceBackupUnitDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return diag.FromErr(err)
@@ -224,7 +224,7 @@ func resourceBackupUnitDelete(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	for {
-		tflog.Info(ctx, "waiting for backup unit to be deleted", map[string]interface{}{"backup_unit_id": d.Id()})
+		tflog.Info(ctx, "waiting for backup unit to be deleted", map[string]any{"backup_unit_id": d.Id()})
 
 		backupUnitDeleted, dsErr := backupUnitDeleted(client, d, ctx)
 
@@ -233,7 +233,7 @@ func resourceBackupUnitDelete(ctx context.Context, d *schema.ResourceData, meta 
 		}
 
 		if backupUnitDeleted {
-			tflog.Info(ctx, "successfully deleted backup unit", map[string]interface{}{"backup_unit_id": d.Id()})
+			tflog.Info(ctx, "successfully deleted backup unit", map[string]any{"backup_unit_id": d.Id()})
 			break
 		}
 
@@ -249,7 +249,7 @@ func resourceBackupUnitDelete(ctx context.Context, d *schema.ResourceData, meta 
 	return nil
 }
 
-func resourceBackupUnitImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceBackupUnitImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return nil, err
@@ -268,7 +268,7 @@ func resourceBackupUnitImport(ctx context.Context, d *schema.ResourceData, meta 
 		return nil, diagutil.ToError(d, fmt.Errorf("unable to retrieve Backup Unit: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	tflog.Info(ctx, "backup unit imported", map[string]interface{}{"backup_unit_id": buId})
+	tflog.Info(ctx, "backup unit imported", map[string]any{"backup_unit_id": buId})
 
 	contractResources, apiResponse, cErr := client.ContractResourcesApi.ContractsGet(ctx).Execute()
 	logApiRequestTime(apiResponse)

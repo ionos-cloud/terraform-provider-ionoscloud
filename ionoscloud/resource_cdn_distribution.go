@@ -170,7 +170,7 @@ func resourceCDNDistributionCreate(ctx context.Context, d *schema.ResourceData, 
 		return diagutil.ToDiags(d, fmt.Errorf("error occurred while checking the status for the CDN Distribution: %w", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String()})
 	}
 
-	tflog.Info(ctx, "CDN distribution created", map[string]interface{}{"distribution_id": d.Id()})
+	tflog.Info(ctx, "CDN distribution created", map[string]any{"distribution_id": d.Id()})
 
 	return resourceCDNDistributionRead(ctx, d, meta)
 }
@@ -188,7 +188,7 @@ func resourceCDNDistributionRead(ctx context.Context, d *schema.ResourceData, me
 		return diagutil.ToDiags(d, fmt.Errorf("error while fetching CDN distribution: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	tflog.Info(ctx, "retrieved CDN distribution", map[string]interface{}{"distribution_id": d.Id()})
+	tflog.Info(ctx, "retrieved CDN distribution", map[string]any{"distribution_id": d.Id()})
 
 	if err := cdnService.SetDistributionData(d, distribution); err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -262,7 +262,7 @@ func resourceCDNDistributionImport(ctx context.Context, d *schema.ResourceData, 
 		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the import of CDN distribution %q, error:%w", distributionID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	tflog.Info(ctx, "CDN distribution imported", map[string]interface{}{"distribution_id": distributionID})
+	tflog.Info(ctx, "CDN distribution imported", map[string]any{"distribution_id": distributionID})
 
 	if err := cdnService.SetDistributionData(d, distribution); err != nil {
 		return nil, diagutil.ToError(d, err, nil)

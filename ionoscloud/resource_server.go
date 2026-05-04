@@ -672,7 +672,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta any)
 				firstNicIps := foundNicProps.Ips
 				if firstNicIps != nil &&
 					len(*firstNicIps) > 0 {
-					tflog.Debug(ctx, "setting primary_ip", map[string]interface{}{"primary_ip": (*firstNicIps)[0]})
+					tflog.Debug(ctx, "setting primary_ip", map[string]any{"primary_ip": (*firstNicIps)[0]})
 					if err := d.Set("primary_ip", (*firstNicIps)[0]); err != nil {
 						return diagutil.ToDiags(d, utils.GenerateSetError("ionoscloud_server", "primary_ip", err), nil)
 					}
@@ -745,7 +745,7 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta any) d
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		if httpNotFound(apiResponse) {
-			tflog.Debug(ctx, "cannot find server by id", map[string]interface{}{"server_id": serverId})
+			tflog.Debug(ctx, "cannot find server by id", map[string]any{"server_id": serverId})
 			d.SetId("")
 			return nil
 		}
@@ -1047,7 +1047,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta any)
 				}
 			}
 			mProp, _ := json.Marshal(nicProperties)
-			tflog.Debug(ctx, "updating nic properties", map[string]interface{}{"properties": string(mProp)})
+			tflog.Debug(ctx, "updating nic properties", map[string]any{"properties": string(mProp)})
 			var createdNic *ionoscloud.Nic
 			if createNic {
 				nic.Properties = &nicProperties
@@ -1141,7 +1141,7 @@ func deleteInlineVolumes(ctx context.Context, d *schema.ResourceData, meta any, 
 		logApiRequestTime(apiResponse)
 		if err != nil {
 			if apiResponse.HttpNotFound() {
-				tflog.Info(ctx, "volume not found during deletion", map[string]interface{}{"volume_id": volumeId.(string), "datacenter_id": dcId, "server_id": d.Id()})
+				tflog.Info(ctx, "volume not found during deletion", map[string]any{"volume_id": volumeId.(string), "datacenter_id": dcId, "server_id": d.Id()})
 				continue
 			}
 			requestLocation, _ := apiResponse.SafeLocation()
@@ -1251,7 +1251,7 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta any)
 				if *nic.Id == primaryNicId {
 					primaryNic = nic
 					if primaryNic.Properties != nil && *nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
-						tflog.Debug(ctx, "setting primary_ip", map[string]interface{}{"primary_ip": (*primaryNic.Properties.Ips)[0]})
+						tflog.Debug(ctx, "setting primary_ip", map[string]any{"primary_ip": (*primaryNic.Properties.Ips)[0]})
 						if err := d.Set("primary_ip", (*primaryNic.Properties.Ips)[0]); err != nil {
 							return nil, diagutil.ToError(d, fmt.Errorf("error while setting primary ip: %w", err), nil)
 						}
@@ -1531,7 +1531,7 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 			logApiRequestTime(apiResponse)
 			if err != nil {
 				if apiResponse.HttpNotFound() {
-					tflog.Info(ctx, "inline volume not found", map[string]interface{}{"volume_id": volumeId.(string), "datacenter_id": datacenterId, "server_id": d.Id()})
+					tflog.Info(ctx, "inline volume not found", map[string]any{"volume_id": volumeId.(string), "datacenter_id": datacenterId, "server_id": d.Id()})
 					continue
 				}
 				return fmt.Errorf("error retrieving inline volume %w", err)
@@ -1563,7 +1563,7 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 		if err != nil {
 			// fixes #467
 			if apiResponse.HttpNotFound() {
-				tflog.Debug(ctx, "primary nic not found, clearing primary_nic/primary_ip/nic", map[string]interface{}{"nic_id": nicId})
+				tflog.Debug(ctx, "primary nic not found, clearing primary_nic/primary_ip/nic", map[string]any{"nic_id": nicId})
 				if err := d.Set("primary_nic", ""); err != nil {
 					return err
 				}

@@ -226,14 +226,14 @@ func resourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, met
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		tflog.Info(ctx, "nat gateway rule not found", map[string]interface{}{"rule_id": d.Id(), "error": err.Error()})
+		tflog.Info(ctx, "nat gateway rule not found", map[string]any{"rule_id": d.Id(), "error": err.Error()})
 		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil
 		}
 	}
 
-	tflog.Info(ctx, "retrieved nat gateway rule", map[string]interface{}{"rule_id": d.Id()})
+	tflog.Info(ctx, "retrieved nat gateway rule", map[string]any{"rule_id": d.Id()})
 
 	if err := setNatGatewayRuleData(d, &natGatewayRule); err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -399,7 +399,7 @@ func resourceNatGatewayRuleImport(ctx context.Context, d *schema.ResourceData, m
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		tflog.Info(ctx, "nat gateway rule not found on import", map[string]interface{}{"rule_id": natGatewayRuleId, "error": err.Error()})
+		tflog.Info(ctx, "nat gateway rule not found on import", map[string]any{"rule_id": natGatewayRuleId, "error": err.Error()})
 		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil, diagutil.ToError(d, fmt.Errorf("unable to find nat gateway rule %q", natGatewayRuleId), nil)

@@ -122,7 +122,7 @@ func dataSourceApplicationLoadBalancerRead(ctx context.Context, d *schema.Resour
 
 	if idOk {
 		/* search by ID */
-		tflog.Info(ctx, "searching application load balancer by id", map[string]interface{}{"id": id})
+		tflog.Info(ctx, "searching application load balancer by id", map[string]any{"id": id})
 		applicationLoadBalancer, apiResponse, err = client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFindByApplicationLoadBalancerId(ctx, datacenterId, id).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
@@ -134,7 +134,7 @@ func dataSourceApplicationLoadBalancerRead(ctx context.Context, d *schema.Resour
 
 		partialMatch := d.Get("partial_match").(bool)
 
-		tflog.Info(ctx, "searching application load balancer by name", map[string]interface{}{"partial_match": partialMatch, "name": name})
+		tflog.Info(ctx, "searching application load balancer by name", map[string]any{"partial_match": partialMatch, "name": name})
 
 		if partialMatch {
 			applicationLoadBalancers, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersGet(ctx, datacenterId).Depth(1).Filter("name", name).Execute()

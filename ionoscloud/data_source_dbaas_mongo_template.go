@@ -64,7 +64,7 @@ func dataSourceDbassMongoTemplate() *schema.Resource {
 	}
 }
 
-func dataSourceDbassMongoTemplateRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceDbassMongoTemplateRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewMongoClient(ctx, "")
 	if err != nil {
 		return diag.FromErr(err)
@@ -113,7 +113,7 @@ func dataSourceDbassMongoTemplateRead(ctx context.Context, d *schema.ResourceDat
 // matchesName checks if a template has a specific name. allows for partial matching if partialMatch is true
 func matchesName(ctx context.Context, template mongo.TemplateResponse, name string, partialMatch bool) bool {
 	if template.Properties == nil || template.Properties.Name == nil {
-		tflog.Warn(ctx, "template missing properties or name", map[string]interface{}{"template_id": *template.Id})
+		tflog.Warn(ctx, "template missing properties or name", map[string]any{"template_id": *template.Id})
 		return false
 	}
 

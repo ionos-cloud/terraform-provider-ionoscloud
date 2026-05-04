@@ -130,7 +130,7 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 			}
 		}
 		if datacenter.Properties != nil {
-			tflog.Info(ctx, "got datacenter", map[string]interface{}{"name": *datacenter.Properties.Name, "location": *datacenter.Properties.Location})
+			tflog.Info(ctx, "got datacenter", map[string]any{"name": *datacenter.Properties.Name, "location": *datacenter.Properties.Location})
 		}
 
 	} else {

@@ -54,7 +54,7 @@ func resourceS3Key() *schema.Resource {
 	}
 }
 
-func resourceS3KeyCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceS3KeyCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return diag.FromErr(err)
@@ -76,7 +76,7 @@ func resourceS3KeyCreate(ctx context.Context, d *schema.ResourceData, meta inter
 		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
-	tflog.Info(ctx, "created Object Storage key", map[string]interface{}{"key_id": d.Id()})
+	tflog.Info(ctx, "created Object Storage key", map[string]any{"key_id": d.Id()})
 
 	active := d.Get("active").(bool)
 	s3Key := ionoscloud.S3Key{
@@ -84,7 +84,7 @@ func resourceS3KeyCreate(ctx context.Context, d *schema.ResourceData, meta inter
 			Active: &active,
 		},
 	}
-	tflog.Info(ctx, "setting S3 key active status", map[string]interface{}{"active": active})
+	tflog.Info(ctx, "setting S3 key active status", map[string]any{"active": active})
 	_, apiResponse, err = client.UserS3KeysApi.UmUsersS3keysPut(ctx, userId, keyId).S3Key(s3Key).Depth(1).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
@@ -122,7 +122,7 @@ func createS3KeyWithRetry(ctx context.Context, d *schema.ResourceData, meta any)
 		}
 
 		if isS3KeyPrivilegeError(ctx, err) {
-			tflog.Info(ctx, "retrying S3 key creation due to privilege error", map[string]interface{}{"error": err.Error()})
+			tflog.Info(ctx, "retrying S3 key creation due to privilege error", map[string]any{"error": err.Error()})
 			return retry.RetryableError(err)
 		}
 
@@ -137,7 +137,7 @@ func createS3KeyWithRetry(ctx context.Context, d *schema.ResourceData, meta any)
 	return s3Key, apiResponse, nil
 }
 
-func resourceS3KeyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceS3KeyRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return diag.FromErr(err)
@@ -156,10 +156,10 @@ func resourceS3KeyRead(ctx context.Context, d *schema.ResourceData, meta interfa
 		return diagutil.ToDiags(d, fmt.Errorf("error while reading Object Storage key: %w, %+v", err, s3Key), nil)
 	}
 
-	tflog.Info(ctx, "retrieved Object Storage key", map[string]interface{}{"key_id": *s3Key.Id})
+	tflog.Info(ctx, "retrieved Object Storage key", map[string]any{"key_id": *s3Key.Id})
 
 	if s3Key.HasProperties() && s3Key.Properties.HasActive() {
-		tflog.Info(ctx, "Object Storage key status", map[string]interface{}{"active": *s3Key.Properties.Active})
+		tflog.Info(ctx, "Object Storage key status", map[string]any{"active": *s3Key.Properties.Active})
 	}
 
 	if err := setS3KeyIdAndProperties(ctx, &s3Key, d); err != nil {
@@ -169,7 +169,7 @@ func resourceS3KeyRead(ctx context.Context, d *schema.ResourceData, meta interfa
 	return nil
 }
 
-func resourceS3KeyUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceS3KeyUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return diag.FromErr(err)
@@ -178,10 +178,10 @@ func resourceS3KeyUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 	request := ionoscloud.S3Key{}
 	request.Properties = &ionoscloud.S3KeyProperties{}
 
-	tflog.Info(ctx, "attempting to update Object Storage key", map[string]interface{}{"key_id": d.Id()})
+	tflog.Info(ctx, "attempting to update Object Storage key", map[string]any{"key_id": d.Id()})
 
 	newActiveSetting := d.Get("active")
-	tflog.Info(ctx, "Object Storage key active setting changed", map[string]interface{}{"active": newActiveSetting})
+	tflog.Info(ctx, "Object Storage key active setting changed", map[string]any{"active": newActiveSetting})
 	active := newActiveSetting.(bool)
 	request.Properties.Active = &active
 
@@ -205,7 +205,7 @@ func resourceS3KeyUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 	return resourceS3KeyRead(ctx, d, meta)
 }
 
-func resourceS3KeyDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceS3KeyDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return diag.FromErr(err)
@@ -224,20 +224,20 @@ func resourceS3KeyDelete(ctx context.Context, d *schema.ResourceData, meta inter
 	}
 
 	for {
-		tflog.Info(ctx, "waiting for S3 key to be deleted", map[string]interface{}{"key_id": d.Id()})
+		tflog.Info(ctx, "waiting for S3 key to be deleted", map[string]any{"key_id": d.Id()})
 
 		s3KeyDeleted, dsErr := s3KeyDeleted(ctx, client, d)
 
 		if dsErr != nil {
 			if isS3KeyNotFound(dsErr) {
-				tflog.Info(ctx, "successfully deleted Object Storage key", map[string]interface{}{"key_id": d.Id()})
+				tflog.Info(ctx, "successfully deleted Object Storage key", map[string]any{"key_id": d.Id()})
 				return nil
 			}
 			return diagutil.ToDiags(d, fmt.Errorf("error while checking deletion status of Object Storage key: %w", dsErr), nil)
 		}
 
 		if s3KeyDeleted {
-			tflog.Info(ctx, "successfully deleted Object Storage key", map[string]interface{}{"key_id": d.Id()})
+			tflog.Info(ctx, "successfully deleted Object Storage key", map[string]any{"key_id": d.Id()})
 			break
 		}
 
@@ -262,7 +262,7 @@ func isS3KeyPrivilegeError(ctx context.Context, err error) bool {
 		if b, err := strconv.ParseBool(strings.ToLower(strings.TrimSpace(envVal))); err == nil {
 			retryEnabled = b
 		} else {
-			tflog.Warn(ctx, "invalid IONOS_S3_KEY_CREATION_RETRY value; defaulting to false", map[string]interface{}{"value": envVal})
+			tflog.Warn(ctx, "invalid IONOS_S3_KEY_CREATION_RETRY value; defaulting to false", map[string]any{"value": envVal})
 		}
 	}
 	if !retryEnabled {
@@ -311,7 +311,7 @@ func s3Ready(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resour
 	return *rsp.Properties.Active == active, nil
 }
 
-func resourceS3KeyImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceS3KeyImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 
 	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
@@ -365,7 +365,7 @@ func setS3KeyIdAndProperties(ctx context.Context, s3Key *ionoscloud.S3Key, data 
 	}
 
 	if s3Key.Properties.Active != nil {
-		tflog.Info(ctx, "setting S3 key active", map[string]interface{}{"active": *s3Key.Properties.Active})
+		tflog.Info(ctx, "setting S3 key active", map[string]any{"active": *s3Key.Properties.Active})
 		if err := data.Set("active", *s3Key.Properties.Active); err != nil {
 			return err
 		}

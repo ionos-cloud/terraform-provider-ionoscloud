@@ -100,7 +100,7 @@ func dataSourceReverseRecordRead(ctx context.Context, d *schema.ResourceData, me
 
 		var results []dns.ReverseRecordRead
 		if nameOk {
-			tflog.Info(ctx, "searching DNS reverse record by name", map[string]interface{}{"name": recordName, "partial_match": partialMatch})
+			tflog.Info(ctx, "searching DNS reverse record by name", map[string]any{"name": recordName, "partial_match": partialMatch})
 			if partialMatch {
 				// In order to have an exact name match, we must retrieve all the DNS Reverse Records and then
 				// build a list of partial matches based on the response

@@ -199,7 +199,7 @@ func resourceApplicationLoadBalancerCreate(ctx context.Context, d *schema.Resour
 						// flowlog creation failed, delete the alb
 						diags := resourceApplicationLoadBalancerDelete(ctx, d, meta)
 						if diags != nil {
-							tflog.Error(ctx, "could not delete alb after flowlog failure", map[string]interface{}{"diags": diags})
+							tflog.Error(ctx, "could not delete alb after flowlog failure", map[string]any{"diags": diags})
 						}
 						diags = diagutil.ToDiags(d, fmt.Errorf("error creating flowlog for application loadbalancer: %w", err), nil)
 						return diags
@@ -225,14 +225,14 @@ func resourceApplicationLoadBalancerRead(ctx context.Context, d *schema.Resource
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		tflog.Info(ctx, "application loadbalancer not found", map[string]interface{}{"alb_id": d.Id(), "error": err.Error()})
+		tflog.Info(ctx, "application loadbalancer not found", map[string]any{"alb_id": d.Id(), "error": err.Error()})
 		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil
 		}
 	}
 
-	tflog.Info(ctx, "retrieved application loadbalancer", map[string]interface{}{"alb_id": d.Id()})
+	tflog.Info(ctx, "retrieved application loadbalancer", map[string]any{"alb_id": d.Id()})
 	fw := cloudapiflowlog.Service{
 		Client: client,
 		Meta:   meta,

@@ -35,7 +35,7 @@ func (c *Client) IsPipelineAvailable(ctx context.Context, d *schema.ResourceData
 	if err != nil {
 		return false, err
 	}
-	tflog.Debug(ctx, "logging pipeline status", map[string]interface{}{"state": pipeline.Metadata.State})
+	tflog.Debug(ctx, "logging pipeline status", map[string]any{"state": pipeline.Metadata.State})
 	return strings.EqualFold(pipeline.Metadata.State, constant.Available), nil
 }
 

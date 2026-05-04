@@ -86,7 +86,7 @@ func (c *Client) IsIPSecTunnelReady(ctx context.Context, d *schema.ResourceData)
 	if err != nil {
 		return false, err
 	}
-	tflog.Debug(ctx, "VPN IPSec Gateway Tunnel state", map[string]interface{}{"status": tunnel.Metadata.Status})
+	tflog.Debug(ctx, "VPN IPSec Gateway Tunnel state", map[string]any{"status": tunnel.Metadata.Status})
 
 	return strings.EqualFold(tunnel.Metadata.Status, constant.Available), nil
 }

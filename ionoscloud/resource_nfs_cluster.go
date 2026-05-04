@@ -195,6 +195,6 @@ func findCluster(ctx context.Context, d *schema.ResourceData, id, location strin
 		return ionoscloud.ClusterRead{},
 			fmt.Errorf("couldn't find NFS Cluster %s in %s: %w", id, location, err)
 	}
-	tflog.Info(ctx, "NFS cluster found", map[string]interface{}{"cluster_id": id, "location": location})
+	tflog.Info(ctx, "NFS cluster found", map[string]any{"cluster_id": id, "location": location})
 	return cluster, nil
 }

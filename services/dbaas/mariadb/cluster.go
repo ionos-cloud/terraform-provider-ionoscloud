@@ -75,7 +75,7 @@ func (c *Client) IsClusterReady(ctx context.Context, d *schema.ResourceData) (bo
 	if utils.IsStateFailed(string(*cluster.Metadata.State)) {
 		return false, fmt.Errorf("cluster %s is in a failed state", d.Id())
 	}
-	tflog.Info(ctx, "MariaDB cluster state", map[string]interface{}{"cluster_id": clusterID, "state": string(*cluster.Metadata.State)})
+	tflog.Info(ctx, "MariaDB cluster state", map[string]any{"cluster_id": clusterID, "state": string(*cluster.Metadata.State)})
 	return strings.EqualFold(string(*cluster.Metadata.State), constant.Available), nil
 }
 

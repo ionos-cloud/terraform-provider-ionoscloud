@@ -153,14 +153,14 @@ func pipelineRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Di
 	pipeline, apiResponse, err := client.GetPipelineByID(ctx, location, pipelineID)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
-			tflog.Info(ctx, "logging pipeline not found", map[string]interface{}{"pipeline_id": pipelineID})
+			tflog.Info(ctx, "logging pipeline not found", map[string]any{"pipeline_id": pipelineID})
 			d.SetId("")
 			return nil
 		}
 		return diagutil.ToDiags(d, fmt.Errorf("error while fetching Logging pipeline: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	tflog.Info(ctx, "retrieved logging pipeline", map[string]interface{}{"pipeline_id": pipelineID})
+	tflog.Info(ctx, "retrieved logging pipeline", map[string]any{"pipeline_id": pipelineID})
 	if err := client.SetPipelineData(d, pipeline); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}

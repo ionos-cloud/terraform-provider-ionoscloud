@@ -197,7 +197,7 @@ func resourceNSGImport(ctx context.Context, d *schema.ResourceData, meta any) ([
 		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while retrieving the Network Security Group, %w", err), nil)
 	}
 
-	tflog.Info(ctx, "NSG imported", map[string]interface{}{"nsg_id": nsgID, "datacenter_id": datacenterID})
+	tflog.Info(ctx, "NSG imported", map[string]any{"nsg_id": nsgID, "datacenter_id": datacenterID})
 	if err = d.Set("datacenter_id", datacenterID); err != nil {
 		return nil, diagutil.ToError(d, err, nil)
 	}

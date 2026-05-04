@@ -99,7 +99,7 @@ func recordRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diag
 		}
 		return diagutil.ToDiags(d, fmt.Errorf("error while fetching the DNS Record, zone ID: %s, error: %w", zoneId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
-	tflog.Info(ctx, "retrieved DNS record", map[string]interface{}{"record_id": recordId, "zone_id": zoneId})
+	tflog.Info(ctx, "retrieved DNS record", map[string]any{"record_id": recordId, "zone_id": zoneId})
 	if err := client.SetRecordData(d, record); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
@@ -162,7 +162,7 @@ func recordImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*sch
 		}
 		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to import the DNS Record with ID: %s, zone ID: %s, error: %w", recordId, zoneId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
-	tflog.Info(ctx, "DNS record imported", map[string]interface{}{"record_id": recordId, "zone_id": zoneId})
+	tflog.Info(ctx, "DNS record imported", map[string]any{"record_id": recordId, "zone_id": zoneId})
 	if err := client.SetRecordData(d, record); err != nil {
 		return nil, diagutil.ToError(d, err, nil)
 	}

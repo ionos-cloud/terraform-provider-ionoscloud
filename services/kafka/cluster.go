@@ -36,7 +36,7 @@ func (c *Client) IsClusterAvailable(ctx context.Context, d *schema.ResourceData)
 	if err != nil {
 		return false, err
 	}
-	tflog.Debug(ctx, "kafka cluster status", map[string]interface{}{"state": cluster.Metadata.State})
+	tflog.Debug(ctx, "kafka cluster status", map[string]any{"state": cluster.Metadata.State})
 	return strings.EqualFold(cluster.Metadata.State, constant.Available), nil
 }
 

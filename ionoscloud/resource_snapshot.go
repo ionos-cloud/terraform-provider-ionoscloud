@@ -309,7 +309,7 @@ func resourceSnapshotImport(ctx context.Context, d *schema.ResourceData, meta an
 		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while retrieving the snapshot %q, %w", snapshotID, err), nil)
 	}
 
-	tflog.Info(ctx, "snapshot found", map[string]interface{}{"import_id": importID})
+	tflog.Info(ctx, "snapshot found", map[string]any{"import_id": importID})
 
 	if err = setSnapshotData(d, &snapshot); err != nil {
 		return nil, diagutil.ToError(d, err, nil)

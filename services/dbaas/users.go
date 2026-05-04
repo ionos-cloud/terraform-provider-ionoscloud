@@ -95,10 +95,10 @@ func (c *MongoClient) IsUserReady(ctx context.Context, d *schema.ResourceData) (
 		return true, fmt.Errorf("error checking cluster status: %w", err)
 	}
 	if cluster.Metadata == nil || cluster.Metadata.State == nil {
-		tflog.Warn(ctx, "cluster metadata or state is empty", map[string]interface{}{"username": username, "cluster_id": clusterID})
+		tflog.Warn(ctx, "cluster metadata or state is empty", map[string]any{"username": username, "cluster_id": clusterID})
 		return false, fmt.Errorf("cluster metadata or state is empty for id %s", d.Id())
 	}
-	tflog.Info(ctx, "mongo cluster state", map[string]interface{}{"cluster_id": clusterID, "state": string(*cluster.Metadata.State)})
+	tflog.Info(ctx, "mongo cluster state", map[string]any{"cluster_id": clusterID, "state": string(*cluster.Metadata.State)})
 	if utils.IsStateFailed(string(*cluster.Metadata.State)) {
 		return false, fmt.Errorf("cluster %s is in a failed state", d.Id())
 	}

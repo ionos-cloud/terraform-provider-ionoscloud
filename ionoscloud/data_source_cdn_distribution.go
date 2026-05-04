@@ -173,7 +173,7 @@ func dataSourceCDNDistributionRead(ctx context.Context, d *schema.ResourceData, 
 		if domainOk {
 			partialMatch := d.Get("partial_match").(bool)
 
-			tflog.Info(ctx, "searching CDN distributions by domain", map[string]interface{}{"partial_match": partialMatch, "domain": domain})
+			tflog.Info(ctx, "searching CDN distributions by domain", map[string]any{"partial_match": partialMatch, "domain": domain})
 
 			if len(distributions.Items) > 0 {
 				var distributionsByDomain []cdn.Distribution

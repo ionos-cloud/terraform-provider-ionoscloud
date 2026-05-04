@@ -141,7 +141,7 @@ func resourceNatGatewayCreate(ctx context.Context, d *schema.ResourceData, meta 
 			}
 
 			if updateLans == true {
-				tflog.Info(ctx, "setting NatGateway LANs", map[string]interface{}{"lan_count": len(lans)})
+				tflog.Info(ctx, "setting NatGateway LANs", map[string]any{"lan_count": len(lans)})
 				natGateway.Properties.Lans = &lans
 			} else {
 				return diagutil.ToDiags(d, fmt.Errorf("you must provide lans for the nat gateway resource"), nil)
@@ -151,7 +151,7 @@ func resourceNatGatewayCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 	dcId := d.Get("datacenter_id").(string)
 
-	tflog.Debug(ctx, "creating nat gateway", map[string]interface{}{"datacenter_id": dcId})
+	tflog.Debug(ctx, "creating nat gateway", map[string]any{"datacenter_id": dcId})
 	natGatewayResp, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysPost(ctx, dcId).NatGateway(natGateway).Execute()
 	logApiRequestTime(apiResponse)
 
@@ -187,14 +187,14 @@ func resourceNatGatewayRead(ctx context.Context, d *schema.ResourceData, meta an
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		tflog.Info(ctx, "nat gateway not found", map[string]interface{}{"nat_gateway_id": d.Id(), "error": err.Error()})
+		tflog.Info(ctx, "nat gateway not found", map[string]any{"nat_gateway_id": d.Id(), "error": err.Error()})
 		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil
 		}
 	}
 
-	tflog.Info(ctx, "retrieved nat gateway", map[string]interface{}{"nat_gateway_id": d.Id()})
+	tflog.Info(ctx, "retrieved nat gateway", map[string]any{"nat_gateway_id": d.Id()})
 
 	if err := setNatGatewayData(d, &natGateway); err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -223,7 +223,7 @@ func resourceNatGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 	if d.HasChange("public_ips") {
 		oldPublicIps, newPublicIps := d.GetChange("public_ips")
-		tflog.Info(ctx, "nat gateway public IPs changed", map[string]interface{}{"old": oldPublicIps, "new": newPublicIps})
+		tflog.Info(ctx, "nat gateway public IPs changed", map[string]any{"old": oldPublicIps, "new": newPublicIps})
 		publicIpsVal := newPublicIps.(*schema.Set).List()
 		if publicIpsVal != nil {
 			publicIps := make([]string, 0)
@@ -268,7 +268,7 @@ func resourceNatGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta 
 			}
 
 			if updateLans == true {
-				tflog.Info(ctx, "nat gateway LANs changed", map[string]interface{}{"old": oldLANs, "new": newLANs})
+				tflog.Info(ctx, "nat gateway LANs changed", map[string]any{"old": oldLANs, "new": newLANs})
 				request.Properties.Lans = &lans
 			}
 		}
@@ -344,7 +344,7 @@ func resourceNatGatewayImport(ctx context.Context, d *schema.ResourceData, meta 
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		tflog.Info(ctx, "nat gateway not found on import", map[string]interface{}{"nat_gateway_id": natGatewayId, "error": err.Error()})
+		tflog.Info(ctx, "nat gateway not found on import", map[string]any{"nat_gateway_id": natGatewayId, "error": err.Error()})
 		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil, diagutil.ToError(d, fmt.Errorf("unable to find nat gateway  %q", natGatewayId), nil)

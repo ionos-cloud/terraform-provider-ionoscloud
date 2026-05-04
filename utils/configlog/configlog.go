@@ -25,7 +25,7 @@ func LoadFileConfigWithLogging(ctx context.Context) (*fileconfiguration.FileConf
 		source = "default"
 		defaultPath, err := fileconfiguration.DefaultConfigFileName()
 		if err != nil {
-			tflog.Debug(ctx, "could not determine default config file path", map[string]interface{}{"error": err.Error()})
+			tflog.Debug(ctx, "could not determine default config file path", map[string]any{"error": err.Error()})
 		} else {
 			filePath = defaultPath
 		}
@@ -44,16 +44,16 @@ func LoadFileConfigWithLogging(ctx context.Context) (*fileconfiguration.FileConf
 		} else if os.IsNotExist(err) {
 			status = "not found"
 		}
-		tflog.Debug(ctx, "config file", map[string]interface{}{"path": filePath, "source": source, "status": status})
+		tflog.Debug(ctx, "config file", map[string]any{"path": filePath, "source": source, "status": status})
 	}
 
 	fileConfig, err := fileconfiguration.NewFromEnv()
 	if err != nil {
-		tflog.Debug(ctx, "config file not loaded", map[string]interface{}{"error": err.Error()})
+		tflog.Debug(ctx, "config file not loaded", map[string]any{"error": err.Error()})
 		return nil, err
 	}
 
-	tflog.Debug(ctx, "config file loaded successfully", map[string]interface{}{"version": float64(fileConfig.Version)})
+	tflog.Debug(ctx, "config file loaded successfully", map[string]any{"version": float64(fileConfig.Version)})
 	logProfileAndEnvironment(ctx, fileConfig)
 	logFileConfigEndpoints(ctx, fileConfig)
 
@@ -83,14 +83,14 @@ func logProfileAndEnvironment(ctx context.Context, fileConfig *fileconfiguration
 		}
 	}
 
-	tflog.Debug(ctx, "profile resolution", map[string]interface{}{"details": strings.Join(parts, " | ")})
+	tflog.Debug(ctx, "profile resolution", map[string]any{"details": strings.Join(parts, " | ")})
 }
 
 // logFileConfigEndpoints logs product and endpoint counts from the active environment in the file config.
 func logFileConfigEndpoints(ctx context.Context, fileConfig *fileconfiguration.FileConfig) {
 	failoverOpts := fileConfig.GetFailoverOptions()
 	if failoverOpts != nil {
-		tflog.Debug(ctx, "failover config", map[string]interface{}{"strategy": failoverOpts.Strategy})
+		tflog.Debug(ctx, "failover config", map[string]any{"strategy": failoverOpts.Strategy})
 	} else {
 		tflog.Debug(ctx, "failover config not set (default: none)")
 	}
@@ -128,9 +128,9 @@ func logFileConfigEndpoints(ctx context.Context, fileConfig *fileconfiguration.F
 
 			jsonBytes, err := json.Marshal(products)
 			if err != nil {
-				tflog.Debug(ctx, "environment products (failed to marshal)", map[string]interface{}{"environment": env.Name, "product_count": len(env.Products), "error": err.Error()})
+				tflog.Debug(ctx, "environment products (failed to marshal)", map[string]any{"environment": env.Name, "product_count": len(env.Products), "error": err.Error()})
 			} else {
-				tflog.Debug(ctx, "environment products", map[string]interface{}{"environment": env.Name, "product_count": len(env.Products), "products": string(jsonBytes)})
+				tflog.Debug(ctx, "environment products", map[string]any{"environment": env.Name, "product_count": len(env.Products), "products": string(jsonBytes)})
 			}
 			return
 		}
@@ -205,7 +205,7 @@ func LogEndpointEnvVars(ctx context.Context) {
 	}
 	sort.Strings(set)
 	if len(set) > 0 {
-		tflog.Debug(ctx, "endpoint env vars", map[string]interface{}{"vars": strings.Join(set, " | ")})
+		tflog.Debug(ctx, "endpoint env vars", map[string]any{"vars": strings.Join(set, " | ")})
 	}
 }
 
@@ -222,14 +222,14 @@ func LogTLSConfig(ctx context.Context, insecureBool bool) {
 		parts = append(parts, fmt.Sprintf("%s is set (%d bytes) — cert pinning active for all products", shared.IonosPinnedCertEnvVar, len(pinnedCert)))
 	}
 	if len(parts) > 0 {
-		tflog.Debug(ctx, "TLS config", map[string]interface{}{"details": strings.Join(parts, ", ")})
+		tflog.Debug(ctx, "TLS config", map[string]any{"details": strings.Join(parts, ", ")})
 	}
 }
 
 // LogEndpoint logs the global endpoint configuration.
 func LogEndpoint(ctx context.Context, endpoint string) {
 	if endpoint != "" {
-		tflog.Debug(ctx, "global endpoint", map[string]interface{}{"endpoint": endpoint})
+		tflog.Debug(ctx, "global endpoint", map[string]any{"endpoint": endpoint})
 	} else {
 		tflog.Debug(ctx, "global endpoint not set, using SDK defaults")
 	}
@@ -238,9 +238,9 @@ func LogEndpoint(ctx context.Context, endpoint string) {
 // LogS3Region logs the S3 region configuration.
 func LogS3Region(ctx context.Context, region string) {
 	if region != "" {
-		tflog.Debug(ctx, "S3 region", map[string]interface{}{"region": region})
+		tflog.Debug(ctx, "S3 region", map[string]any{"region": region})
 	} else {
-		tflog.Debug(ctx, "S3 region (default)", map[string]interface{}{"region": constant.DefaultS3Region})
+		tflog.Debug(ctx, "S3 region (default)", map[string]any{"region": constant.DefaultS3Region})
 	}
 }
 

@@ -38,7 +38,7 @@ func (c *Client) IsWireguardPeerAvailable(ctx context.Context, d *schema.Resourc
 	if err != nil {
 		return false, err
 	}
-	tflog.Debug(ctx, "wireguard peer status", map[string]interface{}{"status": wireguard.Metadata.Status})
+	tflog.Debug(ctx, "wireguard peer status", map[string]any{"status": wireguard.Metadata.Status})
 	return strings.EqualFold(wireguard.Metadata.Status, constant.Available), nil
 }
 
@@ -96,7 +96,7 @@ func (c *Client) IsWireguardPeerReady(ctx context.Context, d *schema.ResourceDat
 	if err != nil {
 		return false, err
 	}
-	tflog.Debug(ctx, "wireguard peer state", map[string]interface{}{"status": cluster.Metadata.Status})
+	tflog.Debug(ctx, "wireguard peer state", map[string]any{"status": cluster.Metadata.Status})
 	return strings.EqualFold(cluster.Metadata.Status, constant.Available), nil
 }
 

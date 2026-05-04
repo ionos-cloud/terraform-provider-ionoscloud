@@ -106,7 +106,7 @@ func autoCertificateRead(ctx context.Context, d *schema.ResourceData, meta any) 
 		}
 		return diagutil.ToDiags(d, fmt.Errorf("error while fetching auto-certificate: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
-	tflog.Info(ctx, "retrieved auto-certificate", map[string]interface{}{"auto_certificate_id": autoCertificateID})
+	tflog.Info(ctx, "retrieved auto-certificate", map[string]any{"auto_certificate_id": autoCertificateID})
 	if err := cert.SetAutoCertificateData(d, autoCertificate); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
@@ -167,7 +167,7 @@ func autoCertificateImport(ctx context.Context, d *schema.ResourceData, meta any
 		}
 		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to import auto-certificate with ID: %v, error: %w", autoCertificateID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
-	tflog.Info(ctx, "auto-certificate imported", map[string]interface{}{"auto_certificate_id": autoCertificateID})
+	tflog.Info(ctx, "auto-certificate imported", map[string]any{"auto_certificate_id": autoCertificateID})
 	if err := d.Set("location", location); err != nil {
 		return nil, utils.GenerateSetError("Auto-certificate", "location", err)
 	}

@@ -137,7 +137,7 @@ func resourceNSGFirewallRead(ctx context.Context, d *schema.ResourceData, meta a
 
 	if err != nil {
 		if httpNotFound(apiResponse) {
-			tflog.Debug(ctx, "nsg firewall rule not found", map[string]interface{}{"datacenter_id": d.Get("datacenter_id").(string), "nsg_id": d.Get("nsg_id").(string), "rule_id": d.Id()})
+			tflog.Debug(ctx, "nsg firewall rule not found", map[string]any{"datacenter_id": d.Get("datacenter_id").(string), "nsg_id": d.Get("nsg_id").(string), "rule_id": d.Id()})
 			d.SetId("")
 			return nil
 		}

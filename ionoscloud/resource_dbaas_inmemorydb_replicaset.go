@@ -252,7 +252,7 @@ func replicaSetRead(ctx context.Context, d *schema.ResourceData, meta any) diag.
 		}
 		return diagutil.ToDiags(d, fmt.Errorf("error while fetching InMemoryDB replica set with ID: %v, error: %w", replicaSetID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
-	tflog.Info(ctx, "retrieved InMemoryDB replica set", map[string]interface{}{"replica_set_id": replicaSetID})
+	tflog.Info(ctx, "retrieved InMemoryDB replica set", map[string]any{"replica_set_id": replicaSetID})
 	if err := client.SetReplicaSetData(d, replicaSet); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
@@ -293,7 +293,7 @@ func replicaSetImport(ctx context.Context, d *schema.ResourceData, meta any) ([]
 		}
 		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to import InMemoryDB replica set with ID: %v, error: %w", replicaSetID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
-	tflog.Info(ctx, "InMemoryDB replica set imported", map[string]interface{}{"replica_set_id": replicaSetID})
+	tflog.Info(ctx, "InMemoryDB replica set imported", map[string]any{"replica_set_id": replicaSetID})
 	if err := d.Set("location", location); err != nil {
 		return nil, utils.GenerateSetError("InMemoryDB replica set", "location", err)
 	}

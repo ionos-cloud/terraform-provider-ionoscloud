@@ -176,7 +176,7 @@ func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	if k8svVal, k8svOk := d.GetOk("k8s_version"); k8svOk {
-		tflog.Info(ctx, "setting k8s version", map[string]interface{}{"version": k8svVal.(string)})
+		tflog.Info(ctx, "setting k8s version", map[string]any{"version": k8svVal.(string)})
 		k8svVal := k8svVal.(string)
 		cluster.Properties.K8sVersion = &k8svVal
 	}
@@ -186,7 +186,7 @@ func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	if mtVal, mtOk := d.GetOk("maintenance_window.0.time"); mtOk {
-		tflog.Info(ctx, "setting maintenance window time", map[string]interface{}{"time": mtVal.(string)})
+		tflog.Info(ctx, "setting maintenance window time", map[string]any{"time": mtVal.(string)})
 		mtVal := mtVal.(string)
 		cluster.Properties.MaintenanceWindow.Time = &mtVal
 	}
@@ -263,10 +263,10 @@ func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	d.SetId(*createdCluster.Id)
-	tflog.Info(ctx, "created k8s cluster", map[string]interface{}{"cluster_id": d.Id()})
+	tflog.Info(ctx, "created k8s cluster", map[string]any{"cluster_id": d.Id()})
 
 	for {
-		tflog.Info(ctx, "waiting for k8s cluster to be ACTIVE", map[string]interface{}{"cluster_id": d.Id()})
+		tflog.Info(ctx, "waiting for k8s cluster to be ACTIVE", map[string]any{"cluster_id": d.Id()})
 
 		clusterReady, rsErr := k8sClusterReady(ctx, client, d)
 
@@ -275,7 +275,7 @@ func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 		}
 
 		if clusterReady {
-			tflog.Info(ctx, "k8s cluster ready", map[string]interface{}{"cluster_id": d.Id()})
+			tflog.Info(ctx, "k8s cluster ready", map[string]any{"cluster_id": d.Id()})
 			break
 		}
 
@@ -310,7 +310,7 @@ func resourcek8sClusterRead(ctx context.Context, d *schema.ResourceData, meta an
 		return diagutil.ToDiags(d, fmt.Errorf("error while fetching k8s cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	tflog.Info(ctx, "retrieved k8s cluster", map[string]interface{}{"cluster_id": d.Id()})
+	tflog.Info(ctx, "retrieved k8s cluster", map[string]any{"cluster_id": d.Id()})
 
 	if err := setK8sClusterData(d, &cluster); err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -335,16 +335,16 @@ func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 	if d.HasChange("name") {
 		oldName, newName := d.GetChange("name")
-		tflog.Info(ctx, "k8s cluster name changed", map[string]interface{}{"old": oldName, "new": newName})
+		tflog.Info(ctx, "k8s cluster name changed", map[string]any{"old": oldName, "new": newName})
 		newNameStr := newName.(string)
 		request.Properties.Name = &newNameStr
 	}
 
-	tflog.Info(ctx, "attempting k8s cluster update", map[string]interface{}{"cluster_id": d.Id()})
+	tflog.Info(ctx, "attempting k8s cluster update", map[string]any{"cluster_id": d.Id()})
 
 	if d.HasChange("k8s_version") {
 		oldk8sVersion, newk8sVersion := d.GetChange("k8s_version")
-		tflog.Info(ctx, "k8s version changed", map[string]interface{}{"old": oldk8sVersion, "new": newk8sVersion})
+		tflog.Info(ctx, "k8s version changed", map[string]any{"old": oldk8sVersion, "new": newk8sVersion})
 		newk8sVersionStr := newk8sVersion.(string)
 		if newk8sVersion != nil {
 			request.Properties.K8sVersion = &newk8sVersionStr
@@ -368,7 +368,7 @@ func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 			if d.HasChange("maintenance_window.0.day_of_the_week") {
 				oldMd, newMd := d.GetChange("maintenance_window.0.day_of_the_week")
 				if newMd.(string) != "" {
-					tflog.Info(ctx, "k8s maintenance window DOW changed", map[string]interface{}{"old": oldMd, "new": newMd})
+					tflog.Info(ctx, "k8s maintenance window DOW changed", map[string]any{"old": oldMd, "new": newMd})
 					updateMaintenanceWindow = true
 					newMd := newMd.(string)
 					maintenanceWindow.DayOfTheWeek = &newMd
@@ -379,7 +379,7 @@ func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 				oldMt, newMt := d.GetChange("maintenance_window.0.time")
 				if newMt.(string) != "" {
-					tflog.Info(ctx, "k8s maintenance window time changed", map[string]interface{}{"old": oldMt, "new": newMt})
+					tflog.Info(ctx, "k8s maintenance window time changed", map[string]any{"old": oldMt, "new": newMt})
 					updateMaintenanceWindow = true
 					newMt := newMt.(string)
 					maintenanceWindow.Time = &newMt
@@ -437,7 +437,7 @@ func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	for {
-		tflog.Info(ctx, "waiting for k8s cluster to be ready", map[string]interface{}{"cluster_id": d.Id()})
+		tflog.Info(ctx, "waiting for k8s cluster to be ready", map[string]any{"cluster_id": d.Id()})
 
 		clusterReady, rsErr := k8sClusterReady(ctx, client, d)
 
@@ -446,7 +446,7 @@ func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		}
 
 		if clusterReady {
-			tflog.Info(ctx, "k8s cluster ready", map[string]interface{}{"cluster_id": d.Id()})
+			tflog.Info(ctx, "k8s cluster ready", map[string]any{"cluster_id": d.Id()})
 			break
 		}
 
@@ -481,7 +481,7 @@ func resourcek8sClusterDelete(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	for {
-		tflog.Info(ctx, "waiting for k8s cluster to be deleted", map[string]interface{}{"cluster_id": d.Id()})
+		tflog.Info(ctx, "waiting for k8s cluster to be deleted", map[string]any{"cluster_id": d.Id()})
 
 		clusterDeleted, dsErr := k8sClusterDeleted(ctx, client, d)
 
@@ -490,7 +490,7 @@ func resourcek8sClusterDelete(ctx context.Context, d *schema.ResourceData, meta 
 		}
 
 		if clusterDeleted {
-			tflog.Info(ctx, "successfully deleted k8s cluster", map[string]interface{}{"cluster_id": d.Id()})
+			tflog.Info(ctx, "successfully deleted k8s cluster", map[string]any{"cluster_id": d.Id()})
 			break
 		}
 
@@ -537,7 +537,7 @@ func resourceK8sClusterImport(ctx context.Context, d *schema.ResourceData, meta 
 		return nil, diagutil.ToError(d, fmt.Errorf("unable to retrieve k8s cluster %q, error:%w", clusterID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	tflog.Info(ctx, "k8s cluster imported", map[string]interface{}{"cluster_id": clusterID})
+	tflog.Info(ctx, "k8s cluster imported", map[string]any{"cluster_id": clusterID})
 
 	if err := setK8sClusterData(d, &cluster); err != nil {
 		return nil, diagutil.ToError(d, err, nil)
@@ -655,7 +655,7 @@ func k8sClusterReady(ctx context.Context, client *ionoscloud.APIClient, d *schem
 	if utils.IsStateFailed(*resource.Metadata.State) {
 		return false, fmt.Errorf("error while checking if k8s cluster is ready %s, state %s", *resource.Id, *resource.Metadata.State)
 	}
-	tflog.Info(ctx, "k8s cluster state", map[string]interface{}{"state": *resource.Metadata.State})
+	tflog.Info(ctx, "k8s cluster state", map[string]any{"state": *resource.Metadata.State})
 	// k8s is the only resource that has a state of ACTIVE when it is ready
 	return strings.EqualFold(*resource.Metadata.State, ionoscloud.Active), nil
 }

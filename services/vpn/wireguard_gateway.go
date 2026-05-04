@@ -37,7 +37,7 @@ func (c *Client) IsWireguardAvailable(ctx context.Context, d *schema.ResourceDat
 	if err != nil {
 		return false, err
 	}
-	tflog.Debug(ctx, "wireguard status", map[string]interface{}{"status": wireguard.Metadata.Status})
+	tflog.Debug(ctx, "wireguard status", map[string]any{"status": wireguard.Metadata.Status})
 	return strings.EqualFold(wireguard.Metadata.Status, constant.Available), nil
 }
 
@@ -90,7 +90,7 @@ func (c *Client) IsWireguardGatewayReady(ctx context.Context, d *schema.Resource
 	if err != nil {
 		return false, err
 	}
-	tflog.Debug(ctx, "wireguard gateway state", map[string]interface{}{"status": cluster.Metadata.Status})
+	tflog.Debug(ctx, "wireguard gateway state", map[string]any{"status": cluster.Metadata.Status})
 	return strings.EqualFold(cluster.Metadata.Status, constant.Available), nil
 }
 

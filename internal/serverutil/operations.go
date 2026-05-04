@@ -49,7 +49,7 @@ func ResourceCommonServerDelete(ctx context.Context, d *schema.ResourceData, met
 
 	apiResponse, err := client.ServersApi.DatacentersServersDelete(ctx, dcId, d.Id()).Execute()
 	if apiResponse != nil {
-		tflog.Debug(ctx, "api request completed", map[string]interface{}{
+		tflog.Debug(ctx, "api request completed", map[string]any{
 			"request_time": apiResponse.RequestTime.String(),
 			"operation":    apiResponse.Operation,
 			"status_code":  apiResponse.SafeStatusCode(),

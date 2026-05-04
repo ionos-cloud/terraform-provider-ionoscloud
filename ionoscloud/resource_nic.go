@@ -228,7 +228,7 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta any) di
 		var err error
 		foundNic, apiResponse, err = ns.Get(ctx, dcid, srvid, *createdNic.Id, 3)
 		if apiResponse.HttpNotFound() {
-			tflog.Info(ctx, "could not find nic, retrying", map[string]interface{}{"nic_id": *createdNic.Id})
+			tflog.Info(ctx, "could not find nic, retrying", map[string]any{"nic_id": *createdNic.Id})
 			return retry.RetryableError(fmt.Errorf("could not find nic, %w", err))
 		}
 		if err != nil {
@@ -262,7 +262,7 @@ func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta any) diag
 	nic, apiResponse, err := ns.Get(ctx, dcid, srvid, nicid, 3)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
-			tflog.Info(ctx, "nic not found", map[string]interface{}{"nic_id": nicid})
+			tflog.Info(ctx, "nic not found", map[string]any{"nic_id": nicid})
 			d.SetId("")
 			return nil
 		}
@@ -410,7 +410,7 @@ func resourceNicImport(ctx context.Context, d *schema.ResourceData, meta any) ([
 		return nil, diagutil.ToError(d, err, nil)
 	}
 
-	tflog.Info(ctx, "nic found", map[string]interface{}{"nic_id": nicId, "server_id": sId, "datacenter_id": dcId})
+	tflog.Info(ctx, "nic found", map[string]any{"nic_id": nicId, "server_id": sId, "datacenter_id": dcId})
 
 	return []*schema.ResourceData{d}, nil
 }

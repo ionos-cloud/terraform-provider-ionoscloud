@@ -442,7 +442,7 @@ func resourceAutoscalingGroupCreate(ctx context.Context, d *schema.ResourceData,
 	}
 
 	d.SetId(autoscalingGroup.Id)
-	tflog.Info(ctx, "autoscaling group created", map[string]interface{}{"group_id": autoscalingGroup.Id})
+	tflog.Info(ctx, "autoscaling group created", map[string]any{"group_id": autoscalingGroup.Id})
 
 	if err := checkAction(ctx, client, d); err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -456,19 +456,19 @@ func resourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData, m
 	group, apiResponse, err := client.GetGroup(ctx, d.Id(), 2)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
-			tflog.Info(ctx, "autoscaling group not found", map[string]interface{}{"group_id": d.Id(), "error": err.Error()})
+			tflog.Info(ctx, "autoscaling group not found", map[string]any{"group_id": d.Id(), "error": err.Error()})
 			d.SetId("")
 			return nil
 		}
 		return diagutil.ToDiags(d, fmt.Errorf("error while retrieving Autoscaling Group: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	tflog.Info(ctx, "retrieved autoscaling group", map[string]interface{}{"group_id": d.Id()})
+	tflog.Info(ctx, "retrieved autoscaling group", map[string]any{"group_id": d.Id()})
 	if err := setAutoscalingGroupData(d, &group.Properties); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
 
-	tflog.Info(ctx, "autoscaling group data set", map[string]interface{}{"group_id": d.Id()})
+	tflog.Info(ctx, "autoscaling group data set", map[string]any{"group_id": d.Id()})
 
 	return nil
 }
@@ -502,7 +502,7 @@ func resourceAutoscalingGroupUpdate(ctx context.Context, d *schema.ResourceData,
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating Autoscaling Group: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	tflog.Info(ctx, "autoscaling group updated", map[string]interface{}{"group_id": d.Id()})
+	tflog.Info(ctx, "autoscaling group updated", map[string]any{"group_id": d.Id()})
 
 	if err := checkAction(ctx, client, d); err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -517,7 +517,7 @@ func resourceAutoscalingGroupDelete(ctx context.Context, d *schema.ResourceData,
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while deleting an Autoscaling Group: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	tflog.Info(ctx, "autoscaling group deleted", map[string]interface{}{"group_id": d.Id()})
+	tflog.Info(ctx, "autoscaling group deleted", map[string]any{"group_id": d.Id()})
 
 	d.SetId("")
 
@@ -538,7 +538,7 @@ func resourceAutoscalingGroupImport(ctx context.Context, d *schema.ResourceData,
 		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while retrieving Autoscaling Group %q, %w", groupID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	tflog.Info(ctx, "autoscaling group imported", map[string]interface{}{"group_id": groupID})
+	tflog.Info(ctx, "autoscaling group imported", map[string]any{"group_id": groupID})
 
 	if err := setAutoscalingGroupData(d, &group.Properties); err != nil {
 		return nil, diagutil.ToError(d, err, nil)
@@ -1134,7 +1134,7 @@ func checkAction(ctx context.Context, client *autoscalingService.Client, d *sche
 
 	// wait for completion of triggered action
 	for {
-		tflog.Info(ctx, "waiting for autoscaling action to be ready", map[string]interface{}{"action_id": actionID})
+		tflog.Info(ctx, "waiting for autoscaling action to be ready", map[string]any{"action_id": actionID})
 
 		actionSuccessful, rsErr := actionReady(ctx, client, d, actionID)
 		if rsErr != nil {
@@ -1142,7 +1142,7 @@ func checkAction(ctx context.Context, client *autoscalingService.Client, d *sche
 		}
 
 		if actionSuccessful {
-			tflog.Info(ctx, "autoscaling action ready", map[string]interface{}{"action_id": actionID})
+			tflog.Info(ctx, "autoscaling action ready", map[string]any{"action_id": actionID})
 			break
 		}
 

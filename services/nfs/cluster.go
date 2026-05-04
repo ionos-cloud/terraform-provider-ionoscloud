@@ -108,7 +108,7 @@ func (c *Client) IsClusterReady(ctx context.Context, d *schema.ResourceData) (bo
 		return false, fmt.Errorf("failed checking if Cluster %s from %s is ready: %w", clusterID, location, err)
 	}
 
-	tflog.Info(ctx, "cluster state", map[string]interface{}{"cluster_id": clusterID, "status": cluster.Metadata.Status})
+	tflog.Info(ctx, "cluster state", map[string]any{"cluster_id": clusterID, "status": cluster.Metadata.Status})
 	if utils.IsStateFailed(cluster.Metadata.Status) {
 		return false, fmt.Errorf("cluster %s is in a failed state", d.Id())
 	}

@@ -279,14 +279,14 @@ func resourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d *s
 	applicationLoadBalancerForwardingRule, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesFindByForwardingRuleId(ctx, dcId, albId, d.Id()).Execute()
 
 	if err != nil {
-		tflog.Info(ctx, "alb forwarding rule not found", map[string]interface{}{"rule_id": d.Id(), "error": err.Error()})
+		tflog.Info(ctx, "alb forwarding rule not found", map[string]any{"rule_id": d.Id(), "error": err.Error()})
 		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil
 		}
 	}
 
-	tflog.Info(ctx, "retrieved alb forwarding rule", map[string]interface{}{"rule_id": d.Id()})
+	tflog.Info(ctx, "retrieved alb forwarding rule", map[string]any{"rule_id": d.Id()})
 
 	if err := setApplicationLoadBalancerForwardingRuleData(d, &applicationLoadBalancerForwardingRule); err != nil {
 		return diagutil.ToDiags(d, err, nil)

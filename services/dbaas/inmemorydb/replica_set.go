@@ -23,7 +23,7 @@ func (c *Client) overrideClientEndpoint(ctx context.Context, productName, locati
 	// whatever is set, at the end we need to check if the IONOS_API_URL_productname is set and use override the endpoint if yes
 	defer c.changeConfigURL(ctx, location)
 	if os.Getenv(shared.IonosApiUrlEnvVar) != "" {
-		tflog.Debug(ctx, "InMemoryDB: endpoint from env", map[string]interface{}{"env": shared.IonosApiUrlEnvVar, "url": os.Getenv(shared.IonosApiUrlEnvVar)})
+		tflog.Debug(ctx, "InMemoryDB: endpoint from env", map[string]any{"env": shared.IonosApiUrlEnvVar, "url": os.Getenv(shared.IonosApiUrlEnvVar)})
 		return
 	}
 	fileConfig := c.GetFileConfig()
@@ -36,7 +36,7 @@ func (c *Client) overrideClientEndpoint(ctx context.Context, productName, locati
 	}
 	endpoint := fileConfig.GetProductLocationOverrides(productName, location)
 	if endpoint == nil {
-		tflog.Warn(ctx, "missing endpoint", map[string]interface{}{"product": productName, "location": location})
+		tflog.Warn(ctx, "missing endpoint", map[string]any{"product": productName, "location": location})
 		return
 	}
 	config.Servers = shared.ServerConfigurations{
@@ -65,7 +65,7 @@ func (c *Client) IsReplicaSetReady(ctx context.Context, d *schema.ResourceData) 
 		return false, fmt.Errorf("status check failed for InMemoryDB replica set with ID: %v, error: %w", replicaSetID, err)
 	}
 
-	tflog.Info(ctx, "InMemoryDB replica set state", map[string]interface{}{"replica_set_id": replicaSetID, "state": replicaSet.Metadata.State})
+	tflog.Info(ctx, "InMemoryDB replica set state", map[string]any{"replica_set_id": replicaSetID, "state": replicaSet.Metadata.State})
 	if utils.IsStateFailed(replicaSet.Metadata.State) {
 		return false, fmt.Errorf("replica set with ID: %v is in FAILED state", replicaSetID)
 	}

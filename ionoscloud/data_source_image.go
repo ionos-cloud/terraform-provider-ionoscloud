@@ -243,7 +243,7 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta any) 
 	} else if len(results) > 1 {
 		for _, result := range results {
 			if result.Properties != nil {
-				tflog.Debug(ctx, "found candidate image", map[string]interface{}{"name": *result.Properties.Name, "location": *result.Properties.Location})
+				tflog.Debug(ctx, "found candidate image", map[string]any{"name": *result.Properties.Name, "location": *result.Properties.Location})
 			}
 		}
 		return diagutil.ToDiags(d, fmt.Errorf("more than one image found, enable debug to learn more. Criteria used name = %s, type = %s, location = %s, version = %s, cloudInit = %s, imageAlias = %s", name, imageType, location, version, cloudInit, imgAlias), nil)

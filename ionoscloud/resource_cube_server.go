@@ -408,7 +408,7 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 		},
 	}
 	primaryNic = &(*server.Entities.Nics.Items)[0]
-	tflog.Debug(ctx, "nic dhcp", map[string]interface{}{"nic_dhcp": *nic.Properties.Dhcp, "primary_nic_dhcp": *primaryNic.Properties.Dhcp})
+	tflog.Debug(ctx, "nic dhcp", map[string]any{"nic_dhcp": *nic.Properties.Dhcp, "primary_nic_dhcp": *primaryNic.Properties.Dhcp})
 
 	firewall := ionoscloud.FirewallRule{
 		Properties: &ionoscloud.FirewallruleProperties{},
@@ -555,7 +555,7 @@ func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta an
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		if httpNotFound(apiResponse) {
-			tflog.Debug(ctx, "cannot find cube server by id", map[string]interface{}{"server_id": serverId})
+			tflog.Debug(ctx, "cannot find cube server by id", map[string]any{"server_id": serverId})
 			d.SetId("")
 			return nil
 		}
@@ -946,7 +946,7 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		}
 		mProp, _ := json.Marshal(properties)
 
-		tflog.Debug(ctx, "updating cube nic properties", map[string]interface{}{"properties": string(mProp)})
+		tflog.Debug(ctx, "updating cube nic properties", map[string]any{"properties": string(mProp)})
 		ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
 		_, apiResponse, err = ns.Update(ctx, d.Get("datacenter_id").(string), *server.Id, *nic.Id, properties)
 		if err != nil {
@@ -1019,7 +1019,7 @@ func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta 
 	if server.Entities != nil && server.Entities.Nics != nil && firstNicItem.Properties != nil &&
 		firstNicItem.Properties.Ips != nil &&
 		len(*firstNicItem.Properties.Ips) > 0 {
-		tflog.Debug(ctx, "setting primary_ip", map[string]interface{}{"primary_ip": (*firstNicItem.Properties.Ips)[0]})
+		tflog.Debug(ctx, "setting primary_ip", map[string]any{"primary_ip": (*firstNicItem.Properties.Ips)[0]})
 		if err := d.Set("primary_ip", (*firstNicItem.Properties.Ips)[0]); err != nil {
 			return nil, diagutil.ToError(d, fmt.Errorf("error while setting primary ip: %w", err), nil)
 		}

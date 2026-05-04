@@ -19,7 +19,7 @@ import (
 
 type Service struct {
 	Client *ionoscloud.APIClient
-	Meta   interface{}
+	Meta   any
 	D      *schema.ResourceData
 }
 
@@ -31,7 +31,7 @@ func (fs *Service) List(ctx context.Context, datacenterID, serverID string, dept
 		return emptyNicList, err
 	}
 	if nics.Items == nil {
-		tflog.Debug(ctx, "empty nic list", map[string]interface{}{"datacenter_id": datacenterID, "server_id": serverID})
+		tflog.Debug(ctx, "empty nic list", map[string]any{"datacenter_id": datacenterID, "server_id": serverID})
 		return emptyNicList, nil
 	}
 	return *nics.Items, nil
@@ -42,7 +42,7 @@ func (fs *Service) Get(ctx context.Context, datacenterId, serverId, ID string, d
 	apiResponse.LogInfo()
 	if err != nil {
 		if apiResponse.HttpNotFound() {
-			tflog.Debug(ctx, "no nic found", map[string]interface{}{"datacenter_id": datacenterId, "server_id": serverId})
+			tflog.Debug(ctx, "no nic found", map[string]any{"datacenter_id": datacenterId, "server_id": serverId})
 		}
 		return nil, apiResponse, err
 	}
@@ -90,7 +90,7 @@ func (fs *Service) Update(ctx context.Context, datacenterID, serverID, ID string
 }
 
 // DecodeTo - receives old and new values as slice of interfaces from schema, decodes and returns nic properties
-func DecodeTo(ctx context.Context, oldValues, newValues []interface{}) ([]ionoscloud.Nic, []ionoscloud.Nic, error) {
+func DecodeTo(ctx context.Context, oldValues, newValues []any) ([]ionoscloud.Nic, []ionoscloud.Nic, error) {
 	oldNicProps := make([]ionoscloud.Nic, len(oldValues))
 	newNicProps := make([]ionoscloud.Nic, len(newValues))
 	err := utils.DecodeInterfaceToStruct(ctx, newValues, newNicProps)
@@ -104,8 +104,8 @@ func DecodeTo(ctx context.Context, oldValues, newValues []interface{}) ([]ionosc
 	return oldNicProps, newNicProps, nil
 }
 
-func SetNetworkProperties(nic ionoscloud.Nic) map[string]interface{} {
-	network := map[string]interface{}{}
+func SetNetworkProperties(nic ionoscloud.Nic) map[string]any {
+	network := map[string]any{}
 	if nic.Properties != nil {
 		utils.SetPropWithNilCheck(network, "dhcp", nic.Properties.Dhcp)
 		utils.SetPropWithNilCheck(network, "dhcpv6", nic.Properties.Dhcpv6)
@@ -227,7 +227,7 @@ func NicSetData(ctx context.Context, d *schema.ResourceData, nic *ionoscloud.Nic
 	}
 
 	if nic.Properties != nil {
-		tflog.Info(ctx, "LAN on NIC", map[string]interface{}{"lan": nic.Properties.Lan})
+		tflog.Info(ctx, "LAN on NIC", map[string]any{"lan": nic.Properties.Lan})
 		if nic.Properties.Dhcp != nil {
 			if err := d.Set("dhcp", *nic.Properties.Dhcp); err != nil {
 				return fmt.Errorf("error setting dhcp %w", err)

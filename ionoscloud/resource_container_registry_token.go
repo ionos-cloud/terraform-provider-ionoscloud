@@ -167,7 +167,7 @@ func resourceContainerRegistryTokenRead(ctx context.Context, d *schema.ResourceD
 		return diagutil.ToDiags(d, fmt.Errorf("error while fetching registry token: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	tflog.Info(ctx, "retrieved container registry token", map[string]interface{}{"token_id": d.Id()})
+	tflog.Info(ctx, "retrieved container registry token", map[string]any{"token_id": d.Id()})
 
 	if err := crService.SetTokenData(d, registryToken.Properties); err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -250,7 +250,7 @@ func resourceContainerRegistryTokenImport(ctx context.Context, d *schema.Resourc
 		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the import of registry token %q, error:%w", registryTokenId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	tflog.Info(ctx, "container registry token imported", map[string]interface{}{"token_id": registryTokenId})
+	tflog.Info(ctx, "container registry token imported", map[string]any{"token_id": registryTokenId})
 
 	if registryToken.Id != nil {
 		d.SetId(*registryToken.Id)

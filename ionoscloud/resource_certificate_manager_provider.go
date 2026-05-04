@@ -110,7 +110,7 @@ func providerRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Di
 		}
 		return diagutil.ToDiags(d, fmt.Errorf("error while fetching auto-certificate provider with ID: %v, error: %w", providerID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
-	tflog.Info(ctx, "retrieved auto-certificate provider", map[string]interface{}{"provider_id": providerID})
+	tflog.Info(ctx, "retrieved auto-certificate provider", map[string]any{"provider_id": providerID})
 	if err := cert.SetProviderData(d, provider); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
@@ -171,7 +171,7 @@ func providerImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*s
 		}
 		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to import auto-certificate provider with ID: %v, error: %w", providerID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
-	tflog.Info(ctx, "auto-certificate provider imported", map[string]interface{}{"provider_id": providerID})
+	tflog.Info(ctx, "auto-certificate provider imported", map[string]any{"provider_id": providerID})
 	if err := d.Set("location", location); err != nil {
 		return nil, utils.GenerateSetError("Auto-certificate provider", "location", err)
 	}

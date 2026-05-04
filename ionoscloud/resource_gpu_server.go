@@ -359,7 +359,7 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta a
 			},
 		}
 		primaryNic = &(*server.Entities.Nics.Items)[0]
-		tflog.Debug(ctx, "nic dhcp", map[string]interface{}{"nic_dhcp": *nic.Properties.Dhcp, "primary_nic_dhcp": *primaryNic.Properties.Dhcp})
+		tflog.Debug(ctx, "nic dhcp", map[string]any{"nic_dhcp": *nic.Properties.Dhcp, "primary_nic_dhcp": *primaryNic.Properties.Dhcp})
 
 		var firewall ionoscloud.FirewallRule
 		if _, ok := d.GetOk("nic.0.firewall"); ok {

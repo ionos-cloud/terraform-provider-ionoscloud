@@ -273,7 +273,7 @@ func dataSourceServersRead(ctx context.Context, d *schema.ResourceData, meta any
 			name := strcase.ToLowerCamel(filter["name"].(string))
 			value := filter["value"].(string)
 			req = req.Filter(name, value)
-			tflog.Info(ctx, "adding server filter", map[string]interface{}{"name": name, "value": value})
+			tflog.Info(ctx, "adding server filter", map[string]any{"name": name, "value": value})
 		}
 	}
 	var apiResponse *ionoscloud.APIResponse

@@ -167,7 +167,7 @@ func (c *Client) IsDistributionReady(ctx context.Context, d *schema.ResourceData
 		return true, fmt.Errorf("status check failed for distribution with ID: %v, error: %w", distributionID, err)
 	}
 
-	tflog.Info(ctx, "distribution state", map[string]interface{}{"id": distributionID, "state": distribution.Metadata.State})
+	tflog.Info(ctx, "distribution state", map[string]any{"id": distributionID, "state": distribution.Metadata.State})
 	if utils.IsStateFailed(distribution.Metadata.State) {
 		return false, fmt.Errorf("distribution %s is in a failed state", d.Id())
 	}

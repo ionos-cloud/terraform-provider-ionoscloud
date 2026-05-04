@@ -94,7 +94,7 @@ func dataSourceReverseRecordReads(ctx context.Context, d *schema.ResourceData, m
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching DNS Reverse Records: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	if nameOk {
-		tflog.Info(ctx, "filtering DNS reverse records", map[string]interface{}{"name": recordName, "partial_match": partialMatch})
+		tflog.Info(ctx, "filtering DNS reverse records", map[string]any{"name": recordName, "partial_match": partialMatch})
 		if partialMatch {
 			for _, recordItem := range records.Items {
 				if strings.Contains(recordItem.Properties.Name, recordName) {

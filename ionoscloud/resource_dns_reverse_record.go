@@ -64,7 +64,7 @@ func reverseRecordRead(ctx context.Context, d *schema.ResourceData, meta any) di
 		}
 		return diagutil.ToDiags(d, fmt.Errorf("error while fetching the DNS Reverse Record: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
-	tflog.Info(ctx, "retrieved DNS reverse record", map[string]interface{}{"record_id": recordId})
+	tflog.Info(ctx, "retrieved DNS reverse record", map[string]any{"record_id": recordId})
 	if err := client.SetReverseRecordData(d, record); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
@@ -114,7 +114,7 @@ func reverseRecordImport(ctx context.Context, d *schema.ResourceData, meta any) 
 		}
 		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to import the DNS Reverse Record: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
-	tflog.Info(ctx, "DNS reverse record imported", map[string]interface{}{"record_id": recordId})
+	tflog.Info(ctx, "DNS reverse record imported", map[string]any{"record_id": recordId})
 	if err := client.SetReverseRecordData(d, record); err != nil {
 		return nil, diagutil.ToError(d, err, nil)
 	}

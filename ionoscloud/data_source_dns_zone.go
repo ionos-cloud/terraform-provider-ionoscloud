@@ -89,7 +89,7 @@ func dataSourceZoneRead(ctx context.Context, d *schema.ResourceData, meta any) d
 		}
 	} else {
 		var results []dns.ZoneRead
-		tflog.Info(ctx, "searching DNS zone by name", map[string]interface{}{"name": name, "partial_match": partialMatch})
+		tflog.Info(ctx, "searching DNS zone by name", map[string]any{"name": name, "partial_match": partialMatch})
 
 		if partialMatch {
 			// By default, when providing the name as a filter, for the GET requests, partial match
