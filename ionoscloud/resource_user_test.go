@@ -178,14 +178,14 @@ func TestUserWriteOnlyPassword(t *testing.T) {
 }
 
 func testAccCheckUserDestroyCheck(s *terraform.State) error {
-	client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
-	if err != nil {
-		return err
-	}
-
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 	if cancel != nil {
 		defer cancel()
+	}
+
+	client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
+	if err != nil {
+		return err
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -209,10 +209,6 @@ func testAccCheckUserDestroyCheck(s *terraform.State) error {
 
 func testAccCheckUserExists(n string, user *ionoscloud.User) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
-		if err != nil {
-			return err
-		}
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
@@ -227,6 +223,11 @@ func testAccCheckUserExists(n string, user *ionoscloud.User) resource.TestCheckF
 
 		if cancel != nil {
 			defer cancel()
+		}
+
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
+		if err != nil {
+			return err
 		}
 
 		foundUser, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, rs.Primary.ID).Execute()
@@ -247,10 +248,6 @@ func testAccCheckUserExists(n string, user *ionoscloud.User) resource.TestCheckF
 
 func testAccRemoveUserFromGroup(group, user string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
-		if err != nil {
-			return err
-		}
 		gr, ok := s.RootModule().Resources[group]
 		if !ok {
 			return fmt.Errorf("testAccRemoveUserFromGroup: group not found: %s", group)
@@ -269,6 +266,11 @@ func testAccRemoveUserFromGroup(group, user string) resource.TestCheckFunc {
 
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 		defer cancel()
+
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
+		if err != nil {
+			return err
+		}
 
 		apiResponse, err := client.UserManagementApi.UmGroupsUsersDelete(ctx, gr.Primary.ID, u.Primary.ID).Execute()
 		logApiRequestTime(apiResponse)

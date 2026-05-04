@@ -392,14 +392,14 @@ func TestAccGroupBasic(t *testing.T) {
 }
 
 func testAccCheckGroupDestroyCheck(s *terraform.State) error {
-	client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
-	if err != nil {
-		return err
-	}
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
 	if cancel != nil {
 		defer cancel()
+	}
+	client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
+	if err != nil {
+		return err
 	}
 	for _, rs := range s.RootModule().Resources {
 
@@ -424,11 +424,6 @@ func testAccCheckGroupDestroyCheck(s *terraform.State) error {
 
 func testAccCheckGroupExists(n string, group *ionoscloud.Group) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
-		if err != nil {
-			return err
-		}
-
 		rs, ok := s.RootModule().Resources[n]
 
 		if !ok {
@@ -443,6 +438,11 @@ func testAccCheckGroupExists(n string, group *ionoscloud.Group) resource.TestChe
 
 		if cancel != nil {
 			defer cancel()
+		}
+
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
+		if err != nil {
+			return err
 		}
 
 		foundgroup, apiResponse, err := client.UserManagementApi.UmGroupsFindById(ctx, rs.Primary.ID).Execute()

@@ -315,15 +315,15 @@ func testAccCheckDbaasMongoClusterExists(n string, cluster *mongo.ClusterRespons
 			return fmt.Errorf("no Record ID is set")
 		}
 
-		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewMongoClient(ctx, rs.Primary.Attributes["location"])
-		if err != nil {
-			return err
-		}
-
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 
 		if cancel != nil {
 			defer cancel()
+		}
+
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewMongoClient(ctx, rs.Primary.Attributes["location"])
+		if err != nil {
+			return err
 		}
 
 		foundCluster, _, err := client.GetCluster(ctx, rs.Primary.ID)

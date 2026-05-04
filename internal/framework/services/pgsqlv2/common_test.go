@@ -135,7 +135,7 @@ func checkClusterV2Exists(resourceAddr string) resource.TestCheckFunc {
 		if !ok {
 			return fmt.Errorf("not found: %s", resourceAddr)
 		}
-		client, err := acctest.NewTestBundleClientFromEnv().NewPgSQLV2Client(ctx, testLocation)
+		client, err := acctest.NewTestBundleClientFromEnv().NewPgSQLV2Client(context.Background(), testLocation)
 		if err != nil {
 			return fmt.Errorf("failed to create PgSQL v2 client: %w", err)
 		}
@@ -153,7 +153,7 @@ func checkClusterV2ExistsInLocation(resourceAddr, location string) resource.Test
 		if !ok {
 			return fmt.Errorf("not found: %s", resourceAddr)
 		}
-		client, err := acctest.NewTestBundleClientFromEnv().NewPgSQLV2Client(ctx, location)
+		client, err := acctest.NewTestBundleClientFromEnv().NewPgSQLV2Client(context.Background(), location)
 		if err != nil {
 			return fmt.Errorf("failed to create PgSQL v2 client for location %s: %w", location, err)
 		}
@@ -171,7 +171,7 @@ func checkClusterV2Destroy(s *terraform.State) error {
 			continue
 		}
 		location := rs.Primary.Attributes["location"]
-		client, err := acctest.NewTestBundleClientFromEnv().NewPgSQLV2Client(ctx, location)
+		client, err := acctest.NewTestBundleClientFromEnv().NewPgSQLV2Client(context.Background(), location)
 		if err != nil {
 			return fmt.Errorf("failed to create PgSQL v2 client for location %s: %w", location, err)
 		}

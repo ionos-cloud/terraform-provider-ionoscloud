@@ -61,12 +61,12 @@ func pgSqlUserExistsCheck(path string, user *pgsql.UserResource) resource.TestCh
 		if rs.Primary.ID == "" {
 			return fmt.Errorf("no ID is set for the PgSql user")
 		}
+		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+		defer cancel()
 		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewPsqlClient(ctx, rs.Primary.Attributes["location"])
 		if err != nil {
 			return err
 		}
-		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
-		defer cancel()
 		clusterId := rs.Primary.Attributes["cluster_id"]
 		username := rs.Primary.Attributes["username"]
 		foundUser, apiResponse, err := client.FindUserByUsername(ctx, clusterId, username)
