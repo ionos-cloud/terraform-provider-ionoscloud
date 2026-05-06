@@ -131,6 +131,22 @@ func TestAccCubeServerBasic(t *testing.T) {
 				ExpectError: regexp.MustCompile(`no server found with the specified criteria: name`),
 			},
 			{
+				Config:      testAccDataSourceCubeServerBothIdAndNameError,
+				ExpectError: regexp.MustCompile(`ID and name cannot be both specified in the same time`),
+			},
+			{
+				Config:      testAccDataSourceCubeServerNoIdNoNameError,
+				ExpectError: regexp.MustCompile(`please provide either the server id or name`),
+			},
+			{
+				Config:      testAccDataSourceCubeServerWrongIdError,
+				ExpectError: regexp.MustCompile(`an error occurred while fetching the server with ID`),
+			},
+			{
+				Config:      testAccDataSourceCubeServerMultipleResultsError,
+				ExpectError: regexp.MustCompile(`more than one server found with the specified criteria: name`),
+			},
+			{
 				Config: testAccCheckCubeServerConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCubeServerExists(constant.ServerCubeResource+"."+constant.ServerTestResource, &server),
@@ -501,6 +517,55 @@ const testAccDataSourceCubeServerWrongNameError = testAccCheckCubeServerConfigBa
 data ` + constant.ServerCubeResource + ` ` + constant.ServerDataSourceByName + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   name			= "wrong_name"
+}
+`
+
+const testAccDataSourceCubeServerBothIdAndNameError = testAccCheckCubeServerConfigBasic + `
+data ` + constant.ServerCubeResource + ` ` + constant.ServerDataSourceByName + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  id            = ` + constant.ServerCubeResource + `.` + constant.ServerTestResource + `.id
+  name          = "` + constant.ServerTestResource + `"
+}
+`
+
+const testAccDataSourceCubeServerNoIdNoNameError = testAccCheckCubeServerConfigBasic + `
+data ` + constant.ServerCubeResource + ` ` + constant.ServerDataSourceByName + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+}
+`
+
+const testAccDataSourceCubeServerWrongIdError = testAccCheckCubeServerConfigBasic + `
+data ` + constant.ServerCubeResource + ` ` + constant.ServerDataSourceById + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  id            = "00000000-0000-0000-0000-000000000000"
+}
+`
+
+const testAccDataSourceCubeServerMultipleResultsError = testAccCheckCubeServerConfigBasic + `
+resource ` + constant.ServerCubeResource + ` ` + constant.ServerTestResource + `_same_name {
+  template_uuid     = data.ionoscloud_template.` + constant.ServerTestResource + `.id
+  name = "` + constant.ServerTestResource + `"
+  hostname = "` + constant.ServerTestHostname + `"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  image_name = "ubuntu:latest"
+  image_password = ` + constant.RandomPassword + `.server_image_password.result
+  volume {
+    name = "system"
+    licence_type = "LINUX"
+    disk_type = "DAS"
+  }
+  nic {
+    lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
+    name = "system"
+    dhcp = true
+    firewall_active = false
+  }
+}
+
+data ` + constant.ServerCubeResource + ` ` + constant.ServerDataSourceByName + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  name          = "` + constant.ServerTestResource + `"
+  depends_on    = [` + constant.ServerCubeResource + `.` + constant.ServerTestResource + `_same_name]
 }
 `
 

@@ -98,6 +98,17 @@ func TestAccDataSourceServersBasic(t *testing.T) {
 				Config:      testAccCheck2ServersBadFilter,
 				ExpectError: regexp.MustCompile("no servers found for criteria, please check your filter configuration"),
 			},
+			{
+				Config: testAccDataSourceServersNoFilter,
+				// Expect 2: prior step's test_server2 is still being destroyed when the data source reads.
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.#", "2"),
+				),
+			},
+			{
+				Config:      testAccDataSourceServersWrongDatacenterIdError,
+				ExpectError: regexp.MustCompile(`an error occurred while fetching servers`),
+			},
 		},
 	})
 }
@@ -413,3 +424,51 @@ data ` + constant.ServersDataSource + ` ` + constant.ServerDataSourceByName + ` 
 
 const cpuFamilyTest = "INTEL_XEON"
 const noCoresTest = "1"
+
+const testAccDataSourceServersNoFilter = `
+resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
+	name       = "server-test"
+	location = "us/las"
+}
+
+resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  public = true
+  name = "public"
+}
+
+resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
+  name = "` + constant.ServerTestResource + `"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  cores = 2
+  ram = 2048
+  image_name ="ubuntu:latest"
+  image_password = ` + constant.RandomPassword + `.server_image_password.result
+  type = "ENTERPRISE"
+  volume {
+    name = "` + constant.VolumeTestResource + `"
+    size = 6
+    disk_type = "SSD Standard"
+    bus = "IDE"
+  }
+  nic {
+    lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
+    name = "` + constant.LanTestResource + `"
+    dhcp = false
+    firewall_active = false
+  }
+}
+
+` + ServerImagePassword + `
+
+data ` + constant.ServersDataSource + ` ` + constant.ServerDataSourceByName + ` {
+ depends_on    = [` + constant.ServerResource + `.` + constant.ServerTestResource + `]
+ datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+}
+`
+
+const testAccDataSourceServersWrongDatacenterIdError = `
+data ` + constant.ServersDataSource + ` ` + constant.ServerDataSourceByName + ` {
+  datacenter_id = "00000000-0000-0000-0000-000000000000"
+}
+`

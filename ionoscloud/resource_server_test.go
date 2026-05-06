@@ -201,6 +201,22 @@ func TestAccServerBasic(t *testing.T) {
 				ExpectError: regexp.MustCompile(`no server found with the specified criteria: name`),
 			},
 			{
+				Config:      testAccDataSourceServerBothIdAndNameError,
+				ExpectError: regexp.MustCompile(`ID and name cannot be both specified in the same time`),
+			},
+			{
+				Config:      testAccDataSourceServerNoIdNoNameError,
+				ExpectError: regexp.MustCompile(`please provide either the server id or name`),
+			},
+			{
+				Config:      testAccDataSourceServerWrongIdError,
+				ExpectError: regexp.MustCompile(`an error occurred while fetching the server with ID`),
+			},
+			{
+				Config:      testAccDataSourceServerMultipleResultsError,
+				ExpectError: regexp.MustCompile(`more than one server found with the specified criteria: name`),
+			},
+			{
 				Config: testAccCheckServerConfigIpv6Enabled,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(constant.ServerResource+"."+constant.ServerTestResource, "nic.0.dhcpv6", "true"),
@@ -1112,6 +1128,56 @@ const testAccDataSourceServerWrongNameError = testAccCheckServerConfigBasic + `
 data ` + constant.ServerResource + ` ` + constant.ServerDataSourceByName + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   name			= "wrong_name"
+}
+`
+
+const testAccDataSourceServerBothIdAndNameError = testAccCheckServerConfigBasic + `
+data ` + constant.ServerResource + ` ` + constant.ServerDataSourceByName + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  id            = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
+  name          = "` + constant.ServerTestResource + `"
+}
+`
+
+const testAccDataSourceServerNoIdNoNameError = testAccCheckServerConfigBasic + `
+data ` + constant.ServerResource + ` ` + constant.ServerDataSourceByName + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+}
+`
+
+const testAccDataSourceServerWrongIdError = testAccCheckServerConfigBasic + `
+data ` + constant.ServerResource + ` ` + constant.ServerDataSourceById + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  id            = "00000000-0000-0000-0000-000000000000"
+}
+`
+
+const testAccDataSourceServerMultipleResultsError = testAccCheckServerConfigBasic + `
+resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + `_same_name {
+  name              = "` + constant.ServerTestResource + `"
+  datacenter_id     = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  cores             = 1
+  ram               = 1024
+  availability_zone = "ZONE_1"
+  cpu_family        = "INTEL_XEON"
+  image_name        = "ubuntu:latest"
+  image_password    = ` + constant.RandomPassword + `.server_image_password.result
+  volume {
+    name      = "system"
+    size      = 5
+    disk_type = "SSD Standard"
+  }
+  nic {
+    lan             = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
+    dhcp            = true
+    firewall_active = false
+  }
+}
+
+data ` + constant.ServerResource + ` ` + constant.ServerDataSourceByName + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  name          = "` + constant.ServerTestResource + `"
+  depends_on    = [` + constant.ServerResource + `.` + constant.ServerTestResource + `_same_name]
 }
 `
 

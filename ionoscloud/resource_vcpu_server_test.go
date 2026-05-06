@@ -189,6 +189,26 @@ func TestAccServerVCPUBasic(t *testing.T) {
 				ExpectError: regexp.MustCompile(`no server found with the specified criteria: name`),
 			},
 			{
+				Config:      testAccDataSourceServerVCPUBothIdAndNameError,
+				ExpectError: regexp.MustCompile(`ID and name cannot be both specified in the same time`),
+			},
+			{
+				Config:      testAccDataSourceServerVCPUNoIdNoNameError,
+				ExpectError: regexp.MustCompile(`please provide either the server id or name`),
+			},
+			{
+				Config:      testAccDataSourceServerVCPUWrongIdError,
+				ExpectError: regexp.MustCompile(`an error occurred while fetching the server with ID`),
+			},
+			{
+				Config:      testAccDataSourceServerVCPUMultipleResultsError,
+				ExpectError: regexp.MustCompile(`more than one server found with the specified criteria: name`),
+			},
+			{
+				Config:      testAccDataSourceServerVCPUInvalidDatacenterIdError,
+				ExpectError: regexp.MustCompile(`expected .+ to be a valid UUID`),
+			},
+			{
 				Config: testAccCheckServerVCPUConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckServerVCPUExists(constant.ServerVCPUResource+"."+constant.ServerTestResource, &server),
@@ -944,6 +964,62 @@ const testAccDataSourceServerVCPUWrongNameError = testAccCheckServerVCPUConfigBa
 data ` + constant.ServerVCPUResource + ` ` + constant.ServerDataSourceByName + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   name			= "wrong_name"
+}
+`
+
+const testAccDataSourceServerVCPUBothIdAndNameError = testAccCheckServerVCPUConfigBasic + `
+data ` + constant.ServerVCPUResource + ` ` + constant.ServerDataSourceByName + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  id            = ` + constant.ServerVCPUResource + `.` + constant.ServerTestResource + `.id
+  name          = "` + constant.ServerTestResource + `"
+}
+`
+
+const testAccDataSourceServerVCPUNoIdNoNameError = testAccCheckServerVCPUConfigBasic + `
+data ` + constant.ServerVCPUResource + ` ` + constant.ServerDataSourceByName + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+}
+`
+
+const testAccDataSourceServerVCPUWrongIdError = testAccCheckServerVCPUConfigBasic + `
+data ` + constant.ServerVCPUResource + ` ` + constant.ServerDataSourceById + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  id            = "00000000-0000-0000-0000-000000000000"
+}
+`
+
+const testAccDataSourceServerVCPUMultipleResultsError = testAccCheckServerVCPUConfigBasic + `
+resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + `_same_name {
+  name              = "` + constant.ServerTestResource + `"
+  datacenter_id     = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  cores             = 1
+  ram               = 1024
+  availability_zone = "AUTO"
+  image_name        = "ubuntu:latest"
+  image_password    = ` + constant.RandomPassword + `.server_image_password.result
+  volume {
+    name      = "system"
+    size      = 5
+    disk_type = "SSD Standard"
+  }
+  nic {
+    lan             = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
+    dhcp            = true
+    firewall_active = false
+  }
+}
+
+data ` + constant.ServerVCPUResource + ` ` + constant.ServerDataSourceByName + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  name          = "` + constant.ServerTestResource + `"
+  depends_on    = [` + constant.ServerVCPUResource + `.` + constant.ServerTestResource + `_same_name]
+}
+`
+
+const testAccDataSourceServerVCPUInvalidDatacenterIdError = testAccCheckServerVCPUConfigBasic + `
+data ` + constant.ServerVCPUResource + ` ` + constant.ServerDataSourceByName + ` {
+  datacenter_id = "not-a-uuid"
+  name          = "anything"
 }
 `
 

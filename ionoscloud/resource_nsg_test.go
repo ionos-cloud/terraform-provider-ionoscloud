@@ -1,10 +1,11 @@
-//go:build compute || all
+//go:build compute || all || nsg
 
 package ionoscloud
 
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -58,6 +59,30 @@ func TestAccNSGBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NSGResource+"."+constant.NSGDataSourceByName, "description", constant.NSGResource+"."+constant.NSGTestResource, "description"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.NSGResource+"."+constant.NSGDataSourceByName, "rule_ids.#", constant.NSGResource+"."+constant.NSGTestResource, "rule_ids.#"),
 				),
+			},
+			{
+				Config:      testAccCheckNSGDataSourceBothIdAndNameError,
+				ExpectError: regexp.MustCompile(`id and name cannot be both specified at the same time`),
+			},
+			{
+				Config:      testAccCheckNSGDataSourceNoIdNoNameError,
+				ExpectError: regexp.MustCompile(`please provide either the network security group id or name`),
+			},
+			{
+				Config:      testAccCheckNSGDataSourceWrongIdError,
+				ExpectError: regexp.MustCompile(`an error occurred while retrieving network security group with ID`),
+			},
+			{
+				Config:      testAccCheckNSGDataSourceWrongNameError,
+				ExpectError: regexp.MustCompile(`no network security group found with the specified name`),
+			},
+			{
+				Config:      testAccCheckNSGDataSourceMultipleResultsError,
+				ExpectError: regexp.MustCompile(`more than one network security group found with the specified name`),
+			},
+			{
+				Config:      testAccCheckNSGDataSourceInvalidDatacenterIdError,
+				ExpectError: regexp.MustCompile(`expected .+ to be a valid UUID`),
 			},
 			{
 				Config: testAccCheckNSGConfigBasicUpdated,
@@ -385,6 +410,55 @@ const testAccCheckNSGDataSourceMatchName = testAccCheckNSGConfigBasic + `
 data ` + constant.NSGResource + ` ` + constant.NSGDataSourceByName + ` {
   name          = "testing-name"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+}
+`
+
+const testAccCheckNSGDataSourceBothIdAndNameError = testAccCheckNSGConfigBasic + `
+data ` + constant.NSGResource + ` ` + constant.NSGDataSourceByName + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  id            = ` + constant.NSGResource + `.` + constant.NSGTestResource + `.id
+  name          = "testing-name"
+}
+`
+
+const testAccCheckNSGDataSourceNoIdNoNameError = testAccCheckNSGConfigBasic + `
+data ` + constant.NSGResource + ` ` + constant.NSGDataSourceByName + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+}
+`
+
+const testAccCheckNSGDataSourceWrongIdError = testAccCheckNSGConfigBasic + `
+data ` + constant.NSGResource + ` ` + constant.NGDataSourceByID + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  id            = "00000000-0000-0000-0000-000000000000"
+}
+`
+
+const testAccCheckNSGDataSourceWrongNameError = testAccCheckNSGConfigBasic + `
+data ` + constant.NSGResource + ` ` + constant.NSGDataSourceByName + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  name          = "wrong_name"
+}
+`
+
+const testAccCheckNSGDataSourceMultipleResultsError = testAccCheckNSGConfigBasic + `
+resource ` + constant.NSGResource + ` ` + constant.NSGTestResource + `_same_name {
+  name          = "testing-name"
+  description   = "duplicate-name"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+}
+
+data ` + constant.NSGResource + ` ` + constant.NSGDataSourceByName + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  name          = "testing-name"
+  depends_on    = [` + constant.NSGResource + `.` + constant.NSGTestResource + `_same_name]
+}
+`
+
+const testAccCheckNSGDataSourceInvalidDatacenterIdError = testAccCheckNSGConfigBasic + `
+data ` + constant.NSGResource + ` ` + constant.NSGDataSourceByName + ` {
+  datacenter_id = "not-a-uuid"
+  name          = "anything"
 }
 `
 

@@ -35,6 +35,17 @@ func TestAccDataSourceLocationBasic(t *testing.T) {
 				Config:      testAccDataSourceLocationWrongFeature,
 				ExpectError: regexp.MustCompile("no location found with the specified criteria"),
 			},
+			{
+				Config:      testAccDataSourceLocationNoFilterError,
+				ExpectError: regexp.MustCompile(`either 'name' or 'feature' must be provided`),
+			},
+			{
+				Config: testAccDataSourceLocationByName,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(locationTestName, "id", "de/fra"),
+					resource.TestCheckResourceAttr(locationTestName, "name", "frankfurt"),
+				),
+			},
 		},
 	})
 
@@ -56,5 +67,16 @@ const testAccDataSourceLocationWrongFeature = `
 data ` + constant.LocationResource + ` ` + constant.LocationTestResource + ` {
 	  name = "frankfurt"
 	  feature = "wrong_feature"
+}
+`
+
+const testAccDataSourceLocationNoFilterError = `
+data ` + constant.LocationResource + ` ` + constant.LocationTestResource + ` {
+}
+`
+
+const testAccDataSourceLocationByName = `
+data ` + constant.LocationResource + ` ` + constant.LocationTestResource + ` {
+	  name = "frankfurt"
 }
 `
