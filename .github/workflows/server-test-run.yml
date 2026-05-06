@@ -27,5 +27,10 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version-file: 'go.mod'
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.5
+          terraform_wrapper: false
       - name: Run tests with `server` tag
         run: go test ./ionoscloud -v -failfast -timeout 240m -tags server

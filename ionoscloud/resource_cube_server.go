@@ -870,7 +870,9 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		}
 
 		if d.HasChange("nic.0.dhcpv6") {
-			if dhcpv6, ok := d.GetOkExists("nic.0.dhcpv6"); ok {
+			// GetOkExists is needed to distinguish unset from explicit false on this *bool;
+			// GetOk treats the zero value (false) as "not set" and would skip SetDhcpv6Nil incorrectly.
+			if dhcpv6, ok := d.GetOkExists("nic.0.dhcpv6"); ok { //nolint:staticcheck // SA1019: GetOkExists has no SDKv2 replacement for tri-state bools
 				dhcpv6 := dhcpv6.(bool)
 				properties.Dhcpv6 = &dhcpv6
 			} else {
