@@ -98,6 +98,16 @@ func TestAccDataSourceServersBasic(t *testing.T) {
 				Config:      testAccCheck2ServersBadFilter,
 				ExpectError: regexp.MustCompile("no servers found for criteria, please check your filter configuration"),
 			},
+			{
+				Config: testAccDataSourceServersNoFilter,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.ServersDataSource+"."+constant.ServerDataSourceByName, "servers.#", "2"),
+				),
+			},
+			{
+				Config:      testAccDataSourceServersWrongDatacenterIdError,
+				ExpectError: regexp.MustCompile(`an error occurred while fetching servers`),
+			},
 		},
 	})
 }
@@ -329,12 +339,12 @@ resource ` + constant.RandomPassword + ` "server2_image_password" {
 }
 
 data ` + constant.ServersDataSource + ` ` + constant.ServerDataSourceByName + ` {
- depends_on = [` + constant.ServerResource + `.` + constant.ServerTestResource + "2" + `,
+ depends_on = [` + constant.ServerResource + `.` + serverTestResource2 + `,
 	` + constant.ServerResource + `.` + constant.ServerTestResource + `]
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   filter {
    name = "cpu_family"
-   value = "` + cpuFamilyTest + `" 
+   value = "` + cpuFamilyTest + `"
   }
 } `
 
@@ -372,8 +382,8 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   }
 }
 
-resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + "2" + ` {
-  name = "` + constant.ServerTestResource + "2" + `"
+resource ` + constant.ServerResource + ` ` + serverTestResource2 + ` {
+  name = "` + serverTestResource2 + `"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = ` + noCoresTest + `
   ram = 2048
@@ -402,14 +412,88 @@ resource ` + constant.RandomPassword + ` "server2_image_password" {
 }
 
 data ` + constant.ServersDataSource + ` ` + constant.ServerDataSourceByName + ` {
- depends_on = [` + constant.ServerResource + `.` + constant.ServerTestResource + "2" + `,
+ depends_on = [` + constant.ServerResource + `.` + serverTestResource2 + `,
 	` + constant.ServerResource + `.` + constant.ServerTestResource + `]
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   filter {
    name = "cpu_family"
-   value = "doesNotExist" 
+   value = "doesNotExist"
   }
 } `
 
 const cpuFamilyTest = "INTEL_XEON"
 const noCoresTest = "1"
+
+const testAccDataSourceServersNoFilter = `
+resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
+	name       = "server-test"
+	location = "us/las"
+}
+
+resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  public = true
+  name = "public"
+}
+
+resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
+  name = "` + constant.ServerTestResource + `"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  cores = 2
+  ram = 2048
+  image_name ="ubuntu:latest"
+  image_password = ` + constant.RandomPassword + `.server_image_password.result
+  type = "ENTERPRISE"
+  volume {
+    name = "` + constant.VolumeTestResource + `"
+    size = 6
+    disk_type = "SSD Standard"
+    bus = "IDE"
+  }
+  nic {
+    lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
+    name = "` + constant.LanTestResource + `"
+    dhcp = false
+    firewall_active = false
+  }
+}
+
+resource ` + constant.ServerResource + ` ` + serverTestResource2 + ` {
+  name = "` + serverTestResource2 + `"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  cores = ` + noCoresTest + `
+  ram = 2048
+  image_name ="ubuntu:latest"
+  image_password = ` + constant.RandomPassword + `.server2_image_password.result
+  type = "ENTERPRISE"
+  volume {
+    name = "` + constant.VolumeTestResource + "2" + `"
+    size = 6
+    disk_type = "SSD Standard"
+    bus = "IDE"
+  }
+  nic {
+    lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
+    name = "` + constant.LanTestResource + "2" + `"
+    dhcp = false
+    firewall_active = false
+  }
+}
+
+` + ServerImagePassword + `
+resource ` + constant.RandomPassword + ` "server2_image_password" {
+  length           = 16
+  special          = false
+}
+
+data ` + constant.ServersDataSource + ` ` + constant.ServerDataSourceByName + ` {
+  depends_on    = [` + constant.ServerResource + `.` + constant.ServerTestResource + `, ` + constant.ServerResource + `.` + serverTestResource2 + `]
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+}
+`
+
+const testAccDataSourceServersWrongDatacenterIdError = `
+data ` + constant.ServersDataSource + ` ` + constant.ServerDataSourceByName + ` {
+  datacenter_id = "00000000-0000-0000-0000-000000000000"
+}
+`
