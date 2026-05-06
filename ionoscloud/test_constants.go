@@ -578,7 +578,6 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
     dhcp = true
     firewall_active = true
 	firewall_type = "BIDIRECTIONAL"
-    ips            = [""]
     firewall {
       protocol = "TCP"
       name = "SSH"

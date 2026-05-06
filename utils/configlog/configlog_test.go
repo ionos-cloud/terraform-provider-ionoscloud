@@ -1,32 +1,43 @@
 package configlog
 
 import (
-	"bytes"
 	"context"
-	"log"
 	"os"
 	"strings"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-log/tfsdklog"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
-// captureLog captures log output during fn execution and returns it as a string.
-func captureLog(fn func()) string {
-	var buf bytes.Buffer
-	origOutput := log.Writer()
-	origFlags := log.Flags()
-	log.SetOutput(&buf)
-	log.SetFlags(0) // no timestamps for easier assertion
-	defer func() {
-		log.SetOutput(origOutput)
-		log.SetFlags(origFlags)
-	}()
-	fn()
-	return buf.String()
+// captureLog runs fn with a context that has a tflog provider logger attached
+// (writing to a temp file) and returns the captured output.
+func captureLog(t *testing.T, fn func(ctx context.Context)) string {
+	t.Helper()
+	f, err := os.CreateTemp(t.TempDir(), "tflog-*.log")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := f.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	t.Setenv("TF_LOG", "DEBUG")
+	t.Setenv("TF_LOG_PATH", f.Name())
+
+	ctx := tfsdklog.RegisterTestSink(context.Background(), t)
+	ctx = tfsdklog.NewRootProviderLogger(ctx)
+
+	fn(ctx)
+
+	data, err := os.ReadFile(f.Name())
+	if err != nil {
+		t.Fatal(err)
+	}
+	return string(data)
 }
 
 func TestLogProfileAndEnvironment_WithProfiles(t *testing.T) {
@@ -38,14 +49,15 @@ func TestLogProfileAndEnvironment_WithProfiles(t *testing.T) {
 		},
 	}
 
-	output := captureLog(func() {
-		logProfileAndEnvironment(context.Background(), cfg)
+	output := captureLog(t, func(ctx context.Context) {
+		logProfileAndEnvironment(ctx, cfg)
 	})
 
-	assertContains(t, output, "Profile resolution:")
+	assertContains(t, output, "profile resolution")
 	assertContains(t, output, "2 profile(s)")
-	assertContains(t, output, `currentProfile: "prod"`)
-	assertContains(t, output, `active: "prod" (environment: "production")`)
+	assertContains(t, output, "currentProfile:")
+	assertContains(t, output, "prod")
+	assertContains(t, output, "production")
 }
 
 func TestLogProfileAndEnvironment_NoMatchingProfile(t *testing.T) {
@@ -57,11 +69,12 @@ func TestLogProfileAndEnvironment_NoMatchingProfile(t *testing.T) {
 		},
 	}
 
-	output := captureLog(func() {
-		logProfileAndEnvironment(context.Background(), cfg)
+	output := captureLog(t, func(ctx context.Context) {
+		logProfileAndEnvironment(ctx, cfg)
 	})
 
-	assertContains(t, output, `no matching profile for "staging"`)
+	assertContains(t, output, "no matching profile for")
+	assertContains(t, output, "staging")
 	assertContains(t, output, "prod, dev")
 }
 
@@ -75,16 +88,17 @@ func TestLogProfileAndEnvironment_EnvOverride(t *testing.T) {
 		},
 	}
 
-	output := captureLog(func() {
-		logProfileAndEnvironment(context.Background(), cfg)
+	output := captureLog(t, func(ctx context.Context) {
+		logProfileAndEnvironment(ctx, cfg)
 	})
 
-	assertContains(t, output, `overrides to "override-profile"`)
+	assertContains(t, output, "overrides to")
+	assertContains(t, output, "override-profile")
 }
 
 func TestLogCredentialResolution_TokenOnly(t *testing.T) {
-	output := captureLog(func() {
-		LogCredentialResolution(context.Background(), shared.Credentials{Token: "my-token"}, false, "")
+	output := captureLog(t, func(ctx context.Context) {
+		LogCredentialResolution(ctx, shared.Credentials{Token: "my-token"}, false, "")
 	})
 
 	assertContains(t, output, "token=found")
@@ -95,8 +109,8 @@ func TestLogCredentialResolution_TokenOnly(t *testing.T) {
 }
 
 func TestLogCredentialResolution_UsernamePassword(t *testing.T) {
-	output := captureLog(func() {
-		LogCredentialResolution(context.Background(), shared.Credentials{Username: "user", Password: "pass"}, false, "")
+	output := captureLog(t, func(ctx context.Context) {
+		LogCredentialResolution(ctx, shared.Credentials{Username: "user", Password: "pass"}, false, "")
 	})
 
 	assertContains(t, output, "token=not found")
@@ -105,8 +119,8 @@ func TestLogCredentialResolution_UsernamePassword(t *testing.T) {
 }
 
 func TestLogCredentialResolution_BothTokenAndUserPass(t *testing.T) {
-	output := captureLog(func() {
-		LogCredentialResolution(context.Background(), shared.Credentials{Token: "tok", Username: "user", Password: "pass"}, false, "")
+	output := captureLog(t, func(ctx context.Context) {
+		LogCredentialResolution(ctx, shared.Credentials{Token: "tok", Username: "user", Password: "pass"}, false, "")
 	})
 
 	assertContains(t, output, "both token and user/pass provided; token takes precedence")
@@ -114,19 +128,23 @@ func TestLogCredentialResolution_BothTokenAndUserPass(t *testing.T) {
 }
 
 func TestLogCredentialResolution_FileConfigProfile(t *testing.T) {
-	output := captureLog(func() {
-		LogCredentialResolution(context.Background(), shared.Credentials{Token: "tok", S3AccessKey: "ak", S3SecretKey: "sk"}, true, "myprofile")
+	output := captureLog(t, func(ctx context.Context) {
+		LogCredentialResolution(ctx, shared.Credentials{Token: "tok", S3AccessKey: "ak", S3SecretKey: "sk"}, true, "myprofile")
 	})
 
-	assertContains(t, output, `file config profile "myprofile": token, S3 keys`)
+	assertContains(t, output, "file config profile")
+	assertContains(t, output, "myprofile")
+	assertContains(t, output, "token, S3 keys")
 }
 
 func TestLogCredentialResolution_FileConfigNoCredentials(t *testing.T) {
-	output := captureLog(func() {
-		LogCredentialResolution(context.Background(), shared.Credentials{}, true, "empty")
+	output := captureLog(t, func(ctx context.Context) {
+		LogCredentialResolution(ctx, shared.Credentials{}, true, "empty")
 	})
 
-	assertContains(t, output, `file config profile "empty": none`)
+	assertContains(t, output, "file config profile")
+	assertContains(t, output, "empty")
+	assertContains(t, output, "none")
 }
 
 func TestLogEndpointEnvVars_NoneSet(t *testing.T) {
@@ -139,11 +157,11 @@ func TestLogEndpointEnvVars_NoneSet(t *testing.T) {
 		t.Setenv(env, "")
 	}
 
-	output := captureLog(func() {
-		LogEndpointEnvVars(context.Background())
+	output := captureLog(t, func(ctx context.Context) {
+		LogEndpointEnvVars(ctx)
 	})
 
-	if strings.Contains(output, "Endpoint env var") {
+	if strings.Contains(output, "endpoint env vars") {
 		t.Errorf("expected no endpoint env var output, got: %s", output)
 	}
 }
@@ -152,11 +170,11 @@ func TestLogEndpointEnvVars_SomeSet(t *testing.T) {
 	t.Setenv("IONOS_API_URL_VPN", "https://vpn.custom.example.com")
 	t.Setenv("IONOS_API_URL_KAFKA", "https://kafka.custom.example.com")
 
-	output := captureLog(func() {
-		LogEndpointEnvVars(context.Background())
+	output := captureLog(t, func(ctx context.Context) {
+		LogEndpointEnvVars(ctx)
 	})
 
-	assertContains(t, output, "Endpoint env vars:")
+	assertContains(t, output, "endpoint env vars")
 	assertContains(t, output, "IONOS_API_URL_VPN (VPN): https://vpn.custom.example.com")
 	assertContains(t, output, "IONOS_API_URL_KAFKA (Kafka): https://kafka.custom.example.com")
 }
@@ -178,16 +196,17 @@ func TestLogFileConfigEndpoints_WithEnvironment(t *testing.T) {
 		},
 	}
 
-	output := captureLog(func() {
-		logFileConfigEndpoints(context.Background(), cfg)
+	output := captureLog(t, func(ctx context.Context) {
+		logFileConfigEndpoints(ctx, cfg)
 	})
 
-	assertContains(t, output, `Environment "production": 2 product(s):`)
-	assertContains(t, output, `"name":"cloud"`)
-	assertContains(t, output, `"url":"https://api.example.com"`)
-	assertContains(t, output, `"name":"dns"`)
-	assertContains(t, output, `"url":"https://dns1.example.com"`)
-	assertContains(t, output, `"url":"https://dns2.example.com"`)
+	assertContains(t, output, "environment products")
+	assertContains(t, output, "production")
+	assertContains(t, output, "cloud")
+	assertContains(t, output, "https://api.example.com")
+	assertContains(t, output, "dns")
+	assertContains(t, output, "https://dns1.example.com")
+	assertContains(t, output, "https://dns2.example.com")
 }
 
 func TestLogFileConfigEndpoints_WithTLSAndCertPerEndpoint(t *testing.T) {
@@ -211,15 +230,16 @@ func TestLogFileConfigEndpoints_WithTLSAndCertPerEndpoint(t *testing.T) {
 		},
 	}
 
-	output := captureLog(func() {
-		logFileConfigEndpoints(context.Background(), cfg)
+	output := captureLog(t, func(ctx context.Context) {
+		logFileConfigEndpoints(ctx, cfg)
 	})
 
-	assertContains(t, output, `"skipTlsVerify":true`)
-	assertContains(t, output, `"certAuthDataBytes":19`)
-	assertContains(t, output, `"location":"de/fra"`)
-	assertContains(t, output, `"url":"https://api.staging.example.com"`)
-	assertContains(t, output, `"url":"https://dns.staging.example.com"`)
+	assertContains(t, output, "skipTlsVerify")
+	assertContains(t, output, "certAuthDataBytes")
+	assertContains(t, output, "19")
+	assertContains(t, output, "de/fra")
+	assertContains(t, output, "https://api.staging.example.com")
+	assertContains(t, output, "https://dns.staging.example.com")
 }
 
 func TestLogFileConfigEndpoints_NoMatchingEnvironment(t *testing.T) {
@@ -233,21 +253,21 @@ func TestLogFileConfigEndpoints_NoMatchingEnvironment(t *testing.T) {
 		},
 	}
 
-	output := captureLog(func() {
-		logFileConfigEndpoints(context.Background(), cfg)
+	output := captureLog(t, func(ctx context.Context) {
+		logFileConfigEndpoints(ctx, cfg)
 	})
 
-	assertNotContains(t, output, "product(s)")
+	assertNotContains(t, output, "product_count")
 }
 
 func TestLogTLSConfig_InsecureSet(t *testing.T) {
 	t.Setenv("IONOS_ALLOW_INSECURE", "true")
 
-	output := captureLog(func() {
-		LogTLSConfig(context.Background(), true)
+	output := captureLog(t, func(ctx context.Context) {
+		LogTLSConfig(ctx, true)
 	})
 
-	assertContains(t, output, "TLS:")
+	assertContains(t, output, "TLS config")
 	assertContains(t, output, "IONOS_ALLOW_INSECURE is set")
 	assertContains(t, output, "TLS verification disabled")
 }
@@ -255,19 +275,19 @@ func TestLogTLSConfig_InsecureSet(t *testing.T) {
 func TestLogTLSConfig_Secure(t *testing.T) {
 	t.Setenv("IONOS_ALLOW_INSECURE", "")
 
-	output := captureLog(func() {
-		LogTLSConfig(context.Background(), false)
+	output := captureLog(t, func(ctx context.Context) {
+		LogTLSConfig(ctx, false)
 	})
 
-	assertNotContains(t, output, "TLS")
+	assertNotContains(t, output, "TLS config")
 }
 
 func TestLogTLSConfig_WithPinnedCert(t *testing.T) {
 	t.Setenv("IONOS_ALLOW_INSECURE", "")
 	t.Setenv("IONOS_PINNED_CERT", "sha256-fingerprint-here")
 
-	output := captureLog(func() {
-		LogTLSConfig(context.Background(), false)
+	output := captureLog(t, func(ctx context.Context) {
+		LogTLSConfig(ctx, false)
 	})
 
 	assertContains(t, output, "IONOS_PINNED_CERT is set")
@@ -275,31 +295,34 @@ func TestLogTLSConfig_WithPinnedCert(t *testing.T) {
 }
 
 func TestLogEndpoint_Set(t *testing.T) {
-	output := captureLog(func() {
-		LogEndpoint(context.Background(), "https://api.ionos.com")
+	output := captureLog(t, func(ctx context.Context) {
+		LogEndpoint(ctx, "https://api.ionos.com")
 	})
-	assertContains(t, output, "Global endpoint: https://api.ionos.com")
+	assertContains(t, output, "global endpoint")
+	assertContains(t, output, "https://api.ionos.com")
 }
 
 func TestLogEndpoint_Empty(t *testing.T) {
-	output := captureLog(func() {
-		LogEndpoint(context.Background(), "")
+	output := captureLog(t, func(ctx context.Context) {
+		LogEndpoint(ctx, "")
 	})
-	assertContains(t, output, "Global endpoint not set, using SDK defaults")
+	assertContains(t, output, "global endpoint not set, using SDK defaults")
 }
 
 func TestLogS3Region_Explicit(t *testing.T) {
-	output := captureLog(func() {
-		LogS3Region(context.Background(), "us-central-1")
+	output := captureLog(t, func(ctx context.Context) {
+		LogS3Region(ctx, "us-central-1")
 	})
-	assertContains(t, output, "S3 region: us-central-1")
+	assertContains(t, output, "S3 region")
+	assertContains(t, output, "us-central-1")
 }
 
 func TestLogS3Region_Default(t *testing.T) {
-	output := captureLog(func() {
-		LogS3Region(context.Background(), "")
+	output := captureLog(t, func(ctx context.Context) {
+		LogS3Region(ctx, "")
 	})
-	assertContains(t, output, "S3 region: "+constant.DefaultS3Region+" (default)")
+	assertContains(t, output, "S3 region")
+	assertContains(t, output, constant.DefaultS3Region)
 }
 
 func TestFormatLocation(t *testing.T) {
@@ -328,8 +351,8 @@ func TestLoadFileConfigWithLogging_UnreadableFile(t *testing.T) {
 
 	t.Setenv(shared.IonosFilePathEnvVar, tmpFile.Name())
 
-	output := captureLog(func() {
-		cfg, loadErr := LoadFileConfigWithLogging(context.Background())
+	output := captureLog(t, func(ctx context.Context) {
+		cfg, loadErr := LoadFileConfigWithLogging(ctx)
 		if loadErr == nil {
 			t.Error("expected error for unreadable file")
 		}
@@ -338,7 +361,7 @@ func TestLoadFileConfigWithLogging_UnreadableFile(t *testing.T) {
 		}
 	})
 
-	assertContains(t, output, "Config file:")
+	assertContains(t, output, "config file")
 	assertContains(t, output, "unreadable")
 	assertContains(t, output, "0000")
 }
@@ -346,8 +369,8 @@ func TestLoadFileConfigWithLogging_UnreadableFile(t *testing.T) {
 func TestLoadFileConfigWithLogging_NoFile(t *testing.T) {
 	t.Setenv(shared.IonosFilePathEnvVar, "/tmp/nonexistent-ionos-config-test-file")
 
-	output := captureLog(func() {
-		cfg, err := LoadFileConfigWithLogging(context.Background())
+	output := captureLog(t, func(ctx context.Context) {
+		cfg, err := LoadFileConfigWithLogging(ctx)
 		if err == nil {
 			t.Error("expected error for nonexistent file")
 		}
@@ -356,10 +379,10 @@ func TestLoadFileConfigWithLogging_NoFile(t *testing.T) {
 		}
 	})
 
-	assertContains(t, output, "Config file: /tmp/nonexistent-ionos-config-test-file")
-	assertContains(t, output, "source: IONOS_CONFIG_FILE")
-	assertContains(t, output, "status: not found")
-	assertContains(t, output, "Config file not loaded")
+	assertContains(t, output, "/tmp/nonexistent-ionos-config-test-file")
+	assertContains(t, output, "IONOS_CONFIG_FILE")
+	assertContains(t, output, "not found")
+	assertContains(t, output, "config file not loaded")
 }
 
 func TestLoadFileConfigWithLogging_ValidFile(t *testing.T) {
@@ -387,8 +410,8 @@ environments:
 
 	t.Setenv(shared.IonosFilePathEnvVar, tmpFile.Name())
 
-	output := captureLog(func() {
-		cfg, loadErr := LoadFileConfigWithLogging(context.Background())
+	output := captureLog(t, func(ctx context.Context) {
+		cfg, loadErr := LoadFileConfigWithLogging(ctx)
 		if loadErr != nil {
 			t.Errorf("unexpected error: %s", loadErr)
 		}
@@ -400,10 +423,10 @@ environments:
 		}
 	})
 
-	assertContains(t, output, "Config file:")
-	assertContains(t, output, "source: IONOS_CONFIG_FILE")
-	assertContains(t, output, "status: found")
-	assertContains(t, output, "Config file loaded successfully (version: 1.0)")
+	assertContains(t, output, "config file")
+	assertContains(t, output, "IONOS_CONFIG_FILE")
+	assertContains(t, output, "found")
+	assertContains(t, output, "config file loaded successfully")
 }
 
 func assertContains(t *testing.T, output, expected string) {

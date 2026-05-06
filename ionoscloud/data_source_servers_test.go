@@ -195,7 +195,7 @@ resource ` + constant.ServerResource + ` ` + serverTestResource2 + ` {
     bus = "IDE"
 	}
   nic {
-    lan = 1
+    lan = ionoscloud_lan.test_lan.id
     name = "` + constant.LanTestResource + "2" + `"
     dhcp = false
     firewall_active = false
@@ -297,7 +297,7 @@ resource ` + constant.ServerResource + ` ` + serverTestResource2 + ` {
     bus = "IDE"
 	}
   nic {
-    lan = 1
+    lan = ionoscloud_lan.test_lan.id
     name = "` + constant.LanTestResource + "2" + `"
     dhcp = false
     firewall_active = false
@@ -388,7 +388,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + "2" +
     bus = "IDE"
 	}
   nic {
-    lan = 1
+    lan = ionoscloud_lan.test_lan.id
     name = "` + constant.LanTestResource + "2" + `"
     dhcp = false
     firewall_active = false

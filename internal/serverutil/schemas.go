@@ -1,6 +1,8 @@
 package serverutil
 
 import (
+	"maps"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -88,7 +90,6 @@ var SchemaNicElem = map[string]*schema.Schema{
 		Description: "Firewall rules created in the server resource. The rules can also be created as separate resources outside the server resource",
 		Type:        schema.TypeList,
 		Optional:    true,
-		MaxItems:    1,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"id": {
@@ -143,6 +144,16 @@ var SchemaNicElem = map[string]*schema.Schema{
 			},
 		},
 	},
+}
+
+// SchemaNicElemSingleFirewall returns a copy of SchemaNicElem that allows
+// only one inline firewall rule per NIC. Used by Cube and GPU servers.
+func SchemaNicElemSingleFirewall() map[string]*schema.Schema {
+	cloned := maps.Clone(SchemaNicElem)
+	fw := *SchemaNicElem["firewall"]
+	fw.MaxItems = 1
+	cloned["firewall"] = &fw
+	return cloned
 }
 
 var SchemaTemplatedDatasource = map[string]*schema.Schema{
