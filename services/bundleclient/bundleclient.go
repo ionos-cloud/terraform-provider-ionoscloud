@@ -36,6 +36,7 @@ import (
 	nfsService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/nfs"
 	objectStorageService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstorage"
 	objectStorageManagementService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstoragemanagement"
+	userObjectStorageService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/userobjectstorage"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/vpn"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/configlog"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
@@ -55,6 +56,7 @@ func New(ctx context.Context, clientOptions clientoptions.TerraformClientOptions
 		VPNClient:         vpn.NewClient(clientOptions, fileConfig),
 		InMemoryDBClient:  inmemorydb.NewClient(clientOptions, fileConfig),
 		S3Client:          objectStorageService.NewClient(ctx, clientOptions, fileConfig),
+		UserS3Client:      userObjectStorageService.NewClient(ctx, clientOptions),
 		MonitoringClient:  monitoringService.NewClient(clientOptions, fileConfig),
 
 		clientOptions: clientOptions,
@@ -77,6 +79,7 @@ type SdkBundle struct {
 	CDNClient         *cdnService.Client
 	VPNClient         *vpn.Client
 	S3Client          *objectStorageService.Client
+	UserS3Client      *userObjectStorageService.Client
 	MonitoringClient  *monitoringService.Client
 
 	clientOptions clientoptions.TerraformClientOptions

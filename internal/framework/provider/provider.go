@@ -16,12 +16,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/compute"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/kafka"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/monitoring"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/objectstorage"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/objectstoragemanagement"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/pgsqlv2"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/userobjectstorage"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
 	contractService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/contract"
@@ -267,6 +269,7 @@ func (p *IonosCloudProvider) Resources(_ context.Context) []func() resource.Reso
 		objectstoragemanagement.Resources(),
 		monitoring.Resources(),
 		pgsqlv2.Resources(),
+		userobjectstorage.Resources(),
 	}
 
 	for _, r := range resources {

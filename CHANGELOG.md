@@ -1,5 +1,8 @@
 ## Upcoming
 
+### Features
+- New resource: `ionoscloud_user_object_storage_bucket` for user-owned IONOS object storage buckets.
+
 ### Documentation
 - Improve share docs
 
