@@ -66,6 +66,14 @@ func TestAccDataSourceTemplate(t *testing.T) {
 				Config:      testAccDataSourceTemplateStorageWrongStorage,
 				ExpectError: regexp.MustCompile(`no template found with the specified criteria`),
 			},
+			{
+				Config:      testAccDataSourceTemplateNoCriteriaMultipleError,
+				ExpectError: regexp.MustCompile(`more than one template found`),
+			},
+			{
+				Config:      testAccDataSourceTemplatePartialNameMultipleError,
+				ExpectError: regexp.MustCompile(`more than one template found`),
+			},
 		},
 	})
 
@@ -124,4 +132,13 @@ data ` + constant.TemplateResource + ` ` + constant.TemplateTestResource + ` {
 	cores		 = 6
 	ram			 = 16384
 	storage_size = 50
+}`
+
+const testAccDataSourceTemplateNoCriteriaMultipleError = `
+data ` + constant.TemplateResource + ` ` + constant.TemplateTestResource + ` {
+}`
+
+const testAccDataSourceTemplatePartialNameMultipleError = `
+data ` + constant.TemplateResource + ` ` + constant.TemplateTestResource + ` {
+	name = "Basic Cube"
 }`

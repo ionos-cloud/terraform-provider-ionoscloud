@@ -94,6 +94,18 @@ func TestAccIPBlockBasic(t *testing.T) {
 				ExpectError: regexp.MustCompile(`location of ip block`),
 			},
 			{
+				Config:      testAccDataSourceIpBlockNoFilterError,
+				ExpectError: regexp.MustCompile(`either id, location or name must be set`),
+			},
+			{
+				Config:      testAccDataSourceIpBlockWrongIdError,
+				ExpectError: regexp.MustCompile(`error getting ip block with id`),
+			},
+			{
+				Config:      testAccDataSourceIpBlockGoodIdNameError,
+				ExpectError: regexp.MustCompile(`name of ip block \(UUID=.+, name=.+\) does not match expected name`),
+			},
+			{
 				Config: testAccCheckIPBlockConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIPBlockExists(fullIpBlockResourceName, &ipblock),
@@ -245,4 +257,19 @@ const testIpBlockGoodIdLocationError = testAccCheckIPBlockConfigBasic + `
 data ` + constant.IpBlockResource + ` ` + constant.IpBlockDataSourceByName + ` {
     id = ` + fullIpBlockResourceName + `.id
 	location = "none"
+}`
+
+const testAccDataSourceIpBlockNoFilterError = testAccCheckIPBlockConfigBasic + `
+data ` + constant.IpBlockResource + ` ` + constant.IpBlockDataSourceByName + ` {
+}`
+
+const testAccDataSourceIpBlockWrongIdError = testAccCheckIPBlockConfigBasic + `
+data ` + constant.IpBlockResource + ` ` + constant.IpBlockDataSourceById + ` {
+    id = "00000000-0000-0000-0000-000000000000"
+}`
+
+const testAccDataSourceIpBlockGoodIdNameError = testAccCheckIPBlockConfigBasic + `
+data ` + constant.IpBlockResource + ` ` + constant.IpBlockDataSourceByName + ` {
+    id   = ` + fullIpBlockResourceName + `.id
+    name = "wrong_name"
 }`

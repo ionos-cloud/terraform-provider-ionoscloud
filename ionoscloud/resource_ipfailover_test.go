@@ -5,6 +5,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
@@ -57,6 +58,26 @@ func TestAccLanIPFailoverBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.IpfailoverResourceFullName, "lan_id", constant.DataSource+"."+constant.ResourceIpFailover+"."+constant.IpfailoverName, "lan_id"),
 					resource.TestCheckResourceAttrPair(constant.IpfailoverResourceFullName, "datacenter_id", constant.DataSource+"."+constant.ResourceIpFailover+"."+constant.IpfailoverName, "datacenter_id"),
 				),
+			},
+			{
+				Config:      testAccDataSourceIpFailoverWrongIpError,
+				ExpectError: regexp.MustCompile(`IP Failover Group with IP: .+ does not exist in the LAN with ID`),
+			},
+			{
+				Config:      testAccDataSourceIpFailoverWrongLanIdError,
+				ExpectError: regexp.MustCompile(`unable to find the LAN with ID`),
+			},
+			{
+				Config:      testAccDataSourceIpFailoverInvalidIpError,
+				ExpectError: regexp.MustCompile(`expected .+ to contain a valid IP`),
+			},
+			{
+				Config:      testAccDataSourceIpFailoverInvalidDcIdError,
+				ExpectError: regexp.MustCompile(`expected .+ to be a valid UUID`),
+			},
+			{
+				Config:      testAccDataSourceIpFailoverWhitespaceLanIdError,
+				ExpectError: regexp.MustCompile(`to not be an empty string or whitespace`),
 			},
 			{
 				Config: testAccCheckLanIPFailoverGroupUpdateIp,
@@ -453,5 +474,45 @@ data ` + constant.ResourceIpFailover + " " + constant.IpfailoverName + `{
   datacenter_id = ionoscloud_datacenter.foobar.id
   lan_id = ` + constant.ResourceIpFailover + `.` + constant.IpfailoverName + `.lan_id
   ip = ` + constant.ResourceIpFailover + `.` + constant.IpfailoverName + `.ip
+}
+`
+
+var testAccDataSourceIpFailoverWrongIpError = testAccCheckLanIPFailoverConfig + `
+data ` + constant.ResourceIpFailover + " " + constant.IpfailoverName + ` {
+  datacenter_id = ionoscloud_datacenter.foobar.id
+  lan_id        = ` + constant.ResourceIpFailover + `.` + constant.IpfailoverName + `.lan_id
+  ip            = "10.0.0.1"
+}
+`
+
+var testAccDataSourceIpFailoverWrongLanIdError = testAccCheckLanIPFailoverConfig + `
+data ` + constant.ResourceIpFailover + " " + constant.IpfailoverName + ` {
+  datacenter_id = ionoscloud_datacenter.foobar.id
+  lan_id        = "999999"
+  ip            = ` + constant.ResourceIpFailover + `.` + constant.IpfailoverName + `.ip
+}
+`
+
+var testAccDataSourceIpFailoverInvalidIpError = testAccCheckLanIPFailoverConfig + `
+data ` + constant.ResourceIpFailover + " " + constant.IpfailoverName + ` {
+  datacenter_id = ionoscloud_datacenter.foobar.id
+  lan_id        = ` + constant.ResourceIpFailover + `.` + constant.IpfailoverName + `.lan_id
+  ip            = "not-an-ip"
+}
+`
+
+var testAccDataSourceIpFailoverInvalidDcIdError = testAccCheckLanIPFailoverConfig + `
+data ` + constant.ResourceIpFailover + " " + constant.IpfailoverName + ` {
+  datacenter_id = "not-a-uuid"
+  lan_id        = ` + constant.ResourceIpFailover + `.` + constant.IpfailoverName + `.lan_id
+  ip            = ` + constant.ResourceIpFailover + `.` + constant.IpfailoverName + `.ip
+}
+`
+
+var testAccDataSourceIpFailoverWhitespaceLanIdError = testAccCheckLanIPFailoverConfig + `
+data ` + constant.ResourceIpFailover + " " + constant.IpfailoverName + ` {
+  datacenter_id = ionoscloud_datacenter.foobar.id
+  lan_id        = "   "
+  ip            = ` + constant.ResourceIpFailover + `.` + constant.IpfailoverName + `.ip
 }
 `

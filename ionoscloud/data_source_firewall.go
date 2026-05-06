@@ -126,7 +126,7 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta an
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching backup unit: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching firewall rules: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 
 		var results []ionoscloud.FirewallRule

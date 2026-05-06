@@ -11,6 +11,9 @@
 - Add more information to error messages
 - Use tflog instead of print
 
+### Testing 
+- Add more test cases for `compute` data sources.
+
 ## 6.7.28
 ### Fixes
 - Fix possible type assertion panic in `location` and `template` data sources.
