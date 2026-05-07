@@ -4,7 +4,7 @@ layout: "ionoscloud"
 page_title: "IONOS CLOUD: s3_bucket"
 sidebar_current: "docs-ionoscloud-datasource-s3_bucket"
 description: |-
-  Get information about IONOS CLOUD IONOS Object Storage Buckets.
+  Get information about IONOS CLOUD Object Storage Buckets.
 ---
 
 # ionoscloud_s3_bucket

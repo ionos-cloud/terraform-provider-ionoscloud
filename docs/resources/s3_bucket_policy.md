@@ -4,7 +4,7 @@ layout: "ionoscloud"
 page_title: "IONOS CLOUD: s3_bucket_policy"
 sidebar_current: "docs-resource-s3_bucket_policy"
 description: |-
-  Creates and manages IONOS CLOUD IONOS Object Storage Buckets policies.
+  Creates and manages IONOS CLOUD Object Storage Buckets policies.
 ---
 
 # ionoscloud_s3_bucket_policy
