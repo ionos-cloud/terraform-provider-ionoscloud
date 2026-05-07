@@ -95,8 +95,8 @@ func resourceLanIPFailoverCreate(ctx context.Context, d *schema.ResourceData, me
 		NicUuid: &nicUuid,
 	})
 
-	// Modify the LAN using the new list
-	lan, apiResponse, err = client.LANsApi.DatacentersLansPatch(ctx, dcId, lanId).Lan(*lan.Properties).Execute()
+	patchProps := ionoscloud.LanProperties{IpFailover: lan.Properties.IpFailover}
+	_, apiResponse, err = client.LANsApi.DatacentersLansPatch(ctx, dcId, lanId).Lan(patchProps).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
 		requestLocation, _ := apiResponse.SafeLocation()
@@ -203,7 +203,8 @@ func resourceLanIPFailoverUpdate(ctx context.Context, d *schema.ResourceData, me
 			NicUuid: &oldNicUuid,
 		})
 
-		_, apiResponse, err = client.LANsApi.DatacentersLansPatch(ctx, dcId, lanId).Lan(*lan.Properties).Execute()
+		patchProps := ionoscloud.LanProperties{IpFailover: lan.Properties.IpFailover}
+		_, apiResponse, err = client.LANsApi.DatacentersLansPatch(ctx, dcId, lanId).Lan(patchProps).Execute()
 		apiResponse.LogInfo()
 		if err != nil {
 			requestLocation, _ := apiResponse.SafeLocation()
@@ -248,7 +249,8 @@ func resourceLanIPFailoverDelete(ctx context.Context, d *schema.ResourceData, me
 		NicUuid: &nicUuid,
 	})
 
-	_, apiResponse, err = client.LANsApi.DatacentersLansPatch(ctx, dcId, lanId).Lan(*lan.Properties).Execute()
+	patchProps := ionoscloud.LanProperties{IpFailover: lan.Properties.IpFailover}
+	_, apiResponse, err = client.LANsApi.DatacentersLansPatch(ctx, dcId, lanId).Lan(patchProps).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
 		requestLocation, _ := apiResponse.SafeLocation()

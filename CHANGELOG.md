@@ -1,5 +1,8 @@
 ## Upcoming
 
+### Fixes
+- Fix IP Failover resource
+
 ### Documentation
 - Improve share docs
 
