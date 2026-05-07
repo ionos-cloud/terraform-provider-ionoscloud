@@ -57,6 +57,15 @@ jobs:
         with:
           go-version-file: 'go.mod'
 
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
+        with:
+          terraform_version: 1.9.5
+          terraform_wrapper: false
+
+      - name: Export terraform path for acctests
+        run: echo "TF_ACC_TERRAFORM_PATH=$(which terraform)" >> $GITHUB_ENV
+
       - name: Install dependencies
         run: go mod tidy
 
