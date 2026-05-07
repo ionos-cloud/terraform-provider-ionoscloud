@@ -1,7 +1,7 @@
 ---
 subcategory: "Application Load Balancer"
 layout: "ionoscloud"
-page_title: "IonosCloud : ionoscloud_target_group"
+page_title: "IONOS CLOUD : ionoscloud_target_group"
 sidebar_current: "docs-ionoscloud_target_group"
 description: |-
   Get information on an Target Group

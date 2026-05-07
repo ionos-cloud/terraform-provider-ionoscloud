@@ -1,7 +1,7 @@
 ---
 subcategory: "Database as a Service - MongoDB"
 layout: "ionoscloud"
-page_title: "IonosCloud: ionoscloud_mongo_template"
+page_title: "IONOS CLOUD: ionoscloud_mongo_template"
 sidebar_current: "docs-ionoscloud_mongo_template"
 description: |-
   Get information on DbaaS MongoDB Cluster objects.

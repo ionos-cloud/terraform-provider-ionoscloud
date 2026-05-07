@@ -1,15 +1,15 @@
 ---
 subcategory: "Managed Backup"
 layout: "ionoscloud"
-page_title: "IonosCloud: backup_unit"
+page_title: "IONOS CLOUD: backup_unit"
 sidebar_current: "docs-resource-backup-unit"
 description: |-
-  Creates and manages IonosCloud Backup Units.
+  Creates and manages IONOS CLOUD Backup Units.
 ---
 
 # ionoscloud_backup_unit
 
-Manages a [Backup Unit](https://docs.ionos.com/cloud/storage-and-backup/backup-service/overview) on IonosCloud.
+Manages a [Backup Unit](https://docs.ionos.com/cloud/storage-and-backup/backup-service/overview) on IONOS CLOUD.
 
 ## Example Usage
 

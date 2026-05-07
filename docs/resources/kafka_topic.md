@@ -1,15 +1,15 @@
 ---
 subcategory: "Event Streams for Apache Kafka"
 layout: "ionoscloud"
-page_title: "IonosCloud: ionoscloud_kafka_cluster_topic"
+page_title: "IONOS CLOUD: ionoscloud_kafka_cluster_topic"
 sidebar_current: "docs-resource-kafka-topic"
 description: |-
-  Creates and manages IonosCloud Kafka Cluster Topic objects.
+  Creates and manages IONOS CLOUD Kafka Cluster Topic objects.
 ---
 
 # ionoscloud_kafka_cluster_topic
 
-Manages a **Kafka Cluster Topic** on IonosCloud.
+Manages a **Kafka Cluster Topic** on IONOS CLOUD.
 
 ## Example Usage
 

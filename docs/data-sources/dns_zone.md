@@ -1,7 +1,7 @@
 ---
 subcategory: "Cloud DNS"
 layout: "ionoscloud"
-page_title: "IonosCloud : ionoscloud_dns_zone"
+page_title: "IONOS CLOUD : ionoscloud_dns_zone"
 sidebar_current: "docs-dns_zone"
 description: |-
   Get information on a DNS Zone.

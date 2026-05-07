@@ -1,15 +1,15 @@
 ---
 subcategory: "Object Storage"
 layout: "ionoscloud"
-page_title: "IonosCloud: s3_bucket_policy"
+page_title: "IONOS CLOUD: s3_bucket_policy"
 sidebar_current: "docs-resource-s3_bucket_policy"
 description: |-
-  Creates and manages IonosCloud IONOS Object Storage Buckets policies.
+  Creates and manages IONOS CLOUD IONOS Object Storage Buckets policies.
 ---
 
 # ionoscloud_s3_bucket_policy
 
-Manages **Buckets policies** on IonosCloud.
+Manages **Buckets policies** on IONOS CLOUD.
 
 ⚠️ **Note:** The Terraform provider **only supports contract-owned buckets. User-owned buckets are not supported,** and there are no plans to introduce support for them. As a result, **user-owned buckets cannot be created, updated, deleted, read, or imported** using this provider.
 
@@ -53,7 +53,7 @@ resource "ionoscloud_s3_bucket_policy" "example" {
 
 ```
 
-⚠️ **Note:** For more information about the bucket policy or the policy format, please see the [IonosCloud Object Storage documentation](https://docs.ionos.com/cloud/storage-and-backup/ionos-object-storage/settings/bucket-policy#policy-format).
+⚠️ **Note:** For more information about the bucket policy or the policy format, please see the [IONOS CLOUD Object Storage documentation](https://docs.ionos.com/cloud/storage-and-backup/ionos-object-storage/settings/bucket-policy#policy-format).
 
 ## Argument Reference
 

@@ -1,7 +1,7 @@
 ---
 subcategory: "Compute Engine"
 layout: "ionoscloud"
-page_title: "IonosCloud: ipfailover"
+page_title: "IONOS CLOUD: ipfailover"
 sidebar_current: "docs-resource-ipfailover"
 description: |-
   Creates and manages ipfailover objects.
@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_ipfailover
 
-Manages **IP Failover** groups on IonosCloud.
+Manages **IP Failover** groups on IONOS CLOUD.
 
 ## Example Usage
 

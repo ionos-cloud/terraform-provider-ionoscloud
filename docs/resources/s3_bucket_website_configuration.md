@@ -1,15 +1,15 @@
 ---
 subcategory: "Object Storage"
 layout: "ionoscloud"
-page_title: "IonosCloud: s3_bucket_website_configuration"
+page_title: "IONOS CLOUD: s3_bucket_website_configuration"
 sidebar_current: "docs-resource-s3_bucket_website_configuration"
 description: |-
-  Manages Buckets website configuration on IonosCloud.
+  Manages Buckets website configuration on IONOS CLOUD.
 ---
 
 # ionoscloud_s3_bucket_website_configuration
 
-Manages Website Configuration for Buckets on IonosCloud.
+Manages Website Configuration for Buckets on IONOS CLOUD.
 
 ⚠️ **Note:** The Terraform provider **only supports contract-owned buckets. User-owned buckets are not supported,** and there are no plans to introduce support for them. As a result, **user-owned buckets cannot be created, updated, deleted, read, or imported** using this provider.
 

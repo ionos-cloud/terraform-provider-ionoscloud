@@ -9,6 +9,7 @@
 
 ### Documentation
 - Improve share docs
+- Align brand capitalisation to "IONOS CLOUD" across user-facing docs, schema descriptions, and error messages
 
 ### Enhancements
 - Add validation error when update-only attributes are set during snapshot creation

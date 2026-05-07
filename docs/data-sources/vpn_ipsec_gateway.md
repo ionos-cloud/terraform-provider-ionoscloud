@@ -1,10 +1,10 @@
 ---
 subcategory: "VPN"
 layout: "ionoscloud"
-page_title: "IonosCloud: ionoscloud_vpn_ipsec_gateway"
+page_title: "IONOS CLOUD: ionoscloud_vpn_ipsec_gateway"
 sidebar_current: "docs-ionoscloud-datasource-vpn-ipsec-gateway"
 description: |-
-  Reads IonosCloud VPN IPSec Gateway objects.
+  Reads IONOS CLOUD VPN IPSec Gateway objects.
 ---
 
 # ionoscloud_vpn_ipsec_gateway

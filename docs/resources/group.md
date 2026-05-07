@@ -1,7 +1,7 @@
 ---
 subcategory: "User Management"
 layout: "ionoscloud"
-page_title: "IonosCloud: group"
+page_title: "IONOS CLOUD: group"
 sidebar_current: "docs-resource-group"
 description: |-
   Creates and manages group objects.
@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_group
 
-Manages **Groups** and **Group Privileges** on IonosCloud.
+Manages **Groups** and **Group Privileges** on IONOS CLOUD.
 
 ## Example Usage
 

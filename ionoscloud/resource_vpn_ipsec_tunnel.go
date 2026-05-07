@@ -153,7 +153,7 @@ func resourceVpnIPSecTunnel() *schema.Resource {
 			},
 			"cloud_network_cidrs": {
 				Type:        schema.TypeList,
-				Description: `The network CIDRs on the "Left" side that are allowed to connect to the IPSec tunnel, i.e. the CIDRs within your IONOS Cloud LAN. Specify "0.0.0.0/0" or "::/0" for all addresses.`,
+				Description: `The network CIDRs on the "Left" side that are allowed to connect to the IPSec tunnel, i.e. the CIDRs within your IONOS CLOUD LAN. Specify "0.0.0.0/0" or "::/0" for all addresses.`,
 				Required:    true,
 				MinItems:    1,
 				MaxItems:    20,

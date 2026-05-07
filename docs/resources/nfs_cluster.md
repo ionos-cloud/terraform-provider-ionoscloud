@@ -1,7 +1,7 @@
 ---
 subcategory: "Network File Storage"
 layout: "ionoscloud"
-page_title: "IonosCloud: nfs_cluster"
+page_title: "IONOS CLOUD: nfs_cluster"
 sidebar_current: "docs-resource-nfs_cluster"
 description: |-
   Creates and manages Network File Storage (NFS) Cluster objects
@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_nfs_cluster
 
-Create clusters of [Network File Storage (NFS)](https://docs.ionos.com/cloud/storage-and-backup/network-file-storage) on IonosCloud.
+Create clusters of [Network File Storage (NFS)](https://docs.ionos.com/cloud/storage-and-backup/network-file-storage) on IONOS CLOUD.
 
 ## Example Usage
 

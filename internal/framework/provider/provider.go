@@ -64,19 +64,19 @@ func (p *IonosCloudProvider) Schema(ctx context.Context, req provider.SchemaRequ
 		Attributes: map[string]schema.Attribute{
 			"username": schema.StringAttribute{
 				Optional:    true,
-				Description: "IonosCloud username for API operations. If token is provided, token is preferred",
+				Description: "IONOS CLOUD username for API operations. If token is provided, token is preferred",
 			},
 			"password": schema.StringAttribute{
 				Optional:    true,
-				Description: "IonosCloud password for API operations. If token is provided, token is preferred",
+				Description: "IONOS CLOUD password for API operations. If token is provided, token is preferred",
 			},
 			"token": schema.StringAttribute{
 				Optional:    true,
-				Description: "IonosCloud bearer token for API operations.",
+				Description: "IONOS CLOUD bearer token for API operations.",
 			},
 			"endpoint": schema.StringAttribute{
 				Optional:    true,
-				Description: "IonosCloud REST API URL. Usually not necessary to be set, SDKs know internally how to route requests to the API.",
+				Description: "IONOS CLOUD REST API URL. Usually not necessary to be set, SDKs know internally how to route requests to the API.",
 			},
 			"retries": schema.Int64Attribute{
 				Optional:           true,

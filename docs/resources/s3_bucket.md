@@ -1,7 +1,7 @@
 ---
 subcategory: "Object Storage"
 layout: "ionoscloud"
-page_title: "IonosCloud: s3_bucket"
+page_title: "IONOS CLOUD: s3_bucket"
 sidebar_current: "docs-resource-s3_bucket"
 description: |-
   Creates and manages IONOS Object Storage Buckets.
@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_s3_bucket
 
-Manages [IONOS Object Storage Buckets](https://docs.ionos.com/cloud/storage-and-backup/ionos-object-storage) on IonosCloud.
+Manages [IONOS Object Storage Buckets](https://docs.ionos.com/cloud/storage-and-backup/ionos-object-storage) on IONOS CLOUD.
 
 ⚠️ **Note:** The Terraform provider **only supports contract-owned buckets. User-owned buckets are not supported,** and there are no plans to introduce support for them. As a result, **user-owned buckets cannot be created, updated, deleted, read, or imported** using this provider.
 

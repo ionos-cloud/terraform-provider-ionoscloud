@@ -1,10 +1,10 @@
 ---
 subcategory: "Object storage management"
 layout: "ionoscloud"
-page_title: "IonosCloud : object_storage_region"
+page_title: "IONOS CLOUD : object_storage_region"
 sidebar_current: "docs-datasource-object_storage_region"
 description: |-
-  Get information on a IonosCloud Object Storage Region
+  Get information on a IONOS CLOUD Object Storage Region
 ---
 
 # ionoscloud_object_storage_region

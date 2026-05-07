@@ -1,10 +1,10 @@
 ---
 subcategory: "Compute Engine"
 layout: "ionoscloud"
-page_title: "IonosCloud: server"
+page_title: "IONOS CLOUD: server"
 sidebar_current: "docs-resource-server"
 description: |-
-  Creates and manages IonosCloud Server objects.
+  Creates and manages IONOS CLOUD Server objects.
 ---
 
 # ionoscloud_server
@@ -277,8 +277,8 @@ resource "ionoscloud_server" "test" {
 - `primary_ip` - (Computed) The associated IP address.
 - `firewallrule_id` - (Computed) The associated firewall rule.
 - `firewallrule_ids` - (Computed) The associated firewall rules.
-- `ssh_key_path` - (Optional)[list] List of absolute paths to files containing a public SSH key that will be injected into IonosCloud provided Linux images.  Also accepts ssh keys directly. Required for IonosCloud Linux images. Required if `image_password` is not provided. Does not support `~` expansion to homedir in the given path. This property is immutable.
-- `ssh_keys` - (Optional)[list] Immutable List of absolute or relative paths to files containing public SSH key that will be injected into IonosCloud provided Linux images. Also accepts ssh keys directly. Public SSH keys are set on the image as authorized keys for appropriate SSH login to the instance using the corresponding private key. This field may only be set in creation requests. When reading, it always returns null. SSH keys are only supported if a public Linux image is used for the volume creation. Does not support `~` expansion to homedir in the given path.
+- `ssh_key_path` - (Optional)[list] List of absolute paths to files containing a public SSH key that will be injected into IONOS CLOUD provided Linux images.  Also accepts ssh keys directly. Required for IONOS CLOUD Linux images. Required if `image_password` is not provided. Does not support `~` expansion to homedir in the given path. This property is immutable.
+- `ssh_keys` - (Optional)[list] Immutable List of absolute or relative paths to files containing public SSH key that will be injected into IONOS CLOUD provided Linux images. Also accepts ssh keys directly. Public SSH keys are set on the image as authorized keys for appropriate SSH login to the instance using the corresponding private key. This field may only be set in creation requests. When reading, it always returns null. SSH keys are only supported if a public Linux image is used for the volume creation. Does not support `~` expansion to homedir in the given path.
 - `image_password` - (Optional)[string] Required if `ssh_key_path` is not provided.
 - `type` - (Optional)(Computed)[string] Server usages: * `type` - Server usages: [ENTERPRISE](https://docs.ionos.com/cloud/compute-services/compute-engine/dedicated-core) now named dedicated core, [CUBE](https://docs.ionos.com/cloud/compute-services/cubes) or [VCPU](https://docs.ionos.com/cloud/compute-services/compute-engine/vcpu-server). This property is immutable.
 - `label` - (Optional)[set] A label can be seen as an object with only two required fields: `key` and `value`, both of the `string` type. Please check the example presented above to see how a `label` can be used in the plan. A server can have multiple labels.

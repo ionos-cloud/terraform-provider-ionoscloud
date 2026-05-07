@@ -1,10 +1,10 @@
 ---
 subcategory: "Managed Kubernetes"
 layout: "ionoscloud"
-page_title: "IonosCloud : ionoscloud_k8s_clusters"
+page_title: "IONOS CLOUD : ionoscloud_k8s_clusters"
 sidebar_current: "docs-ionoscloud-datasource-clusters"
 description: |-
-  Retrieves a list of Ionos Cloud Kubernetes Clusters
+  Retrieves a list of IONOS CLOUD Kubernetes Clusters
 ---
 
 # ionoscloud_k8s_clusters

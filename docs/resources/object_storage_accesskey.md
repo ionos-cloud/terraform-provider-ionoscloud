@@ -1,15 +1,15 @@
 ---
 subcategory: "Object storage management"
 layout: "ionoscloud"
-page_title: "IonosCloud: object_storage_accesskey"
+page_title: "IONOS CLOUD: object_storage_accesskey"
 sidebar_current: "docs-resource-object_storage_accesskey"
 description: |-
-  Creates and manages IonosCloud Object Storage Accesskeys.
+  Creates and manages IONOS CLOUD Object Storage Accesskeys.
 ---
 
 # ionoscloud_object_storage_accesskey
 
-Manages an [Object Storage Accesskey](https://docs.ionos.com/cloud/storage-and-backup/ionos-object-storage/concepts/key-management) on IonosCloud.
+Manages an [Object Storage Accesskey](https://docs.ionos.com/cloud/storage-and-backup/ionos-object-storage/concepts/key-management) on IONOS CLOUD.
 
 ## Example Usage
 

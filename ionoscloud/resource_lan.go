@@ -171,7 +171,7 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta any) di
 			tflog.Info(ctx, "LAN not yet ready, retrying")
 		case <-ctx.Done():
 			tflog.Info(ctx, "LAN creation timed out")
-			return diagutil.ToDiags(d, fmt.Errorf("lan creation timed out! WARNING: your lan will still probably be created after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"), nil)
+			return diagutil.ToDiags(d, fmt.Errorf("lan creation timed out! WARNING: your lan will still probably be created after some time but the terraform state won't reflect that; check your IONOS CLOUD account for updates"), nil)
 		}
 	}
 
@@ -463,7 +463,7 @@ func waitForLanDeletion(ctx context.Context, client *ionoscloud.APIClient, d *sc
 			tflog.Info(ctx, "LAN not yet deleted, retrying")
 		case <-ctx.Done():
 			tflog.Info(ctx, "LAN deletion timed out")
-			return fmt.Errorf("lan deletion timed out! WARNING: your lan will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates")
+			return fmt.Errorf("lan deletion timed out! WARNING: your lan will still probably be deleted after some time but the terraform state won't reflect that; check your IONOS CLOUD account for updates")
 		}
 	}
 	return nil
@@ -507,7 +507,7 @@ func waitForLanNicsDeletion(ctx context.Context, client *ionoscloud.APIClient, d
 			tflog.Info(ctx, "nics still present under LAN, retrying")
 		case <-ctx.Done():
 			tflog.Info(ctx, "nics deletion check timed out")
-			return fmt.Errorf("nics deletion check timed out! WARNING: your lan nics may still be deleted; check your Ionos Cloud account for updates and perform again a destroy for remaining resources")
+			return fmt.Errorf("nics deletion check timed out! WARNING: your lan nics may still be deleted; check your IONOS CLOUD account for updates and perform again a destroy for remaining resources")
 		}
 	}
 	return nil

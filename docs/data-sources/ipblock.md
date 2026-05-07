@@ -1,10 +1,10 @@
 ---
 subcategory: "Compute Engine"
 layout: "ionoscloud"
-page_title: "IonosCloud: ipblock"
+page_title: "IONOS CLOUD: ipblock"
 sidebar_current: "docs-datasource-ipblock"
 description: |-
-  Get information on a IonosCloud Ip Block
+  Get information on a IONOS CLOUD Ip Block
 ---
 
 # ionoscloud_ipblock

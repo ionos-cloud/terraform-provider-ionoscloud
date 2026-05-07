@@ -1,15 +1,15 @@
 ---
 subcategory: "Application Load Balancer"
 layout: "ionoscloud"
-page_title: "IonosCloud: application_loadbalancer_forwardingrule"
+page_title: "IONOS CLOUD: application_loadbalancer_forwardingrule"
 sidebar_current: "docs-resource-application_loadbalancer_forwardingrule"
 description: |-
-  Creates and manages IonosCloud Application Load Balancer Forwarding Rule.
+  Creates and manages IONOS CLOUD Application Load Balancer Forwarding Rule.
 ---
 
 # ionoscloud_application_loadbalancer_forwardingrule
 
-Manages an **Application Load Balancer Forwarding Rule** on IonosCloud.
+Manages an **Application Load Balancer Forwarding Rule** on IONOS CLOUD.
 
 ## Example Usage
 

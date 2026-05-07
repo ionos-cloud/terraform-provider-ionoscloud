@@ -1,7 +1,7 @@
 ---
 subcategory: "Network Load Balancer"
 layout: "ionoscloud"
-page_title: "IonosCloud: networkloadbalancer_forwardingrule"
+page_title: "IONOS CLOUD: networkloadbalancer_forwardingrule"
 sidebar_current: "docs-resource-networkloadbalancer_forwardingrule"
 description: |-
   Creates and manages Network Load Balancer Forwarding Rule objects.
@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_networkloadbalancer_forwardingrule
 
-Manages a **Network Load Balancer Forwarding Rule** on IonosCloud.
+Manages a **Network Load Balancer Forwarding Rule** on IONOS CLOUD.
 
 ## Example Usage:
 

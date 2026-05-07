@@ -1,10 +1,10 @@
 ---
 subcategory: "Compute Engine"
 layout: "ionoscloud"
-page_title: "IonosCloud: snapshot"
+page_title: "IONOS CLOUD: snapshot"
 sidebar_current: "docs-datasource-snapshot"
 description: |-
-  Get information on a IonosCloud Snapshots
+  Get information on a IONOS CLOUD Snapshots
 ---
 
 # ionoscloud_snapshot

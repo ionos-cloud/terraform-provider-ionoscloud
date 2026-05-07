@@ -1,15 +1,15 @@
 ---
 subcategory: "Compute Engine"
 layout: "ionoscloud"
-page_title: "IonosCloud: ionoscloud_cube_server"
+page_title: "IONOS CLOUD: ionoscloud_cube_server"
 sidebar_current: "docs-resource-cube_server"
 description: |-
-  Creates and manages IonosCloud Cube Server objects.
+  Creates and manages IONOS CLOUD Cube Server objects.
 ---
 
 # ionoscloud_cube_server
 
-A [Cube](https://docs.ionos.com/cloud/compute-services/cubes/overview) is a Virtual Machine (VM) with an attached NVMe Volume. You can use each newly created Cube as a new VM, either standalone or in combination with other IONOS Cloud products.
+A [Cube](https://docs.ionos.com/cloud/compute-services/cubes/overview) is a Virtual Machine (VM) with an attached NVMe Volume. You can use each newly created Cube as a new VM, either standalone or in combination with other IONOS CLOUD products.
 
 Check out [Configuration templates](https://docs.ionos.com/cloud/compute-services/cubes/overview#basic-cubes)
 
@@ -134,7 +134,7 @@ resource "random_password" "server_image_password" {
 - `primary_nic` - (Computed) The associated NIC.
 - `primary_ip` - (Computed) The associated IP address.
 - `firewallrule_id` - (Computed) The associated firewall rule.
-- `ssh_key_path` - (Optional)[list] List of paths to files containing a public SSH key that will be injected into IonosCloud provided Linux images. Required for IonosCloud Linux images. Required if `image_password` is not provided.
+- `ssh_key_path` - (Optional)[list] List of paths to files containing a public SSH key that will be injected into IONOS CLOUD provided Linux images. Required for IONOS CLOUD Linux images. Required if `image_password` is not provided.
 - `image_password` - (Optional)[string] Required if `ssh_key_path` is not provided.
 - `security_groups_ids` - (Optional) The list of Security Group IDs for the resource.
 - `allow_replace` - (Optional)[bool] When set to true, allows the update of immutable fields by first destroying and then re-creating the server.

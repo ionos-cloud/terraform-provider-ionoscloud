@@ -1,7 +1,7 @@
 ---
 subcategory: "Compute Engine"
 layout: "ionoscloud"
-page_title: "IonosCloud: loadbalancer"
+page_title: "IONOS CLOUD: loadbalancer"
 sidebar_current: "docs-resource-loadbalancer"
 description: |-
   Creates and manages Load Balancers
@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_loadbalancer
 
-Manages a Load Balancer on IonosCloud.
+Manages a Load Balancer on IONOS CLOUD.
 
 ## Example Usage
 

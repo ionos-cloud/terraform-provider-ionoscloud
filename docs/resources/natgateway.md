@@ -1,7 +1,7 @@
 ---
 subcategory: "NAT Gateway"
 layout: "ionoscloud"
-page_title: "IonosCloud: natgateway"
+page_title: "IONOS CLOUD: natgateway"
 sidebar_current: "docs-resource-natgateway"
 description: |-
   Creates and manages Nat Gateway objects.
@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_natgateway
 
-Manages a [Nat Gateway](https://docs.ionos.com/cloud/network-services/nat-gateway/overview) on IonosCloud.
+Manages a [Nat Gateway](https://docs.ionos.com/cloud/network-services/nat-gateway/overview) on IONOS CLOUD.
 
 ## Example Usage
 

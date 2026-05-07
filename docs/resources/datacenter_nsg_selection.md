@@ -1,15 +1,15 @@
 ---
 subcategory: "Compute Engine"
 layout: "ionoscloud"
-page_title: "IonosCloud: Datacenter NSG Selection"
+page_title: "IONOS CLOUD: Datacenter NSG Selection"
 sidebar_current: "docs-resource-datacenter-nsg-selection"
 description: |-
-  Links a Network Security Group to a IonosCloud datacenter.
+  Links a Network Security Group to a IONOS CLOUD datacenter.
 ---
 
 # ionoscloud_datacenter_nsg_selection
 
-Links a Network Security Group to a IonosCloud datacenter. The datacenter can only have one linked NSG. To set a new NSG for the datacenter, the current one will be unlinked.
+Links a Network Security Group to a IONOS CLOUD datacenter. The datacenter can only have one linked NSG. To set a new NSG for the datacenter, the current one will be unlinked.
 
 ## Example Usage
 

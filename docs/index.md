@@ -1,14 +1,14 @@
 ---
 layout: "ionoscloud"
-page_title: "Provider: IonosCloud"
+page_title: "Provider: IONOS CLOUD"
 sidebar_current: "docs-index"
 description: |-
-  A provider for IonosCloud.
+  A provider for IONOS CLOUD.
 ---
 
-# IonosCloud Provider
+# IONOS CLOUD Provider
 
-The IonosCloud provider gives the ability to deploy and configure resources using the IonosCloud APIs.
+The IONOS CLOUD provider gives the ability to deploy and configure resources using the IONOS CLOUD APIs.
 
 Use the navigation to the left to read about the available data sources and resources.
 
@@ -295,8 +295,8 @@ The following arguments are supported:
 
 | Environment Variable    | Description                                                                                                                                                               |
 |-------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `IONOS_USERNAME`        | Specify the username used to login, to authenticate against the IONOS Cloud API                                                                                           |
-| `IONOS_PASSWORD`        | Specify the password used to login, to authenticate against the IONOS Cloud API                                                                                           |
+| `IONOS_USERNAME`        | Specify the username used to login, to authenticate against the IONOS CLOUD API                                                                                           |
+| `IONOS_PASSWORD`        | Specify the password used to login, to authenticate against the IONOS CLOUD API                                                                                           |
 | `IONOS_TOKEN`           | Specify the token used to login, if a token is being used instead of username and password                                                                                |
 | `IONOS_API_URL`         | Specify the API URL. It will overwrite the API endpoint default value `api.ionos.com`.  It is not necessary to override this value unless you have special routing config |
 | `IONOS_LOG_LEVEL`       | Specify the Log Level used to log messages. Possible values: Off, Debug, Trace                                                                                            |

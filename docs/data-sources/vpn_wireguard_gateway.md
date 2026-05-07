@@ -1,15 +1,15 @@
 ---
 subcategory: "VPN"
 layout: "ionoscloud"
-page_title: "IonosCloud: vpn_wireguard_gateway - Data Source"
+page_title: "IONOS CLOUD: vpn_wireguard_gateway - Data Source"
 sidebar_current: "docs-ionoscloud-data-source-vpn-wireguard-gateway"
 description: |-
-  Provides information about a specific IonosCloud VPN WireGuard Gateway.
+  Provides information about a specific IONOS CLOUD VPN WireGuard Gateway.
 ---
 
 # Data Source: ionoscloud_vpn_wireguard_gateway
 
-The `ionoscloud_vpn_wireguard_gateway` data source provides information about a specific IonosCloud VPN WireGuard Gateway. You can use this data source to retrieve details of a WireGuard Gateway for use in other resources and configurations.
+The `ionoscloud_vpn_wireguard_gateway` data source provides information about a specific IONOS CLOUD VPN WireGuard Gateway. You can use this data source to retrieve details of a WireGuard Gateway for use in other resources and configurations.
 
 ## Example Usage
 

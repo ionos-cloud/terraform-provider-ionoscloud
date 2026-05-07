@@ -1,15 +1,15 @@
 ---
 subcategory: "CDN"
 layout: "ionoscloud"
-page_title: "IonosCloud: cdn_distribution"
+page_title: "IONOS CLOUD: cdn_distribution"
 sidebar_current: "docs-resource-cdn-distribution"
 description: |-
-  Creates and manages IonosCloud CDN Distributions.
+  Creates and manages IONOS CLOUD CDN Distributions.
 ---
 
 # ionoscloud_cdn_distribution
 
-Manages a [CDN Distribution](https://docs.ionos.com/cloud/network-services/cdn/overview#how-does-cdn-work) on IonosCloud.
+Manages a [CDN Distribution](https://docs.ionos.com/cloud/network-services/cdn/overview#how-does-cdn-work) on IONOS CLOUD.
 
 ## Example Usage
 

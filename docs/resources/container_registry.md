@@ -1,15 +1,15 @@
 ---
 subcategory: "Container Registry"
 layout: "ionoscloud"
-page_title: "IonosCloud: ionoscloud_container_registry"
+page_title: "IONOS CLOUD: ionoscloud_container_registry"
 sidebar_current: "docs-resource-ionoscloud_container_registry"
 description: |-
-  Creates and manages IonosCloud Container Registry.
+  Creates and manages IONOS CLOUD Container Registry.
 ---
 
 # ionoscloud_container_registry
 
-Manages an [Container Registry](https://docs.ionos.com/cloud/containers/private-container-registry/overview) on IonosCloud.
+Manages an [Container Registry](https://docs.ionos.com/cloud/containers/private-container-registry/overview) on IONOS CLOUD.
 
 ## Example Usage
 

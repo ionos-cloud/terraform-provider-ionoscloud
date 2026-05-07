@@ -1152,7 +1152,7 @@ func checkAction(ctx context.Context, client *autoscalingService.Client, d *sche
 		case <-ctx.Done():
 			tflog.Info(ctx, "autoscaling action timed out")
 			return fmt.Errorf("group creation/update timed out! WARNING: your group was created/updated but the action was not yet ready. " +
-				"Check your Ionos Cloud account for updates")
+				"Check your IONOS CLOUD account for updates")
 		}
 	}
 

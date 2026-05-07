@@ -1,10 +1,10 @@
 ---
 subcategory: "Compute Engine"
 layout: "ionoscloud"
-page_title: "IonosCloud : ionoscloud_vcpu_server"
+page_title: "IONOS CLOUD : ionoscloud_vcpu_server"
 sidebar_current: "docs-ionoscloud-datasource-vcpu-server"
 description: |-
-  Get information on a Ionos Cloud VCPU Servers
+  Get information on a IONOS CLOUD VCPU Servers
 ---
 
 # ionoscloud_vcpu_server

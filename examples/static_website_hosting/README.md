@@ -1,6 +1,6 @@
 # Static Website Hosting with Object Storage Bucket and CDN + WAF
 
-This Terraform manifest provisions a static website using IONOS Cloud's Object Storage service. The steps involved are:
+This Terraform manifest provisions a static website using IONOS CLOUD's Object Storage service. The steps involved are:
 
 - Create S3 Bucket: An S3 bucket is created in the eu-central-3 region.
 - Configure Website: Set index and error documents for the website.

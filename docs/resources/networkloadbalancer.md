@@ -1,7 +1,7 @@
 ---
 subcategory: "Network Load Balancer"
 layout: "ionoscloud"
-page_title: "IonosCloud: networkloadbalancer"
+page_title: "IONOS CLOUD: networkloadbalancer"
 sidebar_current: "docs-resource-networkloadbalancer"
 description: |-
   Creates and manages Network Load Balancer objects.
@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_networkloadbalancer
 
-Manages a [Network Load Balancer](https://docs.ionos.com/cloud/network-services/network-load-balancer/outline) on IonosCloud.
+Manages a [Network Load Balancer](https://docs.ionos.com/cloud/network-services/network-load-balancer/outline) on IONOS CLOUD.
 
 ## Example Usage
 

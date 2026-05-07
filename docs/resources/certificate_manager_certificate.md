@@ -1,7 +1,7 @@
 ---
 subcategory: "Certificate Manager Service"
 layout: "ionoscloud"
-page_title: "IonosCloud: certificate"
+page_title: "IONOS CLOUD: certificate"
 sidebar_current: "docs-resource-certificate"
 description: |-
   Creates and manages a certificate.
@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_certificate
 
-Manages a [Certificate](https://docs.ionos.com/cloud/network-services/certificate-manager) on IonosCloud.
+Manages a [Certificate](https://docs.ionos.com/cloud/network-services/certificate-manager) on IONOS CLOUD.
 
 ## Example Usage
 

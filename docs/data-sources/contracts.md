@@ -1,15 +1,15 @@
 ---
 subcategory: "Compute Engine"
 layout: "ionoscloud"
-page_title: "IonosCloud : ionoscloud_contracts"
+page_title: "IONOS CLOUD : ionoscloud_contracts"
 sidebar_current: "docs-ionoscloud-datasource-contracts"
 description: |-
-  Get information on the contracts available in your IONOS Cloud account
+  Get information on the contracts available in your IONOS CLOUD account
 ---
 
 # Contracts Data Source
 
-The `contracts` data source provides information about the contracts available in your IONOS Cloud account, including resource limits and other contract details.
+The `contracts` data source provides information about the contracts available in your IONOS CLOUD account, including resource limits and other contract details.
 
 ## Example Usage
 
