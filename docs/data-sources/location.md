@@ -10,8 +10,7 @@ description: |-
 # ionoscloud_location
 
 The **Location data source** can be used to search for and return an existing location which can then be used elsewhere in the configuration.
-If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
-When this happens, please refine your search string so that it is specific enough to return only one result.
+If a single match is found, it will be returned. If your search results in multiple matches, the first location from the list will be returned.
 
 ## Example Usage
 
@@ -24,8 +23,10 @@ data "ionoscloud_location" "example" {
 
 ## Argument Reference
 
- * `name` - (Required) Name of the location to search for.
+ * `name` - (Optional) Name of the location to search for.
  * `feature` - (Optional) A desired feature that the location must be able to provide.
+
+Either `name` or `feature` must be provided. If none is provided, the datasource will return an error.
 
 ## Attributes Reference
 

@@ -2,6 +2,7 @@
 
 ### Fixes
 - Fix IP Failover resource
+- Fix `location` data source returning "no location found" when searching using the `feature` attribute.
 
 ### Features
 - New resource: `ionoscloud_user_object_storage_bucket` for user-owned IONOS object storage buckets.
