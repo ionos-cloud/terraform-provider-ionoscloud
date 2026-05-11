@@ -90,10 +90,14 @@ func dataSourceLocationRead(ctx context.Context, d *schema.ResourceData, meta an
 	}
 	var results []ionoscloud.Location
 
-	if nameOk && locations.Items != nil {
-		for _, loc := range *locations.Items {
-			if loc.Properties != nil && loc.Properties.Name != nil && *loc.Properties.Name == name.(string) {
-				results = append(results, loc)
+	if locations.Items != nil {
+		if !nameOk {
+			results = *locations.Items
+		} else {
+			for _, l := range *locations.Items {
+				if l.Properties != nil && l.Properties.Name != nil && *l.Properties.Name == name.(string) {
+					results = append(results, l)
+				}
 			}
 		}
 	}
@@ -122,27 +126,32 @@ func setLocationData(d *schema.ResourceData, location *ionoscloud.Location) erro
 	}
 
 	if location.Properties != nil {
+		if err := d.Set("name", location.Properties.Name); err != nil {
+			return fmt.Errorf("error while setting name property for location %s: %w", d.Id(), err)
+		}
 		var cpuArchitectures []any
-		for _, cpuArchitecture := range *location.Properties.CpuArchitecture {
-			architectureEntry := make(map[string]any)
+		if location.Properties.CpuArchitecture != nil {
+			for _, cpuArchitecture := range *location.Properties.CpuArchitecture {
+				architectureEntry := make(map[string]any)
 
-			if cpuArchitecture.CpuFamily != nil {
-				architectureEntry["cpu_family"] = *cpuArchitecture.CpuFamily
+				if cpuArchitecture.CpuFamily != nil {
+					architectureEntry["cpu_family"] = *cpuArchitecture.CpuFamily
+				}
+
+				if cpuArchitecture.MaxCores != nil {
+					architectureEntry["max_cores"] = *cpuArchitecture.MaxCores
+				}
+
+				if cpuArchitecture.MaxRam != nil {
+					architectureEntry["max_ram"] = *cpuArchitecture.MaxRam
+				}
+
+				if cpuArchitecture.Vendor != nil {
+					architectureEntry["vendor"] = *cpuArchitecture.Vendor
+				}
+
+				cpuArchitectures = append(cpuArchitectures, architectureEntry)
 			}
-
-			if cpuArchitecture.MaxCores != nil {
-				architectureEntry["max_cores"] = *cpuArchitecture.MaxCores
-			}
-
-			if cpuArchitecture.MaxRam != nil {
-				architectureEntry["max_ram"] = *cpuArchitecture.MaxRam
-			}
-
-			if cpuArchitecture.Vendor != nil {
-				architectureEntry["vendor"] = *cpuArchitecture.Vendor
-			}
-
-			cpuArchitectures = append(cpuArchitectures, architectureEntry)
 		}
 
 		if len(cpuArchitectures) > 0 {
