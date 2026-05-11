@@ -2,12 +2,13 @@
 
 ### Fixes
 - Fix IP Failover resource
-
-### Documentation
-- Improve share docs
+- Fix `location` data source returning "no location found" when searching using the `feature` attribute.
 
 ### Chore
 - Modernize to 1.26 standards `go fix`
+
+### Documentation
+- Improve share docs
 
 ### Enhancements
 - Add validation error when update-only attributes are set during snapshot creation
