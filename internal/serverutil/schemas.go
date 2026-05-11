@@ -148,7 +148,7 @@ var SchemaNicElem = map[string]*schema.Schema{
 var SchemaTemplatedDatasource = map[string]*schema.Schema{
 	"template_uuid": {
 		Type:     schema.TypeString,
-		Optional: true,
+		Computed: true,
 	},
 	"datacenter_id": {
 		Type:             schema.TypeString,

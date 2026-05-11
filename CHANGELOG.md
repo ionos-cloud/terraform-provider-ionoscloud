@@ -1,8 +1,12 @@
 ## Upcoming
+
 ### Features
 - New list resource: `ionoscloud_s3_bucket` — list all Object Storage buckets via `terraform query` (requires Terraform 1.14+).
 - New list resource: `ionoscloud_object_storage_accesskey` — list all Object Storage Access Keys via `terraform query` (requires Terraform 1.14+).
 - Add filtering support to list resources `ionoscloud_s3_bucket` and `ionoscloud_object_storage_accesskey`.
+
+### Fixes
+- Fix attributes inconsistencies for the following data sources: `data_source_template.go`, `data_source_private_crossconnect.go`, `data_source_cube_server.go`, `data_source_gpu_server.go`
 
 ### Refactor
 - Refactor `ionoscloud_pg_cluster_v2` resource so `password` is now write-only, and require `password_version` to trigger password updates.
