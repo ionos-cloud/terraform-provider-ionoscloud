@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/acctest"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
 const bucketPrefix = "acctest-tf-user-bucket-"
@@ -86,10 +87,42 @@ func testAccCheckUserBucketDestroy(s *terraform.State) error {
 	return nil
 }
 
+func TestAccUserObjectStorageBucketDataSource(t *testing.T) {
+	rName := acctest.GenerateRandomResourceName(bucketPrefix)
+	resourceName := "ionoscloud_user_object_storage_bucket.test"
+	dataSourceName := "data.ionoscloud_user_object_storage_bucket.test"
+
+	resource.Test(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
+		PreCheck: func() {
+			acctest.PreCheck(t)
+		},
+		CheckDestroy: testAccCheckUserBucketDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccUserBucketDataSourceConfig_basic(rName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(dataSourceName, "name", resourceName, "name"),
+					resource.TestCheckResourceAttrPair(dataSourceName, "region", resourceName, "region"),
+				),
+			},
+		},
+	})
+}
+
 func testAccUserBucketConfig_basic(bucketName string) string {
 	return fmt.Sprintf(`
 resource "ionoscloud_user_object_storage_bucket" "test" {
   name = %[1]q
 }
 `, bucketName)
+}
+
+func testAccUserBucketDataSourceConfig_basic(bucketName string) string {
+	return utils.ConfigCompose(testAccUserBucketConfig_basic(bucketName), `
+data "ionoscloud_user_object_storage_bucket" "test" {
+  name   = ionoscloud_user_object_storage_bucket.test.name
+  region = ionoscloud_user_object_storage_bucket.test.region
+}
+`)
 }

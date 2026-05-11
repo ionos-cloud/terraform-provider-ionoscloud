@@ -289,6 +289,7 @@ func (p *IonosCloudProvider) DataSources(_ context.Context) []func() datasource.
 		compute.DataSources(),
 		kafka.DataSources(),
 		pgsqlv2.DataSources(),
+		userobjectstorage.DataSources(),
 	}
 
 	for _, r := range dataSources {

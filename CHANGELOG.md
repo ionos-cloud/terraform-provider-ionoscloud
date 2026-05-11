@@ -2,6 +2,7 @@
 
 ### Features
 - New resource: `ionoscloud_user_object_storage_bucket` for user-owned IONOS object storage buckets.
+- New data source: `ionoscloud_user_object_storage_bucket` to look up user-owned buckets by name and region.
 
 ### Documentation
 - Improve share docs
