@@ -51,6 +51,22 @@ func TestAccDataSourceTemplate(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccDataSourceTemplateCategoryCoresRam,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(templateName, "name", "Basic Cube S"),
+					resource.TestCheckResourceAttr(templateName, "category", "Basic Templates"),
+					resource.TestCheckResourceAttr(templateName, "cores", "2"),
+					resource.TestCheckResourceAttr(templateName, "ram", "4096"),
+				),
+			},
+			{
+				Config: testAccDataSourceTemplateNameCategory,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(templateName, "name", "Basic Cube XL"),
+					resource.TestCheckResourceAttr(templateName, "category", "Basic Templates"),
+				),
+			},
+			{
 				Config:      testAccDataSourceTemplateStorageWrongNameError,
 				ExpectError: regexp.MustCompile(`no template found with the specified criteria`),
 			},
@@ -64,6 +80,14 @@ func TestAccDataSourceTemplate(t *testing.T) {
 			},
 			{
 				Config:      testAccDataSourceTemplateStorageWrongStorage,
+				ExpectError: regexp.MustCompile(`no template found with the specified criteria`),
+			},
+			{
+				Config:      testAccDataSourceTemplateWrongCategory,
+				ExpectError: regexp.MustCompile(`no template found with the specified criteria`),
+			},
+			{
+				Config:      testAccDataSourceTemplateCategoryMismatch,
 				ExpectError: regexp.MustCompile(`no template found with the specified criteria`),
 			},
 		},
@@ -124,4 +148,28 @@ data ` + constant.TemplateResource + ` ` + constant.TemplateTestResource + ` {
 	cores		 = 6
 	ram			 = 16384
 	storage_size = 50
+}`
+
+const testAccDataSourceTemplateCategoryCoresRam = `
+data ` + constant.TemplateResource + ` ` + constant.TemplateTestResource + ` {
+	category = "Basic Templates"
+	cores    = 2
+	ram      = 4096
+}`
+
+const testAccDataSourceTemplateNameCategory = `
+data ` + constant.TemplateResource + ` ` + constant.TemplateTestResource + ` {
+	name     = "Basic Cube XL"
+	category = "Basic Templates"
+}`
+
+const testAccDataSourceTemplateWrongCategory = `
+data ` + constant.TemplateResource + ` ` + constant.TemplateTestResource + ` {
+	category = "NON_EXISTENT_CATEGORY"
+}`
+
+const testAccDataSourceTemplateCategoryMismatch = `
+data ` + constant.TemplateResource + ` ` + constant.TemplateTestResource + ` {
+	name     = "Basic Cube S"
+	category = "NON_EXISTENT_CATEGORY"
 }`
