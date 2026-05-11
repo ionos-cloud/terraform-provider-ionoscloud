@@ -23,7 +23,7 @@ var _ MappedNullable = &Object{}
 
 // Object An object consists of data and its descriptive metadata.
 type Object struct {
-	XMLName xml.Name `xml:"Object"`
+	XMLName xml.Name `xml:"Contents"`
 	// The object key.
 	Key *string `json:"Key,omitempty" xml:"Key"`
 	// Creation date of the object.

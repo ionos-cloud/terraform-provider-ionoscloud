@@ -108,8 +108,7 @@ func (c *Client) deleteAllObjects(ctx context.Context, bucketName string) error 
 			return fmt.Errorf("failed to list objects: %w", err)
 		}
 
-		result := output.GetListBucketResult()
-		for _, obj := range result.Contents {
+		for _, obj := range output.Contents {
 			if obj.Key == nil {
 				continue
 			}
@@ -118,13 +117,13 @@ func (c *Client) deleteAllObjects(ctx context.Context, bucketName string) error 
 			}
 		}
 
-		if !result.IsTruncated {
+		if !output.IsTruncated {
 			break
 		}
-		if result.NextContinuationToken == nil {
+		if output.NextContinuationToken == nil {
 			break
 		}
-		continuationToken = *result.NextContinuationToken
+		continuationToken = *output.NextContinuationToken
 	}
 	return nil
 }

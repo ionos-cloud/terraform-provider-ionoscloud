@@ -48,7 +48,7 @@ var (
 )
 
 const (
-	Version               = "products/userobjectstorage/v2.0.2"
+	Version               = "products/userobjectstorage/v2.0.3"
 	DefaultIonosServerUrl = "https://s3.eu-central-1.ionoscloud.com"
 	DefaultIonosBasePath  = ""
 )
@@ -134,7 +134,7 @@ func NewAPIClient(cfg *shared.Configuration) *APIClient {
 		}
 	}
 	if cfgCopy.UserAgent == "" {
-		cfgCopy.UserAgent = "sdk-go-bundle/products/userobjectstorage/v2.0.2"
+		cfgCopy.UserAgent = "sdk-go-bundle/products/userobjectstorage/v2.0.3"
 	}
 
 	if cfg.Middleware != nil {
@@ -173,13 +173,20 @@ func NewAPIClient(cfg *shared.Configuration) *APIClient {
 				Description: "URL for `eu-south-2` (Logroño, Spain)",
 			},
 		}
+		shared.LogDebug("[DEBUG] userobjectstorage: using default endpoint: %s", cfgCopy.Servers[0].URL)
 	} else {
+		shared.LogDebug("[DEBUG] userobjectstorage: server config provided with %d endpoint(s)", len(cfgCopy.Servers))
 		// If the user has provided a custom server configuration, we need to ensure that the basepath is set
 		for i := range cfgCopy.Servers {
 			if cfgCopy.Servers[i].URL != "" && !strings.HasSuffix(cfgCopy.Servers[i].URL, DefaultIonosBasePath) {
 				cfgCopy.Servers[i].URL = fmt.Sprintf("%s%s", cfgCopy.Servers[i].URL, DefaultIonosBasePath)
 			}
 		}
+	}
+
+	// Log final resolved endpoints
+	for i, srv := range cfgCopy.Servers {
+		shared.LogDebug("[DEBUG] userobjectstorage: final endpoint[%d]: url=%s description=%q", i, srv.URL, srv.Description)
 	}
 
 	// Enable certificate pinning if the environment variable is set
@@ -478,6 +485,7 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, time.Duratio
 		resp, err = c.cfg.HTTPClient.Do(clonedRequest)
 		httpRequestTime = time.Since(httpRequestStartTime)
 		if err != nil {
+			shared.LogDebug("[DEBUG] userobjectstorage: request failed for %s %s: %v", clonedRequest.Method, clonedRequest.URL.Host, err)
 			return resp, httpRequestTime, err
 		}
 
@@ -497,8 +505,10 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, time.Duratio
 			http.StatusGatewayTimeout,
 			http.StatusBadGateway:
 			if request.Method == http.MethodPost {
+				shared.LogDebug("[DEBUG] userobjectstorage: received %d for POST %s, not retrying (non-idempotent)", resp.StatusCode, request.URL.String())
 				return resp, httpRequestTime, err
 			}
+			shared.LogDebug("[DEBUG] userobjectstorage: received %d for %s %s, will retry (attempt %d/%d)", resp.StatusCode, request.Method, request.URL.String(), retryCount, c.GetConfig().MaxRetries)
 			backoffTime = c.GetConfig().WaitTime
 
 		case http.StatusTooManyRequests:
@@ -508,8 +518,10 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, time.Duratio
 					return resp, httpRequestTime, err
 				}
 				backoffTime = waitTime
+				shared.LogDebug("[DEBUG] userobjectstorage: rate limited (429) for %s %s, retry-after=%ss (attempt %d/%d)", request.Method, request.URL.String(), retryAfterSeconds, retryCount, c.GetConfig().MaxRetries)
 			} else {
 				backoffTime = c.GetConfig().WaitTime
+				shared.LogDebug("[DEBUG] userobjectstorage: rate limited (429) for %s %s, using default backoff (attempt %d/%d)", request.Method, request.URL.String(), retryCount, c.GetConfig().MaxRetries)
 			}
 		default:
 			return resp, httpRequestTime, err
@@ -518,7 +530,7 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, time.Duratio
 
 		if retryCount >= c.GetConfig().MaxRetries {
 			if shared.SdkLogLevel.Satisfies(shared.Debug) {
-				shared.SdkLogger.Printf(" Number of maximum retries exceeded (%d retries)\n", c.cfg.MaxRetries)
+				shared.LogDebug("[DEBUG] userobjectstorage: retry exhausted after %d attempts for %s %s, last status=%d", retryCount, request.Method, request.URL.String(), resp.StatusCode)
 			}
 			break
 		} else {

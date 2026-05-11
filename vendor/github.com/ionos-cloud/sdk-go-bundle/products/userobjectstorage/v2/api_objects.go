@@ -1704,7 +1704,6 @@ type ApiListObjectsV2Request struct {
 	ctx               context.Context
 	ApiService        *ObjectsApiService
 	bucket            string
-	listType          *int32
 	delimiter         *string
 	encodingType      *string
 	maxKeys           *int32
@@ -1712,11 +1711,6 @@ type ApiListObjectsV2Request struct {
 	continuationToken *string
 	fetchOwner        *bool
 	startAfter        *string
-}
-
-func (r ApiListObjectsV2Request) ListType(listType int32) ApiListObjectsV2Request {
-	r.listType = &listType
-	return r
 }
 
 // A delimiter is a character you use to group keys.
@@ -1821,11 +1815,7 @@ func (a *ObjectsApiService) ListObjectsV2Execute(r ApiListObjectsV2Request) (*Li
 	if shared.Strlen(r.bucket) > 63 {
 		return localVarReturnValue, nil, reportError("bucket must have less than 63 elements")
 	}
-	if r.listType == nil {
-		return localVarReturnValue, nil, reportError("listType is required and must be specified")
-	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "list-type", r.listType, "")
 	if r.delimiter != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "delimiter", r.delimiter, "")
 	}

@@ -30,7 +30,7 @@ require (
 	github.com/ionos-cloud/sdk-go-bundle/products/nfs/v2 v2.0.0
 	github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2 v2.0.3
 	github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2 v2.0.1
-	github.com/ionos-cloud/sdk-go-bundle/products/userobjectstorage/v2 v2.0.2
+	github.com/ionos-cloud/sdk-go-bundle/products/userobjectstorage/v2 v2.0.3
 	github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2 v2.0.1
 	github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.2
 	github.com/ionos-cloud/sdk-go-bundle/shared v0.1.10
@@ -40,7 +40,6 @@ require (
 	golang.org/x/crypto v0.49.0
 	gopkg.in/yaml.v3 v3.0.1
 )
-
 require (
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
