@@ -20,15 +20,14 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
 )
 
-// Client wraps the user object storage API client.
+// Client holds the configuration needed to create per-region API clients.
+// A new SDK client is instantiated for each operation so concurrent operations
+// on different regions do not share mutable state.
 type Client struct {
-	client *userobjectstorage.APIClient
-	signer *awsv4.Signer
-}
-
-// GetBaseClient returns the underlying SDK client.
-func (c *Client) GetBaseClient() *userobjectstorage.APIClient {
-	return c.client
+	clientOptions clientoptions.TerraformClientOptions
+	httpClient    *http.Client
+	signer        *awsv4.Signer
+	userAgent     string
 }
 
 var regionToURL = map[string]string{
@@ -43,44 +42,51 @@ var ValidRegions = []string{"de", "eu-central-2", "eu-south-2"}
 // DefaultRegion is used when no region is specified (e.g. during import).
 const DefaultRegion = "de"
 
-// NewClient creates a new user object storage client.
+// NewClient creates a new user object storage client factory.
 func NewClient(ctx context.Context, clientOptions clientoptions.TerraformClientOptions) *Client {
 	tflog.Debug(ctx, "User Object Storage: configuring client")
 
-	cfg := shared.NewConfigurationFromOptions(clientOptions.ClientOptions)
 	signer := awsv4.NewSigner(credentials.NewStaticCredentials(
 		clientOptions.StorageOptions.AccessKey,
 		clientOptions.StorageOptions.SecretKey,
 		"",
 	))
-	cfg.MiddlewareWithError = signerMiddleware(DefaultRegion, signer)
-	cfg.UserAgent = fmt.Sprintf(
+	userAgent := fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go-user-object-storage/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		clientOptions.Version, userobjectstorage.Version, clientOptions.TerraformVersion,
 		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
 	)
-	cfg.HTTPClient = &http.Client{Transport: shared.CreateTransport(clientOptions.SkipTLSVerify, "")}
 
 	return &Client{
-		client: userobjectstorage.NewAPIClient(cfg),
-		signer: signer,
+		clientOptions: clientOptions,
+		httpClient:    &http.Client{Transport: shared.CreateTransport(clientOptions.SkipTLSVerify, "")},
+		signer:        signer,
+		userAgent:     userAgent,
 	}
 }
 
-// ChangeRegion switches the client to use the endpoint for the given region.
-// An empty region string defaults to DefaultRegion ("de").
-func (c *Client) ChangeRegion(region string) error {
+// apiClientForRegion returns a new SDK API client configured for the given region.
+// An empty region defaults to DefaultRegion.
+func (c *Client) apiClientForRegion(region string) (*userobjectstorage.APIClient, error) {
 	if region == "" {
 		region = DefaultRegion
 	}
 	url, ok := regionToURL[region]
 	if !ok {
-		return fmt.Errorf("unsupported region %q: must be one of %v", region, ValidRegions)
+		return nil, fmt.Errorf("unsupported region %q: must be one of %v", region, ValidRegions)
 	}
-	cfg := c.client.GetConfig()
+	cfg := shared.NewConfigurationFromOptions(c.clientOptions.ClientOptions)
 	cfg.Servers = shared.ServerConfigurations{{URL: url}}
 	cfg.MiddlewareWithError = signerMiddleware(region, c.signer)
-	return nil
+	cfg.UserAgent = c.userAgent
+	cfg.HTTPClient = c.httpClient
+	return userobjectstorage.NewAPIClient(cfg), nil
+}
+
+// GetBaseClient returns an SDK client for the default region. Used by acceptance tests.
+func (c *Client) GetBaseClient() *userobjectstorage.APIClient {
+	client, _ := c.apiClientForRegion(DefaultRegion)
+	return client
 }
 
 func signerMiddleware(region string, signer *awsv4.Signer) shared.MiddlewareFunctionWithError {

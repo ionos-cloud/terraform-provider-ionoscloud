@@ -223,12 +223,6 @@ type ApiGetObjectLockConfigurationRequest struct {
 	ctx        context.Context
 	ApiService *ObjectLockApiService
 	bucket     string
-	objectLock *bool
-}
-
-func (r ApiGetObjectLockConfigurationRequest) ObjectLock(objectLock bool) ApiGetObjectLockConfigurationRequest {
-	r.objectLock = &objectLock
-	return r
 }
 
 func (r ApiGetObjectLockConfigurationRequest) Execute() (*GetObjectLockConfigurationOutput, *shared.APIResponse, error) {
@@ -286,11 +280,7 @@ func (a *ObjectLockApiService) GetObjectLockConfigurationExecute(r ApiGetObjectL
 	if shared.Strlen(r.bucket) > 63 {
 		return localVarReturnValue, nil, reportError("bucket must have less than 63 elements")
 	}
-	if r.objectLock == nil {
-		return localVarReturnValue, nil, reportError("objectLock is required and must be specified")
-	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "object-lock", r.objectLock, "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -786,14 +776,8 @@ type ApiPutObjectLockConfigurationRequest struct {
 	ctx                               context.Context
 	ApiService                        *ObjectLockApiService
 	bucket                            string
-	objectLock                        *bool
 	contentMD5                        *string
 	putObjectLockConfigurationRequest *PutObjectLockConfigurationRequest
-}
-
-func (r ApiPutObjectLockConfigurationRequest) ObjectLock(objectLock bool) ApiPutObjectLockConfigurationRequest {
-	r.objectLock = &objectLock
-	return r
 }
 
 func (r ApiPutObjectLockConfigurationRequest) ContentMD5(contentMD5 string) ApiPutObjectLockConfigurationRequest {
@@ -868,9 +852,6 @@ func (a *ObjectLockApiService) PutObjectLockConfigurationExecute(r ApiPutObjectL
 	if shared.Strlen(r.bucket) > 63 {
 		return nil, reportError("bucket must have less than 63 elements")
 	}
-	if r.objectLock == nil {
-		return nil, reportError("objectLock is required and must be specified")
-	}
 	if r.contentMD5 == nil {
 		return nil, reportError("contentMD5 is required and must be specified")
 	}
@@ -878,7 +859,6 @@ func (a *ObjectLockApiService) PutObjectLockConfigurationExecute(r ApiPutObjectL
 		return nil, reportError("putObjectLockConfigurationRequest is required and must be specified")
 	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "object-lock", r.objectLock, "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/xml"}
 

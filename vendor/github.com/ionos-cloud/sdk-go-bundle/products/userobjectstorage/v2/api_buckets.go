@@ -365,12 +365,6 @@ type ApiGetBucketLocationRequest struct {
 	ctx        context.Context
 	ApiService *BucketsApiService
 	bucket     string
-	location   *bool
-}
-
-func (r ApiGetBucketLocationRequest) Location(location bool) ApiGetBucketLocationRequest {
-	r.location = &location
-	return r
 }
 
 func (r ApiGetBucketLocationRequest) Execute() (*GetBucketLocation200Response, *shared.APIResponse, error) {
@@ -430,11 +424,7 @@ func (a *BucketsApiService) GetBucketLocationExecute(r ApiGetBucketLocationReque
 	if shared.Strlen(r.bucket) > 63 {
 		return localVarReturnValue, nil, reportError("bucket must have less than 63 elements")
 	}
-	if r.location == nil {
-		return localVarReturnValue, nil, reportError("location is required and must be specified")
-	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "location", r.location, "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 

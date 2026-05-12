@@ -8,13 +8,14 @@ import (
 
 	"github.com/cenkalti/backoff/v4"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/ionos-cloud/sdk-go-bundle/products/userobjectstorage/v2"
+	userobjectstorage "github.com/ionos-cloud/sdk-go-bundle/products/userobjectstorage/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 )
 
 // CreateBucket creates a new user-owned bucket in the given region.
 func (c *Client) CreateBucket(ctx context.Context, name, region types.String, objectLock types.Bool, timeout time.Duration) error {
-	if err := c.ChangeRegion(region.ValueString()); err != nil {
+	api, err := c.apiClientForRegion(region.ValueString())
+	if err != nil {
 		return err
 	}
 
@@ -24,33 +25,33 @@ func (c *Client) CreateBucket(ctx context.Context, name, region types.String, ob
 	createReq := userobjectstorage.NewCreateBucketRequest()
 	createReq.CreateBucketConfiguration = &createBucketConfig
 
-	if _, err := c.client.BucketsApi.CreateBucket(ctx, name.ValueString()).
+	if _, err := api.BucketsApi.CreateBucket(ctx, name.ValueString()).
 		CreateBucketRequest(*createReq).
 		XAmzBucketObjectLockEnabled(objectLock.ValueBool()).
 		Execute(); err != nil {
 		return fmt.Errorf("failed to create bucket %q: %w", name.ValueString(), err)
 	}
 
-	err := backoff.Retry(func() error {
-		return c.bucketExistsCheck(ctx, name.ValueString())
+	backoffErr := backoff.Retry(func() error {
+		return c.bucketExistsCheck(ctx, api, name.ValueString())
 	}, backoff.NewExponentialBackOff(backoff.WithMaxElapsedTime(timeout)))
-	if err != nil {
-		return fmt.Errorf("failed to wait for bucket creation: %w", err)
+	if backoffErr != nil {
+		return fmt.Errorf("failed to wait for bucket creation: %w", backoffErr)
 	}
 
 	return nil
 }
 
 // GetBucket checks whether a bucket exists. Returns (false, nil) if the bucket is not found.
-// Region is not refreshed from the API — it is sourced from Terraform state since region is
-// RequiresReplace and the SDK's GetBucketLocation response model has a generator-level XML tag
-// issue that cannot be fixed without changing the generator templates.
+// Region is sourced from Terraform state — the SDK's GetBucketLocation response model has a
+// generator-level XML tag issue that cannot be fixed without changing the generator templates.
 func (c *Client) GetBucket(ctx context.Context, name, region types.String) (bool, error) {
-	if err := c.ChangeRegion(region.ValueString()); err != nil {
+	api, err := c.apiClientForRegion(region.ValueString())
+	if err != nil {
 		return false, err
 	}
 
-	apiResp, err := c.client.BucketsApi.HeadBucket(ctx, name.ValueString()).Execute()
+	apiResp, err := api.BucketsApi.HeadBucket(ctx, name.ValueString()).Execute()
 	if apiResp.HttpNotFound() {
 		return false, nil
 	}
@@ -61,20 +62,39 @@ func (c *Client) GetBucket(ctx context.Context, name, region types.String) (bool
 	return true, nil
 }
 
+// GetObjectLockEnabled returns true if Object Lock is enabled for the bucket.
+// Returns false when the bucket has no Object Lock configuration (404) or when it is not enabled.
+func (c *Client) GetObjectLockEnabled(ctx context.Context, name types.String) (types.Bool, error) {
+	// Object lock configuration is not region-specific at the API level; use the default region.
+	api, err := c.apiClientForRegion(DefaultRegion)
+	if err != nil {
+		return types.BoolNull(), err
+	}
+	output, apiResp, err := api.ObjectLockApi.GetObjectLockConfiguration(ctx, name.ValueString()).Execute()
+	if apiResp.HttpNotFound() {
+		return types.BoolValue(false), nil
+	}
+	if err != nil {
+		return types.BoolNull(), fmt.Errorf("failed to get object lock configuration for %q: %w", name.ValueString(), err)
+	}
+	return types.BoolValue(output.GetObjectLockEnabled() == "Enabled"), nil
+}
+
 // DeleteBucket deletes a bucket. If forceDestroy is true and the bucket is not empty, all objects
 // are deleted first.
 func (c *Client) DeleteBucket(ctx context.Context, name types.String, forceDestroy types.Bool, region types.String, timeout time.Duration) error {
-	if err := c.ChangeRegion(region.ValueString()); err != nil {
+	api, err := c.apiClientForRegion(region.ValueString())
+	if err != nil {
 		return err
 	}
 
-	apiResp, err := c.client.BucketsApi.DeleteBucket(ctx, name.ValueString()).Execute()
+	apiResp, err := api.BucketsApi.DeleteBucket(ctx, name.ValueString()).Execute()
 	if apiResp.HttpNotFound() {
 		return nil
 	}
 
 	if isBucketNotEmptyError(err) && forceDestroy.ValueBool() {
-		if err = c.deleteAllObjects(ctx, name.ValueString()); err != nil {
+		if err = c.deleteAllObjects(ctx, api, name.ValueString()); err != nil {
 			return fmt.Errorf("failed to empty bucket %q: %w", name.ValueString(), err)
 		}
 		return c.DeleteBucket(ctx, name, forceDestroy, region, timeout)
@@ -86,7 +106,7 @@ func (c *Client) DeleteBucket(ctx context.Context, name types.String, forceDestr
 
 	backOff := backoff.NewExponentialBackOff(backoff.WithMaxElapsedTime(timeout))
 	if err = backoff.Retry(func() error {
-		return c.bucketDeletedCheck(ctx, name.ValueString())
+		return c.bucketDeletedCheck(ctx, api, name.ValueString())
 	}, backOff); err != nil {
 		return fmt.Errorf("failed to wait for bucket deletion: %w", err)
 	}
@@ -95,10 +115,10 @@ func (c *Client) DeleteBucket(ctx context.Context, name types.String, forceDestr
 }
 
 // deleteAllObjects lists and deletes every object in the bucket (used for force_destroy).
-func (c *Client) deleteAllObjects(ctx context.Context, bucketName string) error {
+func (c *Client) deleteAllObjects(ctx context.Context, api *userobjectstorage.APIClient, bucketName string) error {
 	var continuationToken string
 	for {
-		req := c.client.ObjectsApi.ListObjectsV2(ctx, bucketName)
+		req := api.ObjectsApi.ListObjectsV2(ctx, bucketName)
 		if continuationToken != "" {
 			req = req.ContinuationToken(continuationToken)
 		}
@@ -112,7 +132,7 @@ func (c *Client) deleteAllObjects(ctx context.Context, bucketName string) error 
 			if obj.Key == nil {
 				continue
 			}
-			if _, _, err := c.client.ObjectsApi.DeleteObject(ctx, bucketName, *obj.Key).Execute(); err != nil {
+			if _, _, err := api.ObjectsApi.DeleteObject(ctx, bucketName, *obj.Key).Execute(); err != nil {
 				return fmt.Errorf("failed to delete object %q: %w", *obj.Key, err)
 			}
 		}
@@ -128,8 +148,8 @@ func (c *Client) deleteAllObjects(ctx context.Context, bucketName string) error 
 	return nil
 }
 
-func (c *Client) bucketExistsCheck(ctx context.Context, name string) error {
-	apiResp, err := c.client.BucketsApi.HeadBucket(ctx, name).Execute()
+func (c *Client) bucketExistsCheck(ctx context.Context, api *userobjectstorage.APIClient, name string) error {
+	apiResp, err := api.BucketsApi.HeadBucket(ctx, name).Execute()
 	if apiResp.HttpNotFound() {
 		return fmt.Errorf("bucket not found")
 	}
@@ -139,8 +159,8 @@ func (c *Client) bucketExistsCheck(ctx context.Context, name string) error {
 	return nil
 }
 
-func (c *Client) bucketDeletedCheck(ctx context.Context, name string) error {
-	apiResp, err := c.client.BucketsApi.HeadBucket(ctx, name).Execute()
+func (c *Client) bucketDeletedCheck(ctx context.Context, api *userobjectstorage.APIClient, name string) error {
+	apiResp, err := api.BucketsApi.HeadBucket(ctx, name).Execute()
 	if apiResp.HttpNotFound() {
 		return nil
 	}

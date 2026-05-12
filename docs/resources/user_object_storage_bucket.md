@@ -43,6 +43,8 @@ The following arguments are supported:
 - `timeouts` - (Optional) Timeouts for this resource.
   - `create` - (Optional)[string] Time to wait for the bucket to be created. Default is `10m`.
   - `delete` - (Optional)[string] Time to wait for the bucket to be deleted. Default is `10m`.
+  - `update` - (Optional)[string] Time to wait for the bucket to be updated. Default is `10m`.
+  - `read`   - (Optional)[string] Time to wait for the bucket to be read. Default is `10m`.
 
 ## Attributes Reference
 
@@ -52,8 +54,7 @@ The following arguments are supported:
 
 ## Limitations
 
-- **Region cannot be read back from the API** after import due to a known SDK issue with the `GetBucketLocation` response XML model. The region defaults to `de` when importing by bucket name alone. Use the `region:name` import format to specify the correct region explicitly.
-- **`object_lock_enabled` cannot be read back from the API** after import. It defaults to `false` in state. If your bucket was created with Object Lock enabled, set `object_lock_enabled = true` in your configuration and re-import.
+- **Region cannot be read back from the API** after import due to a known SDK generator issue with the `GetBucketLocation` response XML model. The region defaults to `de` when importing by bucket name alone. Use the `region:name` import format to specify the correct region explicitly.
 - Tags and sub-resources (versioning, lifecycle, CORS, SSE, website, policy) are not currently supported for user-owned buckets. Use `ionoscloud_s3_bucket` and its associated resources for full feature coverage.
 
 ## Import

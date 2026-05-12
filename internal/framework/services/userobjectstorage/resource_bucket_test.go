@@ -19,6 +19,7 @@ const bucketPrefix = "acctest-tf-user-bucket-"
 func TestAccUserObjectStorageBucketResource(t *testing.T) {
 	rName := acctest.GenerateRandomResourceName(bucketPrefix)
 	resourceName := "ionoscloud_user_object_storage_bucket.test"
+	dataSourceName := "data.ionoscloud_user_object_storage_bucket.test"
 
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
@@ -38,11 +39,19 @@ func TestAccUserObjectStorageBucketResource(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccUserBucketDataSourceConfig_basic(rName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(dataSourceName, "name", resourceName, "name"),
+					resource.TestCheckResourceAttrPair(dataSourceName, "region", resourceName, "region"),
+					resource.TestCheckResourceAttrPair(dataSourceName, "object_lock_enabled", resourceName, "object_lock_enabled"),
+				),
+			},
+			{
 				ResourceName:                         resourceName,
 				ImportStateId:                        rName,
 				ImportState:                          true,
 				ImportStateVerifyIdentifierAttribute: "name",
-				ImportStateVerifyIgnore:              []string{"force_destroy", "object_lock_enabled"},
+				ImportStateVerifyIgnore:              []string{"force_destroy"},
 				ImportStateVerify:                    true,
 			},
 		},
@@ -69,9 +78,6 @@ func testAccCheckUserBucketDestroy(s *terraform.State) error {
 		if rs.Type != "ionoscloud_user_object_storage_bucket" {
 			continue
 		}
-		if rs.Primary.Attributes["name"] == "" {
-			continue
-		}
 		apiResponse, err := client.BucketsApi.HeadBucket(
 			context.Background(), rs.Primary.Attributes["name"],
 		).Execute()
@@ -85,29 +91,6 @@ func testAccCheckUserBucketDestroy(s *terraform.State) error {
 	}
 
 	return nil
-}
-
-func TestAccUserObjectStorageBucketDataSource(t *testing.T) {
-	rName := acctest.GenerateRandomResourceName(bucketPrefix)
-	resourceName := "ionoscloud_user_object_storage_bucket.test"
-	dataSourceName := "data.ionoscloud_user_object_storage_bucket.test"
-
-	resource.Test(t, resource.TestCase{
-		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
-		PreCheck: func() {
-			acctest.PreCheck(t)
-		},
-		CheckDestroy: testAccCheckUserBucketDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccUserBucketDataSourceConfig_basic(rName),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(dataSourceName, "name", resourceName, "name"),
-					resource.TestCheckResourceAttrPair(dataSourceName, "region", resourceName, "region"),
-				),
-			},
-		},
-	})
 }
 
 func testAccUserBucketConfig_basic(bucketName string) string {

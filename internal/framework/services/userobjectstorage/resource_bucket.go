@@ -39,12 +39,12 @@ type bucketResource struct {
 }
 
 type bucketResourceModel struct {
-	Name              types.String   `tfsdk:"name"`
-	Region            types.String   `tfsdk:"region"`
-	ObjectLockEnabled types.Bool     `tfsdk:"object_lock_enabled"`
 	ForceDestroy      types.Bool     `tfsdk:"force_destroy"`
-	Timeouts          timeouts.Value `tfsdk:"timeouts"`
 	ID                types.String   `tfsdk:"id"`
+	Name              types.String   `tfsdk:"name"`
+	ObjectLockEnabled types.Bool     `tfsdk:"object_lock_enabled"`
+	Region            types.String   `tfsdk:"region"`
+	Timeouts          timeouts.Value `tfsdk:"timeouts"`
 }
 
 // Metadata sets the resource type name.
@@ -56,6 +56,12 @@ func (r *bucketResource) Metadata(_ context.Context, req resource.MetadataReques
 func (r *bucketResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
+			"force_destroy": schema.BoolAttribute{
+				Description: "When true, all objects are deleted from the bucket before destroying it, allowing a non-empty bucket to be destroyed.",
+				Optional:    true,
+				Computed:    true,
+				Default:     booldefault.StaticBool(false),
+			},
 			"id": schema.StringAttribute{
 				Computed:    true,
 				Description: "Same value as name.",
@@ -64,18 +70,6 @@ func (r *bucketResource) Schema(ctx context.Context, req resource.SchemaRequest,
 				Description: "The bucket name. Must be 3–63 characters, lowercase alphanumeric, hyphens, periods, or underscores.",
 				Required:    true,
 				Validators:  []validator.String{stringvalidator.LengthBetween(3, 63)},
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
-			},
-			"region": schema.StringAttribute{
-				Description: "The region where the bucket is created. Defaults to 'de' (Frankfurt). Valid values: 'de', 'eu-central-2', 'eu-south-2'.",
-				Optional:    true,
-				Computed:    true,
-				Default:     stringdefault.StaticString(userobjectstorage.DefaultRegion),
-				Validators: []validator.String{
-					stringvalidator.OneOf(userobjectstorage.ValidRegions...),
-				},
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
@@ -89,11 +83,17 @@ func (r *bucketResource) Schema(ctx context.Context, req resource.SchemaRequest,
 					boolplanmodifier.RequiresReplace(),
 				},
 			},
-			"force_destroy": schema.BoolAttribute{
-				Description: "When true, all objects are deleted from the bucket before destroying it, allowing a non-empty bucket to be destroyed.",
+			"region": schema.StringAttribute{
+				Description: "The region where the bucket is created. Defaults to 'de' (Frankfurt). Valid values: 'de', 'eu-central-2', 'eu-south-2'.",
 				Optional:    true,
 				Computed:    true,
-				Default:     booldefault.StaticBool(false),
+				Default:     stringdefault.StaticString(userobjectstorage.DefaultRegion),
+				Validators: []validator.String{
+					stringvalidator.OneOf(userobjectstorage.ValidRegions...),
+				},
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 		},
 		Blocks: map[string]schema.Block{
@@ -166,13 +166,9 @@ func (r *bucketResource) Read(ctx context.Context, req resource.ReadRequest, res
 		return
 	}
 
-	// Region and object_lock_enabled cannot be read back from the API. Default them when
-	// missing, as happens after a plain `terraform import` by name only.
-	if data.Region.IsNull() || data.Region.IsUnknown() || data.Region.ValueString() == "" {
+	// Region cannot be read back from the API. Default when missing (plain `terraform import`).
+	if data.Region.ValueString() == "" {
 		data.Region = types.StringValue(userobjectstorage.DefaultRegion)
-	}
-	if data.ObjectLockEnabled.IsNull() || data.ObjectLockEnabled.IsUnknown() {
-		data.ObjectLockEnabled = types.BoolValue(false)
 	}
 
 	found, err := r.client.GetBucket(ctx, data.Name, data.Region)
@@ -185,6 +181,13 @@ func (r *bucketResource) Read(ctx context.Context, req resource.ReadRequest, res
 		return
 	}
 
+	objectLockEnabled, err := r.client.GetObjectLockEnabled(ctx, data.Name)
+	if err != nil {
+		resp.Diagnostics.AddError("failed to get object lock configuration", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Name.ValueString()}).Error())
+		return
+	}
+
+	data.ObjectLockEnabled = objectLockEnabled
 	data.ID = data.Name
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -247,7 +250,7 @@ func (r *bucketResource) ImportState(ctx context.Context, req resource.ImportSta
 		name = parts[0]
 	}
 	if name == "" {
-		resp.Diagnostics.AddError("invalid bucket name", fmt.Sprintf("bucket name must not be empty. Got: %q", req.ID))
+		resp.Diagnostics.AddError("invalid bucket name", "bucket name must not be empty")
 		return
 	}
 

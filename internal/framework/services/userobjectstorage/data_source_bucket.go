@@ -25,8 +25,9 @@ type bucketDataSource struct {
 }
 
 type bucketDataSourceModel struct {
-	Name   types.String `tfsdk:"name"`
-	Region types.String `tfsdk:"region"`
+	Name              types.String `tfsdk:"name"`
+	ObjectLockEnabled types.Bool   `tfsdk:"object_lock_enabled"`
+	Region            types.String `tfsdk:"region"`
 }
 
 // Metadata returns the metadata for the data source.
@@ -41,6 +42,10 @@ func (d *bucketDataSource) Schema(_ context.Context, _ datasource.SchemaRequest,
 			"name": schema.StringAttribute{
 				Description: "The name of the bucket.",
 				Required:    true,
+			},
+			"object_lock_enabled": schema.BoolAttribute{
+				Description: "Whether Object Lock is enabled for the bucket.",
+				Computed:    true,
 			},
 			"region": schema.StringAttribute{
 				Description: "The region of the bucket. Defaults to 'de' (Frankfurt). Valid values: 'de', 'eu-central-2', 'eu-south-2'.",
@@ -80,7 +85,7 @@ func (d *bucketDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		return
 	}
 
-	if data.Region.IsNull() || data.Region.IsUnknown() || data.Region.ValueString() == "" {
+	if data.Region.ValueString() == "" {
 		data.Region = types.StringValue(userobjectstorage.DefaultRegion)
 	}
 
@@ -94,5 +99,12 @@ func (d *bucketDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		return
 	}
 
+	objectLockEnabled, err := d.client.GetObjectLockEnabled(ctx, data.Name)
+	if err != nil {
+		resp.Diagnostics.AddError("failed to get object lock configuration", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Name.ValueString()}).Error())
+		return
+	}
+
+	data.ObjectLockEnabled = objectLockEnabled
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

@@ -212,7 +212,7 @@ func (r *bucketResource) ImportState(ctx context.Context, req resource.ImportSta
 		name = parts[0]
 	}
 	if name == "" {
-		resp.Diagnostics.AddError("invalid bucket name", fmt.Sprintf("please provide a non-empty string for the bucket name. Got: %q", req.ID))
+		resp.Diagnostics.AddError("invalid bucket name", fmt.Sprintf("please provide a non-empty string for the bucket"))
 		return
 	}
 
