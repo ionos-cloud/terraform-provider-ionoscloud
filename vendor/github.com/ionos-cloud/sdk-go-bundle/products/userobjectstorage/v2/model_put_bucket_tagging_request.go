@@ -22,18 +22,19 @@ var _ MappedNullable = &PutBucketTaggingRequest{}
 
 // PutBucketTaggingRequest struct for PutBucketTaggingRequest
 type PutBucketTaggingRequest struct {
-	XMLName xml.Name                       `xml:"PutBucketTaggingRequest"`
-	Tagging PutBucketTaggingRequestTagging `json:"Tagging" xml:"Tagging"`
+	XMLName xml.Name `xml:"Tagging"`
+	// Contains the tag set.
+	TagSet []Tag `json:"TagSet" xml:"TagSet"`
 }
 
 // NewPutBucketTaggingRequest instantiates a new PutBucketTaggingRequest object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewPutBucketTaggingRequest(tagging PutBucketTaggingRequestTagging) *PutBucketTaggingRequest {
+func NewPutBucketTaggingRequest(tagSet []Tag) *PutBucketTaggingRequest {
 	this := PutBucketTaggingRequest{}
 
-	this.Tagging = tagging
+	this.TagSet = tagSet
 
 	return &this
 }
@@ -46,28 +47,28 @@ func NewPutBucketTaggingRequestWithDefaults() *PutBucketTaggingRequest {
 	return &this
 }
 
-// GetTagging returns the Tagging field value
-func (o *PutBucketTaggingRequest) GetTagging() PutBucketTaggingRequestTagging {
+// GetTagSet returns the TagSet field value
+func (o *PutBucketTaggingRequest) GetTagSet() []Tag {
 	if o == nil {
-		var ret PutBucketTaggingRequestTagging
+		var ret []Tag
 		return ret
 	}
 
-	return o.Tagging
+	return o.TagSet
 }
 
-// GetTaggingOk returns a tuple with the Tagging field value
+// GetTagSetOk returns a tuple with the TagSet field value
 // and a boolean to check if the value has been set.
-func (o *PutBucketTaggingRequest) GetTaggingOk() (*PutBucketTaggingRequestTagging, bool) {
+func (o *PutBucketTaggingRequest) GetTagSetOk() ([]Tag, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.Tagging, true
+	return o.TagSet, true
 }
 
-// SetTagging sets field value
-func (o *PutBucketTaggingRequest) SetTagging(v PutBucketTaggingRequestTagging) {
-	o.Tagging = v
+// SetTagSet sets field value
+func (o *PutBucketTaggingRequest) SetTagSet(v []Tag) {
+	o.TagSet = v
 }
 
 func (o PutBucketTaggingRequest) MarshalJSON() ([]byte, error) {
@@ -80,7 +81,7 @@ func (o PutBucketTaggingRequest) MarshalJSON() ([]byte, error) {
 
 func (o PutBucketTaggingRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	toSerialize["Tagging"] = o.Tagging
+	toSerialize["TagSet"] = o.TagSet
 	return toSerialize, nil
 }
 

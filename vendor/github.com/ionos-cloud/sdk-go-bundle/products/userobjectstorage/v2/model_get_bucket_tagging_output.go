@@ -22,16 +22,15 @@ var _ MappedNullable = &GetBucketTaggingOutput{}
 
 // GetBucketTaggingOutput struct for GetBucketTaggingOutput
 type GetBucketTaggingOutput struct {
-	XMLName xml.Name `xml:"GetBucketTaggingOutput"`
-	// Contains the tag set.
-	TagSet []Tag `json:"TagSet" xml:"TagSet"`
+	XMLName xml.Name     `xml:"Tagging"`
+	TagSet  BucketTagSet `json:"TagSet" xml:"TagSet"`
 }
 
 // NewGetBucketTaggingOutput instantiates a new GetBucketTaggingOutput object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewGetBucketTaggingOutput(tagSet []Tag) *GetBucketTaggingOutput {
+func NewGetBucketTaggingOutput(tagSet BucketTagSet) *GetBucketTaggingOutput {
 	this := GetBucketTaggingOutput{}
 
 	this.TagSet = tagSet
@@ -48,9 +47,9 @@ func NewGetBucketTaggingOutputWithDefaults() *GetBucketTaggingOutput {
 }
 
 // GetTagSet returns the TagSet field value
-func (o *GetBucketTaggingOutput) GetTagSet() []Tag {
+func (o *GetBucketTaggingOutput) GetTagSet() BucketTagSet {
 	if o == nil {
-		var ret []Tag
+		var ret BucketTagSet
 		return ret
 	}
 
@@ -59,15 +58,15 @@ func (o *GetBucketTaggingOutput) GetTagSet() []Tag {
 
 // GetTagSetOk returns a tuple with the TagSet field value
 // and a boolean to check if the value has been set.
-func (o *GetBucketTaggingOutput) GetTagSetOk() ([]Tag, bool) {
+func (o *GetBucketTaggingOutput) GetTagSetOk() (*BucketTagSet, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return o.TagSet, true
+	return &o.TagSet, true
 }
 
 // SetTagSet sets field value
-func (o *GetBucketTaggingOutput) SetTagSet(v []Tag) {
+func (o *GetBucketTaggingOutput) SetTagSet(v BucketTagSet) {
 	o.TagSet = v
 }
 

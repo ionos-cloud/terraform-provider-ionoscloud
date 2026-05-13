@@ -24,6 +24,7 @@ import (
 // A new SDK client is instantiated for each operation so concurrent operations
 // on different regions do not share mutable state.
 type Client struct {
+	client        *userobjectstorage.APIClient
 	clientOptions clientoptions.TerraformClientOptions
 	httpClient    *http.Client
 	signer        *awsv4.Signer
@@ -57,12 +58,15 @@ func NewClient(ctx context.Context, clientOptions clientoptions.TerraformClientO
 		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
 	)
 
-	return &Client{
+	httpClient := &http.Client{Transport: shared.CreateTransport(clientOptions.SkipTLSVerify, "")}
+	c := &Client{
 		clientOptions: clientOptions,
-		httpClient:    &http.Client{Transport: shared.CreateTransport(clientOptions.SkipTLSVerify, "")},
+		httpClient:    httpClient,
 		signer:        signer,
 		userAgent:     userAgent,
 	}
+	c.client, _ = c.apiClientForRegion(DefaultRegion)
+	return c
 }
 
 // apiClientForRegion returns a new SDK API client configured for the given region.
@@ -83,10 +87,9 @@ func (c *Client) apiClientForRegion(region string) (*userobjectstorage.APIClient
 	return userobjectstorage.NewAPIClient(cfg), nil
 }
 
-// GetBaseClient returns an SDK client for the default region. Used by acceptance tests.
+// GetBaseClient returns the SDK client for the default region. Used by acceptance tests.
 func (c *Client) GetBaseClient() *userobjectstorage.APIClient {
-	client, _ := c.apiClientForRegion(DefaultRegion)
-	return client
+	return c.client
 }
 
 func signerMiddleware(region string, signer *awsv4.Signer) shared.MiddlewareFunctionWithError {

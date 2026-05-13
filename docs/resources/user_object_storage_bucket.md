@@ -22,6 +22,11 @@ resource "ionoscloud_user_object_storage_bucket" "example" {
 
   force_destroy = true
 
+  tags = {
+    environment = "production"
+    team        = "platform"
+  }
+
   timeouts {
     create = "10m"
     delete = "10m"
@@ -39,6 +44,7 @@ The following arguments are supported:
   - `eu-central-2` — Berlin, Germany (`https://s3.eu-central-2.ionoscloud.com`)
   - `eu-south-2` — Logroño, Spain (`https://s3.eu-south-2.ionoscloud.com`)
 - `object_lock_enabled` - (Optional)[bool] Whether Object Lock is enabled for the bucket. Defaults to `false`. **Cannot be changed after creation** — changing this value forces a new resource.
+- `tags` - (Optional) A mapping of tags to assign to the bucket.
 - `force_destroy` - (Optional)[bool] Defaults to `false`. When set to `true`, all objects in the bucket are deleted before the bucket itself is destroyed, allowing Terraform to remove a non-empty bucket. **Use with caution** — this irreversibly deletes all bucket contents.
 - `timeouts` - (Optional) Timeouts for this resource.
   - `create` - (Optional)[string] Time to wait for the bucket to be created. Default is `10m`.

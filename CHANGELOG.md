@@ -5,7 +5,7 @@
 - Fix `location` data source returning "no location found" when searching using the `feature` attribute.
 
 ### Features
-- New resource: `ionoscloud_user_object_storage_bucket` for user-owned IONOS object storage buckets.
+- New resource: `ionoscloud_user_object_storage_bucket` for user-owned IONOS object storage buckets (supports tags, object lock, force destroy).
 - New data source: `ionoscloud_user_object_storage_bucket` to look up user-owned buckets by name and region.
 
 ### Documentation

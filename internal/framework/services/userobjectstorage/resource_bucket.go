@@ -18,6 +18,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/tags"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/userobjectstorage"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
@@ -36,6 +37,16 @@ func NewBucketResource() resource.Resource {
 
 type bucketResource struct {
 	client *userobjectstorage.Client
+}
+
+type bucketResourceModel struct {
+	ForceDestroy      types.Bool     `tfsdk:"force_destroy"`
+	ID                types.String   `tfsdk:"id"`
+	Name              types.String   `tfsdk:"name"`
+	ObjectLockEnabled types.Bool     `tfsdk:"object_lock_enabled"`
+	Region            types.String   `tfsdk:"region"`
+	Tags              types.Map      `tfsdk:"tags"`
+	Timeouts          timeouts.Value `tfsdk:"timeouts"`
 }
 
 // Metadata sets the resource type name.
@@ -73,6 +84,11 @@ func (r *bucketResource) Schema(ctx context.Context, req resource.SchemaRequest,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.RequiresReplace(),
 				},
+			},
+			"tags": schema.MapAttribute{
+				Description: "A mapping of tags to assign to the bucket.",
+				Optional:    true,
+				ElementType: types.StringType,
 			},
 			"region": schema.StringAttribute{
 				Description: "The region where the bucket is created. Defaults to 'de' (Frankfurt). Valid values: 'de', 'eu-central-2', 'eu-south-2'.",
@@ -120,7 +136,7 @@ func (r *bucketResource) Create(ctx context.Context, req resource.CreateRequest,
 		return
 	}
 
-	var data userobjectstorage.BucketModel
+	var data bucketResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -134,9 +150,16 @@ func (r *bucketResource) Create(ctx context.Context, req resource.CreateRequest,
 	ctx, cancel := context.WithTimeout(ctx, createTimeout)
 	defer cancel()
 
-	if err := r.client.CreateBucket(ctx, data, createTimeout); err != nil {
+	if err := r.client.CreateBucket(ctx, data.Name.ValueString(), data.Region.ValueString(), data.ObjectLockEnabled.ValueBool(), createTimeout); err != nil {
 		resp.Diagnostics.AddError("failed to create bucket", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Name.ValueString()}).Error())
 		return
+	}
+
+	if !data.Tags.IsNull() && len(data.Tags.Elements()) > 0 {
+		if err := r.client.PutBucketTags(ctx, data.Name.ValueString(), data.Region.ValueString(), tags.NewFromMap(data.Tags)); err != nil {
+			resp.Diagnostics.AddError("failed to set bucket tags", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Name.ValueString()}).Error())
+			return
+		}
 	}
 
 	data.ID = data.Name
@@ -150,7 +173,7 @@ func (r *bucketResource) Read(ctx context.Context, req resource.ReadRequest, res
 		return
 	}
 
-	var data userobjectstorage.BucketModel
+	var data bucketResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -169,7 +192,7 @@ func (r *bucketResource) Read(ctx context.Context, req resource.ReadRequest, res
 		data.Region = types.StringValue(userobjectstorage.DefaultRegion)
 	}
 
-	found, err := r.client.GetBucket(ctx, data.Name, data.Region)
+	found, err := r.client.GetBucket(ctx, data.Name.ValueString(), data.Region.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Bucket API error", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Name.ValueString()}).Error())
 		return
@@ -179,24 +202,54 @@ func (r *bucketResource) Read(ctx context.Context, req resource.ReadRequest, res
 		return
 	}
 
-	objectLockEnabled, err := r.client.GetObjectLockEnabled(ctx, data.Name)
+	objectLockEnabled, err := r.client.GetObjectLockEnabled(ctx, data.Name.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("failed to get object lock configuration", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Name.ValueString()}).Error())
 		return
 	}
 
-	data.ObjectLockEnabled = objectLockEnabled
+	rawTags, err := r.client.GetBucketTags(ctx, data.Name.ValueString(), data.Region.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("failed to get bucket tags", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Name.ValueString()}).Error())
+		return
+	}
+
+	tagsMap, err := tags.KeyValueTags(rawTags).ToMap(ctx)
+	if err != nil {
+		resp.Diagnostics.AddError("failed to convert bucket tags", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Name.ValueString()}).Error())
+		return
+	}
+
+	data.ObjectLockEnabled = types.BoolValue(objectLockEnabled)
+	data.Tags = tagsMap
 	data.ID = data.Name
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-// Update handles in-place changes (only force_destroy can change without replacement).
+// Update handles in-place changes (force_destroy and tags can change without replacement).
 func (r *bucketResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var plan userobjectstorage.BucketModel
+	var plan, state bucketResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	if !plan.Tags.Equal(state.Tags) {
+		if plan.Tags.IsNull() || len(plan.Tags.Elements()) == 0 {
+			if err := r.client.DeleteBucketTags(ctx, plan.Name.ValueString(), plan.Region.ValueString()); err != nil {
+				resp.Diagnostics.AddError("failed to delete bucket tags", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: plan.Name.ValueString()}).Error())
+				return
+			}
+		} else {
+			if err := r.client.PutBucketTags(ctx, plan.Name.ValueString(), plan.Region.ValueString(), tags.NewFromMap(plan.Tags)); err != nil {
+				resp.Diagnostics.AddError("failed to update bucket tags", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: plan.Name.ValueString()}).Error())
+				return
+			}
+		}
+	}
+
+	plan.ID = plan.Name
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
@@ -207,7 +260,7 @@ func (r *bucketResource) Delete(ctx context.Context, req resource.DeleteRequest,
 		return
 	}
 
-	var data userobjectstorage.BucketModel
+	var data bucketResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -221,7 +274,7 @@ func (r *bucketResource) Delete(ctx context.Context, req resource.DeleteRequest,
 	ctx, cancel := context.WithTimeout(ctx, deleteTimeout)
 	defer cancel()
 
-	if err := r.client.DeleteBucket(ctx, data, deleteTimeout); err != nil {
+	if err := r.client.DeleteBucket(ctx, data.Name.ValueString(), data.Region.ValueString(), data.ForceDestroy.ValueBool(), deleteTimeout); err != nil {
 		resp.Diagnostics.AddError("failed to delete bucket", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Name.ValueString()}).Error())
 	}
 }
