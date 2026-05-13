@@ -17,11 +17,11 @@ import (
 	"time"
 )
 
-// checks if the MetadataWithStatus type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &MetadataWithStatus{}
+// checks if the MetadataWithUsage type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &MetadataWithUsage{}
 
-// MetadataWithStatus struct for MetadataWithStatus
-type MetadataWithStatus struct {
+// MetadataWithUsage struct for MetadataWithUsage
+type MetadataWithUsage struct {
 	// The ISO 8601 creation timestamp.
 	CreatedDate *IonosTime `json:"createdDate,omitempty"`
 	// Unique name of the identity that created the resource.
@@ -40,30 +40,33 @@ type MetadataWithStatus struct {
 	Status string `json:"status"`
 	// The error message when the status is `FAILED`.
 	StatusMessage *string `json:"statusMessage,omitempty"`
+	// The storage capacity currently taken up by the customer's files in bytes, or 0 on error.
+	Used int64 `json:"used"`
 }
 
-// NewMetadataWithStatus instantiates a new MetadataWithStatus object
+// NewMetadataWithUsage instantiates a new MetadataWithUsage object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewMetadataWithStatus(status string) *MetadataWithStatus {
-	this := MetadataWithStatus{}
+func NewMetadataWithUsage(status string, used int64) *MetadataWithUsage {
+	this := MetadataWithUsage{}
 
 	this.Status = status
+	this.Used = used
 
 	return &this
 }
 
-// NewMetadataWithStatusWithDefaults instantiates a new MetadataWithStatus object
+// NewMetadataWithUsageWithDefaults instantiates a new MetadataWithUsage object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewMetadataWithStatusWithDefaults() *MetadataWithStatus {
-	this := MetadataWithStatus{}
+func NewMetadataWithUsageWithDefaults() *MetadataWithUsage {
+	this := MetadataWithUsage{}
 	return &this
 }
 
 // GetCreatedDate returns the CreatedDate field value if set, zero value otherwise.
-func (o *MetadataWithStatus) GetCreatedDate() time.Time {
+func (o *MetadataWithUsage) GetCreatedDate() time.Time {
 	if o == nil || IsNil(o.CreatedDate) {
 		var ret time.Time
 		return ret
@@ -73,7 +76,7 @@ func (o *MetadataWithStatus) GetCreatedDate() time.Time {
 
 // GetCreatedDateOk returns a tuple with the CreatedDate field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *MetadataWithStatus) GetCreatedDateOk() (*time.Time, bool) {
+func (o *MetadataWithUsage) GetCreatedDateOk() (*time.Time, bool) {
 	if o == nil || IsNil(o.CreatedDate) {
 		return nil, false
 	}
@@ -81,7 +84,7 @@ func (o *MetadataWithStatus) GetCreatedDateOk() (*time.Time, bool) {
 }
 
 // HasCreatedDate returns a boolean if a field has been set.
-func (o *MetadataWithStatus) HasCreatedDate() bool {
+func (o *MetadataWithUsage) HasCreatedDate() bool {
 	if o != nil && !IsNil(o.CreatedDate) {
 		return true
 	}
@@ -90,12 +93,12 @@ func (o *MetadataWithStatus) HasCreatedDate() bool {
 }
 
 // SetCreatedDate gets a reference to the given time.Time and assigns it to the CreatedDate field.
-func (o *MetadataWithStatus) SetCreatedDate(v time.Time) {
+func (o *MetadataWithUsage) SetCreatedDate(v time.Time) {
 	o.CreatedDate = &IonosTime{v}
 }
 
 // GetCreatedBy returns the CreatedBy field value if set, zero value otherwise.
-func (o *MetadataWithStatus) GetCreatedBy() string {
+func (o *MetadataWithUsage) GetCreatedBy() string {
 	if o == nil || IsNil(o.CreatedBy) {
 		var ret string
 		return ret
@@ -105,7 +108,7 @@ func (o *MetadataWithStatus) GetCreatedBy() string {
 
 // GetCreatedByOk returns a tuple with the CreatedBy field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *MetadataWithStatus) GetCreatedByOk() (*string, bool) {
+func (o *MetadataWithUsage) GetCreatedByOk() (*string, bool) {
 	if o == nil || IsNil(o.CreatedBy) {
 		return nil, false
 	}
@@ -113,7 +116,7 @@ func (o *MetadataWithStatus) GetCreatedByOk() (*string, bool) {
 }
 
 // HasCreatedBy returns a boolean if a field has been set.
-func (o *MetadataWithStatus) HasCreatedBy() bool {
+func (o *MetadataWithUsage) HasCreatedBy() bool {
 	if o != nil && !IsNil(o.CreatedBy) {
 		return true
 	}
@@ -122,12 +125,12 @@ func (o *MetadataWithStatus) HasCreatedBy() bool {
 }
 
 // SetCreatedBy gets a reference to the given string and assigns it to the CreatedBy field.
-func (o *MetadataWithStatus) SetCreatedBy(v string) {
+func (o *MetadataWithUsage) SetCreatedBy(v string) {
 	o.CreatedBy = &v
 }
 
 // GetCreatedByUserId returns the CreatedByUserId field value if set, zero value otherwise.
-func (o *MetadataWithStatus) GetCreatedByUserId() string {
+func (o *MetadataWithUsage) GetCreatedByUserId() string {
 	if o == nil || IsNil(o.CreatedByUserId) {
 		var ret string
 		return ret
@@ -137,7 +140,7 @@ func (o *MetadataWithStatus) GetCreatedByUserId() string {
 
 // GetCreatedByUserIdOk returns a tuple with the CreatedByUserId field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *MetadataWithStatus) GetCreatedByUserIdOk() (*string, bool) {
+func (o *MetadataWithUsage) GetCreatedByUserIdOk() (*string, bool) {
 	if o == nil || IsNil(o.CreatedByUserId) {
 		return nil, false
 	}
@@ -145,7 +148,7 @@ func (o *MetadataWithStatus) GetCreatedByUserIdOk() (*string, bool) {
 }
 
 // HasCreatedByUserId returns a boolean if a field has been set.
-func (o *MetadataWithStatus) HasCreatedByUserId() bool {
+func (o *MetadataWithUsage) HasCreatedByUserId() bool {
 	if o != nil && !IsNil(o.CreatedByUserId) {
 		return true
 	}
@@ -154,12 +157,12 @@ func (o *MetadataWithStatus) HasCreatedByUserId() bool {
 }
 
 // SetCreatedByUserId gets a reference to the given string and assigns it to the CreatedByUserId field.
-func (o *MetadataWithStatus) SetCreatedByUserId(v string) {
+func (o *MetadataWithUsage) SetCreatedByUserId(v string) {
 	o.CreatedByUserId = &v
 }
 
 // GetLastModifiedDate returns the LastModifiedDate field value if set, zero value otherwise.
-func (o *MetadataWithStatus) GetLastModifiedDate() time.Time {
+func (o *MetadataWithUsage) GetLastModifiedDate() time.Time {
 	if o == nil || IsNil(o.LastModifiedDate) {
 		var ret time.Time
 		return ret
@@ -169,7 +172,7 @@ func (o *MetadataWithStatus) GetLastModifiedDate() time.Time {
 
 // GetLastModifiedDateOk returns a tuple with the LastModifiedDate field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *MetadataWithStatus) GetLastModifiedDateOk() (*time.Time, bool) {
+func (o *MetadataWithUsage) GetLastModifiedDateOk() (*time.Time, bool) {
 	if o == nil || IsNil(o.LastModifiedDate) {
 		return nil, false
 	}
@@ -177,7 +180,7 @@ func (o *MetadataWithStatus) GetLastModifiedDateOk() (*time.Time, bool) {
 }
 
 // HasLastModifiedDate returns a boolean if a field has been set.
-func (o *MetadataWithStatus) HasLastModifiedDate() bool {
+func (o *MetadataWithUsage) HasLastModifiedDate() bool {
 	if o != nil && !IsNil(o.LastModifiedDate) {
 		return true
 	}
@@ -186,12 +189,12 @@ func (o *MetadataWithStatus) HasLastModifiedDate() bool {
 }
 
 // SetLastModifiedDate gets a reference to the given time.Time and assigns it to the LastModifiedDate field.
-func (o *MetadataWithStatus) SetLastModifiedDate(v time.Time) {
+func (o *MetadataWithUsage) SetLastModifiedDate(v time.Time) {
 	o.LastModifiedDate = &IonosTime{v}
 }
 
 // GetLastModifiedBy returns the LastModifiedBy field value if set, zero value otherwise.
-func (o *MetadataWithStatus) GetLastModifiedBy() string {
+func (o *MetadataWithUsage) GetLastModifiedBy() string {
 	if o == nil || IsNil(o.LastModifiedBy) {
 		var ret string
 		return ret
@@ -201,7 +204,7 @@ func (o *MetadataWithStatus) GetLastModifiedBy() string {
 
 // GetLastModifiedByOk returns a tuple with the LastModifiedBy field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *MetadataWithStatus) GetLastModifiedByOk() (*string, bool) {
+func (o *MetadataWithUsage) GetLastModifiedByOk() (*string, bool) {
 	if o == nil || IsNil(o.LastModifiedBy) {
 		return nil, false
 	}
@@ -209,7 +212,7 @@ func (o *MetadataWithStatus) GetLastModifiedByOk() (*string, bool) {
 }
 
 // HasLastModifiedBy returns a boolean if a field has been set.
-func (o *MetadataWithStatus) HasLastModifiedBy() bool {
+func (o *MetadataWithUsage) HasLastModifiedBy() bool {
 	if o != nil && !IsNil(o.LastModifiedBy) {
 		return true
 	}
@@ -218,12 +221,12 @@ func (o *MetadataWithStatus) HasLastModifiedBy() bool {
 }
 
 // SetLastModifiedBy gets a reference to the given string and assigns it to the LastModifiedBy field.
-func (o *MetadataWithStatus) SetLastModifiedBy(v string) {
+func (o *MetadataWithUsage) SetLastModifiedBy(v string) {
 	o.LastModifiedBy = &v
 }
 
 // GetLastModifiedByUserId returns the LastModifiedByUserId field value if set, zero value otherwise.
-func (o *MetadataWithStatus) GetLastModifiedByUserId() string {
+func (o *MetadataWithUsage) GetLastModifiedByUserId() string {
 	if o == nil || IsNil(o.LastModifiedByUserId) {
 		var ret string
 		return ret
@@ -233,7 +236,7 @@ func (o *MetadataWithStatus) GetLastModifiedByUserId() string {
 
 // GetLastModifiedByUserIdOk returns a tuple with the LastModifiedByUserId field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *MetadataWithStatus) GetLastModifiedByUserIdOk() (*string, bool) {
+func (o *MetadataWithUsage) GetLastModifiedByUserIdOk() (*string, bool) {
 	if o == nil || IsNil(o.LastModifiedByUserId) {
 		return nil, false
 	}
@@ -241,7 +244,7 @@ func (o *MetadataWithStatus) GetLastModifiedByUserIdOk() (*string, bool) {
 }
 
 // HasLastModifiedByUserId returns a boolean if a field has been set.
-func (o *MetadataWithStatus) HasLastModifiedByUserId() bool {
+func (o *MetadataWithUsage) HasLastModifiedByUserId() bool {
 	if o != nil && !IsNil(o.LastModifiedByUserId) {
 		return true
 	}
@@ -250,12 +253,12 @@ func (o *MetadataWithStatus) HasLastModifiedByUserId() bool {
 }
 
 // SetLastModifiedByUserId gets a reference to the given string and assigns it to the LastModifiedByUserId field.
-func (o *MetadataWithStatus) SetLastModifiedByUserId(v string) {
+func (o *MetadataWithUsage) SetLastModifiedByUserId(v string) {
 	o.LastModifiedByUserId = &v
 }
 
 // GetResourceURN returns the ResourceURN field value if set, zero value otherwise.
-func (o *MetadataWithStatus) GetResourceURN() string {
+func (o *MetadataWithUsage) GetResourceURN() string {
 	if o == nil || IsNil(o.ResourceURN) {
 		var ret string
 		return ret
@@ -265,7 +268,7 @@ func (o *MetadataWithStatus) GetResourceURN() string {
 
 // GetResourceURNOk returns a tuple with the ResourceURN field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *MetadataWithStatus) GetResourceURNOk() (*string, bool) {
+func (o *MetadataWithUsage) GetResourceURNOk() (*string, bool) {
 	if o == nil || IsNil(o.ResourceURN) {
 		return nil, false
 	}
@@ -273,7 +276,7 @@ func (o *MetadataWithStatus) GetResourceURNOk() (*string, bool) {
 }
 
 // HasResourceURN returns a boolean if a field has been set.
-func (o *MetadataWithStatus) HasResourceURN() bool {
+func (o *MetadataWithUsage) HasResourceURN() bool {
 	if o != nil && !IsNil(o.ResourceURN) {
 		return true
 	}
@@ -282,12 +285,12 @@ func (o *MetadataWithStatus) HasResourceURN() bool {
 }
 
 // SetResourceURN gets a reference to the given string and assigns it to the ResourceURN field.
-func (o *MetadataWithStatus) SetResourceURN(v string) {
+func (o *MetadataWithUsage) SetResourceURN(v string) {
 	o.ResourceURN = &v
 }
 
 // GetStatus returns the Status field value
-func (o *MetadataWithStatus) GetStatus() string {
+func (o *MetadataWithUsage) GetStatus() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -298,7 +301,7 @@ func (o *MetadataWithStatus) GetStatus() string {
 
 // GetStatusOk returns a tuple with the Status field value
 // and a boolean to check if the value has been set.
-func (o *MetadataWithStatus) GetStatusOk() (*string, bool) {
+func (o *MetadataWithUsage) GetStatusOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -306,12 +309,12 @@ func (o *MetadataWithStatus) GetStatusOk() (*string, bool) {
 }
 
 // SetStatus sets field value
-func (o *MetadataWithStatus) SetStatus(v string) {
+func (o *MetadataWithUsage) SetStatus(v string) {
 	o.Status = v
 }
 
 // GetStatusMessage returns the StatusMessage field value if set, zero value otherwise.
-func (o *MetadataWithStatus) GetStatusMessage() string {
+func (o *MetadataWithUsage) GetStatusMessage() string {
 	if o == nil || IsNil(o.StatusMessage) {
 		var ret string
 		return ret
@@ -321,7 +324,7 @@ func (o *MetadataWithStatus) GetStatusMessage() string {
 
 // GetStatusMessageOk returns a tuple with the StatusMessage field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *MetadataWithStatus) GetStatusMessageOk() (*string, bool) {
+func (o *MetadataWithUsage) GetStatusMessageOk() (*string, bool) {
 	if o == nil || IsNil(o.StatusMessage) {
 		return nil, false
 	}
@@ -329,7 +332,7 @@ func (o *MetadataWithStatus) GetStatusMessageOk() (*string, bool) {
 }
 
 // HasStatusMessage returns a boolean if a field has been set.
-func (o *MetadataWithStatus) HasStatusMessage() bool {
+func (o *MetadataWithUsage) HasStatusMessage() bool {
 	if o != nil && !IsNil(o.StatusMessage) {
 		return true
 	}
@@ -338,11 +341,35 @@ func (o *MetadataWithStatus) HasStatusMessage() bool {
 }
 
 // SetStatusMessage gets a reference to the given string and assigns it to the StatusMessage field.
-func (o *MetadataWithStatus) SetStatusMessage(v string) {
+func (o *MetadataWithUsage) SetStatusMessage(v string) {
 	o.StatusMessage = &v
 }
 
-func (o MetadataWithStatus) MarshalJSON() ([]byte, error) {
+// GetUsed returns the Used field value
+func (o *MetadataWithUsage) GetUsed() int64 {
+	if o == nil {
+		var ret int64
+		return ret
+	}
+
+	return o.Used
+}
+
+// GetUsedOk returns a tuple with the Used field value
+// and a boolean to check if the value has been set.
+func (o *MetadataWithUsage) GetUsedOk() (*int64, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Used, true
+}
+
+// SetUsed sets field value
+func (o *MetadataWithUsage) SetUsed(v int64) {
+	o.Used = v
+}
+
+func (o MetadataWithUsage) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -350,7 +377,7 @@ func (o MetadataWithStatus) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o MetadataWithStatus) ToMap() (map[string]interface{}, error) {
+func (o MetadataWithUsage) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.CreatedDate) {
 		toSerialize["createdDate"] = o.CreatedDate
@@ -377,41 +404,42 @@ func (o MetadataWithStatus) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.StatusMessage) {
 		toSerialize["statusMessage"] = o.StatusMessage
 	}
+	toSerialize["used"] = o.Used
 	return toSerialize, nil
 }
 
-type NullableMetadataWithStatus struct {
-	value *MetadataWithStatus
+type NullableMetadataWithUsage struct {
+	value *MetadataWithUsage
 	isSet bool
 }
 
-func (v NullableMetadataWithStatus) Get() *MetadataWithStatus {
+func (v NullableMetadataWithUsage) Get() *MetadataWithUsage {
 	return v.value
 }
 
-func (v *NullableMetadataWithStatus) Set(val *MetadataWithStatus) {
+func (v *NullableMetadataWithUsage) Set(val *MetadataWithUsage) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableMetadataWithStatus) IsSet() bool {
+func (v NullableMetadataWithUsage) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableMetadataWithStatus) Unset() {
+func (v *NullableMetadataWithUsage) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableMetadataWithStatus(val *MetadataWithStatus) *NullableMetadataWithStatus {
-	return &NullableMetadataWithStatus{value: val, isSet: true}
+func NewNullableMetadataWithUsage(val *MetadataWithUsage) *NullableMetadataWithUsage {
+	return &NullableMetadataWithUsage{value: val, isSet: true}
 }
 
-func (v NullableMetadataWithStatus) MarshalJSON() ([]byte, error) {
+func (v NullableMetadataWithUsage) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableMetadataWithStatus) UnmarshalJSON(src []byte) error {
+func (v *NullableMetadataWithUsage) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

@@ -38,7 +38,8 @@ func TestAccNFSClusterBasic(t *testing.T) {
 					testAccCheckNFSClusterExists("ionoscloud_nfs_cluster.example"),
 					resource.TestCheckResourceAttr("ionoscloud_nfs_cluster.example", "name", "example"),
 					resource.TestCheckResourceAttr("ionoscloud_nfs_cluster.example", "location", "de/txl"),
-					resource.TestCheckResourceAttr("ionoscloud_nfs_cluster.example", "size", "2"),
+					resource.TestCheckResourceAttr("ionoscloud_nfs_cluster.example", "size", "2048"),
+					resource.TestCheckResourceAttr("ionoscloud_nfs_cluster.example", "size_unit", "GiB"),
 					resource.TestCheckResourceAttr("ionoscloud_nfs_cluster.example", "nfs.0.min_version", "4.2"),
 				),
 			},
@@ -48,7 +49,8 @@ func TestAccNFSClusterBasic(t *testing.T) {
 					testAccCheckNFSClusterExists("ionoscloud_nfs_cluster.example"),
 					resource.TestCheckResourceAttr("ionoscloud_nfs_cluster.example", "name", "example_updated"),
 					resource.TestCheckResourceAttr("ionoscloud_nfs_cluster.example", "location", "de/txl"),
-					resource.TestCheckResourceAttr("ionoscloud_nfs_cluster.example", "size", "2"),
+					resource.TestCheckResourceAttr("ionoscloud_nfs_cluster.example", "size", "2048"),
+					resource.TestCheckResourceAttr("ionoscloud_nfs_cluster.example", "size_unit", "GiB"),
 					resource.TestCheckResourceAttr("ionoscloud_nfs_cluster.example", "nfs.0.min_version", "4.2"),
 				),
 			},
@@ -166,9 +168,10 @@ resource "ionoscloud_server" "nfs_server" {
 
 const testAccCheckNFSClusterConfigBasic = temporaryConfigSetup + `
 resource "ionoscloud_nfs_cluster" "example" {
-  name = "example"
-  location = "de/txl"
-  size = 2
+  name      = "example"
+  location  = "de/txl"
+  size      = 2048
+  size_unit = "GiB"
 
   nfs {
     min_version = "4.2"
@@ -176,7 +179,7 @@ resource "ionoscloud_nfs_cluster" "example" {
 
   connections {
     datacenter_id = data.ionoscloud_datacenter.datacenterDS.id
-    ip_address    = format("%s/24", data.ionoscloud_server.serverDS.nics[0].ips[0])
+    ip_address    = format("%s/24", tolist(data.ionoscloud_server.serverDS.nics[0].ips)[0])
     lan           = data.ionoscloud_lan.lanDS.id
   }
 }
@@ -184,9 +187,10 @@ resource "ionoscloud_nfs_cluster" "example" {
 
 const testAccCheckNFSClusterConfigUpdate = temporaryConfigSetup + `
 resource "ionoscloud_nfs_cluster" "example" {
-  name = "example_updated"
-  location = "de/txl"
-  size = 2
+  name      = "example_updated"
+  location  = "de/txl"
+  size      = 2048
+  size_unit = "GiB"
 
   nfs {
     min_version = "4.2"
@@ -194,7 +198,7 @@ resource "ionoscloud_nfs_cluster" "example" {
 
   connections {
     datacenter_id = data.ionoscloud_datacenter.datacenterDS.id
-    ip_address    = format("%s/24", data.ionoscloud_server.serverDS.nics[0].ips[0])
+    ip_address    = format("%s/24", tolist(data.ionoscloud_server.serverDS.nics[0].ips)[0])
     lan           = data.ionoscloud_lan.lanDS.id
   }
 }

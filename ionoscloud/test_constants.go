@@ -2139,7 +2139,7 @@ data "ionoscloud_server" "serverDS" {
 }
 
 locals {
- prefix                   = format("%s/%s", data.ionoscloud_server.serverDS.nics[0].ips[0], "24")
+ prefix                   = format("%s/%s", tolist(data.ionoscloud_server.serverDS.nics[0].ips)[0], "24")
  database_ip              = cidrhost(local.prefix, 1)
  database_ip_cidr         = format("%s/%s", local.database_ip, "24")
 }

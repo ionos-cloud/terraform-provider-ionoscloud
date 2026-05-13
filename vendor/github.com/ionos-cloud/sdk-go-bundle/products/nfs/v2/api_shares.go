@@ -3,7 +3,7 @@
  *
  * The RESTful API for managing Network File Storage.
  *
- * API version: 0.1.3
+ * API version: 0.1.6
  * Contact: support@cloud.ionos.com
  */
 
@@ -42,10 +42,10 @@ func (r ApiClustersSharesDeleteRequest) Execute() (*shared.APIResponse, error) {
 
 /*
  * ClustersSharesDelete Delete Share
- * Deletes the specified share.
+ * Deletes the specified Share.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param clusterId The identifier (UUID) of the cluster.
- * @param shareId The identifier (UUID) of the share.
+ * @param clusterId The ID (UUID) of the Cluster.
+ * @param shareId The ID (UUID) of the Share.
  * @return ApiClustersSharesDeleteRequest
  */
 func (a *SharesApiService) ClustersSharesDelete(ctx _context.Context, clusterId string, shareId string) ApiClustersSharesDeleteRequest {
@@ -221,10 +221,10 @@ func (r ApiClustersSharesFindByIdRequest) Execute() (ShareRead, *shared.APIRespo
 
 /*
  * ClustersSharesFindById Retrieve Share
- * Returns the share by ID.
+ * Returns the Share by ID.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param clusterId The identifier (UUID) of the cluster.
- * @param shareId The share identifier.
+ * @param clusterId The ID (UUID) of the Cluster.
+ * @param shareId The ID (UUID) of the Share.
  * @return ApiClustersSharesFindByIdRequest
  */
 func (a *SharesApiService) ClustersSharesFindById(ctx _context.Context, clusterId string, shareId string) ApiClustersSharesFindByIdRequest {
@@ -420,13 +420,15 @@ func (r ApiClustersSharesGetRequest) Execute() (ShareReadList, *shared.APIRespon
 }
 
 /*
-* ClustersSharesGet Retrieve Shares
-* Retrieves shares of the cluster with pagination and optional filters.
+  - ClustersSharesGet Retrieve all Shares
+  - This endpoint enables retrieving all Shares using
 
-* @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-* @param clusterId The identifier (UUID) of the cluster.
-* @return ApiClustersSharesGetRequest
- */
+pagination and optional filters.
+
+  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+  - @param clusterId The ID (UUID) of the Cluster.
+  - @return ApiClustersSharesGetRequest
+*/
 func (a *SharesApiService) ClustersSharesGet(ctx _context.Context, clusterId string) ApiClustersSharesGetRequest {
 	return ApiClustersSharesGetRequest{
 		ApiService: a,
@@ -611,13 +613,13 @@ func (r ApiClustersSharesPostRequest) Execute() (ShareRead, *shared.APIResponse,
 
 /*
   - ClustersSharesPost Create Share
-  - Creates a new share.
+  - Creates a new Share.
 
-The complete share configuration must be provided to create the share.
-Optional data will be filled with default values or left empty.
+The full Share needs to be provided to create the object.
+Optional data will be filled with defaults or left empty.
 
   - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-  - @param clusterId The identifier (UUID) of the cluster.
+  - @param clusterId The ID (UUID) of the Cluster.
   - @return ApiClustersSharesPostRequest
 */
 func (a *SharesApiService) ClustersSharesPost(ctx _context.Context, clusterId string) ApiClustersSharesPostRequest {
@@ -822,14 +824,16 @@ func (r ApiClustersSharesPutRequest) Execute() (ShareRead, *shared.APIResponse, 
 
 /*
   - ClustersSharesPut Ensure Share
-  - Ensures that the share with the provided ID is created or modified.
+  - Ensures that the Share with the provided ID is created or modified.
 
-The complete share configuration must be provided to update or create the share.
-Any missing data will be filled with default values or left empty, without considering previous values.
+The full Share needs to be provided to ensure
+(either update or create) the Share. Non present data will
+only be filled with defaults or left empty, but not take
+previous values into consideration.
 
   - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-  - @param clusterId The identifier (UUID) of the cluster.
-  - @param shareId The identifier (UUID) of the share.
+  - @param clusterId The ID (UUID) of the Cluster.
+  - @param shareId The ID (UUID) of the Share.
   - @return ApiClustersSharesPutRequest
 */
 func (a *SharesApiService) ClustersSharesPut(ctx _context.Context, clusterId string, shareId string) ApiClustersSharesPutRequest {

@@ -30,9 +30,10 @@ resource "ionoscloud_lan" "nfs_lan" {
 }
 
 resource "ionoscloud_nfs_cluster" "example" {
-  name = "test"
-  location = "de/txl"
-  size = 2
+  name      = "test"
+  location  = "de/txl"
+  size      = 2
+  size_unit = "GiB"
 
   nfs {
     min_version = "4.2"
@@ -102,9 +103,10 @@ locals {
 }
 
 resource "ionoscloud_nfs_cluster" "example" {
-  name = "test"
-  location = "de/txl"
-  size = 2
+  name      = "test"
+  location  = "de/txl"
+  size      = 2
+  size_unit = "GiB"
 
   nfs {
     min_version = "4.2"
@@ -126,7 +128,8 @@ The following arguments are supported:
 - `location` - (Optional) The location where the Network File Storage cluster is located. If this is not set and if no value is provided for the `IONOS_API_URL` env var, the default `location` will be: `de/fra`. Other available locations are: `de/fra/2`, `de/txl`, `fr/par`, `gb/lhr`, `es/vit`, `us/las`, `us/ewr`, `us/mci`.
   - `de/fra` - Frankfurt
   - `de/txl` - Berlin
-- `size` - (Required) The size of the Network File Storage cluster in TiB. Note that the cluster size cannot be reduced after provisioning. This value determines the billing fees. Default is `2`. The minimum value is `2` and the maximum value is `42`.
+- `size` - (Required) The size of the Network File Storage cluster. Note that the cluster size cannot be reduced after provisioning. This value determines the billing fees.
+- `size_unit` - (Optional) The unit of the `size` attribute. Accepted values: `TiB`, `GiB`. Defaults to `TiB`.
 - `nfs` - (Optional) The NFS configuration for the Network File Storage cluster. Each NFS configuration supports the following:
     - `min_version` - (Optional) The minimum supported version of the NFS cluster. Supported values: `4.2`. Default is `4.2`.
 - `connections` - (Required) A list of connections for the Network File Storage cluster. You can specify only one connection. Connections are **immutable**. Each connection supports the following:

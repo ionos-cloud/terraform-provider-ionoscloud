@@ -3,7 +3,7 @@
  *
  * The RESTful API for managing Network File Storage.
  *
- * API version: 0.1.3
+ * API version: 0.1.6
  * Contact: support@cloud.ionos.com
  */
 
@@ -18,17 +18,17 @@ import (
 // checks if the Share type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &Share{}
 
-// Share A share represents a directory on a Network File Storage cluster. Options like quotas might be set for this directory.
+// Share A share represents a directory on a Network File Storage cluster, where options like quotas can be set for the directory.
 type Share struct {
-	// The directory being exported
+	// Name of the share
 	Name string `json:"name"`
-	// The quota in MiB for the export. The quota can restrict the amount of data that can be stored within the export. The quota can be disabled using `0`.
+	// The quota for the export in MiB, which can limit the amount of data stored. Setting the quota to 0 will disable it.
 	Quota *int32 `json:"quota,omitempty"`
-	// The group ID that will own the exported directory and be used as anongid in squash modes root-anonymous and all-anonymous.
+	// The group ID that will own the exported directory and be used as the `anongid` NFS option in squash modes `root-anonymous` and `all-anonymous`.
 	Gid *int32 `json:"gid,omitempty"`
-	// The user ID that will own the exported directory and be used as anonuid in squash modes root-anonymous and all-anonymous.
+	// The user ID that will own the exported directory and be used as the `anonuid` NFS option in squash modes `root-anonymous` and `all-anonymous`.
 	Uid *int32 `json:"uid,omitempty"`
-	// The groups of clients are the systems connecting to the Network File Storage cluster.
+	// Client groups are the virtual machines connecting to the Network File Storage cluster.
 	ClientGroups []ShareClientGroups `json:"clientGroups"`
 }
 
@@ -207,6 +207,14 @@ func (o *Share) GetClientGroupsOk() ([]ShareClientGroups, bool) {
 // SetClientGroups sets field value
 func (o *Share) SetClientGroups(v []ShareClientGroups) {
 	o.ClientGroups = v
+}
+
+func (o Share) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
 }
 
 func (o Share) ToMap() (map[string]interface{}, error) {
