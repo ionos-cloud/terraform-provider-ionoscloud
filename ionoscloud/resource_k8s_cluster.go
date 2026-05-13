@@ -284,7 +284,7 @@ func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 			tflog.Info(ctx, "k8s cluster not ready, retrying")
 		case <-ctx.Done():
 			tflog.Info(ctx, "k8s cluster creation timed out")
-			return diagutil.ToDiags(d, fmt.Errorf("k8s cluster creation timed out! WARNING: your k8s cluster will still probably be created after some time but the terraform state wont reflect that; check your IONOS CLOUD account for updates"), nil)
+			return diagutil.ToDiags(d, fmt.Errorf("k8s cluster creation timed out! WARNING: your k8s cluster will still probably be created after some time but the terraform state won't reflect that; check your IONOS CLOUD account for updates"), nil)
 		}
 
 	}
