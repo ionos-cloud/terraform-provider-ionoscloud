@@ -257,7 +257,7 @@ func resourcePrivateCrossConnectDelete(ctx context.Context, d *schema.ResourceDa
 			tflog.Info(ctx, "PCC not yet deleted, retrying")
 		case <-ctx.Done():
 			tflog.Info(ctx, "PCC delete timed out")
-			return diagutil.ToDiags(d, fmt.Errorf("pcc removal timed out! WARNING: your pcc will still probably be removed after some time but the terraform state wont reflect that; check the updates in your IONOS CLOUD account"), nil)
+			return diagutil.ToDiags(d, fmt.Errorf("pcc removal timed out! WARNING: your pcc will still probably be removed after some time but the terraform state won't reflect that; check the updates in your IONOS CLOUD account"), nil)
 		}
 	}
 
