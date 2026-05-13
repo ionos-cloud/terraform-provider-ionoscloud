@@ -42,9 +42,8 @@ The following arguments are supported:
 - `force_destroy` - (Optional)[bool] Defaults to `false`. When set to `true`, all objects in the bucket are deleted before the bucket itself is destroyed, allowing Terraform to remove a non-empty bucket. **Use with caution** — this irreversibly deletes all bucket contents.
 - `timeouts` - (Optional) Timeouts for this resource.
   - `create` - (Optional)[string] Time to wait for the bucket to be created. Default is `10m`.
-  - `delete` - (Optional)[string] Time to wait for the bucket to be deleted. Default is `10m`.
-  - `update` - (Optional)[string] Time to wait for the bucket to be updated. Default is `10m`.
-  - `read`   - (Optional)[string] Time to wait for the bucket to be read. Default is `10m`.
+  - `read`   - (Optional)[string] Time to wait for the bucket read operations. Default is `10m`.
+  - `delete` - (Optional)[string] Time to wait for the bucket to be deleted. Default is `60m`.
 
 ## Attributes Reference
 

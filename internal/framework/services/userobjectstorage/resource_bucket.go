@@ -19,7 +19,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
-	userobjectstorage "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/userobjectstorage"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/userobjectstorage"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
@@ -36,15 +36,6 @@ func NewBucketResource() resource.Resource {
 
 type bucketResource struct {
 	client *userobjectstorage.Client
-}
-
-type bucketResourceModel struct {
-	ForceDestroy      types.Bool     `tfsdk:"force_destroy"`
-	ID                types.String   `tfsdk:"id"`
-	Name              types.String   `tfsdk:"name"`
-	ObjectLockEnabled types.Bool     `tfsdk:"object_lock_enabled"`
-	Region            types.String   `tfsdk:"region"`
-	Timeouts          timeouts.Value `tfsdk:"timeouts"`
 }
 
 // Metadata sets the resource type name.
@@ -100,7 +91,6 @@ func (r *bucketResource) Schema(ctx context.Context, req resource.SchemaRequest,
 			"timeouts": timeouts.Block(ctx, timeouts.Opts{
 				Create: true,
 				Read:   true,
-				Update: true,
 				Delete: true,
 			}),
 		},
@@ -130,13 +120,13 @@ func (r *bucketResource) Create(ctx context.Context, req resource.CreateRequest,
 		return
 	}
 
-	var data bucketResourceModel
+	var data userobjectstorage.BucketModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	createTimeout, diags := data.Timeouts.Create(ctx, utils.DefaultTimeout)
+	createTimeout, diags := data.Timeouts.Create(ctx, utils.BucketDefaultTimeout)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -144,7 +134,7 @@ func (r *bucketResource) Create(ctx context.Context, req resource.CreateRequest,
 	ctx, cancel := context.WithTimeout(ctx, createTimeout)
 	defer cancel()
 
-	if err := r.client.CreateBucket(ctx, data.Name, data.Region, data.ObjectLockEnabled, createTimeout); err != nil {
+	if err := r.client.CreateBucket(ctx, data, createTimeout); err != nil {
 		resp.Diagnostics.AddError("failed to create bucket", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Name.ValueString()}).Error())
 		return
 	}
@@ -160,11 +150,19 @@ func (r *bucketResource) Read(ctx context.Context, req resource.ReadRequest, res
 		return
 	}
 
-	var data bucketResourceModel
+	var data userobjectstorage.BucketModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	readTimeout, diags := data.Timeouts.Read(ctx, utils.BucketDefaultTimeout)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	ctx, cancel := context.WithTimeout(ctx, readTimeout)
+	defer cancel()
 
 	// Region cannot be read back from the API. Default when missing (plain `terraform import`).
 	if data.Region.ValueString() == "" {
@@ -194,17 +192,11 @@ func (r *bucketResource) Read(ctx context.Context, req resource.ReadRequest, res
 
 // Update handles in-place changes (only force_destroy can change without replacement).
 func (r *bucketResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var plan bucketResourceModel
+	var plan userobjectstorage.BucketModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	var state bucketResourceModel
-	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-	plan.ID = state.ID
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
@@ -215,7 +207,7 @@ func (r *bucketResource) Delete(ctx context.Context, req resource.DeleteRequest,
 		return
 	}
 
-	var data bucketResourceModel
+	var data userobjectstorage.BucketModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -229,7 +221,7 @@ func (r *bucketResource) Delete(ctx context.Context, req resource.DeleteRequest,
 	ctx, cancel := context.WithTimeout(ctx, deleteTimeout)
 	defer cancel()
 
-	if err := r.client.DeleteBucket(ctx, data.Name, data.ForceDestroy, data.Region, deleteTimeout); err != nil {
+	if err := r.client.DeleteBucket(ctx, data, deleteTimeout); err != nil {
 		resp.Diagnostics.AddError("failed to delete bucket", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Name.ValueString()}).Error())
 	}
 }

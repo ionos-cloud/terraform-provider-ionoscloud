@@ -7,33 +7,45 @@ import (
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
+	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	userobjectstorage "github.com/ionos-cloud/sdk-go-bundle/products/userobjectstorage/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/products/userobjectstorage/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
+
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
-// CreateBucket creates a new user-owned bucket in the given region.
-func (c *Client) CreateBucket(ctx context.Context, name, region types.String, objectLock types.Bool, timeout time.Duration) error {
-	api, err := c.apiClientForRegion(region.ValueString())
+// BucketModel is the resource model for an ionoscloud_user_object_storage_bucket.
+type BucketModel struct {
+	ForceDestroy      types.Bool     `tfsdk:"force_destroy"`
+	ID                types.String   `tfsdk:"id"`
+	Name              types.String   `tfsdk:"name"`
+	ObjectLockEnabled types.Bool     `tfsdk:"object_lock_enabled"`
+	Region            types.String   `tfsdk:"region"`
+	Timeouts          timeouts.Value `tfsdk:"timeouts"`
+}
+
+// CreateBucket creates a new user-owned bucket.
+func (c *Client) CreateBucket(ctx context.Context, data BucketModel, timeout time.Duration) error {
+	client, err := c.apiClientForRegion(data.Region.ValueString())
 	if err != nil {
 		return err
 	}
 
 	createBucketConfig := userobjectstorage.CreateBucketRequestCreateBucketConfiguration{
-		LocationConstraint: region.ValueStringPointer(),
+		LocationConstraint: data.Region.ValueStringPointer(),
 	}
 	createReq := userobjectstorage.NewCreateBucketRequest()
 	createReq.CreateBucketConfiguration = &createBucketConfig
-
-	if _, err := api.BucketsApi.CreateBucket(ctx, name.ValueString()).
+	if _, err := client.BucketsApi.CreateBucket(ctx, data.Name.ValueString()).
 		CreateBucketRequest(*createReq).
-		XAmzBucketObjectLockEnabled(objectLock.ValueBool()).
+		XAmzBucketObjectLockEnabled(data.ObjectLockEnabled.ValueBool()).
 		Execute(); err != nil {
-		return fmt.Errorf("failed to create bucket %q: %w", name.ValueString(), err)
+		return fmt.Errorf("failed to create bucket %q: %w", data.Name.ValueString(), err)
 	}
 
 	backoffErr := backoff.Retry(func() error {
-		return c.bucketExistsCheck(ctx, api, name.ValueString())
+		return c.bucketExistsCheck(ctx, client, data.Name.ValueString())
 	}, backoff.NewExponentialBackOff(backoff.WithMaxElapsedTime(timeout)))
 	if backoffErr != nil {
 		return fmt.Errorf("failed to wait for bucket creation: %w", backoffErr)
@@ -46,12 +58,12 @@ func (c *Client) CreateBucket(ctx context.Context, name, region types.String, ob
 // Region is sourced from Terraform state — the SDK's GetBucketLocation response model has a
 // generator-level XML tag issue that cannot be fixed without changing the generator templates.
 func (c *Client) GetBucket(ctx context.Context, name, region types.String) (bool, error) {
-	api, err := c.apiClientForRegion(region.ValueString())
+	client, err := c.apiClientForRegion(region.ValueString())
 	if err != nil {
 		return false, err
 	}
 
-	apiResp, err := api.BucketsApi.HeadBucket(ctx, name.ValueString()).Execute()
+	apiResp, err := client.BucketsApi.HeadBucket(ctx, name.ValueString()).Execute()
 	if apiResp.HttpNotFound() {
 		return false, nil
 	}
@@ -70,6 +82,7 @@ func (c *Client) GetObjectLockEnabled(ctx context.Context, name types.String) (t
 	if err != nil {
 		return types.BoolNull(), err
 	}
+
 	output, apiResp, err := api.ObjectLockApi.GetObjectLockConfiguration(ctx, name.ValueString()).Execute()
 	if apiResp.HttpNotFound() {
 		return types.BoolValue(false), nil
@@ -82,31 +95,31 @@ func (c *Client) GetObjectLockEnabled(ctx context.Context, name types.String) (t
 
 // DeleteBucket deletes a bucket. If forceDestroy is true and the bucket is not empty, all objects
 // are deleted first.
-func (c *Client) DeleteBucket(ctx context.Context, name types.String, forceDestroy types.Bool, region types.String, timeout time.Duration) error {
-	api, err := c.apiClientForRegion(region.ValueString())
+func (c *Client) DeleteBucket(ctx context.Context, data BucketModel, timeout time.Duration) error {
+	api, err := c.apiClientForRegion(data.Region.ValueString())
 	if err != nil {
 		return err
 	}
 
-	apiResp, err := api.BucketsApi.DeleteBucket(ctx, name.ValueString()).Execute()
+	apiResp, err := api.BucketsApi.DeleteBucket(ctx, data.Name.ValueString()).Execute()
 	if apiResp.HttpNotFound() {
 		return nil
 	}
 
-	if isBucketNotEmptyError(err) && forceDestroy.ValueBool() {
-		if err = c.deleteAllObjects(ctx, api, name.ValueString()); err != nil {
-			return fmt.Errorf("failed to empty bucket %q: %w", name.ValueString(), err)
+	if isBucketNotEmptyError(err) && data.ForceDestroy.ValueBool() {
+		if err = c.deleteAllObjects(ctx, api, data.Name.ValueString()); err != nil {
+			return fmt.Errorf("failed to empty bucket %q: %w", data.Name.ValueString(), err)
 		}
-		return c.DeleteBucket(ctx, name, forceDestroy, region, timeout)
+		return c.DeleteBucket(ctx, data, timeout)
 	}
 
 	if err != nil {
-		return fmt.Errorf("failed to delete bucket %q: %w", name.ValueString(), err)
+		return fmt.Errorf("failed to delete bucket %q: %w", data.Name.ValueString(), err)
 	}
 
 	backOff := backoff.NewExponentialBackOff(backoff.WithMaxElapsedTime(timeout))
 	if err = backoff.Retry(func() error {
-		return c.bucketDeletedCheck(ctx, api, name.ValueString())
+		return c.bucketDeletedCheck(ctx, api, data.Name.ValueString())
 	}, backOff); err != nil {
 		return fmt.Errorf("failed to wait for bucket deletion: %w", err)
 	}
@@ -154,7 +167,18 @@ func (c *Client) bucketExistsCheck(ctx context.Context, api *userobjectstorage.A
 		return fmt.Errorf("bucket not found")
 	}
 	if err != nil {
-		return backoff.Permanent(fmt.Errorf("failed to check if bucket exists: %w", err))
+		errCtx := &diagutil.ErrorContext{
+			ResourceID: name,
+			StatusCode: apiResp.SafeStatusCode(),
+		}
+		if apiResp != nil {
+			loc, _ := apiResp.Location()
+			if loc != nil {
+				errCtx.RequestID = loc.String()
+			}
+		}
+		return backoff.Permanent(diagutil.WrapError(fmt.Errorf("failed to check if bucket exists: %w", err),
+			errCtx))
 	}
 	return nil
 }
