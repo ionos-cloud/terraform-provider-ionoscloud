@@ -166,7 +166,7 @@ resource "ionoscloud_server" "nfs_server" {
 }
 `
 
-const testAccCheckNFSClusterConfigBasic = temporaryConfigSetup + `
+const testAccCheckNFSClusterConfigBasic = nfsTestSetup + `
 resource "ionoscloud_nfs_cluster" "example" {
   name      = "example"
   location  = "de/txl"
@@ -178,14 +178,14 @@ resource "ionoscloud_nfs_cluster" "example" {
   }
 
   connections {
-    datacenter_id = data.ionoscloud_datacenter.datacenterDS.id
-    ip_address    = format("%s/24", tolist(data.ionoscloud_server.serverDS.nics[0].ips)[0])
-    lan           = data.ionoscloud_lan.lanDS.id
+    datacenter_id = ionoscloud_datacenter.nfs_dc.id
+    ip_address    = "192.168.100.10/24"
+    lan           = ionoscloud_lan.nfs_lan.id
   }
 }
 `
 
-const testAccCheckNFSClusterConfigUpdate = temporaryConfigSetup + `
+const testAccCheckNFSClusterConfigUpdate = nfsTestSetup + `
 resource "ionoscloud_nfs_cluster" "example" {
   name      = "example_updated"
   location  = "de/txl"
@@ -197,9 +197,9 @@ resource "ionoscloud_nfs_cluster" "example" {
   }
 
   connections {
-    datacenter_id = data.ionoscloud_datacenter.datacenterDS.id
-    ip_address    = format("%s/24", tolist(data.ionoscloud_server.serverDS.nics[0].ips)[0])
-    lan           = data.ionoscloud_lan.lanDS.id
+    datacenter_id = ionoscloud_datacenter.nfs_dc.id
+    ip_address    = "192.168.100.10/24"
+    lan           = ionoscloud_lan.nfs_lan.id
   }
 }
 `

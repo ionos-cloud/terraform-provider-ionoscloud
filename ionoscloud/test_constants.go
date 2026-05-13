@@ -2118,35 +2118,17 @@ resource` + ` ` + constant.WireGuardGatewayResource + ` ` + constant.WireGuardGa
   tier = "STANDARD"
 }` // nolint:unused
 
-// This configuration is used because there are some problems with the API and the creation/deletion
-// of the setup resources (datacenter, lan, server) is not possible (there are some problems with
-// LAN deletion). Because of that, for the moment, only to test the InMemoryDB and NFS functionalities, we
-// will use data sources for already existing setup resources.
-
-const temporaryConfigSetup = `
-data "ionoscloud_datacenter" "datacenterDS" {
-	id = "88eeae0d-515d-44c1-b142-d9293c20e676"
+// nfsTestSetup provisions a fresh datacenter and LAN for NFS acceptance tests.
+// Location is de/txl because that is the only region where NFS is currently offered.
+const nfsTestSetup = `
+resource "ionoscloud_datacenter" "nfs_dc" {
+	name     = "test_nfs_dc"
+	location = "de/txl"
 }
 
-data "ionoscloud_lan" "lanDS" {
-	id = "1"
-	datacenter_id = data.ionoscloud_datacenter.datacenterDS.id
-}
-
-data "ionoscloud_server" "serverDS" {
-	id = "1f77a37e-2b38-49f2-b2e1-61a47ccf5f15"
-	datacenter_id = data.ionoscloud_datacenter.datacenterDS.id
-}
-
-locals {
- prefix                   = format("%s/%s", tolist(data.ionoscloud_server.serverDS.nics[0].ips)[0], "24")
- database_ip              = cidrhost(local.prefix, 1)
- database_ip_cidr         = format("%s/%s", local.database_ip, "24")
-}
-
-resource ` + constant.RandomPassword + ` "replicaset_password" {
-  length           = 16
-  special          = true
-  override_special = "!#$%&*()-_=+[]{}<>:?"
+resource "ionoscloud_lan" "nfs_lan" {
+	datacenter_id = ionoscloud_datacenter.nfs_dc.id
+	public        = false
+	name          = "test_nfs_lan"
 }
 `
