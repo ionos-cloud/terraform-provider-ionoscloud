@@ -6,6 +6,7 @@
 
 ### Chore
 - Modernize to 1.26 standards `go fix`
+- Bump `github.com/hashicorp/hc-install` from v0.9.2 to v0.9.5 to fix expired HashiCorp OpenPGP key that caused acceptance tests to fail with `openpgp: key expired`.
 
 ### Documentation
 - Improve share docs
