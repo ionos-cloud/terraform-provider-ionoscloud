@@ -17,60 +17,60 @@ import (
 
 import "encoding/xml"
 
-// checks if the GetBucketTaggingOutput type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &GetBucketTaggingOutput{}
+// checks if the PutObjectTaggingRequest type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &PutObjectTaggingRequest{}
 
-// GetBucketTaggingOutput struct for GetBucketTaggingOutput
-type GetBucketTaggingOutput struct {
-	XMLName xml.Name     `xml:"Tagging"`
-	TagSet  BucketTagSet `json:"TagSet" xml:"TagSet"`
+// PutObjectTaggingRequest struct for PutObjectTaggingRequest
+type PutObjectTaggingRequest struct {
+	XMLName xml.Name                       `xml:"PutObjectTaggingRequest"`
+	Tagging PutObjectTaggingRequestTagging `json:"Tagging" xml:"Tagging"`
 }
 
-// NewGetBucketTaggingOutput instantiates a new GetBucketTaggingOutput object
+// NewPutObjectTaggingRequest instantiates a new PutObjectTaggingRequest object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewGetBucketTaggingOutput(tagSet BucketTagSet) *GetBucketTaggingOutput {
-	this := GetBucketTaggingOutput{}
+func NewPutObjectTaggingRequest(tagging PutObjectTaggingRequestTagging) *PutObjectTaggingRequest {
+	this := PutObjectTaggingRequest{}
 
-	this.TagSet = tagSet
+	this.Tagging = tagging
 
 	return &this
 }
 
-// NewGetBucketTaggingOutputWithDefaults instantiates a new GetBucketTaggingOutput object
+// NewPutObjectTaggingRequestWithDefaults instantiates a new PutObjectTaggingRequest object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewGetBucketTaggingOutputWithDefaults() *GetBucketTaggingOutput {
-	this := GetBucketTaggingOutput{}
+func NewPutObjectTaggingRequestWithDefaults() *PutObjectTaggingRequest {
+	this := PutObjectTaggingRequest{}
 	return &this
 }
 
-// GetTagSet returns the TagSet field value
-func (o *GetBucketTaggingOutput) GetTagSet() BucketTagSet {
+// GetTagging returns the Tagging field value
+func (o *PutObjectTaggingRequest) GetTagging() PutObjectTaggingRequestTagging {
 	if o == nil {
-		var ret BucketTagSet
+		var ret PutObjectTaggingRequestTagging
 		return ret
 	}
 
-	return o.TagSet
+	return o.Tagging
 }
 
-// GetTagSetOk returns a tuple with the TagSet field value
+// GetTaggingOk returns a tuple with the Tagging field value
 // and a boolean to check if the value has been set.
-func (o *GetBucketTaggingOutput) GetTagSetOk() (*BucketTagSet, bool) {
+func (o *PutObjectTaggingRequest) GetTaggingOk() (*PutObjectTaggingRequestTagging, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.TagSet, true
+	return &o.Tagging, true
 }
 
-// SetTagSet sets field value
-func (o *GetBucketTaggingOutput) SetTagSet(v BucketTagSet) {
-	o.TagSet = v
+// SetTagging sets field value
+func (o *PutObjectTaggingRequest) SetTagging(v PutObjectTaggingRequestTagging) {
+	o.Tagging = v
 }
 
-func (o GetBucketTaggingOutput) MarshalJSON() ([]byte, error) {
+func (o PutObjectTaggingRequest) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -78,44 +78,44 @@ func (o GetBucketTaggingOutput) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o GetBucketTaggingOutput) ToMap() (map[string]interface{}, error) {
+func (o PutObjectTaggingRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	toSerialize["TagSet"] = o.TagSet
+	toSerialize["Tagging"] = o.Tagging
 	return toSerialize, nil
 }
 
-type NullableGetBucketTaggingOutput struct {
-	value *GetBucketTaggingOutput
+type NullablePutObjectTaggingRequest struct {
+	value *PutObjectTaggingRequest
 	isSet bool
 }
 
-func (v NullableGetBucketTaggingOutput) Get() *GetBucketTaggingOutput {
+func (v NullablePutObjectTaggingRequest) Get() *PutObjectTaggingRequest {
 	return v.value
 }
 
-func (v *NullableGetBucketTaggingOutput) Set(val *GetBucketTaggingOutput) {
+func (v *NullablePutObjectTaggingRequest) Set(val *PutObjectTaggingRequest) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableGetBucketTaggingOutput) IsSet() bool {
+func (v NullablePutObjectTaggingRequest) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableGetBucketTaggingOutput) Unset() {
+func (v *NullablePutObjectTaggingRequest) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableGetBucketTaggingOutput(val *GetBucketTaggingOutput) *NullableGetBucketTaggingOutput {
-	return &NullableGetBucketTaggingOutput{value: val, isSet: true}
+func NewNullablePutObjectTaggingRequest(val *PutObjectTaggingRequest) *NullablePutObjectTaggingRequest {
+	return &NullablePutObjectTaggingRequest{value: val, isSet: true}
 }
 
-func (v NullableGetBucketTaggingOutput) MarshalJSON() ([]byte, error) {
+func (v NullablePutObjectTaggingRequest) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableGetBucketTaggingOutput) UnmarshalJSON(src []byte) error {
+func (v *NullablePutObjectTaggingRequest) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

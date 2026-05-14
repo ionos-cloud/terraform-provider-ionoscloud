@@ -39,11 +39,33 @@ func TestAccUserObjectStorageBucketResource(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccUserBucketConfig_tags(rName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "tags.key1", "value1"),
+					resource.TestCheckResourceAttr(resourceName, "tags.key2", "value2"),
+				),
+			},
+			{
+				Config: testAccUserBucketConfig_tagsUpdated(rName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "tags.key1", "value1"),
+					resource.TestCheckNoResourceAttr(resourceName, "tags.key2"),
+					resource.TestCheckResourceAttr(resourceName, "tags.key3", "value3"),
+				),
+			},
+			{
+				Config: testAccUserBucketConfig_basic(rName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "tags.%", "0"),
+				),
+			},
+			{
 				Config: testAccUserBucketDataSourceConfig_basic(rName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(dataSourceName, "name", resourceName, "name"),
 					resource.TestCheckResourceAttrPair(dataSourceName, "region", resourceName, "region"),
 					resource.TestCheckResourceAttrPair(dataSourceName, "object_lock_enabled", resourceName, "object_lock_enabled"),
+					resource.TestCheckResourceAttr(dataSourceName, "tags.%", "0"),
 				),
 			},
 			{
@@ -97,6 +119,30 @@ func testAccUserBucketConfig_basic(bucketName string) string {
 	return fmt.Sprintf(`
 resource "ionoscloud_user_object_storage_bucket" "test" {
   name = %[1]q
+}
+`, bucketName)
+}
+
+func testAccUserBucketConfig_tags(bucketName string) string {
+	return fmt.Sprintf(`
+resource "ionoscloud_user_object_storage_bucket" "test" {
+  name = %[1]q
+  tags = {
+    key1 = "value1"
+    key2 = "value2"
+  }
+}
+`, bucketName)
+}
+
+func testAccUserBucketConfig_tagsUpdated(bucketName string) string {
+	return fmt.Sprintf(`
+resource "ionoscloud_user_object_storage_bucket" "test" {
+  name = %[1]q
+  tags = {
+    key1 = "value1"
+    key3 = "value3"
+  }
 }
 `, bucketName)
 }

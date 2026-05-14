@@ -36,3 +36,4 @@ The following attributes are returned by the data source:
 - `name` - The name of the bucket.
 - `object_lock_enabled` - Whether Object Lock is enabled for the bucket.
 - `region` - The region of the bucket.
+- `tags` - Tags assigned to the bucket.

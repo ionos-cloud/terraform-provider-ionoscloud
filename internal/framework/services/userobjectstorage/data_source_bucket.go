@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/tags"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/userobjectstorage"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
@@ -28,6 +29,7 @@ type bucketDataSourceModel struct {
 	Name              types.String `tfsdk:"name"`
 	ObjectLockEnabled types.Bool   `tfsdk:"object_lock_enabled"`
 	Region            types.String `tfsdk:"region"`
+	Tags              types.Map    `tfsdk:"tags"`
 }
 
 // Metadata returns the metadata for the data source.
@@ -46,6 +48,11 @@ func (d *bucketDataSource) Schema(_ context.Context, _ datasource.SchemaRequest,
 			"object_lock_enabled": schema.BoolAttribute{
 				Description: "Whether Object Lock is enabled for the bucket.",
 				Computed:    true,
+			},
+			"tags": schema.MapAttribute{
+				Description: "Tags assigned to the bucket.",
+				Computed:    true,
+				ElementType: types.StringType,
 			},
 			"region": schema.StringAttribute{
 				Description: "The region of the bucket. Defaults to 'de' (Frankfurt). Valid values: 'de', 'eu-central-2', 'eu-south-2'.",
@@ -89,7 +96,7 @@ func (d *bucketDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		data.Region = types.StringValue(userobjectstorage.DefaultRegion)
 	}
 
-	found, err := d.client.GetBucket(ctx, data.Name, data.Region)
+	found, err := d.client.GetBucket(ctx, data.Name.ValueString(), data.Region.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("failed to get bucket", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Name.ValueString()}).Error())
 		return
@@ -99,12 +106,25 @@ func (d *bucketDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		return
 	}
 
-	objectLockEnabled, err := d.client.GetObjectLockEnabled(ctx, data.Name)
+	objectLockEnabled, err := d.client.GetObjectLockEnabled(ctx, data.Name.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("failed to get object lock configuration", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Name.ValueString()}).Error())
 		return
 	}
 
-	data.ObjectLockEnabled = objectLockEnabled
+	rawTags, err := d.client.GetBucketTags(ctx, data.Name.ValueString(), data.Region.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("failed to get bucket tags", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Name.ValueString()}).Error())
+		return
+	}
+
+	tagsMap, tagsErr := tags.KeyValueTags(rawTags).ToMap(ctx)
+	if tagsErr != nil {
+		resp.Diagnostics.AddError("failed to convert bucket tags", diagutil.WrapError(tagsErr, &diagutil.ErrorContext{ResourceName: data.Name.ValueString()}).Error())
+		return
+	}
+
+	data.ObjectLockEnabled = types.BoolValue(objectLockEnabled)
+	data.Tags = tagsMap
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
