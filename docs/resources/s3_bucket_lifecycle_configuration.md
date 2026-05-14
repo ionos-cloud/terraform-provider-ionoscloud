@@ -12,7 +12,6 @@ description: |-
 Manages Lifecycle Configuration for Buckets on IonosCloud.
 
 
-
 ## Example Usage
 
 ```hcl

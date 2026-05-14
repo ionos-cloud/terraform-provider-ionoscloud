@@ -39,7 +39,7 @@ resource "ionoscloud_user_object_storage_bucket" "example" {
 The following arguments are supported:
 
 - `name` - (Required)[string] The bucket name. Must be between 3 and 63 characters.
-- `region` - (Optional)[string] The region where the bucket is created. Defaults to `de` (Frankfurt). Available regions:
+- `region` - (Required)[string] The region where the bucket is created. Available regions:
   - `de` — Frankfurt, Germany (`https://s3.eu-central-1.ionoscloud.com`)
   - `eu-central-2` — Berlin, Germany (`https://s3.eu-central-2.ionoscloud.com`)
   - `eu-south-2` — Logroño, Spain (`https://s3.eu-south-2.ionoscloud.com`)
@@ -64,20 +64,9 @@ The following arguments are supported:
 
 ## Import
 
-A bucket can be imported using the bucket name:
+A bucket must be imported using `region:bucket_name`:
 
 ```shell
-terraform import ionoscloud_user_object_storage_bucket.example bucket_name
-```
-
-If the bucket is not in the default region (`de`), specify the region explicitly:
-
-```shell
-terraform import ionoscloud_user_object_storage_bucket.example region:bucket_name
-```
-
-For example:
-
-```shell
+terraform import ionoscloud_user_object_storage_bucket.example de:my-bucket
 terraform import ionoscloud_user_object_storage_bucket.example eu-central-2:my-bucket
 ```

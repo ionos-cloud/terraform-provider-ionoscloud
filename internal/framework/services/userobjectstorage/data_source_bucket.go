@@ -55,9 +55,8 @@ func (d *bucketDataSource) Schema(_ context.Context, _ datasource.SchemaRequest,
 				ElementType: types.StringType,
 			},
 			"region": schema.StringAttribute{
-				Description: "The region of the bucket. Defaults to 'de' (Frankfurt). Valid values: 'de', 'eu-central-2', 'eu-south-2'.",
-				Optional:    true,
-				Computed:    true,
+				Description: "The region of the bucket. Valid values: 'de' (Frankfurt), 'eu-central-2' (Berlin), 'eu-south-2' (Logroño).",
+				Required:    true,
 			},
 		},
 	}
@@ -90,10 +89,6 @@ func (d *bucketDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
-	}
-
-	if data.Region.ValueString() == "" {
-		data.Region = types.StringValue(userobjectstorage.DefaultRegion)
 	}
 
 	found, err := d.client.GetBucket(ctx, data.Name.ValueString(), data.Region.ValueString())

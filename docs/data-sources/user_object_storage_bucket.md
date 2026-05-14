@@ -27,7 +27,7 @@ data "ionoscloud_user_object_storage_bucket" "example" {
 The following arguments are supported:
 
 - `name` - (Required)[string] The name of the bucket.
-- `region` - (Optional)[string] The region where the bucket resides. Defaults to `de` (Frankfurt). Valid values: `de`, `eu-central-2`, `eu-south-2`. Must match the bucket's actual region or the lookup will return not found.
+- `region` - (Required)[string] The region where the bucket resides. Valid values: `de` (Frankfurt), `eu-central-2` (Berlin), `eu-south-2` (Logroño). Must match the bucket's actual region.
 
 ## Attributes Reference
 

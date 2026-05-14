@@ -12,7 +12,6 @@ description: |-
 Manages Object Lock Configuration for Buckets on IonosCloud.
 
 
-
 ## Example Usage
 
 ```hcl

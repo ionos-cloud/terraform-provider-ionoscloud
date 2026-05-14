@@ -70,7 +70,7 @@ func TestAccUserObjectStorageBucketResource(t *testing.T) {
 			},
 			{
 				ResourceName:                         resourceName,
-				ImportStateId:                        rName,
+				ImportStateId:                        "de:" + rName,
 				ImportState:                          true,
 				ImportStateVerifyIdentifierAttribute: "name",
 				ImportStateVerifyIgnore:              []string{"force_destroy"},
@@ -118,7 +118,8 @@ func testAccCheckUserBucketDestroy(s *terraform.State) error {
 func testAccUserBucketConfig_basic(bucketName string) string {
 	return fmt.Sprintf(`
 resource "ionoscloud_user_object_storage_bucket" "test" {
-  name = %[1]q
+  name   = %[1]q
+  region = "de"
 }
 `, bucketName)
 }
@@ -126,7 +127,8 @@ resource "ionoscloud_user_object_storage_bucket" "test" {
 func testAccUserBucketConfig_tags(bucketName string) string {
 	return fmt.Sprintf(`
 resource "ionoscloud_user_object_storage_bucket" "test" {
-  name = %[1]q
+  name   = %[1]q
+  region = "de"
   tags = {
     key1 = "value1"
     key2 = "value2"
@@ -138,7 +140,8 @@ resource "ionoscloud_user_object_storage_bucket" "test" {
 func testAccUserBucketConfig_tagsUpdated(bucketName string) string {
 	return fmt.Sprintf(`
 resource "ionoscloud_user_object_storage_bucket" "test" {
-  name = %[1]q
+  name   = %[1]q
+  region = "de"
   tags = {
     key1 = "value1"
     key3 = "value3"

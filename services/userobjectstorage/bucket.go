@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
@@ -199,7 +200,7 @@ func (c *Client) deleteAllObjects(ctx context.Context, bucketName string) error 
 
 		for _, obj := range output.Contents {
 			if obj.Key == nil {
-				continue
+				return fmt.Errorf("unexpected nil key in object listing for bucket %q", bucketName)
 			}
 			if _, _, err := c.client.ObjectsApi.DeleteObject(ctx, bucketName, *obj.Key).Execute(); err != nil {
 				return fmt.Errorf("failed to delete object %q: %w", *obj.Key, err)
@@ -252,5 +253,12 @@ func (c *Client) bucketDeletedCheck(ctx context.Context, name string) error {
 
 func isBucketNotEmptyError(err error) bool {
 	var apiErr shared.GenericOpenAPIError
-	return errors.As(err, &apiErr) && apiErr.StatusCode() == http.StatusConflict
+	if !errors.As(err, &apiErr) || apiErr.StatusCode() != http.StatusConflict {
+		return false
+	}
+	var s3Err userobjectstorage.Error
+	if xmlErr := xml.Unmarshal(apiErr.Body(), &s3Err); xmlErr != nil {
+		return false
+	}
+	return strings.EqualFold(s3Err.GetCode(), "BucketNotEmpty")
 }

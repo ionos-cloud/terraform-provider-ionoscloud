@@ -14,7 +14,7 @@ import (
 	awsv4 "github.com/aws/aws-sdk-go/aws/signer/v4"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
-	userobjectstorage "github.com/ionos-cloud/sdk-go-bundle/products/userobjectstorage/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/products/userobjectstorage/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
@@ -58,7 +58,7 @@ func NewClient(ctx context.Context, clientOptions clientoptions.TerraformClientO
 		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
 	)
 
-	httpClient := &http.Client{Transport: shared.CreateTransport(clientOptions.SkipTLSVerify, "")}
+	httpClient := &http.Client{Transport: shared.CreateTransport(clientOptions.SkipTLSVerify, clientOptions.Certificate)}
 	c := &Client{
 		clientOptions: clientOptions,
 		httpClient:    httpClient,

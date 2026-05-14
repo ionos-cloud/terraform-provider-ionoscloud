@@ -13,7 +13,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -91,10 +90,8 @@ func (r *bucketResource) Schema(ctx context.Context, req resource.SchemaRequest,
 				ElementType: types.StringType,
 			},
 			"region": schema.StringAttribute{
-				Description: "The region where the bucket is created. Defaults to 'de' (Frankfurt). Valid values: 'de', 'eu-central-2', 'eu-south-2'.",
-				Optional:    true,
-				Computed:    true,
-				Default:     stringdefault.StaticString(userobjectstorage.DefaultRegion),
+				Description: "The region where the bucket is created. Valid values: 'de' (Frankfurt), 'eu-central-2' (Berlin), 'eu-south-2' (Logroño).",
+				Required:    true,
 				Validators: []validator.String{
 					stringvalidator.OneOf(userobjectstorage.ValidRegions...),
 				},
@@ -186,11 +183,6 @@ func (r *bucketResource) Read(ctx context.Context, req resource.ReadRequest, res
 	}
 	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
-
-	// Region cannot be read back from the API. Default when missing (plain `terraform import`).
-	if data.Region.ValueString() == "" {
-		data.Region = types.StringValue(userobjectstorage.DefaultRegion)
-	}
 
 	found, err := r.client.GetBucket(ctx, data.Name.ValueString(), data.Region.ValueString())
 	if err != nil {
@@ -284,18 +276,14 @@ func (r *bucketResource) ImportState(ctx context.Context, req resource.ImportSta
 	var name, region string
 
 	parts := strings.Split(req.ID, ":")
-	if len(parts) > 2 {
-		resp.Diagnostics.AddError("invalid import ID", fmt.Sprintf("expected 'bucket_name' or 'region:bucket_name'. Got: %q", req.ID))
+	if len(parts) != 2 {
+		resp.Diagnostics.AddError("invalid import ID", fmt.Sprintf("expected 'region:bucket_name'. Got: %q", req.ID))
 		return
 	}
-	if len(parts) == 2 {
-		region = parts[0]
-		name = parts[1]
-	} else {
-		name = parts[0]
-	}
-	if name == "" {
-		resp.Diagnostics.AddError("invalid bucket name", "bucket name must not be empty")
+	region = parts[0]
+	name = parts[1]
+	if region == "" || name == "" {
+		resp.Diagnostics.AddError("invalid import ID", fmt.Sprintf("both region and bucket name must be non-empty. Got: %q", req.ID))
 		return
 	}
 
