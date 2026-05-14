@@ -49,7 +49,7 @@ func TestAccNFSShareBasic(t *testing.T) {
 				Config: testAccCheckNFSShareConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNFSShareExists("ionoscloud_nfs_share.example"),
-					resource.TestCheckResourceAttr("ionoscloud_nfs_share.example", "name", "example-share-updated"),
+					resource.TestCheckResourceAttr("ionoscloud_nfs_share.example", "name", "example-share"),
 					resource.TestCheckResourceAttr("ionoscloud_nfs_share.example", "quota", "1024"),
 					resource.TestCheckResourceAttr("ionoscloud_nfs_share.example", "gid", "1024"),
 					resource.TestCheckResourceAttr("ionoscloud_nfs_share.example", "uid", "1024"),
@@ -81,12 +81,13 @@ func testAccCheckNFSShareDestroy(s *terraform.State) error {
 		}
 
 		_, resp, err := client.GetNFSShareByID(context.Background(), rs.Primary.Attributes["cluster_id"], rs.Primary.ID, rs.Primary.Attributes["location"])
-		if !resp.HttpNotFound() {
-			return fmt.Errorf("NFS Share still exists: %s, clusterID %s", rs.Primary.ID, rs.Primary.Attributes["cluster_id"])
+		if resp != nil && resp.HttpNotFound() {
+			continue
 		}
 		if err != nil {
 			return fmt.Errorf("error fetching NFS Share with ID %s: %v", rs.Primary.ID, err)
 		}
+		return fmt.Errorf("NFS Share still exists: %s, clusterID %s", rs.Primary.ID, rs.Primary.Attributes["cluster_id"])
 	}
 
 	return nil
@@ -146,7 +147,7 @@ resource "ionoscloud_nfs_share" "example" {
   location = ionoscloud_nfs_cluster.example.location
   cluster_id = ionoscloud_nfs_cluster.example.id
 
-  name = "example-share-updated"
+  name = "example-share"
   quota = 1024
   gid = 1024
   uid = 1024
