@@ -1,0 +1,160 @@
+//go:build all || userobjectstorage
+
+package userobjectstorage_test
+
+import (
+	"context"
+	"fmt"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/acctest"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+)
+
+const bucketPrefix = "acctest-tf-user-bucket-"
+
+func TestAccUserObjectStorageBucketResource(t *testing.T) {
+	rName := acctest.GenerateRandomResourceName(bucketPrefix)
+	resourceName := "ionoscloud_user_object_storage_bucket.test"
+	dataSourceName := "data.ionoscloud_user_object_storage_bucket.test"
+
+	resource.Test(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.TestAccProtoV6ProviderFactories,
+		PreCheck: func() {
+			acctest.PreCheck(t)
+		},
+		CheckDestroy: testAccCheckUserBucketDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccUserBucketConfig_basic(rName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckUserBucketExists(context.Background(), resourceName),
+					resource.TestCheckResourceAttr(resourceName, "name", rName),
+					resource.TestCheckResourceAttr(resourceName, "region", "de"),
+					resource.TestCheckResourceAttr(resourceName, "id", rName),
+					resource.TestCheckResourceAttr(resourceName, "object_lock_enabled", "false"),
+				),
+			},
+			{
+				Config: testAccUserBucketConfig_tags(rName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "tags.key1", "value1"),
+					resource.TestCheckResourceAttr(resourceName, "tags.key2", "value2"),
+				),
+			},
+			{
+				Config: testAccUserBucketConfig_tagsUpdated(rName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "tags.key1", "value1"),
+					resource.TestCheckNoResourceAttr(resourceName, "tags.key2"),
+					resource.TestCheckResourceAttr(resourceName, "tags.key3", "value3"),
+				),
+			},
+			{
+				Config: testAccUserBucketConfig_basic(rName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "tags.%", "0"),
+				),
+			},
+			{
+				Config: testAccUserBucketDataSourceConfig_basic(rName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(dataSourceName, "name", resourceName, "name"),
+					resource.TestCheckResourceAttrPair(dataSourceName, "region", resourceName, "region"),
+					resource.TestCheckResourceAttrPair(dataSourceName, "object_lock_enabled", resourceName, "object_lock_enabled"),
+					resource.TestCheckResourceAttr(dataSourceName, "tags.%", "0"),
+				),
+			},
+			{
+				ResourceName:                         resourceName,
+				ImportStateId:                        "de:" + rName,
+				ImportState:                          true,
+				ImportStateVerifyIdentifierAttribute: "name",
+				ImportStateVerifyIgnore:              []string{"force_destroy"},
+				ImportStateVerify:                    true,
+			},
+		},
+	})
+}
+
+func testAccCheckUserBucketExists(ctx context.Context, n string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("not found: %s", n)
+		}
+
+		client := acctest.NewTestBundleClientFromEnv().UserS3Client.GetBaseClient()
+		_, err := client.BucketsApi.HeadBucket(ctx, rs.Primary.Attributes["name"]).Execute()
+		return err
+	}
+}
+
+func testAccCheckUserBucketDestroy(s *terraform.State) error {
+	client := acctest.NewTestBundleClientFromEnv().UserS3Client.GetBaseClient()
+
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type != "ionoscloud_user_object_storage_bucket" {
+			continue
+		}
+		apiResponse, err := client.BucketsApi.HeadBucket(
+			context.Background(), rs.Primary.Attributes["name"],
+		).Execute()
+		if apiResponse.HttpNotFound() {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		return fmt.Errorf("user object storage bucket still exists: %s", rs.Primary.Attributes["name"])
+	}
+
+	return nil
+}
+
+func testAccUserBucketConfig_basic(bucketName string) string {
+	return fmt.Sprintf(`
+resource "ionoscloud_user_object_storage_bucket" "test" {
+  name   = %[1]q
+  region = "de"
+}
+`, bucketName)
+}
+
+func testAccUserBucketConfig_tags(bucketName string) string {
+	return fmt.Sprintf(`
+resource "ionoscloud_user_object_storage_bucket" "test" {
+  name   = %[1]q
+  region = "de"
+  tags = {
+    key1 = "value1"
+    key2 = "value2"
+  }
+}
+`, bucketName)
+}
+
+func testAccUserBucketConfig_tagsUpdated(bucketName string) string {
+	return fmt.Sprintf(`
+resource "ionoscloud_user_object_storage_bucket" "test" {
+  name   = %[1]q
+  region = "de"
+  tags = {
+    key1 = "value1"
+    key3 = "value3"
+  }
+}
+`, bucketName)
+}
+
+func testAccUserBucketDataSourceConfig_basic(bucketName string) string {
+	return utils.ConfigCompose(testAccUserBucketConfig_basic(bucketName), `
+data "ionoscloud_user_object_storage_bucket" "test" {
+  name   = ionoscloud_user_object_storage_bucket.test.name
+  region = ionoscloud_user_object_storage_bucket.test.region
+}
+`)
+}

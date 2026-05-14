@@ -30,6 +30,7 @@ require (
 	github.com/ionos-cloud/sdk-go-bundle/products/nfs/v2 v2.0.0
 	github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2 v2.0.3
 	github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2 v2.0.1
+	github.com/ionos-cloud/sdk-go-bundle/products/userobjectstorage/v2 v2.0.5
 	github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2 v2.0.1
 	github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.2
 	github.com/ionos-cloud/sdk-go-bundle/shared v0.1.10
@@ -50,7 +51,7 @@ require (
 	github.com/rogpeppe/go-internal v1.12.0 // indirect
 	golang.org/x/sync v0.20.0 // indirect
 	golang.org/x/tools v0.42.0 // indirect
-	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
+	gopkg.in/validator.v2 v2.0.1 // indirect
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 )
 

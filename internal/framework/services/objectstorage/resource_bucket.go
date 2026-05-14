@@ -143,7 +143,7 @@ func (r *bucketResource) Create(ctx context.Context, req resource.CreateRequest,
 		return
 	}
 
-	createTimeout, diags := data.Timeouts.Create(ctx, utils.DefaultTimeout)
+	createTimeout, diags := data.Timeouts.Create(ctx, utils.BucketDefaultTimeout)
 	resp.Diagnostics.Append(diags...)
 	ctx, cancel := context.WithTimeout(ctx, createTimeout)
 	defer cancel()
@@ -212,7 +212,7 @@ func (r *bucketResource) ImportState(ctx context.Context, req resource.ImportSta
 		name = parts[0]
 	}
 	if name == "" {
-		resp.Diagnostics.AddError("invalid bucket name", fmt.Sprintf("please provide a non-empty string for the bucket name. Got: %q", req.ID))
+		resp.Diagnostics.AddError("invalid bucket name", "please provide a non-empty string for the bucket")
 		return
 	}
 

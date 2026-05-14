@@ -4,11 +4,15 @@
 - Fix IP Failover resource
 - Fix `location` data source returning "no location found" when searching using the `feature` attribute.
 
-### Chore
-- Modernize to 1.26 standards `go fix`
+### Features
+- New resource: `ionoscloud_user_object_storage_bucket` for user-owned IONOS object storage buckets (supports tags, object lock, force destroy).
+- New data source: `ionoscloud_user_object_storage_bucket` to look up user-owned buckets by name and region.
 
 ### Documentation
 - Improve share docs
+
+### Chore
+- Modernize to 1.26 standards `go fix`
 
 ### Enhancements
 - Add validation error when update-only attributes are set during snapshot creation
