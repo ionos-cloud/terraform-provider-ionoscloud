@@ -32,8 +32,9 @@ type PatchClusterProperties struct {
 	// The PostgreSQL version of your cluster.
 	PostgresVersion *string `json:"postgresVersion,omitempty"`
 	// The total number of instances in the cluster (one master and n-1 standbys).
-	Instances        *int32            `json:"instances,omitempty"`
-	ConnectionPooler *ConnectionPooler `json:"connectionPooler,omitempty"`
+	Instances           *int32               `json:"instances,omitempty"`
+	ConnectionPooler    *ConnectionPooler    `json:"connectionPooler,omitempty"`
+	SynchronizationMode *SynchronizationMode `json:"synchronizationMode,omitempty"`
 }
 
 // NewPatchClusterProperties instantiates a new PatchClusterProperties object
@@ -336,6 +337,38 @@ func (o *PatchClusterProperties) SetConnectionPooler(v ConnectionPooler) {
 	o.ConnectionPooler = &v
 }
 
+// GetSynchronizationMode returns the SynchronizationMode field value if set, zero value otherwise.
+func (o *PatchClusterProperties) GetSynchronizationMode() SynchronizationMode {
+	if o == nil || IsNil(o.SynchronizationMode) {
+		var ret SynchronizationMode
+		return ret
+	}
+	return *o.SynchronizationMode
+}
+
+// GetSynchronizationModeOk returns a tuple with the SynchronizationMode field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *PatchClusterProperties) GetSynchronizationModeOk() (*SynchronizationMode, bool) {
+	if o == nil || IsNil(o.SynchronizationMode) {
+		return nil, false
+	}
+	return o.SynchronizationMode, true
+}
+
+// HasSynchronizationMode returns a boolean if a field has been set.
+func (o *PatchClusterProperties) HasSynchronizationMode() bool {
+	if o != nil && !IsNil(o.SynchronizationMode) {
+		return true
+	}
+
+	return false
+}
+
+// SetSynchronizationMode gets a reference to the given SynchronizationMode and assigns it to the SynchronizationMode field.
+func (o *PatchClusterProperties) SetSynchronizationMode(v SynchronizationMode) {
+	o.SynchronizationMode = &v
+}
+
 func (o PatchClusterProperties) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -370,6 +403,9 @@ func (o PatchClusterProperties) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.ConnectionPooler) {
 		toSerialize["connectionPooler"] = o.ConnectionPooler
+	}
+	if !IsNil(o.SynchronizationMode) {
+		toSerialize["synchronizationMode"] = o.SynchronizationMode
 	}
 	return toSerialize, nil
 }

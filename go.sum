@@ -134,6 +134,8 @@ github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2 v2.1.1 h1:eH4AZ7YCX
 github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2 v2.1.1/go.mod h1:wSlye7CEzwnHow17pvGiwBvlfihh9QhowFXJBFhSFXQ=
 github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2 v2.0.5 h1:wlqzODzGihO/q9LgzaH+8IrrC86QQ4yLVehBU0O9xIU=
 github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2 v2.0.5/go.mod h1:V+PguySovCY0Ajdg8+GYVXem32tNB8iBXOhqIukT1xE=
+github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2 v2.1.0 h1:Upb8i8V7jN+cLDOGq+Jj4azEGoEgRzjWJHcSmnpElK0=
+github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2 v2.1.0/go.mod h1:aACVxcJcOr38Xv2R/UcI7zZpRZaPH6OeZkuOxOM2/i4=
 github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v3 v3.0.1 h1:x7634zPyuK4kPrGvGppLj5i8D9XW/rsQH12lSjSFeqk=
 github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v3 v3.0.1/go.mod h1:u6YnbB2zgH7zsJEh5ujVAEfxhRzUdIIslxUiyPHh51s=
 github.com/ionos-cloud/sdk-go-bundle/products/dns/v2 v2.2.2 h1:bO4Xd2TFgdjzy6kZrIGBEjlN4pCJFVV1E0w/fuazgG0=

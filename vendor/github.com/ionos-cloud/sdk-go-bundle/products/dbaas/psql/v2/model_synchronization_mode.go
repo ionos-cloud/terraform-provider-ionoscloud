@@ -16,7 +16,7 @@ import (
 	"fmt"
 )
 
-// SynchronizationMode Represents different modes of replication.
+// SynchronizationMode Represents different modes of replication. Be aware that the SYNCHRONOUS mode is deprecated and will be removed in future versions. Existing clusters will eventually be migrated to one of the supported modes.
 type SynchronizationMode string
 
 // List of SynchronizationMode
