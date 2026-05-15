@@ -11,6 +11,9 @@
 ### Documentation
 - Improve share docs
 
+### Features
+- Add `size_unit` attribute to `ionoscloud_nfs_cluster` resource and data source, with supported values `TiB` and `GiB`.
+
 ### Enhancements
 - Add validation error when update-only attributes are set during snapshot creation
 - Add more information to error messages
