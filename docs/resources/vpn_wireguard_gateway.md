@@ -1,17 +1,17 @@
 ---
 subcategory: "VPN"
 layout: "ionoscloud"
-page_title: "IonosCloud: vpn_wireguard_gateway"
+page_title: "IONOS CLOUD: vpn_wireguard_gateway"
 sidebar_current: "docs-resource-vpn-wireguard-gateway"
 description: |-
-  Creates and manages IonosCloud VPN Wireguard Gateway objects.
+  Creates and manages IONOS CLOUD VPN Wireguard Gateway objects.
 ---
 
 # ionoscloud_vpn_wireguard_gateway
 
 ## Overview
 
-The `ionoscloud_vpn_wireguard_gateway` resource manages a WireGuard Gateway within the IONOS Cloud infrastructure. 
+The `ionoscloud_vpn_wireguard_gateway` resource manages a WireGuard Gateway within the IONOS CLOUD infrastructure. 
 This resource facilitates the creation, management, and deletion of WireGuard VPN Gateways, enabling secure connections between your network resources.
 
 ## Example Usage

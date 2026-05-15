@@ -1,7 +1,7 @@
 ---
 subcategory: "User Management"
 layout: "ionoscloud"
-page_title: "IonosCloud: user"
+page_title: "IONOS CLOUD: user"
 sidebar_current: "docs-resource-user"
 description: |-
   Creates and manages user objects.

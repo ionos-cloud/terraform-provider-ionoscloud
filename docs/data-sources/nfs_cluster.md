@@ -1,7 +1,7 @@
 ---
 subcategory: "Network File Storage"
 layout: "ionoscloud"
-page_title: "IonosCloud: nfs_cluster"
+page_title: "IONOS CLOUD: nfs_cluster"
 sidebar_current: "docs-datasource-nfs_cluster"
 description: |-
   Get information on Network File Storage (NFS) Cluster objects
@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_nfs_cluster
 
-Returns information about clusters of Network File Storage (NFS) on IonosCloud.
+Returns information about clusters of Network File Storage (NFS) on IONOS CLOUD.
 
 ## Example Usage
 

@@ -1,10 +1,10 @@
 ---
 subcategory: "Compute Engine"
 layout: "ionoscloud"
-page_title: "IonosCloud : ionoscloud_cube_server"
+page_title: "IONOS CLOUD : ionoscloud_cube_server"
 sidebar_current: "docs-ionoscloud-datasource-server"
 description: |-
-  Get information on a Ionos Cloud Cube Servers
+  Get information on a IONOS CLOUD Cube Servers
 ---
 
 # ionoscloud_cube_server

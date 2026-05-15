@@ -1,7 +1,7 @@
 ---
 subcategory: "Database as a Service - MariaDB"
 layout: "ionoscloud"
-page_title: "IonosCloud : ionoscloud_mariadb_backups"
+page_title: "IONOS CLOUD : ionoscloud_mariadb_backups"
 sidebar_current: "docs-ionoscloud_mariadb_backups"
 description: |-
   Get information on DBaaS MariaDB Backups

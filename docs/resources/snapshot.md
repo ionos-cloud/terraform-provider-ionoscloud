@@ -1,7 +1,7 @@
 ---
 subcategory: "Compute Engine"
 layout: "ionoscloud"
-page_title: "IonosCloud: snapshot"
+page_title: "IONOS CLOUD: snapshot"
 sidebar_current: "docs-resource-snapshot"
 description: |-
   Creates and manages snapshot objects.
@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_snapshot
 
-Manages [Snapshots](https://docs.ionos.com/cloud/storage-and-backup/images-snapshots/snapshots) on IonosCloud.
+Manages [Snapshots](https://docs.ionos.com/cloud/storage-and-backup/images-snapshots/snapshots) on IONOS CLOUD.
 
 ## Example Usage
 

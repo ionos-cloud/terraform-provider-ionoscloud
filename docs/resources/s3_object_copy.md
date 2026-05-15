@@ -1,7 +1,7 @@
 ---
 subcategory: "Object Storage"
 layout: "ionoscloud"
-page_title: "IonosCloud: s3_object_copy"
+page_title: "IONOS CLOUD: s3_object_copy"
 sidebar_current: "docs-resource-s3_object_copy"
 description: |-
   Creates a copy of an object that is already stored in IONOS Object Storage.

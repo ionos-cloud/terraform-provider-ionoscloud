@@ -790,7 +790,7 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 		case <-time.After(constant.SleepInterval):
 			tflog.Debug(ctx, "k8s node pool not ready, retrying")
 		case <-ctx.Done():
-			return diagutil.ToDiags(d, fmt.Errorf("k8s node pool update timed out! WARNING: your k8s node pool will still probably be updated after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"), nil)
+			return diagutil.ToDiags(d, fmt.Errorf("k8s node pool update timed out! WARNING: your k8s node pool will still probably be updated after some time but the terraform state won't reflect that; check your IONOS CLOUD account for updates"), nil)
 		}
 	}
 
@@ -832,7 +832,7 @@ func resourcek8sNodePoolDelete(ctx context.Context, d *schema.ResourceData, meta
 		case <-time.After(constant.SleepInterval):
 			tflog.Debug(ctx, "k8s node pool not yet deleted, retrying")
 		case <-ctx.Done():
-			return diagutil.ToDiags(d, fmt.Errorf("k8s node pool deletion timed out! WARNING: your k8s node pool will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"), nil)
+			return diagutil.ToDiags(d, fmt.Errorf("k8s node pool deletion timed out! WARNING: your k8s node pool will still probably be deleted after some time but the terraform state won't reflect that; check your IONOS CLOUD account for updates"), nil)
 		}
 	}
 

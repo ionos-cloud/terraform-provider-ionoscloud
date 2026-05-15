@@ -1,7 +1,7 @@
 ---
 subcategory: "Network File Storage"
 layout: "ionoscloud"
-page_title: "IonosCloud: nfs_share"
+page_title: "IONOS CLOUD: nfs_share"
 sidebar_current: "docs-datasource-nfs_share"
 description: |-
   Get information on Network File Storage (NFS) Share objects
@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_nfs_share
 
-Returns information about shares of Network File Storage (NFS) on IonosCloud.
+Returns information about shares of Network File Storage (NFS) on IONOS CLOUD.
 
 ## Example Usage
 

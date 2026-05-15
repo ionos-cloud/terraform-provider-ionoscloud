@@ -1,15 +1,15 @@
 ---
 subcategory: "Compute Engine"
 layout: "ionoscloud"
-page_title: "IonosCloud: Server Boot Device Selection"
+page_title: "IONOS CLOUD: Server Boot Device Selection"
 sidebar_current: "docs-resource-server-boot-device-selection"
 description: |-
-  Manages the selection of boot devices for IonosCloud Server objects.
+  Manages the selection of boot devices for IONOS CLOUD Server objects.
 ---
 
 # ionoscloud_server_boot_device_selection
 
-Manages the selection of a boot device for IonosCloud Servers. 
+Manages the selection of a boot device for IONOS CLOUD Servers. 
 
 ## Example Usage
 

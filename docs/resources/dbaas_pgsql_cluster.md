@@ -1,7 +1,7 @@
 ---
 subcategory: "Database as a Service - Postgres"
 layout: "ionoscloud"
-page_title: "IonosCloud: ionoscloud_pg_cluster"
+page_title: "IONOS CLOUD: ionoscloud_pg_cluster"
 sidebar_current: "docs-resource-pg_cluster"
 description: |-
   Creates and manages DbaaS Postgres Cluster objects.

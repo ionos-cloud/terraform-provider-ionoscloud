@@ -1,10 +1,10 @@
 ---
 subcategory: "Event Streams for Apache Kafka"
 layout: "ionoscloud"
-page_title: "IonosCloud: ionoscloud_kafka_cluster"
+page_title: "IONOS CLOUD: ionoscloud_kafka_cluster"
 sidebar_current: "docs-datasource-kafka-cluster"
 description: |-
-  Reads IonosCloud Kafka Cluster objects.
+  Reads IONOS CLOUD Kafka Cluster objects.
 ---
 
 # ionoscloud_kafka_cluster

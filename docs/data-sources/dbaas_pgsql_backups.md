@@ -1,7 +1,7 @@
 ---
 subcategory: "Database as a Service - Postgres"
 layout: "ionoscloud"
-page_title: "IonosCloud : ionoscloud_pg_backups"
+page_title: "IONOS CLOUD : ionoscloud_pg_backups"
 sidebar_current: "docs-ionoscloud_pg_backups"
 description: |-
   Get information on DbaaS PgSql Backups

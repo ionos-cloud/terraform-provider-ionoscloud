@@ -1,7 +1,7 @@
 ---
 subcategory: "Database as a Service - Postgres"
 layout: "ionoscloud"
-page_title: "IonosCloud: ionoscloud_pg_user"
+page_title: "IONOS CLOUD: ionoscloud_pg_user"
 sidebar_current: "docs-resource-pg_user"
 description: |-
   Creates and manages DbaaS Postgres User objects.

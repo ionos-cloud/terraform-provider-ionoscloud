@@ -1,7 +1,7 @@
 ---
 subcategory: "Certificate Manager Service"
 layout: "ionoscloud"
-page_title: "IonosCloud: ionoscloud_auto_certificate_provider"
+page_title: "IONOS CLOUD: ionoscloud_auto_certificate_provider"
 sidebar_current: "docs-datasource-auto_certificate_provider"
 description: |-
   Get Information on Certificate Manager Provider

@@ -1,7 +1,7 @@
 ---
 subcategory: "Certificate Manager Service"
 layout: "ionoscloud"
-page_title: "IonosCloud: ionoscloud_auto_certificate"
+page_title: "IONOS CLOUD: ionoscloud_auto_certificate"
 sidebar_current: "docs-datasource-auto_certificate"
 description: |-
   Get Information on Certificate Manager AutoCertificate
@@ -46,7 +46,7 @@ Either `name` or `id` must be provided. If none, or both are provided, the datas
 
 The following attributes are returned by the datasource:
 
-* `common_name` - [string] The common name (DNS) of the certificate to issue. The common name needs to be part of a zone in IONOS Cloud DNS.
+* `common_name` - [string] The common name (DNS) of the certificate to issue. The common name needs to be part of a zone in IONOS CLOUD DNS.
 * `key_algorithm` - [string] The key algorithm used to generate the certificate.
-* `subject_alternative_names` - [list][string] Optional additional names to be added to the issued certificate. The additional names needs to be part of a zone in IONOS Cloud DNS.
+* `subject_alternative_names` - [list][string] Optional additional names to be added to the issued certificate. The additional names needs to be part of a zone in IONOS CLOUD DNS.
 * `last_issued_certificate_id` - [string] The ID of the last certificate that was issued.

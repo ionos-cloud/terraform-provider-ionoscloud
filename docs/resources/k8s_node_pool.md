@@ -1,15 +1,15 @@
 ---
 subcategory: "Managed Kubernetes"
 layout: "ionoscloud"
-page_title: "IonosCloud: k8s_node_pool"
+page_title: "IONOS CLOUD: k8s_node_pool"
 sidebar_current: "docs-resource-k8s-node-pool"
 description: |-
-  Creates and manages IonosCloud Kubernetes Node Pools.
+  Creates and manages IONOS CLOUD Kubernetes Node Pools.
 ---
 
 # ionoscloud_k8s_node_pool
 
-Manages a **Managed Kubernetes Node Pool**, part of a managed Kubernetes cluster on IonosCloud.
+Manages a **Managed Kubernetes Node Pool**, part of a managed Kubernetes cluster on IONOS CLOUD.
 
 ## Example Usage
 

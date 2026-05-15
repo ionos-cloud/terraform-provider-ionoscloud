@@ -1,7 +1,7 @@
 ---
 subcategory: "Database as a Service - InMemoryDB"
 layout: "ionoscloud"
-page_title: "IonosCloud: ionoscloud_inmemorydb_snapshot"
+page_title: "IONOS CLOUD: ionoscloud_inmemorydb_snapshot"
 sidebar_current: "docs-datasource-inmemorydb_snapshot"
 description: |-
   Gets information about an existing InMemoryDB Snapshot.

@@ -1,7 +1,7 @@
 ---
 subcategory: "Autoscaling"
 layout: "ionoscloud"
-page_title: "IonosCloud : ionoscloud_autoscaling_group_servers"
+page_title: "IONOS CLOUD : ionoscloud_autoscaling_group_servers"
 sidebar_current: "docs-ionoscloud_autoscaling_group_servers"
 description: |-
   Get information on servers generated as part of the autoscaling group.

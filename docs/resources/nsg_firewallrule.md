@@ -1,15 +1,15 @@
 ---
 subcategory: "Compute Engine"
 layout: "ionoscloud"
-page_title: "IonosCloud: network security group rule"
+page_title: "IONOS CLOUD: network security group rule"
 sidebar_current: "docs-resource-nsg-rule"
 description: |-
-  Creates and manages IonosCloud Network Security Group Firewall Rule.
+  Creates and manages IONOS CLOUD Network Security Group Firewall Rule.
 ---
 
 # ionoscloud_nsg_firewallrule
 
-Manages a **Network Security Group Rule** on IonosCloud.
+Manages a **Network Security Group Rule** on IONOS CLOUD.
 
 ## Example Usage
 

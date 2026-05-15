@@ -1,10 +1,10 @@
 ---
 subcategory: "Compute Engine"
 layout: "ionoscloud"
-page_title: "IonosCloud : ionoscloud_gpus"
+page_title: "IONOS CLOUD : ionoscloud_gpus"
 sidebar_current: "docs-ionoscloud-datasource-gpus"
 description: |-
-  Get information on Ionos Cloud GPUs
+  Get information on IONOS CLOUD GPUs
 ---
 
 # ionoscloud_gpus

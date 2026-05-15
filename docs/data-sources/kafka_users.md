@@ -1,7 +1,7 @@
 ---
 subcategory: "Event Streams for Apache Kafka"
 layout: "ionoscloud"
-page_title: "IonosCloud: ionoscloud_kafka_users"
+page_title: "IONOS CLOUD: ionoscloud_kafka_users"
 sidebar_current: "docs-ionoscloud-datasource-kafka-users"
 description: |-
   Gets information about Kafka users.

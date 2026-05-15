@@ -200,7 +200,7 @@ func waitForUnitToBeReady(ctx context.Context, d *schema.ResourceData, client *i
 			tflog.Info(ctx, "backup unit not ready, retrying")
 		case <-ctx.Done():
 			return diagutil.ToDiags(d, fmt.Errorf("backup unit readiness check timed out! WARNING: your backup unit will still probably be created/updated "+
-				"after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"), nil)
+				"after some time but the terraform state won't reflect that; check your IONOS CLOUD account for updates"), nil)
 		}
 	}
 	return nil
@@ -242,7 +242,7 @@ func resourceBackupUnitDelete(ctx context.Context, d *schema.ResourceData, meta 
 			tflog.Info(ctx, "backup unit not yet deleted, retrying")
 		case <-ctx.Done():
 			return diagutil.ToDiags(d, fmt.Errorf("backup unit deletion timed out! WARNING: your backup unit will still probably be deleted "+
-				"after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"), nil)
+				"after some time but the terraform state won't reflect that; check your IONOS CLOUD account for updates"), nil)
 		}
 	}
 

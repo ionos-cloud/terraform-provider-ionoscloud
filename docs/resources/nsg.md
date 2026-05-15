@@ -1,15 +1,15 @@
 ---
 subcategory: "Compute Engine"
 layout: "ionoscloud"
-page_title: "IonosCloud: network security group"
+page_title: "IONOS CLOUD: network security group"
 sidebar_current: "docs-resource-nsg"
 description: |-
-  Creates and manages IonosCloud Network Security Group.
+  Creates and manages IONOS CLOUD Network Security Group.
 ---
 
 # ionoscloud_nsg
 
-Manages a [Network Security Group](https://docs.ionos.com/cloud/network-services/network-security-groups/overview) on IonosCloud.
+Manages a [Network Security Group](https://docs.ionos.com/cloud/network-services/network-security-groups/overview) on IONOS CLOUD.
 
 ## Example Usage
 

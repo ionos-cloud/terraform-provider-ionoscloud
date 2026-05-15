@@ -1,10 +1,10 @@
 ---
 subcategory: "Compute Engine"
 layout: "ionoscloud"
-page_title: "IonosCloud: location"
+page_title: "IONOS CLOUD: location"
 sidebar_current: "docs-datasource-location"
 description: |-
-  Get information on a IonosCloud Locations
+  Get information on a IONOS CLOUD Locations
 ---
 
 # ionoscloud_location

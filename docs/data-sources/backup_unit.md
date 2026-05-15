@@ -1,10 +1,10 @@
 ---
 subcategory: "Managed Backup"
 layout: "ionoscloud"
-page_title: "IonosCloud: backup_unit"
+page_title: "IONOS CLOUD: backup_unit"
 sidebar_current: "docs-datasource-backup-unit"
 description: |-
-  Get Information on a IonosCloud Backup Unit
+  Get Information on a IONOS CLOUD Backup Unit
 ---
 
 # ionoscloud_backup_unit

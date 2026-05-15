@@ -10,6 +10,7 @@
 
 ### Documentation
 - Improve share docs
+- Align brand capitalisation to "IONOS CLOUD" across user-facing docs, schema descriptions, and error messages
 
 ### Features
 - Add `size_unit` attribute to `ionoscloud_nfs_cluster` resource and data source, with supported values `TiB` and `GiB`.

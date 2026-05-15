@@ -1,7 +1,7 @@
 ---
 subcategory: "Container Registry"
 layout: "ionoscloud"
-page_title: "IonosCloud : ionoscloud_container_registry_token"
+page_title: "IONOS CLOUD : ionoscloud_container_registry_token"
 sidebar_current: "docs-ionoscloud_container_registry_token"
 description: |-
   Get information on a Container Registry Token

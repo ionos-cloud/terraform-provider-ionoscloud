@@ -1,7 +1,7 @@
 ---
 subcategory: "Database as a Service - Postgres"
 layout: "ionoscloud"
-page_title: "IonosCloud: ionoscloud_pg_databases"
+page_title: "IONOS CLOUD: ionoscloud_pg_databases"
 sidebar_current: "docs-ionoscloud-datasource-pg_databases"
 description: |-
   Get information on DBaaS PgSql Databases.
