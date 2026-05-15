@@ -15,7 +15,6 @@ Manages a [DbaaS PgSql Cluster](https://docs.ionos.com/cloud/databases/postgresq
 
 ```hcl
 # Basic example
-github.com/ionos-cloud/sdk-go-bundle/products/postgres
 resource "ionoscloud_datacenter" "example" {
   name                    = "example"
   location                = "de/txl"
