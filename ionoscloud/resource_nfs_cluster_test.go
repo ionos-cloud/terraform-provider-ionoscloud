@@ -49,8 +49,8 @@ func TestAccNFSClusterBasic(t *testing.T) {
 					testAccCheckNFSClusterExists("ionoscloud_nfs_cluster.example"),
 					resource.TestCheckResourceAttr("ionoscloud_nfs_cluster.example", "name", "example_updated"),
 					resource.TestCheckResourceAttr("ionoscloud_nfs_cluster.example", "location", "de/txl"),
-					resource.TestCheckResourceAttr("ionoscloud_nfs_cluster.example", "size", "2048"),
-					resource.TestCheckResourceAttr("ionoscloud_nfs_cluster.example", "size_unit", "GiB"),
+					resource.TestCheckResourceAttr("ionoscloud_nfs_cluster.example", "size", "2"),
+					resource.TestCheckResourceAttr("ionoscloud_nfs_cluster.example", "size_unit", "TiB"),
 					resource.TestCheckResourceAttr("ionoscloud_nfs_cluster.example", "nfs.0.min_version", "4.2"),
 				),
 			},
@@ -81,7 +81,7 @@ func testAccCheckNFSClusterDestroy(s *terraform.State) error {
 		}
 
 		_, resp, err := client.GetNFSClusterByID(context.Background(), rs.Primary.ID, rs.Primary.Attributes["location"])
-		if resp != nil && resp.SafeStatusCode() == 404 {
+		if resp != nil && resp.HttpNotFound() {
 			continue
 		}
 		if err != nil {
