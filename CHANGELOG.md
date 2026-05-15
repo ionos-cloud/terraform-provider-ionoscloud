@@ -6,9 +6,13 @@
 
 ### Chore
 - Modernize to 1.26 standards `go fix`
+- Bump `github.com/hashicorp/hc-install` from v0.9.2 to v0.9.5 to fix expired HashiCorp OpenPGP key that caused acceptance tests to fail with `openpgp: key expired`.
 
 ### Documentation
 - Improve share docs
+
+### Features
+- Add `size_unit` attribute to `ionoscloud_nfs_cluster` resource and data source, with supported values `TiB` and `GiB`.
 
 ### Enhancements
 - Add validation error when update-only attributes are set during snapshot creation

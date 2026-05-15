@@ -32,7 +32,8 @@ resource "ionoscloud_lan" "nfs_lan" {
 resource "ionoscloud_nfs_cluster" "example" {
   name = "test"
   location = "de/txl"
-  size = 2
+  size      = 2048
+  size_unit = "GiB"
 
   nfs {
     min_version = "4.2"

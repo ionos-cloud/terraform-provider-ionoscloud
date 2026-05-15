@@ -3,7 +3,7 @@
  *
  * The RESTful API for managing Network File Storage.
  *
- * API version: 0.1.3
+ * API version: 0.1.6
  * Contact: support@cloud.ionos.com
  */
 
@@ -36,11 +36,11 @@ type MetadataWithPath struct {
 	LastModifiedByUserId *string `json:"lastModifiedByUserId,omitempty"`
 	// Unique name of the resource.
 	ResourceURN *string `json:"resourceURN,omitempty"`
-	// The status of the resource can be one of the following:  * `AVAILABLE` - The resource exists and is healthy. * `PROVISIONING` - The resource is being created or updated. * `DESTROYING` - A delete command was issued, and the resource is being deleted. * `FAILED` - The resource failed, with details provided in `statusMessage`.
+	// The status of the resource can be one of the following: * `AVAILABLE` - The resource exists and is healthy. * `PROVISIONING` - The resource is being created or updated. * `DESTROYING` - A delete command was issued, and the resource is being deleted. * `FAILED` - The resource failed, with details provided in `statusMessage`.
 	Status string `json:"status"`
-	// The message of the failure if the status is `FAILED`.
+	// The error message when the status is `FAILED`.
 	StatusMessage *string `json:"statusMessage,omitempty"`
-	// The path of the NFS export.
+	// The path of the NFS export (currently equal to the UUID of the share). On a machine with access to the share, mount it using the following command: `mount -t nfs <cluster-ip>:<nfs-path> <target-dir>`
 	NfsPath string `json:"nfsPath"`
 }
 
@@ -367,6 +367,14 @@ func (o *MetadataWithPath) GetNfsPathOk() (*string, bool) {
 // SetNfsPath sets field value
 func (o *MetadataWithPath) SetNfsPath(v string) {
 	o.NfsPath = v
+}
+
+func (o MetadataWithPath) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
 }
 
 func (o MetadataWithPath) ToMap() (map[string]interface{}, error) {

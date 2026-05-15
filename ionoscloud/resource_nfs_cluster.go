@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/nfs/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
@@ -88,6 +89,13 @@ func resourceNFSCluster() *schema.Resource {
 				Type:        schema.TypeInt,
 				Description: "The size of the Network File Storage Cluster. Minimum size is 2.",
 				Required:    true,
+			},
+			"size_unit": {
+				Type:         schema.TypeString,
+				Description:  "The unit of the 'size' attribute. Can be 'TiB' or 'GiB'. Defaults to 'TiB'.",
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.StringInSlice([]string{"TiB", "GiB"}, false),
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,

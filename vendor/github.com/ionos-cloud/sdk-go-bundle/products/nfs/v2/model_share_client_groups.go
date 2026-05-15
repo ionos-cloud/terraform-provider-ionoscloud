@@ -3,7 +3,7 @@
  *
  * The RESTful API for managing Network File Storage.
  *
- * API version: 0.1.3
+ * API version: 0.1.6
  * Contact: support@cloud.ionos.com
  */
 
@@ -20,7 +20,7 @@ var _ MappedNullable = &ShareClientGroups{}
 
 // ShareClientGroups struct for ShareClientGroups
 type ShareClientGroups struct {
-	// Optional description for the clients groups.
+	// Optional description for the client group.
 	Description *string               `json:"description,omitempty"`
 	IpNetworks  []string              `json:"ipNetworks,omitempty"`
 	Hosts       []string              `json:"hosts,omitempty"`
@@ -171,6 +171,14 @@ func (o *ShareClientGroups) HasNfs() bool {
 // SetNfs gets a reference to the given ShareClientGroupsNfs and assigns it to the Nfs field.
 func (o *ShareClientGroups) SetNfs(v ShareClientGroupsNfs) {
 	o.Nfs = &v
+}
+
+func (o ShareClientGroups) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
 }
 
 func (o ShareClientGroups) ToMap() (map[string]interface{}, error) {

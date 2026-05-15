@@ -52,7 +52,8 @@ The following attributes are returned by the datasource:
 -`id` - The ID of the Network File Storage cluster.
 - `name` - The name of the Network File Storage cluster.
 - `location` - The location where the Network File Storage cluster is located.
-- `size` - The size of the Network File Storage cluster in TiB. Note that the cluster size cannot be reduced after provisioning. This value determines the billing fees. Default is `2`. The minimum value is `2` and the maximum value is `42`.
+- `size` - The size of the Network File Storage cluster. Note that the cluster size cannot be reduced after provisioning. This value determines the billing fees.
+- `size_unit` - The unit of the `size` attribute. Possible values: `TiB`, `GiB`.
 - `nfs` - The NFS configuration for the Network File Storage cluster. Each NFS configuration supports the following:
     - `min_version` - The minimum supported version of the NFS cluster. Default is `4.2`
 - `connections` - A list of connections for the Network File Storage cluster. You can specify only one connection. Each connection supports the following:

@@ -3,7 +3,7 @@
  *
  * The RESTful API for managing Network File Storage.
  *
- * API version: 0.1.3
+ * API version: 0.1.6
  * Contact: support@cloud.ionos.com
  */
 
@@ -24,7 +24,7 @@ type ClusterConnections struct {
 	DatacenterId string `json:"datacenterId"`
 	// The LAN to which the Network File Storage cluster must be connected.
 	Lan string `json:"lan"`
-	// The IP address and prefix of the Network File Storage cluster. The IP address can be either IPv4 or IPv6. The IP address has to be given with CIDR notation.
+	// The IP address and prefix of the Network File Storage cluster. Must be specified in CIDR notation. Both IPv4 and IPv6 addresses are supported.
 	IpAddress string `json:"ipAddress"`
 }
 
@@ -120,6 +120,14 @@ func (o *ClusterConnections) GetIpAddressOk() (*string, bool) {
 // SetIpAddress sets field value
 func (o *ClusterConnections) SetIpAddress(v string) {
 	o.IpAddress = v
+}
+
+func (o ClusterConnections) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
 }
 
 func (o ClusterConnections) ToMap() (map[string]interface{}, error) {
