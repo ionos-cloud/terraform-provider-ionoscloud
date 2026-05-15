@@ -229,7 +229,11 @@ func GetPgSqlClusterDataCreate(d *schema.ResourceData) (*psql.CreateClusterReque
 	dbaasCluster.Properties.Credentials = GetPsqlClusterCredentialsData(d)
 
 	if synchronizationMode, ok := d.GetOk("synchronization_mode"); ok {
-		synchronizationMode := psql.SynchronizationMode(synchronizationMode.(string))
+		syncModeStr := synchronizationMode.(string)
+		if syncModeStr == string(psql.SYNCHRONIZATIONMODE_SYNCHRONOUS) {
+			return nil, fmt.Errorf("%s is no longer a valid synchronization mode for create cluster requests", syncModeStr)
+		}
+		synchronizationMode := psql.CreateSynchronizationMode(syncModeStr)
 		dbaasCluster.Properties.SynchronizationMode = synchronizationMode
 	}
 
@@ -468,6 +472,10 @@ func GetPgSqlClusterDataUpdate(d *schema.ResourceData) (*psql.PatchClusterReques
 	}
 
 	dbaasCluster.Properties.MaintenanceWindow = GetPsqlClusterMaintenanceWindowData(d)
+
+	if syncMode, ok := d.GetOk("synchronization_mode"); ok {
+		dbaasCluster.Properties.SynchronizationMode = new(psql.SynchronizationMode(syncMode.(string)))
+	}
 
 	return &dbaasCluster, nil
 }

@@ -15,7 +15,6 @@ Manages a [DbaaS PgSql Cluster](https://docs.ionos.com/cloud/databases/postgresq
 
 ```hcl
 # Basic example
-
 resource "ionoscloud_datacenter" "example" {
   name                    = "example"
   location                = "de/txl"
@@ -161,7 +160,7 @@ resource "random_password" "cluster_password" {
 * `credentials` - (Required)[string] Credentials for the database user to be created. This attribute is immutable(disallowed in update requests).
     * `username` - (Required)[string] The username for the initial postgres user. Some system usernames are restricted (e.g. "postgres", "admin", "standby")
     * `password` - (Required)[string]
-* `synchronization_mode` - (Required) [string] Represents different modes of replication. Can have one of the following values: ASYNCHRONOUS, SYNCHRONOUS, STRICTLY_SYNCHRONOUS. This attribute is immutable(disallowed in update requests).
+* `synchronization_mode` - (Required) [string] Represents different modes of replication. Can have one of the following values: ASYNCHRONOUS, STRICTLY_SYNCHRONOUS. The SYNCHRONOUS value has been deprecated for create requests.
 * `from_backup` - (Optional)[string] The unique ID of the backup you want to restore. This attribute is immutable(disallowed in update requests).
   * `backup_id` - (Required)[string] The unique ID of the backup you want to restore.
   * `recovery_target_time` - (Optional)[string] If this value is supplied as ISO 8601 timestamp, the backup will be replayed up until the given timestamp. If empty, the backup will be applied completely.
