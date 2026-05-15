@@ -86,8 +86,12 @@ func dataSourceDataCenter() *schema.Resource {
 
 func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 
-	var name, location string
-	id, idOk := d.GetOk("id")
+	var id, name, location string
+
+	t, idOk := d.GetOk("id")
+	if idOk {
+		id = t.(string)
+	}
 
 	t, nameOk := d.GetOk("name")
 	if nameOk {
@@ -112,10 +116,10 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	if idOk {
-		datacenter, apiResponse, err = client.DataCentersApi.DatacentersFindById(ctx, id.(string)).Execute()
+		datacenter, apiResponse, err = client.DataCentersApi.DatacentersFindById(ctx, id).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("error getting datacenter with id %s %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return diagutil.ToDiags(d, fmt.Errorf("error getting datacenter with id %s %w", id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 		if nameOk {
 			if *datacenter.Properties.Name != name {

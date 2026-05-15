@@ -1,9 +1,5 @@
 ## Upcoming
 
-### Fixes
-- Fix IP Failover resource
-- Fix `location` data source returning "no location found" when searching using the `feature` attribute.
-
 ### Chore
 - Modernize to 1.26 standards `go fix`
 - Bump `github.com/hashicorp/hc-install` from v0.9.2 to v0.9.5 to fix expired HashiCorp OpenPGP key that caused acceptance tests to fail with `openpgp: key expired`.
@@ -19,6 +15,11 @@
 - Add validation error when update-only attributes are set during snapshot creation
 - Add more information to error messages
 - Use tflog instead of print
+
+### Fixes
+- Fix IP Failover resource
+- Fix `location` data source returning "no location found" when searching using the `feature` attribute.
+- Fix attributes inconsistencies for the following data sources: `data_source_template.go`, `data_source_private_crossconnect.go`, `data_source_cube_server.go`, `data_source_gpu_server.go`
 
 ## 6.7.28
 ### Fixes
