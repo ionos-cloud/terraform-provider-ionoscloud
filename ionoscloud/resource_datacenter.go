@@ -30,12 +30,14 @@ func resourceDatacenter() *schema.Resource {
 			"name": {
 				Type:             schema.TypeString,
 				Required:         true,
+				Description:      "The name of the datacenter.",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"location": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: "The regional location where the datacenter will be created. This property is immutable.",
 			},
 			"description": {
 				Type:        schema.TypeString,
@@ -44,40 +46,48 @@ func resourceDatacenter() *schema.Resource {
 				Computed:    true,
 			},
 			"sec_auth_protection": {
-				Type:     schema.TypeBool,
-				Optional: true,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Boolean value representing if the data center requires extra protection, such as two-step verification.",
 			},
 			"version": {
-				Type:     schema.TypeInt,
-				Computed: true,
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "The version of the datacenter.",
 			},
 			"features": {
-				Type:     schema.TypeSet,
-				Computed: true,
+				Type:        schema.TypeSet,
+				Computed:    true,
+				Description: "List of features supported by the location where this datacenter is provisioned.",
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 			},
 			"cpu_architecture": {
-				Type:     schema.TypeList,
-				Computed: true,
+				Type:        schema.TypeList,
+				Computed:    true,
+				Description: "Array of features and CPU families available in a location.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"cpu_family": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "A valid CPU family name.",
 						},
 						"max_cores": {
-							Type:     schema.TypeInt,
-							Computed: true,
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The maximum number of cores available.",
 						},
 						"max_ram": {
-							Type:     schema.TypeInt,
-							Computed: true,
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The maximum RAM size in MB.",
 						},
 						"vendor": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The CPU vendor name (e.g., AMD, Intel).",
 						},
 					},
 				},

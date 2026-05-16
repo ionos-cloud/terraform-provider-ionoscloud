@@ -1,0 +1,34 @@
+---
+subcategory: "Compute Engine"
+page_title: "IonosCloud: Server Boot Device Selection"
+description: |-
+  Manages the selection of boot devices for IonosCloud Server objects.
+---
+
+# ionoscloud_server_boot_device_selection
+
+Manages the selection of a boot device for IonosCloud Servers.
+
+## Example Usage
+
+The boot device of a `ionoscloud_server`, `ionoscloud_vcpu_server` or `ionoscloud_cube_server` can be selected with this resource.
+Deleting this resource will revert the boot device back to the default volume, which is the first inline volume created together with the server. In case in which there is no default to revert to, when the server had no boot device, the current device will remain set as a boot device when this resource is deleted.
+This resource also allows switching between a `volume` and a `ionoscloud_image` CDROM. Note that CDROM images are detached after they are no longer set as boot devices.
+
+### Select an external volume
+
+{{ tffile "examples/resources/ionoscloud_server_boot_device_selection/external_volume.tf" }}
+
+### Select an inline volume again
+
+{{ tffile "examples/resources/ionoscloud_server_boot_device_selection/inline_volume.tf" }}
+
+### Select a CDROM image
+
+{{ tffile "examples/resources/ionoscloud_server_boot_device_selection/cdrom.tf" }}
+
+### Perform a network boot
+
+{{ tffile "examples/resources/ionoscloud_server_boot_device_selection/network_boot.tf" }}
+
+{{ .SchemaMarkdown | trimspace }}
