@@ -97,7 +97,7 @@ func (p *IonosCloudProvider) Schema(ctx context.Context, req provider.SchemaRequ
 			},
 			"s3_region": schema.StringAttribute{
 				Optional:    true,
-				Description: "Region for IONOS Object Storage operations.",
+				Description: "Region for IONOS Contract Owned Object Storage operations.",
 			},
 			"insecure": schema.BoolAttribute{
 				Optional:    true,
