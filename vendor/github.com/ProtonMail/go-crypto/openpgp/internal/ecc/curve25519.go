@@ -125,10 +125,7 @@ func (c *curve25519) Encaps(rand io.Reader, point []byte) (ephemeral, sharedSecr
 	//	"VB = convert point V to the octet string"
 	// sharedPoint corresponds to `VB`.
 	var sharedPoint x25519lib.Key
-	ok := x25519lib.Shared(&sharedPoint, &ephemeralPrivate, &pubKey)
-	if !ok {
-		return nil, nil, errors.KeyInvalidError("ecc: the public key is a low order point")
-	}
+	x25519lib.Shared(&sharedPoint, &ephemeralPrivate, &pubKey)
 
 	return ephemeralPublic[:], sharedPoint[:], nil
 }
@@ -149,10 +146,7 @@ func (c *curve25519) Decaps(vsG, secret []byte) (sharedSecret []byte, err error)
 	// RFC6637 §8: "Note that the recipient obtains the shared secret by calculating
 	//   S = rV = rvG, where (r,R) is the recipient's key pair."
 	// sharedPoint corresponds to `S`.
-	ok := x25519lib.Shared(&sharedPoint, &decodedPrivate, &ephemeralPublic)
-	if !ok {
-		return nil, errors.KeyInvalidError("ecc: the public key is a low order point")
-	}
+	x25519lib.Shared(&sharedPoint, &decodedPrivate, &ephemeralPublic)
 
 	return sharedPoint[:], nil
 }

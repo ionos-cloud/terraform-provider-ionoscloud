@@ -1,38 +1,22 @@
-// Copyright IBM Corp. 2014, 2025
+// Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
 
 package version
 
 import (
+	"bytes"
 	"database/sql/driver"
 	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
-	"sync"
 )
 
 // The compiled regular expression used to test the validity of a version.
 var (
-	versionRegexp     *regexp.Regexp
-	versionRegexpOnce sync.Once
-	semverRegexp      *regexp.Regexp
-	semverRegexpOnce  sync.Once
+	versionRegexp *regexp.Regexp
+	semverRegexp  *regexp.Regexp
 )
-
-func getVersionRegexp() *regexp.Regexp {
-	versionRegexpOnce.Do(func() {
-		versionRegexp = regexp.MustCompile("^" + VersionRegexpRaw + "$")
-	})
-	return versionRegexp
-}
-
-func getSemverRegexp() *regexp.Regexp {
-	semverRegexpOnce.Do(func() {
-		semverRegexp = regexp.MustCompile("^" + SemverRegexpRaw + "$")
-	})
-	return semverRegexp
-}
 
 // The raw regular expression string used for testing the validity
 // of a version.
@@ -49,23 +33,6 @@ const (
 		`?`
 )
 
-// Optional options for NewVersion function.
-type options struct {
-	// If set, this prefix will be trimmed from the version string before parsing.
-	prefix string
-}
-
-// Option is a functional option for NewVersion.
-type Option func(*options)
-
-// WithPrefix is a functional option that sets a prefix to be removed from the
-// version string before parsing.
-func WithPrefix(prefix string) Option {
-	return func(o *options) {
-		o.prefix = prefix
-	}
-}
-
 // Version represents a single version.
 type Version struct {
 	metadata string
@@ -73,49 +40,30 @@ type Version struct {
 	segments []int64
 	si       int
 	original string
-	prefix   string
 }
 
-// NewVersion parses the given version and returns a new Version.
-//
-// Optional parsing behavior can be enabled with Option values such as
-// WithPrefix, which validates and strips an expected prefix before parsing.
-func NewVersion(v string, opts ...Option) (*Version, error) {
-	options := &options{}
-	for _, opt := range opts {
-		if opt != nil {
-			opt(options)
-		}
-	}
+func init() {
+	versionRegexp = regexp.MustCompile("^" + VersionRegexpRaw + "$")
+	semverRegexp = regexp.MustCompile("^" + SemverRegexpRaw + "$")
+}
 
-	vToParse := v
-	if options.prefix != "" {
-		if !strings.HasPrefix(v, options.prefix) {
-			return nil, fmt.Errorf("version %q does not have prefix %q", v, options.prefix)
-		}
-		vToParse = strings.TrimPrefix(v, options.prefix)
-	}
-
-	ver, err := newVersion(vToParse, getVersionRegexp())
-	if err != nil {
-		return nil, err
-	}
-	ver.prefix = options.prefix
-	ver.original = v
-	return ver, nil
+// NewVersion parses the given version and returns a new
+// Version.
+func NewVersion(v string) (*Version, error) {
+	return newVersion(v, versionRegexp)
 }
 
 // NewSemver parses the given version and returns a new
 // Version that adheres strictly to SemVer specs
 // https://semver.org/
 func NewSemver(v string) (*Version, error) {
-	return newVersion(v, getSemverRegexp())
+	return newVersion(v, semverRegexp)
 }
 
 func newVersion(v string, pattern *regexp.Regexp) (*Version, error) {
 	matches := pattern.FindStringSubmatch(v)
 	if matches == nil {
-		return nil, fmt.Errorf("malformed version: %s", v)
+		return nil, fmt.Errorf("Malformed version: %s", v)
 	}
 	segmentsStr := strings.Split(matches[1], ".")
 	segments := make([]int64, len(segmentsStr))
@@ -123,7 +71,7 @@ func newVersion(v string, pattern *regexp.Regexp) (*Version, error) {
 		val, err := strconv.ParseInt(str, 10, 64)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"error parsing version: %s", err)
+				"Error parsing version: %s", err)
 		}
 
 		segments[i] = val
@@ -226,7 +174,7 @@ func (v *Version) Compare(other *Version) int {
 		} else if lhs < rhs {
 			return -1
 		}
-		// Otherwise, rhs was > lhs, they're not equal
+		// Otherwis, rhs was > lhs, they're not equal
 		return 1
 	}
 
@@ -434,40 +382,28 @@ func (v *Version) Segments64() []int64 {
 // missing parts (1.0 => 1.0.0) will be made into a canonicalized form
 // as shown in the parenthesized examples.
 func (v *Version) String() string {
-	return string(v.bytes())
-}
-
-func (v *Version) bytes() []byte {
-	var buf []byte
+	var buf bytes.Buffer
+	fmtParts := make([]string, len(v.segments))
 	for i, s := range v.segments {
-		if i > 0 {
-			buf = append(buf, '.')
-		}
-		buf = strconv.AppendInt(buf, s, 10)
+		// We can ignore err here since we've pre-parsed the values in segments
+		str := strconv.FormatInt(s, 10)
+		fmtParts[i] = str
 	}
-
+	fmt.Fprintf(&buf, strings.Join(fmtParts, "."))
 	if v.pre != "" {
-		buf = append(buf, '-')
-		buf = append(buf, v.pre...)
+		fmt.Fprintf(&buf, "-%s", v.pre)
 	}
-
 	if v.metadata != "" {
-		buf = append(buf, '+')
-		buf = append(buf, v.metadata...)
+		fmt.Fprintf(&buf, "+%s", v.metadata)
 	}
 
-	return buf
+	return buf.String()
 }
 
 // Original returns the original parsed version as-is, including any
 // potential whitespace, `v` prefix, etc.
 func (v *Version) Original() string {
 	return v.original
-}
-
-// Prefix returns the explicit prefix used with WithPrefix, if any.
-func (v *Version) Prefix() string {
-	return v.prefix
 }
 
 // UnmarshalText implements encoding.TextUnmarshaler interface.
