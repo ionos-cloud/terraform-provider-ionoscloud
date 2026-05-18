@@ -1,5 +1,4 @@
 //go:build all || monitoring
-// +build all monitoring
 
 package monitoring_test
 

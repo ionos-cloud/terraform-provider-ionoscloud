@@ -67,7 +67,7 @@ func dataSourceCertificateManagerProvider() *schema.Resource {
 	}
 }
 
-func dataSourceProviderRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceProviderRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).CertManagerClient
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")
@@ -118,8 +118,8 @@ func dataSourceProviderRead(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	if provider.Properties.ExternalAccountBinding != nil {
-		var externalAccountBinding []interface{}
-		externalAccountBindingEntry := map[string]interface{}{}
+		var externalAccountBinding []any
+		externalAccountBindingEntry := map[string]any{}
 		utils.SetPropWithNilCheck(externalAccountBindingEntry, "key_id", *provider.Properties.ExternalAccountBinding.KeyId)
 		externalAccountBinding = append(externalAccountBinding, externalAccountBindingEntry)
 		if err := d.Set("external_account_binding", externalAccountBinding); err != nil {

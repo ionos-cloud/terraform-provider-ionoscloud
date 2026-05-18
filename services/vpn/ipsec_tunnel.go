@@ -86,7 +86,7 @@ func (c *Client) IsIPSecTunnelReady(ctx context.Context, d *schema.ResourceData)
 	if err != nil {
 		return false, err
 	}
-	tflog.Debug(ctx, "VPN IPSec Gateway Tunnel state", map[string]interface{}{"status": tunnel.Metadata.Status})
+	tflog.Debug(ctx, "VPN IPSec Gateway Tunnel state", map[string]any{"status": tunnel.Metadata.Status})
 
 	return strings.EqualFold(tunnel.Metadata.Status, constant.Available), nil
 }
@@ -128,31 +128,31 @@ func SetIPSecTunnelData(d *schema.ResourceData, tunnel vpn.IPSecTunnelRead) erro
 		return utils.GenerateSetError(ipsecTunnelResourceName, "peer_network_cidrs", err)
 	}
 
-	auth := map[string]interface{}{
+	auth := map[string]any{
 		"method": tunnel.Properties.Auth.Method,
 	}
 
-	if err := d.Set("auth", []interface{}{auth}); err != nil {
+	if err := d.Set("auth", []any{auth}); err != nil {
 		return utils.GenerateSetError(ipsecTunnelResourceName, "auth", err)
 	}
 
-	ike := map[string]interface{}{
+	ike := map[string]any{
 		"diffie_hellman_group": tunnel.Properties.Ike.DiffieHellmanGroup,
 		"encryption_algorithm": tunnel.Properties.Ike.EncryptionAlgorithm,
 		"integrity_algorithm":  tunnel.Properties.Ike.IntegrityAlgorithm,
 		"lifetime":             tunnel.Properties.Ike.Lifetime,
 	}
-	if err := d.Set("ike", []interface{}{ike}); err != nil {
+	if err := d.Set("ike", []any{ike}); err != nil {
 		return utils.GenerateSetError(ipsecTunnelResourceName, "ike", err)
 	}
 
-	esp := map[string]interface{}{
+	esp := map[string]any{
 		"diffie_hellman_group": tunnel.Properties.Esp.DiffieHellmanGroup,
 		"encryption_algorithm": tunnel.Properties.Esp.EncryptionAlgorithm,
 		"integrity_algorithm":  tunnel.Properties.Esp.IntegrityAlgorithm,
 		"lifetime":             tunnel.Properties.Esp.Lifetime,
 	}
-	if err := d.Set("esp", []interface{}{esp}); err != nil {
+	if err := d.Set("esp", []any{esp}); err != nil {
 		return utils.GenerateSetError(ipsecTunnelResourceName, "esp", err)
 	}
 
@@ -177,11 +177,11 @@ func setIPSecTunnelProperties(d *schema.ResourceData) vpn.IPSecTunnel {
 	properties.Name = d.Get("name").(string)
 	properties.RemoteHost = d.Get("remote_host").(string)
 
-	for _, v := range d.Get("cloud_network_cidrs").([]interface{}) {
+	for _, v := range d.Get("cloud_network_cidrs").([]any) {
 		properties.CloudNetworkCIDRs = append(properties.CloudNetworkCIDRs, v.(string))
 	}
 
-	for _, v := range d.Get("peer_network_cidrs").([]interface{}) {
+	for _, v := range d.Get("peer_network_cidrs").([]any) {
 		properties.PeerNetworkCIDRs = append(properties.PeerNetworkCIDRs, v.(string))
 	}
 
@@ -195,21 +195,21 @@ func setIPSecTunnelProperties(d *schema.ResourceData) vpn.IPSecTunnel {
 	}
 
 	properties.Ike = vpn.IKEEncryption{
-		DiffieHellmanGroup:  shared.ToPtr(d.Get("ike.0.diffie_hellman_group").(string)),
-		EncryptionAlgorithm: shared.ToPtr(d.Get("ike.0.encryption_algorithm").(string)),
-		IntegrityAlgorithm:  shared.ToPtr(d.Get("ike.0.integrity_algorithm").(string)),
-		Lifetime:            shared.ToPtr(int32(d.Get("ike.0.lifetime").(int))),
+		DiffieHellmanGroup:  new(d.Get("ike.0.diffie_hellman_group").(string)),
+		EncryptionAlgorithm: new(d.Get("ike.0.encryption_algorithm").(string)),
+		IntegrityAlgorithm:  new(d.Get("ike.0.integrity_algorithm").(string)),
+		Lifetime:            new(int32(d.Get("ike.0.lifetime").(int))),
 	}
 
 	properties.Esp = vpn.ESPEncryption{
-		DiffieHellmanGroup:  shared.ToPtr(d.Get("esp.0.diffie_hellman_group").(string)),
-		EncryptionAlgorithm: shared.ToPtr(d.Get("esp.0.encryption_algorithm").(string)),
-		IntegrityAlgorithm:  shared.ToPtr(d.Get("esp.0.integrity_algorithm").(string)),
-		Lifetime:            shared.ToPtr(int32(d.Get("esp.0.lifetime").(int))),
+		DiffieHellmanGroup:  new(d.Get("esp.0.diffie_hellman_group").(string)),
+		EncryptionAlgorithm: new(d.Get("esp.0.encryption_algorithm").(string)),
+		IntegrityAlgorithm:  new(d.Get("esp.0.integrity_algorithm").(string)),
+		Lifetime:            new(int32(d.Get("esp.0.lifetime").(int))),
 	}
 
 	if v, ok := d.GetOk("description"); ok {
-		properties.Description = shared.ToPtr(v.(string))
+		properties.Description = new(v.(string))
 	}
 
 	return properties

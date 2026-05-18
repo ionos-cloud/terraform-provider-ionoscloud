@@ -1,15 +1,15 @@
 ---
 subcategory: "Network File Storage"
 layout: "ionoscloud"
-page_title: "IonosCloud: nfs_share"
+page_title: "IONOS CLOUD: nfs_share"
 sidebar_current: "docs-resource-nfs_share"
 description: |-
-  Creates and manages Network File Storage (NFS) Share objects on IonosCloud.
+  Creates and manages Network File Storage (NFS) Share objects on IONOS CLOUD.
 ---
 
 # ionoscloud_nfs_cluster
 
-Creates and manages Network File Storage (NFS) Share objects on IonosCloud.
+Creates and manages Network File Storage (NFS) Share objects on IONOS CLOUD.
 
 ## Example Usage
 
@@ -32,7 +32,8 @@ resource "ionoscloud_lan" "nfs_lan" {
 resource "ionoscloud_nfs_cluster" "example" {
   name = "test"
   location = "de/txl"
-  size = 2
+  size      = 2048
+  size_unit = "GiB"
 
   nfs {
     min_version = "4.2"

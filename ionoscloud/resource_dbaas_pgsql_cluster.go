@@ -195,7 +195,6 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 				Type:             schema.TypeString,
 				Description:      "Represents different modes of replication.",
 				Required:         true,
-				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"ASYNCHRONOUS", "SYNCHRONOUS", "STRICTLY_SYNCHRONOUS"}, false)),
 			},
 			"from_backup": {
@@ -229,7 +228,7 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 		Timeouts: &resourceDefaultTimeouts,
 	}
 }
-func checkDBaaSClusterImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
+func checkDBaaSClusterImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ any) error {
 
 	allowReplace := diff.Get("allow_replace").(bool)
 	if allowReplace {
@@ -260,9 +259,6 @@ func checkDBaaSClusterImmutableFields(_ context.Context, diff *schema.ResourceDi
 	if diff.HasChange("credentials") {
 		return fmt.Errorf("credentials %s", ImmutableError)
 	}
-	if diff.HasChange("synchronization_mode") {
-		return fmt.Errorf("synchronization_mode %s", ImmutableError)
-	}
 	if diff.HasChange("from_backup") {
 		return fmt.Errorf("from_backup %s", ImmutableError)
 	}
@@ -270,7 +266,7 @@ func checkDBaaSClusterImmutableFields(_ context.Context, diff *schema.ResourceDi
 
 }
 
-func resourceDbaasPgSqlClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDbaasPgSqlClusterCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(ctx, d.Get("location").(string))
 	if err != nil {
 		return diag.FromErr(err)
@@ -297,7 +293,7 @@ func resourceDbaasPgSqlClusterCreate(ctx context.Context, d *schema.ResourceData
 	return resourceDbaasPgSqlClusterRead(ctx, d, meta)
 }
 
-func resourceDbaasPgSqlClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDbaasPgSqlClusterRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(ctx, d.Get("location").(string))
 	if err != nil {
 		return diag.FromErr(err)
@@ -313,7 +309,7 @@ func resourceDbaasPgSqlClusterRead(ctx context.Context, d *schema.ResourceData, 
 		return diagutil.ToDiags(d, fmt.Errorf("error while fetching dbaas cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	tflog.Info(ctx, "retrieved PgSQL cluster", map[string]interface{}{"cluster_id": d.Id()})
+	tflog.Info(ctx, "retrieved PgSQL cluster", map[string]any{"cluster_id": d.Id()})
 
 	if err := dbaasService.SetPgSqlClusterData(d, cluster, false); err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -322,7 +318,7 @@ func resourceDbaasPgSqlClusterRead(ctx context.Context, d *schema.ResourceData, 
 	return nil
 }
 
-func resourceDbaasPgSqlClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDbaasPgSqlClusterUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(ctx, d.Get("location").(string))
 	if err != nil {
 		return diag.FromErr(err)
@@ -351,7 +347,7 @@ func resourceDbaasPgSqlClusterUpdate(ctx context.Context, d *schema.ResourceData
 	return resourceDbaasPgSqlClusterRead(ctx, d, meta)
 }
 
-func resourceDbaasPgSqlClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDbaasPgSqlClusterDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(ctx, d.Get("location").(string))
 	if err != nil {
 		return diag.FromErr(err)
@@ -378,7 +374,7 @@ func resourceDbaasPgSqlClusterDelete(ctx context.Context, d *schema.ResourceData
 	return nil
 }
 
-func resourceDbaasPgSqlClusterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceDbaasPgSqlClusterImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	importID := d.Id()
 	location, parts := splitImportID(importID, "/")
 	if len(parts) != 1 {
@@ -405,7 +401,7 @@ func resourceDbaasPgSqlClusterImport(ctx context.Context, d *schema.ResourceData
 		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the import of dbaas cluster %q, error:%w", clusterId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	tflog.Info(ctx, "PgSQL cluster imported", map[string]interface{}{"cluster_id": clusterId})
+	tflog.Info(ctx, "PgSQL cluster imported", map[string]any{"cluster_id": clusterId})
 
 	if err := dbaasService.SetPgSqlClusterData(d, dbaasCluster, false); err != nil {
 		return nil, diagutil.ToError(d, err, nil)

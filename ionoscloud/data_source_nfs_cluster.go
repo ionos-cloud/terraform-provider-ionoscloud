@@ -46,6 +46,11 @@ func dataSourceNFSCluster() *schema.Resource {
 				Description: "The size of the NFS Cluster.",
 				Computed:    true,
 			},
+			"size_unit": {
+				Type:        schema.TypeString,
+				Description: "The unit of the size for the NFS Cluster. Can be 'TiB' or 'GiB'.",
+				Computed:    true,
+			},
 			"nfs": {
 				Type:        schema.TypeList,
 				Description: "The NFS properties of the NFS Cluster.",
@@ -94,7 +99,7 @@ func dataSourceNFSCluster() *schema.Resource {
 	}
 }
 
-func dataSourceNFSClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceNFSClusterRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).NFSClient
 	idValue, idOk := d.GetOk("id")
 	nameValue, nameOk := d.GetOk("name")

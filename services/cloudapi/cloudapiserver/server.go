@@ -62,7 +62,7 @@ func (ss *Service) FindById(ctx context.Context, datacenterID, serverID string, 
 	apiResponse.LogInfo()
 	if err != nil {
 		if apiResponse.HttpNotFound() {
-			tflog.Debug(ctx, "cannot find server by id", map[string]interface{}{"datacenter_id": datacenterID, "server_id": serverID})
+			tflog.Debug(ctx, "cannot find server by id", map[string]any{"datacenter_id": datacenterID, "server_id": serverID})
 			return nil, ErrServerNotFound
 		}
 		return nil, err
@@ -227,7 +227,7 @@ func (ss *Service) UpdateBootDevice(ctx context.Context, datacenterID, serverID,
 			if !apiResponse.HttpNotFound() {
 				return err
 			}
-			tflog.Debug(ctx, "no bootable image found", map[string]interface{}{"image_id": newBootDeviceID})
+			tflog.Debug(ctx, "no bootable image found", map[string]any{"image_id": newBootDeviceID})
 			newBdType = constant.BootDeviceTypeVolume
 		}
 	}
@@ -251,7 +251,7 @@ func (ss *Service) UpdateBootDevice(ctx context.Context, datacenterID, serverID,
 				if errState := bundleclient.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutUpdate); errState != nil {
 					return errState
 				}
-				tflog.Debug(ctx, "attached CDROM image to server", map[string]interface{}{"server_id": serverID, "image_id": newBootDeviceID})
+				tflog.Debug(ctx, "attached CDROM image to server", map[string]any{"server_id": serverID, "image_id": newBootDeviceID})
 				// update to new boot cdrom
 				sp := ionoscloud.ServerProperties{BootCdrom: ionoscloud.NewResourceReference(newBootDeviceID)}
 				if _, _, err = ss.Update(ctx, datacenterID, serverID, sp); err != nil {
@@ -267,7 +267,7 @@ func (ss *Service) UpdateBootDevice(ctx context.Context, datacenterID, serverID,
 		if errState := bundleclient.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutUpdate); errState != nil {
 			return errState
 		}
-		tflog.Debug(ctx, "detached CDROM image from server", map[string]interface{}{"server_id": serverID, "image_id": oldBootDeviceID})
+		tflog.Debug(ctx, "detached CDROM image from server", map[string]any{"server_id": serverID, "image_id": oldBootDeviceID})
 
 	case constant.BootDeviceTypeVolume:
 		// no cdrom is detached, only update to the new boot device, regardless of type
@@ -324,7 +324,7 @@ func (ss *Service) Start(ctx context.Context, datacenterID, serverID, serverType
 		if errState := bundleclient.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutUpdate); errState != nil {
 			return fmt.Errorf("an error occurred while waiting for server state change on VM POWER ON dcId: %s, server_id: %s, Response: (%w)", datacenterID, serverID, errState)
 		}
-		tflog.Debug(ctx, "server powered on", map[string]interface{}{"server_type": serverType, "server_id": serverID})
+		tflog.Debug(ctx, "server powered on", map[string]any{"server_type": serverType, "server_id": serverID})
 		return nil
 
 	case constant.CubeType, constant.GpuType:
@@ -339,7 +339,7 @@ func (ss *Service) Start(ctx context.Context, datacenterID, serverID, serverType
 		if errState := bundleclient.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutUpdate); errState != nil {
 			return fmt.Errorf("an error occurred while waiting for server state change on VM RESUME dcId: %s, server_id: %s, Response: (%w)", datacenterID, serverID, errState)
 		}
-		tflog.Debug(ctx, "server unsuspended", map[string]interface{}{"server_type": serverType, "server_id": serverID})
+		tflog.Debug(ctx, "server unsuspended", map[string]any{"server_type": serverType, "server_id": serverID})
 		return nil
 
 	}
@@ -364,7 +364,7 @@ func (ss *Service) Stop(ctx context.Context, datacenterID, serverID, serverType 
 		if errState := bundleclient.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutUpdate); errState != nil {
 			return fmt.Errorf("an error occurred while waiting for server state change on VM SHUTOFF dcId: %s, server_id: %s, Response: (%w)", datacenterID, serverID, errState)
 		}
-		tflog.Debug(ctx, "server powered off", map[string]interface{}{"server_type": serverType, "server_id": serverID})
+		tflog.Debug(ctx, "server powered off", map[string]any{"server_type": serverType, "server_id": serverID})
 		return nil
 
 	case constant.CubeType, constant.GpuType:
@@ -379,7 +379,7 @@ func (ss *Service) Stop(ctx context.Context, datacenterID, serverID, serverType 
 		if errState := bundleclient.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutUpdate); errState != nil {
 			return fmt.Errorf("an error occurred while waiting for server state change on VM SUSPEND dcId: %s, server_id: %s, Response: (%w)", datacenterID, serverID, errState)
 		}
-		tflog.Debug(ctx, "server suspended", map[string]interface{}{"server_type": serverType, "server_id": serverID})
+		tflog.Debug(ctx, "server suspended", map[string]any{"server_type": serverType, "server_id": serverID})
 		return nil
 	}
 
@@ -401,7 +401,7 @@ func (ss *Service) Reboot(ctx context.Context, datacenterID, serverID string) er
 	if errState := bundleclient.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutUpdate); errState != nil {
 		return fmt.Errorf("an error occurred while waiting for server state change on reboot dcId: %s, server_id: %s, Response: (%w)", datacenterID, serverID, errState)
 	}
-	tflog.Debug(ctx, "server reboot finished", map[string]interface{}{"server_id": serverID})
+	tflog.Debug(ctx, "server reboot finished", map[string]any{"server_id": serverID})
 	return nil
 }
 
@@ -427,7 +427,7 @@ func (ss *Service) PxeBoot(ctx context.Context, datacenterID, serverID string) e
 		if errState := bundleclient.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutUpdate); errState != nil {
 			return errState
 		}
-		tflog.Debug(ctx, "unset primary boot volume and performed reboot into PXE shell", map[string]interface{}{"server_id": serverID, "volume_id": deviceID})
+		tflog.Debug(ctx, "unset primary boot volume and performed reboot into PXE shell", map[string]any{"server_id": serverID, "volume_id": deviceID})
 
 	case constant.BootDeviceTypeCDROM:
 		apiResponse, err := ss.Client.ServersApi.DatacentersServersCdromsDelete(ctx, datacenterID, serverID, deviceID).Execute()
@@ -437,7 +437,7 @@ func (ss *Service) PxeBoot(ctx context.Context, datacenterID, serverID string) e
 		if errState := bundleclient.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutUpdate); errState != nil {
 			return errState
 		}
-		tflog.Debug(ctx, "detached CDROM image from server", map[string]interface{}{"server_id": serverID, "image_id": deviceID})
+		tflog.Debug(ctx, "detached CDROM image from server", map[string]any{"server_id": serverID, "image_id": deviceID})
 	}
 
 	return ss.Reboot(ctx, datacenterID, serverID)
@@ -454,7 +454,7 @@ func (ss *Service) checkExpectedVMStateFn(dcID, expectedState string) utils.Reso
 
 		serverType := *server.Properties.Type
 		if !strings.EqualFold(*server.Properties.VmState, expectedState) {
-			tflog.Info(ctx, "server vmState not yet changed", map[string]interface{}{"server_type": serverType, "expected_state": expectedState, "server_id": d.Id()})
+			tflog.Info(ctx, "server vmState not yet changed", map[string]any{"server_type": serverType, "expected_state": expectedState, "server_id": d.Id()})
 			return false, nil
 		}
 		return true, nil

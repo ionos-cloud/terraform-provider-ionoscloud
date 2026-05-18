@@ -1,10 +1,10 @@
 ---
 subcategory: "Autoscaling"
 layout: "ionoscloud"
-page_title: "IonosCloud : autoscaling_group"
+page_title: "IONOS CLOUD : autoscaling_group"
 sidebar_current: "docs-datasource-autoscaling_group"
 description: |-
-  Get information on a IonosCloud Autoscaling Group
+  Get information on a IONOS CLOUD Autoscaling Group
 ---
 
 # ionoscloud_autoscaling_group

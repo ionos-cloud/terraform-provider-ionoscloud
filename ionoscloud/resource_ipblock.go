@@ -97,7 +97,7 @@ func resourceIPBlock() *schema.Resource {
 	}
 }
 
-func resourceIPBlockCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIPBlockCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	size := d.Get("size").(int)
 	sizeConverted := int32(size)
 	location := d.Get("location").(string)
@@ -135,7 +135,7 @@ func resourceIPBlockCreate(ctx context.Context, d *schema.ResourceData, meta int
 	return resourceIPBlockRead(ctx, d, meta)
 }
 
-func resourceIPBlockRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIPBlockRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
@@ -154,7 +154,7 @@ func resourceIPBlockRead(ctx context.Context, d *schema.ResourceData, meta inter
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching an ip block: %w", err), nil)
 	}
 
-	tflog.Info(ctx, "ip block fetched", map[string]interface{}{"ips": strings.Join(*ipBlock.Properties.Ips, ",")})
+	tflog.Info(ctx, "ip block fetched", map[string]any{"ips": strings.Join(*ipBlock.Properties.Ips, ",")})
 
 	if err := IpBlockSetData(d, &ipBlock); err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -162,7 +162,7 @@ func resourceIPBlockRead(ctx context.Context, d *schema.ResourceData, meta inter
 
 	return nil
 }
-func resourceIPBlockUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIPBlockUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
@@ -190,7 +190,7 @@ func resourceIPBlockUpdate(ctx context.Context, d *schema.ResourceData, meta int
 
 }
 
-func resourceIPBlockDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIPBlockDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
@@ -214,7 +214,7 @@ func resourceIPBlockDelete(ctx context.Context, d *schema.ResourceData, meta int
 	return nil
 }
 
-func resourceIpBlockImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceIpBlockImporter(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	importID := d.Id()
 
 	location, parts := splitImportID(importID, ":")
@@ -245,7 +245,7 @@ func resourceIpBlockImporter(ctx context.Context, d *schema.ResourceData, meta i
 
 	}
 
-	tflog.Info(ctx, "ipBlock found", map[string]interface{}{"id": *ipBlock.Id})
+	tflog.Info(ctx, "ipBlock found", map[string]any{"id": *ipBlock.Id})
 
 	d.SetId(*ipBlock.Id)
 
@@ -290,9 +290,9 @@ func IpBlockSetData(d *schema.ResourceData, ipBlock *ionoscloud.IpBlock) error {
 	}
 
 	if ipBlock.Properties.IpConsumers != nil && len(*ipBlock.Properties.IpConsumers) > 0 {
-		var ipConsumers []interface{}
+		var ipConsumers []any
 		for _, ipConsumer := range *ipBlock.Properties.IpConsumers {
-			ipConsumerEntry := make(map[string]interface{})
+			ipConsumerEntry := make(map[string]any)
 			utils.SetPropWithNilCheck(ipConsumerEntry, "ip", ipConsumer.Ip)
 			utils.SetPropWithNilCheck(ipConsumerEntry, "mac", ipConsumer.Mac)
 			utils.SetPropWithNilCheck(ipConsumerEntry, "nic_id", ipConsumer.NicId)

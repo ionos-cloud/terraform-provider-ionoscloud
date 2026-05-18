@@ -109,7 +109,7 @@ func resourceContainerRegistry() *schema.Resource {
 	}
 }
 
-func resourceContainerRegistryCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceContainerRegistryCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(ctx, location)
 	if err != nil {
@@ -136,7 +136,7 @@ func resourceContainerRegistryCreate(ctx context.Context, d *schema.ResourceData
 	return append(warnings, resourceContainerRegistryRead(ctx, d, meta)...)
 }
 
-func resourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(ctx, location)
 	if err != nil {
@@ -152,7 +152,7 @@ func resourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData, 
 		return diagutil.ToDiags(d, fmt.Errorf("error while fetching registry: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	tflog.Info(ctx, "retrieved container registry", map[string]interface{}{"registry_id": d.Id()})
+	tflog.Info(ctx, "retrieved container registry", map[string]any{"registry_id": d.Id()})
 
 	if err := crService.SetRegistryData(d, registry); err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -161,7 +161,7 @@ func resourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData, 
 	return nil
 }
 
-func resourceContainerRegistryUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceContainerRegistryUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(ctx, location)
 	if err != nil {
@@ -193,7 +193,7 @@ func resourceContainerRegistryUpdate(ctx context.Context, d *schema.ResourceData
 	return append(warnings, resourceContainerRegistryRead(ctx, d, meta)...)
 }
 
-func resourceContainerRegistryDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceContainerRegistryDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(ctx, location)
 	if err != nil {
@@ -215,7 +215,7 @@ func resourceContainerRegistryDelete(ctx context.Context, d *schema.ResourceData
 	return diagutil.ToDiags(d, utils.WaitForResourceToBeDeleted(ctx, d, client.IsRegistryDeleted), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String()})
 }
 
-func resourceContainerRegistryImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceContainerRegistryImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	importID := d.Id()
 	location, parts := splitImportID(importID, "/")
 	if len(parts) != 1 {
@@ -242,7 +242,7 @@ func resourceContainerRegistryImport(ctx context.Context, d *schema.ResourceData
 		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the import of registry %q, error:%w", registryId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	tflog.Info(ctx, "container registry imported", map[string]interface{}{"registry_id": registryId})
+	tflog.Info(ctx, "container registry imported", map[string]any{"registry_id": registryId})
 
 	if err := crService.SetRegistryData(d, containerRegistry); err != nil {
 		return nil, diagutil.ToError(d, err, nil)

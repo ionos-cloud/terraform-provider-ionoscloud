@@ -146,7 +146,7 @@ func dataSourceDBaaSInMemoryDBReplicaSet() *schema.Resource {
 	}
 }
 
-func dataSourceReplicaSetRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceReplicaSetRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).InMemoryDBClient
 	id, idOk := d.GetOk("id")
 	displayName, displayNameOk := d.GetOk("display_name")

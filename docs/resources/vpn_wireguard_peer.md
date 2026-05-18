@@ -1,10 +1,10 @@
 ---
 subcategory: "VPN"
 layout: "ionoscloud"
-page_title: "IonosCloud: vpn_wireguard_peer"
+page_title: "IONOS CLOUD: vpn_wireguard_peer"
 sidebar_current: "docs-resource-vpn-wireguard-peer"
 description: |-
-  Creates and manages IonosCloud VPN Wireguard Gateway Peer objects.
+  Creates and manages IONOS CLOUD VPN Wireguard Gateway Peer objects.
 ---
 
 # ionoscloud_vpn_wireguard_peer

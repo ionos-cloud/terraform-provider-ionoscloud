@@ -77,7 +77,7 @@ func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *f
 func (c *Client) ChangeConfigURL(ctx context.Context, location string) {
 	config := c.sdkClient.GetConfig()
 	url := locationToURL[location]
-	tflog.Debug(ctx, "Kafka: endpoint for location", map[string]interface{}{"location": configlog.FormatLocation(location), "url": url})
+	tflog.Debug(ctx, "Kafka: endpoint for location", map[string]any{"location": configlog.FormatLocation(location), "url": url})
 	config.Servers = shared.ServerConfigurations{
 		{
 			URL: url,

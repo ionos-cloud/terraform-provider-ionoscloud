@@ -1,14 +1,14 @@
 ---
 layout: "ionoscloud"
-page_title: "Provider: IonosCloud"
+page_title: "Provider: IONOS CLOUD"
 sidebar_current: "docs-index"
 description: |-
-  A provider for IonosCloud.
+  A provider for IONOS CLOUD.
 ---
 
-# IonosCloud Provider
+# IONOS CLOUD Provider
 
-The IonosCloud provider gives the ability to deploy and configure resources using the IonosCloud APIs.
+The IONOS CLOUD provider gives the ability to deploy and configure resources using the IONOS CLOUD APIs.
 
 Use the navigation to the left to read about the available data sources and resources.
 
@@ -58,7 +58,7 @@ provider "ionoscloud" {
 #  s3_secret_key     =  "your_secret_key"
 ```
 
-⚠️ **Note:** It's NOT usually necessary to set `endpoint` field. The SDKs the terraform uses know how to route requests to the correct endpoints in the API. 
+⚠️ **Note:** It's NOT usually necessary to set `endpoint` field. The SDKs know how to route requests to the correct endpoints in the API. 
 
 You can either explicitly write them in the .tf file or use var.name as in the example above. For setting the var.name, environment variables can be used. The environment variables must be in the format TF_VAR_name and this will be checked last for a value. For example:
 
@@ -283,20 +283,20 @@ The following arguments are supported:
 
 - `retries` - (Deprecated) Number of retries while waiting for a resource to be provisioned. Default value is 50. **Note**: This argument has been deprecated and replaced by the implementation of resource timeouts described below.
 
-- `contract_number` - "To be set only for reseller accounts. Allows to run terraform on a contract number under a reseller account.",
+- `contract_number` - "To be set only for reseller accounts. Allows to provision infrastructure on a contract number under a reseller account.",
 
 - `s3_access_key` - Required for managing IONOS Object Storage resources.
 
 - `s3_secret_key` - Required for managing IONOS Object Storage resources.
 
-- `s3_region` - Optional, defines the region of the Object Storage resource.
+- `s3_region` - Optional, defines the region of the Contract Owned Object Storage resource.
 
 ### Environment Variables
 
 | Environment Variable    | Description                                                                                                                                                               |
 |-------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `IONOS_USERNAME`        | Specify the username used to login, to authenticate against the IONOS Cloud API                                                                                           |
-| `IONOS_PASSWORD`        | Specify the password used to login, to authenticate against the IONOS Cloud API                                                                                           |
+| `IONOS_USERNAME`        | Specify the username used to login, to authenticate against the IONOS CLOUD API                                                                                           |
+| `IONOS_PASSWORD`        | Specify the password used to login, to authenticate against the IONOS CLOUD API                                                                                           |
 | `IONOS_TOKEN`           | Specify the token used to login, if a token is being used instead of username and password                                                                                |
 | `IONOS_API_URL`         | Specify the API URL. It will overwrite the API endpoint default value `api.ionos.com`.  It is not necessary to override this value unless you have special routing config |
 | `IONOS_LOG_LEVEL`       | Specify the Log Level used to log messages. Possible values: Off, Debug, Trace                                                                                            |
@@ -304,7 +304,7 @@ The following arguments are supported:
 | `IONOS_CONTRACT_NUMBER` | Specify the contract number on which you wish to provision. Only valid for reseller accounts, for other types of accounts the header will be ignored                      |
 | `IONOS_S3_ACCESS_KEY`   | Specify the access key used to authenticate against the IONOS Object Storage API                                                                                          |
 | `IONOS_S3_SECRET_KEY`   | Specify the secret key used to authenticate against the IONOS Object Storage API                                                                                          |
-| `IONOS_S3_REGION`       | Region for IONOS Object Storage operations. Default value: eu-central-3. **If you use IONOS_API_URL_OBJECT_STORAGE, `IONOS_S3_REGION` is mandatory**                      |
+| `IONOS_S3_REGION`       | Region for IONOS Contract Owned Object Storage operations. Default value: eu-central-3. **If you use IONOS_API_URL_OBJECT_STORAGE, `IONOS_S3_REGION` is mandatory**       |
 | `IONOS_CONFIG_FILE`     | Specify the path to the YAML configuration file. Default value: `~/.ionos/config.yaml`.                                                                                   |
 | `IONOS_CURRENT_PROFILE` | Specify the current profile to use from the YAML configuration file.                                                                                                      |
 

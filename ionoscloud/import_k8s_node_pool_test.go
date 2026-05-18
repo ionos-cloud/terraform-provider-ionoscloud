@@ -1,5 +1,4 @@
 //go:build all || k8s
-// +build all k8s
 
 package ionoscloud
 

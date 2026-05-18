@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -80,7 +81,7 @@ func DiffExpiryDate(_, old, new string, _ *schema.ResourceData) bool {
 }
 
 // VerifyUnavailableIPs used for DBaaS cluster to check the provided IPs
-func VerifyUnavailableIPs(val interface{}, key string) (warns []string, errs []error) {
+func VerifyUnavailableIPs(val any, key string) (warns []string, errs []error) {
 	v := val.(string)
 	unavailableNetworks := []string{"10.233.64.0/18", "10.233.0.0/18", "10.233.114.0/24"}
 
@@ -132,10 +133,8 @@ func splitImportID(importID, del string) (location string, resourceIDs []string)
 
 // validateImportIDParts checks that all resource IDs within the import identifier are non-empty.
 func validateImportIDParts(parts []string) error {
-	for _, id := range parts {
-		if id == "" {
-			return fmt.Errorf("all parts of the import identifier must be non-empty")
-		}
+	if slices.Contains(parts, "") {
+		return fmt.Errorf("all parts of the import identifier must be non-empty")
 	}
 
 	return nil

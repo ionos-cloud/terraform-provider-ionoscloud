@@ -93,7 +93,7 @@ func resourceNSGFirewallRule() *schema.Resource {
 	}
 }
 
-func resourceNSGFirewallCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNSGFirewallCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	firewall, diags := getFirewallData(d, "", false)
 	if diags != nil {
 		return diags
@@ -124,7 +124,7 @@ func resourceNSGFirewallCreate(ctx context.Context, d *schema.ResourceData, meta
 	return resourceNSGFirewallRead(ctx, d, meta)
 }
 
-func resourceNSGFirewallRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNSGFirewallRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
@@ -137,7 +137,7 @@ func resourceNSGFirewallRead(ctx context.Context, d *schema.ResourceData, meta i
 
 	if err != nil {
 		if httpNotFound(apiResponse) {
-			tflog.Debug(ctx, "nsg firewall rule not found", map[string]interface{}{"datacenter_id": d.Get("datacenter_id").(string), "nsg_id": d.Get("nsg_id").(string), "rule_id": d.Id()})
+			tflog.Debug(ctx, "nsg firewall rule not found", map[string]any{"datacenter_id": d.Get("datacenter_id").(string), "nsg_id": d.Get("nsg_id").(string), "rule_id": d.Id()})
 			d.SetId("")
 			return nil
 		}
@@ -152,7 +152,7 @@ func resourceNSGFirewallRead(ctx context.Context, d *schema.ResourceData, meta i
 	return nil
 }
 
-func resourceNSGFirewallUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNSGFirewallUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	firewall, diags := getFirewallData(d, "", true)
 	if diags != nil {
 		return diags
@@ -182,7 +182,7 @@ func resourceNSGFirewallUpdate(ctx context.Context, d *schema.ResourceData, meta
 	return resourceNSGFirewallRead(ctx, d, meta)
 }
 
-func resourceNSGFirewallDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNSGFirewallDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	dcID := d.Get("datacenter_id").(string)
 	nsgID := d.Get("nsg_id").(string)
 	location := d.Get("location").(string)
@@ -213,7 +213,7 @@ func resourceNSGFirewallDelete(ctx context.Context, d *schema.ResourceData, meta
 	return nil
 }
 
-func resourceNSGFirewallImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceNSGFirewallImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	importID := d.Id()
 
 	location, parts := splitImportID(importID, "/")

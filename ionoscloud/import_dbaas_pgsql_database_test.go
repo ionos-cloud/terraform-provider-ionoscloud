@@ -1,5 +1,4 @@
 //go:build all || dbaas || psql
-// +build all dbaas psql
 
 package ionoscloud
 

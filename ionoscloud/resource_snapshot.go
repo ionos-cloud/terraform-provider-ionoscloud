@@ -131,7 +131,7 @@ func resourceSnapshot() *schema.Resource {
 	}
 }
 
-func resourceSnapshotCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSnapshotCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
@@ -144,15 +144,15 @@ func resourceSnapshotCreate(ctx context.Context, d *schema.ResourceData, meta in
 	snapshot := ionoscloud.NewCreateSnapshot()
 	snapshot.Properties = ionoscloud.NewCreateSnapshotProperties()
 	props := snapshot.Properties
-	props.Name = ionoscloud.ToPtr(name)
+	props.Name = new(name)
 	if v, ok := d.GetOk("description"); ok {
-		props.Description = ionoscloud.ToPtr(v.(string))
+		props.Description = new(v.(string))
 	}
 	if v, ok := d.GetOk("licence_type"); ok {
-		props.LicenceType = ionoscloud.ToPtr(v.(string))
+		props.LicenceType = new(v.(string))
 	}
 	if v, ok := d.GetOk("sec_auth_protection"); ok {
-		props.SecAuthProtection = ionoscloud.ToPtr(v.(bool))
+		props.SecAuthProtection = new(v.(bool))
 	}
 	rsp, apiResponse, err := client.VolumesApi.DatacentersVolumesCreateSnapshotPost(ctx, dcId, volumeId).Snapshot(*snapshot).Execute()
 	logApiRequestTime(apiResponse)
@@ -173,7 +173,7 @@ func resourceSnapshotCreate(ctx context.Context, d *schema.ResourceData, meta in
 	return resourceSnapshotRead(ctx, d, meta)
 }
 
-func resourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
@@ -198,7 +198,7 @@ func resourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta inte
 	return nil
 }
 
-func resourceSnapshotUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSnapshotUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
@@ -212,34 +212,34 @@ func resourceSnapshotUpdate(ctx context.Context, d *schema.ResourceData, meta in
 	input.Name = &name
 
 	if d.HasChange("description") {
-		input.Description = ionoscloud.ToPtr(d.Get("description").(string))
+		input.Description = new(d.Get("description").(string))
 	}
 	if d.HasChange("licence_type") {
-		input.LicenceType = ionoscloud.ToPtr(d.Get("licence_type").(string))
+		input.LicenceType = new(d.Get("licence_type").(string))
 	}
 	if d.HasChange("sec_auth_protection") {
-		input.SecAuthProtection = ionoscloud.ToPtr(d.Get("sec_auth_protection").(bool))
+		input.SecAuthProtection = new(d.Get("sec_auth_protection").(bool))
 	}
 	if d.HasChange("cpu_hot_plug") {
-		input.CpuHotPlug = ionoscloud.ToPtr(d.Get("cpu_hot_plug").(bool))
+		input.CpuHotPlug = new(d.Get("cpu_hot_plug").(bool))
 	}
 	if d.HasChange("nic_hot_plug") {
-		input.NicHotPlug = ionoscloud.ToPtr(d.Get("nic_hot_plug").(bool))
+		input.NicHotPlug = new(d.Get("nic_hot_plug").(bool))
 	}
 	if d.HasChange("nic_hot_unplug") {
-		input.NicHotUnplug = ionoscloud.ToPtr(d.Get("nic_hot_unplug").(bool))
+		input.NicHotUnplug = new(d.Get("nic_hot_unplug").(bool))
 	}
 	if d.HasChange("ram_hot_plug") {
-		input.RamHotPlug = ionoscloud.ToPtr(d.Get("ram_hot_plug").(bool))
+		input.RamHotPlug = new(d.Get("ram_hot_plug").(bool))
 	}
 	if d.HasChange("disc_virtio_hot_plug") {
-		input.DiscVirtioHotPlug = ionoscloud.ToPtr(d.Get("disc_virtio_hot_plug").(bool))
+		input.DiscVirtioHotPlug = new(d.Get("disc_virtio_hot_plug").(bool))
 	}
 	if d.HasChange("disc_virtio_hot_unplug") {
-		input.DiscVirtioHotUnplug = ionoscloud.ToPtr(d.Get("disc_virtio_hot_unplug").(bool))
+		input.DiscVirtioHotUnplug = new(d.Get("disc_virtio_hot_unplug").(bool))
 	}
 	if d.HasChange("require_legacy_bios") {
-		input.RequireLegacyBios = ionoscloud.ToPtr(d.Get("require_legacy_bios").(bool))
+		input.RequireLegacyBios = new(d.Get("require_legacy_bios").(bool))
 	}
 
 	_, apiResponse, err := client.SnapshotsApi.SnapshotsPatch(ctx, d.Id()).Snapshot(input).Execute()
@@ -257,7 +257,7 @@ func resourceSnapshotUpdate(ctx context.Context, d *schema.ResourceData, meta in
 	return resourceSnapshotRead(ctx, d, meta)
 }
 
-func resourceSnapshotDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSnapshotDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
@@ -280,7 +280,7 @@ func resourceSnapshotDelete(ctx context.Context, d *schema.ResourceData, meta in
 	return nil
 }
 
-func resourceSnapshotImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceSnapshotImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	importID := d.Id()
 
 	location, parts := splitImportID(importID, ":")
@@ -309,7 +309,7 @@ func resourceSnapshotImport(ctx context.Context, d *schema.ResourceData, meta in
 		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while retrieving the snapshot %q, %w", snapshotID, err), nil)
 	}
 
-	tflog.Info(ctx, "snapshot found", map[string]interface{}{"import_id": importID})
+	tflog.Info(ctx, "snapshot found", map[string]any{"import_id": importID})
 
 	if err = setSnapshotData(d, &snapshot); err != nil {
 		return nil, diagutil.ToError(d, err, nil)
@@ -429,7 +429,7 @@ func setSnapshotData(d *schema.ResourceData, snapshot *ionoscloud.Snapshot) erro
 
 // check that update-only attributes are not explicitly
 // set during snapshot creation and return an error if any are found.
-func checkSnapshotUpdateOnlyAttrs(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
+func checkSnapshotUpdateOnlyAttrs(_ context.Context, diff *schema.ResourceDiff, _ any) error {
 	// Only validate during creation (no ID yet)
 	if diff.Id() != "" {
 		return nil

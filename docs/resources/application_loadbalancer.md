@@ -1,15 +1,15 @@
 ---
 subcategory: "Application Load Balancer"
 layout: "ionoscloud"
-page_title: "IonosCloud: application_loadbalancer"
+page_title: "IONOS CLOUD: application_loadbalancer"
 sidebar_current: "docs-resource-application_loadbalancer"
 description: |-
-  Creates and manages IonosCloud Application Load Balancer.
+  Creates and manages IONOS CLOUD Application Load Balancer.
 ---
 
 # ionoscloud_application_loadbalancer
 
-Manages an [Application Load Balancer](https://docs.ionos.com/cloud/network-services/application-load-balancer/overview) on IonosCloud.
+Manages an [Application Load Balancer](https://docs.ionos.com/cloud/network-services/application-load-balancer/overview) on IONOS CLOUD.
 
 ## Example Usage
 

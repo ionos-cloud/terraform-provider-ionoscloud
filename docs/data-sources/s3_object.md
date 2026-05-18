@@ -1,7 +1,7 @@
 ---
 subcategory: "Object Storage"
 layout: "ionoscloud"
-page_title: "IonosCloud: s3_object"
+page_title: "IONOS CLOUD: s3_object"
 sidebar_current: "docs-ionoscloud-datasource-s3_object"
 description: |-
   Get information about  IONOS Object Storage Objects.
@@ -13,7 +13,6 @@ The **Object data source** can be used to search for and return existing objects
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
 When this happens, please refine your search string so that it is specific enough to return only one result.
 
-⚠️ **Note:** The Terraform provider **only supports contract-owned buckets. User-owned buckets are not supported,** and there are no plans to introduce support for them. As a result, **user-owned buckets cannot be created, updated, deleted, read, or imported** using this provider.
 
 ## Example Usage
 

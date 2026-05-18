@@ -1,5 +1,4 @@
 //go:build natgateway
-// +build natgateway
 
 package ionoscloud
 

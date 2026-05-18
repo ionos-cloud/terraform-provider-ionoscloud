@@ -35,7 +35,7 @@ func toCtyStringValSlice(s []string) []cty.Value {
 
 // getResourceData returns a resource data mock.
 func getResourceData(t *testing.T, testSchema map[string]*schema.Schema, ipAttr string, ips []string) *schema.ResourceData {
-	var config map[string]interface{}
+	var config map[string]any
 	d := schema.TestResourceDataRaw(t, testSchema, config)
 	if ipAttr != "ips" && ipAttr != "ipv6_ips" {
 		// Error case with an invalid attribute, proper configuration doesn't matter.

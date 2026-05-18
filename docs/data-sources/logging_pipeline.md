@@ -1,7 +1,7 @@
 ---
 subcategory: "Logging Service"
 layout: "ionoscloud"
-page_title: "IonosCloud: ionoscloud_logging_pipeline"
+page_title: "IONOS CLOUD: ionoscloud_logging_pipeline"
 sidebar_current: "docs-resource-logging_pipeline"
 description: |-
   Get information on a Logging pipeline.

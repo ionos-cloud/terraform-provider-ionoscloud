@@ -190,7 +190,7 @@ func tryDisableLegalHold(ctx context.Context, client *objstorage.APIClient, buck
 
 	_, err = client.ObjectLockApi.PutObjectLegalHold(ctx, bucket, key).VersionId(versionID).
 		ObjectLegalHoldConfiguration(objstorage.ObjectLegalHoldConfiguration{
-			Status: shared.ToPtr("OFF"),
+			Status: new("OFF"),
 		}).Execute()
 
 	if err != nil {

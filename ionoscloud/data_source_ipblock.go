@@ -96,7 +96,7 @@ func dataSourceIpBlock() *schema.Resource {
 }
 
 //nolint:gocyclo
-func datasourceIpBlockRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func datasourceIpBlockRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	id, idOk := d.GetOk("id")
 
 	var name, location string
@@ -140,7 +140,7 @@ func datasourceIpBlockRead(ctx context.Context, d *schema.ResourceData, meta int
 					*ipBlock.Id, *ipBlock.Properties.Location, location), nil)
 			}
 		}
-		tflog.Info(ctx, "got ip block", map[string]interface{}{"name": *ipBlock.Properties.Name, "location": *ipBlock.Properties.Location})
+		tflog.Info(ctx, "got ip block", map[string]any{"name": *ipBlock.Properties.Name, "location": *ipBlock.Properties.Location})
 	} else {
 
 		ipBlocks, apiResponse, err := client.IPBlocksApi.IpblocksGet(ctx).Depth(1).Limit(constant.IPBlockLimit).Execute()

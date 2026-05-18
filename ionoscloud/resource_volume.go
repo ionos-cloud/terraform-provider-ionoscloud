@@ -180,7 +180,7 @@ func resourceVolume() *schema.Resource {
 	}
 }
 
-func checkVolumeImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
+func checkVolumeImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ any) error {
 
 	// we do not want to check in case of resource creation
 	if diff.Id() == "" {
@@ -214,7 +214,7 @@ func checkVolumeImmutableFields(_ context.Context, diff *schema.ResourceDiff, _ 
 
 }
 
-func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	var image, imageAlias string
 
 	dcId := d.Get("datacenter_id").(string)
@@ -320,7 +320,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	return resourceVolumeRead(ctx, d, meta)
 }
 
-func resourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	dcId := d.Get("datacenter_id").(string)
 	serverID := d.Get("server_id").(string)
 	volumeID := d.Id()
@@ -358,7 +358,7 @@ func resourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta interf
 	return nil
 }
 
-func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	properties := ionoscloud.VolumeProperties{}
 	dcId := d.Get("datacenter_id").(string)
 	location := d.Get("location").(string)
@@ -438,7 +438,7 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	return resourceVolumeRead(ctx, d, meta)
 }
 
-func resourceVolumeDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVolumeDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	dcId := d.Get("datacenter_id").(string)
 	location := d.Get("location").(string)
 
@@ -464,7 +464,7 @@ func resourceVolumeDelete(ctx context.Context, d *schema.ResourceData, meta inte
 	return nil
 }
 
-func resourceVolumeImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceVolumeImporter(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	importID := d.Id()
 
 	location, parts := splitImportID(importID, "/")
@@ -499,7 +499,7 @@ func resourceVolumeImporter(ctx context.Context, d *schema.ResourceData, meta in
 		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to find the volume %q", volumeId), nil)
 	}
 
-	tflog.Info(ctx, "volume found", map[string]interface{}{"volume_id": *volume.Id, "datacenter_id": dcId})
+	tflog.Info(ctx, "volume found", map[string]any{"volume_id": *volume.Id, "datacenter_id": dcId})
 
 	d.SetId(*volume.Id)
 	if err := d.Set("datacenter_id", dcId); err != nil {
@@ -706,13 +706,13 @@ func getVolumeData(ctx context.Context, d *schema.ResourceData, path, serverType
 		volume.Name = &vStr
 	}
 
-	var sshKeys []interface{}
+	var sshKeys []any
 
 	if serverType != constant.VCPUType {
 		if v, ok := d.GetOk(path + "ssh_key_path"); ok {
-			sshKeys = v.([]interface{})
+			sshKeys = v.([]any)
 		} else if v, ok := d.GetOk("ssh_key_path"); ok {
-			sshKeys = v.([]interface{})
+			sshKeys = v.([]any)
 		} else {
 			if err := d.Set("ssh_key_path", [][]string{}); err != nil {
 				return nil, err
@@ -721,9 +721,9 @@ func getVolumeData(ctx context.Context, d *schema.ResourceData, path, serverType
 	}
 
 	if v, ok := d.GetOk(path + "ssh_keys"); ok {
-		sshKeys = v.([]interface{})
+		sshKeys = v.([]any)
 	} else if v, ok := d.GetOk("ssh_keys"); ok {
-		sshKeys = v.([]interface{})
+		sshKeys = v.([]any)
 	}
 
 	if len(sshKeys) != 0 {
@@ -733,7 +733,7 @@ func getVolumeData(ctx context.Context, d *schema.ResourceData, path, serverType
 				return nil, fmt.Errorf("ssh_keys or ssh_key_path contains empty value")
 			}
 
-			tflog.Debug(ctx, "reading ssh key file", map[string]interface{}{"path": path})
+			tflog.Debug(ctx, "reading ssh key file", map[string]any{"path": path})
 			publicKey, err := utils.ReadPublicKey(ctx, path.(string))
 			if err != nil {
 				return nil, err
@@ -790,12 +790,12 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 			}
 			// if no image id was found with that name we look for a matching snapshot
 			if image == "" {
-				tflog.Debug(ctx, "looking for a snapshot by name", map[string]interface{}{"image_name": imageName})
+				tflog.Debug(ctx, "looking for a snapshot by name", map[string]any{"image_name": imageName})
 				image = getSnapshotId(ctx, client, imageName)
 				if image != "" {
 					isSnapshot = true
 				} else {
-					tflog.Info(ctx, "looking for an image alias", map[string]interface{}{"image_name": imageName})
+					tflog.Info(ctx, "looking for an image alias", map[string]any{"image_name": imageName})
 
 					imageAlias = getImageAlias(ctx, client, imageName, *dc.Properties.Location)
 					if imageAlias == "" {
@@ -849,7 +849,7 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 
 				img, rejectedImg, err := resolveVolumeImageName(ctx, client, imageName, *dc.Properties.Location)
 				if rejectedImg != nil {
-					tflog.Debug(ctx, "image matched by name but filtered out", map[string]interface{}{"name": *rejectedImg.Properties.Name, "type": *rejectedImg.Properties.ImageType, "location": *rejectedImg.Properties.Location})
+					tflog.Debug(ctx, "image matched by name but filtered out", map[string]any{"name": *rejectedImg.Properties.Name, "type": *rejectedImg.Properties.ImageType, "location": *rejectedImg.Properties.Location})
 				}
 
 				if err != nil {
@@ -915,7 +915,7 @@ func getSnapshotId(ctx context.Context, client *ionoscloud.APIClient, snapshotNa
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		tflog.Error(ctx, "error while fetching the list of snapshots", map[string]interface{}{"error": err.Error()})
+		tflog.Error(ctx, "error while fetching the list of snapshots", map[string]any{"error": err.Error()})
 	}
 
 	if len(*snapshots.Items) > 0 {
@@ -940,14 +940,14 @@ func getImageAlias(ctx context.Context, client *ionoscloud.APIClient, imageAlias
 	}
 	parts := strings.SplitN(location, "/", 2)
 	if len(parts) != 2 {
-		tflog.Error(ctx, "invalid location id", map[string]interface{}{"location": location})
+		tflog.Error(ctx, "invalid location id", map[string]any{"location": location})
 	}
 
 	locations, apiResponse, err := client.LocationsApi.LocationsFindByRegionIdAndId(ctx, parts[0], parts[1]).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		tflog.Error(ctx, "error while fetching the list of locations", map[string]interface{}{"error": err.Error()})
+		tflog.Error(ctx, "error while fetching the list of locations", map[string]any{"error": err.Error()})
 	}
 
 	if len(*locations.Properties.ImageAliases) > 0 {
@@ -975,7 +975,7 @@ func resolveVolumeImageName(ctx context.Context, client *ionoscloud.APIClient, i
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		tflog.Error(ctx, "error while fetching the list of images", map[string]interface{}{"error": err.Error()})
+		tflog.Error(ctx, "error while fetching the list of images", map[string]any{"error": err.Error()})
 		return nil, nil, err
 	}
 

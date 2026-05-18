@@ -55,7 +55,7 @@ func (c *Client) ChangeConfigURL(ctx context.Context, location string) {
 	config := c.sdkClient.GetConfig()
 	if location == "" && os.Getenv(ionosAPIURLLogging) != "" {
 		url := utils.CleanURL(os.Getenv(ionosAPIURLLogging))
-		tflog.Debug(ctx, "Logging: endpoint from env", map[string]interface{}{"env": ionosAPIURLLogging, "url": url})
+		tflog.Debug(ctx, "Logging: endpoint from env", map[string]any{"env": ionosAPIURLLogging, "url": url})
 		c.GetConfig().Servers = shared.ServerConfigurations{
 			{
 				URL: url,
@@ -65,7 +65,7 @@ func (c *Client) ChangeConfigURL(ctx context.Context, location string) {
 	}
 	for _, server := range config.Servers {
 		if strings.EqualFold(server.Description, shared.EndpointOverridden+location) || strings.EqualFold(server.URL, locationToURL[location]) {
-			tflog.Debug(ctx, "Logging: endpoint for location", map[string]interface{}{"location": configlog.FormatLocation(location), "url": server.URL})
+			tflog.Debug(ctx, "Logging: endpoint for location", map[string]any{"location": configlog.FormatLocation(location), "url": server.URL})
 			config.Servers = shared.ServerConfigurations{
 				{
 					URL:         server.URL,
@@ -75,7 +75,7 @@ func (c *Client) ChangeConfigURL(ctx context.Context, location string) {
 			return
 		}
 	}
-	tflog.Debug(ctx, "Logging: endpoint for location", map[string]interface{}{"location": configlog.FormatLocation(location), "url": locationToURL[location]})
+	tflog.Debug(ctx, "Logging: endpoint for location", map[string]any{"location": configlog.FormatLocation(location), "url": locationToURL[location]})
 }
 
 var (

@@ -1,5 +1,4 @@
 //go:build all || waiting_for_vdc
-// +build all waiting_for_vdc
 
 package ionoscloud
 

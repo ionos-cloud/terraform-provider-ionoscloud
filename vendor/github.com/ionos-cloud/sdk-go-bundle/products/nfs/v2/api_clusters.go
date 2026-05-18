@@ -3,7 +3,7 @@
  *
  * The RESTful API for managing Network File Storage.
  *
- * API version: 0.1.3
+ * API version: 0.1.6
  * Contact: support@cloud.ionos.com
  */
 
@@ -41,9 +41,9 @@ func (r ApiClustersDeleteRequest) Execute() (*shared.APIResponse, error) {
 
 /*
  * ClustersDelete Delete Cluster
- * Deletes the specified cluster.
+ * Deletes the specified Cluster.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param clusterId The identifier (UUID) of the cluster.
+ * @param clusterId The ID (UUID) of the Cluster.
  * @return ApiClustersDeleteRequest
  */
 func (a *ClustersApiService) ClustersDelete(ctx _context.Context, clusterId string) ApiClustersDeleteRequest {
@@ -225,9 +225,9 @@ func (r ApiClustersFindByIdRequest) Execute() (ClusterRead, *shared.APIResponse,
 
 /*
  * ClustersFindById Retrieve Cluster
- * Returns cluster details by ID.
+ * Returns the Cluster by ID.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param clusterId The identifier (UUID) of the cluster.
+ * @param clusterId The ID (UUID) of the Cluster.
  * @return ApiClustersFindByIdRequest
  */
 func (a *ClustersApiService) ClustersFindById(ctx _context.Context, clusterId string) ApiClustersFindByIdRequest {
@@ -425,12 +425,14 @@ func (r ApiClustersGetRequest) Execute() (ClusterReadList, *shared.APIResponse, 
 }
 
 /*
-* ClustersGet Retrieve Clusters
-* Retrieve Network File Storage clusters with pagination and optional filters.
+  - ClustersGet Retrieve all Clusters
+  - This endpoint enables retrieving all Clusters using
 
-* @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-* @return ApiClustersGetRequest
- */
+pagination and optional filters.
+
+  - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+  - @return ApiClustersGetRequest
+*/
 func (a *ClustersApiService) ClustersGet(ctx _context.Context) ApiClustersGetRequest {
 	return ApiClustersGetRequest{
 		ApiService: a,
@@ -615,10 +617,10 @@ func (r ApiClustersPostRequest) Execute() (ClusterRead, *shared.APIResponse, err
 
 /*
   - ClustersPost Create Cluster
-  - Creates a new Network File Storage cluster.
+  - Creates a new Cluster.
 
-The complete cluster configuration must be provided to create the resource.
-Optional data will be filled with default values or left empty.
+The full Cluster needs to be provided to create the object.
+Optional data will be filled with defaults or left empty.
 
   - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
   - @return ApiClustersPostRequest
@@ -822,10 +824,12 @@ func (r ApiClustersPutRequest) Execute() (ClusterRead, *shared.APIResponse, erro
 
 /*
   - ClustersPut Ensure Cluster
-  - Ensures that the cluster with the provided identifier is created or modified.
+  - Ensures that the Cluster with the provided ID is created or modified.
 
-The complete cluster configuration must be provided to update or create the cluster.
-Any missing data will be filled with default values or left empty, without considering previous values.
+The full Cluster needs to be provided to ensure
+(either update or create) the Cluster. Non present data will
+only be filled with defaults or left empty, but not take
+previous values into consideration.
 
   - @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
   - @param clusterId The ID (UUID) of the Cluster.

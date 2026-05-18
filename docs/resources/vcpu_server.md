@@ -1,15 +1,15 @@
 ---
 subcategory: "Compute Engine"
 layout: "ionoscloud"
-page_title: "IonosCloud: ionoscloud_vcpu_server"
+page_title: "IONOS CLOUD: ionoscloud_vcpu_server"
 sidebar_current: "docs-resource-vcpu-server"
 description: |-
-  Creates and manages IonosCloud VCPU Server objects.
+  Creates and manages IONOS CLOUD VCPU Server objects.
 ---
 
 # ionoscloud_vcpu_server
 
-A [vCPU Server](https://docs.ionos.com/cloud/compute-services/compute-engine/vcpu-server) that you create is a new Virtual Machine (VM) provisioned and hosted in one of IONOS' physical data centers. A vCPU Server behaves exactly like physical servers and you can use them either standalone or in combination with other IONOS Cloud products.
+A [vCPU Server](https://docs.ionos.com/cloud/compute-services/compute-engine/vcpu-server) that you create is a new Virtual Machine (VM) provisioned and hosted in one of IONOS' physical data centers. A vCPU Server behaves exactly like physical servers and you can use them either standalone or in combination with other IONOS CLOUD products.
 
 These servers are configured with virtual CPUs and distributed among multiple users sharing the same physical server. The performance of your vCPU Server relies on various factors, including the underlying CPU of the physical server, VM configurations, and the current load on the physical server.
 
@@ -113,7 +113,7 @@ resource "random_password" "server_image_password" {
 - `primary_ip` - (Computed) The associated IP address.
 - `firewallrule_id` - (Computed) The associated firewall rule.
 - `firewallrule_ids` - (Computed) The associated firewall rules.
-- `ssh_keys` - (Optional)[list] Immutable List of absolute or relative paths to files containing public SSH key that will be injected into IonosCloud provided Linux images. Also accepts ssh keys directly. Public SSH keys are set on the image as authorized keys for appropriate SSH login to the instance using the corresponding private key. This field may only be set in creation requests. When reading, it always returns null. SSH keys are only supported if a public Linux image is used for the volume creation. Does not support `~` expansion to homedir in the given path.
+- `ssh_keys` - (Optional)[list] Immutable List of absolute or relative paths to files containing public SSH key that will be injected into IONOS CLOUD provided Linux images. Also accepts ssh keys directly. Public SSH keys are set on the image as authorized keys for appropriate SSH login to the instance using the corresponding private key. This field may only be set in creation requests. When reading, it always returns null. SSH keys are only supported if a public Linux image is used for the volume creation. Does not support `~` expansion to homedir in the given path.
 - `image_password` - (Optional)[string] The password for the image.
 - `label` - (Optional) A label can be seen as an object with only two required fields: `key` and `value`, both of the `string` type. Please check the example presented above to see how a `label` can be used in the plan. A server can have multiple labels.
 - `inline_volume_ids` - (Computed) A list with the IDs for the volumes that are defined inside the server resource.

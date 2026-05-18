@@ -109,7 +109,7 @@ func dataSourceNSG() *schema.Resource {
 	}
 }
 
-func dataSourceNSGRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceNSGRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	datacenterID := d.Get("datacenter_id").(string)
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")

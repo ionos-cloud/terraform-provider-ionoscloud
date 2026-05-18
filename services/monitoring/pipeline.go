@@ -63,7 +63,7 @@ func (c *Client) IsPipelineReady(ctx context.Context, pipelineID, location strin
 	if err != nil {
 		return backoff.Permanent(err)
 	}
-	tflog.Debug(ctx, "monitoring pipeline state", map[string]interface{}{"status": pipeline.Metadata.Status})
+	tflog.Debug(ctx, "monitoring pipeline state", map[string]any{"status": pipeline.Metadata.Status})
 
 	if strings.EqualFold(pipeline.Metadata.Status, constant.Available) {
 		return nil

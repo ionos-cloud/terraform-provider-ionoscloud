@@ -1,7 +1,7 @@
 ---
 subcategory: "NAT Gateway"
 layout: "ionoscloud"
-page_title: "IonosCloud: natgateway_rule"
+page_title: "IONOS CLOUD: natgateway_rule"
 sidebar_current: "docs-resource-natgateway_rule"
 description: |-
   Creates and manages Nat Gateway Rule objects.
@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_natgateway_rule
 
-Manages a **Nat Gateway Rule** on IonosCloud.
+Manages a **Nat Gateway Rule** on IONOS CLOUD.
 
 ## Example Usage
 

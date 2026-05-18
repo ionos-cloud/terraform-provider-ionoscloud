@@ -104,7 +104,7 @@ func dataSourceSnapshot() *schema.Resource {
 	}
 }
 
-func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")
 	location, locationOk := d.GetOk("location")
@@ -139,7 +139,7 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta in
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching IonosCloud locations %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching IONOS CLOUD locations %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 
 		if snapshots.Items != nil {

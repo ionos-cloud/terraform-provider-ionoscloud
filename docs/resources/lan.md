@@ -1,7 +1,7 @@
 ---
 subcategory: "Compute Engine"
 layout: "ionoscloud"
-page_title: "IonosCloud: lan"
+page_title: "IONOS CLOUD: lan"
 sidebar_current: "docs-resource-lan"
 description: |-
   Creates and manages LAN objects.
@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_lan
 
-Manages a **LAN** on IonosCloud.
+Manages a **LAN** on IONOS CLOUD.
 
 ## Example Usage
 

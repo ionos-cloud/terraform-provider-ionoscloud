@@ -45,7 +45,7 @@ func dataSourceObjectStorageKey() *schema.Resource {
 	}
 }
 
-func dataSourceObjectStorageKeyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceObjectStorageKeyRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 
 	userIDItf, idOk := d.GetOk("user_id")
 	if !idOk {

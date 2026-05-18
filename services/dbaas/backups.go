@@ -30,10 +30,10 @@ func SetPgSqlClusterBackupData(d *schema.ResourceData, clusterBackups *psql.Clus
 	d.SetId(resourceId.String())
 
 	if clusterBackups.Items != nil {
-		var backups []interface{}
+		var backups []any
 		for _, backup := range clusterBackups.Items {
 
-			backupEntry := make(map[string]interface{})
+			backupEntry := make(map[string]any)
 			if backup.Id != nil {
 				backupEntry["id"] = *backup.Id
 			}
@@ -71,9 +71,9 @@ func SetPgSqlClusterBackupData(d *schema.ResourceData, clusterBackups *psql.Clus
 			}
 
 			if backup.Metadata != nil {
-				var metadata []interface{}
+				var metadata []any
 
-				metadataEntry := make(map[string]interface{})
+				metadataEntry := make(map[string]any)
 
 				if backup.Metadata.CreatedDate != nil {
 					metadataEntry["created_date"] = (*backup.Metadata.CreatedDate).Time.Format("2006-01-02T15:04:05Z")

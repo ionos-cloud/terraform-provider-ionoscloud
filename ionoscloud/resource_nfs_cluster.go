@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/nfs/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
@@ -89,12 +90,19 @@ func resourceNFSCluster() *schema.Resource {
 				Description: "The size of the Network File Storage Cluster. Minimum size is 2.",
 				Required:    true,
 			},
+			"size_unit": {
+				Type:         schema.TypeString,
+				Description:  "The unit of the 'size' attribute. Can be 'TiB' or 'GiB'. Defaults to 'TiB'.",
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.StringInSlice([]string{"TiB", "GiB"}, false),
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
 }
 
-func resourceNFSClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNFSClusterCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).NFSClient
 
 	response, apiResponse, err := client.CreateNFSCluster(ctx, d)
@@ -113,7 +121,7 @@ func resourceNFSClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 	return nil
 }
 
-func resourceNFSClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNFSClusterUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).NFSClient
 
 	response, apiResponse, err := client.UpdateNFSCluster(ctx, d)
@@ -130,7 +138,7 @@ func resourceNFSClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	return nil
 }
 
-func resourceNFSClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNFSClusterDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).NFSClient
 	clusterID := d.Id()
 	apiResponse, err := client.DeleteNFSCluster(ctx, d)
@@ -144,7 +152,7 @@ func resourceNFSClusterDelete(ctx context.Context, d *schema.ResourceData, meta 
 	return nil
 }
 
-func resourceNFSClusterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceNFSClusterImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	client := meta.(bundleclient.SdkBundle).NFSClient
 	parts := strings.Split(d.Id(), ":")
 	if len(parts) != 2 {
@@ -172,7 +180,7 @@ func resourceNFSClusterImport(ctx context.Context, d *schema.ResourceData, meta 
 	return []*schema.ResourceData{d}, nil
 }
 
-func resourceNFSClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNFSClusterRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).NFSClient
 	cluster, err := findCluster(ctx, d, d.Id(), d.Get("location").(string), client)
 	if err != nil {
@@ -195,6 +203,6 @@ func findCluster(ctx context.Context, d *schema.ResourceData, id, location strin
 		return ionoscloud.ClusterRead{},
 			fmt.Errorf("couldn't find NFS Cluster %s in %s: %w", id, location, err)
 	}
-	tflog.Info(ctx, "NFS cluster found", map[string]interface{}{"cluster_id": id, "location": location})
+	tflog.Info(ctx, "NFS cluster found", map[string]any{"cluster_id": id, "location": location})
 	return cluster, nil
 }

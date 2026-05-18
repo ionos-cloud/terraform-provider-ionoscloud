@@ -84,7 +84,7 @@ func resourceKafkaTopic() *schema.Resource {
 		Timeouts: &resourceDefaultTimeouts,
 	}
 }
-func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).KafkaClient
 
 	createdTopic, apiResponse, err := client.CreateTopic(ctx, d)
@@ -94,7 +94,7 @@ func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	d.SetId(createdTopic.Id)
-	tflog.Info(ctx, "created Kafka cluster topic", map[string]interface{}{"topic_id": d.Id()})
+	tflog.Info(ctx, "created Kafka cluster topic", map[string]any{"topic_id": d.Id()})
 
 	// Sleep for 5 second to avoid 500 error from the API
 	time.Sleep(5 * time.Second)
@@ -107,7 +107,7 @@ func resourceKafkaTopicCreate(ctx context.Context, d *schema.ResourceData, meta 
 	return resourceKafkaTopicRead(ctx, d, meta)
 }
 
-func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).KafkaClient
 	topicID := d.Id()
 	clusterID := d.Get("cluster_id").(string)
@@ -122,7 +122,7 @@ func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, meta in
 		return diagutil.ToDiags(d, fmt.Errorf("error while fetching Kafka Cluster Topic: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	tflog.Info(ctx, "retrieved Kafka cluster topic", map[string]interface{}{"topic_id": d.Id()})
+	tflog.Info(ctx, "retrieved Kafka cluster topic", map[string]any{"topic_id": d.Id()})
 
 	if err := client.SetKafkaTopicData(d, &topic); err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -131,7 +131,7 @@ func resourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, meta in
 	return nil
 }
 
-func resourceKafkaTopicDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceKafkaTopicDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).KafkaClient
 	topicID := d.Id()
 	clusterID := d.Get("cluster_id").(string)
@@ -156,7 +156,7 @@ func resourceKafkaTopicDelete(ctx context.Context, d *schema.ResourceData, meta 
 	return nil
 }
 
-func resourceKafkaTopicImport(ctx context.Context, d *schema.ResourceData, meta interface{}) (
+func resourceKafkaTopicImport(ctx context.Context, d *schema.ResourceData, meta any) (
 	[]*schema.ResourceData, error,
 ) {
 	parts := strings.Split(d.Id(), ":")

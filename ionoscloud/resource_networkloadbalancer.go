@@ -105,7 +105,7 @@ and log the extent to which your instances are being accessed.`,
 	}
 }
 
-func resourceNetworkLoadBalancerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkLoadBalancerCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
@@ -148,7 +148,7 @@ func resourceNetworkLoadBalancerCreate(ctx context.Context, d *schema.ResourceDa
 	}
 
 	if ipsVal, ipsOk := d.GetOk("ips"); ipsOk {
-		ipsVal := ipsVal.([]interface{})
+		ipsVal := ipsVal.([]any)
 		if ipsVal != nil {
 			ips := make([]string, len(ipsVal), len(ipsVal))
 			for idx := range ipsVal {
@@ -159,7 +159,7 @@ func resourceNetworkLoadBalancerCreate(ctx context.Context, d *schema.ResourceDa
 	}
 
 	if lbPrivateIpsVal, lbPrivateIpsOk := d.GetOk("lb_private_ips"); lbPrivateIpsOk {
-		lbPrivateIpsVal := lbPrivateIpsVal.([]interface{})
+		lbPrivateIpsVal := lbPrivateIpsVal.([]any)
 		if lbPrivateIpsVal != nil {
 			lbPrivateIps := make([]string, len(lbPrivateIpsVal), len(lbPrivateIpsVal))
 			for idx := range lbPrivateIpsVal {
@@ -177,7 +177,7 @@ func resourceNetworkLoadBalancerCreate(ctx context.Context, d *schema.ResourceDa
 		}
 		if flowLogList, ok := flowLogs.([]any); ok {
 			for _, flowLogData := range flowLogList {
-				if flowLog, ok := flowLogData.(map[string]interface{}); ok {
+				if flowLog, ok := flowLogData.(map[string]any); ok {
 					*networkLoadBalancer.Entities.Flowlogs.Items = append(*networkLoadBalancer.Entities.Flowlogs.Items, cloudapiflowlog.GetFlowlogFromMap(flowLog))
 				}
 			}
@@ -207,7 +207,7 @@ func resourceNetworkLoadBalancerCreate(ctx context.Context, d *schema.ResourceDa
 	return resourceNetworkLoadBalancerRead(ctx, d, meta)
 }
 
-func resourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
@@ -220,14 +220,14 @@ func resourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceData
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		tflog.Info(ctx, "network load balancer not found", map[string]interface{}{"nlb_id": d.Id(), "error": err.Error()})
+		tflog.Info(ctx, "network load balancer not found", map[string]any{"nlb_id": d.Id(), "error": err.Error()})
 		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil
 		}
 	}
 
-	tflog.Info(ctx, "retrieved network load balancer", map[string]interface{}{"nlb_id": d.Id()})
+	tflog.Info(ctx, "retrieved network load balancer", map[string]any{"nlb_id": d.Id()})
 
 	if err := setNetworkLoadBalancerData(d, &networkLoadBalancer); err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -236,7 +236,7 @@ func resourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceData
 	return nil
 }
 
-func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
@@ -280,8 +280,8 @@ func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceDa
 
 	if d.HasChange("ips") {
 		oldIps, newIps := d.GetChange("ips")
-		tflog.Info(ctx, "network load balancer ips changed", map[string]interface{}{"old": oldIps, "new": newIps})
-		ipsVal := newIps.([]interface{})
+		tflog.Info(ctx, "network load balancer ips changed", map[string]any{"old": oldIps, "new": newIps})
+		ipsVal := newIps.([]any)
 		ips := make([]string, 0)
 		if ipsVal != nil {
 			for _, ip := range ipsVal {
@@ -297,8 +297,8 @@ func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceDa
 
 	if d.HasChange("lb_private_ips") {
 		oldLbPrivateIps, newLbPrivateIps := d.GetChange("lb_private_ips")
-		tflog.Info(ctx, "network load balancer lb_private_ips changed", map[string]interface{}{"old": oldLbPrivateIps, "new": newLbPrivateIps})
-		lbPrivateIpsVal := newLbPrivateIps.([]interface{})
+		tflog.Info(ctx, "network load balancer lb_private_ips changed", map[string]any{"old": oldLbPrivateIps, "new": newLbPrivateIps})
+		lbPrivateIpsVal := newLbPrivateIps.([]any)
 		lbPrivateIps := make([]string, 0)
 		if lbPrivateIpsVal != nil {
 			for _, privateIp := range lbPrivateIpsVal {
@@ -356,7 +356,7 @@ func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceDa
 	return resourceNetworkLoadBalancerRead(ctx, d, meta)
 }
 
-func resourceNetworkLoadBalancerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkLoadBalancerDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
@@ -383,7 +383,7 @@ func resourceNetworkLoadBalancerDelete(ctx context.Context, d *schema.ResourceDa
 	return nil
 }
 
-func resourceNetworkLoadBalancerImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceNetworkLoadBalancerImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	importID := d.Id()
 
 	location, parts := splitImportID(importID, "/")
@@ -410,7 +410,7 @@ func resourceNetworkLoadBalancerImport(ctx context.Context, d *schema.ResourceDa
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		tflog.Info(ctx, "network load balancer not found on import", map[string]interface{}{"nlb_id": networkLoadBalancerId, "error": err.Error()})
+		tflog.Info(ctx, "network load balancer not found on import", map[string]any{"nlb_id": networkLoadBalancerId, "error": err.Error()})
 		if httpNotFound(apiResponse) {
 			d.SetId("")
 			return nil, diagutil.ToError(d, fmt.Errorf("unable to find network load balancer %q", networkLoadBalancerId), nil)

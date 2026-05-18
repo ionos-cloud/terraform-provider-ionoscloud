@@ -1,7 +1,7 @@
 ---
 subcategory: "Cloud DNS"
 layout: "ionoscloud"
-page_title: "IonosCloud : ionoscloud_dns_reverse_record"
+page_title: "IONOS CLOUD : ionoscloud_dns_reverse_record"
 sidebar_current: "docs-dns_reverse_record"
 description: |-
   Get information on a DNS Reverse Record.

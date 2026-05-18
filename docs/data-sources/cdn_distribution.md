@@ -1,7 +1,7 @@
 ---
 subcategory: "CDN"
 layout: "ionoscloud"
-page_title: "IonosCloud : ionoscloud_cdn_distribution"
+page_title: "IONOS CLOUD : ionoscloud_cdn_distribution"
 sidebar_current: "docs-ionoscloud_cdn_distribution"
 description: |-
   Get information on an CDN Distribution

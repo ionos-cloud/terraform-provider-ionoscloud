@@ -121,7 +121,7 @@ func resourceLoggingPipeline() *schema.Resource {
 	}
 }
 
-func pipelineCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func pipelineCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).LoggingClient
 	pipelineResponse, apiResponse, err := client.CreatePipeline(ctx, d)
 	if err != nil {
@@ -143,7 +143,7 @@ func pipelineCreate(ctx context.Context, d *schema.ResourceData, meta interface{
 	return pipelineRead(ctx, d, meta)
 }
 
-func pipelineRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func pipelineRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).LoggingClient
 	pipelineID := d.Id()
 	location := ""
@@ -153,14 +153,14 @@ func pipelineRead(ctx context.Context, d *schema.ResourceData, meta interface{})
 	pipeline, apiResponse, err := client.GetPipelineByID(ctx, location, pipelineID)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
-			tflog.Info(ctx, "logging pipeline not found", map[string]interface{}{"pipeline_id": pipelineID})
+			tflog.Info(ctx, "logging pipeline not found", map[string]any{"pipeline_id": pipelineID})
 			d.SetId("")
 			return nil
 		}
 		return diagutil.ToDiags(d, fmt.Errorf("error while fetching Logging pipeline: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	tflog.Info(ctx, "retrieved logging pipeline", map[string]interface{}{"pipeline_id": pipelineID})
+	tflog.Info(ctx, "retrieved logging pipeline", map[string]any{"pipeline_id": pipelineID})
 	if err := client.SetPipelineData(d, pipeline); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
@@ -168,7 +168,7 @@ func pipelineRead(ctx context.Context, d *schema.ResourceData, meta interface{})
 	return nil
 }
 
-func pipelineDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func pipelineDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).LoggingClient
 	pipelineID := d.Id()
 	location := d.Get("location").(string)
@@ -188,7 +188,7 @@ func pipelineDelete(ctx context.Context, d *schema.ResourceData, meta interface{
 	return nil
 }
 
-func pipelineUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func pipelineUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).LoggingClient
 	pipelineID := d.Id()
 
@@ -206,7 +206,7 @@ func pipelineUpdate(ctx context.Context, d *schema.ResourceData, meta interface{
 	return nil
 }
 
-func pipelineImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func pipelineImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), ":")
 	if len(parts) != 2 {
 		return nil, diagutil.ToError(d, fmt.Errorf("expected ID in the format location:id"), nil)

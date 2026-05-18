@@ -1,10 +1,10 @@
 ---
 subcategory: "Compute Engine"
 layout: "ionoscloud"
-page_title: "IonosCloud : datacenter"
+page_title: "IONOS CLOUD : datacenter"
 sidebar_current: "docs-datasource-datacenter"
 description: |-
-  Get information on a IonosCloud Data Centers
+  Get information on a IONOS CLOUD Data Centers
 ---
 
 # ionoscloud_datacenter

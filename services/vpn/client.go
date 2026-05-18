@@ -75,7 +75,7 @@ func (c *Client) ChangeConfigURL(ctx context.Context, location string) {
 	config := c.sdkClient.GetConfig()
 	if location == "" && os.Getenv(ionosAPIURLVPN) != "" {
 		url := utils.CleanURL(os.Getenv(ionosAPIURLVPN))
-		tflog.Debug(ctx, "VPN: endpoint from env", map[string]interface{}{"env": ionosAPIURLVPN, "url": url})
+		tflog.Debug(ctx, "VPN: endpoint from env", map[string]any{"env": ionosAPIURLVPN, "url": url})
 		config.Servers = shared.ServerConfigurations{
 			{
 				URL: url,
@@ -85,7 +85,7 @@ func (c *Client) ChangeConfigURL(ctx context.Context, location string) {
 	}
 
 	url := locationToURL[location]
-	tflog.Debug(ctx, "VPN: endpoint for location", map[string]interface{}{"location": configlog.FormatLocation(location), "url": url})
+	tflog.Debug(ctx, "VPN: endpoint for location", map[string]any{"location": configlog.FormatLocation(location), "url": url})
 	config.Servers = shared.ServerConfigurations{
 		{
 			URL: url,

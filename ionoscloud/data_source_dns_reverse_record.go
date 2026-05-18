@@ -54,7 +54,7 @@ func dataSourceDNSReverseRecord() *schema.Resource {
 	}
 }
 
-func dataSourceReverseRecordRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceReverseRecordRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).DNSClient
 	partialMatch := d.Get("partial_match").(bool)
 	idValue, idOk := d.GetOk("id")
@@ -100,7 +100,7 @@ func dataSourceReverseRecordRead(ctx context.Context, d *schema.ResourceData, me
 
 		var results []dns.ReverseRecordRead
 		if nameOk {
-			tflog.Info(ctx, "searching DNS reverse record by name", map[string]interface{}{"name": recordName, "partial_match": partialMatch})
+			tflog.Info(ctx, "searching DNS reverse record by name", map[string]any{"name": recordName, "partial_match": partialMatch})
 			if partialMatch {
 				// In order to have an exact name match, we must retrieve all the DNS Reverse Records and then
 				// build a list of partial matches based on the response

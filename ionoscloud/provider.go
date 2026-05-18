@@ -31,25 +31,25 @@ func Provider() *schema.Provider {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc(ionoscloud.IonosUsernameEnvVar, nil),
-				Description: "IonosCloud username for API operations. If token is provided, token is preferred",
+				Description: "IONOS CLOUD username for API operations. If token is provided, token is preferred",
 			},
 			"password": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc(ionoscloud.IonosPasswordEnvVar, nil),
-				Description: "IonosCloud password for API operations. If token is provided, token is preferred",
+				Description: "IONOS CLOUD password for API operations. If token is provided, token is preferred",
 			},
 			"token": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc(ionoscloud.IonosTokenEnvVar, nil),
-				Description: "IonosCloud bearer token for API operations.",
+				Description: "IONOS CLOUD bearer token for API operations.",
 			},
 			"endpoint": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc(ionoscloud.IonosApiUrlEnvVar, ""),
-				Description: "IonosCloud REST API URL. Usually not necessary to be set, SDKs know internally how to route requests to the API.",
+				Description: "IONOS CLOUD REST API URL. Usually not necessary to be set, SDKs know internally how to route requests to the API.",
 			},
 			"retries": {
 				Type:       schema.TypeInt,
@@ -80,7 +80,7 @@ func Provider() *schema.Provider {
 				Optional:    true,
 				Default:     constant.DefaultS3Region,
 				DefaultFunc: schema.EnvDefaultFunc("IONOS_S3_REGION", nil),
-				Description: "Region for IONOS Object Storage operations.",
+				Description: "Region for IONOS Contract Owned Object Storage operations.",
 			},
 			"insecure": {
 				Type:        schema.TypeBool,
@@ -226,7 +226,7 @@ func Provider() *schema.Provider {
 		},
 	}
 
-	provider.ConfigureContextFunc = func(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
+	provider.ConfigureContextFunc = func(ctx context.Context, d *schema.ResourceData) (any, diag.Diagnostics) {
 
 		terraformVersion := provider.TerraformVersion
 
@@ -236,7 +236,7 @@ func Provider() *schema.Provider {
 			terraformVersion = "0.11+compatible"
 		}
 
-		tflog.Debug(ctx, "setting terraformVersion", map[string]interface{}{"terraform_version": terraformVersion})
+		tflog.Debug(ctx, "setting terraformVersion", map[string]any{"terraform_version": terraformVersion})
 
 		return providerConfigure(ctx, d, terraformVersion)
 	}
@@ -244,7 +244,7 @@ func Provider() *schema.Provider {
 	return provider
 }
 
-func providerConfigure(ctx context.Context, d *schema.ResourceData, terraformVersion string) (interface{}, diag.Diagnostics) {
+func providerConfigure(ctx context.Context, d *schema.ResourceData, terraformVersion string) (any, diag.Diagnostics) {
 	usernameItf, usernameOk := d.GetOk("username")
 	passwordItf, passwordOk := d.GetOk("password")
 	tokenItf, tokenOk := d.GetOk("token")

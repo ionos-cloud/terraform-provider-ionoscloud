@@ -1,7 +1,7 @@
 ---
 subcategory: "NAT Gateway"
 layout: "ionoscloud"
-page_title: "IonosCloud : ionoscloud_natgateway"
+page_title: "IONOS CLOUD : ionoscloud_natgateway"
 sidebar_current: "docs-ionoscloud-datasource-natgateway"
 description: |-
   Get information on a Nat Gateway

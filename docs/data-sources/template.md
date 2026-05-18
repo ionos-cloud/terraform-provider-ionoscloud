@@ -1,10 +1,10 @@
 ---
 subcategory: "Compute Engine"
 layout: "ionoscloud"
-page_title: "IonosCloud : ionoscloud_template"
+page_title: "IONOS CLOUD : ionoscloud_template"
 sidebar_current: "docs-ionoscloud-datasource-template"
 description: |-
-  Get information on a Ionos Cloud Template
+  Get information on a IONOS CLOUD Template
 ---
 
 # ionoscloud_template

@@ -92,7 +92,7 @@ func resourceDatacenter() *schema.Resource {
 	}
 }
 
-func resourceDatacenterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDatacenterCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	datacenterName := d.Get("name").(string)
 	datacenterLocation := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, datacenterLocation)
@@ -124,7 +124,7 @@ func resourceDatacenterCreate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 	d.SetId(*createdDatacenter.Id)
 
-	tflog.Info(ctx, "datacenter created", map[string]interface{}{"resource_id": d.Id()})
+	tflog.Info(ctx, "datacenter created", map[string]any{"resource_id": d.Id()})
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
 		if bundleclient.IsRequestFailed(errState) {
@@ -137,7 +137,7 @@ func resourceDatacenterCreate(ctx context.Context, d *schema.ResourceData, meta 
 	return resourceDatacenterRead(ctx, d, meta)
 }
 
-func resourceDatacenterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDatacenterRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 
 	datacenterLocation := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, datacenterLocation)
@@ -163,7 +163,7 @@ func resourceDatacenterRead(ctx context.Context, d *schema.ResourceData, meta in
 	return nil
 }
 
-func resourceDatacenterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDatacenterUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 
 	obj := ionoscloud.DatacenterPropertiesPut{}
 
@@ -213,7 +213,7 @@ func resourceDatacenterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	return resourceDatacenterRead(ctx, d, meta)
 }
 
-func resourceDatacenterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDatacenterDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 
 	datacenterLocation := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, datacenterLocation)
@@ -238,7 +238,7 @@ func resourceDatacenterDelete(ctx context.Context, d *schema.ResourceData, meta 
 	return nil
 }
 
-func resourceDatacenterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceDatacenterImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	importID := d.Id()
 	location, parts := splitImportID(importID, ":")
 	if len(parts) != 1 {
@@ -267,7 +267,7 @@ func resourceDatacenterImport(ctx context.Context, d *schema.ResourceData, meta 
 		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while retrieving the datacenter: %w", err), nil)
 	}
 
-	tflog.Info(ctx, "datacenter imported", map[string]interface{}{"resource_id": d.Id()})
+	tflog.Info(ctx, "datacenter imported", map[string]any{"resource_id": d.Id()})
 
 	if err := setDatacenterData(d, &datacenter); err != nil {
 		return nil, diagutil.ToError(d, err, nil)
@@ -326,9 +326,9 @@ func setDatacenterData(d *schema.ResourceData, datacenter *ionoscloud.Datacenter
 		}
 
 		if datacenter.Properties.CpuArchitecture != nil && len(*datacenter.Properties.CpuArchitecture) > 0 {
-			var cpuArchitectures []interface{}
+			var cpuArchitectures []any
 			for _, cpuArchitecture := range *datacenter.Properties.CpuArchitecture {
-				architectureEntry := make(map[string]interface{})
+				architectureEntry := make(map[string]any)
 
 				if cpuArchitecture.CpuFamily != nil {
 					architectureEntry["cpu_family"] = *cpuArchitecture.CpuFamily

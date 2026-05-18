@@ -73,25 +73,25 @@ func setShareConfig(d *schema.ResourceData) nfs.Share {
 	gid := int32(d.Get("gid").(int))
 	uid := int32(d.Get("uid").(int))
 
-	clientGroupsRaw := d.Get("client_groups").([]interface{})
+	clientGroupsRaw := d.Get("client_groups").([]any)
 	clientGroups := make([]nfs.ShareClientGroups, 0, len(clientGroupsRaw))
 	for _, cgRaw := range clientGroupsRaw {
-		cg := cgRaw.(map[string]interface{})
+		cg := cgRaw.(map[string]any)
 		description := cg["description"].(string)
-		ipNetworksRaw := cg["ip_networks"].([]interface{})
+		ipNetworksRaw := cg["ip_networks"].([]any)
 		var ipNetworks []string
 		for _, ip := range ipNetworksRaw {
 			ipNetworks = append(ipNetworks, ip.(string))
 		}
-		hostsRaw := cg["hosts"].([]interface{})
+		hostsRaw := cg["hosts"].([]any)
 		var hosts []string
 		for _, host := range hostsRaw {
 			hosts = append(hosts, host.(string))
 		}
-		nfsRaw := cg["nfs"].([]interface{})
+		nfsRaw := cg["nfs"].([]any)
 		var squash string
 		if len(nfsRaw) > 0 {
-			nfsData := nfsRaw[0].(map[string]interface{})
+			nfsData := nfsRaw[0].(map[string]any)
 			squash = nfsData["squash"].(string)
 		}
 
@@ -138,14 +138,14 @@ func (c *Client) SetNFSShareData(d *schema.ResourceData, share nfs.ShareRead) er
 	return nil
 }
 
-func flattenClientGroups(clientGroups []nfs.ShareClientGroups) []map[string]interface{} {
-	result := make([]map[string]interface{}, len(clientGroups))
+func flattenClientGroups(clientGroups []nfs.ShareClientGroups) []map[string]any {
+	result := make([]map[string]any, len(clientGroups))
 	for i, cg := range clientGroups {
-		flattened := map[string]interface{}{
+		flattened := map[string]any{
 			"description": *cg.Description,
 			"ip_networks": cg.IpNetworks,
 			"hosts":       cg.Hosts,
-			"nfs": []map[string]interface{}{
+			"nfs": []map[string]any{
 				{
 					"squash": *cg.Nfs.Squash,
 				},

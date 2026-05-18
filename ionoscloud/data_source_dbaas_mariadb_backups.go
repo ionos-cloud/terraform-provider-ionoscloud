@@ -83,7 +83,7 @@ func dataSourceDBaaSMariaDBBackups() *schema.Resource {
 	}
 }
 
-func dataSourceDBaaSMariaDBReadBackups(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceDBaaSMariaDBReadBackups(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).MariaDBClient
 
 	clusterIdIntf, clusterIdOk := d.GetOk("cluster_id")

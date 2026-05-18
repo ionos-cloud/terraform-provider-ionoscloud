@@ -94,14 +94,14 @@ func dataSourcePcc() *schema.Resource {
 	}
 }
 
-func convertPccPeers(peers *[]ionoscloud.Peer) []interface{} {
+func convertPccPeers(peers *[]ionoscloud.Peer) []any {
 	if peers == nil {
-		return make([]interface{}, 0)
+		return make([]any, 0)
 	}
 
-	ret := make([]interface{}, len(*peers), len(*peers))
+	ret := make([]any, len(*peers), len(*peers))
 	for i, peer := range *peers {
-		entry := make(map[string]interface{})
+		entry := make(map[string]any)
 
 		entry["lan_id"] = peer.Id
 		entry["lan_name"] = peer.Name
@@ -115,14 +115,14 @@ func convertPccPeers(peers *[]ionoscloud.Peer) []interface{} {
 	return ret
 }
 
-func convertConnectableDatacenters(dcs *[]ionoscloud.ConnectableDatacenter) []interface{} {
+func convertConnectableDatacenters(dcs *[]ionoscloud.ConnectableDatacenter) []any {
 	if dcs == nil {
-		return make([]interface{}, 0)
+		return make([]any, 0)
 	}
 
-	ret := make([]interface{}, len(*dcs), len(*dcs))
+	ret := make([]any, len(*dcs), len(*dcs))
 	for i, dc := range *dcs {
-		entry := make(map[string]interface{})
+		entry := make(map[string]any)
 
 		entry["id"] = dc.Id
 		entry["name"] = dc.Name
@@ -165,7 +165,7 @@ func setPccDataSource(d *schema.ResourceData, pcc *ionoscloud.PrivateCrossConnec
 	return nil
 }
 
-func dataSourcePccRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourcePccRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {

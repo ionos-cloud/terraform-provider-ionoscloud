@@ -15,7 +15,7 @@ const (
 // tests.
 func GenerateRandomResourceName(prefix string) string {
 	result := make([]byte, resourceNameLength)
-	for i := 0; i < resourceNameLength; i++ {
+	for i := range resourceNameLength {
 		result[i] = charSetAlphaNum[randIntRange(0, len(charSetAlphaNum))]
 	}
 	return prefix + string(result)

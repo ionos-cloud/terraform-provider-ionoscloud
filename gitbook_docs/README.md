@@ -1,8 +1,8 @@
 # Introduction
 
-## IONOS Cloud Terraform Provider
+## IONOS CLOUD Terraform Provider
 
-The IonosCloud provider gives the ability to deploy and configure resources using the IonosCloud APIs.
+The IONOS CLOUD provider gives the ability to deploy and configure resources using the IONOS CLOUD APIs.
 
 ### Requirements
 
@@ -18,14 +18,14 @@ provider "ionoscloud" {
 
 ### Using the provider
 
-See the [IonosCloud Provider documentation](https://registry.terraform.io/providers/ionos-cloud/ionoscloud/latest/docs) to get started using the IonosCloud provider.
+See the [IONOS CLOUD Provider documentation](https://registry.terraform.io/providers/ionos-cloud/ionoscloud/latest/docs) to get started using the IONOS CLOUD provider.
 
 ### Environment Variables
 
 | Environment Variable    | Description                                                                                                                                                                |
 |-------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `IONOS_USERNAME`        | Specify the username used to login, to authenticate against the IONOS Cloud API, unless a token is provided                                                                |
-| `IONOS_PASSWORD`        | Specify the password used to login, to authenticate against the IONOS Cloud API, unless a token is provided                                                                |
+| `IONOS_USERNAME`        | Specify the username used to login, to authenticate against the IONOS CLOUD API, unless a token is provided                                                                |
+| `IONOS_PASSWORD`        | Specify the password used to login, to authenticate against the IONOS CLOUD API, unless a token is provided                                                                |
 | `IONOS_TOKEN`           | Specify the token used to login, if a token is being used instead of username and password                                                                                 |
 | `IONOS_API_URL`         | Specify th`e API URL. It will overwrite the API endpoint default value `api.ionos.com`.  It is not necessary to override this value unless you have special routing config |
 | `IONOS_LOG_LEVEL`       | Specify the Log Level used to log messages. Possible values: Off, Debug, Trace                                                                                             |

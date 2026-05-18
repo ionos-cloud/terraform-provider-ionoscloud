@@ -41,7 +41,7 @@ func resourceCertificateManagerAutoCertificate() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: "The common name (DNS) of the certificate to issue. The common name needs to be part of a zone in IONOS Cloud DNS",
+				Description: "The common name (DNS) of the certificate to issue. The common name needs to be part of a zone in IONOS CLOUD DNS",
 			},
 			"key_algorithm": {
 				Type:        schema.TypeString,
@@ -61,7 +61,7 @@ func resourceCertificateManagerAutoCertificate() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
-				Description: "Optional additional names to be added to the issued certificate. The additional names needs to be part of a zone in IONOS Cloud DNS",
+				Description: "Optional additional names to be added to the issued certificate. The additional names needs to be part of a zone in IONOS CLOUD DNS",
 			},
 			"last_issued_certificate_id": {
 				Type:        schema.TypeString,
@@ -73,7 +73,7 @@ func resourceCertificateManagerAutoCertificate() *schema.Resource {
 	}
 }
 
-func autoCertificateCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func autoCertificateCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).CertManagerClient
 	location := d.Get("location").(string)
 
@@ -94,7 +94,7 @@ func autoCertificateCreate(ctx context.Context, d *schema.ResourceData, meta int
 	return autoCertificateRead(ctx, d, meta)
 }
 
-func autoCertificateRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func autoCertificateRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).CertManagerClient
 	autoCertificateID := d.Id()
 	location := d.Get("location").(string)
@@ -106,14 +106,14 @@ func autoCertificateRead(ctx context.Context, d *schema.ResourceData, meta inter
 		}
 		return diagutil.ToDiags(d, fmt.Errorf("error while fetching auto-certificate: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
-	tflog.Info(ctx, "retrieved auto-certificate", map[string]interface{}{"auto_certificate_id": autoCertificateID})
+	tflog.Info(ctx, "retrieved auto-certificate", map[string]any{"auto_certificate_id": autoCertificateID})
 	if err := cert.SetAutoCertificateData(d, autoCertificate); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
 	return nil
 }
 
-func autoCertificateUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func autoCertificateUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).CertManagerClient
 	autoCertificateID := d.Id()
 	location := d.Get("location").(string)
@@ -132,7 +132,7 @@ func autoCertificateUpdate(ctx context.Context, d *schema.ResourceData, meta int
 	return nil
 }
 
-func autoCertificateDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func autoCertificateDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).CertManagerClient
 	autoCertificateID := d.Id()
 	location := d.Get("location").(string)
@@ -151,7 +151,7 @@ func autoCertificateDelete(ctx context.Context, d *schema.ResourceData, meta int
 	return nil
 }
 
-func autoCertificateImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func autoCertificateImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	client := meta.(bundleclient.SdkBundle).CertManagerClient
 	parts := strings.Split(d.Id(), ":")
 	if len(parts) != 2 {
@@ -167,7 +167,7 @@ func autoCertificateImport(ctx context.Context, d *schema.ResourceData, meta int
 		}
 		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to import auto-certificate with ID: %v, error: %w", autoCertificateID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
-	tflog.Info(ctx, "auto-certificate imported", map[string]interface{}{"auto_certificate_id": autoCertificateID})
+	tflog.Info(ctx, "auto-certificate imported", map[string]any{"auto_certificate_id": autoCertificateID})
 	if err := d.Set("location", location); err != nil {
 		return nil, utils.GenerateSetError("Auto-certificate", "location", err)
 	}

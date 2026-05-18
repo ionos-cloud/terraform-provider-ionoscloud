@@ -3,7 +3,7 @@
  *
  * The RESTful API for managing Network File Storage.
  *
- * API version: 0.1.3
+ * API version: 0.1.6
  * Contact: support@cloud.ionos.com
  */
 
@@ -20,7 +20,7 @@ import (
 // checks if the Metadata type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &Metadata{}
 
-// Metadata The resource metadata.
+// Metadata Metadata of the resource.
 type Metadata struct {
 	// The ISO 8601 creation timestamp.
 	CreatedDate *IonosTime `json:"createdDate,omitempty"`
@@ -278,6 +278,14 @@ func (o *Metadata) HasResourceURN() bool {
 // SetResourceURN gets a reference to the given string and assigns it to the ResourceURN field.
 func (o *Metadata) SetResourceURN(v string) {
 	o.ResourceURN = &v
+}
+
+func (o Metadata) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
 }
 
 func (o Metadata) ToMap() (map[string]interface{}, error) {

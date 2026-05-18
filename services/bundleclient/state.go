@@ -15,7 +15,7 @@ import (
 )
 
 // GetStateChangeConf gets the default configuration for tracking a request progress
-func GetStateChangeConf(ctx context.Context, meta interface{}, d *schema.ResourceData, requestLocation string, timeoutType string) *retry.StateChangeConf {
+func GetStateChangeConf(ctx context.Context, meta any, d *schema.ResourceData, requestLocation string, timeoutType string) *retry.StateChangeConf {
 	var apiLocation string
 	if temp, ok := d.GetOk("location"); ok {
 		apiLocation = temp.(string)
@@ -35,14 +35,14 @@ func GetStateChangeConf(ctx context.Context, meta interface{}, d *schema.Resourc
 }
 
 // resourceStateRefreshFunc tracks progress of a request
-func resourceStateRefreshFunc(ctx context.Context, meta interface{}, location, path string) retry.StateRefreshFunc {
-	return func() (interface{}, string, error) {
+func resourceStateRefreshFunc(ctx context.Context, meta any, location, path string) retry.StateRefreshFunc {
+	return func() (any, string, error) {
 		client, err := meta.(SdkBundle).NewCloudAPIClient(ctx, location)
 		if err != nil {
 			return nil, "", err
 		}
 
-		tflog.Info(ctx, "checking path", map[string]interface{}{"path": path})
+		tflog.Info(ctx, "checking path", map[string]any{"path": path})
 		if path == "" {
 			return nil, "", fmt.Errorf("can not check a state when path is empty")
 		}
@@ -73,10 +73,10 @@ func resourceStateRefreshFunc(ctx context.Context, meta interface{}, location, p
 				tflog.Debug(ctx, "request metadata is nil")
 			}
 			if request != nil && request.Metadata != nil && request.Metadata.Message != nil {
-				tflog.Debug(ctx, "request failed", map[string]interface{}{"error": *request.Metadata.Message})
+				tflog.Debug(ctx, "request failed", map[string]any{"error": *request.Metadata.Message})
 			}
 			if apiResponse != nil {
-				tflog.Debug(ctx, "response message", map[string]interface{}{"message": apiResponse.Message})
+				tflog.Debug(ctx, "response message", map[string]any{"message": apiResponse.Message})
 			}
 			return nil, "", RequestFailedError{fmt.Sprintf("request metadata status is nil for path %s", path)}
 		}
@@ -86,7 +86,7 @@ func resourceStateRefreshFunc(ctx context.Context, meta interface{}, location, p
 }
 
 // WaitForStateChange tracks state change progress of a resource
-func WaitForStateChange(ctx context.Context, meta interface{}, d *schema.ResourceData, apiResponse *ionoscloud.APIResponse, opTimeout string) error {
+func WaitForStateChange(ctx context.Context, meta any, d *schema.ResourceData, apiResponse *ionoscloud.APIResponse, opTimeout string) error {
 	var err error
 	var loc *url.URL
 

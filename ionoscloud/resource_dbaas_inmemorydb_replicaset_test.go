@@ -1,5 +1,4 @@
 //go:build all || dbaas || inmemorydb
-// +build all dbaas inmemorydb
 
 package ionoscloud
 

@@ -236,12 +236,12 @@ func groupResourceSchemaV1() *schema.Resource {
 }
 
 // groupStateUpgrader sets the default value in the state to ensure a smooth version transition.
-func groupStateUpgrader(ctx context.Context, rawState map[string]interface{}, meta interface{}) (map[string]interface{}, error) {
+func groupStateUpgrader(ctx context.Context, rawState map[string]any, meta any) (map[string]any, error) {
 	rawState["get_users_data"] = constant.DefaultGetUsersData
 	return rawState, nil
 }
 
-func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return diag.FromErr(err)
@@ -314,7 +314,7 @@ func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta inter
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating a group: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	tflog.Debug(ctx, "group created", map[string]interface{}{"group_id": *group.Id})
+	tflog.Debug(ctx, "group created", map[string]any{"group_id": *group.Id})
 
 	d.SetId(*group.Id)
 
@@ -329,7 +329,7 @@ func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta inter
 	// add users to group if any is provided
 	if userVal, userOK := d.GetOk("user_id"); userOK {
 		userID := userVal.(string)
-		tflog.Info(ctx, "adding user to group", map[string]interface{}{"user_id": userID, "group_id": d.Id()})
+		tflog.Info(ctx, "adding user to group", map[string]any{"user_id": userID, "group_id": d.Id()})
 		if err := addUserToGroup(userID, d.Id(), ctx, d, meta); err != nil {
 			return diagutil.ToDiags(d, err, nil)
 		}
@@ -340,7 +340,7 @@ func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta inter
 		if usersList.List() != nil {
 			for _, userItem := range usersList.List() {
 				userID := userItem.(string)
-				tflog.Info(ctx, "adding user to group", map[string]interface{}{"user_id": userID, "group_id": d.Id()})
+				tflog.Info(ctx, "adding user to group", map[string]any{"user_id": userID, "group_id": d.Id()})
 				if err := addUserToGroup(userID, d.Id(), ctx, d, meta); err != nil {
 					return diagutil.ToDiags(d, err, nil)
 				}
@@ -350,7 +350,7 @@ func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta inter
 	return resourceGroupRead(ctx, d, meta)
 }
 
-func resourceGroupRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceGroupRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return diag.FromErr(err)
@@ -374,7 +374,7 @@ func resourceGroupRead(ctx context.Context, d *schema.ResourceData, meta interfa
 	return nil
 }
 
-func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return diag.FromErr(err)
@@ -459,7 +459,7 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 		userIdToAdd := newValue.(string)
 		userIdToRemove := oldValue.(string)
 
-		tflog.Info(ctx, "group user_id change", map[string]interface{}{"user_to_add": userIdToAdd, "user_to_remove": userIdToRemove})
+		tflog.Info(ctx, "group user_id change", map[string]any{"user_to_add": userIdToAdd, "user_to_remove": userIdToRemove})
 
 		if userIdToAdd != "" {
 			if err := addUserToGroup(userIdToAdd, d.Id(), ctx, d, meta); err != nil {
@@ -483,7 +483,7 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 		deletedUsers := utils.DiffSliceOneWay(oldUsersList, newUsersList)
 
 		if newUsers != nil && len(newUsers) > 0 {
-			tflog.Info(ctx, "new users to add to group", map[string]interface{}{"user_ids": newUsers, "group_id": d.Id()})
+			tflog.Info(ctx, "new users to add to group", map[string]any{"user_ids": newUsers, "group_id": d.Id()})
 			for _, userID := range newUsers {
 				if err := addUserToGroup(userID, d.Id(), ctx, d, meta); err != nil {
 					return diagutil.ToDiags(d, err, nil)
@@ -492,7 +492,7 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 		}
 
 		if deletedUsers != nil && len(deletedUsers) > 0 {
-			tflog.Info(ctx, "users to remove from group", map[string]interface{}{"user_ids": deletedUsers, "group_id": d.Id()})
+			tflog.Info(ctx, "users to remove from group", map[string]any{"user_ids": deletedUsers, "group_id": d.Id()})
 			for _, userID := range deletedUsers {
 				if err := deleteUserFromGroup(userID, d.Id(), ctx, d, meta); err != nil {
 					return diagutil.ToDiags(d, err, nil)
@@ -504,7 +504,7 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 	return resourceGroupRead(ctx, d, meta)
 }
 
-func resourceGroupDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceGroupDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return diag.FromErr(err)
@@ -526,7 +526,7 @@ func resourceGroupDelete(ctx context.Context, d *schema.ResourceData, meta inter
 	return nil
 }
 
-func resourceGroupImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceGroupImporter(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return nil, err
@@ -546,7 +546,7 @@ func resourceGroupImporter(ctx context.Context, d *schema.ResourceData, meta int
 
 	}
 
-	tflog.Info(ctx, "group found", map[string]interface{}{"group_id": grpId})
+	tflog.Info(ctx, "group found", map[string]any{"group_id": grpId})
 
 	if err := d.Set("get_users_data", constant.DefaultGetUsersData); err != nil {
 		return nil, diagutil.ToError(d, fmt.Errorf("error while setting the default value for the 'get_users_data' attribute inside the import function, error: %w", err), nil)
@@ -746,7 +746,7 @@ func setGroupData(ctx context.Context, client *ionoscloud.APIClient, d *schema.R
 			}
 		}
 
-		usersEntries := make([]interface{}, 0)
+		usersEntries := make([]any, 0)
 		if d.Get("get_users_data").(bool) {
 			users, apiResponse, err := client.UserManagementApi.UmGroupsUsersGet(ctx, d.Id()).Depth(1).Execute()
 			logApiRequestTime(apiResponse)
@@ -754,9 +754,9 @@ func setGroupData(ctx context.Context, client *ionoscloud.APIClient, d *schema.R
 				return fmt.Errorf("an error occurred while UmGroupsUsersGet %s %w", d.Id(), err)
 			}
 			if users.Items != nil && len(*users.Items) > 0 {
-				usersEntries = make([]interface{}, len(*users.Items))
+				usersEntries = make([]any, len(*users.Items))
 				for userIndex, user := range *users.Items {
-					userEntry := make(map[string]interface{})
+					userEntry := make(map[string]any)
 
 					if user.Id != nil {
 						userEntry["id"] = *user.Id
@@ -795,7 +795,7 @@ func setGroupData(ctx context.Context, client *ionoscloud.APIClient, d *schema.R
 	return nil
 }
 
-func addUserToGroup(userId, groupId string, ctx context.Context, d *schema.ResourceData, meta interface{}) error {
+func addUserToGroup(userId, groupId string, ctx context.Context, d *schema.ResourceData, meta any) error {
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return err
@@ -811,7 +811,7 @@ func addUserToGroup(userId, groupId string, ctx context.Context, d *schema.Resou
 		return fmt.Errorf("an error occurred while adding %s user to group ID %s %w", userId, groupId, err)
 	}
 
-	tflog.Info(ctx, "added user to group", map[string]interface{}{"user_id": userId, "group_id": groupId})
+	tflog.Info(ctx, "added user to group", map[string]any{"user_id": userId, "group_id": groupId})
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
 		return errState
@@ -820,7 +820,7 @@ func addUserToGroup(userId, groupId string, ctx context.Context, d *schema.Resou
 	return nil
 }
 
-func deleteUserFromGroup(userId, groupId string, ctx context.Context, d *schema.ResourceData, meta interface{}) error {
+func deleteUserFromGroup(userId, groupId string, ctx context.Context, d *schema.ResourceData, meta any) error {
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return err
@@ -833,7 +833,7 @@ func deleteUserFromGroup(userId, groupId string, ctx context.Context, d *schema.
 		return fmt.Errorf("an error occurred while deleting %s user from group ID %s %w", userId, groupId, err)
 	}
 
-	tflog.Info(ctx, "deleted user from group", map[string]interface{}{"user_id": userId, "group_id": groupId})
+	tflog.Info(ctx, "deleted user from group", map[string]any{"user_id": userId, "group_id": groupId})
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
 		return errState
@@ -844,14 +844,14 @@ func deleteUserFromGroup(userId, groupId string, ctx context.Context, d *schema.
 
 // customGroupDiff establishes the relationship between 'get_users_data' attribute and 'users', when
 // the 'get_users_data' attribute will be modified, the 'users' list will be modified accordingly.
-func customGroupDiff(ctx context.Context, d *schema.ResourceDiff, m interface{}) error {
+func customGroupDiff(ctx context.Context, d *schema.ResourceDiff, m any) error {
 	if d.HasChange("get_users_data") {
 		oldVal, newVal := d.GetChange("get_users_data")
 
 		// Flag is turned OFF
 		if oldVal.(bool) && !newVal.(bool) {
 			// Explicitly set the new value in the plan to an empty list.
-			if err := d.SetNew("users", make([]interface{}, 0)); err != nil {
+			if err := d.SetNew("users", make([]any, 0)); err != nil {
 				return err
 			}
 		}

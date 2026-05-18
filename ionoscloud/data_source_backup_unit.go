@@ -44,7 +44,7 @@ func dataSourceBackupUnit() *schema.Resource {
 	}
 }
 
-func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return diag.FromErr(err)
@@ -70,7 +70,7 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the backup unit %s: %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 		if backupUnit.Properties != nil {
-			tflog.Info(ctx, "got backup unit", map[string]interface{}{"name": *backupUnit.Properties.Name, "id": *backupUnit.Id})
+			tflog.Info(ctx, "got backup unit", map[string]any{"name": *backupUnit.Properties.Name, "id": *backupUnit.Id})
 		}
 	} else {
 		/* search by name */

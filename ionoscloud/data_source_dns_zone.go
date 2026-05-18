@@ -59,7 +59,7 @@ func dataSourceDNSZone() *schema.Resource {
 	}
 }
 
-func dataSourceZoneRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceZoneRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).DNSClient
 	idValue, idOk := d.GetOk("id")
 	nameValue, nameOk := d.GetOk("name")
@@ -89,7 +89,7 @@ func dataSourceZoneRead(ctx context.Context, d *schema.ResourceData, meta interf
 		}
 	} else {
 		var results []dns.ZoneRead
-		tflog.Info(ctx, "searching DNS zone by name", map[string]interface{}{"name": name, "partial_match": partialMatch})
+		tflog.Info(ctx, "searching DNS zone by name", map[string]any{"name": name, "partial_match": partialMatch})
 
 		if partialMatch {
 			// By default, when providing the name as a filter, for the GET requests, partial match

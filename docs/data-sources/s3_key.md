@@ -1,10 +1,10 @@
 ---
 subcategory: "User Management"
 layout: "ionoscloud"
-page_title: "IonosCloud: s3_key"
+page_title: "IONOS CLOUD: s3_key"
 sidebar_current: "docs-resource-s3-key"
 description: |-
-  Get Information on a IonosCloud Object Storage key
+  Get Information on a IONOS CLOUD Object Storage key
 ---
 
 # ionoscloud_s3_key

@@ -104,7 +104,7 @@ func deletePageOfObjectVersions(ctx context.Context, conn *objstorage.APIClient,
 
 	req := conn.ObjectsApi.DeleteObjects(ctx, bucket).DeleteObjectsRequest(objstorage.DeleteObjectsRequest{
 		Objects: toDelete,
-		Quiet:   shared.ToPtr(true),
+		Quiet:   new(true),
 	})
 	if force {
 		req = req.XAmzBypassGovernanceRetention(true)
@@ -163,7 +163,7 @@ func deletePageOfDeleteMarkers(ctx context.Context, conn *objstorage.APIClient, 
 
 	output, apiResponse, err := conn.ObjectsApi.DeleteObjects(ctx, bucket).DeleteObjectsRequest(objstorage.DeleteObjectsRequest{
 		Objects: toDelete,
-		Quiet:   shared.ToPtr(true),
+		Quiet:   new(true),
 	}).Execute()
 	if apiResponse.HttpNotFound() {
 		return objCount, nil

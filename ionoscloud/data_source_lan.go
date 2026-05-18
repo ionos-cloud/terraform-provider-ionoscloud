@@ -75,14 +75,14 @@ func dataSourceLan() *schema.Resource {
 	}
 }
 
-func convertIpFailoverList(ips *[]ionoscloud.IPFailover) []interface{} {
+func convertIpFailoverList(ips *[]ionoscloud.IPFailover) []any {
 	if ips == nil {
-		return make([]interface{}, 0)
+		return make([]any, 0)
 	}
 
-	ret := make([]interface{}, len(*ips), len(*ips))
+	ret := make([]any, len(*ips), len(*ips))
 	for i, ip := range *ips {
-		entry := make(map[string]interface{})
+		entry := make(map[string]any)
 
 		entry["ip"] = ip.Ip
 		entry["nic_uuid"] = ip.NicUuid
@@ -93,7 +93,7 @@ func convertIpFailoverList(ips *[]ionoscloud.IPFailover) []interface{} {
 	return ret
 }
 
-func dataSourceLanRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceLanRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	datacenterId, dcIdOk := d.GetOk("datacenter_id")
 	if !dcIdOk {
 		return diagutil.ToDiags(d, fmt.Errorf("no datacenter_id was specified"), nil)

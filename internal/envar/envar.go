@@ -7,11 +7,11 @@ import (
 )
 
 const (
-	// IonosToken is the environment variable name for the Ionos Cloud API token.
+	// IonosToken is the environment variable name for the IONOS CLOUD API token.
 	IonosToken = "IONOS_TOKEN"
-	// IonosUsername is the environment variable name for the Ionos Cloud API username.
+	// IonosUsername is the environment variable name for the IONOS CLOUD API username.
 	IonosUsername = "IONOS_USERNAME"
-	// IonosPassword is the environment variable name for the Ionos Cloud API password.
+	// IonosPassword is the environment variable name for the IONOS CLOUD API password.
 	IonosPassword = "IONOS_PASSWORD"
 	// IonosS3AccessKey is the environment variable name for the IONOS Object Storage access key.
 	IonosS3AccessKey = "IONOS_S3_ACCESS_KEY"

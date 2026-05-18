@@ -94,7 +94,7 @@ func dataSourceContainerRegistryToken() *schema.Resource {
 	}
 }
 
-func dataSourceContainerRegistryTokenRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceContainerRegistryTokenRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewContainerRegistryClient(ctx, location)
 	if err != nil {
@@ -134,7 +134,7 @@ func dataSourceContainerRegistryTokenRead(ctx context.Context, d *schema.Resourc
 
 		partialMatch := d.Get("partial_match").(bool)
 
-		tflog.Info(ctx, "searching container registry token by name", map[string]interface{}{"partial_match": partialMatch, "name": name})
+		tflog.Info(ctx, "searching container registry token by name", map[string]any{"partial_match": partialMatch, "name": name})
 
 		if tokens.Items != nil && len(tokens.Items) > 0 {
 			for _, tokenItem := range tokens.Items {

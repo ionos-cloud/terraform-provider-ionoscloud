@@ -33,7 +33,7 @@ func (c *Client) IsZoneCreated(ctx context.Context, d *schema.ResourceData) (boo
 		return false, err
 	}
 
-	tflog.Debug(ctx, "zone state", map[string]interface{}{"state": zone.Metadata.State})
+	tflog.Debug(ctx, "zone state", map[string]any{"state": zone.Metadata.State})
 
 	return strings.EqualFold((string)(zone.Metadata.State), (string)(dns.PROVISIONINGSTATE_AVAILABLE)), nil
 }

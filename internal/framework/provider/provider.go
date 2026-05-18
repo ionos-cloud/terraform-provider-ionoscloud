@@ -7,21 +7,22 @@ import (
 	"runtime/debug"
 	"strconv"
 
-	"github.com/hashicorp/terraform-plugin-framework/ephemeral"
-	"github.com/ionos-cloud/sdk-go-bundle/shared"
-
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/ephemeral"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/compute"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/kafka"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/monitoring"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/objectstorage"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/objectstoragemanagement"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/pgsqlv2"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/userobjectstorage"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
 	contractService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/contract"
@@ -64,19 +65,19 @@ func (p *IonosCloudProvider) Schema(ctx context.Context, req provider.SchemaRequ
 		Attributes: map[string]schema.Attribute{
 			"username": schema.StringAttribute{
 				Optional:    true,
-				Description: "IonosCloud username for API operations. If token is provided, token is preferred",
+				Description: "IONOS CLOUD username for API operations. If token is provided, token is preferred",
 			},
 			"password": schema.StringAttribute{
 				Optional:    true,
-				Description: "IonosCloud password for API operations. If token is provided, token is preferred",
+				Description: "IONOS CLOUD password for API operations. If token is provided, token is preferred",
 			},
 			"token": schema.StringAttribute{
 				Optional:    true,
-				Description: "IonosCloud bearer token for API operations.",
+				Description: "IONOS CLOUD bearer token for API operations.",
 			},
 			"endpoint": schema.StringAttribute{
 				Optional:    true,
-				Description: "IonosCloud REST API URL. Usually not necessary to be set, SDKs know internally how to route requests to the API.",
+				Description: "IONOS CLOUD REST API URL. Usually not necessary to be set, SDKs know internally how to route requests to the API.",
 			},
 			"retries": schema.Int64Attribute{
 				Optional:           true,
@@ -267,6 +268,7 @@ func (p *IonosCloudProvider) Resources(_ context.Context) []func() resource.Reso
 		objectstoragemanagement.Resources(),
 		monitoring.Resources(),
 		pgsqlv2.Resources(),
+		userobjectstorage.Resources(),
 	}
 
 	for _, r := range resources {
@@ -286,6 +288,7 @@ func (p *IonosCloudProvider) DataSources(_ context.Context) []func() datasource.
 		compute.DataSources(),
 		kafka.DataSources(),
 		pgsqlv2.DataSources(),
+		userobjectstorage.DataSources(),
 	}
 
 	for _, r := range dataSources {

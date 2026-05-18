@@ -55,7 +55,7 @@ func NewClient(ctx context.Context, clientOptions clientoptions.TerraformClientO
 	// Set custom endpoint if provided
 	if envValue := os.Getenv(ionosAPIURLObjectStorage); envValue != "" {
 		clientOptions.Endpoint = envValue
-		tflog.Debug(ctx, "Object Storage: endpoint from env", map[string]interface{}{"env": ionosAPIURLObjectStorage, "url": envValue})
+		tflog.Debug(ctx, "Object Storage: endpoint from env", map[string]any{"env": ionosAPIURLObjectStorage, "url": envValue})
 	}
 	certificateAuthData := ""
 	if clientOptions.Endpoint == "" {
@@ -65,7 +65,7 @@ func NewClient(ctx context.Context, clientOptions clientoptions.TerraformClientO
 		}
 		if endpointOverrides := config.GetProductLocationOverrides(fileconfiguration.ObjectStorage, clientOptions.StorageOptions.Region); endpointOverrides != nil {
 			clientOptions.Endpoint = endpointOverrides.Name
-			tflog.Debug(ctx, "Object Storage: endpoint from file config", map[string]interface{}{"region": region, "url": endpointOverrides.Name})
+			tflog.Debug(ctx, "Object Storage: endpoint from file config", map[string]any{"region": region, "url": endpointOverrides.Name})
 			if !clientOptions.SkipTLSVerify {
 				clientOptions.SkipTLSVerify = endpointOverrides.SkipTLSVerify
 			}
@@ -76,7 +76,7 @@ func NewClient(ctx context.Context, clientOptions clientoptions.TerraformClientO
 	if clientOptions.StorageOptions.Region == "" {
 		clientOptions.StorageOptions.Region = constant.DefaultS3Region
 	}
-	tflog.Debug(ctx, "Object Storage: configured", map[string]interface{}{"region": clientOptions.StorageOptions.Region, "endpoint": clientOptions.Endpoint})
+	tflog.Debug(ctx, "Object Storage: configured", map[string]any{"region": clientOptions.StorageOptions.Region, "endpoint": clientOptions.Endpoint})
 
 	// TODO -- replace with WithObjectStorage from sdk-go-bundle
 	cfg := shared.NewConfigurationFromOptions(clientOptions.ClientOptions)

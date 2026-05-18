@@ -1,7 +1,7 @@
 ---
 subcategory: "Container Registry"
 layout: "ionoscloud"
-page_title: "IonosCloud : ionoscloud_container_registry_locations"
+page_title: "IONOS CLOUD : ionoscloud_container_registry_locations"
 sidebar_current: "docs-ionoscloud_container_registry_locations"
 description: |-
   Get list of Container Registry Locations

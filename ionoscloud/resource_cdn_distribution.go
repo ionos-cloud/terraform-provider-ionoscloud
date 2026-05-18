@@ -137,7 +137,7 @@ func resourceCDNDistribution() *schema.Resource {
 	}
 }
 
-func resourceCDNDistributionCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCDNDistributionCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 
 	client := meta.(bundleclient.SdkBundle).CDNClient
 
@@ -170,12 +170,12 @@ func resourceCDNDistributionCreate(ctx context.Context, d *schema.ResourceData, 
 		return diagutil.ToDiags(d, fmt.Errorf("error occurred while checking the status for the CDN Distribution: %w", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String()})
 	}
 
-	tflog.Info(ctx, "CDN distribution created", map[string]interface{}{"distribution_id": d.Id()})
+	tflog.Info(ctx, "CDN distribution created", map[string]any{"distribution_id": d.Id()})
 
 	return resourceCDNDistributionRead(ctx, d, meta)
 }
 
-func resourceCDNDistributionRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCDNDistributionRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).CDNClient
 
 	distribution, apiResponse, err := client.SdkClient.DistributionsApi.DistributionsFindById(ctx, d.Id()).Execute()
@@ -188,7 +188,7 @@ func resourceCDNDistributionRead(ctx context.Context, d *schema.ResourceData, me
 		return diagutil.ToDiags(d, fmt.Errorf("error while fetching CDN distribution: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	tflog.Info(ctx, "retrieved CDN distribution", map[string]interface{}{"distribution_id": d.Id()})
+	tflog.Info(ctx, "retrieved CDN distribution", map[string]any{"distribution_id": d.Id()})
 
 	if err := cdnService.SetDistributionData(d, distribution); err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -197,7 +197,7 @@ func resourceCDNDistributionRead(ctx context.Context, d *schema.ResourceData, me
 	return nil
 }
 
-func resourceCDNDistributionUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCDNDistributionUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).CDNClient
 
 	distributionDomain := d.Get("domain").(string)
@@ -234,7 +234,7 @@ func resourceCDNDistributionUpdate(ctx context.Context, d *schema.ResourceData, 
 	return resourceCDNDistributionRead(ctx, d, meta)
 }
 
-func resourceCDNDistributionDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCDNDistributionDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).CDNClient
 
 	apiResponse, err := client.SdkClient.DistributionsApi.DistributionsDelete(ctx, d.Id()).Execute()
@@ -247,7 +247,7 @@ func resourceCDNDistributionDelete(ctx context.Context, d *schema.ResourceData, 
 	return nil
 }
 
-func resourceCDNDistributionImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceCDNDistributionImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	client := *meta.(bundleclient.SdkBundle).CDNClient
 
 	distributionID := d.Id()
@@ -262,7 +262,7 @@ func resourceCDNDistributionImport(ctx context.Context, d *schema.ResourceData, 
 		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the import of CDN distribution %q, error:%w", distributionID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	tflog.Info(ctx, "CDN distribution imported", map[string]interface{}{"distribution_id": distributionID})
+	tflog.Info(ctx, "CDN distribution imported", map[string]any{"distribution_id": distributionID})
 
 	if err := cdnService.SetDistributionData(d, distribution); err != nil {
 		return nil, diagutil.ToError(d, err, nil)

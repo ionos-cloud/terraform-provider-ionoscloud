@@ -126,7 +126,7 @@ func dataSourceImage() *schema.Resource {
 	}
 }
 
-func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	nameValue, nameOk := d.GetOk("name")
 	imageTypeValue, imageTypeOk := d.GetOk("type")
 	locationValue, locationOk := d.GetOk("location")
@@ -151,7 +151,7 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occurred while fetching IonosCloud images %w", err))
+		return diag.FromErr(fmt.Errorf("an error occurred while fetching IONOS CLOUD images %w", err))
 	}
 
 	// if version value is present then concatenate name - version
@@ -243,7 +243,7 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta inter
 	} else if len(results) > 1 {
 		for _, result := range results {
 			if result.Properties != nil {
-				tflog.Debug(ctx, "found candidate image", map[string]interface{}{"name": *result.Properties.Name, "location": *result.Properties.Location})
+				tflog.Debug(ctx, "found candidate image", map[string]any{"name": *result.Properties.Name, "location": *result.Properties.Location})
 			}
 		}
 		return diagutil.ToDiags(d, fmt.Errorf("more than one image found, enable debug to learn more. Criteria used name = %s, type = %s, location = %s, version = %s, cloudInit = %s, imageAlias = %s", name, imageType, location, version, cloudInit, imgAlias), nil)

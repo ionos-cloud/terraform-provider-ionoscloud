@@ -45,7 +45,7 @@ func dataSourceCertificate() *schema.Resource {
 	}
 }
 
-func dataSourceCertificateRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceCertificateRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).CertManagerClient
 
 	var name, idStr string
@@ -77,10 +77,10 @@ func dataSourceCertificateRead(ctx context.Context, d *schema.ResourceData, meta
 					certificate.Id, certificate.Properties.Name, name), nil)
 			}
 		}
-		tflog.Info(ctx, "got certificate", map[string]interface{}{"name": certificate.Properties.Name})
+		tflog.Info(ctx, "got certificate", map[string]any{"name": certificate.Properties.Name})
 
 	} else {
-		tflog.Info(ctx, "searching certificate by name", map[string]interface{}{"name": name})
+		tflog.Info(ctx, "searching certificate by name", map[string]any{"name": name})
 
 		certificates, apiResponse, err := client.ListCertificates(ctx)
 		if err != nil {

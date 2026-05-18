@@ -46,7 +46,7 @@ func resourceDatacenterNSGSelection() *schema.Resource {
 		Timeouts: &resourceDefaultTimeouts,
 	}
 }
-func resourceDatacenterNSGSelectionCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDatacenterNSGSelectionCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	dcID := d.Get("datacenter_id").(string)
 	nsgID := d.Get("nsg_id").(string)
 	location := d.Get("location").(string)
@@ -65,7 +65,7 @@ func resourceDatacenterNSGSelectionCreate(ctx context.Context, d *schema.Resourc
 	return resourceDatacenterNSGSelectionRead(ctx, d, meta)
 }
 
-func resourceDatacenterNSGSelectionRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDatacenterNSGSelectionRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	dcID := d.Get("datacenter_id").(string)
 	nsgID := d.Get("nsg_id").(string)
 	location := d.Get("location").(string)
@@ -91,7 +91,7 @@ func resourceDatacenterNSGSelectionRead(ctx context.Context, d *schema.ResourceD
 	return nil
 }
 
-func resourceDatacenterNSGSelectionUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDatacenterNSGSelectionUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	dcID := d.Get("datacenter_id").(string)
 	location := d.Get("location").(string)
 
@@ -112,7 +112,7 @@ func resourceDatacenterNSGSelectionUpdate(ctx context.Context, d *schema.Resourc
 
 }
 
-func resourceDatacenterNSGSelectionDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDatacenterNSGSelectionDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	dcID := d.Get("datacenter_id").(string)
 	location := d.Get("location").(string)
 

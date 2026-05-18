@@ -366,7 +366,7 @@ func DataSourceAutoscalingGroup() *schema.Resource {
 	}
 }
 
-func dataSourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).AutoscalingClient
 
 	id, idOk := d.GetOk("id")

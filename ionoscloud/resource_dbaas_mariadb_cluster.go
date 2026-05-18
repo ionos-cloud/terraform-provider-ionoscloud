@@ -174,7 +174,7 @@ func resourceDBaaSMariaDBCluster() *schema.Resource {
 	}
 }
 
-func errorOnVersionDowngrade(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
+func errorOnVersionDowngrade(_ context.Context, diff *schema.ResourceDiff, _ any) error {
 	// we do not want to check in case of resource creation
 	if diff.Id() == "" {
 		return nil
@@ -198,7 +198,7 @@ func errorOnVersionDowngrade(_ context.Context, diff *schema.ResourceDiff, _ int
 	return nil
 }
 
-func mariaDBClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func mariaDBClusterCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).MariaDBClient
 
 	cluster, err := mariadb.GetMariaDBClusterDataCreate(d)
@@ -223,7 +223,7 @@ func mariaDBClusterCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	return nil
 }
 
-func mariaDBClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func mariaDBClusterDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).MariaDBClient
 	clusterID := d.Id()
 	_, apiResponse, err := client.DeleteCluster(ctx, d.Id(), d.Get("location").(string))
@@ -245,7 +245,7 @@ func mariaDBClusterDelete(ctx context.Context, d *schema.ResourceData, meta inte
 	return nil
 }
 
-func mariaDBClusterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func mariaDBClusterImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	client := meta.(bundleclient.SdkBundle).MariaDBClient
 	parts := strings.Split(d.Id(), ":")
 	if len(parts) != 2 {
@@ -263,7 +263,7 @@ func mariaDBClusterImport(ctx context.Context, d *schema.ResourceData, meta inte
 		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to import MariaDB cluster with ID: %v, error: %w", clusterID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	tflog.Info(ctx, "MariaDB cluster imported", map[string]interface{}{"cluster_id": clusterID})
+	tflog.Info(ctx, "MariaDB cluster imported", map[string]any{"cluster_id": clusterID})
 
 	if err := d.Set("location", location); err != nil {
 		return nil, utils.GenerateSetError("MariaDB cluster", "location", err)
@@ -275,7 +275,7 @@ func mariaDBClusterImport(ctx context.Context, d *schema.ResourceData, meta inte
 	return []*schema.ResourceData{d}, nil
 }
 
-func mariaDBClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func mariaDBClusterRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).MariaDBClient
 	clusterID := d.Id()
 	cluster, apiResponse, err := client.GetCluster(ctx, clusterID, d.Get("location").(string))
@@ -286,7 +286,7 @@ func mariaDBClusterRead(ctx context.Context, d *schema.ResourceData, meta interf
 		}
 		return diagutil.ToDiags(d, fmt.Errorf("error while fetching MariaDB cluster with ID: %v, error: %w", clusterID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
-	tflog.Info(ctx, "retrieved MariaDB cluster", map[string]interface{}{"cluster_id": clusterID})
+	tflog.Info(ctx, "retrieved MariaDB cluster", map[string]any{"cluster_id": clusterID})
 
 	if err := client.SetMariaDBClusterData(d, cluster); err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -295,7 +295,7 @@ func mariaDBClusterRead(ctx context.Context, d *schema.ResourceData, meta interf
 	return nil
 }
 
-func mariaDBClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func mariaDBClusterUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).MariaDBClient
 
 	clusterID := d.Id()

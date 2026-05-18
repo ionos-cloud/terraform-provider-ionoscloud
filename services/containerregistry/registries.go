@@ -61,7 +61,7 @@ func (c *Client) IsRegistryReady(ctx context.Context, d *schema.ResourceData) (b
 	if err != nil {
 		return true, fmt.Errorf("status check failed for container registry creg with ID: %v, error: %w", ID, err)
 	}
-	tflog.Info(ctx, "container registry state", map[string]interface{}{"id": ID, "state": creg.Metadata.State})
+	tflog.Info(ctx, "container registry state", map[string]any{"id": ID, "state": creg.Metadata.State})
 	if utils.IsStateFailed(creg.Metadata.State) {
 		return false, fmt.Errorf("container registry  %s is in a failed state", d.Id())
 	}

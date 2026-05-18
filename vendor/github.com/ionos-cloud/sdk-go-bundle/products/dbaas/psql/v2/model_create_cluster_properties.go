@@ -36,19 +36,19 @@ type CreateClusterProperties struct {
 	// The S3 location where the backups will be stored.
 	BackupLocation *string `json:"backupLocation,omitempty"`
 	// The friendly name of your cluster.
-	DisplayName         string                `json:"displayName"`
-	MaintenanceWindow   *MaintenanceWindow    `json:"maintenanceWindow,omitempty"`
-	Credentials         DBUser                `json:"credentials"`
-	SynchronizationMode SynchronizationMode   `json:"synchronizationMode"`
-	FromBackup          *CreateRestoreRequest `json:"fromBackup,omitempty"`
-	ConnectionPooler    *ConnectionPooler     `json:"connectionPooler,omitempty"`
+	DisplayName         string                    `json:"displayName"`
+	MaintenanceWindow   *MaintenanceWindow        `json:"maintenanceWindow,omitempty"`
+	Credentials         DBUser                    `json:"credentials"`
+	SynchronizationMode CreateSynchronizationMode `json:"synchronizationMode"`
+	FromBackup          *CreateRestoreRequest     `json:"fromBackup,omitempty"`
+	ConnectionPooler    *ConnectionPooler         `json:"connectionPooler,omitempty"`
 }
 
 // NewCreateClusterProperties instantiates a new CreateClusterProperties object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCreateClusterProperties(postgresVersion string, instances int32, cores int32, ram int32, storageSize int32, storageType StorageType, connections []Connection, location string, displayName string, credentials DBUser, synchronizationMode SynchronizationMode) *CreateClusterProperties {
+func NewCreateClusterProperties(postgresVersion string, instances int32, cores int32, ram int32, storageSize int32, storageType StorageType, connections []Connection, location string, displayName string, credentials DBUser, synchronizationMode CreateSynchronizationMode) *CreateClusterProperties {
 	this := CreateClusterProperties{}
 
 	this.PostgresVersion = postgresVersion
@@ -379,9 +379,9 @@ func (o *CreateClusterProperties) SetCredentials(v DBUser) {
 }
 
 // GetSynchronizationMode returns the SynchronizationMode field value
-func (o *CreateClusterProperties) GetSynchronizationMode() SynchronizationMode {
+func (o *CreateClusterProperties) GetSynchronizationMode() CreateSynchronizationMode {
 	if o == nil {
-		var ret SynchronizationMode
+		var ret CreateSynchronizationMode
 		return ret
 	}
 
@@ -390,7 +390,7 @@ func (o *CreateClusterProperties) GetSynchronizationMode() SynchronizationMode {
 
 // GetSynchronizationModeOk returns a tuple with the SynchronizationMode field value
 // and a boolean to check if the value has been set.
-func (o *CreateClusterProperties) GetSynchronizationModeOk() (*SynchronizationMode, bool) {
+func (o *CreateClusterProperties) GetSynchronizationModeOk() (*CreateSynchronizationMode, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -398,7 +398,7 @@ func (o *CreateClusterProperties) GetSynchronizationModeOk() (*SynchronizationMo
 }
 
 // SetSynchronizationMode sets field value
-func (o *CreateClusterProperties) SetSynchronizationMode(v SynchronizationMode) {
+func (o *CreateClusterProperties) SetSynchronizationMode(v CreateSynchronizationMode) {
 	o.SynchronizationMode = v
 }
 

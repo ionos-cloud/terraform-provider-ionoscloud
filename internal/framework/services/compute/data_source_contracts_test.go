@@ -1,5 +1,4 @@
 //go:build all || compute || contract
-// +build all compute contract
 
 package compute_test
 

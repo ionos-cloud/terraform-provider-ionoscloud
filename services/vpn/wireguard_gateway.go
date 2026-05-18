@@ -37,7 +37,7 @@ func (c *Client) IsWireguardAvailable(ctx context.Context, d *schema.ResourceDat
 	if err != nil {
 		return false, err
 	}
-	tflog.Debug(ctx, "wireguard status", map[string]interface{}{"status": wireguard.Metadata.Status})
+	tflog.Debug(ctx, "wireguard status", map[string]any{"status": wireguard.Metadata.Status})
 	return strings.EqualFold(wireguard.Metadata.Status, constant.Available), nil
 }
 
@@ -90,7 +90,7 @@ func (c *Client) IsWireguardGatewayReady(ctx context.Context, d *schema.Resource
 	if err != nil {
 		return false, err
 	}
-	tflog.Debug(ctx, "wireguard gateway state", map[string]interface{}{"status": cluster.Metadata.Status})
+	tflog.Debug(ctx, "wireguard gateway state", map[string]any{"status": cluster.Metadata.Status})
 	return strings.EqualFold(cluster.Metadata.Status, constant.Available), nil
 }
 
@@ -105,27 +105,22 @@ func setWireguardGWPostRequest(d *schema.ResourceData) *vpnsdk.WireguardGatewayC
 	request.Properties.PrivateKey = privateKey
 
 	if value, ok := d.GetOk("description"); ok {
-		valueStr := value.(string)
-		request.Properties.Description = &valueStr
+		request.Properties.Description = new(value.(string))
 	}
 	if value, ok := d.GetOk("interface_ipv4_cidr"); ok {
-		valueStr := value.(string)
-		request.Properties.InterfaceIPv4CIDR = &valueStr
+		request.Properties.InterfaceIPv4CIDR = new(value.(string))
 	}
 	if value, ok := d.GetOk("interface_ipv6_cidr"); ok {
-		valueStr := value.(string)
-		request.Properties.InterfaceIPv6CIDR = &valueStr
+		request.Properties.InterfaceIPv6CIDR = new(value.(string))
 	}
 	if value, ok := d.GetOk("listenPort"); ok {
-		valueStr := (int32)(value.(int))
-		request.Properties.ListenPort = &valueStr
+		request.Properties.ListenPort = new((int32)(value.(int)))
 	}
 	if _, ok := d.GetOk("maintenance_window"); ok {
 		request.Properties.MaintenanceWindow = GetMaintenanceWindowData(d)
 	}
 	if value, ok := d.GetOk("tier"); ok {
-		valueStr := value.(string)
-		request.Properties.Tier = &valueStr
+		request.Properties.Tier = new(value.(string))
 	}
 
 	request.Properties.Connections = getWireguardGwConnectionsData(d)
@@ -154,8 +149,7 @@ func getWireguardGwConnectionsData(d *schema.ResourceData) []vpnsdk.Connection {
 			}
 
 			if cidr, ok := d.GetOk(fmt.Sprintf("connections.%d.ipv6_cidr", idx)); ok {
-				cidr := cidr.(string)
-				connection.Ipv6CIDR = &cidr
+				connection.Ipv6CIDR = new(cidr.(string))
 			}
 
 			connections = append(connections, connection)
@@ -173,22 +167,22 @@ func setWireguardGatewayPutRequest(d *schema.ResourceData) *vpnsdk.WireguardGate
 	request.Properties.PrivateKey = d.Get("private_key").(string)
 	request.Properties.Connections = getWireguardGwConnectionsData(d)
 	if val, ok := d.GetOk("interface_ipv4_cidr"); ok {
-		request.Properties.InterfaceIPv4CIDR = shared.ToPtr(val.(string))
+		request.Properties.InterfaceIPv4CIDR = new(val.(string))
 	}
 	if v, ok := d.GetOk("description"); ok {
-		request.Properties.Description = shared.ToPtr(v.(string))
+		request.Properties.Description = new(v.(string))
 	}
 	if v, ok := d.GetOk("interface_ipv6_cidr"); ok {
-		request.Properties.InterfaceIPv6CIDR = shared.ToPtr(v.(string))
+		request.Properties.InterfaceIPv6CIDR = new(v.(string))
 	}
 	if v, ok := d.GetOk("listen_port"); ok {
-		request.Properties.ListenPort = shared.ToPtr(int32(v.(int)))
+		request.Properties.ListenPort = new(int32(v.(int)))
 	}
 	if _, ok := d.GetOk("maintenance_window"); ok {
 		request.Properties.MaintenanceWindow = GetMaintenanceWindowData(d)
 	}
 	if v, ok := d.GetOk("tier"); ok {
-		request.Properties.Tier = shared.ToPtr(v.(string))
+		request.Properties.Tier = new(v.(string))
 	}
 	return &request
 }
@@ -248,9 +242,9 @@ func SetWireguardGWData(d *schema.ResourceData, wireguard vpnsdk.WireguardGatewa
 	return nil
 }
 
-func setWireguardMaintenanceWindowData(wireguardGateway vpnsdk.WireguardGateway) []interface{} {
-	var maintenanceWindows []interface{}
-	maintenanceWindow := map[string]interface{}{}
+func setWireguardMaintenanceWindowData(wireguardGateway vpnsdk.WireguardGateway) []any {
+	var maintenanceWindows []any
+	maintenanceWindow := map[string]any{}
 	utils.SetPropWithNilCheck(maintenanceWindow, "time", wireguardGateway.MaintenanceWindow.Time)
 	utils.SetPropWithNilCheck(maintenanceWindow, "day_of_the_week", wireguardGateway.MaintenanceWindow.DayOfTheWeek)
 

@@ -1,13 +1,6 @@
 # Go API client for psql
 
-An enterprise-grade Database is provided as a Service (DBaaS) solution that
-can be managed through a browser-based \"Data Center Designer\" (DCD) tool or
-via an easy to use API.
-
-The API allows you to create additional PostgreSQL database clusters or modify existing
-ones. It is designed to allow users to leverage the same power and
-flexibility found within the DCD visual tool. Both tools are consistent with
-their concepts and lend well to making the experience smooth and intuitive.
+DBaaS PostgreSQL v2 is the new version of the PostgreSQL API at IONOS cloud.
 
 
 ## Overview
@@ -55,9 +48,17 @@ Examples for creating resources using the Go SDK can be found [here](examples/)
 
 All available server URLs are:
 
-- *https://api.ionos.com/databases/postgresql* - Production
+- *https://postgresql.de-txl.ionos.com* - Germany, Berlin
+- *https://postgresql.de-fra.ionos.com* - Germany, Frankfurt (de/fra, de/fra/2)
+- *https://postgresql.fr-par.ionos.com* - France, Paris
+- *https://postgresql.es-vit.ionos.com* - Spain, Logroño
+- *https://postgresql.gb-lhr.ionos.com* - United Kingdom, London
+- *https://postgresql.gb-bhx.ionos.com* - United Kingdom, Worcester
+- *https://postgresql.us-las.ionos.com* - United States, Las Vegas
+- *https://postgresql.us-mci.ionos.com* - United States, Lenexa
+- *https://postgresql.us-ewr.ionos.com* - United States, Newark
 
-By default, *https://api.ionos.com/databases/postgresql* is used, however this can be overriden at authentication, either
+By default, *https://postgresql.de-txl.ionos.com* is used, however this can be overriden at authentication, either
 by setting the `IONOS_API_URL` environment variable or by specifying the `hostUrl` parameter when
 initializing the sdk client.
 
@@ -210,98 +211,70 @@ func main() {
 
 ## Documentation for API Endpoints
 
-All URIs are relative to *https://api.ionos.com/databases/postgresql*
+All URIs are relative to *https://postgresql.de-txl.ionos.com*
 <details >
 <summary title="Click to toggle">API Endpoints table</summary>
 
 
 Class | Method | HTTP request | Description
 ------------- | ------------- | ------------- | -------------
-BackupsApi | [**ClusterBackupsGet**](docs/api/BackupsApi.md#clusterbackupsget) | **Get** /clusters/{clusterId}/backups | List backups of cluster
-BackupsApi | [**ClustersBackupsFindById**](docs/api/BackupsApi.md#clustersbackupsfindbyid) | **Get** /clusters/backups/{backupId} | Fetch a cluster backup
-BackupsApi | [**ClustersBackupsGet**](docs/api/BackupsApi.md#clustersbackupsget) | **Get** /clusters/backups | List cluster backups
-ClustersApi | [**ClusterPostgresVersionsGet**](docs/api/ClustersApi.md#clusterpostgresversionsget) | **Get** /clusters/{clusterId}/postgresversions | List PostgreSQL versions
-ClustersApi | [**ClustersDelete**](docs/api/ClustersApi.md#clustersdelete) | **Delete** /clusters/{clusterId} | Delete a cluster
-ClustersApi | [**ClustersFindById**](docs/api/ClustersApi.md#clustersfindbyid) | **Get** /clusters/{clusterId} | Fetch a cluster
-ClustersApi | [**ClustersGet**](docs/api/ClustersApi.md#clustersget) | **Get** /clusters | List clusters
-ClustersApi | [**ClustersPatch**](docs/api/ClustersApi.md#clusterspatch) | **Patch** /clusters/{clusterId} | Patch a cluster
-ClustersApi | [**ClustersPost**](docs/api/ClustersApi.md#clusterspost) | **Post** /clusters | Create a cluster
-ClustersApi | [**ClustersVersionsGet**](docs/api/ClustersApi.md#clustersversionsget) | **Get** /clusters/{clusterId}/versions | Supported PostgreSQL versions of cluster
-ClustersApi | [**PostgresVersionsGet**](docs/api/ClustersApi.md#postgresversionsget) | **Get** /clusters/postgresversions | List all PostgreSQL versions
-DatabasesApi | [**DatabasesDelete**](docs/api/DatabasesApi.md#databasesdelete) | **Delete** /clusters/{clusterId}/databases/{databasename} | Delete database
-DatabasesApi | [**DatabasesGet**](docs/api/DatabasesApi.md#databasesget) | **Get** /clusters/{clusterId}/databases/{databasename} | Get database
-DatabasesApi | [**DatabasesList**](docs/api/DatabasesApi.md#databaseslist) | **Get** /clusters/{clusterId}/databases | List databases
-DatabasesApi | [**DatabasesPost**](docs/api/DatabasesApi.md#databasespost) | **Post** /clusters/{clusterId}/databases | Create a database
-LogsApi | [**ClusterLogsGet**](docs/api/LogsApi.md#clusterlogsget) | **Get** /clusters/{clusterId}/logs | Get logs of your cluster
-MetadataApi | [**InfosVersionGet**](docs/api/MetadataApi.md#infosversionget) | **Get** /infos/version | Get the current API version
-MetadataApi | [**InfosVersionsGet**](docs/api/MetadataApi.md#infosversionsget) | **Get** /infos/versions | Fetch all API versions
-MetadataApi | [**VersionsGet**](docs/api/MetadataApi.md#versionsget) | **Get** /versions | PostgreSQL versions for new clusters
-RestoresApi | [**ClusterRestorePost**](docs/api/RestoresApi.md#clusterrestorepost) | **Post** /clusters/{clusterId}/restore | In-place restore of a cluster
-UsersApi | [**UsersDelete**](docs/api/UsersApi.md#usersdelete) | **Delete** /clusters/{clusterId}/users/{username} | Delete user
-UsersApi | [**UsersGet**](docs/api/UsersApi.md#usersget) | **Get** /clusters/{clusterId}/users/{username} | Get user
-UsersApi | [**UsersList**](docs/api/UsersApi.md#userslist) | **Get** /clusters/{clusterId}/users | List users
-UsersApi | [**UsersPatch**](docs/api/UsersApi.md#userspatch) | **Patch** /clusters/{clusterId}/users/{username} | Patch user
-UsersApi | [**UsersPost**](docs/api/UsersApi.md#userspost) | **Post** /clusters/{clusterId}/users | Create a user
+BackupLocationsApi | [**BackuplocationsFindById**](docs/api/BackupLocationsApi.md#backuplocationsfindbyid) | **Get** /backup-locations/{backupLocationId} | Retrieve BackupLocation
+BackupLocationsApi | [**BackuplocationsGet**](docs/api/BackupLocationsApi.md#backuplocationsget) | **Get** /backup-locations | Retrieve all BackupLocations
+BackupsApi | [**BackupsFindById**](docs/api/BackupsApi.md#backupsfindbyid) | **Get** /backups/{backupId} | Retrieve Backup
+BackupsApi | [**BackupsGet**](docs/api/BackupsApi.md#backupsget) | **Get** /backups | Retrieve all Backups
+ClustersApi | [**ClustersDelete**](docs/api/ClustersApi.md#clustersdelete) | **Delete** /clusters/{clusterId} | Delete Cluster
+ClustersApi | [**ClustersFindById**](docs/api/ClustersApi.md#clustersfindbyid) | **Get** /clusters/{clusterId} | Retrieve Cluster
+ClustersApi | [**ClustersGet**](docs/api/ClustersApi.md#clustersget) | **Get** /clusters | Retrieve all Clusters
+ClustersApi | [**ClustersPost**](docs/api/ClustersApi.md#clusterspost) | **Post** /clusters | Create Cluster
+ClustersApi | [**ClustersPut**](docs/api/ClustersApi.md#clustersput) | **Put** /clusters/{clusterId} | Ensure Cluster
+VersionsApi | [**VersionsFindById**](docs/api/VersionsApi.md#versionsfindbyid) | **Get** /versions/{versionId} | Retrieve PostgresVersion
+VersionsApi | [**VersionsGet**](docs/api/VersionsApi.md#versionsget) | **Get** /versions | Retrieve all Versions
 
 </details>
 
 ## Documentation For Models
 
-All URIs are relative to *https://api.ionos.com/databases/postgresql*
+All URIs are relative to *https://postgresql.de-txl.ionos.com*
 <details >
 <summary title="Click to toggle">API models list</summary>
 
- - [APIVersion](docs/models/APIVersion)
- - [BackupMetadata](docs/models/BackupMetadata)
- - [BackupResponse](docs/models/BackupResponse)
- - [ClusterBackup](docs/models/ClusterBackup)
- - [ClusterBackupList](docs/models/ClusterBackupList)
- - [ClusterBackupListAllOf](docs/models/ClusterBackupListAllOf)
- - [ClusterList](docs/models/ClusterList)
- - [ClusterListAllOf](docs/models/ClusterListAllOf)
- - [ClusterLogs](docs/models/ClusterLogs)
- - [ClusterLogsInstances](docs/models/ClusterLogsInstances)
- - [ClusterLogsInstancesMessages](docs/models/ClusterLogsInstancesMessages)
+ - [Backup](docs/models/Backup)
+ - [BackupCreate](docs/models/BackupCreate)
+ - [BackupEnsure](docs/models/BackupEnsure)
+ - [BackupLocation](docs/models/BackupLocation)
+ - [BackupLocationRead](docs/models/BackupLocationRead)
+ - [BackupLocationReadList](docs/models/BackupLocationReadList)
+ - [BackupLocationReadListAllOf](docs/models/BackupLocationReadListAllOf)
+ - [BackupRead](docs/models/BackupRead)
+ - [BackupReadList](docs/models/BackupReadList)
+ - [BackupReadListAllOf](docs/models/BackupReadListAllOf)
+ - [Cluster](docs/models/Cluster)
+ - [ClusterCreate](docs/models/ClusterCreate)
+ - [ClusterCreateProperties](docs/models/ClusterCreateProperties)
+ - [ClusterEnsure](docs/models/ClusterEnsure)
  - [ClusterMetadata](docs/models/ClusterMetadata)
- - [ClusterProperties](docs/models/ClusterProperties)
- - [ClusterResponse](docs/models/ClusterResponse)
- - [Connection](docs/models/Connection)
- - [ConnectionPooler](docs/models/ConnectionPooler)
- - [CreateClusterProperties](docs/models/CreateClusterProperties)
- - [CreateClusterRequest](docs/models/CreateClusterRequest)
- - [CreateRestoreRequest](docs/models/CreateRestoreRequest)
- - [DBUser](docs/models/DBUser)
- - [Database](docs/models/Database)
- - [DatabaseItems](docs/models/DatabaseItems)
- - [DatabaseList](docs/models/DatabaseList)
- - [DatabaseProperties](docs/models/DatabaseProperties)
- - [DatabaseResource](docs/models/DatabaseResource)
+ - [ClusterMetadataAllOf](docs/models/ClusterMetadataAllOf)
+ - [ClusterMetadataAllOf1](docs/models/ClusterMetadataAllOf1)
+ - [ClusterRead](docs/models/ClusterRead)
+ - [ClusterReadList](docs/models/ClusterReadList)
+ - [ClusterReadListAllOf](docs/models/ClusterReadListAllOf)
  - [DayOfTheWeek](docs/models/DayOfTheWeek)
- - [DeprecatedPagination](docs/models/DeprecatedPagination)
- - [ErrorMessage](docs/models/ErrorMessage)
- - [ErrorResponse](docs/models/ErrorResponse)
+ - [Error](docs/models/Error)
+ - [ErrorMessages](docs/models/ErrorMessages)
+ - [InstanceConfiguration](docs/models/InstanceConfiguration)
+ - [Links](docs/models/Links)
  - [MaintenanceWindow](docs/models/MaintenanceWindow)
  - [Metadata](docs/models/Metadata)
  - [Pagination](docs/models/Pagination)
- - [PaginationLinks](docs/models/PaginationLinks)
- - [PatchClusterProperties](docs/models/PatchClusterProperties)
- - [PatchClusterRequest](docs/models/PatchClusterRequest)
- - [PatchUserProperties](docs/models/PatchUserProperties)
- - [PoolMode](docs/models/PoolMode)
- - [PostgresVersionList](docs/models/PostgresVersionList)
- - [PostgresVersionListData](docs/models/PostgresVersionListData)
- - [Resource](docs/models/Resource)
- - [ResourceMetadata](docs/models/ResourceMetadata)
- - [ResourceType](docs/models/ResourceType)
- - [State](docs/models/State)
- - [StorageType](docs/models/StorageType)
- - [SynchronizationMode](docs/models/SynchronizationMode)
- - [User](docs/models/User)
- - [UserItems](docs/models/UserItems)
- - [UserList](docs/models/UserList)
- - [UserProperties](docs/models/UserProperties)
- - [UserResource](docs/models/UserResource)
- - [UsersPatchRequest](docs/models/UsersPatchRequest)
+ - [PostgresClusterConnection](docs/models/PostgresClusterConnection)
+ - [PostgresClusterFromBackup](docs/models/PostgresClusterFromBackup)
+ - [PostgresClusterReplicationMode](docs/models/PostgresClusterReplicationMode)
+ - [PostgresClusterStates](docs/models/PostgresClusterStates)
+ - [PostgresUser](docs/models/PostgresUser)
+ - [PostgresVersion](docs/models/PostgresVersion)
+ - [PostgresVersionRead](docs/models/PostgresVersionRead)
+ - [PostgresVersionReadList](docs/models/PostgresVersionReadList)
+ - [PostgresVersionReadListAllOf](docs/models/PostgresVersionReadListAllOf)
 
 
 [[Back to API list]](#documentation-for-api-endpoints) [[Back to Model list]](#documentation-for-models)

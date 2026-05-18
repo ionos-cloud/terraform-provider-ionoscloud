@@ -3,6 +3,7 @@ package tags
 import (
 	"context"
 	"fmt"
+	"maps"
 
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	objstorage "github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2"
@@ -51,13 +52,9 @@ func NewFromMap(m types.Map) KeyValueTags {
 func (t KeyValueTags) Merge(other KeyValueTags) KeyValueTags {
 	result := make(KeyValueTags)
 
-	for k, v := range t {
-		result[k] = v
-	}
+	maps.Copy(result, t)
 
-	for k, v := range other {
-		result[k] = v
-	}
+	maps.Copy(result, other)
 
 	return result
 }

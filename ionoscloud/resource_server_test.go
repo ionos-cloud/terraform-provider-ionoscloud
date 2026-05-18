@@ -1,5 +1,4 @@
 //go:build compute || all || server || enterprise
-// +build compute all server enterprise
 
 package ionoscloud
 

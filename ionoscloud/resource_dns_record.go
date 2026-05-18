@@ -68,7 +68,7 @@ func resourceDNSRecord() *schema.Resource {
 	}
 }
 
-func recordCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func recordCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).DNSClient
 	zoneId := d.Get("zone_id").(string)
 
@@ -86,7 +86,7 @@ func recordCreate(ctx context.Context, d *schema.ResourceData, meta interface{})
 	return recordRead(ctx, d, meta)
 }
 
-func recordRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func recordRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).DNSClient
 	zoneId := d.Get("zone_id").(string)
 	recordId := d.Id()
@@ -99,14 +99,14 @@ func recordRead(ctx context.Context, d *schema.ResourceData, meta interface{}) d
 		}
 		return diagutil.ToDiags(d, fmt.Errorf("error while fetching the DNS Record, zone ID: %s, error: %w", zoneId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
-	tflog.Info(ctx, "retrieved DNS record", map[string]interface{}{"record_id": recordId, "zone_id": zoneId})
+	tflog.Info(ctx, "retrieved DNS record", map[string]any{"record_id": recordId, "zone_id": zoneId})
 	if err := client.SetRecordData(d, record); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
 	return nil
 }
 
-func recordUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func recordUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).DNSClient
 	zoneId := d.Get("zone_id").(string)
 	recordId := d.Id()
@@ -123,7 +123,7 @@ func recordUpdate(ctx context.Context, d *schema.ResourceData, meta interface{})
 	return recordRead(ctx, d, meta)
 }
 
-func recordDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func recordDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).DNSClient
 	zoneId := d.Get("zone_id").(string)
 	recordId := d.Id()
@@ -143,7 +143,7 @@ func recordDelete(ctx context.Context, d *schema.ResourceData, meta interface{})
 	return nil
 }
 
-func recordImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func recordImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	client := meta.(bundleclient.SdkBundle).DNSClient
 
 	// Split the string provided in order to get the IDs for both zone and record.
@@ -162,7 +162,7 @@ func recordImport(ctx context.Context, d *schema.ResourceData, meta interface{})
 		}
 		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to import the DNS Record with ID: %s, zone ID: %s, error: %w", recordId, zoneId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
-	tflog.Info(ctx, "DNS record imported", map[string]interface{}{"record_id": recordId, "zone_id": zoneId})
+	tflog.Info(ctx, "DNS record imported", map[string]any{"record_id": recordId, "zone_id": zoneId})
 	if err := client.SetRecordData(d, record); err != nil {
 		return nil, diagutil.ToError(d, err, nil)
 	}

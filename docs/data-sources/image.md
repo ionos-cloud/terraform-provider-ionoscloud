@@ -1,10 +1,10 @@
 ---
 subcategory: "Compute Engine"
 layout: "ionoscloud"
-page_title: "IonosCloud: image"
+page_title: "IONOS CLOUD: image"
 sidebar_current: "docs-datasource-image"
 description: |-
-  Get information on a IonosCloud Image
+  Get information on a IONOS CLOUD Image
 ---
 
 # ionoscloud_image

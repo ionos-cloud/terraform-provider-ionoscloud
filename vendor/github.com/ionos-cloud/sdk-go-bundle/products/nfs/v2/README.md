@@ -91,7 +91,7 @@ func basicAuthExample() error {
 ### Token Authentication
 There are 2 ways to generate your token:
 
- ### Generate token using sdk for [auth](https://github.com/ionos-cloud/products/auth):
+ ### Generate token using sdk for [auth](https://github.com/ionos-cloud/sdk-go-bundle/products/auth):
 ```golang
     import (
         "context"
