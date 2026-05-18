@@ -7,6 +7,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/list"
+	listschema "github.com/hashicorp/terraform-plugin-framework/list/schema"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -28,6 +31,7 @@ import (
 var (
 	_ resource.ResourceWithImportState = (*bucketResource)(nil)
 	_ resource.ResourceWithConfigure   = (*bucketResource)(nil)
+	_ list.ListResource                = (*bucketResource)(nil)
 )
 
 // NewBucketResource creates a new resource for the bucket resource.
@@ -35,8 +39,17 @@ func NewBucketResource() resource.Resource {
 	return &bucketResource{}
 }
 
+// NewBucketListResource creates a new list resource for the bucket.
+func NewBucketListResource() list.ListResource {
+	return &bucketResource{}
+}
+
 type bucketResource struct {
 	client *objectstorage.Client
+}
+
+type bucketIdentityModel struct {
+	ID types.String `tfsdk:"id"`
 }
 
 type bucketResourceModel struct {
@@ -267,5 +280,85 @@ func (r *bucketResource) Delete(ctx context.Context, req resource.DeleteRequest,
 	if err := r.client.DeleteBucket(ctx, data.Name, data.ObjectLockEnabled, data.ForceDestroy, data.Region, deleteTimeout); err != nil {
 		resp.Diagnostics.AddError("failed to delete bucket", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Name.ValueString()}).Error())
 		return
+	}
+}
+
+// ListResourceConfigSchema returns the schema for the configuration of the bucket list resource.
+func (r *bucketResource) ListResourceConfigSchema(_ context.Context, _ list.ListResourceSchemaRequest, resp *list.ListResourceSchemaResponse) {
+	resp.Schema = listschema.Schema{
+		Attributes: map[string]listschema.Attribute{},
+	}
+}
+
+// List lists all bucket resources.
+func (r *bucketResource) List(ctx context.Context, req list.ListRequest, stream *list.ListResultsStream) {
+	if r.client == nil {
+		var diags diag.Diagnostics
+		diags.AddError("object storage api client not configured", "The provider client is not configured")
+		stream.Results = list.ListResultsStreamDiagnostics(diags)
+		return
+	}
+
+	buckets, err := r.client.ListBuckets(ctx)
+	if err != nil {
+		var diags diag.Diagnostics
+		diags.AddError("failed to list buckets", err.Error())
+		stream.Results = list.ListResultsStreamDiagnostics(diags)
+		return
+	}
+
+	stream.Results = func(push func(list.ListResult) bool) {
+		for _, b := range buckets {
+			result := req.NewListResult(ctx)
+			if b.Name == nil {
+				continue
+			}
+			result.DisplayName = *b.Name
+			identity := bucketIdentityModel{
+				ID: types.StringValue(*b.Name),
+			}
+			result.Diagnostics.Append(result.Identity.Set(ctx, &identity)...)
+
+			if req.IncludeResource {
+				region, err := r.client.GetBucketLocation(ctx, types.StringValue(*b.Name))
+				if err != nil {
+					result.Diagnostics.AddError("failed to get bucket location", err.Error())
+					if !push(result) {
+						return
+					}
+					continue
+				}
+
+				bucketModel, found, err := r.client.GetBucket(ctx, types.StringValue(*b.Name), region)
+				if err != nil {
+					result.Diagnostics.AddError("failed to get bucket details", err.Error())
+					if !push(result) {
+						return
+					}
+					continue
+				}
+				if !found {
+					result.Diagnostics.AddError("bucket not found during detailed fetch", fmt.Sprintf("Bucket %s was not found", *b.Name))
+					if !push(result) {
+						return
+					}
+					continue
+				}
+
+				resourceModel := bucketResourceModel{
+					Name:              bucketModel.Name,
+					Region:            bucketModel.Region,
+					ObjectLockEnabled: bucketModel.ObjectLockEnabled,
+					Tags:              bucketModel.Tags,
+					ID:                bucketModel.Name,
+				}
+
+				result.Diagnostics.Append(result.Resource.Set(ctx, &resourceModel)...)
+			}
+
+			if !push(result) {
+				return
+			}
+		}
 	}
 }

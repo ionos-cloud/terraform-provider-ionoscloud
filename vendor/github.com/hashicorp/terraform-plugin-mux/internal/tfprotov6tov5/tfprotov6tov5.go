@@ -1,4 +1,4 @@
-// Copyright (c) HashiCorp, Inc.
+// Copyright IBM Corp. 2020, 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package tfprotov6tov5
@@ -195,6 +195,12 @@ func EphemeralResourceMetadata(in tfprotov6.EphemeralResourceMetadata) tfprotov5
 	}
 }
 
+func ListResourceMetadata(in tfprotov6.ListResourceMetadata) tfprotov5.ListResourceMetadata {
+	return tfprotov5.ListResourceMetadata{
+		TypeName: in.TypeName,
+	}
+}
+
 func Function(in *tfprotov6.Function) *tfprotov5.Function {
 	if in == nil {
 		return nil
@@ -300,9 +306,11 @@ func GetMetadataResponse(in *tfprotov6.GetMetadataResponse) *tfprotov5.GetMetada
 	}
 
 	resp := &tfprotov5.GetMetadataResponse{
+		Actions:            make([]tfprotov5.ActionMetadata, 0, len(in.Actions)),
 		DataSources:        make([]tfprotov5.DataSourceMetadata, 0, len(in.DataSources)),
 		Diagnostics:        Diagnostics(in.Diagnostics),
 		EphemeralResources: make([]tfprotov5.EphemeralResourceMetadata, 0, len(in.Resources)),
+		ListResources:      make([]tfprotov5.ListResourceMetadata, 0, len(in.ListResources)),
 		Functions:          make([]tfprotov5.FunctionMetadata, 0, len(in.Functions)),
 		Resources:          make([]tfprotov5.ResourceMetadata, 0, len(in.Resources)),
 		ServerCapabilities: ServerCapabilities(in.ServerCapabilities),
@@ -316,12 +324,20 @@ func GetMetadataResponse(in *tfprotov6.GetMetadataResponse) *tfprotov5.GetMetada
 		resp.EphemeralResources = append(resp.EphemeralResources, EphemeralResourceMetadata(ephemeralResource))
 	}
 
+	for _, listResource := range in.ListResources {
+		resp.ListResources = append(resp.ListResources, ListResourceMetadata(listResource))
+	}
+
 	for _, function := range in.Functions {
 		resp.Functions = append(resp.Functions, FunctionMetadata(function))
 	}
 
 	for _, resource := range in.Resources {
 		resp.Resources = append(resp.Resources, ResourceMetadata(resource))
+	}
+
+	for _, action := range in.Actions {
+		resp.Actions = append(resp.Actions, ActionMetadata(action))
 	}
 
 	return resp
@@ -364,6 +380,18 @@ func GetProviderSchemaResponse(in *tfprotov6.GetProviderSchemaResponse) (*tfprot
 		ephemeralResourceSchemas[k] = v5Schema
 	}
 
+	listResourceSchemas := make(map[string]*tfprotov5.Schema, len(in.ListResourceSchemas))
+
+	for k, v := range in.ListResourceSchemas {
+		v5Schema, err := Schema(v)
+
+		if err != nil {
+			return nil, fmt.Errorf("unable to convert list resource %q schema: %w", k, err)
+		}
+
+		listResourceSchemas[k] = v5Schema
+	}
+
 	functions := make(map[string]*tfprotov5.Function, len(in.Functions))
 
 	for name, function := range in.Functions {
@@ -394,10 +422,24 @@ func GetProviderSchemaResponse(in *tfprotov6.GetProviderSchemaResponse) (*tfprot
 		resourceSchemas[k] = v5Schema
 	}
 
+	actionSchemas := make(map[string]*tfprotov5.ActionSchema, len(in.ActionSchemas))
+
+	for k, v := range in.ActionSchemas {
+		actionSchema, err := ActionSchema(v)
+
+		if err != nil {
+			return nil, fmt.Errorf("unable to convert action %q schema: %w", k, err)
+		}
+
+		actionSchemas[k] = actionSchema
+	}
+
 	return &tfprotov5.GetProviderSchemaResponse{
+		ActionSchemas:            actionSchemas,
 		DataSourceSchemas:        dataSourceSchemas,
 		Diagnostics:              Diagnostics(in.Diagnostics),
 		EphemeralResourceSchemas: ephemeralResourceSchemas,
+		ListResourceSchemas:      listResourceSchemas,
 		Functions:                functions,
 		Provider:                 provider,
 		ProviderMeta:             providerMeta,
@@ -768,16 +810,17 @@ func SchemaAttribute(in *tfprotov6.SchemaAttribute) (*tfprotov5.SchemaAttribute,
 	}
 
 	return &tfprotov5.SchemaAttribute{
-		Computed:        in.Computed,
-		Deprecated:      in.Deprecated,
-		Description:     in.Description,
-		DescriptionKind: StringKind(in.DescriptionKind),
-		Name:            in.Name,
-		Optional:        in.Optional,
-		Required:        in.Required,
-		Sensitive:       in.Sensitive,
-		Type:            in.Type,
-		WriteOnly:       in.WriteOnly,
+		Computed:           in.Computed,
+		Deprecated:         in.Deprecated,
+		DeprecationMessage: in.DeprecationMessage,
+		Description:        in.Description,
+		DescriptionKind:    StringKind(in.DescriptionKind),
+		Name:               in.Name,
+		Optional:           in.Optional,
+		Required:           in.Required,
+		Sensitive:          in.Sensitive,
+		Type:               in.Type,
+		WriteOnly:          in.WriteOnly,
 	}, nil
 }
 
@@ -819,12 +862,13 @@ func SchemaBlock(in *tfprotov6.SchemaBlock) (*tfprotov5.SchemaBlock, error) {
 	}
 
 	return &tfprotov5.SchemaBlock{
-		Attributes:      attrs,
-		BlockTypes:      nestedBlocks,
-		Deprecated:      in.Deprecated,
-		Description:     in.Description,
-		DescriptionKind: StringKind(in.DescriptionKind),
-		Version:         in.Version,
+		Attributes:         attrs,
+		BlockTypes:         nestedBlocks,
+		Deprecated:         in.Deprecated,
+		DeprecationMessage: in.DeprecationMessage,
+		Description:        in.Description,
+		DescriptionKind:    StringKind(in.DescriptionKind),
+		Version:            in.Version,
 	}, nil
 }
 
@@ -1035,6 +1079,225 @@ func ValidateResourceTypeConfigResponse(in *tfprotov6.ValidateResourceConfigResp
 	}
 
 	return &tfprotov5.ValidateResourceTypeConfigResponse{
+		Diagnostics: Diagnostics(in.Diagnostics),
+	}
+}
+
+func ValidateListResourceConfigRequest(in *tfprotov6.ValidateListResourceConfigRequest) *tfprotov5.ValidateListResourceConfigRequest {
+	if in == nil {
+		return nil
+	}
+
+	return &tfprotov5.ValidateListResourceConfigRequest{
+		Config:   DynamicValue(in.Config),
+		TypeName: in.TypeName,
+	}
+}
+
+func ValidateListResourceConfigResponse(in *tfprotov6.ValidateListResourceConfigResponse) *tfprotov5.ValidateListResourceConfigResponse {
+	if in == nil {
+		return nil
+	}
+
+	return &tfprotov5.ValidateListResourceConfigResponse{
+		Diagnostics: Diagnostics(in.Diagnostics),
+	}
+}
+
+func ListResourceRequest(in *tfprotov6.ListResourceRequest) *tfprotov5.ListResourceRequest {
+	if in == nil {
+		return nil
+	}
+
+	return &tfprotov5.ListResourceRequest{
+		Config:   DynamicValue(in.Config),
+		TypeName: in.TypeName,
+	}
+}
+
+func ListResourceServerStream(in *tfprotov6.ListResourceServerStream) *tfprotov5.ListResourceServerStream {
+	if in == nil {
+		return nil
+	}
+
+	return &tfprotov5.ListResourceServerStream{
+		Results: func(yield func(tfprotov5.ListResourceResult) bool) {
+			for res := range in.Results {
+				if !yield(ListResourceResult(res)) {
+					break
+				}
+			}
+		},
+	}
+}
+
+func ListResourceResult(in tfprotov6.ListResourceResult) tfprotov5.ListResourceResult {
+	return tfprotov5.ListResourceResult{
+		DisplayName: in.DisplayName,
+		Resource:    DynamicValue(in.Resource),
+		Identity:    ResourceIdentityData(in.Identity),
+		Diagnostics: Diagnostics(in.Diagnostics),
+	}
+}
+
+func ActionMetadata(in tfprotov6.ActionMetadata) tfprotov5.ActionMetadata {
+	return tfprotov5.ActionMetadata{
+		TypeName: in.TypeName,
+	}
+}
+
+func ActionSchema(in *tfprotov6.ActionSchema) (*tfprotov5.ActionSchema, error) {
+	if in == nil {
+		return nil, nil
+	}
+
+	v5Schema, err := Schema(in.Schema)
+	if err != nil {
+		return nil, err
+	}
+
+	actionSchema := &tfprotov5.ActionSchema{
+		Schema: v5Schema,
+	}
+
+	return actionSchema, nil
+}
+
+func ValidateActionConfigRequest(in *tfprotov6.ValidateActionConfigRequest) *tfprotov5.ValidateActionConfigRequest {
+	if in == nil {
+		return nil
+	}
+
+	return &tfprotov5.ValidateActionConfigRequest{
+		Config:     DynamicValue(in.Config),
+		ActionType: in.ActionType,
+	}
+}
+
+func ValidateActionConfigResponse(in *tfprotov6.ValidateActionConfigResponse) *tfprotov5.ValidateActionConfigResponse {
+	if in == nil {
+		return nil
+	}
+
+	return &tfprotov5.ValidateActionConfigResponse{
+		Diagnostics: Diagnostics(in.Diagnostics),
+	}
+}
+
+func PlanActionRequest(in *tfprotov6.PlanActionRequest) *tfprotov5.PlanActionRequest {
+	if in == nil {
+		return nil
+	}
+
+	return &tfprotov5.PlanActionRequest{
+		ActionType:         in.ActionType,
+		Config:             DynamicValue(in.Config),
+		ClientCapabilities: PlanActionClientCapabilities(in.ClientCapabilities),
+	}
+}
+
+func PlanActionClientCapabilities(in *tfprotov6.PlanActionClientCapabilities) *tfprotov5.PlanActionClientCapabilities {
+	if in == nil {
+		return nil
+	}
+
+	resp := &tfprotov5.PlanActionClientCapabilities{
+		DeferralAllowed: in.DeferralAllowed,
+	}
+
+	return resp
+}
+
+func PlanActionResponse(in *tfprotov6.PlanActionResponse) *tfprotov5.PlanActionResponse {
+	if in == nil {
+		return nil
+	}
+
+	return &tfprotov5.PlanActionResponse{
+		Diagnostics: Diagnostics(in.Diagnostics),
+		Deferred:    Deferred(in.Deferred),
+	}
+}
+
+func InvokeActionClientCapabilities(in *tfprotov6.InvokeActionClientCapabilities) *tfprotov5.InvokeActionClientCapabilities {
+	if in == nil {
+		return nil
+	}
+
+	resp := &tfprotov5.InvokeActionClientCapabilities{}
+
+	return resp
+}
+
+func InvokeActionRequest(in *tfprotov6.InvokeActionRequest) *tfprotov5.InvokeActionRequest {
+	if in == nil {
+		return nil
+	}
+
+	return &tfprotov5.InvokeActionRequest{
+		ActionType:         in.ActionType,
+		ClientCapabilities: InvokeActionClientCapabilities(in.ClientCapabilities),
+		Config:             DynamicValue(in.Config),
+	}
+}
+
+func InvokeActionServerStream(in *tfprotov6.InvokeActionServerStream) *tfprotov5.InvokeActionServerStream {
+	if in == nil {
+		return nil
+	}
+
+	return &tfprotov5.InvokeActionServerStream{
+		Events: func(yield func(tfprotov5.InvokeActionEvent) bool) {
+			for res := range in.Events {
+				if !yield(InvokeActionEvent(res)) {
+					break
+				}
+			}
+		},
+	}
+}
+
+func InvokeActionEvent(in tfprotov6.InvokeActionEvent) tfprotov5.InvokeActionEvent {
+	switch event := (in.Type).(type) {
+	case tfprotov6.ProgressInvokeActionEventType:
+		return tfprotov5.InvokeActionEvent{
+			Type: tfprotov5.ProgressInvokeActionEventType{
+				Message: event.Message,
+			},
+		}
+	case tfprotov6.CompletedInvokeActionEventType:
+		return tfprotov5.InvokeActionEvent{
+			Type: tfprotov5.CompletedInvokeActionEventType{
+				Diagnostics: Diagnostics(event.Diagnostics),
+			},
+		}
+	}
+
+	// It is not currently possible to create tfprotov6.InvokeActionEventType
+	// implementations outside the terraform-plugin-go module. If this panic was reached,
+	// it implies that a new event type was introduced and needs to be implemented
+	// as a new case above.
+	panic(fmt.Sprintf("unimplemented tfprotov6.InvokeActionEventType type: %T", in.Type))
+}
+
+func GenerateResourceConfigRequest(in *tfprotov6.GenerateResourceConfigRequest) *tfprotov5.GenerateResourceConfigRequest {
+	if in == nil {
+		return nil
+	}
+
+	return &tfprotov5.GenerateResourceConfigRequest{
+		TypeName: in.TypeName,
+		State:    DynamicValue(in.State),
+	}
+}
+
+func GenerateResourceConfigResponse(in *tfprotov6.GenerateResourceConfigResponse) *tfprotov5.GenerateResourceConfigResponse {
+	if in == nil {
+		return nil
+	}
+
+	return &tfprotov5.GenerateResourceConfigResponse{
+		Config:      DynamicValue(in.Config),
 		Diagnostics: Diagnostics(in.Diagnostics),
 	}
 }

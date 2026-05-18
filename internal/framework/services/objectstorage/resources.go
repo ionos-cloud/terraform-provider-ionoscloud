@@ -1,6 +1,9 @@
 package objectstorage
 
-import "github.com/hashicorp/terraform-plugin-framework/resource"
+import (
+	"github.com/hashicorp/terraform-plugin-framework/list"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
+)
 
 // Resources returns the list of resources for the objectstorage package.
 func Resources() []func() resource.Resource {
@@ -16,5 +19,12 @@ func Resources() []func() resource.Resource {
 		NewBucketCorsConfigurationResource,
 		NewBucketLifecycleConfigurationResource,
 		NewBucketWebsiteConfigurationResource,
+	}
+}
+
+// ListResources returns the list of list resources for the objectstorage package.
+func ListResources() []func() list.ListResource {
+	return []func() list.ListResource{
+		NewBucketListResource,
 	}
 }
