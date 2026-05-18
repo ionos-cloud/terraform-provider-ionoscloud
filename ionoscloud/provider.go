@@ -80,7 +80,7 @@ func Provider() *schema.Provider {
 				Optional:    true,
 				Default:     constant.DefaultS3Region,
 				DefaultFunc: schema.EnvDefaultFunc("IONOS_S3_REGION", nil),
-				Description: "Region for IONOS Object Storage operations.",
+				Description: "Region for IONOS Contract Owned Object Storage operations.",
 			},
 			"insecure": {
 				Type:        schema.TypeBool,

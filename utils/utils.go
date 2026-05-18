@@ -28,6 +28,7 @@ import (
 )
 
 const DefaultTimeout = 60 * time.Minute
+const BucketDefaultTimeout = 10 * time.Minute
 
 // CreateTransport - creates customizable transport for http clients
 func CreateTransport(insecure bool) *http.Transport {

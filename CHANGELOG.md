@@ -9,13 +9,15 @@
 - Bump `github.com/hashicorp/hc-install` from v0.9.2 to v0.9.5 to fix expired HashiCorp OpenPGP key that caused acceptance tests to fail with `openpgp: key expired`.
 - Bump `github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2` to v2.1.0
 
+### Features
+- New resource: `ionoscloud_user_object_storage_bucket` for user-owned IONOS object storage buckets (supports tags, object lock, force destroy).
+- New data source: `ionoscloud_user_object_storage_bucket` to look up user-owned buckets by name and region.
+- Add `size_unit` attribute to `ionoscloud_nfs_cluster` resource and data source, with supported values `TiB` and `GiB`.
+- Allow updates to the `synchronization_mode` field for `ionoscloud_pg_cluster` resource.
+
 ### Documentation
 - Improve share docs
 - Align brand capitalisation to "IONOS CLOUD" across user-facing docs, schema descriptions, and error messages
-
-### Features
-- Add `size_unit` attribute to `ionoscloud_nfs_cluster` resource and data source, with supported values `TiB` and `GiB`.
-- Allow updates to the `synchronization_mode` field for `ionoscloud_pg_cluster` resource.
 
 ### Enhancements
 - Add validation error when update-only attributes are set during snapshot creation
