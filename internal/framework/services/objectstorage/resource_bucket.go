@@ -7,11 +7,13 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/list"
 	listschema "github.com/hashicorp/terraform-plugin-framework/list/schema"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
@@ -21,6 +23,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/models"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/tags"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstorage"
@@ -31,7 +34,9 @@ import (
 var (
 	_ resource.ResourceWithImportState = (*bucketResource)(nil)
 	_ resource.ResourceWithConfigure   = (*bucketResource)(nil)
+	_ resource.ResourceWithIdentity    = (*bucketResource)(nil)
 	_ list.ListResource                = (*bucketResource)(nil)
+	_ list.ListResourceWithConfigure   = (*bucketResource)(nil)
 )
 
 // NewBucketResource creates a new resource for the bucket resource.
@@ -48,10 +53,6 @@ type bucketResource struct {
 	client *objectstorage.Client
 }
 
-type bucketIdentityModel struct {
-	ID types.String `tfsdk:"id"`
-}
-
 type bucketResourceModel struct {
 	Name              types.String   `tfsdk:"name"`
 	Region            types.String   `tfsdk:"region"`
@@ -65,6 +66,17 @@ type bucketResourceModel struct {
 // Metadata returns the metadata for the bucket resource.
 func (r *bucketResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_s3_bucket"
+}
+
+// IdentitySchema returns the identity schema for the bucket resource.
+func (r *bucketResource) IdentitySchema(_ context.Context, _ resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
+	resp.IdentitySchema = identityschema.Schema{
+		Attributes: map[string]identityschema.Attribute{
+			"id": identityschema.StringAttribute{
+				RequiredForImport: true,
+			},
+		},
+	}
 }
 
 // Schema returns the schema for the bucket resource.
@@ -307,6 +319,13 @@ func (r *bucketResource) List(ctx context.Context, req list.ListRequest, stream 
 		return
 	}
 
+	timeoutsAttrTypes := map[string]attr.Type{
+		"create": types.StringType,
+		"read":   types.StringType,
+		"update": types.StringType,
+		"delete": types.StringType,
+	}
+
 	stream.Results = func(push func(list.ListResult) bool) {
 		for _, b := range buckets {
 			result := req.NewListResult(ctx)
@@ -314,7 +333,8 @@ func (r *bucketResource) List(ctx context.Context, req list.ListRequest, stream 
 				continue
 			}
 			result.DisplayName = *b.Name
-			identity := bucketIdentityModel{
+
+			identity := models.Identity{
 				ID: types.StringValue(*b.Name),
 			}
 			result.Diagnostics.Append(result.Identity.Set(ctx, &identity)...)
@@ -346,11 +366,13 @@ func (r *bucketResource) List(ctx context.Context, req list.ListRequest, stream 
 				}
 
 				resourceModel := bucketResourceModel{
+					ID:                bucketModel.Name,
 					Name:              bucketModel.Name,
 					Region:            bucketModel.Region,
 					ObjectLockEnabled: bucketModel.ObjectLockEnabled,
+					ForceDestroy:      types.BoolNull(),
 					Tags:              bucketModel.Tags,
-					ID:                bucketModel.Name,
+					Timeouts:          timeouts.Value{Object: types.ObjectNull(timeoutsAttrTypes)},
 				}
 
 				result.Diagnostics.Append(result.Resource.Set(ctx, &resourceModel)...)

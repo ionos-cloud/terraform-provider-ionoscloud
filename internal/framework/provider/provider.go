@@ -260,6 +260,7 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 	resp.DataSourceData = client
 	resp.EphemeralResourceData = client
 	resp.ResourceData = client
+	resp.ListResourceData = client
 
 	diagutil.SetupContractNumberResolver(clientOpts.ContractNumber.ValueString(), token, func() string { //nolint:contextcheck
 		return contractService.GetContractNumber(ctx, client)
