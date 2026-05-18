@@ -13,9 +13,9 @@
 
 ![Alt text](.github/IONOS.CLOUD.BLU.svg?raw=true "Title")
 
-# IONOS Cloud Terraform Provider
+# IONOS CLOUD Terraform Provider
 
-The IonosCloud provider gives the ability to deploy and configure resources using the IonosCloud APIs.
+The IONOS CLOUD provider gives the ability to deploy and configure resources using the IONOS CLOUD APIs.
 
 ---
 
@@ -130,14 +130,14 @@ credentials set for the `currentProfile`. All endpoints defined in the `currentP
 
 </details>
 
-See the [IonosCloud Provider documentation](https://registry.terraform.io/providers/ionos-cloud/ionoscloud/latest/docs) for more details.
+See the [IONOS CLOUD Provider documentation](https://registry.terraform.io/providers/ionos-cloud/ionoscloud/latest/docs) for more details.
 
 ## Environment Variables
 
 | Environment Variable    | Description                                                                                                                                                              |
 |-------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `IONOS_USERNAME`        | Specify the username used to login, to authenticate against the IONOS Cloud API                                                                                          |
-| `IONOS_PASSWORD`        | Specify the password used to login, to authenticate against the IONOS Cloud API                                                                                          |
+| `IONOS_USERNAME`        | Specify the username used to login, to authenticate against the IONOS CLOUD API                                                                                          |
+| `IONOS_PASSWORD`        | Specify the password used to login, to authenticate against the IONOS CLOUD API                                                                                          |
 | `IONOS_TOKEN`           | Specify the token used to login, if a token is being used instead of username and password                                                                               |
 | `IONOS_API_URL`         | Specify the API URL. It will overwrite the API endpoint default value `api.ionos.com`. It is not necessary to override this value unless you have special routing config |
 | `IONOS_LOG_LEVEL`       | Specify the Log Level used to log messages. Possible values: Off, Debug, Trace                                                                                           |
@@ -235,7 +235,7 @@ now you can see the response body incl. api error message:
 
   ### How to Run Tests Locally
 
-  ⚠️ **Warning:** Acceptance tests provision resources in the IONOS Cloud, and often may involve extra billing charges on your account.
+  ⚠️ **Warning:** Acceptance tests provision resources in the IONOS CLOUD, and often may involve extra billing charges on your account.
 
   In order to test the provider, you can simply run:
 

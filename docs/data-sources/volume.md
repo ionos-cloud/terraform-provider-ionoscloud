@@ -1,10 +1,10 @@
 ---
 subcategory: "Compute Engine"
 layout: "ionoscloud"
-page_title: "IonosCloud : ionoscloud_volume"
+page_title: "IONOS CLOUD : ionoscloud_volume"
 sidebar_current: "docs-ionoscloud-datasource-volume"
 description: |-
-  Get information on a Ionos Cloud Volume
+  Get information on a IONOS CLOUD Volume
 ---
 
 # ionoscloud_volume
@@ -47,7 +47,7 @@ The following attributes are returned by the datasource:
 * `disk_type` - The volume type: HDD or SSD.
 * `bus` - The bus type of the volume: VIRTIO or IDE.
 * `size` -  The size of the volume in GB.
-* `ssh_key_path` -  List of paths to files containing a public SSH key that will be injected into IonosCloud provided Linux images. Also accepts ssh keys directly.
+* `ssh_key_path` -  List of paths to files containing a public SSH key that will be injected into IONOS CLOUD provided Linux images. Also accepts ssh keys directly.
 * `sshkey` - The associated public SSH key.
 * `image_password` - Required if `sshkey_path` is not provided.
 * `image` - The image or snapshot UUID.

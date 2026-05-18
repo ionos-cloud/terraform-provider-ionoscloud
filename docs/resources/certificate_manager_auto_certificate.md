@@ -1,7 +1,7 @@
 ---
 subcategory: "Certificate Manager Service"
 layout: "ionoscloud"
-page_title: "IonosCloud: ionoscloud_auto_certificate"
+page_title: "IONOS CLOUD: ionoscloud_auto_certificate"
 sidebar_current: "docs-resource-auto_certificate"
 description: |-
   Creates and manages Certificate Manager AutoCertificate objects.
@@ -39,10 +39,10 @@ resource "ionoscloud_auto_certificate" "example" {
 
 * `provider_id` - (Required)[string] The certificate provider used to issue the certificates.
 * `location` - (Required)[string] The location of the auto-certificate. Available locations: `de/fra`, `de/fra/2`.
-* `common_name` - (Required)[string] The common name (DNS) of the certificate to issue. The common name needs to be part of a zone in IONOS Cloud DNS.
+* `common_name` - (Required)[string] The common name (DNS) of the certificate to issue. The common name needs to be part of a zone in IONOS CLOUD DNS.
 * `key_algorithm` - (Required)[string] The key algorithm used to generate the certificate.
 * `name` - (Required)[string] A certificate name used for management purposes.
-* `subject_alternative_names` - (Optional)[list][string] Optional additional names to be added to the issued certificate. The additional names needs to be part of a zone in IONOS Cloud DNS.
+* `subject_alternative_names` - (Optional)[list][string] Optional additional names to be added to the issued certificate. The additional names needs to be part of a zone in IONOS CLOUD DNS.
 * `last_issued_certificate_id` - (Computed)[string] The ID of the last certificate that was issued.
 
 ## Import

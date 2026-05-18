@@ -151,7 +151,7 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta any) 
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("an error occurred while fetching IonosCloud images %w", err))
+		return diag.FromErr(fmt.Errorf("an error occurred while fetching IONOS CLOUD images %w", err))
 	}
 
 	// if version value is present then concatenate name - version

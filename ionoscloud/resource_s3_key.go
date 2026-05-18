@@ -246,7 +246,7 @@ func resourceS3KeyDelete(ctx context.Context, d *schema.ResourceData, meta any) 
 			tflog.Info(ctx, "S3 key not yet deleted, retrying")
 		case <-ctx.Done():
 			tflog.Info(ctx, "S3 key delete timed out")
-			return diagutil.ToDiags(d, fmt.Errorf("object storage key delete timed out, your key will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"), nil)
+			return diagutil.ToDiags(d, fmt.Errorf("object storage key delete timed out, your key will still probably be deleted after some time but the terraform state won't reflect that; check your IONOS CLOUD account for updates"), nil)
 		}
 	}
 

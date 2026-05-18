@@ -1,15 +1,15 @@
 ---
 subcategory: "Container Registry Token"
 layout: "ionoscloud"
-page_title: "IonosCloud: ionoscloud_container_registry_token"
+page_title: "IONOS CLOUD: ionoscloud_container_registry_token"
 sidebar_current: "docs-resource-ionoscloud_container_registry_token"
 description: |-
-  Creates and manages IonosCloud Container Registry Token.
+  Creates and manages IONOS CLOUD Container Registry Token.
 ---
 
 # ionoscloud_container_registry_token
 
-Manages an [Container Registry Token](https://docs.ionos.com/cloud/containers/private-container-registry/overview) on IonosCloud.
+Manages an [Container Registry Token](https://docs.ionos.com/cloud/containers/private-container-registry/overview) on IONOS CLOUD.
 
 ## Example Usage
 

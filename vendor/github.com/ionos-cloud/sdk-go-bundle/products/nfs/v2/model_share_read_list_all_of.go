@@ -3,7 +3,7 @@
  *
  * The RESTful API for managing Network File Storage.
  *
- * API version: 0.1.3
+ * API version: 0.1.6
  * Contact: support@cloud.ionos.com
  */
 
@@ -20,13 +20,13 @@ var _ MappedNullable = &ShareReadListAllOf{}
 
 // ShareReadListAllOf struct for ShareReadListAllOf
 type ShareReadListAllOf struct {
-	// The Share identifier (UUID)
+	// ID of the list of Share resources.
 	Id string `json:"id"`
-	// The resource type
+	// The type of the resource.
 	Type string `json:"type"`
-	// The URL of the Share.
+	// The URL of the list of Share resources.
 	Href string `json:"href"`
-	// The list of share resources.
+	// The list of Share resources.
 	Items []ShareRead `json:"items,omitempty"`
 }
 
@@ -154,6 +154,14 @@ func (o *ShareReadListAllOf) HasItems() bool {
 // SetItems gets a reference to the given []ShareRead and assigns it to the Items field.
 func (o *ShareReadListAllOf) SetItems(v []ShareRead) {
 	o.Items = v
+}
+
+func (o ShareReadListAllOf) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
 }
 
 func (o ShareReadListAllOf) ToMap() (map[string]interface{}, error) {

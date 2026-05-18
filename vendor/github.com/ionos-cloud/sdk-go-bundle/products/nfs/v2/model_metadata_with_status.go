@@ -3,7 +3,7 @@
  *
  * The RESTful API for managing Network File Storage.
  *
- * API version: 0.1.3
+ * API version: 0.1.6
  * Contact: support@cloud.ionos.com
  */
 
@@ -36,9 +36,9 @@ type MetadataWithStatus struct {
 	LastModifiedByUserId *string `json:"lastModifiedByUserId,omitempty"`
 	// Unique name of the resource.
 	ResourceURN *string `json:"resourceURN,omitempty"`
-	// The status of the resource can be one of the following:  * `AVAILABLE` - The resource exists and is healthy. * `PROVISIONING` - The resource is being created or updated. * `DESTROYING` - A delete command was issued, and the resource is being deleted. * `FAILED` - The resource failed, with details provided in `statusMessage`.
+	// The status of the resource can be one of the following: * `AVAILABLE` - The resource exists and is healthy. * `PROVISIONING` - The resource is being created or updated. * `DESTROYING` - A delete command was issued, and the resource is being deleted. * `FAILED` - The resource failed, with details provided in `statusMessage`.
 	Status string `json:"status"`
-	// The message of the failure if the status is `FAILED`.
+	// The error message when the status is `FAILED`.
 	StatusMessage *string `json:"statusMessage,omitempty"`
 }
 
@@ -340,6 +340,14 @@ func (o *MetadataWithStatus) HasStatusMessage() bool {
 // SetStatusMessage gets a reference to the given string and assigns it to the StatusMessage field.
 func (o *MetadataWithStatus) SetStatusMessage(v string) {
 	o.StatusMessage = &v
+}
+
+func (o MetadataWithStatus) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
 }
 
 func (o MetadataWithStatus) ToMap() (map[string]interface{}, error) {

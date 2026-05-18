@@ -1,7 +1,7 @@
 ---
 subcategory: "Network Load Balancer"
 layout: "ionoscloud"
-page_title: "IonosCloud : ionoscloud_networkloadbalancer"
+page_title: "IONOS CLOUD : ionoscloud_networkloadbalancer"
 sidebar_current: "docs-ionoscloud-datasource-networkloadbalancer"
 description: |-
   Get information on a Network Load Balancer

@@ -1,15 +1,15 @@
 ---
 subcategory: "Managed Kubernetes"
 layout: "ionoscloud"
-page_title: "IonosCloud: k8s_cluster"
+page_title: "IONOS CLOUD: k8s_cluster"
 sidebar_current: "docs-resource-k8s-cluster"
 description: |-
-  Creates and manages IonosCloud Kubernetes Clusters.
+  Creates and manages IONOS CLOUD Kubernetes Clusters.
 ---
 
 # ionoscloud_k8s_cluster
 
-Manages a [Managed Kubernetes Cluster](https://docs.ionos.com/cloud/containers/managed-kubernetes/overview) on IonosCloud.
+Manages a [Managed Kubernetes Cluster](https://docs.ionos.com/cloud/containers/managed-kubernetes/overview) on IONOS CLOUD.
 
 ## Example Usage
 

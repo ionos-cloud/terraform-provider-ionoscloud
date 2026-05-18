@@ -1,10 +1,10 @@
 ---
 subcategory: "Object storage management"
 layout: "ionoscloud"
-page_title: "IonosCloud : object_storage_accesskey"
+page_title: "IONOS CLOUD : object_storage_accesskey"
 sidebar_current: "docs-datasource-object_storage_accesskey"
 description: |-
-  Get information on a IonosCloud Object storage Accesskey
+  Get information on a IONOS CLOUD Object storage Accesskey
 ---
 
 # ionoscloud_object_storage_accesskey

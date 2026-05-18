@@ -1,10 +1,10 @@
 ---
 subcategory: "VPN"
 layout: "ionoscloud"
-page_title: "IonosCloud: ionoscloud_vpn_ipsec_tunnel"
+page_title: "IONOS CLOUD: ionoscloud_vpn_ipsec_tunnel"
 sidebar_current: "docs-ionoscloud-datasource-vpn-ipsec-tunnel"
 description: |-
-  Reads IonosCloud VPN IPSec Gateway Tunnel objects.
+  Reads IONOS CLOUD VPN IPSec Gateway Tunnel objects.
 ---
 
 # ionoscloud_vpn_ipsec_tunnel
@@ -67,6 +67,6 @@ The following attributes are returned by the datasource:
 * `auth` - Properties with all data needed to define IPSec Authentication.
     * `method` - The authentication method to use for IPSec Authentication.
 * `cloud_network_cidrs` - The network CIDRs on the "Left" side that are allowed to connect to the IPSec
-  tunnel, i.e. the CIDRs within your IONOS Cloud LAN. Specify "0.0.0.0/0" or "::/0" for all addresses.
+  tunnel, i.e. the CIDRs within your IONOS CLOUD LAN. Specify "0.0.0.0/0" or "::/0" for all addresses.
 * `peer_network_cidrs` - The network CIDRs on the "Right" side that are allowed to connect to the IPSec
   tunnel. Specify "0.0.0.0/0" or "::/0" for all addresses.

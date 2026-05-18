@@ -284,7 +284,7 @@ func resourcek8sClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 			tflog.Info(ctx, "k8s cluster not ready, retrying")
 		case <-ctx.Done():
 			tflog.Info(ctx, "k8s cluster creation timed out")
-			return diagutil.ToDiags(d, fmt.Errorf("k8s cluster creation timed out! WARNING: your k8s cluster will still probably be created after some time but the terraform state wont reflect that; check your Ionos Cloud account for updates"), nil)
+			return diagutil.ToDiags(d, fmt.Errorf("k8s cluster creation timed out! WARNING: your k8s cluster will still probably be created after some time but the terraform state won't reflect that; check your IONOS CLOUD account for updates"), nil)
 		}
 
 	}
@@ -454,7 +454,7 @@ func resourcek8sClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		case <-time.After(constant.SleepInterval):
 			tflog.Info(ctx, "k8s cluster not ready, retrying")
 		case <-ctx.Done():
-			return diagutil.ToDiags(d, fmt.Errorf("k8s cluster update timed out! WARNING: your k8s cluster will still probably be created after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"), nil)
+			return diagutil.ToDiags(d, fmt.Errorf("k8s cluster update timed out! WARNING: your k8s cluster will still probably be created after some time but the terraform state won't reflect that; check your IONOS CLOUD account for updates"), nil)
 		}
 
 	}
@@ -498,7 +498,7 @@ func resourcek8sClusterDelete(ctx context.Context, d *schema.ResourceData, meta 
 		case <-time.After(constant.SleepInterval):
 			tflog.Info(ctx, "k8s cluster not yet deleted, retrying")
 		case <-ctx.Done():
-			return diagutil.ToDiags(d, fmt.Errorf("k8s cluster deletion timed out! WARNING: your k8s cluster will still probably be deleted after some time but the terraform state won't reflect that; check your Ionos Cloud account for updates"), nil)
+			return diagutil.ToDiags(d, fmt.Errorf("k8s cluster deletion timed out! WARNING: your k8s cluster will still probably be deleted after some time but the terraform state won't reflect that; check your IONOS CLOUD account for updates"), nil)
 		}
 	}
 

@@ -1,7 +1,7 @@
 ---
 subcategory: "VPN"
 layout: "ionoscloud"
-page_title: "IonosCloud: ionoscloud_vpn_ipsec_tunnel"
+page_title: "IONOS CLOUD: ionoscloud_vpn_ipsec_tunnel"
 sidebar_current: "docs-resource-vpn-ipsec-tunnel"
 description: |-
   IPSec Gateway Tunnel
@@ -10,7 +10,7 @@ description: |-
 # ionoscloud_vpn_ipsec_tunnel
 
 An IPSec Gateway Tunnel resource manages the creation, management, and deletion of VPN IPSec Gateway Tunnels within the
-IONOS Cloud infrastructure. This resource facilitates the creation of VPN IPSec Gateway Tunnels, enabling secure
+IONOS CLOUD infrastructure. This resource facilitates the creation of VPN IPSec Gateway Tunnels, enabling secure
 connections between your network resources.
 
 ## Usage example
@@ -233,7 +233,7 @@ resource "ionoscloud_vpn_ipsec_tunnel" "example" {
     * `psk_key` - (Optional)[string] The pre-shared key to use for IPSec Authentication. **Note**: Required if method is
       PSK.
 * `cloud_network_cidrs` - (Required)[list] The network CIDRs on the "Left" side that are allowed to connect to the IPSec
-  tunnel, i.e. the CIDRs within your IONOS Cloud LAN. Specify "0.0.0.0/0" or "::/0" for all addresses. Minimum items: 1.
+  tunnel, i.e. the CIDRs within your IONOS CLOUD LAN. Specify "0.0.0.0/0" or "::/0" for all addresses. Minimum items: 1.
   Maximum items: 20.
 * `peer_network_cidrs` - (Required)[list] The network CIDRs on the "Right" side that are allowed to connect to the IPSec
   tunnel. Specify "0.0.0.0/0" or "::/0" for all addresses. Minimum items: 1. Maximum items: 20.

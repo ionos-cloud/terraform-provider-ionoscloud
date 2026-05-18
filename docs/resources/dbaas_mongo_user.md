@@ -1,7 +1,7 @@
 ---
 subcategory: "Database as a Service - MongoDB"
 layout: "ionoscloud"
-page_title: "IonosCloud: ionoscloud_mongo_user"
+page_title: "IONOS CLOUD: ionoscloud_mongo_user"
 sidebar_current: "docs-resource_mongo_user"
 description: |-
   Creates and manages DbaaS MongoDB users.

@@ -1,7 +1,7 @@
 ---
 subcategory: "Compute Engine"
 layout: "ionoscloud"
-page_title: "IonosCloud: ipfailover"
+page_title: "IONOS CLOUD: ipfailover"
 sidebar_current: "docs-resource-ipfailover"
 description: |-
   Get Information on ipfailover objects.

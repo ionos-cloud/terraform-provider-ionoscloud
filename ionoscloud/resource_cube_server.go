@@ -656,7 +656,7 @@ func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta an
 
 		networks := []map[string]any{network}
 		if err := d.Set("nic", networks); err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("[ERROR] unable to save nic to state IonosCloud Server (%s): %w", serverId, err), nil)
+			return diagutil.ToDiags(d, fmt.Errorf("[ERROR] unable to save nic to state IONOS CLOUD Server (%s): %w", serverId, err), nil)
 		}
 	}
 

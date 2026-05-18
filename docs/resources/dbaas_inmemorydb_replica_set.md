@@ -1,7 +1,7 @@
 ---
 subcategory: "Database as a Service - InMemoryDB"
 layout: "ionoscloud"
-page_title: "IonosCloud: ionoscloud_inmemorydb_replicaset"
+page_title: "IONOS CLOUD: ionoscloud_inmemorydb_replicaset"
 sidebar_current: "docs-resource-inmemorydb_replicaset"
 description: |-
   Creates and manages DBaaS InMemoryDB Replica Set objects.

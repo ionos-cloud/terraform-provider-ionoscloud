@@ -1,15 +1,15 @@
 ---
 subcategory: "Compute Engine"
 layout: "ionoscloud"
-page_title: "IonosCloud: volume"
+page_title: "IONOS CLOUD: volume"
 sidebar_current: "docs-resource-volume"
 description: |-
-  Creates and manages IonosCloud Volume objects.
+  Creates and manages IONOS CLOUD Volume objects.
 ---
 
 # ionoscloud_volume
 
-Manages a [Volume](https://docs.ionos.com/cloud/storage-and-backup/block-storage) on IonosCloud.
+Manages a [Volume](https://docs.ionos.com/cloud/storage-and-backup/block-storage) on IONOS CLOUD.
 
 ## Example Usage
 
@@ -120,8 +120,8 @@ resource "random_password" "volume_image_password" {
 * `disk_type` - (Required)[string] The volume type: HDD or SSD. This property is immutable.
 * `bus` - (Optional)[Boolean] The bus type of the volume: VIRTIO or IDE.
 * `size` -  (Required)[integer] The size of the volume in GB.
-* `ssh_key_path` -  (Optional)[list] List of absolute paths to files containing a public SSH key that will be injected into IonosCloud provided Linux images. Also accepts ssh keys directly. Required for IonosCloud Linux images. Required if `image_password` is not provided. This property is immutable.
-* `ssh_keys` -  (Optional)[list] List of absolute paths to files containing a public SSH key that will be injected into IonosCloud provided Linux images. Also accepts ssh keys directly. Required for IonosCloud Linux images. Required if `image_password` is not provided. This property is immutable.
+* `ssh_key_path` -  (Optional)[list] List of absolute paths to files containing a public SSH key that will be injected into IONOS CLOUD provided Linux images. Also accepts ssh keys directly. Required for IONOS CLOUD Linux images. Required if `image_password` is not provided. This property is immutable.
+* `ssh_keys` -  (Optional)[list] List of absolute paths to files containing a public SSH key that will be injected into IONOS CLOUD provided Linux images. Also accepts ssh keys directly. Required for IONOS CLOUD Linux images. Required if `image_password` is not provided. This property is immutable.
 * `sshkey` - (Computed) The associated public SSH key.
 * `image_password` - (Optional)[string] Required if `sshkey_path` is not provided.
 * `image_name` - (Optional)[string] The name, ID or alias of the image. May also be a snapshot ID. It is required if `licence_type` is not provided. Attribute is immutable.

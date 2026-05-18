@@ -1,7 +1,7 @@
 ---
 subcategory: "Monitoring Service"
 layout: "ionoscloud"
-page_title: "IonosCloud: ionoscloud_monitoring_pipeline"
+page_title: "IONOS CLOUD: ionoscloud_monitoring_pipeline"
 sidebar_current: "docs-resource-monitoring_pipeline"
 description: |-
   Creates and manages Monitoring pipeline objects.

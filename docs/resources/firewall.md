@@ -1,7 +1,7 @@
 ---
 subcategory: "Compute Engine"
 layout: "ionoscloud"
-page_title: "IonosCloud: firewall"
+page_title: "IONOS CLOUD: firewall"
 sidebar_current: "docs-resource-firewall"
 description: |-
   Creates and manages Firewall Rules.
@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_firewall
 
-Manages a set of **Firewall Rules** on IonosCloud.
+Manages a set of **Firewall Rules** on IONOS CLOUD.
 
 ## Example Usage
 

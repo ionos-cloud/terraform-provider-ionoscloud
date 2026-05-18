@@ -1,7 +1,7 @@
 ---
 subcategory: "Application Load Balancer"
 layout: "ionoscloud"
-page_title: "IonosCloud : ionoscloud_application_loadbalancer"
+page_title: "IONOS CLOUD : ionoscloud_application_loadbalancer"
 sidebar_current: "docs-ionoscloud_application_loadbalancer"
 description: |-
   Get information on an Application Load Balancer

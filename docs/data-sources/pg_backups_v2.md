@@ -1,7 +1,7 @@
 ---
 subcategory: "Database as a Service - PostgreSQL v2"
 layout: "ionoscloud"
-page_title: "IonosCloud : ionoscloud_pg_backups_v2"
+page_title: "IONOS CLOUD : ionoscloud_pg_backups_v2"
 sidebar_current: "docs-ionoscloud_pg_backups_v2"
 description: |-
   Get information on DBaaS PostgreSQL v2 Backups

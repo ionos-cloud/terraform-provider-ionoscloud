@@ -1,15 +1,15 @@
 ---
 subcategory: "Object Storage"
 layout: "ionoscloud"
-page_title: "IonosCloud: s3_bucket_versioning"
+page_title: "IONOS CLOUD: s3_bucket_versioning"
 sidebar_current: "docs-resource-s3_bucket_versioning"
 description: |-
-  Manages Buckets versioning on IonosCloud.
+  Manages Buckets versioning on IONOS CLOUD.
 ---
 
 # ionoscloud_s3_versioning
 
-Manages **Buckets versioning** on IonosCloud.
+Manages **Buckets versioning** on IONOS CLOUD.
 
 
 ## Example Usage

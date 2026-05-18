@@ -41,7 +41,7 @@ func resourceCertificateManagerAutoCertificate() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: "The common name (DNS) of the certificate to issue. The common name needs to be part of a zone in IONOS Cloud DNS",
+				Description: "The common name (DNS) of the certificate to issue. The common name needs to be part of a zone in IONOS CLOUD DNS",
 			},
 			"key_algorithm": {
 				Type:        schema.TypeString,
@@ -61,7 +61,7 @@ func resourceCertificateManagerAutoCertificate() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
-				Description: "Optional additional names to be added to the issued certificate. The additional names needs to be part of a zone in IONOS Cloud DNS",
+				Description: "Optional additional names to be added to the issued certificate. The additional names needs to be part of a zone in IONOS CLOUD DNS",
 			},
 			"last_issued_certificate_id": {
 				Type:        schema.TypeString,

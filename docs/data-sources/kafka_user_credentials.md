@@ -1,7 +1,7 @@
 ---
 subcategory: "Event Streams for Apache Kafka"
 layout: "ionoscloud"
-page_title: "IonosCloud: ionoscloud_kafka_user_credentials"
+page_title: "IONOS CLOUD: ionoscloud_kafka_user_credentials"
 sidebar_current: "docs-ionoscloud-datasource-kafka-user-credentials"
 description: |-
   Gets information about Kafka users access credentials.

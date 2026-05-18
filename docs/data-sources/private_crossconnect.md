@@ -1,10 +1,10 @@
 ---
 subcategory: "Compute Engine"
 layout: "ionoscloud"
-page_title: "IonosCloud : ionoscloud_private_crossconnect"
+page_title: "IONOS CLOUD : ionoscloud_private_crossconnect"
 sidebar_current: "docs-ionoscloud-datasource-private-crossconnect"
 description: |-
-  Get information on a Ionos Cloud Crossconnects
+  Get information on a IONOS CLOUD Crossconnects
 ---
 
 # ionoscloud_private_crossconnect

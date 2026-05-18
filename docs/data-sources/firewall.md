@@ -1,10 +1,10 @@
 ---
 subcategory: "Compute Engine"
 layout: "ionoscloud"
-page_title: "IonosCloud: firewall"
+page_title: "IONOS CLOUD: firewall"
 sidebar_current: "docs-datasource-firewall"
 description: |-
-  Get Information on a IonosCloud Firewall
+  Get Information on a IONOS CLOUD Firewall
 ---
 
 # ionoscloud_firewall

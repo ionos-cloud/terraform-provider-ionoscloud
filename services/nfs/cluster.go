@@ -71,6 +71,12 @@ func (c *Client) SetNFSClusterData(d *schema.ResourceData, cluster sdk.ClusterRe
 		}
 	}
 
+	if cluster.Properties.SizeUnit != nil {
+		if err := d.Set("size_unit", *cluster.Properties.SizeUnit); err != nil {
+			return err
+		}
+	}
+
 	if cluster.Properties.Nfs != nil {
 		nfs := []map[string]any{
 			{
@@ -171,10 +177,16 @@ func setClusterConfig(d *schema.ResourceData) sdk.Cluster {
 		}
 	}
 
-	return sdk.Cluster{
+	sizeUnit := d.Get("size_unit").(string)
+
+	cluster := sdk.Cluster{
 		Name:        name,
 		Size:        &size,
 		Nfs:         &nfs,
 		Connections: connections,
 	}
+	if sizeUnit != "" {
+		cluster.SizeUnit = &sizeUnit
+	}
+	return cluster
 }

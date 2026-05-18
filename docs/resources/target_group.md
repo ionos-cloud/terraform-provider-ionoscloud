@@ -1,15 +1,15 @@
 ---
 subcategory: "Application Load Balancer"
 layout: "ionoscloud"
-page_title: "IonosCloud: target_group"
+page_title: "IONOS CLOUD: target_group"
 sidebar_current: "docs-resource-target_group"
 description: |-
-  Creates and manages IonosCloud Target Group.
+  Creates and manages IONOS CLOUD Target Group.
 ---
 
 # ionoscloud_target_group
 
-Manages a [Target Group](https://docs.ionos.com/cloud/network-services/application-load-balancer/overview#target-group) on IonosCloud.
+Manages a [Target Group](https://docs.ionos.com/cloud/network-services/application-load-balancer/overview#target-group) on IONOS CLOUD.
 
 ## Example Usage
 

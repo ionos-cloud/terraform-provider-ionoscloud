@@ -1,15 +1,15 @@
 ---
 subcategory: "Object Storage"
 layout: "ionoscloud"
-page_title: "IonosCloud: s3_bucket_lifecycle_configuration"
+page_title: "IONOS CLOUD: s3_bucket_lifecycle_configuration"
 sidebar_current: "docs-resource-s3_bucket_lifecycle_configuration"
 description: |-
-  Manages Buckets lifecycle configuration on IonosCloud.
+  Manages Buckets lifecycle configuration on IONOS CLOUD.
 ---
 
 # ionoscloud_s3_bucket_lifecycle_configuration
 
-Manages Lifecycle Configuration for Buckets on IonosCloud.
+Manages Lifecycle Configuration for Buckets on IONOS CLOUD.
 
 
 ## Example Usage

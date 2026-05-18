@@ -3,7 +3,7 @@
  *
  * The RESTful API for managing Network File Storage.
  *
- * API version: 0.1.3
+ * API version: 0.1.6
  * Contact: support@cloud.ionos.com
  */
 
@@ -99,6 +99,14 @@ func (o *ShareCreate) GetPropertiesOk() (*Share, bool) {
 // SetProperties sets field value
 func (o *ShareCreate) SetProperties(v Share) {
 	o.Properties = v
+}
+
+func (o ShareCreate) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
 }
 
 func (o ShareCreate) ToMap() (map[string]interface{}, error) {

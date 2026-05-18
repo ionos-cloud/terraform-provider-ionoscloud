@@ -1,15 +1,15 @@
 ---
 subcategory: "Autoscaling"
 layout: "ionoscloud"
-page_title: "IonosCloud: autoscaling_group"
+page_title: "IONOS CLOUD: autoscaling_group"
 sidebar_current: "docs-resource-autoscaling_group"
 description: |-
-  Creates and manages IonosCloud Autoscaling Group.
+  Creates and manages IONOS CLOUD Autoscaling Group.
 ---
 
 # ionoscloud_autoscaling_group
 
-Manages an [Autoscaling Group](https://docs.ionos.com/cloud/compute-services/vm-auto-scaling/overview#components-of-vm-auto-scaling) on IonosCloud.
+Manages an [Autoscaling Group](https://docs.ionos.com/cloud/compute-services/vm-auto-scaling/overview#components-of-vm-auto-scaling) on IONOS CLOUD.
 
 ## Example Usage
 

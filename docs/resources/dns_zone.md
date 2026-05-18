@@ -1,7 +1,7 @@
 ---
 subcategory: "Cloud DNS"
 layout: "ionoscloud"
-page_title: "IonosCloud: ionoscloud_dns_zone"
+page_title: "IONOS CLOUD: ionoscloud_dns_zone"
 sidebar_current: "docs-resource-dns_zone"
 description: |-
   Creates and manages DNS Zone objects.

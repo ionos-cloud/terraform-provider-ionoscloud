@@ -195,7 +195,6 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 				Type:             schema.TypeString,
 				Description:      "Represents different modes of replication.",
 				Required:         true,
-				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"ASYNCHRONOUS", "SYNCHRONOUS", "STRICTLY_SYNCHRONOUS"}, false)),
 			},
 			"from_backup": {
@@ -259,9 +258,6 @@ func checkDBaaSClusterImmutableFields(_ context.Context, diff *schema.ResourceDi
 	}
 	if diff.HasChange("credentials") {
 		return fmt.Errorf("credentials %s", ImmutableError)
-	}
-	if diff.HasChange("synchronization_mode") {
-		return fmt.Errorf("synchronization_mode %s", ImmutableError)
 	}
 	if diff.HasChange("from_backup") {
 		return fmt.Errorf("from_backup %s", ImmutableError)

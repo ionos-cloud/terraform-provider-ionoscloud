@@ -1,10 +1,10 @@
 ---
 subcategory: "Compute Engine"
 layout: "ionoscloud"
-page_title: "IonosCloud : ionoscloud_lan"
+page_title: "IONOS CLOUD : ionoscloud_lan"
 sidebar_current: "docs-ionoscloud-datasource-lan"
 description: |-
-  Get information on a Ionos Cloud Lans
+  Get information on a IONOS CLOUD Lans
 ---
 
 # ionoscloud_lan

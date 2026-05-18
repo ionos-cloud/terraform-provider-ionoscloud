@@ -1,10 +1,10 @@
 ---
 subcategory: "Managed Kubernetes"
 layout: "ionoscloud"
-page_title: "IonosCloud : ionoscloud_k8s_node_pool"
+page_title: "IONOS CLOUD : ionoscloud_k8s_node_pool"
 sidebar_current: "docs-ionoscloud-datasource-k8s-node-pool"
 description: |-
-  Get information on a IonosCloud K8s Node Pool
+  Get information on a IONOS CLOUD K8s Node Pool
 ---
 
 # ionoscloud_k8s_node_pool

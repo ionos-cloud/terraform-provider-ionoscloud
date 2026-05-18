@@ -1,7 +1,7 @@
 ---
 subcategory: "Object Storage"
 layout: "ionoscloud"
-page_title: "IonosCloud: s3_object"
+page_title: "IONOS CLOUD: s3_object"
 sidebar_current: "docs-resource-s3_object"
 description: |-
   Creates and manages IONOS Object Storage Objects.
@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_s3_object
 
-Manages **IONOS Object Storage Objects** on IonosCloud.
+Manages **IONOS Object Storage Objects** on IONOS CLOUD.
 
 
 ## Example Usage

@@ -1,7 +1,7 @@
 ---
 subcategory: "Certificate Manager Service"
 layout: "ionoscloud"
-page_title: "IonosCloud: certificate"
+page_title: "IONOS CLOUD: certificate"
 sidebar_current: "docs-datasource-certificate"
 description: |-
   Get Information on a certificate

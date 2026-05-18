@@ -1,15 +1,15 @@
 ---
 subcategory: "Compute Engine"
 layout: "ionoscloud"
-page_title: "IonosCloud: datacenter"
+page_title: "IONOS CLOUD: datacenter"
 sidebar_current: "docs-resource-datacenter"
 description: |-
-  Creates and manages IonosCloud Virtual Data Center.
+  Creates and manages IONOS CLOUD Virtual Data Center.
 ---
 
 # ionoscloud_datacenter
 
-Manages a Virtual [Data Center](https://docs.ionos.com/cloud/set-up-ionos-cloud/get-started/configure-data-center) on IonosCloud.
+Manages a Virtual [Data Center](https://docs.ionos.com/cloud/set-up-ionos-cloud/get-started/configure-data-center) on IONOS CLOUD.
 
 ## Example Usage
 

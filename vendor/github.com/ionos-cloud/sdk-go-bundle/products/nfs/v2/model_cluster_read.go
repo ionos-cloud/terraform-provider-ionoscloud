@@ -3,7 +3,7 @@
  *
  * The RESTful API for managing Network File Storage.
  *
- * API version: 0.1.3
+ * API version: 0.1.6
  * Contact: support@cloud.ionos.com
  */
 
@@ -20,21 +20,21 @@ var _ MappedNullable = &ClusterRead{}
 
 // ClusterRead struct for ClusterRead
 type ClusterRead struct {
-	// The ID (UUID) of the cluster.
+	// The ID (UUID) of the Cluster.
 	Id string `json:"id"`
-	// The resource type
+	// The type of the resource.
 	Type string `json:"type"`
-	// The URL of the cluster.
-	Href       string             `json:"href"`
-	Metadata   MetadataWithStatus `json:"metadata"`
-	Properties Cluster            `json:"properties"`
+	// The URL of the Cluster.
+	Href       string            `json:"href"`
+	Metadata   MetadataWithUsage `json:"metadata"`
+	Properties Cluster           `json:"properties"`
 }
 
 // NewClusterRead instantiates a new ClusterRead object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewClusterRead(id string, type_ string, href string, metadata MetadataWithStatus, properties Cluster) *ClusterRead {
+func NewClusterRead(id string, type_ string, href string, metadata MetadataWithUsage, properties Cluster) *ClusterRead {
 	this := ClusterRead{}
 
 	this.Id = id
@@ -127,9 +127,9 @@ func (o *ClusterRead) SetHref(v string) {
 }
 
 // GetMetadata returns the Metadata field value
-func (o *ClusterRead) GetMetadata() MetadataWithStatus {
+func (o *ClusterRead) GetMetadata() MetadataWithUsage {
 	if o == nil {
-		var ret MetadataWithStatus
+		var ret MetadataWithUsage
 		return ret
 	}
 
@@ -138,7 +138,7 @@ func (o *ClusterRead) GetMetadata() MetadataWithStatus {
 
 // GetMetadataOk returns a tuple with the Metadata field value
 // and a boolean to check if the value has been set.
-func (o *ClusterRead) GetMetadataOk() (*MetadataWithStatus, bool) {
+func (o *ClusterRead) GetMetadataOk() (*MetadataWithUsage, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -146,7 +146,7 @@ func (o *ClusterRead) GetMetadataOk() (*MetadataWithStatus, bool) {
 }
 
 // SetMetadata sets field value
-func (o *ClusterRead) SetMetadata(v MetadataWithStatus) {
+func (o *ClusterRead) SetMetadata(v MetadataWithUsage) {
 	o.Metadata = v
 }
 
@@ -172,6 +172,14 @@ func (o *ClusterRead) GetPropertiesOk() (*Cluster, bool) {
 // SetProperties sets field value
 func (o *ClusterRead) SetProperties(v Cluster) {
 	o.Properties = v
+}
+
+func (o ClusterRead) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
 }
 
 func (o ClusterRead) ToMap() (map[string]interface{}, error) {

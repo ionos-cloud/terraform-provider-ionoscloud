@@ -1,7 +1,7 @@
 ---
 subcategory: "User Management"
 layout: "ionoscloud"
-page_title: "IonosCloud: share"
+page_title: "IONOS CLOUD: share"
 sidebar_current: "docs-resource-share"
 description: |-
   Creates and manages share objects.

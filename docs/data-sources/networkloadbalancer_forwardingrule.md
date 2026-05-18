@@ -1,7 +1,7 @@
 ---
 subcategory: "Network Load Balancer"
 layout: "ionoscloud"
-page_title: "IonosCloud : ionoscloud_networkloadbalancer_forwardingrule"
+page_title: "IONOS CLOUD : ionoscloud_networkloadbalancer_forwardingrule"
 sidebar_current: "docs-ionoscloud-datasource-networkloadbalancer_forwardingrule"
 description: |-
   Get information on a Network Load Balancer Forwarding Rule

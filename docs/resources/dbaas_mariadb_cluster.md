@@ -1,7 +1,7 @@
 ---
 subcategory: "Database as a Service - MariaDB"
 layout: "ionoscloud"
-page_title: "IonosCloud: ionoscloud_mariadb_cluster"
+page_title: "IONOS CLOUD: ionoscloud_mariadb_cluster"
 sidebar_current: "docs-resource-mariadb_cluster"
 description: |-
   Creates and manages DBaaS MariaDB Cluster objects.

@@ -1,15 +1,15 @@
 ---
 subcategory: "Object Storage"
 layout: "ionoscloud"
-page_title: "IonosCloud: s3_bucket_object_lock_configuration"
+page_title: "IONOS CLOUD: s3_bucket_object_lock_configuration"
 sidebar_current: "docs-resource-s3_bucket_object_lock_configuration"
 description: |-
-  Manages Buckets object_lock_configuration on IonosCloud.
+  Manages Buckets object_lock_configuration on IONOS CLOUD.
 ---
 
 # ionoscloud_s3_object_lock_configuration
 
-Manages Object Lock Configuration for Buckets on IonosCloud.
+Manages Object Lock Configuration for Buckets on IONOS CLOUD.
 
 
 ## Example Usage

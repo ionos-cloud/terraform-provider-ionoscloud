@@ -3,7 +3,7 @@
  *
  * The RESTful API for managing Network File Storage.
  *
- * API version: 0.1.3
+ * API version: 0.1.6
  * Contact: support@cloud.ionos.com
  */
 
@@ -20,11 +20,14 @@ var _ MappedNullable = &Cluster{}
 
 // Cluster Network File Storage cluster
 type Cluster struct {
+	// Name of the cluster
 	Name        string               `json:"name"`
 	Connections []ClusterConnections `json:"connections"`
 	Nfs         *ClusterNfs          `json:"nfs,omitempty"`
-	// The size of the Network File Storage cluster in TiB. Note that the cluster size cannot be reduced after provisioning. This value determines the billing fees.
+	// The size of the Network File Storage cluster in TiB or GiB. Note that the cluster size cannot be reduced after provisioning. This value determines the billing fees. - When `sizeUnit` is `TiB`, the allowed values are between 2 and 42. - When `sizeUnit` is `GiB`, the allowed values are between 2048 and 43008.
 	Size *int32 `json:"size,omitempty"`
+	// The type of the size for the Network File Storage cluster which can be TiB or GiB.
+	SizeUnit *string `json:"sizeUnit,omitempty"`
 }
 
 // NewCluster instantiates a new Cluster object
@@ -38,6 +41,8 @@ func NewCluster(name string, connections []ClusterConnections) *Cluster {
 	this.Connections = connections
 	var size int32 = 2
 	this.Size = &size
+	var sizeUnit string = "TiB"
+	this.SizeUnit = &sizeUnit
 
 	return &this
 }
@@ -49,6 +54,8 @@ func NewClusterWithDefaults() *Cluster {
 	this := Cluster{}
 	var size int32 = 2
 	this.Size = &size
+	var sizeUnit string = "TiB"
+	this.SizeUnit = &sizeUnit
 	return &this
 }
 
@@ -164,6 +171,46 @@ func (o *Cluster) SetSize(v int32) {
 	o.Size = &v
 }
 
+// GetSizeUnit returns the SizeUnit field value if set, zero value otherwise.
+func (o *Cluster) GetSizeUnit() string {
+	if o == nil || IsNil(o.SizeUnit) {
+		var ret string
+		return ret
+	}
+	return *o.SizeUnit
+}
+
+// GetSizeUnitOk returns a tuple with the SizeUnit field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Cluster) GetSizeUnitOk() (*string, bool) {
+	if o == nil || IsNil(o.SizeUnit) {
+		return nil, false
+	}
+	return o.SizeUnit, true
+}
+
+// HasSizeUnit returns a boolean if a field has been set.
+func (o *Cluster) HasSizeUnit() bool {
+	if o != nil && !IsNil(o.SizeUnit) {
+		return true
+	}
+
+	return false
+}
+
+// SetSizeUnit gets a reference to the given string and assigns it to the SizeUnit field.
+func (o *Cluster) SetSizeUnit(v string) {
+	o.SizeUnit = &v
+}
+
+func (o Cluster) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
+}
+
 func (o Cluster) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["name"] = o.Name
@@ -173,6 +220,9 @@ func (o Cluster) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.Size) {
 		toSerialize["size"] = o.Size
+	}
+	if !IsNil(o.SizeUnit) {
+		toSerialize["sizeUnit"] = o.SizeUnit
 	}
 	return toSerialize, nil
 }

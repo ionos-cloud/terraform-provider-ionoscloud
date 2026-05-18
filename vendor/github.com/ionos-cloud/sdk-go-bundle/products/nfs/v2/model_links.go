@@ -3,7 +3,7 @@
  *
  * The RESTful API for managing Network File Storage.
  *
- * API version: 0.1.3
+ * API version: 0.1.6
  * Contact: support@cloud.ionos.com
  */
 
@@ -140,6 +140,14 @@ func (o *Links) HasNext() bool {
 // SetNext gets a reference to the given string and assigns it to the Next field.
 func (o *Links) SetNext(v string) {
 	o.Next = &v
+}
+
+func (o Links) MarshalJSON() ([]byte, error) {
+	toSerialize, err := o.ToMap()
+	if err != nil {
+		return []byte{}, err
+	}
+	return json.Marshal(toSerialize)
 }
 
 func (o Links) ToMap() (map[string]interface{}, error) {

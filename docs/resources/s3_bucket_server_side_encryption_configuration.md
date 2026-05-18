@@ -1,15 +1,15 @@
 ---
 subcategory: "Object Storage"
 layout: "ionoscloud"
-page_title: "IonosCloud: s3_bucket_server_side_encryption_configuration"
+page_title: "IONOS CLOUD: s3_bucket_server_side_encryption_configuration"
 sidebar_current: "docs-resource-s3_bucket_server_side_encryption_configuration"
 description: |-
-  Manages Buckets server side encryption configuration on IonosCloud.
+  Manages Buckets server side encryption configuration on IONOS CLOUD.
 ---
 
 # ionoscloud_s3_bucket_server_side_encryption_configuration
 
-Manages Server Side Encryption Configuration for Buckets on IonosCloud.
+Manages Server Side Encryption Configuration for Buckets on IONOS CLOUD.
 
 
 ## Example Usage

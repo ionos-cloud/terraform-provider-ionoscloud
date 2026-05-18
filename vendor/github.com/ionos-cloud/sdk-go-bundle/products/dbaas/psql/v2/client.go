@@ -22,7 +22,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"mime/multipart"
 	"net"
 	"net/http"
@@ -53,7 +52,7 @@ const (
 	RequestStatusFailed  = "FAILED"
 	RequestStatusDone    = "DONE"
 
-	Version               = "products/dbaas/psql/v2.0.5"
+	Version               = "products/dbaas/psql/v2.1.0"
 	DefaultIonosServerUrl = "https://api.ionos.com/databases/postgresql"
 	DefaultIonosBasePath  = "/databases/postgresql"
 )
@@ -107,18 +106,25 @@ func DeepCopy(cfg *shared.Configuration) (*shared.Configuration, error) {
 // NewAPIClient creates a new API client. Requires a userAgent string describing your application.
 // optionally a custom http.Client to allow for advanced features such as caching.
 func NewAPIClient(cfg *shared.Configuration) *APIClient {
-	// Attempt to deep copy the input configuration. If the configuration contains an httpclient,
-	// deepcopy(serialization) will fail. In this case, we fallback to a shallow copy.
-	cfgCopy, err := DeepCopy(cfg)
-	if err != nil {
-		log.Printf("Error creating deep copy of configuration: %v", err)
+	cfgCopy := &shared.Configuration{}
+	*cfgCopy = *cfg
+	if cfg.HTTPClient == nil || cfg.HTTPClient.Transport == nil {
+		var err error
+		cfgCopy, err = DeepCopy(cfg)
+		if err != nil {
+			if shared.SdkLogLevel.Satisfies(shared.Debug) {
+				shared.SdkLogger.Printf("Error creating deep copy of configuration: %v", err)
+			}
 
-		// shallow copy instead as a fallback
-		cfgCopy = &shared.Configuration{}
-		*cfgCopy = *cfg
+			// shallow copy instead as a fallback
+			cfgCopy = &shared.Configuration{}
+			*cfgCopy = *cfg
+		}
 	}
 
-	cfgCopy.UserAgent = "sdk-go-bundle/products/dbaas/psql/v2.0.5"
+	if cfgCopy.UserAgent == "" {
+		cfgCopy.UserAgent = "sdk-go-bundle/products/dbaas/psql/v2.1.0"
+	}
 
 	// Initialize default values in the copied configuration
 	if cfgCopy.HTTPClient == nil {
@@ -132,7 +138,9 @@ func NewAPIClient(cfg *shared.Configuration) *APIClient {
 				Description: "Production",
 			},
 		}
+		shared.LogDebug("[DEBUG] psql: using default endpoint: %s", cfgCopy.Servers[0].URL)
 	} else {
+		shared.LogDebug("[DEBUG] psql: server config provided with %d endpoint(s)", len(cfgCopy.Servers))
 		// If the user has provided a custom server configuration, we need to ensure that the basepath is set
 		for i := range cfgCopy.Servers {
 			if cfgCopy.Servers[i].URL != "" && !strings.HasSuffix(cfgCopy.Servers[i].URL, DefaultIonosBasePath) {
@@ -147,6 +155,11 @@ func NewAPIClient(cfg *shared.Configuration) *APIClient {
 		httpTransport := &http.Transport{}
 		AddPinnedCert(httpTransport, pkFingerprint)
 		cfgCopy.HTTPClient.Transport = httpTransport
+	}
+
+	// Log final resolved endpoints
+	for i, srv := range cfgCopy.Servers {
+		shared.LogDebug("[DEBUG] psql: final endpoint[%d]: url=%s description=%q", i, srv.URL, srv.Description)
 	}
 
 	// Create and initialize the API client
@@ -448,6 +461,7 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, time.Duratio
 		resp, err = c.cfg.HTTPClient.Do(clonedRequest)
 		httpRequestTime = time.Since(httpRequestStartTime)
 		if err != nil {
+			shared.LogDebug("[DEBUG] psql: request failed for %s %s: %v", clonedRequest.Method, clonedRequest.URL.Host, err)
 			return resp, httpRequestTime, err
 		}
 
@@ -467,8 +481,10 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, time.Duratio
 			http.StatusGatewayTimeout,
 			http.StatusBadGateway:
 			if request.Method == http.MethodPost {
+				shared.LogDebug("[DEBUG] psql: received %d for POST %s, not retrying (non-idempotent)", resp.StatusCode, request.URL.String())
 				return resp, httpRequestTime, err
 			}
+			shared.LogDebug("[DEBUG] psql: received %d for %s %s, will retry (attempt %d/%d)", resp.StatusCode, request.Method, request.URL.String(), retryCount, c.GetConfig().MaxRetries)
 			backoffTime = c.GetConfig().WaitTime
 
 		case http.StatusTooManyRequests:
@@ -478,8 +494,10 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, time.Duratio
 					return resp, httpRequestTime, err
 				}
 				backoffTime = waitTime
+				shared.LogDebug("[DEBUG] psql: rate limited (429) for %s %s, retry-after=%ss (attempt %d/%d)", request.Method, request.URL.String(), retryAfterSeconds, retryCount, c.GetConfig().MaxRetries)
 			} else {
 				backoffTime = c.GetConfig().WaitTime
+				shared.LogDebug("[DEBUG] psql: rate limited (429) for %s %s, using default backoff (attempt %d/%d)", request.Method, request.URL.String(), retryCount, c.GetConfig().MaxRetries)
 			}
 		default:
 			return resp, httpRequestTime, err
@@ -487,9 +505,7 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, time.Duratio
 		}
 
 		if retryCount >= c.GetConfig().MaxRetries {
-			if shared.SdkLogLevel.Satisfies(shared.Debug) {
-				shared.SdkLogger.Printf(" Number of maximum retries exceeded (%d retries)\n", c.cfg.MaxRetries)
-			}
+			shared.LogDebug("[DEBUG] psql: retry exhausted after %d attempts for %s %s, last status=%d", retryCount, request.Method, request.URL.String(), resp.StatusCode)
 			break
 		} else {
 			c.backOff(request.Context(), backoffTime)

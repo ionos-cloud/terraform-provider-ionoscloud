@@ -1,15 +1,15 @@
 ---
 subcategory: "Object Storage"
 layout: "ionoscloud"
-page_title: "IonosCloud: s3_bucket_public_access_block"
+page_title: "IONOS CLOUD: s3_bucket_public_access_block"
 sidebar_current: "docs-resource-s3_bucket_public_access_block"
 description: |-
-  Creates and manages IonosCloud IONOS Object Storage Public Access Block for buckets.
+  Creates and manages IONOS CLOUD Object Storage Public Access Block for buckets.
 ---
 
 # ionoscloud_s3_public_access_block
 
-Manages **public acccess for Buckets** on IonosCloud.
+Manages **public access for Buckets** on IONOS CLOUD.
 
 
 ## Example Usage

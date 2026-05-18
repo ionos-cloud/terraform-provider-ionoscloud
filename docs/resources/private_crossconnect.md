@@ -1,7 +1,7 @@
 ---
 subcategory: "Compute Engine"
 layout: "ionoscloud"
-page_title: "IonosCloud: private_crossconnect"
+page_title: "IONOS CLOUD: private_crossconnect"
 sidebar_current: "docs-resource-private-crossconnect"
 description: |-
   Creates and manages Cross Connections between virtual datacenters.
@@ -9,9 +9,9 @@ description: |-
 
 # ionoscloud_private_crossconnect
 
-Manages a [Cross Connect](https://docs.ionos.com/cloud/network-services/cross-connect/overview) on IonosCloud.
+Manages a [Cross Connect](https://docs.ionos.com/cloud/network-services/cross-connect/overview) on IONOS CLOUD.
 Cross Connect allows you to connect virtual data centers (VDC) with each other using a private LAN. 
-The VDCs to be connected need to belong to the same IONOS Cloud contract and location. 
+The VDCs to be connected need to belong to the same IONOS CLOUD contract and location. 
 You can only use private LANs for a Cross Connect connection. A LAN can only be a part of one Cross Connect.
 
 The IP addresses of the NICs used for the Cross Connect connection may not be used in more than one NIC and they need to belong to the same IP range.
