@@ -13,7 +13,6 @@ import (
 	listschema "github.com/hashicorp/terraform-plugin-framework/list/schema"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
@@ -23,7 +22,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/models"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/identity"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/tags"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstorage"
@@ -34,7 +33,6 @@ import (
 var (
 	_ resource.ResourceWithImportState = (*bucketResource)(nil)
 	_ resource.ResourceWithConfigure   = (*bucketResource)(nil)
-	_ resource.ResourceWithIdentity    = (*bucketResource)(nil)
 	_ list.ListResource                = (*bucketResource)(nil)
 	_ list.ListResourceWithConfigure   = (*bucketResource)(nil)
 )
@@ -66,17 +64,6 @@ type bucketResourceModel struct {
 // Metadata returns the metadata for the bucket resource.
 func (r *bucketResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_s3_bucket"
-}
-
-// IdentitySchema returns the identity schema for the bucket resource.
-func (r *bucketResource) IdentitySchema(_ context.Context, _ resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
-	resp.IdentitySchema = identityschema.Schema{
-		Attributes: map[string]identityschema.Attribute{
-			"id": identityschema.StringAttribute{
-				RequiredForImport: true,
-			},
-		},
-	}
 }
 
 // Schema returns the schema for the bucket resource.
@@ -334,10 +321,9 @@ func (r *bucketResource) List(ctx context.Context, req list.ListRequest, stream 
 			}
 			result.DisplayName = *b.Name
 
-			identity := models.Identity{
+			result.Diagnostics.Append(result.Identity.Set(ctx, &identity.Model{
 				ID: types.StringValue(*b.Name),
-			}
-			result.Diagnostics.Append(result.Identity.Set(ctx, &identity)...)
+			})...)
 
 			if req.IncludeResource {
 				region, err := r.client.GetBucketLocation(ctx, types.StringValue(*b.Name))

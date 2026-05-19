@@ -1,11 +1,11 @@
-package models
+package identity
 
 import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-// Identity represents a reusable identity model for Terraform Plugin Framework resources
+// Model represents a reusable identity model for Terraform Plugin Framework resources
 // that use a single "id" attribute in their Identity Schema.
-type Identity struct {
+type Model struct {
 	ID types.String `tfsdk:"id"`
 }
