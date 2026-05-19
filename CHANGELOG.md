@@ -5,9 +5,11 @@
 - Fix `location` data source returning "no location found" when searching using the `feature` attribute.
 
 ### Chore
+- Update go version to 1.26.3 to fix CVEs
 - Modernize to 1.26 standards `go fix`
 - Bump `github.com/hashicorp/hc-install` from v0.9.2 to v0.9.5 to fix expired HashiCorp OpenPGP key that caused acceptance tests to fail with `openpgp: key expired`.
 - Bump `github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2` to v2.1.0
+- Bump `github.com/ionos-cloud/sdk-go-bundle/products/nfs/v2` to v2.0.2
 
 ### Features
 - New resource: `ionoscloud_user_object_storage_bucket` for user-owned IONOS object storage buckets (supports tags, object lock, force destroy).
