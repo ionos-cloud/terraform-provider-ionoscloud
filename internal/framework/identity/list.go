@@ -8,8 +8,8 @@ import (
 )
 
 // StreamResults streams a slice of items of type T into the list results stream.
-// It sets stream.Results to an iterator function that processes each item with the mapper.
-// If mapping returns diagnostics with errors, they are pushed to the stream and execution stops.
+// The mapper receives a pre-created *list.ListResult to populate and returns whether
+// to push the result (false = skip). If diagnostics contain errors, iteration stops.
 func StreamResults[T any](
 	ctx context.Context,
 	stream *list.ListResultsStream,
@@ -26,10 +26,10 @@ func StreamResults[T any](
 				push(result)
 				return
 			}
-			result.Diagnostics.Append(diags...)
 			if !shouldPush {
 				continue
 			}
+			result.Diagnostics.Append(diags...)
 			if !push(result) {
 				return
 			}

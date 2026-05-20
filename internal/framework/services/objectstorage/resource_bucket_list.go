@@ -48,14 +48,14 @@ func (r *bucketResource) List(ctx context.Context, req list.ListRequest, stream 
 	identity.StreamResults(ctx, stream, req, buckets, r.Map)
 }
 
-// Map implements identity.ListMapper for mapping an objstorage.Bucket to a list.ListResult.
+// Map populates result and returns whether to push it (false = skip).
 func (r *bucketResource) Map(ctx context.Context, req list.ListRequest, b objstorage.Bucket, result *list.ListResult) (bool, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	if b.Name == nil {
 		return false, diags
 	}
-	result.DisplayName = *b.Name
 
+	result.DisplayName = *b.Name
 	diags.Append(result.Identity.Set(ctx, &identity.Model{
 		ID: types.StringValue(*b.Name),
 	})...)
@@ -89,11 +89,10 @@ func (r *bucketResource) Map(ctx context.Context, req list.ListRequest, b objsto
 			Name:              bucketModel.Name,
 			Region:            bucketModel.Region,
 			ObjectLockEnabled: bucketModel.ObjectLockEnabled,
-			ForceDestroy:      types.BoolNull(),
+			ForceDestroy:      types.BoolValue(false),
 			Tags:              bucketModel.Tags,
 			Timeouts:          timeouts.Value{Object: types.ObjectNull(timeoutsAttrTypes)},
 		}
-
 		diags.Append(result.Resource.Set(ctx, &resourceModel)...)
 	}
 

@@ -48,15 +48,14 @@ func (r *accesskeyResource) List(ctx context.Context, req list.ListRequest, stre
 	identity.StreamResults(ctx, stream, req, accessKeys.Items, r.Map)
 }
 
-// Map implements identity.ListMapper for mapping an objectstoragemanagementSDK.AccessKeyRead to a list.ListResult.
+// Map populates result and returns whether to push it (always true for access keys).
 func (r *accesskeyResource) Map(ctx context.Context, req list.ListRequest, ak objectstoragemanagementSDK.AccessKeyRead, result *list.ListResult) (bool, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	result.DisplayName = ak.Properties.AccessKey
 
-	identityStruct := identity.Model{
+	result.DisplayName = ak.Properties.AccessKey
+	diags.Append(result.Identity.Set(ctx, &identity.Model{
 		ID: types.StringValue(ak.Id),
-	}
-	diags.Append(result.Identity.Set(ctx, &identityStruct)...)
+	})...)
 
 	if req.IncludeResource {
 		timeoutsAttrTypes := map[string]attr.Type{
@@ -74,7 +73,6 @@ func (r *accesskeyResource) Map(ctx context.Context, req list.ListRequest, ak ob
 			ID:              types.StringValue(ak.Id),
 			Timeouts:        timeouts.Value{Object: types.ObjectNull(timeoutsAttrTypes)},
 		}
-
 		diags.Append(result.Resource.Set(ctx, &resourceModel)...)
 	}
 
