@@ -59,7 +59,7 @@ The following arguments are supported:
 
 In Terraform v1.12.0 and later, the [`import` block](https://developer.hashicorp.com/terraform/language/import) can be used with the `identity` attribute. For example:
 
-``` hcl
+```hcl
 import {
   to = ionoscloud_s3_bucket.example
   identity = {

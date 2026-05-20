@@ -8,17 +8,30 @@ description: |-
 
 # List Resource: ionoscloud_s3_bucket
 
--> **Note:** List Resources are supported in HashiCorp Terraform version 1.14 and later.
+-> **Note:** List Resources require HashiCorp Terraform version 1.14 or later and are queried using `terraform query`.
 
 Lists [IONOS Object Storage Buckets](https://docs.ionos.com/cloud/storage-and-backup/ionos-object-storage) on IONOS CLOUD.
 
 ## Example Usage
 
-``` hcl
+### List buckets
+
+```hcl
 list "ionoscloud_s3_bucket" "example" {
   provider = ionoscloud
+  include_resource = true
 }
 ```
+
+### Generate resource configuration from existing buckets
+
+Use `terraform query` with `-generate-config-out` to produce ready-to-use `ionoscloud_s3_bucket` resource blocks for all existing buckets:
+
+```shell
+terraform query -generate-config-out=imported.tf
+```
+
+Terraform will write an `ionoscloud_s3_bucket` resource block for each discovered bucket into `imported.tf`, which can then be used directly in your configuration.
 
 ## Argument Reference
 

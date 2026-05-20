@@ -8,17 +8,30 @@ description: |-
 
 # List Resource: ionoscloud_object_storage_accesskey
 
--> **Note:** List Resources are supported in HashiCorp Terraform version 1.14 and later.
+-> **Note:** List Resources require HashiCorp Terraform version 1.14 or later and are queried using `terraform query`.
 
 Lists [Object Storage Access Keys](https://docs.ionos.com/cloud/storage-and-backup/ionos-object-storage/concepts/key-management) on IONOS CLOUD.
 
 ## Example Usage
 
-``` hcl
+### List access keys
+
+```hcl
 list "ionoscloud_object_storage_accesskey" "example" {
   provider = ionoscloud
+  include_resource = true
 }
 ```
+
+### Generate resource configuration from existing access keys
+
+Use `terraform query` with `-generate-config-out` to produce ready-to-use `ionoscloud_object_storage_accesskey` resource blocks for all existing access keys:
+
+```shell
+terraform query -generate-config-out=imported.tf
+```
+
+Terraform will write an `ionoscloud_object_storage_accesskey` resource block for each discovered access key into `imported.tf`, which can then be used directly in your configuration.
 
 ## Argument Reference
 

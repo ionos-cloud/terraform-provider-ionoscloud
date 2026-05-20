@@ -9,13 +9,12 @@ import (
 	"os"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/querycheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/acctest"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/identity"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/objectstorage"
 )
 
 func TestAccBucketResource(t *testing.T) {
@@ -37,12 +36,16 @@ func TestAccBucketResource(t *testing.T) {
 					resource.TestCheckResourceAttr(name, "region", "eu-central-3"),
 					resource.TestCheckResourceAttr(name, "id", rName),
 					resource.TestCheckResourceAttr(name, "object_lock_enabled", "false"),
-					acctest.TestAccCheckResourceInList(
-						objectstorage.NewBucketListResource(),
-						identity.WithIdentity(objectstorage.NewBucketResource)(),
-						rName, false,
-					),
 				),
+			},
+			{
+				Query:  true,
+				Config: "list \"ionoscloud_s3_bucket\" \"test\" {\n  provider = ionoscloud\n}",
+				QueryResultChecks: []querycheck.QueryResultCheck{
+					querycheck.ExpectIdentity("ionoscloud_s3_bucket.test", map[string]knownvalue.Check{
+						"id": knownvalue.StringExact(rName),
+					}),
+				},
 			},
 			{
 				ResourceName:                         name,
