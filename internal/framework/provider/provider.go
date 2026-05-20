@@ -320,7 +320,7 @@ func (p *IonosCloudProvider) EphemeralResources(_ context.Context) []func() ephe
 
 // ListResources returns the list resources for the provider.
 func (p *IonosCloudProvider) ListResources(_ context.Context) []func() list.ListResource {
-	var finalResult []func() list.ListResource
+	var finalResult []func() list.ListResource //nolint:prealloc
 	listResources := [][]func() list.ListResource{
 		objectstorage.ListResources(),
 		objectstoragemanagement.ListResources(),
