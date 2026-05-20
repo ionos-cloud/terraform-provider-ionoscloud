@@ -7,39 +7,43 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/list"
 )
 
-// StreamResults streams a slice of items of type T into the list results stream.
-// The mapper receives a pre-created *list.ListResult to populate and returns whether
-// to push the result (false = skip). If diagnostics contain errors, iteration stops.
-func StreamResults[T any](
+// StreamList fetches items using fetch and streams them into the results stream.
+// If the fetch fails, the error is emitted as a diagnostic and iteration stops.
+// The mapper returns a *MappedItem to populate each result with; nil skips the item.
+func StreamList[T any](
 	ctx context.Context,
 	stream *list.ListResultsStream,
 	req list.ListRequest,
-	items []T,
-	mapper func(context.Context, list.ListRequest, T, *list.ListResult) (bool, diag.Diagnostics),
+	fetch func(context.Context) ([]T, error),
+	mapper func(context.Context, bool, T) (*MappedItem, diag.Diagnostics),
 ) {
+	items, err := fetch(ctx)
+	if err != nil {
+		var diags diag.Diagnostics
+		diags.AddError(err.Error(), "")
+		stream.Results = list.ListResultsStreamDiagnostics(diags)
+		return
+	}
 	stream.Results = func(push func(list.ListResult) bool) {
 		for _, item := range items {
 			result := req.NewListResult(ctx)
-			shouldPush, diags := mapper(ctx, req, item, &result)
+			mapped, diags := mapper(ctx, req.IncludeResource, item)
 			if diags.HasError() {
 				result.Diagnostics.Append(diags...)
 				push(result)
 				return
 			}
-			if !shouldPush {
+			if mapped == nil {
 				continue
 			}
-			result.Diagnostics.Append(diags...)
+			result.DisplayName = mapped.DisplayName
+			result.Diagnostics.Append(result.Identity.Set(ctx, mapped.Identity)...)
+			if mapped.Resource != nil {
+				result.Diagnostics.Append(result.Resource.Set(ctx, mapped.Resource)...)
+			}
 			if !push(result) {
 				return
 			}
 		}
 	}
-}
-
-// StreamError sets the results stream to emit a single diagnostic error.
-func StreamError(stream *list.ListResultsStream, summary, detail string) {
-	var diags diag.Diagnostics
-	diags.AddError(summary, detail)
-	stream.Results = list.ListResultsStreamDiagnostics(diags)
 }

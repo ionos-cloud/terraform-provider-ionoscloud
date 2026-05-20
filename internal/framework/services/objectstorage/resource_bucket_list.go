@@ -34,67 +34,56 @@ func (r *bucketResource) ListResourceConfigSchema(_ context.Context, _ list.List
 
 // List lists all bucket resources.
 func (r *bucketResource) List(ctx context.Context, req list.ListRequest, stream *list.ListResultsStream) {
-	if r.client == nil {
-		identity.StreamError(stream, "object storage api client not configured", "The provider client is not configured")
-		return
-	}
-
-	buckets, err := r.client.ListBuckets(ctx)
-	if err != nil {
-		identity.StreamError(stream, "failed to list buckets", err.Error())
-		return
-	}
-
-	identity.StreamResults(ctx, stream, req, buckets, r.Map)
+	identity.StreamList(ctx, stream, req, r.client.ListBuckets, r.Map)
 }
 
-// Map populates result and returns whether to push it (false = skip).
-func (r *bucketResource) Map(ctx context.Context, req list.ListRequest, b objstorage.Bucket, result *list.ListResult) (bool, diag.Diagnostics) {
+// Map returns a MappedItem describing the bucket, or nil to skip it.
+func (r *bucketResource) Map(ctx context.Context, includeResource bool, b objstorage.Bucket) (*identity.MappedItem, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	if b.Name == nil {
-		return false, diags
+		return nil, diags
 	}
 
-	result.DisplayName = *b.Name
-	diags.Append(result.Identity.Set(ctx, &identity.Model{
-		ID: types.StringValue(*b.Name),
-	})...)
-
-	if req.IncludeResource {
-		region, err := r.client.GetBucketLocation(ctx, types.StringValue(*b.Name))
-		if err != nil {
-			diags.AddError("failed to get bucket location", err.Error())
-			return true, diags
-		}
-
-		bucketModel, found, err := r.client.GetBucket(ctx, types.StringValue(*b.Name), region)
-		if err != nil {
-			diags.AddError("failed to get bucket details", err.Error())
-			return true, diags
-		}
-		if !found {
-			diags.AddError("bucket not found during detailed fetch", fmt.Sprintf("Bucket %s was not found", *b.Name))
-			return true, diags
-		}
-
-		timeoutsAttrTypes := map[string]attr.Type{
-			"create": types.StringType,
-			"read":   types.StringType,
-			"update": types.StringType,
-			"delete": types.StringType,
-		}
-
-		resourceModel := bucketResourceModel{
-			ID:                bucketModel.Name,
-			Name:              bucketModel.Name,
-			Region:            bucketModel.Region,
-			ObjectLockEnabled: bucketModel.ObjectLockEnabled,
-			ForceDestroy:      types.BoolValue(false),
-			Tags:              bucketModel.Tags,
-			Timeouts:          timeouts.Value{Object: types.ObjectNull(timeoutsAttrTypes)},
-		}
-		diags.Append(result.Resource.Set(ctx, &resourceModel)...)
+	mapped := &identity.MappedItem{
+		DisplayName: *b.Name,
+		Identity:    &identity.Model{ID: types.StringValue(*b.Name)},
 	}
 
-	return true, diags
+	if !includeResource {
+		return mapped, diags
+	}
+
+	region, err := r.client.GetBucketLocation(ctx, types.StringValue(*b.Name))
+	if err != nil {
+		diags.AddError("failed to get bucket location", err.Error())
+		return mapped, diags
+	}
+
+	bucketModel, found, err := r.client.GetBucket(ctx, types.StringValue(*b.Name), region)
+	if err != nil {
+		diags.AddError("failed to get bucket details", err.Error())
+		return mapped, diags
+	}
+	if !found {
+		diags.AddError("bucket not found during detailed fetch", fmt.Sprintf("Bucket %s was not found", *b.Name))
+		return mapped, diags
+	}
+
+	timeoutsAttrTypes := map[string]attr.Type{
+		"create": types.StringType,
+		"read":   types.StringType,
+		"update": types.StringType,
+		"delete": types.StringType,
+	}
+
+	mapped.Resource = &bucketResourceModel{
+		ID:                bucketModel.Name,
+		Name:              bucketModel.Name,
+		Region:            bucketModel.Region,
+		ObjectLockEnabled: bucketModel.ObjectLockEnabled,
+		ForceDestroy:      types.BoolValue(false),
+		Tags:              bucketModel.Tags,
+		Timeouts:          timeouts.Value{Object: types.ObjectNull(timeoutsAttrTypes)},
+	}
+	return mapped, diags
 }

@@ -9,10 +9,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/list"
 	listschema "github.com/hashicorp/terraform-plugin-framework/list/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	objectstoragemanagementSDK "github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2"
+	objstoragesdk "github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/identity"
-	objectStorageManagementService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstoragemanagement"
+	objstorageservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstoragemanagement"
 )
 
 var (
@@ -34,47 +34,42 @@ func (r *accesskeyResource) ListResourceConfigSchema(_ context.Context, _ list.L
 
 // List lists all accesskey resources.
 func (r *accesskeyResource) List(ctx context.Context, req list.ListRequest, stream *list.ListResultsStream) {
-	if r.client == nil {
-		identity.StreamError(stream, "object storage management api client not configured", "The provider client is not configured")
-		return
-	}
-
-	accessKeys, _, err := r.client.ListAccessKeys(ctx)
-	if err != nil {
-		identity.StreamError(stream, "failed to list access keys", err.Error())
-		return
-	}
-
-	identity.StreamResults(ctx, stream, req, accessKeys.Items, r.Map)
+	identity.StreamList(ctx, stream, req,
+		func(ctx context.Context) ([]objstoragesdk.AccessKeyRead, error) {
+			result, _, err := r.client.ListAccessKeys(ctx)
+			return result.Items, err
+		},
+		r.Map,
+	)
 }
 
-// Map populates result and returns whether to push it (always true for access keys).
-func (r *accesskeyResource) Map(ctx context.Context, req list.ListRequest, ak objectstoragemanagementSDK.AccessKeyRead, result *list.ListResult) (bool, diag.Diagnostics) {
+// Map returns a MappedItem describing the access key.
+func (r *accesskeyResource) Map(_ context.Context, includeResource bool, ak objstoragesdk.AccessKeyRead) (*identity.MappedItem, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	result.DisplayName = ak.Properties.AccessKey
-	diags.Append(result.Identity.Set(ctx, &identity.Model{
-		ID: types.StringValue(ak.Id),
-	})...)
-
-	if req.IncludeResource {
-		timeoutsAttrTypes := map[string]attr.Type{
-			"create": types.StringType,
-			"read":   types.StringType,
-			"delete": types.StringType,
-		}
-
-		resourceModel := objectStorageManagementService.AccesskeyResourceModel{
-			AccessKey:       types.StringValue(ak.Properties.AccessKey),
-			SecretKey:       types.StringNull(),
-			CanonicalUserID: types.StringPointerValue(ak.Properties.CanonicalUserId),
-			ContractUserID:  types.StringPointerValue(ak.Properties.ContractUserId),
-			Description:     types.StringValue(ak.Properties.Description),
-			ID:              types.StringValue(ak.Id),
-			Timeouts:        timeouts.Value{Object: types.ObjectNull(timeoutsAttrTypes)},
-		}
-		diags.Append(result.Resource.Set(ctx, &resourceModel)...)
+	mapped := &identity.MappedItem{
+		DisplayName: ak.Properties.AccessKey,
+		Identity:    &identity.Model{ID: types.StringValue(ak.Id)},
 	}
 
-	return true, diags
+	if !includeResource {
+		return mapped, diags
+	}
+
+	timeoutsAttrTypes := map[string]attr.Type{
+		"create": types.StringType,
+		"read":   types.StringType,
+		"delete": types.StringType,
+	}
+
+	mapped.Resource = &objstorageservice.AccesskeyResourceModel{
+		AccessKey:       types.StringValue(ak.Properties.AccessKey),
+		SecretKey:       types.StringNull(),
+		CanonicalUserID: types.StringPointerValue(ak.Properties.CanonicalUserId),
+		ContractUserID:  types.StringPointerValue(ak.Properties.ContractUserId),
+		Description:     types.StringValue(ak.Properties.Description),
+		ID:              types.StringValue(ak.Id),
+		Timeouts:        timeouts.Value{Object: types.ObjectNull(timeoutsAttrTypes)},
+	}
+	return mapped, diags
 }
