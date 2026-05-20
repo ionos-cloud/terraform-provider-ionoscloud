@@ -32,17 +32,20 @@ func resourceLan() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			"public": {
-				Type:     schema.TypeBool,
-				Optional: true,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Indicates if the LAN is connected to the internet. If true, the LAN will have public internet access.",
 			},
 			"name": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The name of the LAN.",
 			},
 			"datacenter_id": {
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
+				Description:      "The ID of a Virtual Data Center.",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"location": {
@@ -52,22 +55,26 @@ func resourceLan() *schema.Resource {
 				ForceNew:    true,
 			},
 			"pcc": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The unique identifier of the private Cross-Connect the LAN is connected to, if any.",
 			},
 			"ip_failover": {
-				Type:     schema.TypeList,
-				Computed: true,
-				Optional: true,
+				Type:        schema.TypeList,
+				Computed:    true,
+				Optional:    true,
+				Description: "List of IP failover groups associated with the LAN.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"ip": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The IP address of the failover group.",
 						},
 						"nic_uuid": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The UUID of the NIC associated with this failover IP.",
 						},
 					},
 				},

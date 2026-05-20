@@ -6,6 +6,7 @@ require (
 	github.com/aws/aws-sdk-go v1.55.7
 	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/gofrs/uuid/v5 v5.3.2
+	github.com/hashicorp/terraform-plugin-docs v0.21.0
 	github.com/hashicorp/terraform-plugin-framework v1.15.0
 	github.com/hashicorp/terraform-plugin-framework-jsontypes v0.2.0
 	github.com/hashicorp/terraform-plugin-framework-timeouts v0.5.0

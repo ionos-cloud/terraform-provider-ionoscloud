@@ -1,0 +1,83 @@
+---
+subcategory: "Compute Engine"
+page_title: "IonosCloud: server"
+description: |-
+  Creates and manages IonosCloud Server objects.
+---
+
+# ionoscloud_server
+
+Dedicated Core Servers or [Enterprise Servers](https://docs.ionos.com/cloud/compute-services/compute-engine/dedicated-core) are provisioned and hosted in one of IONOS' physical data centers. Dedicated Core Servers behave exactly like physical servers. They can be configured and managed with your choice of the operating system.
+
+Check out [Limitations](https://docs.ionos.com/cloud/compute-services/compute-engine/dedicated-core#limitations).
+
+## Example Usage
+
+This resource will create an operational server. After this section completes, the provisioner can be called.
+
+### Dedicated Core Server
+
+{{ tffile "examples/resources/ionoscloud_server/dedicated_core.tf" }}
+
+### With IPv6 Enabled
+
+{{ tffile "examples/resources/ionoscloud_server/ipv6.tf" }}
+
+### CUBE Server
+
+{{ tffile "examples/resources/ionoscloud_server/cube.tf" }}
+
+### Server that boots from CDROM
+
+{{ tffile "examples/resources/ionoscloud_server/cdrom.tf" }}
+
+{{ .SchemaMarkdown | trimspace }}
+
+⚠️ **_Warning: `allow_replace` - lets you update immutable fields, but it first destroys and then re-creates the server in order to do it. This field should be used with care, understanding the risks._**
+
+> **⚠ WARNING**
+>
+> Image_name under volume level is deprecated, please use image_name under server level
+> ssh_key_path and ssh_keys fields are immutable.
+
+
+> **⚠ WARNING**
+>
+> If you want to create a **CUBE** server, you have to provide the `template_uuid`. In this case you can not set `cores`, `ram` and `volume.size` arguments, these being mutually exclusive with `template_uuid`.
+>
+> In all the other cases (**ENTERPRISE** servers) you have to provide values for `cores`, `ram` and `volume size`.
+
+## Import
+
+Resource Server can be imported using the `resource id` and the `datacenter id`, e.g.. Passing only resource id and datacenter id means that the first nic found linked to the server will be attached to it.
+
+```hcl
+import {
+    to = ionoscloud_server.example
+    id = "datacenter id/server id"
+}
+```
+Auto-generate the server resource in the `generated.tf` file using the following command:
+
+```shell
+terraform plan -generate-config-out=generated.tf
+```
+
+The older syntax can be for importing the resource is still supported:
+```shell
+terraform import ionoscloud_server.myserver datacenter uuid/server uuid
+```
+Optionally, you can pass `primary_nic` and `firewallrule_id` so terraform will know to import also the first nic and firewall rule (if it exists on the server):
+```shell
+terraform import ionoscloud_server.myserver datacenter uuid/server uuid/primary nic id/firewall rule id
+```
+
+## Notes
+
+Please note that for any secondary volume, you need to set the **licence_type** property to **UNKNOWN**
+
+⚠️ **Note:** Important for deleting an `firewall` rule from within a list of inline resources defined on the same nic. There is one limitation to removing one firewall rule
+from the middle of the list of `firewall` rules. Terraform will actually modify the existing rules and delete the last one.
+More details [here](https://github.com/hashicorp/terraform/issues/14275). There is a workaround described in the issue
+that involves moving the resources in the list prior to deletion.
+`terraform state mv <resource-name>.<resource-id>[<i>] <resource-name>.<resource-id>[<j>]`

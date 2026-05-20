@@ -1,0 +1,32 @@
+---
+subcategory: "VPN"
+page_title: "IonosCloud: ionoscloud_vpn_ipsec_tunnel"
+description: |-
+  IPSec Gateway Tunnel
+---
+
+# ionoscloud_vpn_ipsec_tunnel
+
+An IPSec Gateway Tunnel resource manages the creation, management, and deletion of VPN IPSec Gateway Tunnels within the
+IONOS Cloud infrastructure. This resource facilitates the creation of VPN IPSec Gateway Tunnels, enabling secure
+connections between your network resources.
+
+## Usage example
+
+### Basic example
+
+{{ tffile "examples/resources/ionoscloud_vpn_ipsec_tunnel/basic.tf" }}
+
+### Complete example
+
+{{ tffile "examples/resources/ionoscloud_vpn_ipsec_tunnel/complete.tf" }}
+
+{{ .SchemaMarkdown | trimspace }}
+
+## Import
+
+The resource can be imported using the `location`, `gateway_id` and `tunnel_id`, for example:
+
+```
+terraform import ionoscloud_vpn_ipsec_tunnel.example location:gateway_id:tunnel_id
+```

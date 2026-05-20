@@ -1,0 +1,51 @@
+---
+subcategory: "Managed Kubernetes"
+page_title: "IonosCloud: k8s_node_pool"
+description: |-
+  Creates and manages IonosCloud Kubernetes Node Pools.
+---
+
+# ionoscloud_k8s_node_pool
+
+Manages a **Managed Kubernetes Node Pool**, part of a managed Kubernetes cluster on IonosCloud.
+
+## Example Usage
+
+{{ tffile "examples/resources/ionoscloud_k8s_node_pool/main.tf" }}
+
+**Note:** Set `create_before_destroy` on the lan resource if you want to remove it from the nodepool during an update. This is to ensure that the nodepool is updated before the lan is destroyed.
+
+{{ .SchemaMarkdown | trimspace }}
+
+⚠️ **_Warning: `allow_replace` - lets you update immutable fields, but it first destroys and then re-creates the node pool in order to do it. Set the field to true only if you know what you are doing.
+This will cause a downtime for all pods on that nodepool. Consider adding multiple nodepools and update one after the other for downtime free nodepool upgrade._**
+
+Immutable fields list: name, cpu_family, availability_zone, cores_count, ram_size, storage_size, storage_type.
+
+⚠️ **Note**:
+
+Be careful when using `auto_scaling` since the number of nodes can change. Because of that, when running
+`terraform plan`, Terraform will think that an update is required (since `node_count` from the `tf` plan will be different
+from the number of nodes set by the scheduler). To avoid that, you can use:
+```hcl
+lifecycle {
+    ignore_changes = [
+      node_count
+    ]
+  }
+```
+This will also ignore the manual changes for `node_count` made in the `tf` plan.
+You can read more details about the `ignore_changes` attribute [here](https://developer.hashicorp.com/terraform/language/meta-arguments/lifecycle).
+
+## Import
+
+A Kubernetes Node Pool resource can be imported using its Kubernetes cluster's uuid as well as its own UUID, both of which you can retrieve from the cloud API: `resource id`, e.g.:
+
+```shell
+terraform import ionoscloud_k8s_node_pool.demo k8s_cluster_uuid/k8s_nodepool_id
+```
+
+⚠️ **_Warning: During a maintenance window, k8s can update your `k8s_version` if the old one reaches end of life. This upgrade will not be shown in the plan, as we prevent
+terraform from doing a downgrade, as downgrading `k8s_version` is not supported._**
+
+⚠️ **_Warning: If you are upgrading from v5.x.x to v6.x.x: You have to modify you plan for lans to match the new structure, by putting the ids from the old slice in lans.id fields. This is not backwards compatible._**

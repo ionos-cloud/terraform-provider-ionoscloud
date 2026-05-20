@@ -1,0 +1,49 @@
+---
+subcategory: "Compute Engine"
+page_title: "IonosCloud: ionoscloud_cube_server"
+description: |-
+  Creates and manages IonosCloud Cube Server objects.
+---
+
+# ionoscloud_cube_server
+
+A [Cube](https://docs.ionos.com/cloud/compute-services/cubes/overview) is a Virtual Machine (VM) with an attached NVMe Volume. You can use each newly created Cube as a new VM, either standalone or in combination with other IONOS Cloud products.
+
+Check out [Configuration templates](https://docs.ionos.com/cloud/compute-services/cubes/overview#basic-cubes)
+
+## Example Usage
+
+This resource will create an operational server. After this section completes, the provisioner can be called.
+
+### CUBE Server
+
+{{ tffile "examples/resources/ionoscloud_cube_server/basic.tf" }}
+
+### With IPv6 Enabled
+
+{{ tffile "examples/resources/ionoscloud_cube_server/ipv6.tf" }}
+
+{{ .SchemaMarkdown | trimspace }}
+
+⚠️ **_Warning: `allow_replace` - lets you update immutable fields, but it first destroys and then re-creates the server in order to do it. This field should be used with care, understanding the risks._**
+
+> **⚠ WARNING**
+>
+> Image_name under volume level is deprecated, please use image_name under server level
+
+
+> **⚠ WARNING**
+>
+> For creating a **CUBE** server, you can not set `volume.size` argument.
+
+## Import
+
+Resource Server can be imported using the `resource id` and the `datacenter id`, e.g.
+
+```shell
+terraform import ionoscloud_cube_server.myserver datacenter uuid/server uuid
+```
+
+## Notes
+
+Please note that for any secondary volume, you need to set the **licence_type** property to **UNKNOWN**
