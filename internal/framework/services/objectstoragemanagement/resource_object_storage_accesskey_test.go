@@ -14,6 +14,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/acctest"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/identity"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/objectstoragemanagement"
 )
 
 func TestAccAccesskeyResource(t *testing.T) {
@@ -36,6 +38,11 @@ func TestAccAccesskeyResource(t *testing.T) {
 					resource.TestCheckResourceAttrSet(name, "secretkey"),
 					resource.TestCheckResourceAttrSet(name, "canonical_user_id"),
 					resource.TestCheckResourceAttrSet(name, "contract_user_id"),
+					acctest.TestAccCheckResourceInList(
+						objectstoragemanagement.NewAccesskeyListResource(),
+						identity.WithIdentity(objectstoragemanagement.NewAccesskeyResource)(),
+						name, true,
+					),
 				),
 			},
 			{

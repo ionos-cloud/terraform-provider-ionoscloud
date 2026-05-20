@@ -3,8 +3,11 @@ package identity
 import (
 	"context"
 
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
+	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 // ResourceWithIdentityWrapper wraps any standard resource and automatically
@@ -25,6 +28,54 @@ func (w ResourceWithIdentityWrapper) IdentitySchema(ctx context.Context, req res
 					RequiredForImport: true,
 				},
 			},
+		}
+	}
+}
+
+// Create implements resource.Resource.
+func (w ResourceWithIdentityWrapper) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	w.Resource.Create(ctx, req, resp)
+	if !resp.Diagnostics.HasError() {
+		w.populateIdentity(ctx, resp.State, resp.Identity)
+	}
+}
+
+// Read implements resource.Resource.
+func (w ResourceWithIdentityWrapper) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	w.Resource.Read(ctx, req, resp)
+	if !resp.Diagnostics.HasError() {
+		w.populateIdentity(ctx, resp.State, resp.Identity)
+	}
+}
+
+// Update implements resource.Resource.
+func (w ResourceWithIdentityWrapper) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	w.Resource.Update(ctx, req, resp)
+	if !resp.Diagnostics.HasError() {
+		w.populateIdentity(ctx, resp.State, resp.Identity)
+	}
+}
+
+// Delete implements resource.Resource.
+func (w ResourceWithIdentityWrapper) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	w.Resource.Delete(ctx, req, resp)
+}
+
+func (w ResourceWithIdentityWrapper) populateIdentity(ctx context.Context, state tfsdk.State, identity *tfsdk.ResourceIdentity) {
+	if identity == nil {
+		return
+	}
+
+	if w.CustomSchema == nil {
+		var idVal types.String
+		diags := state.GetAttribute(ctx, path.Root("id"), &idVal)
+		if diags.HasError() {
+			return
+		}
+		if !idVal.IsUnknown() && !idVal.IsNull() {
+			identity.Set(ctx, &Model{
+				ID: idVal,
+			})
 		}
 	}
 }

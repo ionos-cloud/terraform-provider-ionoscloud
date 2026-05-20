@@ -171,7 +171,7 @@ func (r *accesskeyResource) Read(ctx context.Context, req resource.ReadRequest, 
 
 // ImportState imports the state of the accessKey.
 func (r *accesskeyResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+	resource.ImportStatePassthroughWithIdentity(ctx, path.Root("id"), path.Root("id"), req, resp)
 }
 
 // Update updates the accesskey.

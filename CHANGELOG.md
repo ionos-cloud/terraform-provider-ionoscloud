@@ -1,4 +1,10 @@
-## Upcoming
+Upcoming
+
+### Features
+- New list resource: `ionoscloud_s3_bucket` — list all Object Storage buckets via `terraform list` (requires Terraform 1.14+).
+- New list resource: `ionoscloud_object_storage_accesskey` — list all Object Storage Access Keys via `terraform list` (requires Terraform 1.14+).
+
+## 6.7.20
 
 ### Fixes
 - Fix IP Failover resource

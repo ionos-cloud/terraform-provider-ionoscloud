@@ -37,6 +37,29 @@ The following arguments are supported:
 
 ## Import
 
+In Terraform v1.12.0 and later, the [`import` block](https://developer.hashicorp.com/terraform/language/import) can be used with the `identity` attribute. For example:
+
+``` hcl
+import {
+  to = ionoscloud_object_storage_accesskey.example
+  identity = {
+    id = "objectStorageAccesskeyid"
+  }
+}
+
+resource "ionoscloud_object_storage_accesskey" "example" {
+  ### Configuration omitted for brevity ###
+}
+```
+
+### Identity Schema
+
+#### Required
+
+* `id` (String) The ID (UUID) of the AccessKey.
+
+---
+
 An object storage accesskey resource can be imported using its `resource id`, e.g.
 
 ```shell

@@ -323,6 +323,7 @@ func (p *IonosCloudProvider) ListResources(_ context.Context) []func() list.List
 	var finalResult []func() list.ListResource
 	listResources := [][]func() list.ListResource{
 		objectstorage.ListResources(),
+		objectstoragemanagement.ListResources(),
 	}
 
 	for _, r := range listResources {

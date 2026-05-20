@@ -57,6 +57,29 @@ The following arguments are supported:
 
 ## Import
 
+In Terraform v1.12.0 and later, the [`import` block](https://developer.hashicorp.com/terraform/language/import) can be used with the `identity` attribute. For example:
+
+``` hcl
+import {
+  to = ionoscloud_s3_bucket.example
+  identity = {
+    id = "bucket_name"
+  }
+}
+
+resource "ionoscloud_s3_bucket" "example" {
+  ### Configuration omitted for brevity ###
+}
+```
+
+### Identity Schema
+
+#### Required
+
+* `id` (String) Name of the bucket.
+
+---
+
 A bucket can be imported using the `bucket name` and the `region`:
 
 ```shell
