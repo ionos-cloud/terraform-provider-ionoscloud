@@ -199,6 +199,5 @@ func (c *Client) ListBuckets(ctx context.Context) ([]objstorage.Bucket, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to list buckets: %w", err)
 	}
-
 	return output.GetBuckets(), nil
 }

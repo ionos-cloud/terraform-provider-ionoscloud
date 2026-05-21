@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
@@ -29,6 +30,7 @@ import (
 var (
 	_ resource.ResourceWithImportState = (*bucketResource)(nil)
 	_ resource.ResourceWithConfigure   = (*bucketResource)(nil)
+	_ resource.ResourceWithIdentity    = (*bucketResource)(nil)
 )
 
 // NewBucketResource creates a new resource for the bucket resource.
@@ -48,6 +50,17 @@ type bucketResourceModel struct {
 	Timeouts          timeouts.Value `tfsdk:"timeouts"`
 	Tags              types.Map      `tfsdk:"tags"`
 	ID                types.String   `tfsdk:"id"`
+}
+
+// IdentitySchema returns the identity schema for the bucket resource.
+func (r *bucketResource) IdentitySchema(_ context.Context, _ resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
+	resp.IdentitySchema = identityschema.Schema{
+		Attributes: map[string]identityschema.Attribute{
+			"id": identityschema.StringAttribute{
+				RequiredForImport: true,
+			},
+		},
+	}
 }
 
 // Metadata returns the metadata for the bucket resource.
@@ -164,6 +177,7 @@ func (r *bucketResource) Create(ctx context.Context, req resource.CreateRequest,
 	data.ID = data.Name
 	data.Region = location
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	resp.Diagnostics.Append(resp.Identity.Set(ctx, &identity.Model{ID: data.Name})...)
 }
 
 // Read reads the bucket.
@@ -195,6 +209,7 @@ func (r *bucketResource) Read(ctx context.Context, req resource.ReadRequest, res
 	data.ObjectLockEnabled = bucket.ObjectLockEnabled
 	data.ID = data.Name
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	resp.Diagnostics.Append(resp.Identity.Set(ctx, &identity.Model{ID: data.Name})...)
 }
 
 // ImportState imports the state of the bucket.
@@ -253,6 +268,7 @@ func (r *bucketResource) Update(ctx context.Context, req resource.UpdateRequest,
 
 	plan.ID = state.ID
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
+	resp.Diagnostics.Append(resp.Identity.Set(ctx, &identity.Model{ID: plan.Name})...)
 }
 
 // Delete deletes the bucket.
