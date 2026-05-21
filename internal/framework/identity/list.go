@@ -20,7 +20,7 @@ func StreamList[T any](
 	items, err := fetch(ctx)
 	if err != nil {
 		var diags diag.Diagnostics
-		diags.AddError(err.Error(), "")
+		diags.AddError("Failed to list resources", err.Error())
 		stream.Results = list.ListResultsStreamDiagnostics(diags)
 		return
 	}
