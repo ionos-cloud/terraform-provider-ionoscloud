@@ -81,9 +81,10 @@ resource "ionoscloud_pg_cluster_v2" "test" {
   }
 
   credentials = {
-    username = "testuser"
-    password = random_password.cluster_password.result
-    database = "testdb"
+    username         = "testuser"
+    password         = random_password.cluster_password.result
+    password_version = "v1"
+    database         = "testdb"
   }
 }
 `, testLocation)
@@ -120,9 +121,57 @@ resource "ionoscloud_pg_cluster_v2" "test" {
   }
 
   credentials = {
-    username = "testuser"
-    password = random_password.cluster_password.result
-    database = "testdb"
+    username         = "testuser"
+    password         = random_password.cluster_password.result
+    password_version = "v1"
+    database         = "testdb"
+  }
+}
+`, testLocation)
+
+// clusterUpdatePasswordConfig updates only the password and increments password_version to trigger the change.
+var clusterUpdatePasswordConfig = infraConfig + fmt.Sprintf(`
+resource "random_password" "cluster_password_v2" {
+  length           = 16
+  special          = true
+  min_special      = 1
+  override_special = "@$!%%*?&"
+}
+
+resource "ionoscloud_pg_cluster_v2" "test" {
+  name              = "tf-test-pgsqlv2-updated"
+  description       = "Updated PgSQL v2 cluster"
+  version           = "17"
+  location          = "%[1]s"
+  backup_location   = "eu-central-3"
+  replication_mode  = "ASYNCHRONOUS"
+  connection_pooler = "DISABLED"
+  logs_enabled      = false
+  metrics_enabled   = false
+
+  instances = {
+    count        = 2
+    cores        = 2
+    ram          = 4
+    storage_size = 20
+  }
+
+  connections = {
+    datacenter_id            = ionoscloud_datacenter.test.id
+    lan_id                   = ionoscloud_lan.test.id
+    primary_instance_address = "192.168.1.100/24"
+  }
+
+  maintenance_window = {
+    time            = "12:00:00"
+    day_of_the_week = "Wednesday"
+  }
+
+  credentials = {
+    username         = "testuser"
+    password         = random_password.cluster_password_v2.result
+    password_version = "v2"
+    database         = "testdb"
   }
 }
 `, testLocation)
@@ -251,9 +300,10 @@ resource "ionoscloud_pg_cluster_v2" "test" {
   }
 
   credentials = {
-    username = "testuser"
-    password = random_password.cluster_password.result
-    database = "testdb"
+    username         = "testuser"
+    password         = random_password.cluster_password.result
+    password_version = "v1"
+    database         = "testdb"
   }
 }
 `, testLocationChanged)

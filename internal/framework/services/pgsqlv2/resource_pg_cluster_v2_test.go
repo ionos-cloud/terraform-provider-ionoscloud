@@ -52,6 +52,8 @@ func TestAccPgClusterV2(t *testing.T) {
 					resource.TestCheckResourceAttr(clusterResourceAddr, "maintenance_window.day_of_the_week", "Sunday"),
 					resource.TestCheckResourceAttr(clusterResourceAddr, "credentials.username", "testuser"),
 					resource.TestCheckResourceAttr(clusterResourceAddr, "credentials.database", "testdb"),
+					resource.TestCheckResourceAttr(clusterResourceAddr, "credentials.password_version", "v1"),
+					resource.TestCheckNoResourceAttr(clusterResourceAddr, "credentials.password"),
 					resource.TestCheckResourceAttrSet(clusterResourceAddr, "id"),
 					resource.TestCheckResourceAttrSet(clusterResourceAddr, "dns_name"),
 				),
@@ -61,7 +63,7 @@ func TestAccPgClusterV2(t *testing.T) {
 				ImportState:             true,
 				ImportStateIdFunc:       pgClusterV2ImportStateID,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"timeouts", "credentials.password", "restore_from_backup"},
+				ImportStateVerifyIgnore: []string{"timeouts", "credentials.password", "credentials.password_version", "restore_from_backup"},
 			},
 			{
 				Config: clusterDSByIDConfig,
@@ -182,7 +184,19 @@ func TestAccPgClusterV2(t *testing.T) {
 					resource.TestCheckResourceAttr(clusterResourceAddr, "maintenance_window.day_of_the_week", "Wednesday"),
 					resource.TestCheckResourceAttr(clusterResourceAddr, "credentials.username", "testuser"),
 					resource.TestCheckResourceAttr(clusterResourceAddr, "credentials.database", "testdb"),
+					resource.TestCheckResourceAttr(clusterResourceAddr, "credentials.password_version", "v1"),
+					resource.TestCheckNoResourceAttr(clusterResourceAddr, "credentials.password"),
 					resource.TestCheckResourceAttrSet(clusterResourceAddr, "dns_name"),
+				),
+			},
+			{
+				Config: clusterUpdatePasswordConfig,
+				Check: resource.ComposeTestCheckFunc(
+					checkClusterV2Exists(clusterResourceAddr),
+					resource.TestCheckResourceAttr(clusterResourceAddr, "credentials.username", "testuser"),
+					resource.TestCheckResourceAttr(clusterResourceAddr, "credentials.database", "testdb"),
+					resource.TestCheckResourceAttr(clusterResourceAddr, "credentials.password_version", "v2"),
+					resource.TestCheckNoResourceAttr(clusterResourceAddr, "credentials.password"),
 				),
 			},
 			{
