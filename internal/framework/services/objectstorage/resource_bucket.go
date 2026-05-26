@@ -19,7 +19,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/identity"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/tags"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstorage"
@@ -42,6 +41,11 @@ type bucketResource struct {
 	client *objectstorage.Client
 }
 
+type bucketIdentityModel struct {
+	ID     types.String `tfsdk:"id"`
+	Region types.String `tfsdk:"region"`
+}
+
 type bucketResourceModel struct {
 	Name              types.String   `tfsdk:"name"`
 	Region            types.String   `tfsdk:"region"`
@@ -57,6 +61,9 @@ func (r *bucketResource) IdentitySchema(_ context.Context, _ resource.IdentitySc
 	resp.IdentitySchema = identityschema.Schema{
 		Attributes: map[string]identityschema.Attribute{
 			"id": identityschema.StringAttribute{
+				RequiredForImport: true,
+			},
+			"region": identityschema.StringAttribute{
 				RequiredForImport: true,
 			},
 		},
@@ -177,7 +184,7 @@ func (r *bucketResource) Create(ctx context.Context, req resource.CreateRequest,
 	data.ID = data.Name
 	data.Region = location
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-	resp.Diagnostics.Append(resp.Identity.Set(ctx, &identity.Model{ID: data.Name})...)
+	resp.Diagnostics.Append(resp.Identity.Set(ctx, &bucketIdentityModel{ID: data.Name, Region: data.Region})...)
 }
 
 // Read reads the bucket.
@@ -209,19 +216,21 @@ func (r *bucketResource) Read(ctx context.Context, req resource.ReadRequest, res
 	data.ObjectLockEnabled = bucket.ObjectLockEnabled
 	data.ID = data.Name
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-	resp.Diagnostics.Append(resp.Identity.Set(ctx, &identity.Model{ID: data.Name})...)
+	resp.Diagnostics.Append(resp.Identity.Set(ctx, &bucketIdentityModel{ID: data.Name, Region: data.Region})...)
 }
 
 // ImportState imports the state of the bucket.
 func (r *bucketResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	if req.Identity != nil {
-		var identityModel *identity.Model
+		var identityModel *bucketIdentityModel
 		resp.Diagnostics.Append(req.Identity.Get(ctx, &identityModel)...)
 		if resp.Diagnostics.HasError() {
 			return
 		}
 		if identityModel != nil {
-			req.ID = identityModel.ID.ValueString()
+			resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("region"), identityModel.Region)...)
+			resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("name"), identityModel.ID)...)
+			return
 		}
 	}
 
@@ -268,7 +277,7 @@ func (r *bucketResource) Update(ctx context.Context, req resource.UpdateRequest,
 
 	plan.ID = state.ID
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
-	resp.Diagnostics.Append(resp.Identity.Set(ctx, &identity.Model{ID: plan.Name})...)
+	resp.Diagnostics.Append(resp.Identity.Set(ctx, &bucketIdentityModel{ID: plan.Name, Region: plan.Region})...)
 }
 
 // Delete deletes the bucket.

@@ -43,7 +43,8 @@ func TestAccBucketResource(t *testing.T) {
 				Config: "list \"ionoscloud_s3_bucket\" \"test\" {\n  provider = ionoscloud\n}",
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectIdentity("ionoscloud_s3_bucket.test", map[string]knownvalue.Check{
-						"id": knownvalue.StringExact(rName),
+						"id":     knownvalue.StringExact(rName),
+						"region": knownvalue.StringExact("eu-central-3"),
 					}),
 				},
 			},

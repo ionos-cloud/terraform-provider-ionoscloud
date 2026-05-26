@@ -14,6 +14,6 @@ type Model struct {
 // populate the list result — the mapper itself never mutates *list.ListResult directly.
 type MappedItem struct {
 	DisplayName string
-	Identity    *Model
+	Identity    any
 	Resource    any
 }

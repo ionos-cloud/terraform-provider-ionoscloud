@@ -44,18 +44,18 @@ func (r *bucketResource) Map(ctx context.Context, includeResource bool, b objsto
 		return nil, diags
 	}
 
-	mapped := &identity.MappedItem{
-		DisplayName: *b.Name,
-		Identity:    &identity.Model{ID: types.StringValue(*b.Name)},
-	}
-
-	if !includeResource {
-		return mapped, diags
-	}
-
 	region, err := r.client.GetBucketLocation(ctx, types.StringValue(*b.Name))
 	if err != nil {
 		diags.AddError("failed to get bucket location", err.Error())
+		return nil, diags
+	}
+
+	mapped := &identity.MappedItem{
+		DisplayName: *b.Name,
+		Identity:    &bucketIdentityModel{ID: types.StringValue(*b.Name), Region: region},
+	}
+
+	if !includeResource {
 		return mapped, diags
 	}
 
