@@ -41,6 +41,10 @@ func (r *bucketResource) List(ctx context.Context, req list.ListRequest, stream 
 // Map returns a MappedItem describing the bucket, or nil to skip it.
 func (r *bucketResource) Map(ctx context.Context, includeResource bool, b objstorage.Bucket) (*identity.MappedItem, diag.Diagnostics) {
 	var diags diag.Diagnostics
+	if b.Name == nil {
+		diags.AddError("unexpected API response", "bucket returned by API has no name")
+		return nil, diags
+	}
 
 	region, err := r.client.GetBucketLocation(ctx, types.StringValue(*b.Name))
 	if err != nil {
