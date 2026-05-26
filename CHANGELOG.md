@@ -5,7 +5,7 @@ Upcoming
 - New list resource: `ionoscloud_object_storage_accesskey` — list all Object Storage Access Keys via `terraform query` (requires Terraform 1.14+).
 
 ### Refactor
-- Refactor `ionoscloud_pg_cluster_v2` resource to have use write-only password and password_wo fields instead of password.
+ - Refactor `ionoscloud_pg_cluster_v2` resource to have use write-only password and password_version fields instead of password.
 
 ## 6.7.20
 

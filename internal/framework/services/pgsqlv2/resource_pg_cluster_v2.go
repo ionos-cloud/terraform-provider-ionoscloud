@@ -674,10 +674,15 @@ func mapClusterResponseToModel(cluster *pgsqlv2.ClusterRead, model *clusterResou
 	// Credentials block: the API returns username and database but not the password.
 	// Password is write-only so it is not stored in state and must remain null on Read.
 	// Preserve password_version from existing state so Terraform does not see a spurious diff.
+	// model.Credentials may be nil on import where only id/location are in state.
+	var passwordVersion types.String
+	if model.Credentials != nil {
+		passwordVersion = model.Credentials.PasswordVersion
+	}
 	model.Credentials = &credentialsModel{
 		Username:        types.StringValue(props.Credentials.Username),
 		Password:        types.StringNull(),
-		PasswordVersion: model.Credentials.PasswordVersion,
+		PasswordVersion: passwordVersion,
 		Database:        types.StringValue(props.Credentials.Database),
 	}
 }

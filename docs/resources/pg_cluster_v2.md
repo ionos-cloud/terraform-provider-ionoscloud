@@ -109,7 +109,7 @@ ephemeral "random_password" "cluster_password" {
 * `credentials` - (Required)[object] Credentials for the master database user to be created.
   * `username` - (Required)[string] The username of the master database user.
   * `password` - (Required, Sensitive, WriteOnly)[string] The password for the master database user. This value is never stored in Terraform state. Requires Terraform 1.11+.
-  * `password_version` - (Required)[string] An arbitrary string (e.g. `"1"`, `"2"`) that must be changed alongside `password` to signal a password update. Increment this value whenever the password changes. This value is never stored in Terraform state. Requires Terraform 1.11+.
+  * `password_version` - (Required)[string] An arbitrary string (e.g. `"1"`, `"2"`) stored in Terraform state solely to trigger password updates. Increment this value whenever the write-only `password` field changes so Terraform detects a diff and sends the new password to the API.
   * `database` - (Required)[string] The name of the initial database to be created.
 * `restore_from_backup` - (Optional)[object] Configures the cluster to be initialized with data from an existing backup.
   * `source_backup_id` - (Optional)[string] The UUID of the backup to restore data from.
