@@ -9,7 +9,13 @@ import (
 
 // StreamList fetches items using fetch and streams them into the results stream.
 // If the fetch fails, the error is emitted as a diagnostic and iteration stops.
-// The mapper returns a *MappedItem to populate each result with; nil skips the item.
+//
+// The mapper contract:
+//   - Return nil to skip the item (it will not be pushed to the stream).
+//   - Return a non-nil *MappedItem to include the item; MappedItem.Identity must be
+//     non-nil. StreamList sets DisplayName, Identity, and Resource on the result.
+//   - Any diagnostics returned by the mapper are always appended to the result,
+//     regardless of whether the item is skipped or included.
 func StreamList[T any](
 	ctx context.Context,
 	stream *list.ListResultsStream,
@@ -28,13 +34,14 @@ func StreamList[T any](
 		for _, item := range items {
 			result := req.NewListResult(ctx)
 			mapped, diags := mapper(ctx, req.IncludeResource, item)
-			if diags.HasError() {
-				result.Diagnostics.Append(diags...)
-				push(result)
-				return
-			}
+			result.Diagnostics.Append(diags...)
 			if mapped == nil {
 				continue
+			}
+			if mapped.Identity == nil {
+				result.Diagnostics.AddError("mapper contract violation", "MappedItem.Identity must not be nil")
+				push(result)
+				return
 			}
 			result.DisplayName = mapped.DisplayName
 			result.Diagnostics.Append(result.Identity.Set(ctx, mapped.Identity)...)

@@ -13,6 +13,7 @@ import (
 	objstorage "github.com/ionos-cloud/sdk-go-bundle/products/objectstorage/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/identity"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 var (
@@ -40,13 +41,10 @@ func (r *bucketResource) List(ctx context.Context, req list.ListRequest, stream 
 // Map returns a MappedItem describing the bucket, or nil to skip it.
 func (r *bucketResource) Map(ctx context.Context, includeResource bool, b objstorage.Bucket) (*identity.MappedItem, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	if b.Name == nil {
-		return nil, diags
-	}
 
 	region, err := r.client.GetBucketLocation(ctx, types.StringValue(*b.Name))
 	if err != nil {
-		diags.AddError("failed to get bucket location", err.Error())
+		diags.AddError("failed to get bucket location", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: *b.Name}).Error())
 		return nil, diags
 	}
 
@@ -61,7 +59,7 @@ func (r *bucketResource) Map(ctx context.Context, includeResource bool, b objsto
 
 	bucketModel, found, err := r.client.GetBucket(ctx, types.StringValue(*b.Name), region)
 	if err != nil {
-		diags.AddError("failed to get bucket details", err.Error())
+		diags.AddError("failed to get bucket details", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: *b.Name}).Error())
 		return mapped, diags
 	}
 	if !found {
