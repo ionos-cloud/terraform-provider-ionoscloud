@@ -35,7 +35,7 @@ type BucketDataSourceModel struct {
 func (c *Client) CreateBucket(ctx context.Context, name, location types.String, objectLock types.Bool, tags types.Map, timeout time.Duration) error {
 	err := c.ChangeConfigURL(location.ValueString())
 	if err != nil {
-		return fmt.Errorf("failed to set config url while creating bucket: %w", err)
+		return fmt.Errorf("failed to set config URL while creating bucket: %w", err)
 	}
 	createBucketConfig := objstorage.CreateBucketConfiguration{
 		LocationConstraint: location.ValueStringPointer(),
