@@ -62,9 +62,19 @@ func (d *clustersDataSource) Schema(_ context.Context, _ datasource.SchemaReques
 				Description: "The list of PostgreSQL v2 clusters.",
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
-						"backup_location": schema.StringAttribute{
+						"backup": schema.SingleNestedAttribute{
 							Computed:    true,
-							Description: "The S3 location where the backups are stored.",
+							Description: "Backup location and retention configuration.",
+							Attributes: map[string]schema.Attribute{
+								"location": schema.StringAttribute{
+									Computed:    true,
+									Description: "The Object Storage location where the backups are stored.",
+								},
+								"retention_days": schema.Int32Attribute{
+									Computed:    true,
+									Description: "How many days cluster backups are retained.",
+								},
+							},
 						},
 						"connection_pooler": schema.StringAttribute{
 							Computed:    true,

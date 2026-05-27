@@ -17,39 +17,39 @@ import (
 	"time"
 )
 
-// checks if the PostgresClusterFromBackup type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &PostgresClusterFromBackup{}
+// checks if the PostgresRestoreClusterFromBackup type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &PostgresRestoreClusterFromBackup{}
 
-// PostgresClusterFromBackup If you specify this field when creating a new cluster, it initializes the cluster with data from an existing backup. If modifying an existing cluster, this field would configure an in-place restore from the specified backup, overwriting the current data with the backup data. The cluster may experience a brief period of downtime during this process.
-type PostgresClusterFromBackup struct {
-	// UUID for the backup to get data from
+// PostgresRestoreClusterFromBackup This option is only valid for cluster creation, and is not valid for in-place restore. When specified during cluster creation, it initializes the cluster with data from an existing backup.
+type PostgresRestoreClusterFromBackup struct {
+	// UUID for the backup to get data from.
 	SourceBackupId string `json:"sourceBackupId"`
-	// Providing this value as an ISO 8601 timestamp causes the system to replay the backups up to the specified time; if empty, the system applies the backup in its entirety.
+	// Providing this value as an ISO 8601 timestamp causes the system to replay the backups up to the specified time. If omitted on cluster creation, the system applies the backup in its entirety.
 	RecoveryTargetDatetime *IonosTime `json:"recoveryTargetDatetime,omitempty"`
 }
 
-// NewPostgresClusterFromBackup instantiates a new PostgresClusterFromBackup object
+// NewPostgresRestoreClusterFromBackup instantiates a new PostgresRestoreClusterFromBackup object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewPostgresClusterFromBackup(sourceBackupId string) *PostgresClusterFromBackup {
-	this := PostgresClusterFromBackup{}
+func NewPostgresRestoreClusterFromBackup(sourceBackupId string) *PostgresRestoreClusterFromBackup {
+	this := PostgresRestoreClusterFromBackup{}
 
 	this.SourceBackupId = sourceBackupId
 
 	return &this
 }
 
-// NewPostgresClusterFromBackupWithDefaults instantiates a new PostgresClusterFromBackup object
+// NewPostgresRestoreClusterFromBackupWithDefaults instantiates a new PostgresRestoreClusterFromBackup object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewPostgresClusterFromBackupWithDefaults() *PostgresClusterFromBackup {
-	this := PostgresClusterFromBackup{}
+func NewPostgresRestoreClusterFromBackupWithDefaults() *PostgresRestoreClusterFromBackup {
+	this := PostgresRestoreClusterFromBackup{}
 	return &this
 }
 
 // GetSourceBackupId returns the SourceBackupId field value
-func (o *PostgresClusterFromBackup) GetSourceBackupId() string {
+func (o *PostgresRestoreClusterFromBackup) GetSourceBackupId() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -60,7 +60,7 @@ func (o *PostgresClusterFromBackup) GetSourceBackupId() string {
 
 // GetSourceBackupIdOk returns a tuple with the SourceBackupId field value
 // and a boolean to check if the value has been set.
-func (o *PostgresClusterFromBackup) GetSourceBackupIdOk() (*string, bool) {
+func (o *PostgresRestoreClusterFromBackup) GetSourceBackupIdOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -68,12 +68,12 @@ func (o *PostgresClusterFromBackup) GetSourceBackupIdOk() (*string, bool) {
 }
 
 // SetSourceBackupId sets field value
-func (o *PostgresClusterFromBackup) SetSourceBackupId(v string) {
+func (o *PostgresRestoreClusterFromBackup) SetSourceBackupId(v string) {
 	o.SourceBackupId = v
 }
 
 // GetRecoveryTargetDatetime returns the RecoveryTargetDatetime field value if set, zero value otherwise.
-func (o *PostgresClusterFromBackup) GetRecoveryTargetDatetime() time.Time {
+func (o *PostgresRestoreClusterFromBackup) GetRecoveryTargetDatetime() time.Time {
 	if o == nil || IsNil(o.RecoveryTargetDatetime) {
 		var ret time.Time
 		return ret
@@ -83,7 +83,7 @@ func (o *PostgresClusterFromBackup) GetRecoveryTargetDatetime() time.Time {
 
 // GetRecoveryTargetDatetimeOk returns a tuple with the RecoveryTargetDatetime field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *PostgresClusterFromBackup) GetRecoveryTargetDatetimeOk() (*time.Time, bool) {
+func (o *PostgresRestoreClusterFromBackup) GetRecoveryTargetDatetimeOk() (*time.Time, bool) {
 	if o == nil || IsNil(o.RecoveryTargetDatetime) {
 		return nil, false
 	}
@@ -91,7 +91,7 @@ func (o *PostgresClusterFromBackup) GetRecoveryTargetDatetimeOk() (*time.Time, b
 }
 
 // HasRecoveryTargetDatetime returns a boolean if a field has been set.
-func (o *PostgresClusterFromBackup) HasRecoveryTargetDatetime() bool {
+func (o *PostgresRestoreClusterFromBackup) HasRecoveryTargetDatetime() bool {
 	if o != nil && !IsNil(o.RecoveryTargetDatetime) {
 		return true
 	}
@@ -100,11 +100,11 @@ func (o *PostgresClusterFromBackup) HasRecoveryTargetDatetime() bool {
 }
 
 // SetRecoveryTargetDatetime gets a reference to the given time.Time and assigns it to the RecoveryTargetDatetime field.
-func (o *PostgresClusterFromBackup) SetRecoveryTargetDatetime(v time.Time) {
+func (o *PostgresRestoreClusterFromBackup) SetRecoveryTargetDatetime(v time.Time) {
 	o.RecoveryTargetDatetime = &IonosTime{v}
 }
 
-func (o PostgresClusterFromBackup) MarshalJSON() ([]byte, error) {
+func (o PostgresRestoreClusterFromBackup) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -112,7 +112,7 @@ func (o PostgresClusterFromBackup) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o PostgresClusterFromBackup) ToMap() (map[string]interface{}, error) {
+func (o PostgresRestoreClusterFromBackup) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["sourceBackupId"] = o.SourceBackupId
 	if !IsNil(o.RecoveryTargetDatetime) {
@@ -121,38 +121,38 @@ func (o PostgresClusterFromBackup) ToMap() (map[string]interface{}, error) {
 	return toSerialize, nil
 }
 
-type NullablePostgresClusterFromBackup struct {
-	value *PostgresClusterFromBackup
+type NullablePostgresRestoreClusterFromBackup struct {
+	value *PostgresRestoreClusterFromBackup
 	isSet bool
 }
 
-func (v NullablePostgresClusterFromBackup) Get() *PostgresClusterFromBackup {
+func (v NullablePostgresRestoreClusterFromBackup) Get() *PostgresRestoreClusterFromBackup {
 	return v.value
 }
 
-func (v *NullablePostgresClusterFromBackup) Set(val *PostgresClusterFromBackup) {
+func (v *NullablePostgresRestoreClusterFromBackup) Set(val *PostgresRestoreClusterFromBackup) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullablePostgresClusterFromBackup) IsSet() bool {
+func (v NullablePostgresRestoreClusterFromBackup) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullablePostgresClusterFromBackup) Unset() {
+func (v *NullablePostgresRestoreClusterFromBackup) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullablePostgresClusterFromBackup(val *PostgresClusterFromBackup) *NullablePostgresClusterFromBackup {
-	return &NullablePostgresClusterFromBackup{value: val, isSet: true}
+func NewNullablePostgresRestoreClusterFromBackup(val *PostgresRestoreClusterFromBackup) *NullablePostgresRestoreClusterFromBackup {
+	return &NullablePostgresRestoreClusterFromBackup{value: val, isSet: true}
 }
 
-func (v NullablePostgresClusterFromBackup) MarshalJSON() ([]byte, error) {
+func (v NullablePostgresRestoreClusterFromBackup) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullablePostgresClusterFromBackup) UnmarshalJSON(src []byte) error {
+func (v *NullablePostgresRestoreClusterFromBackup) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

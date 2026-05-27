@@ -38,18 +38,23 @@ type clusterResourceModel struct {
 	Version          types.String   `tfsdk:"version"`
 	DNSName          types.String   `tfsdk:"dns_name"`
 	Location         types.String   `tfsdk:"location"`
-	BackupLocation   types.String   `tfsdk:"backup_location"`
 	ReplicationMode  types.String   `tfsdk:"replication_mode"`
 	ConnectionPooler types.String   `tfsdk:"connection_pooler"`
 	LogsEnabled      types.Bool     `tfsdk:"logs_enabled"`
 	MetricsEnabled   types.Bool     `tfsdk:"metrics_enabled"`
 	Timeouts         timeouts.Value `tfsdk:"timeouts"`
 
-	Instances         *instancesModel         `tfsdk:"instances"`
-	Connections       *connectionModel        `tfsdk:"connections"`
-	MaintenanceWindow *maintenanceWindowModel `tfsdk:"maintenance_window"`
+	Instances         instancesModel          `tfsdk:"instances"`
+	Connections       connectionModel         `tfsdk:"connections"`
+	MaintenanceWindow maintenanceWindowModel  `tfsdk:"maintenance_window"`
 	Credentials       *credentialsModel       `tfsdk:"credentials"`
 	RestoreFromBackup *restoreFromBackupModel `tfsdk:"restore_from_backup"`
+	Backup            backupSpecModel         `tfsdk:"backup"`
+}
+
+type backupSpecModel struct {
+	Location      types.String `tfsdk:"location"`
+	RetentionDays types.Int32  `tfsdk:"retention_days"`
 }
 
 type instancesModel struct {
@@ -96,9 +101,19 @@ func (r *clusterResource) Metadata(_ context.Context, req resource.MetadataReque
 func (r *clusterResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			"backup_location": schema.StringAttribute{
+			"backup": schema.SingleNestedAttribute{
 				Required:    true,
-				Description: "The S3 location where the backups will be created. Supported locations are provided by the backup locations endpoint.",
+				Description: "Backup location and retention configurations",
+				Attributes: map[string]schema.Attribute{
+					"location": schema.StringAttribute{
+						Required:    true,
+						Description: "The Object Storage location where the backups will be created. Supported locations are provided by the backup locations endpoint.",
+					},
+					"retention_days": schema.Int32Attribute{
+						Required:    true,
+						Description: "How many days cluster backups are retained.",
+					},
+				},
 			},
 			"connection_pooler": schema.StringAttribute{
 				Optional:    true,
@@ -496,14 +511,16 @@ func (r *clusterResource) ImportState(ctx context.Context, req resource.ImportSt
 
 // buildClusterCreateProperties constructs the cluster create request from the plan model.
 func buildClusterCreateProperties(plan *clusterResourceModel) (pgsqlv2.ClusterCreateProperties, diag.Diagnostics) {
-	var diagnostics diag.Diagnostics
 	props := pgsqlv2.ClusterCreateProperties{
 		Name:            plan.Name.ValueString(),
 		ReplicationMode: pgsqlv2.PostgresClusterReplicationMode(plan.ReplicationMode.ValueString()),
-		BackupLocation:  plan.BackupLocation.ValueString(),
+		Backup: pgsqlv2.ClusterBackup{
+			Location:      plan.Backup.Location.ValueString(),
+			RetentionDays: plan.Backup.RetentionDays.ValueInt32(),
+		},
 	}
 
-	props.Version = plan.Version.ValueStringPointer()
+	props.Version = plan.Version.ValueString()
 
 	props.Instances = pgsqlv2.InstanceConfiguration{
 		Count:       plan.Instances.Count.ValueInt32(),
@@ -544,23 +561,53 @@ func buildClusterCreateProperties(plan *clusterResourceModel) (pgsqlv2.ClusterCr
 	}
 
 	if plan.RestoreFromBackup != nil {
-		restore := &pgsqlv2.PostgresClusterFromBackup{}
-		if !plan.RestoreFromBackup.SourceBackupID.IsNull() {
-			restore.SourceBackupId = plan.RestoreFromBackup.SourceBackupID.ValueString()
+		restore, diags := buildClusterRestoreFromBackup(plan)
+		if diags.HasError() {
+			return props, diags
 		}
+
+		props.RestoreFromBackup = &restore
+	}
+
+	return props, nil
+}
+
+// buildClusterRestoreFromBackup constructs the ClusterRestoreFromBackup struct for cluster creation from backup.
+// It assumes that clusterResourceModel.RestoreFromBackup is not nil
+func buildClusterRestoreFromBackup(plan *clusterResourceModel) (pgsqlv2.ClusterRestoreFromBackup, diag.Diagnostics) {
+	var diagnostics diag.Diagnostics
+
+	restore := pgsqlv2.ClusterRestoreFromBackup{}
+	if !plan.RestoreFromBackup.SourceBackupID.IsNull() {
+		// if SourceBackupID is set, send a PostgresRestoreClusterFromBackup
+		restore.PostgresRestoreClusterFromBackup = &pgsqlv2.PostgresRestoreClusterFromBackup{
+			SourceBackupId: plan.RestoreFromBackup.SourceBackupID.ValueString(),
+		}
+
 		if !plan.RestoreFromBackup.RecoveryTargetDateTime.IsNull() {
 			t, err := time.Parse(time.RFC3339, plan.RestoreFromBackup.RecoveryTargetDateTime.ValueString())
 			if err != nil {
 				diagnostics.AddError("invalid recovery_target_datetime",
 					fmt.Sprintf("expected RFC3339 format (e.g. 2020-12-10T13:37:50+01:00), got %q, error: %v", plan.RestoreFromBackup.RecoveryTargetDateTime.ValueString(), err))
-				return props, diagnostics
+				return restore, diagnostics
 			}
-			restore.RecoveryTargetDatetime = &pgsqlv2.IonosTime{Time: t}
+
+			restore.PostgresRestoreClusterFromBackup.RecoveryTargetDatetime = &pgsqlv2.IonosTime{Time: t}
 		}
-		props.RestoreFromBackup = restore
+	} else if !plan.RestoreFromBackup.RecoveryTargetDateTime.IsNull() {
+		// if only RecoveryTargetDateTime is set, send a PostgresInPlaceRestoreFromBackup
+		restore.PostgresInPlaceRestoreClusterFromBackup = &pgsqlv2.PostgresInPlaceRestoreClusterFromBackup{}
+		t, err := time.Parse(time.RFC3339, plan.RestoreFromBackup.RecoveryTargetDateTime.ValueString())
+		if err != nil {
+			diagnostics.AddError("invalid recovery_target_datetime",
+				fmt.Sprintf("expected RFC3339 format (e.g. 2020-12-10T13:37:50+01:00), got %q, error: %v", plan.RestoreFromBackup.RecoveryTargetDateTime.ValueString(), err))
+			return restore, diagnostics
+		}
+
+		restore.PostgresInPlaceRestoreClusterFromBackup.RecoveryTargetDatetime = &pgsqlv2.IonosTime{Time: t}
 	}
 
-	return props, diagnostics
+	return restore, nil
 }
 
 // buildClusterUpdateProperties constructs the Cluster properties for PUT update.
@@ -569,10 +616,13 @@ func buildClusterUpdateProperties(plan *clusterResourceModel) (pgsqlv2.Cluster, 
 	props := pgsqlv2.Cluster{
 		Name:            plan.Name.ValueString(),
 		ReplicationMode: pgsqlv2.PostgresClusterReplicationMode(plan.ReplicationMode.ValueString()),
-		BackupLocation:  plan.BackupLocation.ValueString(),
+		Backup: pgsqlv2.ClusterBackup{
+			Location:      plan.Backup.Location.ValueString(),
+			RetentionDays: plan.Backup.RetentionDays.ValueInt32(),
+		},
 	}
 
-	props.Version = plan.Version.ValueStringPointer()
+	props.Version = plan.Version.ValueString()
 
 	props.Instances = pgsqlv2.InstanceConfiguration{
 		Count:       plan.Instances.Count.ValueInt32(),
@@ -613,20 +663,12 @@ func buildClusterUpdateProperties(plan *clusterResourceModel) (pgsqlv2.Cluster, 
 	}
 
 	if plan.RestoreFromBackup != nil {
-		restore := &pgsqlv2.PostgresClusterFromBackup{}
-		if !plan.RestoreFromBackup.SourceBackupID.IsNull() {
-			restore.SourceBackupId = plan.RestoreFromBackup.SourceBackupID.ValueString()
+		restore, diags := buildClusterRestoreFromBackup(plan)
+		if diags.HasError() {
+			return props, diags
 		}
-		if !plan.RestoreFromBackup.RecoveryTargetDateTime.IsNull() {
-			t, err := time.Parse(time.RFC3339, plan.RestoreFromBackup.RecoveryTargetDateTime.ValueString())
-			if err != nil {
-				diagnostics.AddError("invalid recovery_target_datetime",
-					fmt.Sprintf("expected RFC3339 format (e.g. 2020-12-10T13:37:50+01:00), got %q, error: %v", plan.RestoreFromBackup.RecoveryTargetDateTime.ValueString(), err))
-				return props, diagnostics
-			}
-			restore.RecoveryTargetDatetime = &pgsqlv2.IonosTime{Time: t}
-		}
-		props.RestoreFromBackup = restore
+
+		props.RestoreFromBackup = &restore
 	}
 
 	return props, diagnostics
@@ -642,29 +684,33 @@ func mapClusterResponseToModel(cluster *pgsqlv2.ClusterRead, model *clusterResou
 
 	model.Name = types.StringValue(props.Name)
 	model.Description = types.StringPointerValue(props.Description)
-	model.Version = types.StringPointerValue(props.Version)
+	model.Version = types.StringValue(props.Version)
 	model.ReplicationMode = types.StringValue(string(props.ReplicationMode))
-	model.BackupLocation = types.StringValue(props.BackupLocation)
 	model.ConnectionPooler = types.StringPointerValue(props.ConnectionPooler)
 	model.LogsEnabled = types.BoolPointerValue(props.LogsEnabled)
 	model.MetricsEnabled = types.BoolPointerValue(props.MetricsEnabled)
 
-	model.Instances = &instancesModel{
+	model.Instances = instancesModel{
 		Count:       types.Int32Value(props.Instances.Count),
 		Cores:       types.Int32Value(props.Instances.Cores),
 		RAM:         types.Int32Value(props.Instances.Ram),
 		StorageSize: types.Int32Value(props.Instances.StorageSize),
 	}
 
-	model.Connections = &connectionModel{
+	model.Connections = connectionModel{
 		DatacenterID:           types.StringValue(props.Connection.DatacenterId),
 		LanID:                  types.StringValue(props.Connection.LanId),
 		PrimaryInstanceAddress: types.StringValue(props.Connection.PrimaryInstanceAddress),
 	}
 
-	model.MaintenanceWindow = &maintenanceWindowModel{
+	model.MaintenanceWindow = maintenanceWindowModel{
 		Time:         types.StringValue(props.MaintenanceWindow.Time),
 		DayOfTheWeek: types.StringValue(string(props.MaintenanceWindow.DayOfTheWeek)),
+	}
+
+	model.Backup = backupSpecModel{
+		Location:      types.StringValue(props.Backup.Location),
+		RetentionDays: types.Int32Value(props.Backup.RetentionDays),
 	}
 
 	if props.Credentials == nil {
