@@ -25,6 +25,21 @@ list "ionoscloud_s3_bucket" "example" {
 }
 ```
 
+### Filter buckets by region
+
+```hcl
+list "ionoscloud_s3_bucket" "eu_central" {
+  provider = ionoscloud
+  include_resource = true
+  config {
+    filters = [{
+      field_name  = "region"
+      field_value = "eu-central-3"
+    }]
+  }
+}
+```
+
 ### Generate resource configuration from existing buckets
 
 Use `terraform query` with `-generate-config-out` to produce ready-to-use `ionoscloud_s3_bucket` resource blocks for all existing buckets:
@@ -37,7 +52,11 @@ Terraform will write an `ionoscloud_s3_bucket` resource block for each discovere
 
 ## Argument Reference
 
-This list resource has no configuration arguments.
+The `config` block supports the following arguments:
+
+- `filters` - (Optional) List of filters to apply. All filters must match (AND logic). Each filter supports:
+  - `field_name` - (Required) The field to filter on. Supported values: `name`, `region`.
+  - `field_value` - (Required) The exact value to match against.
 
 ## Attributes Reference
 
