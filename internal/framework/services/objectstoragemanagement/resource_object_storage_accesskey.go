@@ -7,8 +7,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/identity"
 
 	objectStorageManagement "github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2"
 
@@ -21,7 +24,19 @@ import (
 var (
 	_ resource.ResourceWithImportState = (*accesskeyResource)(nil)
 	_ resource.ResourceWithConfigure   = (*accesskeyResource)(nil)
+	_ resource.ResourceWithIdentity    = (*accesskeyResource)(nil)
 )
+
+// IdentitySchema returns the identity schema for the accesskey resource.
+func (r *accesskeyResource) IdentitySchema(_ context.Context, _ resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
+	resp.IdentitySchema = identityschema.Schema{
+		Attributes: map[string]identityschema.Attribute{
+			"id": identityschema.StringAttribute{
+				RequiredForImport: true,
+			},
+		},
+	}
+}
 
 // NewAccesskeyResource creates a new resource for the accesskey resource.
 func NewAccesskeyResource() resource.Resource {
@@ -140,6 +155,7 @@ func (r *accesskeyResource) Create(ctx context.Context, req resource.CreateReque
 	// we need this because canonical_user_id not available on create response
 	objectStorageManagementService.SetAccessKeyPropertiesToPlan(data, accessKeyRead)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	resp.Diagnostics.Append(resp.Identity.Set(ctx, &identity.Model{ID: data.ID})...)
 }
 
 // Read reads the accesskey.
@@ -167,11 +183,12 @@ func (r *accesskeyResource) Read(ctx context.Context, req resource.ReadRequest, 
 
 	objectStorageManagementService.SetAccessKeyPropertiesToPlan(&data, accessKey)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	resp.Diagnostics.Append(resp.Identity.Set(ctx, &identity.Model{ID: data.ID})...)
 }
 
 // ImportState imports the state of the accessKey.
 func (r *accesskeyResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+	resource.ImportStatePassthroughWithIdentity(ctx, path.Root("id"), path.Root("id"), req, resp)
 }
 
 // Update updates the accesskey.
@@ -212,6 +229,7 @@ func (r *accesskeyResource) Update(ctx context.Context, req resource.UpdateReque
 
 	objectStorageManagementService.SetAccessKeyPropertiesToPlan(state, accessKeyRead)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
+	resp.Diagnostics.Append(resp.Identity.Set(ctx, &identity.Model{ID: state.ID})...)
 }
 
 // Delete deletes the accessKey.

@@ -9,6 +9,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/ephemeral"
+	"github.com/hashicorp/terraform-plugin-framework/list"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
@@ -44,6 +45,10 @@ type FrameworkClientOptions struct {
 	Retries        types.Int64  `tfsdk:"retries"`
 	Insecure       types.Bool   `tfsdk:"insecure"`
 }
+
+var (
+	_ provider.ProviderWithListResources = (*IonosCloudProvider)(nil)
+)
 
 // IonosCloudProvider is the provider implementation.
 type IonosCloudProvider struct {
@@ -254,6 +259,7 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 	resp.DataSourceData = client
 	resp.EphemeralResourceData = client
 	resp.ResourceData = client
+	resp.ListResourceData = client
 
 	diagutil.SetupContractNumberResolver(clientOpts.ContractNumber.ValueString(), token, func() string { //nolint:contextcheck
 		return contractService.GetContractNumber(ctx, client)
@@ -308,5 +314,20 @@ func (p *IonosCloudProvider) EphemeralResources(_ context.Context) []func() ephe
 	for _, r := range ephemeralResources {
 		finalResult = append(finalResult, r...)
 	}
+	return finalResult
+}
+
+// ListResources returns the list resources for the provider.
+func (p *IonosCloudProvider) ListResources(_ context.Context) []func() list.ListResource {
+	var finalResult []func() list.ListResource //nolint:prealloc
+	listResources := [][]func() list.ListResource{
+		objectstorage.ListResources(),
+		objectstoragemanagement.ListResources(),
+	}
+
+	for _, r := range listResources {
+		finalResult = append(finalResult, r...)
+	}
+
 	return finalResult
 }

@@ -192,3 +192,12 @@ func (c *Client) bucketExistsCheck(ctx context.Context, name string) error {
 
 	return nil
 }
+
+// ListBuckets lists all buckets.
+func (c *Client) ListBuckets(ctx context.Context) ([]objstorage.Bucket, error) {
+	output, _, err := c.client.BucketsApi.ListBuckets(ctx).Execute()
+	if err != nil {
+		return nil, fmt.Errorf("failed to list buckets: %w", err)
+	}
+	return output.GetBuckets(), nil
+}

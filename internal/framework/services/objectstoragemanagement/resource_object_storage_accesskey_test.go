@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/querycheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/acctest"
@@ -37,6 +38,20 @@ func TestAccAccesskeyResource(t *testing.T) {
 					resource.TestCheckResourceAttrSet(name, "canonical_user_id"),
 					resource.TestCheckResourceAttrSet(name, "contract_user_id"),
 				),
+			},
+			{
+				Query:  true,
+				Config: "list \"ionoscloud_object_storage_accesskey\" \"test\" {\n  provider = ionoscloud\n}",
+				QueryResultChecks: []querycheck.QueryResultCheck{
+					querycheck.ExpectLengthAtLeast("ionoscloud_object_storage_accesskey.test", 1),
+				},
+			},
+			{
+				Query:  true,
+				Config: "list \"ionoscloud_object_storage_accesskey\" \"test\" {\n  provider = ionoscloud\n  include_resource = true\n}",
+				QueryResultChecks: []querycheck.QueryResultCheck{
+					querycheck.ExpectLengthAtLeast("ionoscloud_object_storage_accesskey.test", 1),
+				},
 			},
 			{
 				Config: testAccAccesskeyConfigDescription(descriptionUpdated),
