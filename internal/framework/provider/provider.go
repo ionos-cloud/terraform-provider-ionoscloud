@@ -47,7 +47,6 @@ type FrameworkClientOptions struct {
 }
 
 var (
-	_ provider.Provider                  = (*IonosCloudProvider)(nil)
 	_ provider.ProviderWithListResources = (*IonosCloudProvider)(nil)
 )
 

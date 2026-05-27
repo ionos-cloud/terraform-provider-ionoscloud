@@ -63,7 +63,8 @@ In Terraform v1.12.0 and later, the [`import` block](https://developer.hashicorp
 import {
   to = ionoscloud_s3_bucket.example
   identity = {
-    id = "bucket_name"
+    id     = "bucket_name"
+    region = "your_bucket_region"
   }
 }
 
@@ -77,6 +78,7 @@ resource "ionoscloud_s3_bucket" "example" {
 #### Required
 
 * `id` (String) Name of the bucket.
+* `region` (String) Region where the bucket is located.
 
 ---
 

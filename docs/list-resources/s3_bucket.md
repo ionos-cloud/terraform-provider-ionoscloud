@@ -8,11 +8,13 @@ description: |-
 
 # List Resource: ionoscloud_s3_bucket
 
--> **Note:** List Resources require HashiCorp Terraform version 1.14 or later and are queried using `terraform query`.
+⚠️ **Note:** List Resources require HashiCorp Terraform version 1.14 or later and are queried using `terraform query`.
 
 Lists [IONOS Object Storage Buckets](https://docs.ionos.com/cloud/storage-and-backup/ionos-object-storage) on IONOS CLOUD.
 
 ## Example Usage
+
+⚠️ **Note:** `list` blocks must be placed in a dedicated `tfquery.hcl` file, separate from your main Terraform configuration.
 
 ### List buckets
 

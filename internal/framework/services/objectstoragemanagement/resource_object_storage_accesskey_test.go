@@ -47,6 +47,13 @@ func TestAccAccesskeyResource(t *testing.T) {
 				},
 			},
 			{
+				Query:  true,
+				Config: "list \"ionoscloud_object_storage_accesskey\" \"test\" {\n  provider = ionoscloud\n  include_resource = true\n}",
+				QueryResultChecks: []querycheck.QueryResultCheck{
+					querycheck.ExpectLengthAtLeast("ionoscloud_object_storage_accesskey.test", 1),
+				},
+			},
+			{
 				Config: testAccAccesskeyConfigDescription(descriptionUpdated),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(name, "description", descriptionUpdated),

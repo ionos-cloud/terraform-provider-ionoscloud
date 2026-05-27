@@ -12,7 +12,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
 	"github.com/hashicorp/terraform-plugin-testing/querycheck"
+	"github.com/hashicorp/terraform-plugin-testing/querycheck/queryfilter"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/acctest"
 )
@@ -43,8 +45,27 @@ func TestAccBucketResource(t *testing.T) {
 				Config: "list \"ionoscloud_s3_bucket\" \"test\" {\n  provider = ionoscloud\n}",
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectIdentity("ionoscloud_s3_bucket.test", map[string]knownvalue.Check{
-						"id": knownvalue.StringExact(rName),
+						"id":     knownvalue.StringExact(rName),
+						"region": knownvalue.StringExact("eu-central-3"),
 					}),
+				},
+			},
+			{
+				Query:  true,
+				Config: "list \"ionoscloud_s3_bucket\" \"test\" {\n  provider = ionoscloud\n  include_resource = true\n}",
+				QueryResultChecks: []querycheck.QueryResultCheck{
+					querycheck.ExpectResourceKnownValues(
+						"ionoscloud_s3_bucket.test",
+						queryfilter.ByResourceIdentity(map[string]knownvalue.Check{
+							"id":     knownvalue.StringExact(rName),
+							"region": knownvalue.StringExact("eu-central-3"),
+						}),
+						[]querycheck.KnownValueCheck{
+							{Path: tfjsonpath.New("name"), KnownValue: knownvalue.StringExact(rName)},
+							{Path: tfjsonpath.New("region"), KnownValue: knownvalue.StringExact("eu-central-3")},
+							{Path: tfjsonpath.New("object_lock_enabled"), KnownValue: knownvalue.Bool(false)},
+						},
+					),
 				},
 			},
 			{

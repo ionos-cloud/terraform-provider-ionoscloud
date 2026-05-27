@@ -8,11 +8,13 @@ description: |-
 
 # List Resource: ionoscloud_object_storage_accesskey
 
--> **Note:** List Resources require HashiCorp Terraform version 1.14 or later and are queried using `terraform query`.
+⚠️ **Note:** List Resources require HashiCorp Terraform version 1.14 or later and are queried using `terraform query`.
 
 Lists [Object Storage Access Keys](https://docs.ionos.com/cloud/storage-and-backup/ionos-object-storage/concepts/key-management) on IONOS CLOUD.
 
 ## Example Usage
+
+⚠️ **Note:** `list` blocks must be placed in a dedicated `tfquery.hcl` file, separate from your main Terraform configuration.
 
 ### List access keys
 
