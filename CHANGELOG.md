@@ -4,6 +4,9 @@ Upcoming
 - New list resource: `ionoscloud_s3_bucket` — list all Object Storage buckets via `terraform query` (requires Terraform 1.14+).
 - New list resource: `ionoscloud_object_storage_accesskey` — list all Object Storage Access Keys via `terraform query` (requires Terraform 1.14+).
 
+### Refactor
+- Refactor `ionoscloud_pg_cluster_v2` resource so `password` is now write-only, and require `password_version` to trigger password updates.
+
 ## 6.7.20
 
 ### Fixes

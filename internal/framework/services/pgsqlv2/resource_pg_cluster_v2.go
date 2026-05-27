@@ -71,9 +71,10 @@ type maintenanceWindowModel struct {
 }
 
 type credentialsModel struct {
-	Username types.String `tfsdk:"username"`
-	Password types.String `tfsdk:"password"`
-	Database types.String `tfsdk:"database"`
+	Username        types.String `tfsdk:"username"`
+	Password        types.String `tfsdk:"password"`
+	PasswordVersion types.String `tfsdk:"password_version"`
+	Database        types.String `tfsdk:"database"`
 }
 
 type restoreFromBackupModel struct {
@@ -132,8 +133,13 @@ func (r *clusterResource) Schema(ctx context.Context, req resource.SchemaRequest
 					},
 					"password": schema.StringAttribute{
 						Required:    true,
+						WriteOnly:   true,
 						Sensitive:   true,
 						Description: "The password for the master database user.",
+					},
+					"password_version": schema.StringAttribute{
+						Required:    true,
+						Description: "Arbitrary string incremented by the practitioner to trigger a password update when the write-only password field changes.",
 					},
 					"username": schema.StringAttribute{
 						Required:    true,
@@ -242,7 +248,6 @@ func (r *clusterResource) Schema(ctx context.Context, req resource.SchemaRequest
 		Blocks: map[string]schema.Block{
 			"timeouts": timeouts.Block(ctx, timeouts.Opts{
 				Create: true,
-				Read:   true,
 				Update: true,
 				Delete: true,
 			}),
@@ -270,10 +275,15 @@ func (r *clusterResource) Configure(_ context.Context, req resource.ConfigureReq
 
 // Create creates a new PgSQL v2 cluster.
 func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var plan clusterResourceModel
+	var plan, config clusterResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
 	if resp.Diagnostics.HasError() {
 		return
+	}
+	// Write-only values are null in the plan; read them from config.
+	if config.Credentials != nil && plan.Credentials != nil {
+		plan.Credentials.Password = config.Credentials.Password
 	}
 
 	location := plan.Location.ValueString()
@@ -307,7 +317,7 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 
 	clusterID := clusterResponse.Id
 
-	// Poll for PROVISIONED state.
+	// Poll for POSTGRESCLUSTERSTATES_AVAILABLE state.
 	err = backoff.Retry(func() error {
 		return client.IsClusterReady(ctx, clusterID)
 	}, backoff.NewExponentialBackOff(backoff.WithMaxElapsedTime(createTimeout)))
@@ -362,12 +372,17 @@ func (r *clusterResource) Read(ctx context.Context, req resource.ReadRequest, re
 
 // Update updates the PgSQL v2 cluster using PUT semantics (full replacement).
 func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var plan, state clusterResourceModel
+	var plan, state, config clusterResourceModel
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
 	if resp.Diagnostics.HasError() {
 		return
+	}
+	// Write-only values are null in the plan; read them from config.
+	if config.Credentials != nil && plan.Credentials != nil {
+		plan.Credentials.Password = config.Credentials.Password
 	}
 
 	clusterID := state.ID.ValueString()
@@ -652,17 +667,22 @@ func mapClusterResponseToModel(cluster *pgsqlv2.ClusterRead, model *clusterResou
 		DayOfTheWeek: types.StringValue(string(props.MaintenanceWindow.DayOfTheWeek)),
 	}
 
+	if props.Credentials == nil {
+		return
+	}
+
 	// Credentials block: the API returns username and database but not the password.
-	// Preserve the password from the existing model (state/plan) since the API never returns it.
-	if props.Credentials != nil {
-		var existingPassword types.String
-		if model.Credentials != nil {
-			existingPassword = model.Credentials.Password
-		}
-		model.Credentials = &credentialsModel{
-			Username: types.StringValue(props.Credentials.Username),
-			Password: existingPassword,
-			Database: types.StringValue(props.Credentials.Database),
-		}
+	// Password is write-only so it is not stored in state and must remain null on Read.
+	// Preserve password_version from existing state so Terraform does not see a spurious diff.
+	// model.Credentials may be nil on import where only id/location are in state.
+	var passwordVersion types.String
+	if model.Credentials != nil {
+		passwordVersion = model.Credentials.PasswordVersion
+	}
+	model.Credentials = &credentialsModel{
+		Username:        types.StringValue(props.Credentials.Username),
+		Password:        types.StringNull(),
+		PasswordVersion: passwordVersion,
+		Database:        types.StringValue(props.Credentials.Database),
 	}
 }

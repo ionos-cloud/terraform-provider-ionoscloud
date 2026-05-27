@@ -14,9 +14,17 @@ Manages a DBaaS PostgreSQL v2 Cluster.
 ## Example Usage
 
 ```hcl
+locals {
+  location = "de/txl"
+}
+
+data "ionoscloud_pg_backup_location_v2" "example" {
+  location = local.location
+}
+
 resource "ionoscloud_datacenter" "example" {
   name     = "example"
-  location = "de/txl"
+  location = local.location
 }
 
 resource "ionoscloud_lan" "example" {
@@ -29,8 +37,8 @@ resource "ionoscloud_pg_cluster_v2" "example" {
   name              = "PostgreSQL_cluster"
   description       = "Production PostgreSQL cluster"
   version           = "17"
-  location          = "de/txl"
-  backup_location   = "de"
+  location          = local.location
+  backup_location   = one([for bl in data.ionoscloud_pg_backup_location_v2.example.backup_locations : bl.location if bl.location == "eu-central-3"])
   replication_mode  = "ASYNCHRONOUS"
   connection_pooler = "DISABLED"
   logs_enabled      = true
@@ -55,24 +63,20 @@ resource "ionoscloud_pg_cluster_v2" "example" {
   }
 
   credentials = {
-    username = "username"
-    password = random_password.cluster_password.result
-    database = "mydb"
+    username         = "username"
+    password         = ephemeral.random_password.cluster_password.result
+    password_version = "1"
+    database         = "mydb"
   }
 
-  restore_from_backup = {
-    source_backup_id         = "backup_uuid"
-    recovery_target_datetime = "2024-12-06T13:54:08Z"
-  }
-
-  timeouts = {
+  timeouts {
     create = "60m"
     update = "60m"
     delete = "60m"
   }
 }
 
-resource "random_password" "cluster_password" {
+ephemeral "random_password" "cluster_password" {
   length           = 16
   special          = true
   override_special = "@$!%*?&"
@@ -84,7 +88,7 @@ resource "random_password" "cluster_password" {
 * `name` - (Required)[string] The name of the PostgreSQL cluster.
 * `description` - (Optional)[string] Human-readable description for the cluster.
 * `version` - (Optional)(Computed)[string] The PostgreSQL version of the cluster. If omitted, the API assigns a default version.
-* `location` - (Required)[string] The location of the PostgreSQL cluster. This is used for routing to the regional API endpoint. Changing this value will destroy the existing cluster and create a new one in the specified location. Available locations: `de/fra`, `de/fra/2`, `de/txl`, `es/vit`, `fr/par`, `gb/bhx`, `gb/lhr`, `us/ewr`, `us/las`, `us/mci`.
+* `location` - (Required, RequiresReplace)[string] The location of the PostgreSQL cluster. This is used for routing to the regional API endpoint. Changing this value will destroy the existing cluster and create a new one in the specified location. Available locations: `de/fra`, `de/fra/2`, `de/txl`, `es/vit`, `fr/par`, `gb/bhx`, `gb/lhr`, `us/ewr`, `us/las`, `us/mci`.
 * `backup_location` - (Required)[string] The S3 location where the backups will be created. Supported locations are provided by the `ionoscloud_pg_backup_location_v2` data source.
 * `replication_mode` - (Required)[string] Replication mode across the instances. Possible values: `ASYNCHRONOUS`, `STRICTLY_SYNCHRONOUS`.
 * `connection_pooler` - (Optional)(Computed)[string] Defines how database connections are managed and reused. Possible values: `DISABLED`, `TRANSACTION`, `SESSION`.
@@ -104,7 +108,8 @@ resource "random_password" "cluster_password" {
   * `day_of_the_week` - (Required)[string] The name of the week day.
 * `credentials` - (Required)[object] Credentials for the master database user to be created.
   * `username` - (Required)[string] The username of the master database user.
-  * `password` - (Required, WriteOnly)[string] The password for the master database user. This value is never stored in state (requires Terraform 1.11+).
+  * `password` - (Required, Sensitive, WriteOnly)[string] The password for the master database user. This value is never stored in Terraform state. Requires Terraform 1.11+.
+  * `password_version` - (Required)[string] An arbitrary string (e.g. `"1"`, `"2"`) stored in Terraform state solely to trigger password updates. Increment this value whenever the write-only `password` field changes so Terraform detects a diff and sends the new password to the API.
   * `database` - (Required)[string] The name of the initial database to be created.
 * `restore_from_backup` - (Optional)[object] Configures the cluster to be initialized with data from an existing backup.
   * `source_backup_id` - (Optional)[string] The UUID of the backup to restore data from.
@@ -116,7 +121,6 @@ resource "random_password" "cluster_password" {
 This resource supports the following `Timeouts` configuration options:
 
 * `create` - (Default `60m`) Time to wait for the cluster to be provisioned.
-* `read` - (Default `60m`) Time to wait for the cluster to be read.
 * `update` - (Default `60m`) Time to wait for the cluster to be updated.
 * `delete` - (Default `60m`) Time to wait for the cluster to be deleted.
 
