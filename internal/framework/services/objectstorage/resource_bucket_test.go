@@ -41,8 +41,10 @@ func TestAccBucketResource(t *testing.T) {
 				),
 			},
 			{
-				Query:  true,
-				Config: "list \"ionoscloud_s3_bucket\" \"test\" {\n  provider = ionoscloud\n}",
+				Query: true,
+				Config: `list "ionoscloud_s3_bucket" "test" {
+				  provider = ionoscloud
+				}`,
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectIdentity("ionoscloud_s3_bucket.test", map[string]knownvalue.Check{
 						"id":     knownvalue.StringExact(rName),
@@ -51,8 +53,11 @@ func TestAccBucketResource(t *testing.T) {
 				},
 			},
 			{
-				Query:  true,
-				Config: "list \"ionoscloud_s3_bucket\" \"test\" {\n  provider = ionoscloud\n  include_resource = true\n}",
+				Query: true,
+				Config: `list "ionoscloud_s3_bucket" "test" {
+				  provider = ionoscloud
+				  include_resource = true
+				}`,
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectResourceKnownValues(
 						"ionoscloud_s3_bucket.test",
@@ -69,8 +74,16 @@ func TestAccBucketResource(t *testing.T) {
 				},
 			},
 			{
-				Query:  true,
-				Config: "list \"ionoscloud_s3_bucket\" \"test\" {\n  provider = ionoscloud\n  config {\n    filters = [{\n      field_name  = \"region\"\n      field_value = \"eu-central-3\"\n    }]\n  }\n}",
+				Query: true,
+				Config: `list "ionoscloud_s3_bucket" "test" {
+				  provider = ionoscloud
+				  config {
+					filters = [{
+					  field_name  = "region"
+					  field_value = "eu-central-3"
+					}]
+				  }
+				}`,
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectIdentity("ionoscloud_s3_bucket.test", map[string]knownvalue.Check{
 						"id":     knownvalue.StringExact(rName),
@@ -79,8 +92,16 @@ func TestAccBucketResource(t *testing.T) {
 				},
 			},
 			{
-				Query:  true,
-				Config: "list \"ionoscloud_s3_bucket\" \"test\" {\n  provider = ionoscloud\n  config {\n    filters = [{\n      field_name  = \"name\"\n      field_value = \"" + rName + "\"\n    }]\n  }\n}",
+				Query: true,
+				Config: fmt.Sprintf(`list "ionoscloud_s3_bucket" "test" {
+				  provider = ionoscloud
+				  config {
+					filters = [{
+					  field_name  = "name"
+					  field_value = %q
+					}]
+				  }
+				}`, rName),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectIdentity("ionoscloud_s3_bucket.test", map[string]knownvalue.Check{
 						"id":     knownvalue.StringExact(rName),
