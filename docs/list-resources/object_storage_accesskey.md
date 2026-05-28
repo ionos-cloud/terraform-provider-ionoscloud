@@ -25,6 +25,21 @@ list "ionoscloud_object_storage_accesskey" "example" {
 }
 ```
 
+### Filter access keys by description
+
+```hcl
+list "ionoscloud_object_storage_accesskey" "filtered" {
+  provider = ionoscloud
+  include_resource = true
+  config {
+    filters = [{
+      field_name  = "description"
+      field_value = "my-key"
+    }]
+  }
+}
+```
+
 ### Generate resource configuration from existing access keys
 
 Use `terraform query` with `-generate-config-out` to produce ready-to-use `ionoscloud_object_storage_accesskey` resource blocks for all existing access keys:
@@ -37,7 +52,11 @@ Terraform will write an `ionoscloud_object_storage_accesskey` resource block for
 
 ## Argument Reference
 
-This list resource has no configuration arguments.
+The `config` block supports the following arguments:
+
+- `filters` - (Optional) List of filters to apply. All filters must match (AND logic). Each filter supports:
+  - `field_name` - (Required) The field to filter on. Supported values: `id`, `description`, `accesskey`.
+  - `field_value` - (Required) The exact value to match against.
 
 ## Attributes Reference
 

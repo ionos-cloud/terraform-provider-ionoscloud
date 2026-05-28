@@ -40,17 +40,37 @@ func TestAccAccesskeyResource(t *testing.T) {
 				),
 			},
 			{
-				Query:  true,
-				Config: "list \"ionoscloud_object_storage_accesskey\" \"test\" {\n  provider = ionoscloud\n}",
+				Query: true,
+				Config: `list "ionoscloud_object_storage_accesskey" "test" {
+  provider = ionoscloud
+}`,
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLengthAtLeast("ionoscloud_object_storage_accesskey.test", 1),
 				},
 			},
 			{
-				Query:  true,
-				Config: "list \"ionoscloud_object_storage_accesskey\" \"test\" {\n  provider = ionoscloud\n  include_resource = true\n}",
+				Query: true,
+				Config: `list "ionoscloud_object_storage_accesskey" "test" {
+				  provider = ionoscloud
+				  include_resource = true
+				}`,
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLengthAtLeast("ionoscloud_object_storage_accesskey.test", 1),
+				},
+			},
+			{
+				Query: true,
+				Config: fmt.Sprintf(`list "ionoscloud_object_storage_accesskey" "test" {
+				  provider = ionoscloud
+				  config {
+					filters = [{
+					  field_name  = "description"
+					  field_value = %q
+					}]
+				  }
+				}`, description),
+				QueryResultChecks: []querycheck.QueryResultCheck{
+					querycheck.ExpectLength("ionoscloud_object_storage_accesskey.test", 1),
 				},
 			},
 			{

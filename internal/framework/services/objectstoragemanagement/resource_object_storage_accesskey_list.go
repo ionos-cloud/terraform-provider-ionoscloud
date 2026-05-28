@@ -28,7 +28,9 @@ func NewAccesskeyListResource() list.ListResource {
 // ListResourceConfigSchema returns the schema for the configuration of the accesskey list resource.
 func (r *accesskeyResource) ListResourceConfigSchema(_ context.Context, _ list.ListResourceSchemaRequest, resp *list.ListResourceSchemaResponse) {
 	resp.Schema = listschema.Schema{
-		Attributes: map[string]listschema.Attribute{},
+		Attributes: map[string]listschema.Attribute{
+			identity.FiltersKey: identity.FilterAttribute("id", "description", "accesskey"),
+		},
 	}
 }
 
@@ -44,8 +46,16 @@ func (r *accesskeyResource) List(ctx context.Context, req list.ListRequest, stre
 }
 
 // Map returns a MappedItem describing the access key.
-func (r *accesskeyResource) Map(_ context.Context, includeResource bool, ak objstoragesdk.AccessKeyRead) (*identity.MappedItem, diag.Diagnostics) {
+func (r *accesskeyResource) Map(_ context.Context, includeResource bool, filters []identity.Filter, ak objstoragesdk.AccessKeyRead) (*identity.MappedItem, diag.Diagnostics) {
 	var diags diag.Diagnostics
+
+	if !identity.MatchesFilters(map[string]string{
+		"id":          ak.Id,
+		"description": ak.Properties.Description,
+		"accesskey":   ak.Properties.AccessKey,
+	}, filters) {
+		return nil, diags
+	}
 
 	mapped := &identity.MappedItem{
 		DisplayName: ak.Properties.AccessKey,

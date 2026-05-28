@@ -29,7 +29,9 @@ func NewBucketListResource() list.ListResource {
 // ListResourceConfigSchema returns the schema for the configuration of the bucket list resource.
 func (r *bucketResource) ListResourceConfigSchema(_ context.Context, _ list.ListResourceSchemaRequest, resp *list.ListResourceSchemaResponse) {
 	resp.Schema = listschema.Schema{
-		Attributes: map[string]listschema.Attribute{},
+		Attributes: map[string]listschema.Attribute{
+			identity.FiltersKey: identity.FilterAttribute("name", "region"),
+		},
 	}
 }
 
@@ -39,7 +41,7 @@ func (r *bucketResource) List(ctx context.Context, req list.ListRequest, stream 
 }
 
 // Map returns a MappedItem describing the bucket, or nil to skip it.
-func (r *bucketResource) Map(ctx context.Context, includeResource bool, b objstorage.Bucket) (*identity.MappedItem, diag.Diagnostics) {
+func (r *bucketResource) Map(ctx context.Context, includeResource bool, filters []identity.Filter, b objstorage.Bucket) (*identity.MappedItem, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	if b.Name == nil {
 		diags.AddError("unexpected API response", "bucket returned by API has no name")
@@ -49,6 +51,13 @@ func (r *bucketResource) Map(ctx context.Context, includeResource bool, b objsto
 	region, err := r.client.GetBucketLocation(ctx, types.StringValue(*b.Name))
 	if err != nil {
 		diags.AddError("failed to get bucket location", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: *b.Name}).Error())
+		return nil, diags
+	}
+
+	if !identity.MatchesFilters(map[string]string{
+		"name":   *b.Name,
+		"region": region.ValueString(),
+	}, filters) {
 		return nil, diags
 	}
 

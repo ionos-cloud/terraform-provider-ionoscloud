@@ -21,6 +21,7 @@ import (
 
 func TestAccBucketResource(t *testing.T) {
 	rName := acctest.GenerateRandomResourceName(bucketPrefix)
+	rName2 := acctest.GenerateRandomResourceName(bucketPrefix)
 	name := "ionoscloud_s3_bucket.test"
 
 	resource.Test(t, resource.TestCase{
@@ -31,7 +32,7 @@ func TestAccBucketResource(t *testing.T) {
 		CheckDestroy: testAccCheckBucketDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBucketConfig_basic(rName),
+				Config: testAccBucketConfig_twoRegions(rName, rName2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBucketExists(context.Background(), name),
 					resource.TestCheckResourceAttr(name, "name", rName),
@@ -41,8 +42,10 @@ func TestAccBucketResource(t *testing.T) {
 				),
 			},
 			{
-				Query:  true,
-				Config: "list \"ionoscloud_s3_bucket\" \"test\" {\n  provider = ionoscloud\n}",
+				Query: true,
+				Config: `list "ionoscloud_s3_bucket" "test" {
+				  provider = ionoscloud
+				}`,
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectIdentity("ionoscloud_s3_bucket.test", map[string]knownvalue.Check{
 						"id":     knownvalue.StringExact(rName),
@@ -51,8 +54,11 @@ func TestAccBucketResource(t *testing.T) {
 				},
 			},
 			{
-				Query:  true,
-				Config: "list \"ionoscloud_s3_bucket\" \"test\" {\n  provider = ionoscloud\n  include_resource = true\n}",
+				Query: true,
+				Config: `list "ionoscloud_s3_bucket" "test" {
+				  provider = ionoscloud
+				  include_resource = true
+				}`,
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectResourceKnownValues(
 						"ionoscloud_s3_bucket.test",
@@ -66,6 +72,53 @@ func TestAccBucketResource(t *testing.T) {
 							{Path: tfjsonpath.New("object_lock_enabled"), KnownValue: knownvalue.Bool(false)},
 						},
 					),
+				},
+			},
+			// Filter by name+region matching: unique name guarantees exactly 1 result,
+			// proving the AND filter genuinely narrows the list.
+			{
+				Query: true,
+				Config: fmt.Sprintf(`list "ionoscloud_s3_bucket" "test" {
+				  provider = ionoscloud
+				  config {
+					filters = [
+					  { field_name = "name",   field_value = %q },
+					  { field_name = "region", field_value = "eu-central-3" },
+					]
+				  }
+				}`, rName),
+				QueryResultChecks: []querycheck.QueryResultCheck{
+					querycheck.ExpectLength("ionoscloud_s3_bucket.test", 1),
+				},
+			},
+			// Filter by name+wrong region: rName is in eu-central-3, so eu-central-4 must return 0.
+			// This proves the region field is actually being evaluated.
+			{
+				Query: true,
+				Config: fmt.Sprintf(`list "ionoscloud_s3_bucket" "test" {
+				  provider = ionoscloud
+				  config {
+					filters = [
+					  { field_name = "name",   field_value = %q },
+					  { field_name = "region", field_value = "eu-central-4" },
+					]
+				  }
+				}`, rName),
+				QueryResultChecks: []querycheck.QueryResultCheck{
+					querycheck.ExpectLength("ionoscloud_s3_bucket.test", 0),
+				},
+			},
+			// Filter by the eu-central-4 bucket name: proves it is listable and name filter works.
+			{
+				Query: true,
+				Config: fmt.Sprintf(`list "ionoscloud_s3_bucket" "test" {
+				  provider = ionoscloud
+				  config {
+					filters = [{ field_name = "name", field_value = %q }]
+				  }
+				}`, rName2),
+				QueryResultChecks: []querycheck.QueryResultCheck{
+					querycheck.ExpectLength("ionoscloud_s3_bucket.test", 1),
 				},
 			},
 			{
@@ -222,6 +275,20 @@ resource "ionoscloud_s3_bucket" "test" {
   name = %[1]q
 }
 `, bucketName)
+}
+
+func testAccBucketConfig_twoRegions(bucketName, bucketName2 string) string {
+	return fmt.Sprintf(`
+resource "ionoscloud_s3_bucket" "test" {
+  name   = %[1]q
+  region = "eu-central-3"
+}
+
+resource "ionoscloud_s3_bucket" "test2" {
+  name   = %[2]q
+  region = "eu-central-4"
+}
+`, bucketName, bucketName2)
 }
 
 func testAccBucketConfig_tags(bucketName string) string {
