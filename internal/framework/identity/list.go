@@ -12,7 +12,7 @@ import (
 // StreamList fetches items using fetch and streams them into the results stream.
 // If the fetch fails, the error is emitted as a diagnostic and iteration stops.
 //
-// Filters are read from req.Config["filters"]; the list resource schema must
+// Filters are read from req.Config[FiltersKey]; the list resource schema must
 // include identity.FilterAttribute() under that key.
 //
 // The mapper contract:
@@ -29,7 +29,11 @@ func StreamList[T any](
 	mapper func(context.Context, bool, []Filter, T) (*MappedItem, diag.Diagnostics),
 ) {
 	var filters []Filter
-	req.Config.GetAttribute(ctx, path.Root("filters"), &filters)
+	diags := req.Config.GetAttribute(ctx, path.Root(FiltersKey), &filters)
+	if diags.HasError() {
+		stream.Results = list.ListResultsStreamDiagnostics(diags)
+		return
+	}
 
 	items, err := fetch(ctx)
 	if err != nil {

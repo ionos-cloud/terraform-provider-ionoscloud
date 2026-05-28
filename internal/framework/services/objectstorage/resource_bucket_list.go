@@ -30,7 +30,7 @@ func NewBucketListResource() list.ListResource {
 func (r *bucketResource) ListResourceConfigSchema(_ context.Context, _ list.ListResourceSchemaRequest, resp *list.ListResourceSchemaResponse) {
 	resp.Schema = listschema.Schema{
 		Attributes: map[string]listschema.Attribute{
-			"filters": identity.FilterAttribute(),
+			identity.FiltersKey: identity.FilterAttribute(),
 		},
 	}
 }

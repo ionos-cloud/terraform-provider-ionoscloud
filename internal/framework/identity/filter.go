@@ -5,6 +5,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
+// FiltersKey is the standard config key used by list resources for filters.
+const FiltersKey = "filters"
+
 // Filter represents a single filter criterion for list resources.
 type Filter struct {
 	FieldName  types.String `tfsdk:"field_name"`
