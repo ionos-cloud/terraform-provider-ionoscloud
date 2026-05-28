@@ -1,7 +1,9 @@
 package identity
 
 import (
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	listschema "github.com/hashicorp/terraform-plugin-framework/list/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -15,13 +17,18 @@ type Filter struct {
 }
 
 // FilterAttribute returns the standard "filters" list attribute for list resource config schemas.
-func FilterAttribute() listschema.ListNestedAttribute {
+func FilterAttribute(allowedFields ...string) listschema.ListNestedAttribute {
+	fieldNameAttr := listschema.StringAttribute{Required: true, Description: "The name of the field to filter on."}
+	if len(allowedFields) > 0 {
+		fieldNameAttr.Validators = []validator.String{stringvalidator.OneOf(allowedFields...)}
+	}
+
 	return listschema.ListNestedAttribute{
 		Optional:    true,
 		Description: "Filters to apply when listing resources. All filters must match (AND logic).",
 		NestedObject: listschema.NestedAttributeObject{
 			Attributes: map[string]listschema.Attribute{
-				"field_name":  listschema.StringAttribute{Required: true, Description: "The name of the field to filter on."},
+				"field_name":  fieldNameAttr,
 				"field_value": listschema.StringAttribute{Required: true, Description: "The value to match against."},
 			},
 		},
