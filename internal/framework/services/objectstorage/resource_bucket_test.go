@@ -69,6 +69,26 @@ func TestAccBucketResource(t *testing.T) {
 				},
 			},
 			{
+				Query:  true,
+				Config: "list \"ionoscloud_s3_bucket\" \"test\" {\n  provider = ionoscloud\n  config {\n    filters = [{\n      field_name  = \"region\"\n      field_value = \"eu-central-3\"\n    }]\n  }\n}",
+				QueryResultChecks: []querycheck.QueryResultCheck{
+					querycheck.ExpectIdentity("ionoscloud_s3_bucket.test", map[string]knownvalue.Check{
+						"id":     knownvalue.StringExact(rName),
+						"region": knownvalue.StringExact("eu-central-3"),
+					}),
+				},
+			},
+			{
+				Query:  true,
+				Config: "list \"ionoscloud_s3_bucket\" \"test\" {\n  provider = ionoscloud\n  config {\n    filters = [{\n      field_name  = \"name\"\n      field_value = \"" + rName + "\"\n    }]\n  }\n}",
+				QueryResultChecks: []querycheck.QueryResultCheck{
+					querycheck.ExpectIdentity("ionoscloud_s3_bucket.test", map[string]knownvalue.Check{
+						"id":     knownvalue.StringExact(rName),
+						"region": knownvalue.StringExact("eu-central-3"),
+					}),
+				},
+			},
+			{
 				ResourceName:                         name,
 				ImportStateId:                        rName,
 				ImportState:                          true,

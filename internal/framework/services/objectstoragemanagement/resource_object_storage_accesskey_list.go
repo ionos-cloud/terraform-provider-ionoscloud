@@ -29,7 +29,7 @@ func NewAccesskeyListResource() list.ListResource {
 func (r *accesskeyResource) ListResourceConfigSchema(_ context.Context, _ list.ListResourceSchemaRequest, resp *list.ListResourceSchemaResponse) {
 	resp.Schema = listschema.Schema{
 		Attributes: map[string]listschema.Attribute{
-			identity.FiltersKey: identity.FilterAttribute(),
+			identity.FiltersKey: identity.FilterAttribute("id", "description", "accesskey"),
 		},
 	}
 }

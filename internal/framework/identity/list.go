@@ -16,7 +16,8 @@ import (
 // include identity.FilterAttribute() under that key.
 //
 // The mapper contract:
-//   - Return nil to skip the item (e.g. no match); any diagnostics are logged as warnings.
+//   - Return nil to skip the item (e.g. no match); error diagnostics are logged as warnings.
+//     Non-error diagnostics are silently dropped.
 //   - Return a non-nil *MappedItem to include the item; MappedItem.Identity must be
 //     non-nil. StreamList sets DisplayName, Identity, and Resource on the result.
 //   - Errors during result population (Identity.Set, Resource.Set) are fatal —
