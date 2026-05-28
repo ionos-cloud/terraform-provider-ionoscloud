@@ -511,6 +511,7 @@ func (r *clusterResource) ImportState(ctx context.Context, req resource.ImportSt
 
 // buildClusterCreateProperties constructs the cluster create request from the plan model.
 func buildClusterCreateProperties(plan *clusterResourceModel) (pgsqlv2.ClusterCreateProperties, diag.Diagnostics) {
+	var diagnostics diag.Diagnostics
 	props := pgsqlv2.ClusterCreateProperties{
 		Name:            plan.Name.ValueString(),
 		ReplicationMode: pgsqlv2.PostgresClusterReplicationMode(plan.ReplicationMode.ValueString()),
@@ -563,13 +564,18 @@ func buildClusterCreateProperties(plan *clusterResourceModel) (pgsqlv2.ClusterCr
 	if plan.RestoreFromBackup != nil {
 		restore, diags := buildClusterRestoreFromBackup(plan)
 		if diags.HasError() {
-			return props, diags
+			diagnostics.Append(diags...)
+			return props, diagnostics
+		}
+		if restore.PostgresInPlaceRestoreClusterFromBackup != nil {
+			diagnostics.AddError("invalid restore_from_backup configuration", "")
+			return props, diagnostics
 		}
 
 		props.RestoreFromBackup = &restore
 	}
 
-	return props, nil
+	return props, diagnostics
 }
 
 // buildClusterRestoreFromBackup constructs the ClusterRestoreFromBackup struct for cluster creation from backup.
@@ -594,18 +600,20 @@ func buildClusterRestoreFromBackup(plan *clusterResourceModel) (pgsqlv2.ClusterR
 
 			restore.PostgresRestoreClusterFromBackup.RecoveryTargetDatetime = &pgsqlv2.IonosTime{Time: t}
 		}
-	} else if !plan.RestoreFromBackup.RecoveryTargetDateTime.IsNull() {
-		// if only RecoveryTargetDateTime is set, send a PostgresInPlaceRestoreFromBackup
-		restore.PostgresInPlaceRestoreClusterFromBackup = &pgsqlv2.PostgresInPlaceRestoreClusterFromBackup{}
-		t, err := time.Parse(time.RFC3339, plan.RestoreFromBackup.RecoveryTargetDateTime.ValueString())
-		if err != nil {
-			diagnostics.AddError("invalid recovery_target_datetime",
-				fmt.Sprintf("expected RFC3339 format (e.g. 2020-12-10T13:37:50+01:00), got %q, error: %v", plan.RestoreFromBackup.RecoveryTargetDateTime.ValueString(), err))
-			return restore, diagnostics
-		}
 
-		restore.PostgresInPlaceRestoreClusterFromBackup.RecoveryTargetDatetime = &pgsqlv2.IonosTime{Time: t}
+		return restore, diagnostics
 	}
+
+	// if only RecoveryTargetDateTime is set, send a PostgresInPlaceRestoreFromBackup
+	restore.PostgresInPlaceRestoreClusterFromBackup = &pgsqlv2.PostgresInPlaceRestoreClusterFromBackup{}
+	t, err := time.Parse(time.RFC3339, plan.RestoreFromBackup.RecoveryTargetDateTime.ValueString())
+	if err != nil {
+		diagnostics.AddError("invalid recovery_target_datetime",
+			fmt.Sprintf("expected RFC3339 format (e.g. 2020-12-10T13:37:50+01:00), got %q, error: %v", plan.RestoreFromBackup.RecoveryTargetDateTime.ValueString(), err))
+		return restore, diagnostics
+	}
+
+	restore.PostgresInPlaceRestoreClusterFromBackup.RecoveryTargetDatetime = &pgsqlv2.IonosTime{Time: t}
 
 	return restore, nil
 }
@@ -713,6 +721,10 @@ func mapClusterResponseToModel(cluster *pgsqlv2.ClusterRead, model *clusterResou
 		RetentionDays: types.Int32Value(props.Backup.RetentionDays),
 	}
 
+	if props.RestoreFromBackup != nil {
+		mapClusterRestoreFromBackupResponseToModel(*props.RestoreFromBackup, model)
+	}
+
 	if props.Credentials == nil {
 		return
 	}
@@ -730,5 +742,22 @@ func mapClusterResponseToModel(cluster *pgsqlv2.ClusterRead, model *clusterResou
 		Password:        types.StringNull(),
 		PasswordVersion: passwordVersion,
 		Database:        types.StringValue(props.Credentials.Database),
+	}
+}
+
+func mapClusterRestoreFromBackupResponseToModel(restore pgsqlv2.ClusterRestoreFromBackup, model *clusterResourceModel) {
+	if restore.PostgresRestoreClusterFromBackup != nil {
+		model.RestoreFromBackup.SourceBackupID = types.StringValue(restore.PostgresRestoreClusterFromBackup.SourceBackupId)
+
+		if restore.PostgresRestoreClusterFromBackup.HasRecoveryTargetDatetime() {
+			model.RestoreFromBackup.RecoveryTargetDateTime = types.StringValue(restore.PostgresRestoreClusterFromBackup.RecoveryTargetDatetime.Format(time.RFC3339))
+		}
+
+		return
+	}
+
+	if restore.PostgresInPlaceRestoreClusterFromBackup != nil {
+		model.RestoreFromBackup.SourceBackupID = types.StringNull()
+		model.RestoreFromBackup.RecoveryTargetDateTime = types.StringValue(restore.PostgresInPlaceRestoreClusterFromBackup.RecoveryTargetDatetime.Format(time.RFC3339))
 	}
 }
