@@ -28,7 +28,6 @@ func dataSourcePcc() *schema.Resource {
 			},
 			"description": {
 				Type:     schema.TypeString,
-				Optional: true,
 				Computed: true,
 			},
 			"location": {
