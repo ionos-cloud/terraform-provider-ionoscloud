@@ -4,16 +4,16 @@ package ionoscloud
 
 import (
 	"fmt"
+	"testing"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
-
-	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccNicImportBasic(t *testing.T) {
+	t.Parallel()
 	volumeName := "volume"
 
 	resource.Test(t, resource.TestCase{

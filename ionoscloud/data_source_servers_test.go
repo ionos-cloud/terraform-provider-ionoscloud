@@ -18,6 +18,7 @@ import (
 const serverTestResource2 = constant.ServerTestResource + "2"
 
 func TestAccDataSourceServersBasic(t *testing.T) {
+	t.Parallel()
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
