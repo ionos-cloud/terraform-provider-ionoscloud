@@ -104,7 +104,7 @@ resource "ionoscloud_pg_cluster_v2" "test" {
 
   backup = {
     location       = "eu-central-3"
-    retention_days = 7
+    retention_days = 14
   }
 
   connection_pooler = "DISABLED"

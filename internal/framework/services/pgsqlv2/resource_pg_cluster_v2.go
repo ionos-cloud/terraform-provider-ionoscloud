@@ -106,8 +106,12 @@ func (r *clusterResource) Schema(ctx context.Context, req resource.SchemaRequest
 				Description: "Backup location and retention configurations",
 				Attributes: map[string]schema.Attribute{
 					"location": schema.StringAttribute{
-						Required:    true,
-						Description: "The Object Storage location where the backups will be created. Supported locations are provided by the backup locations endpoint.",
+						Required: true,
+						Description: "The Object Storage location where the backups will be created. " +
+							"Supported locations are provided by the backup locations endpoint. Immutable — changing this forces a new cluster.",
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.RequiresReplace(),
+						},
 					},
 					"retention_days": schema.Int32Attribute{
 						Required:    true,
@@ -566,8 +570,8 @@ func buildClusterCreateProperties(plan *clusterResourceModel) (pgsqlv2.ClusterCr
 
 	if plan.RestoreFromBackup != nil {
 		restore, diags := buildClusterCreateRestoreFromBackup(plan)
+		diagnostics.Append(diags...)
 		if diags.HasError() {
-			diagnostics.Append(diags...)
 			return props, diagnostics
 		}
 
@@ -653,26 +657,24 @@ func buildClusterUpdateProperties(plan *clusterResourceModel) (pgsqlv2.Cluster, 
 		props.MetricsEnabled = plan.MetricsEnabled.ValueBoolPointer()
 	}
 
-	restore, diags := buildClusterUpdateRestoreFromBackup(plan)
-	if diags.HasError() {
-		return props, diags
+	if plan.RestoreFromBackup != nil && !plan.RestoreFromBackup.RecoveryTargetDateTime.IsNull() {
+		restore, diags := buildClusterUpdateRestoreFromBackup(plan)
+		diagnostics.Append(diags...)
+		if diags.HasError() {
+			return props, diags
+		}
+
+		props.RestoreFromBackup = restore
 	}
-	props.RestoreFromBackup = restore
 
 	return props, diagnostics
 }
 
 // buildClusterUpdateRestoreFromBackup constructs the ClusterRestoreFromBackup for in-place restore during update.
 // Only PostgresInPlaceRestoreClusterFromBackup (recoveryTargetDatetime only) is valid on update.
-// Returns nil if no in-place restore is requested.
 func buildClusterUpdateRestoreFromBackup(plan *clusterResourceModel) (*pgsqlv2.ClusterRestoreFromBackup, diag.Diagnostics) {
 	var diagnostics diag.Diagnostics
-	if plan.RestoreFromBackup == nil {
-		return nil, diagnostics
-	}
-	if plan.RestoreFromBackup.RecoveryTargetDateTime.IsNull() || plan.RestoreFromBackup.RecoveryTargetDateTime.IsUnknown() {
-		return nil, diagnostics
-	}
+
 	t, err := time.Parse(time.RFC3339, plan.RestoreFromBackup.RecoveryTargetDateTime.ValueString())
 	if err != nil {
 		diagnostics.AddError("invalid recovery_target_datetime",
@@ -762,7 +764,6 @@ func mapClusterRestoreFromBackupResponseToModel(restore pgsqlv2.ClusterRestoreFr
 	}
 
 	if restore.PostgresInPlaceRestoreClusterFromBackup != nil {
-		model.RestoreFromBackup.SourceBackupID = types.StringNull()
 		model.RestoreFromBackup.RecoveryTargetDateTime = types.StringValue(restore.PostgresInPlaceRestoreClusterFromBackup.RecoveryTargetDatetime.Format(time.RFC3339))
 	}
 }

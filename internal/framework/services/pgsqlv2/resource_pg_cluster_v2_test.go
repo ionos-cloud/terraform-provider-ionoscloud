@@ -172,7 +172,7 @@ func TestAccPgClusterV2(t *testing.T) {
 					resource.TestCheckResourceAttr(clusterResourceAddr, "version", "17"),
 					resource.TestCheckResourceAttr(clusterResourceAddr, "location", testLocation),
 					resource.TestCheckResourceAttr(clusterResourceAddr, "backup.location", "eu-central-3"),
-					resource.TestCheckResourceAttr(clusterResourceAddr, "backup.retention_days", "7"),
+					resource.TestCheckResourceAttr(clusterResourceAddr, "backup.retention_days", "14"),
 					resource.TestCheckResourceAttr(clusterResourceAddr, "replication_mode", "ASYNCHRONOUS"),
 					resource.TestCheckResourceAttr(clusterResourceAddr, "connection_pooler", "DISABLED"),
 					resource.TestCheckResourceAttr(clusterResourceAddr, "logs_enabled", "false"),
