@@ -250,8 +250,11 @@ func (r *clusterResource) Schema(ctx context.Context, req resource.SchemaRequest
 						Description: "If supplied as ISO 8601 timestamp, the backup will be replayed up until the given timestamp. If empty, the backup will be applied completely.",
 					},
 					"source_backup_id": schema.StringAttribute{
-						Optional:    true,
-						Description: "The UUID of the backup to restore data from.",
+						Required:    true,
+						Description: "The UUID of the backup to restore data from. Immutable — changing this forces a new cluster.",
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.RequiresReplace(),
+						},
 					},
 				},
 			},
@@ -562,60 +565,40 @@ func buildClusterCreateProperties(plan *clusterResourceModel) (pgsqlv2.ClusterCr
 	}
 
 	if plan.RestoreFromBackup != nil {
-		restore, diags := buildClusterRestoreFromBackup(plan)
+		restore, diags := buildClusterCreateRestoreFromBackup(plan)
 		if diags.HasError() {
 			diagnostics.Append(diags...)
 			return props, diagnostics
 		}
-		if restore.PostgresInPlaceRestoreClusterFromBackup != nil {
-			diagnostics.AddError("invalid restore_from_backup configuration", "")
-			return props, diagnostics
-		}
 
-		props.RestoreFromBackup = &restore
+		props.RestoreFromBackup = restore
 	}
 
 	return props, diagnostics
 }
 
-// buildClusterRestoreFromBackup constructs the ClusterRestoreFromBackup struct for cluster creation from backup.
+// buildClusterCreateRestoreFromBackup constructs the ClusterRestoreFromBackup struct for cluster creation from backup.
 // It assumes that clusterResourceModel.RestoreFromBackup is not nil
-func buildClusterRestoreFromBackup(plan *clusterResourceModel) (pgsqlv2.ClusterRestoreFromBackup, diag.Diagnostics) {
+func buildClusterCreateRestoreFromBackup(plan *clusterResourceModel) (*pgsqlv2.ClusterRestoreFromBackup, diag.Diagnostics) {
 	var diagnostics diag.Diagnostics
 
 	restore := pgsqlv2.ClusterRestoreFromBackup{}
-	if !plan.RestoreFromBackup.SourceBackupID.IsNull() {
-		// if SourceBackupID is set, send a PostgresRestoreClusterFromBackup
-		restore.PostgresRestoreClusterFromBackup = &pgsqlv2.PostgresRestoreClusterFromBackup{
-			SourceBackupId: plan.RestoreFromBackup.SourceBackupID.ValueString(),
-		}
-
-		if !plan.RestoreFromBackup.RecoveryTargetDateTime.IsNull() {
-			t, err := time.Parse(time.RFC3339, plan.RestoreFromBackup.RecoveryTargetDateTime.ValueString())
-			if err != nil {
-				diagnostics.AddError("invalid recovery_target_datetime",
-					fmt.Sprintf("expected RFC3339 format (e.g. 2020-12-10T13:37:50+01:00), got %q, error: %v", plan.RestoreFromBackup.RecoveryTargetDateTime.ValueString(), err))
-				return restore, diagnostics
-			}
-
-			restore.PostgresRestoreClusterFromBackup.RecoveryTargetDatetime = &pgsqlv2.IonosTime{Time: t}
-		}
-
-		return restore, diagnostics
+	restore.PostgresRestoreClusterFromBackup = &pgsqlv2.PostgresRestoreClusterFromBackup{
+		SourceBackupId: plan.RestoreFromBackup.SourceBackupID.ValueString(),
 	}
 
-	// if only RecoveryTargetDateTime is set, send a PostgresInPlaceRestoreFromBackup
-	restore.PostgresInPlaceRestoreClusterFromBackup = &pgsqlv2.PostgresInPlaceRestoreClusterFromBackup{}
-	t, err := time.Parse(time.RFC3339, plan.RestoreFromBackup.RecoveryTargetDateTime.ValueString())
-	if err != nil {
-		diagnostics.AddError("invalid recovery_target_datetime",
-			fmt.Sprintf("expected RFC3339 format (e.g. 2020-12-10T13:37:50+01:00), got %q, error: %v", plan.RestoreFromBackup.RecoveryTargetDateTime.ValueString(), err))
-		return restore, diagnostics
+	if !plan.RestoreFromBackup.RecoveryTargetDateTime.IsNull() {
+		t, err := time.Parse(time.RFC3339, plan.RestoreFromBackup.RecoveryTargetDateTime.ValueString())
+		if err != nil {
+			diagnostics.AddError("invalid recovery_target_datetime",
+				fmt.Sprintf("expected RFC3339 format (e.g. 2020-12-10T13:37:50+01:00), got %q, error: %v", plan.RestoreFromBackup.RecoveryTargetDateTime.ValueString(), err))
+			return nil, diagnostics
+		}
+
+		restore.PostgresRestoreClusterFromBackup.RecoveryTargetDatetime = &pgsqlv2.IonosTime{Time: t}
 	}
 
-	restore.PostgresInPlaceRestoreClusterFromBackup.RecoveryTargetDatetime = &pgsqlv2.IonosTime{Time: t}
-
-	return restore, nil
+	return &restore, diagnostics
 }
 
 // buildClusterUpdateProperties constructs the Cluster properties for PUT update.
@@ -670,16 +653,38 @@ func buildClusterUpdateProperties(plan *clusterResourceModel) (pgsqlv2.Cluster, 
 		props.MetricsEnabled = plan.MetricsEnabled.ValueBoolPointer()
 	}
 
-	if plan.RestoreFromBackup != nil {
-		restore, diags := buildClusterRestoreFromBackup(plan)
-		if diags.HasError() {
-			return props, diags
-		}
-
-		props.RestoreFromBackup = &restore
+	restore, diags := buildClusterUpdateRestoreFromBackup(plan)
+	if diags.HasError() {
+		return props, diags
 	}
+	props.RestoreFromBackup = restore
 
 	return props, diagnostics
+}
+
+// buildClusterUpdateRestoreFromBackup constructs the ClusterRestoreFromBackup for in-place restore during update.
+// Only PostgresInPlaceRestoreClusterFromBackup (recoveryTargetDatetime only) is valid on update.
+// Returns nil if no in-place restore is requested.
+func buildClusterUpdateRestoreFromBackup(plan *clusterResourceModel) (*pgsqlv2.ClusterRestoreFromBackup, diag.Diagnostics) {
+	var diagnostics diag.Diagnostics
+	if plan.RestoreFromBackup == nil {
+		return nil, diagnostics
+	}
+	if plan.RestoreFromBackup.RecoveryTargetDateTime.IsNull() || plan.RestoreFromBackup.RecoveryTargetDateTime.IsUnknown() {
+		return nil, diagnostics
+	}
+	t, err := time.Parse(time.RFC3339, plan.RestoreFromBackup.RecoveryTargetDateTime.ValueString())
+	if err != nil {
+		diagnostics.AddError("invalid recovery_target_datetime",
+			fmt.Sprintf("expected RFC3339 format (e.g. 2020-12-10T13:37:50+01:00), got %q, error: %v", plan.RestoreFromBackup.RecoveryTargetDateTime.ValueString(), err))
+		return nil, diagnostics
+	}
+	restore := pgsqlv2.ClusterRestoreFromBackup{
+		PostgresInPlaceRestoreClusterFromBackup: &pgsqlv2.PostgresInPlaceRestoreClusterFromBackup{
+			RecoveryTargetDatetime: &pgsqlv2.IonosTime{Time: t},
+		},
+	}
+	return &restore, diagnostics
 }
 
 // mapClusterResponseToModel maps API response fields to the Terraform model.
