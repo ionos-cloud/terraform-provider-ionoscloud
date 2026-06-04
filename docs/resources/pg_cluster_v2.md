@@ -41,7 +41,7 @@ resource "ionoscloud_pg_cluster_v2" "example" {
   replication_mode = "ASYNCHRONOUS"
 
   backup = {
-    location       = one([for bl in data.ionoscloud_pg_backup_location_v2.example.backup_locations : bl.location if bl.location == "eu-central-3"])
+    location       = "eu-central-3"
     retention_days = 7
   }
   connection_pooler = "DISABLED"
