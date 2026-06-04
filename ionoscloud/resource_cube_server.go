@@ -275,7 +275,7 @@ func resourceCubeServer() *schema.Resource {
 				Required: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
-					Schema: serverutil.SchemaNicElem,
+					Schema: serverutil.SchemaNicElemSingleFirewall(),
 				},
 			},
 			"inline_volume_ids": {
@@ -710,7 +710,7 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		return diagutil.ToDiags(d, fmt.Errorf("could not retrieve server vmState: %w", err), nil)
 	}
 	if strings.EqualFold(currentVmState, constant.CubeVMStateStop) && !d.HasChange("vm_state") {
-		return diagutil.ToDiags(d, fmt.Errorf("cannot update a suspended Templated Server, must change the state to RUNNING first"), nil)
+		return diagutil.ToDiags(d, fmt.Errorf("cannot update a suspended Cube Server, must change the state to RUNNING first"), nil)
 	}
 
 	// Unsuspend a Cube server first, before applying other changes
@@ -870,7 +870,9 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		}
 
 		if d.HasChange("nic.0.dhcpv6") {
-			if dhcpv6, ok := d.GetOk("nic.0.dhcpv6"); ok {
+			// GetOkExists is needed to distinguish unset from explicit false on this *bool;
+			// GetOk treats the zero value (false) as "not set" and would skip SetDhcpv6Nil incorrectly.
+			if dhcpv6, ok := d.GetOkExists("nic.0.dhcpv6"); ok { //nolint:staticcheck // SA1019: GetOkExists has no SDKv2 replacement for tri-state bools
 				dhcpv6 := dhcpv6.(bool)
 				properties.Dhcpv6 = &dhcpv6
 			} else {

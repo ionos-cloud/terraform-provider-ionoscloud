@@ -234,7 +234,7 @@ func resourceGPUServer() *schema.Resource {
 				Optional: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
-					Schema: serverutil.SchemaNicElem,
+					Schema: serverutil.SchemaNicElemSingleFirewall(),
 				},
 			},
 			"inline_volume_ids": {
