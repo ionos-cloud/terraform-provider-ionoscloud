@@ -672,6 +672,7 @@ func buildClusterUpdateProperties(plan *clusterResourceModel) (pgsqlv2.Cluster, 
 
 // buildClusterUpdateRestoreFromBackup constructs the ClusterRestoreFromBackup for in-place restore during update.
 // Only PostgresInPlaceRestoreClusterFromBackup (recoveryTargetDatetime only) is valid on update.
+// It assumes that clusterResourceModel.RestoreFromBackup is not nil
 func buildClusterUpdateRestoreFromBackup(plan *clusterResourceModel) (*pgsqlv2.ClusterRestoreFromBackup, diag.Diagnostics) {
 	var diagnostics diag.Diagnostics
 
