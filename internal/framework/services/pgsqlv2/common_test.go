@@ -52,12 +52,16 @@ resource "random_password" "cluster_password" {
 // clusterCreateConfig creates a PgSQL v2 cluster with all attributes explicitly set.
 var clusterCreateConfig = infraConfig + fmt.Sprintf(`
 resource "ionoscloud_pg_cluster_v2" "test" {
-  name              = "tf-test-pgsqlv2"
-  description       = "Test PgSQL v2 cluster"
-  version           = "17"
-  location          = "%[1]s"
-  backup_location   = "eu-central-3"
-  replication_mode  = "ASYNCHRONOUS"
+  name             = "tf-test-pgsqlv2"
+  description      = "Test PgSQL v2 cluster"
+  version          = "17"
+  location         = "%[1]s"
+  replication_mode = "ASYNCHRONOUS"
+
+  backup = {
+    location       = "eu-central-3"
+    retention_days = 7
+  }
   connection_pooler = "DISABLED"
   logs_enabled      = true
   metrics_enabled   = true
@@ -92,12 +96,17 @@ resource "ionoscloud_pg_cluster_v2" "test" {
 // clusterUpdateConfig updates all mutable attributes of the PgSQL v2 cluster.
 var clusterUpdateConfig = infraConfig + fmt.Sprintf(`
 resource "ionoscloud_pg_cluster_v2" "test" {
-  name              = "tf-test-pgsqlv2-updated"
-  description       = "Updated PgSQL v2 cluster"
-  version           = "17"
-  location          = "%[1]s"
-  backup_location   = "eu-central-3"
-  replication_mode  = "ASYNCHRONOUS"
+  name             = "tf-test-pgsqlv2-updated"
+  description      = "Updated PgSQL v2 cluster"
+  version          = "17"
+  location         = "%[1]s"
+  replication_mode = "ASYNCHRONOUS"
+
+  backup = {
+    location       = "eu-central-3"
+    retention_days = 14
+  }
+
   connection_pooler = "DISABLED"
   logs_enabled      = false
   metrics_enabled   = false
@@ -139,12 +148,17 @@ resource "random_password" "cluster_password_v2" {
 }
 
 resource "ionoscloud_pg_cluster_v2" "test" {
-  name              = "tf-test-pgsqlv2-updated"
-  description       = "Updated PgSQL v2 cluster"
-  version           = "17"
-  location          = "%[1]s"
-  backup_location   = "eu-central-3"
-  replication_mode  = "ASYNCHRONOUS"
+  name             = "tf-test-pgsqlv2-updated"
+  description      = "Updated PgSQL v2 cluster"
+  version          = "17"
+  location         = "%[1]s"
+  replication_mode = "ASYNCHRONOUS"
+
+  backup = {
+    location       = "eu-central-3"
+    retention_days = 7
+  }
+
   connection_pooler = "DISABLED"
   logs_enabled      = false
   metrics_enabled   = false
@@ -271,12 +285,17 @@ resource "random_password" "cluster_password" {
 // Because location has RequiresReplace, this should destroy the old cluster and create a new one.
 var clusterLocationChangeConfig = infraConfigNewLocation + fmt.Sprintf(`
 resource "ionoscloud_pg_cluster_v2" "test" {
-  name              = "tf-test-pgsqlv2-updated"
-  description       = "Updated PgSQL v2 cluster"
-  version           = "17"
-  location          = "%[1]s"
-  backup_location   = "eu-central-3"
-  replication_mode  = "ASYNCHRONOUS"
+  name             = "tf-test-pgsqlv2-updated"
+  description      = "Updated PgSQL v2 cluster"
+  version          = "17"
+  location         = "%[1]s"
+  replication_mode = "ASYNCHRONOUS"
+
+  backup = {
+    location       = "eu-central-3"
+    retention_days = 7
+  }
+
   connection_pooler = "DISABLED"
   logs_enabled      = false
   metrics_enabled   = false

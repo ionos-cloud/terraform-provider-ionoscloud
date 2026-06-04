@@ -25,41 +25,41 @@ type ClusterCreateProperties struct {
 	// Human-readable description for the cluster.
 	Description *string `json:"description,omitempty"`
 	// The PostgreSQL version for the cluster.
-	Version           *string                        `json:"version,omitempty"`
+	Version           string                         `json:"version"`
 	Instances         InstanceConfiguration          `json:"instances"`
 	Connection        PostgresClusterConnection      `json:"connection"`
 	MaintenanceWindow MaintenanceWindow              `json:"maintenanceWindow"`
 	ReplicationMode   PostgresClusterReplicationMode `json:"replicationMode"`
 	Credentials       PostgresUser                   `json:"credentials"`
 	// Defines how database connections are managed and reused. Default value is DISABLED. DISABLED: No connection pooling is used. Each request opens a new connection, which is closed immediately after use. It ensures isolation but may impact performance due to frequent connection setup and teardown. TRANSACTION: Connections are pooled and reused for the duration of a transaction. Once the transaction completes, the connection is returned to the pool. This mode balances efficiency with transactional integrity. SESSION: Connections are retained for the entire session and reused across multiple transactions. Offers the highest performance by minimizing connection overhead, but may tie up resources longer.
-	ConnectionPooler  *string                    `json:"connectionPooler,omitempty"`
-	RestoreFromBackup *PostgresClusterFromBackup `json:"restoreFromBackup,omitempty"`
-	// The Object Storage location where the backup will be created. The BackupLocations provides a list of supported locations.
-	BackupLocation string `json:"backupLocation"`
-	// Allows or disallows the collection and reporting of logs for this cluster's observability.
+	ConnectionPooler  *string                   `json:"connectionPooler,omitempty"`
+	RestoreFromBackup *ClusterRestoreFromBackup `json:"restoreFromBackup,omitempty"`
+	// Allows or disallows the collection and reporting of logs for this cluster's observability. If the observability service is not activated on the contract, this setting is accepted but has no effect; log collection will not be enabled until the observability service is activated.
 	LogsEnabled *bool `json:"logsEnabled,omitempty"`
-	// Allows or disallows the collection and reporting of metrics for this cluster's observability.
-	MetricsEnabled *bool `json:"metricsEnabled,omitempty"`
+	// Allows or disallows the collection and reporting of metrics for this cluster's observability. If the observability service is not activated on the contract, this setting is accepted but has no effect; metric collection will not be enabled until the observability service is activated.
+	MetricsEnabled *bool         `json:"metricsEnabled,omitempty"`
+	Backup         ClusterBackup `json:"backup"`
 }
 
 // NewClusterCreateProperties instantiates a new ClusterCreateProperties object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewClusterCreateProperties(name string, instances InstanceConfiguration, connection PostgresClusterConnection, maintenanceWindow MaintenanceWindow, replicationMode PostgresClusterReplicationMode, credentials PostgresUser, backupLocation string) *ClusterCreateProperties {
+func NewClusterCreateProperties(name string, version string, instances InstanceConfiguration, connection PostgresClusterConnection, maintenanceWindow MaintenanceWindow, replicationMode PostgresClusterReplicationMode, credentials PostgresUser, backup ClusterBackup) *ClusterCreateProperties {
 	this := ClusterCreateProperties{}
 
 	this.Name = name
+	this.Version = version
 	this.Instances = instances
 	this.Connection = connection
 	this.MaintenanceWindow = maintenanceWindow
 	this.ReplicationMode = replicationMode
 	this.Credentials = credentials
-	this.BackupLocation = backupLocation
 	var logsEnabled bool = false
 	this.LogsEnabled = &logsEnabled
 	var metricsEnabled bool = false
 	this.MetricsEnabled = &metricsEnabled
+	this.Backup = backup
 
 	return &this
 }
@@ -132,36 +132,28 @@ func (o *ClusterCreateProperties) SetDescription(v string) {
 	o.Description = &v
 }
 
-// GetVersion returns the Version field value if set, zero value otherwise.
+// GetVersion returns the Version field value
 func (o *ClusterCreateProperties) GetVersion() string {
-	if o == nil || IsNil(o.Version) {
+	if o == nil {
 		var ret string
 		return ret
 	}
-	return *o.Version
+
+	return o.Version
 }
 
-// GetVersionOk returns a tuple with the Version field value if set, nil otherwise
+// GetVersionOk returns a tuple with the Version field value
 // and a boolean to check if the value has been set.
 func (o *ClusterCreateProperties) GetVersionOk() (*string, bool) {
-	if o == nil || IsNil(o.Version) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Version, true
+	return &o.Version, true
 }
 
-// HasVersion returns a boolean if a field has been set.
-func (o *ClusterCreateProperties) HasVersion() bool {
-	if o != nil && !IsNil(o.Version) {
-		return true
-	}
-
-	return false
-}
-
-// SetVersion gets a reference to the given string and assigns it to the Version field.
+// SetVersion sets field value
 func (o *ClusterCreateProperties) SetVersion(v string) {
-	o.Version = &v
+	o.Version = v
 }
 
 // GetInstances returns the Instances field value
@@ -317,9 +309,9 @@ func (o *ClusterCreateProperties) SetConnectionPooler(v string) {
 }
 
 // GetRestoreFromBackup returns the RestoreFromBackup field value if set, zero value otherwise.
-func (o *ClusterCreateProperties) GetRestoreFromBackup() PostgresClusterFromBackup {
+func (o *ClusterCreateProperties) GetRestoreFromBackup() ClusterRestoreFromBackup {
 	if o == nil || IsNil(o.RestoreFromBackup) {
-		var ret PostgresClusterFromBackup
+		var ret ClusterRestoreFromBackup
 		return ret
 	}
 	return *o.RestoreFromBackup
@@ -327,7 +319,7 @@ func (o *ClusterCreateProperties) GetRestoreFromBackup() PostgresClusterFromBack
 
 // GetRestoreFromBackupOk returns a tuple with the RestoreFromBackup field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ClusterCreateProperties) GetRestoreFromBackupOk() (*PostgresClusterFromBackup, bool) {
+func (o *ClusterCreateProperties) GetRestoreFromBackupOk() (*ClusterRestoreFromBackup, bool) {
 	if o == nil || IsNil(o.RestoreFromBackup) {
 		return nil, false
 	}
@@ -343,33 +335,9 @@ func (o *ClusterCreateProperties) HasRestoreFromBackup() bool {
 	return false
 }
 
-// SetRestoreFromBackup gets a reference to the given PostgresClusterFromBackup and assigns it to the RestoreFromBackup field.
-func (o *ClusterCreateProperties) SetRestoreFromBackup(v PostgresClusterFromBackup) {
+// SetRestoreFromBackup gets a reference to the given ClusterRestoreFromBackup and assigns it to the RestoreFromBackup field.
+func (o *ClusterCreateProperties) SetRestoreFromBackup(v ClusterRestoreFromBackup) {
 	o.RestoreFromBackup = &v
-}
-
-// GetBackupLocation returns the BackupLocation field value
-func (o *ClusterCreateProperties) GetBackupLocation() string {
-	if o == nil {
-		var ret string
-		return ret
-	}
-
-	return o.BackupLocation
-}
-
-// GetBackupLocationOk returns a tuple with the BackupLocation field value
-// and a boolean to check if the value has been set.
-func (o *ClusterCreateProperties) GetBackupLocationOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.BackupLocation, true
-}
-
-// SetBackupLocation sets field value
-func (o *ClusterCreateProperties) SetBackupLocation(v string) {
-	o.BackupLocation = v
 }
 
 // GetLogsEnabled returns the LogsEnabled field value if set, zero value otherwise.
@@ -436,6 +404,30 @@ func (o *ClusterCreateProperties) SetMetricsEnabled(v bool) {
 	o.MetricsEnabled = &v
 }
 
+// GetBackup returns the Backup field value
+func (o *ClusterCreateProperties) GetBackup() ClusterBackup {
+	if o == nil {
+		var ret ClusterBackup
+		return ret
+	}
+
+	return o.Backup
+}
+
+// GetBackupOk returns a tuple with the Backup field value
+// and a boolean to check if the value has been set.
+func (o *ClusterCreateProperties) GetBackupOk() (*ClusterBackup, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Backup, true
+}
+
+// SetBackup sets field value
+func (o *ClusterCreateProperties) SetBackup(v ClusterBackup) {
+	o.Backup = v
+}
+
 func (o ClusterCreateProperties) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -450,9 +442,7 @@ func (o ClusterCreateProperties) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Description) {
 		toSerialize["description"] = o.Description
 	}
-	if !IsNil(o.Version) {
-		toSerialize["version"] = o.Version
-	}
+	toSerialize["version"] = o.Version
 	toSerialize["instances"] = o.Instances
 	toSerialize["connection"] = o.Connection
 	toSerialize["maintenanceWindow"] = o.MaintenanceWindow
@@ -464,13 +454,13 @@ func (o ClusterCreateProperties) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.RestoreFromBackup) {
 		toSerialize["restoreFromBackup"] = o.RestoreFromBackup
 	}
-	toSerialize["backupLocation"] = o.BackupLocation
 	if !IsNil(o.LogsEnabled) {
 		toSerialize["logsEnabled"] = o.LogsEnabled
 	}
 	if !IsNil(o.MetricsEnabled) {
 		toSerialize["metricsEnabled"] = o.MetricsEnabled
 	}
+	toSerialize["backup"] = o.Backup
 	return toSerialize, nil
 }
 

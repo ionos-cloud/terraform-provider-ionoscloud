@@ -45,4 +45,4 @@ The following attributes are returned by the datasource:
   * `is_active` - Whether the backup is active.
   * `earliest_recovery_target_time` - The earliest point in time to which the cluster can be restored.
   * `latest_recovery_target_time` - The latest point in time to which the cluster can be restored. If the backup can be restored up to the current time, this field will be null.
-  * `location` - The S3 location where the backup is stored.
+  * `location` - The Object Storage location where the backup is stored.

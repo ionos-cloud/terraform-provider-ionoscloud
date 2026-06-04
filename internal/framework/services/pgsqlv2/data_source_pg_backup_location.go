@@ -72,7 +72,7 @@ func (d *backupLocationDataSource) Schema(_ context.Context, _ datasource.Schema
 						},
 						"location": schema.StringAttribute{
 							Computed:    true,
-							Description: "The S3 location where the backup is stored.",
+							Description: "The Object Storage location where the backup is stored.",
 						},
 					},
 				},

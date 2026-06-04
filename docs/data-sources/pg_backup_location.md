@@ -30,4 +30,4 @@ The following attributes are returned by the datasource:
 
 * `backup_locations` - The list of available backup locations. Each backup location has the following attributes:
   * `id` - The ID (UUID) of the backup location.
-  * `location` - The S3 location identifier (e.g. `de`, `eu-central-2`).
+  * `location` - The Object Storage location identifier (e.g. `de`, `eu-central-2`).

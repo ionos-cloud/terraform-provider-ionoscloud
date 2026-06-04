@@ -32,7 +32,7 @@ type clusterDataSourceModel struct {
 	Version           types.String            `tfsdk:"version"`
 	DNSName           types.String            `tfsdk:"dns_name"`
 	Location          types.String            `tfsdk:"location"`
-	BackupLocation    types.String            `tfsdk:"backup_location"`
+	Backup            *backupSpecModel        `tfsdk:"backup"`
 	ReplicationMode   types.String            `tfsdk:"replication_mode"`
 	ConnectionPooler  types.String            `tfsdk:"connection_pooler"`
 	LogsEnabled       types.Bool              `tfsdk:"logs_enabled"`
@@ -85,9 +85,19 @@ func (d *clusterDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 	resp.Schema = schema.Schema{
 		Description: "Reads a single PostgreSQL v2 cluster by ID or name.",
 		Attributes: map[string]schema.Attribute{
-			"backup_location": schema.StringAttribute{
+			"backup": schema.SingleNestedAttribute{
 				Computed:    true,
-				Description: "The S3 location where the backups are stored.",
+				Description: "Backup location and retention configuration.",
+				Attributes: map[string]schema.Attribute{
+					"location": schema.StringAttribute{
+						Computed:    true,
+						Description: "The Object Storage location where the backups are stored.",
+					},
+					"retention_days": schema.Int32Attribute{
+						Computed:    true,
+						Description: "How many days cluster backups are retained.",
+					},
+				},
 			},
 			"connection_pooler": schema.StringAttribute{
 				Computed:    true,
@@ -274,9 +284,12 @@ func mapClusterResponseToDataSourceModel(cluster *pgsqlv2.ClusterRead, model *cl
 
 	model.Name = types.StringValue(props.Name)
 	model.Description = types.StringPointerValue(props.Description)
-	model.Version = types.StringPointerValue(props.Version)
+	model.Version = types.StringValue(props.Version)
 	model.ReplicationMode = types.StringValue(string(props.ReplicationMode))
-	model.BackupLocation = types.StringValue(props.BackupLocation)
+	model.Backup = &backupSpecModel{
+		Location:      types.StringValue(props.Backup.Location),
+		RetentionDays: types.Int32Value(props.Backup.RetentionDays),
+	}
 	model.ConnectionPooler = types.StringPointerValue(props.ConnectionPooler)
 	model.LogsEnabled = types.BoolPointerValue(props.LogsEnabled)
 	model.MetricsEnabled = types.BoolPointerValue(props.MetricsEnabled)

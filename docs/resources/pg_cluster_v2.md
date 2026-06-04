@@ -37,9 +37,13 @@ resource "ionoscloud_pg_cluster_v2" "example" {
   name              = "PostgreSQL_cluster"
   description       = "Production PostgreSQL cluster"
   version           = "17"
-  location          = local.location
-  backup_location   = one([for bl in data.ionoscloud_pg_backup_location_v2.example.backup_locations : bl.location if bl.location == "eu-central-3"])
-  replication_mode  = "ASYNCHRONOUS"
+  location         = local.location
+  replication_mode = "ASYNCHRONOUS"
+
+  backup = {
+    location       = "eu-central-3"
+    retention_days = 7
+  }
   connection_pooler = "DISABLED"
   logs_enabled      = true
   metrics_enabled   = true
@@ -87,9 +91,11 @@ ephemeral "random_password" "cluster_password" {
 
 * `name` - (Required)[string] The name of the PostgreSQL cluster.
 * `description` - (Optional)[string] Human-readable description for the cluster.
-* `version` - (Optional)(Computed)[string] The PostgreSQL version of the cluster. If omitted, the API assigns a default version.
+* `version` - (Required)[string] The PostgreSQL version of the cluster.
 * `location` - (Required, RequiresReplace)[string] The location of the PostgreSQL cluster. This is used for routing to the regional API endpoint. Changing this value will destroy the existing cluster and create a new one in the specified location. Available locations: `de/fra`, `de/fra/2`, `de/txl`, `es/vit`, `fr/par`, `gb/bhx`, `gb/lhr`, `us/ewr`, `us/las`, `us/mci`.
-* `backup_location` - (Required)[string] The S3 location where the backups will be created. Supported locations are provided by the `ionoscloud_pg_backup_location_v2` data source.
+* `backup` - (Required)[object] Backup location and retention configuration.
+  * `location` - (Required)[string] The Object Storage location where the backups will be created. Supported locations are provided by the `ionoscloud_pg_backup_location_v2` data source. Immutable — changing this forces a new cluster.
+  * `retention_days` - (Required)[int] How many days cluster backups are retained.
 * `replication_mode` - (Required)[string] Replication mode across the instances. Possible values: `ASYNCHRONOUS`, `STRICTLY_SYNCHRONOUS`.
 * `connection_pooler` - (Optional)(Computed)[string] Defines how database connections are managed and reused. Possible values: `DISABLED`, `TRANSACTION`, `SESSION`.
 * `logs_enabled` - (Optional)(Computed)[bool] Enables or disables the collection and reporting of logs for observability of this cluster.
@@ -112,7 +118,7 @@ ephemeral "random_password" "cluster_password" {
   * `password_version` - (Required)[string] An arbitrary string (e.g. `"1"`, `"2"`) stored in Terraform state solely to trigger password updates. Increment this value whenever the write-only `password` field changes so Terraform detects a diff and sends the new password to the API.
   * `database` - (Required)[string] The name of the initial database to be created.
 * `restore_from_backup` - (Optional)[object] Configures the cluster to be initialized with data from an existing backup.
-  * `source_backup_id` - (Optional)[string] The UUID of the backup to restore data from.
+  * `source_backup_id` - (Required)[string] The UUID of the backup to restore data from. Immutable — changing this forces a new cluster.
   * `recovery_target_datetime` - (Optional)[string] If supplied as ISO 8601 timestamp, the backup will be replayed up until the given timestamp. If empty, the backup will be applied completely.
 * `dns_name` - (Computed)[string] The DNS name used to access the cluster.
 

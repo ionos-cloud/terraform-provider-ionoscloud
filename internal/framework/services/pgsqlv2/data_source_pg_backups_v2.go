@@ -95,7 +95,7 @@ func (d *backupsDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 						},
 						"location": schema.StringAttribute{
 							Computed:    true,
-							Description: "The S3 location where the backup is stored.",
+							Description: "The Object Storage location where the backup is stored.",
 						},
 						"postgres_cluster_version": schema.StringAttribute{
 							Computed:    true,

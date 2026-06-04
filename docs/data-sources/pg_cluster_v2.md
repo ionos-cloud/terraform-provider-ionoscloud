@@ -49,7 +49,9 @@ The following attributes are returned by the datasource:
 * `version` - The PostgreSQL version of the cluster.
 * `dns_name` - The DNS name used to access the cluster.
 * `location` - The location of the PostgreSQL cluster.
-* `backup_location` - The S3 location where the backups are stored.
+* `backup` - Backup configuration of the cluster.
+  * `location` - The Object Storage location where the backups are stored.
+  * `retention_days` - How many days cluster backups are retained.
 * `replication_mode` - Replication mode across the instances.
 * `connection_pooler` - How database connections are managed and reused.
 * `logs_enabled` - Whether the collection and reporting of logs is enabled for this cluster.

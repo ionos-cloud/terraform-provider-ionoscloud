@@ -10,6 +10,7 @@
 
 ### Refactor
 - Refactor `ionoscloud_pg_cluster_v2` resource so `password` is now write-only, and require `password_version` to trigger password updates.
+- `backup_location` field in `ionoscloud_pg_cluster_v2` resource and data source is now replaced by `backup` block, which includes `location` and `retention_days` fields.
 
 ## 6.7.29
 ### Fixes
