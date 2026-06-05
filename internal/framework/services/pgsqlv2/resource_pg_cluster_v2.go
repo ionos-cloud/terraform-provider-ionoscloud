@@ -763,6 +763,10 @@ func mapClusterResponseToModel(cluster *pgsqlv2.ClusterRead, model *clusterResou
 	}
 
 	if props.RestoreFromBackup != nil {
+		model.RestoreFromBackup = &restoreFromBackupModel{
+			SourceBackupID:         types.StringNull(),
+			RecoveryTargetDateTime: types.StringNull(),
+		}
 		mapClusterRestoreFromBackupResponseToModel(*props.RestoreFromBackup, model)
 	}
 

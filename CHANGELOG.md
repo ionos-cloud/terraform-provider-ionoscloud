@@ -1,6 +1,6 @@
 ## Upcoming Release
 
-## Features
+### Features
 - New list resource: `ionoscloud_pg_cluster_v2` — list PostgreSQL v2 clusters via `terraform query`, with optional filtering using `name` or `location` (requires Terraform 1.14+).
 
 ## 6.7.30
