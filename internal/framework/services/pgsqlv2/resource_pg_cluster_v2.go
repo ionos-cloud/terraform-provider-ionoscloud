@@ -19,7 +19,7 @@ import (
 	pgsqlv2 "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v3"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
-	pgsqlv2Service "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/pgsqlv2"
+	psqlv2service "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/pgsqlv2"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
@@ -224,7 +224,7 @@ func (r *clusterResource) Schema(ctx context.Context, req resource.SchemaRequest
 			},
 			"location": schema.StringAttribute{
 				Required:    true,
-				Description: "The location of the PostgreSQL cluster. This is used for routing to the regional API endpoint. Available locations: " + pgsqlv2Service.AvailableLocationsString() + ".",
+				Description: "The location of the PostgreSQL cluster. This is used for routing to the regional API endpoint. Available locations: " + psqlv2service.AvailableLocationsString() + ".",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},

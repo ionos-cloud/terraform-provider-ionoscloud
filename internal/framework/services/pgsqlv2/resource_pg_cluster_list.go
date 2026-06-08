@@ -14,7 +14,7 @@ import (
 	pgsqlv2sdk "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v3"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/identity"
-	pgsqlv2Service "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/pgsqlv2"
+	psqlv2service "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/pgsqlv2"
 )
 
 var (
@@ -55,7 +55,7 @@ func (r *clusterResource) List(ctx context.Context, req list.ListRequest, stream
 			nameFilter := identity.FilterValue(filters, "name")
 			locationFilter := identity.FilterValue(filters, "location")
 
-			locations := pgsqlv2Service.AvailableLocations()
+			locations := psqlv2service.AvailableLocations()
 			if locationFilter != "" {
 				locations = []string{locationFilter}
 			}
