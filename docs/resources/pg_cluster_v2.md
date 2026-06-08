@@ -137,3 +137,31 @@ Resource DBaaS PostgreSQL v2 Cluster can be imported using the format `location:
 ```shell
 terraform import ionoscloud_pg_cluster_v2.mycluster de/txl:cluster_uuid
 ```
+
+## Query (List Resource)
+
+PostgreSQL v2 clusters can be listed using `terraform query` (requires Terraform 1.14+). List blocks must be placed in a dedicated `tfquery.hcl` file.
+
+```hcl
+list "ionoscloud_pg_cluster_v2" "all" {
+  provider         = ionoscloud
+  include_resource = true
+}
+```
+
+Filter by name and location:
+
+```hcl
+list "ionoscloud_pg_cluster_v2" "prod" {
+  provider         = ionoscloud
+  include_resource = true
+  config {
+    filters = [
+      { field_name = "name",     field_value = "my-cluster" },
+      { field_name = "location", field_value = "de/txl" },
+    ]
+  }
+}
+```
+
+See the [ionoscloud_pg_cluster_v2 list resource](../list-resources/psql_cluster.md) documentation for the full filter reference.

@@ -17,15 +17,32 @@ func (c *Client) GetCluster(ctx context.Context, clusterID string) (pgsqlv2.Clus
 	return cluster, apiResponse, err
 }
 
-// ListClusters retrieves a list of clusters. An optional name filter can be used.
+// ListClusters retrieves all clusters, following pagination links. An optional name filter can be used.
 func (c *Client) ListClusters(ctx context.Context, filterName string) (pgsqlv2.ClusterReadList, *shared.APIResponse, error) {
-	request := c.sdkClient.ClustersApi.ClustersGet(ctx)
-	if filterName != "" {
-		request = request.FilterName(filterName)
+	const pageSize int32 = 100
+	var (
+		all         []pgsqlv2.ClusterRead
+		offset      int32
+		apiResponse *shared.APIResponse
+	)
+	for {
+		request := c.sdkClient.ClustersApi.ClustersGet(ctx).Offset(offset).Limit(pageSize)
+		if filterName != "" {
+			request = request.FilterName(filterName)
+		}
+		page, resp, err := request.Execute()
+		resp.LogInfo()
+		apiResponse = resp
+		if err != nil {
+			return pgsqlv2.ClusterReadList{}, apiResponse, err
+		}
+		all = append(all, page.Items...)
+		if !page.Links.HasNext() {
+			page.Items = all
+			return page, apiResponse, nil
+		}
+		offset += pageSize
 	}
-	clusters, apiResponse, err := request.Execute()
-	apiResponse.LogInfo()
-	return clusters, apiResponse, err
 }
 
 // CreateCluster creates a new cluster.
