@@ -53,11 +53,10 @@ func (r *clusterResource) List(ctx context.Context, req list.ListRequest, stream
 			req.Config.GetAttribute(ctx, path.Root(identity.FiltersKey), &filters) //nolint:errcheck
 
 			nameFilter := identity.FilterValue(filters, "name")
-			locationFilter := identity.FilterValue(filters, "location")
 
 			locations := psqlv2service.AvailableLocations()
-			if locationFilter != "" {
-				locations = []string{locationFilter}
+			if loc := identity.FilterValue(filters, "location"); loc != "" {
+				locations = []string{loc}
 			}
 
 			var all []clusterWithLocation
