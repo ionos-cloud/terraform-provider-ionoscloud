@@ -100,7 +100,7 @@ func TestAccPgClusterV2(t *testing.T) {
       { field_name = "name",     field_value = "tf-test-pgsqlv2" },
       { field_name = "location", field_value = "` + testLocationChanged + `" },
     ]
-  }	
+  }
 }`,
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLength(clusterResourceAddr, 0),
