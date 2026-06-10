@@ -20,23 +20,23 @@ import (
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
-	autoscalingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/autoscaling"
-	cdnService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cdn"
+	autoscalingservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/autoscaling"
+	cdnservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cdn"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
-	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
-	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
+	crservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
+	dbaasservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/inmemorydb"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/mariadb"
-	pgsqlv2Service "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/pgsqlv2"
-	dnsService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dns"
-	kafkaService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/kafka"
-	loggingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/logging"
-	monitoringService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/monitoring"
-	nfsService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/nfs"
-	objectStorageService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstorage"
-	objectStorageManagementService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstoragemanagement"
-	userObjectStorageService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/userobjectstorage"
+	psqlv2service "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/pgsqlv2"
+	dnsservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dns"
+	kafkaservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/kafka"
+	loggingservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/logging"
+	monitoringservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/monitoring"
+	nfsservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/nfs"
+	objectstorageservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstorage"
+	objectstoragemanagementservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstoragemanagement"
+	userobjectstorageservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/userobjectstorage"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/vpn"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/configlog"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
@@ -45,19 +45,19 @@ import (
 // New creates a new SdkBundle client
 func New(ctx context.Context, clientOptions clientoptions.TerraformClientOptions, fileConfig *fileconfiguration.FileConfig) *SdkBundle {
 	return &SdkBundle{
-		CDNClient:         cdnService.NewClient(ctx, clientOptions, fileConfig),
-		AutoscalingClient: autoscalingService.NewClient(ctx, clientOptions, fileConfig),
+		CDNClient:         cdnservice.NewClient(ctx, clientOptions, fileConfig),
+		AutoscalingClient: autoscalingservice.NewClient(ctx, clientOptions, fileConfig),
 		CertManagerClient: cert.NewClient(ctx, clientOptions, fileConfig),
-		DNSClient:         dnsService.NewClient(ctx, clientOptions, fileConfig),
-		LoggingClient:     loggingService.NewClient(clientOptions, fileConfig),
+		DNSClient:         dnsservice.NewClient(ctx, clientOptions, fileConfig),
+		LoggingClient:     loggingservice.NewClient(clientOptions, fileConfig),
 		MariaDBClient:     mariadb.NewClient(clientOptions, fileConfig),
-		NFSClient:         nfsService.NewClient(clientOptions, fileConfig),
-		KafkaClient:       kafkaService.NewClient(clientOptions, fileConfig),
+		NFSClient:         nfsservice.NewClient(clientOptions, fileConfig),
+		KafkaClient:       kafkaservice.NewClient(clientOptions, fileConfig),
 		VPNClient:         vpn.NewClient(clientOptions, fileConfig),
 		InMemoryDBClient:  inmemorydb.NewClient(clientOptions, fileConfig),
-		S3Client:          objectStorageService.NewClient(ctx, clientOptions, fileConfig),
-		UserS3Client:      userObjectStorageService.NewClient(ctx, clientOptions),
-		MonitoringClient:  monitoringService.NewClient(clientOptions, fileConfig),
+		S3Client:          objectstorageservice.NewClient(ctx, clientOptions, fileConfig),
+		UserS3Client:      userobjectstorageservice.NewClient(ctx, clientOptions),
+		MonitoringClient:  monitoringservice.NewClient(clientOptions, fileConfig),
 
 		clientOptions: clientOptions,
 		fileConfig:    fileConfig,
@@ -67,20 +67,20 @@ func New(ctx context.Context, clientOptions clientoptions.TerraformClientOptions
 // SdkBundle is a struct that defines the bundle client. It is used for both sdkv2 and plugin framework
 type SdkBundle struct {
 	InMemoryDBClient  *inmemorydb.Client
-	PsqlClient        *dbaasService.PsqlClient
-	MongoClient       *dbaasService.MongoClient
+	PsqlClient        *dbaasservice.PsqlClient
+	MongoClient       *dbaasservice.MongoClient
 	MariaDBClient     *mariadb.Client
-	NFSClient         *nfsService.Client
+	NFSClient         *nfsservice.Client
 	CertManagerClient *cert.Client
-	DNSClient         *dnsService.Client
-	LoggingClient     *loggingService.Client
-	AutoscalingClient *autoscalingService.Client
-	KafkaClient       *kafkaService.Client
-	CDNClient         *cdnService.Client
+	DNSClient         *dnsservice.Client
+	LoggingClient     *loggingservice.Client
+	AutoscalingClient *autoscalingservice.Client
+	KafkaClient       *kafkaservice.Client
+	CDNClient         *cdnservice.Client
 	VPNClient         *vpn.Client
-	S3Client          *objectStorageService.Client
-	UserS3Client      *userObjectStorageService.Client
-	MonitoringClient  *monitoringService.Client
+	S3Client          *objectstorageservice.Client
+	UserS3Client      *userobjectstorageservice.Client
+	MonitoringClient  *monitoringservice.Client
 
 	clientOptions clientoptions.TerraformClientOptions
 	fileConfig    *fileconfiguration.FileConfig
@@ -126,7 +126,7 @@ func (c SdkBundle) shouldApplyOverrides(ctx context.Context, product string) boo
 }
 
 // NewContainerRegistryClient creates a new Container Registry client for a specific location
-func (c SdkBundle) NewContainerRegistryClient(ctx context.Context, location string) (*crService.Client, error) {
+func (c SdkBundle) NewContainerRegistryClient(ctx context.Context, location string) (*crservice.Client, error) {
 	config := c.newBundleClientConfig(fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go-container-cr/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		c.clientOptions.Version, cr.Version, c.clientOptions.TerraformVersion,
@@ -134,7 +134,7 @@ func (c SdkBundle) NewContainerRegistryClient(ctx context.Context, location stri
 	))
 
 	if !c.shouldApplyOverrides(ctx, fileconfiguration.ContainerRegistry) {
-		return crService.NewClientFromConfig(config), nil
+		return crservice.NewClientFromConfig(config), nil
 	}
 
 	endpoint := c.fileConfig.GetLocationOverridesWithGlobalFallback(fileconfiguration.ContainerRegistry, location)
@@ -161,11 +161,11 @@ func (c SdkBundle) NewContainerRegistryClient(ctx context.Context, location stri
 	}
 	config.HTTPClient = &http.Client{}
 	config.HTTPClient.Transport = shared.CreateTransport(endpoint.SkipTLSVerify, endpoint.CertificateAuthData)
-	return crService.NewClientFromConfig(config), nil
+	return crservice.NewClientFromConfig(config), nil
 }
 
 // NewMongoClient creates a new MongoDB client for a specific location
-func (c SdkBundle) NewMongoClient(ctx context.Context, location string) (*dbaasService.MongoClient, error) {
+func (c SdkBundle) NewMongoClient(ctx context.Context, location string) (*dbaasservice.MongoClient, error) {
 	config := c.newBundleClientConfig(fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go-dbaas-mongo/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		c.clientOptions.Version, mongo.Version, c.clientOptions.TerraformVersion,
@@ -173,7 +173,7 @@ func (c SdkBundle) NewMongoClient(ctx context.Context, location string) (*dbaasS
 	))
 
 	if !c.shouldApplyOverrides(ctx, fileconfiguration.Mongo) {
-		return dbaasService.NewMongoClientFromConfig(config), nil
+		return dbaasservice.NewMongoClientFromConfig(config), nil
 	}
 
 	endpoint := c.fileConfig.GetLocationOverridesWithGlobalFallback(fileconfiguration.Mongo, location)
@@ -200,11 +200,11 @@ func (c SdkBundle) NewMongoClient(ctx context.Context, location string) (*dbaasS
 	}
 	config.HTTPClient = &http.Client{}
 	config.HTTPClient.Transport = shared.CreateTransport(endpoint.SkipTLSVerify, endpoint.CertificateAuthData)
-	return dbaasService.NewMongoClientFromConfig(config), nil
+	return dbaasservice.NewMongoClientFromConfig(config), nil
 }
 
 // NewPsqlClient creates a new PostgreSQL client for a specific location
-func (c SdkBundle) NewPsqlClient(ctx context.Context, location string) (*dbaasService.PsqlClient, error) {
+func (c SdkBundle) NewPsqlClient(ctx context.Context, location string) (*dbaasservice.PsqlClient, error) {
 	config := c.newBundleClientConfig(fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go-dbaas-postgres/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		c.clientOptions.Version, psql.Version, c.clientOptions.TerraformVersion,
@@ -212,7 +212,7 @@ func (c SdkBundle) NewPsqlClient(ctx context.Context, location string) (*dbaasSe
 	))
 
 	if !c.shouldApplyOverrides(ctx, fileconfiguration.PSQL) {
-		return dbaasService.NewPsqlClientFromConfig(config), nil
+		return dbaasservice.NewPsqlClientFromConfig(config), nil
 	}
 
 	endpoint := c.fileConfig.GetLocationOverridesWithGlobalFallback(fileconfiguration.PSQL, location)
@@ -239,11 +239,11 @@ func (c SdkBundle) NewPsqlClient(ctx context.Context, location string) (*dbaasSe
 	}
 	config.HTTPClient = &http.Client{}
 	config.HTTPClient.Transport = shared.CreateTransport(endpoint.SkipTLSVerify, endpoint.CertificateAuthData)
-	return dbaasService.NewPsqlClientFromConfig(config), nil
+	return dbaasservice.NewPsqlClientFromConfig(config), nil
 }
 
 // NewPgSQLV2Client creates a new PostgreSQL v2 client for a specific location.
-func (c SdkBundle) NewPgSQLV2Client(ctx context.Context, location string) (*pgsqlv2Service.Client, error) {
+func (c SdkBundle) NewPgSQLV2Client(ctx context.Context, location string) (*psqlv2service.Client, error) {
 	config := c.newBundleClientConfig(fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go-dbaas-pgsqlv2/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		c.clientOptions.Version, pgsqlv2sdk.Version, c.clientOptions.TerraformVersion,
@@ -263,13 +263,13 @@ func (c SdkBundle) NewPgSQLV2Client(ctx context.Context, location string) (*pgsq
 			}
 			config.HTTPClient = &http.Client{}
 			config.HTTPClient.Transport = shared.CreateTransport(endpoint.SkipTLSVerify, endpoint.CertificateAuthData)
-			return pgsqlv2Service.NewClientFromConfig(config), nil
+			return psqlv2service.NewClientFromConfig(config), nil
 		}
 	}
 
-	endpoint := pgsqlv2Service.LocationToURL[location]
+	endpoint := psqlv2service.LocationToURL[location]
 	if endpoint == "" {
-		return nil, fmt.Errorf("can't configure endpoint for location %q, available locations: %s", location, strings.Join(pgsqlv2Service.AvailableLocations(), ", "))
+		return nil, fmt.Errorf("can't configure endpoint for location %q, available locations: %s", location, strings.Join(psqlv2service.AvailableLocations(), ", "))
 	}
 	config.Servers = shared.ServerConfigurations{
 		{
@@ -278,7 +278,7 @@ func (c SdkBundle) NewPgSQLV2Client(ctx context.Context, location string) (*pgsq
 		},
 	}
 
-	return pgsqlv2Service.NewClientFromConfig(config), nil
+	return psqlv2service.NewClientFromConfig(config), nil
 }
 
 // newCloudAPIClientConfig creates a new *ionoscloud.Configuration using the client options defined in the SdkBundle struct.
@@ -403,15 +403,15 @@ func (c SdkBundle) NewCloudAPIClientWithFailover(ctx context.Context) (*ionosclo
 // NewObjectStorageManagementClient creates a new Object Storage Management client that distributes requests
 // across all global endpoints configured for this product using the failover strategy
 // defined in the file config.
-func (c SdkBundle) NewObjectStorageManagementClient(ctx context.Context) (*objectStorageManagementService.Client, error) {
+func (c SdkBundle) NewObjectStorageManagementClient(ctx context.Context) (*objectstoragemanagementservice.Client, error) {
 	config := c.newBundleClientConfig(fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go-object-storage-management/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		c.clientOptions.Version, objectstoragemanagement.Version, c.clientOptions.TerraformVersion,
 		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
 	))
 
-	if !c.shouldApplyOverridesCustomEnv(ctx, fileconfiguration.ObjectStorageManagement, objectStorageManagementService.IonosAPIURLObjectStorageManagement) {
-		return objectStorageManagementService.NewClientFromConfig(config), nil
+	if !c.shouldApplyOverridesCustomEnv(ctx, fileconfiguration.ObjectStorageManagement, objectstoragemanagementservice.IonosAPIURLObjectStorageManagement) {
+		return objectstoragemanagementservice.NewClientFromConfig(config), nil
 	}
 
 	failoverOptions := c.fileConfig.GetFailoverOptions()
@@ -464,5 +464,5 @@ func (c SdkBundle) NewObjectStorageManagementClient(ctx context.Context) (*objec
 
 	config.Servers = servers
 
-	return objectStorageManagementService.NewClientFromConfig(config), nil
+	return objectstoragemanagementservice.NewClientFromConfig(config), nil
 }

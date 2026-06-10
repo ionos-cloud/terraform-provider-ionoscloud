@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -18,14 +19,20 @@ import (
 	pgsqlv2 "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v3"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
-	pgsqlv2Service "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/pgsqlv2"
+	psqlv2service "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/pgsqlv2"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
 var (
 	_ resource.ResourceWithImportState = (*clusterResource)(nil)
 	_ resource.ResourceWithConfigure   = (*clusterResource)(nil)
+	_ resource.ResourceWithIdentity    = (*clusterResource)(nil)
 )
+
+type clusterIdentityModel struct {
+	ID       types.String `tfsdk:"id"`
+	Location types.String `tfsdk:"location"`
+}
 
 type clusterResource struct {
 	bundle *bundleclient.SdkBundle
@@ -95,6 +102,15 @@ func NewClusterResource() resource.Resource {
 // Metadata returns the metadata for the cluster resource.
 func (r *clusterResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_pg_cluster_v2"
+}
+
+func (r *clusterResource) IdentitySchema(_ context.Context, _ resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
+	resp.IdentitySchema = identityschema.Schema{
+		Attributes: map[string]identityschema.Attribute{
+			"id":       identityschema.StringAttribute{RequiredForImport: true},
+			"location": identityschema.StringAttribute{RequiredForImport: true},
+		},
+	}
 }
 
 // Schema returns the schema for the cluster resource.
@@ -208,7 +224,7 @@ func (r *clusterResource) Schema(ctx context.Context, req resource.SchemaRequest
 			},
 			"location": schema.StringAttribute{
 				Required:    true,
-				Description: "The location of the PostgreSQL cluster. This is used for routing to the regional API endpoint. Available locations: " + pgsqlv2Service.AvailableLocationsString() + ".",
+				Description: "The location of the PostgreSQL cluster. This is used for routing to the regional API endpoint. Available locations: " + psqlv2service.AvailableLocationsString() + ".",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
@@ -358,6 +374,7 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 	mapClusterResponseToModel(&cluster, &plan)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
+	resp.Diagnostics.Append(resp.Identity.Set(ctx, &clusterIdentityModel{ID: plan.ID, Location: plan.Location})...)
 }
 
 // Read reads the PgSQL v2 cluster state.
@@ -390,6 +407,7 @@ func (r *clusterResource) Read(ctx context.Context, req resource.ReadRequest, re
 	mapClusterResponseToModel(&cluster, &state)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
+	resp.Diagnostics.Append(resp.Identity.Set(ctx, &clusterIdentityModel{ID: state.ID, Location: state.Location})...)
 }
 
 // Update updates the PgSQL v2 cluster using PUT semantics (full replacement).
@@ -457,6 +475,7 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 	mapClusterResponseToModel(&cluster, &plan)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
+	resp.Diagnostics.Append(resp.Identity.Set(ctx, &clusterIdentityModel{ID: plan.ID, Location: plan.Location})...)
 }
 
 // Delete deletes the PgSQL v2 cluster.
@@ -499,8 +518,22 @@ func (r *clusterResource) Delete(ctx context.Context, req resource.DeleteRequest
 	}
 }
 
-// ImportState imports a PgSQL v2 cluster using the format "location:cluster_id".
+// ImportState imports a PgSQL v2 cluster. Supports identity-based import (from terraform query)
+// and the legacy "location:cluster_id" string format.
 func (r *clusterResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	if req.Identity != nil {
+		var id *clusterIdentityModel
+		resp.Diagnostics.Append(req.Identity.Get(ctx, &id)...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		if id != nil {
+			resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("location"), id.Location)...)
+			resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), id.ID)...)
+			return
+		}
+	}
+
 	parts := strings.Split(req.ID, ":")
 	if len(parts) != 2 {
 		resp.Diagnostics.AddError(
@@ -730,6 +763,10 @@ func mapClusterResponseToModel(cluster *pgsqlv2.ClusterRead, model *clusterResou
 	}
 
 	if props.RestoreFromBackup != nil {
+		model.RestoreFromBackup = &restoreFromBackupModel{
+			SourceBackupID:         types.StringNull(),
+			RecoveryTargetDateTime: types.StringNull(),
+		}
 		mapClusterRestoreFromBackupResponseToModel(*props.RestoreFromBackup, model)
 	}
 

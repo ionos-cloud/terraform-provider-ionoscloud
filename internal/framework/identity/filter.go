@@ -1,6 +1,8 @@
 package identity
 
 import (
+	"slices"
+
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	listschema "github.com/hashicorp/terraform-plugin-framework/list/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -33,6 +35,18 @@ func FilterAttribute(allowedFields ...string) listschema.ListNestedAttribute {
 			},
 		},
 	}
+}
+
+// FilterValue returns the field_value of the first filter whose field_name matches fieldName,
+// or "" if no such filter exists. Useful for pushing a filter down to an API call.
+func FilterValue(filters []Filter, fieldName string) string {
+	idx := slices.IndexFunc(filters, func(f Filter) bool {
+		return f.FieldName.ValueString() == fieldName
+	})
+	if idx < 0 {
+		return ""
+	}
+	return filters[idx].FieldValue.ValueString()
 }
 
 // MatchesFilters returns true if all filters match the given fields map.
