@@ -387,7 +387,7 @@ func resourceNicImport(ctx context.Context, d *schema.ResourceData, meta any) ([
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("lan does not exist%q", nicID), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return nil, diagutil.ToError(d, fmt.Errorf("nic does not exist %q", nicID), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 
 		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the nic %q, error:%w", nicID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
