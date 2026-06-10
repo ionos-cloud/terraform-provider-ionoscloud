@@ -27,7 +27,7 @@ func TestAccNicImportBasic(t *testing.T) {
 			},
 			{
 				ResourceName:            constant.FullNicResourceName,
-				ImportStateIdFunc:       testAccNicImportStateId,
+				ImportStateIdFunc:       testAccNicImportStateID,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location"},
@@ -36,7 +36,7 @@ func TestAccNicImportBasic(t *testing.T) {
 	})
 }
 
-func testAccNicImportStateId(s *terraform.State) (string, error) {
+func testAccNicImportStateID(s *terraform.State) (string, error) {
 	var importID = ""
 
 	for _, rs := range s.RootModule().Resources {

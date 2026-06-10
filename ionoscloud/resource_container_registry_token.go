@@ -115,14 +115,14 @@ func resourceContainerRegistryTokenCreate(ctx context.Context, d *schema.Resourc
 		return diag.FromErr(err)
 	}
 
-	registryId := d.Get("registry_id").(string)
+	registryID := d.Get("registry_id").(string)
 	fileStr := d.Get("save_password_to_file").(string)
 	registryToken, err := crService.GetTokenDataCreate(d)
 
 	if err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
-	registryTokenResponse, apiResponse, err := client.CreateToken(ctx, registryId, *registryToken)
+	registryTokenResponse, apiResponse, err := client.CreateToken(ctx, registryID, *registryToken)
 	if err != nil {
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating the registry token: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
@@ -155,9 +155,9 @@ func resourceContainerRegistryTokenRead(ctx context.Context, d *schema.ResourceD
 		return diag.FromErr(err)
 	}
 
-	registryId := d.Get("registry_id").(string)
-	registryTokenId := d.Id()
-	registryToken, apiResponse, err := client.GetToken(ctx, registryId, registryTokenId)
+	registryID := d.Get("registry_id").(string)
+	registryTokenID := d.Id()
+	registryToken, apiResponse, err := client.GetToken(ctx, registryID, registryTokenID)
 
 	if err != nil {
 		if apiResponse.HttpNotFound() {
@@ -183,14 +183,14 @@ func resourceContainerRegistryTokenUpdate(ctx context.Context, d *schema.Resourc
 		return diag.FromErr(err)
 	}
 
-	registryId := d.Get("registry_id").(string)
-	registryTokenId := d.Id()
+	registryID := d.Get("registry_id").(string)
+	registryTokenID := d.Id()
 	registryToken, err := crService.GetTokenDataUpdate(d)
 	if err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
 
-	_, apiResponse, err := client.PatchToken(ctx, registryId, registryTokenId, *registryToken)
+	_, apiResponse, err := client.PatchToken(ctx, registryID, registryTokenID, *registryToken)
 	if err != nil {
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating a registry token: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
@@ -205,17 +205,17 @@ func resourceContainerRegistryTokenDelete(ctx context.Context, d *schema.Resourc
 		return diag.FromErr(err)
 	}
 
-	registryId := d.Get("registry_id").(string)
-	registryTokenId := d.Id()
+	registryID := d.Get("registry_id").(string)
+	registryTokenID := d.Id()
 
-	apiResponse, err := client.DeleteToken(ctx, registryId, registryTokenId)
+	apiResponse, err := client.DeleteToken(ctx, registryID, registryTokenID)
 
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while deleting registry token %s: %w", registryTokenId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return diagutil.ToDiags(d, fmt.Errorf("error while deleting registry token %s: %w", registryTokenID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	return nil
@@ -237,26 +237,26 @@ func resourceContainerRegistryTokenImport(ctx context.Context, d *schema.Resourc
 		return nil, err
 	}
 
-	registryId := parts[0]
-	registryTokenId := parts[1]
+	registryID := parts[0]
+	registryTokenID := parts[1]
 
-	registryToken, apiResponse, err := client.GetToken(ctx, registryId, registryTokenId)
+	registryToken, apiResponse, err := client.GetToken(ctx, registryID, registryTokenID)
 
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("registry does not exist %q", registryTokenId), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return nil, diagutil.ToError(d, fmt.Errorf("registry does not exist %q", registryTokenID), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
-		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the import of registry token %q, error:%w", registryTokenId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the import of registry token %q, error:%w", registryTokenID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	tflog.Info(ctx, "container registry token imported", map[string]any{"token_id": registryTokenId})
+	tflog.Info(ctx, "container registry token imported", map[string]any{"token_id": registryTokenID})
 
 	if registryToken.Id != nil {
 		d.SetId(*registryToken.Id)
 	}
 
-	err = d.Set("registry_id", registryId)
+	err = d.Set("registry_id", registryID)
 	if err != nil {
 		return nil, err
 	}

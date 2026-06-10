@@ -2047,7 +2047,7 @@ resource ` + constant.LoggingPipelineResource + ` ` + constant.LoggingPipelineTe
 // DBaaS constants
 // Attributes
 // These can be used for all clusters, no matter the type
-const clusterIdAttribute = "cluster_id"
+const clusterIDAttribute = "cluster_id"
 const clusterInstancesAttribute = "instances"
 const clusterCoresAttribute = "cores"
 const clusterLocationAttribute = "location"

@@ -159,14 +159,14 @@ func testAccDNSReverseRecordDestroyCheck(s *terraform.State) error {
 		if rs.Type != constant.DNSReverseRecordResource {
 			continue
 		}
-		recordId := rs.Primary.ID
-		_, apiResponse, err := client.GetReverseRecordById(ctx, recordId)
+		recordID := rs.Primary.ID
+		_, apiResponse, err := client.GetReverseRecordById(ctx, recordID)
 		if err != nil {
 			if !apiResponse.HttpNotFound() {
-				return fmt.Errorf("an error occurred while checking the destruction of DNS Reverse Record with ID: %s, error: %w", recordId, err)
+				return fmt.Errorf("an error occurred while checking the destruction of DNS Reverse Record with ID: %s, error: %w", recordID, err)
 			}
 		} else {
-			return fmt.Errorf("DNS Reverse Record with ID: %s still exists", recordId)
+			return fmt.Errorf("DNS Reverse Record with ID: %s still exists", recordID)
 		}
 	}
 	return nil
@@ -185,10 +185,10 @@ func testAccDNSReverseRecordExistenceCheck(path string, record *dns.ReverseRecor
 		}
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 		defer cancel()
-		recordId := rs.Primary.ID
-		recordResponse, _, err := client.GetReverseRecordById(ctx, recordId)
+		recordID := rs.Primary.ID
+		recordResponse, _, err := client.GetReverseRecordById(ctx, recordID)
 		if err != nil {
-			return fmt.Errorf("an error occurred while fetching DNS Record with ID: %s, error: %w", recordId, err)
+			return fmt.Errorf("an error occurred while fetching DNS Record with ID: %s, error: %w", recordID, err)
 		}
 		record = &recordResponse
 		return nil

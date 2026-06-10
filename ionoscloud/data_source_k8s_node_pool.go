@@ -211,7 +211,7 @@ func dataSourceK8sReadNodePool(ctx context.Context, d *schema.ResourceData, meta
 		return diag.FromErr(err)
 	}
 
-	clusterId := d.Get("k8s_cluster_id")
+	clusterID := d.Get("k8s_cluster_id")
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")
 
@@ -225,7 +225,7 @@ func dataSourceK8sReadNodePool(ctx context.Context, d *schema.ResourceData, meta
 	var apiResponse *ionoscloud.APIResponse
 	if idOk {
 		/* search by ID */
-		nodePool, apiResponse, err = client.KubernetesApi.K8sNodepoolsFindById(ctx, clusterId.(string), id.(string)).Execute()
+		nodePool, apiResponse, err = client.KubernetesApi.K8sNodepoolsFindById(ctx, clusterID.(string), id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
 			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the k8s nodePool with ID %s: %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
@@ -234,7 +234,7 @@ func dataSourceK8sReadNodePool(ctx context.Context, d *schema.ResourceData, meta
 		/* search by name */
 		var nodePools ionoscloud.KubernetesNodePools
 
-		nodePools, apiResponse, err := client.KubernetesApi.K8sNodepoolsGet(ctx, clusterId.(string)).Depth(1).Execute()
+		nodePools, apiResponse, err := client.KubernetesApi.K8sNodepoolsGet(ctx, clusterID.(string)).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
 			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching k8s nodepools: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
@@ -245,7 +245,7 @@ func dataSourceK8sReadNodePool(ctx context.Context, d *schema.ResourceData, meta
 
 			for _, c := range *nodePools.Items {
 				if c.Properties != nil && c.Properties.Name != nil && *c.Properties.Name == name.(string) {
-					tmpNodePool, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, clusterId.(string), *c.Id).Execute()
+					tmpNodePool, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, clusterID.(string), *c.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {
 						return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching k8s nodePool with ID %s: %w", *c.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})

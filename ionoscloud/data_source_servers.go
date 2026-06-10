@@ -260,11 +260,11 @@ func dataSourceServersRead(ctx context.Context, d *schema.ResourceData, meta any
 		return diag.FromErr(err)
 	}
 
-	datacenterId, dcIdOk := d.GetOk("datacenter_id")
-	if !dcIdOk {
+	datacenterID, dcIDOk := d.GetOk("datacenter_id")
+	if !dcIDOk {
 		return diagutil.ToDiags(d, fmt.Errorf("no datacenter_id was specified"), nil)
 	}
-	req := client.ServersApi.DatacentersServersGet(ctx, datacenterId.(string)).Depth(5)
+	req := client.ServersApi.DatacentersServersGet(ctx, datacenterID.(string)).Depth(5)
 	filters, filtersOk := d.GetOk("filter")
 	if filtersOk {
 		for _, v := range filters.(*schema.Set).List() {
@@ -288,7 +288,7 @@ func dataSourceServersRead(ctx context.Context, d *schema.ResourceData, meta any
 	var serversIntf []any
 
 	if d.Id() == "" {
-		d.SetId(datacenterId.(string))
+		d.SetId(datacenterID.(string))
 	}
 	for _, server := range *servers.Items {
 		serverEntry = SetServerProperties(server)
@@ -331,7 +331,7 @@ func dataSourceServersRead(ctx context.Context, d *schema.ResourceData, meta any
 			}
 			// Labels logic
 			ls := LabelsService{ctx: ctx, client: client}
-			labels, err := ls.datacentersServersLabelsGet(datacenterId.(string), *server.Id, true)
+			labels, err := ls.datacentersServersLabelsGet(datacenterID.(string), *server.Id, true)
 			if err != nil {
 				return diagutil.ToDiags(d, err, nil)
 			}

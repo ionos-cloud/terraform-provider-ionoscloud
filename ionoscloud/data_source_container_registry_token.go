@@ -101,7 +101,7 @@ func dataSourceContainerRegistryTokenRead(ctx context.Context, d *schema.Resourc
 		return diag.FromErr(err)
 	}
 
-	registryId := d.Get("registry_id").(string)
+	registryID := d.Get("registry_id").(string)
 	idValue, idOk := d.GetOk("id")
 	nameValue, nameOk := d.GetOk("name")
 
@@ -120,14 +120,14 @@ func dataSourceContainerRegistryTokenRead(ctx context.Context, d *schema.Resourc
 
 	if idOk {
 		/* search by ID */
-		token, apiResponse, err = client.GetToken(ctx, registryId, id)
+		token, apiResponse, err = client.GetToken(ctx, registryID, id)
 		if err != nil {
 			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the token with ID %s: %w", id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 	} else {
 		var results []cr.TokenResponse
 
-		tokens, apiResponse, err := client.ListTokens(ctx, registryId)
+		tokens, apiResponse, err := client.ListTokens(ctx, registryID)
 		if err != nil {
 			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching registry tokens: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}

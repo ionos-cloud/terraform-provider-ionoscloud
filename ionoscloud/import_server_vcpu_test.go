@@ -25,7 +25,7 @@ func TestAccServerVCPUImportBasic(t *testing.T) {
 			},
 			{
 				ResourceName:            constant.ServerVCPUResource + "." + constant.ServerTestResource,
-				ImportStateIdFunc:       testAccServerVCPUImportStateIdWithNicAndFw,
+				ImportStateIdFunc:       testAccServerVCPUImportStateIDWithNicAndFw,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"image_password", "ssh_key_path.#", "image_name", "volume.0.user_data", "volume.0.backup_unit_id", "firewallrule_id", "primary_nic", "inline_volume_ids", "location"},
@@ -47,7 +47,7 @@ func TestAccServerVCPUWithLabelsImport(t *testing.T) {
 			},
 			{
 				ResourceName:            constant.ServerVCPUResource + "." + constant.ServerTestResource,
-				ImportStateIdFunc:       testAccServerVCPUImportStateId,
+				ImportStateIdFunc:       testAccServerVCPUImportStateID,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"image_password", "ssh_key_path.#", "image_name", "volume.0.user_data", "volume.0.backup_unit_id", "firewallrule_id", "primary_nic", "inline_volume_ids", "primary_ip", "location"},
@@ -55,7 +55,7 @@ func TestAccServerVCPUWithLabelsImport(t *testing.T) {
 		},
 	})
 }
-func testAccServerVCPUImportStateId(s *terraform.State) (string, error) {
+func testAccServerVCPUImportStateID(s *terraform.State) (string, error) {
 	var importID = ""
 
 	for _, rs := range s.RootModule().Resources {
@@ -71,7 +71,7 @@ func testAccServerVCPUImportStateId(s *terraform.State) (string, error) {
 
 	return importID, nil
 }
-func testAccServerVCPUImportStateIdWithNicAndFw(s *terraform.State) (string, error) {
+func testAccServerVCPUImportStateIDWithNicAndFw(s *terraform.State) (string, error) {
 	var importID = ""
 
 	for _, rs := range s.RootModule().Resources {

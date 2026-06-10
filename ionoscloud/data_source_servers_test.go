@@ -114,7 +114,7 @@ func testAccCheckServersDestroyCheck(s *terraform.State) error {
 			continue
 		}
 
-		dcId := rs.Primary.Attributes["datacenter_id"]
+		dcID := rs.Primary.Attributes["datacenter_id"]
 		location := rs.Primary.Attributes["location"]
 
 		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
@@ -122,7 +122,7 @@ func testAccCheckServersDestroyCheck(s *terraform.State) error {
 			return err
 		}
 
-		_, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, dcId, rs.Primary.ID).Execute()
+		_, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, dcID, rs.Primary.ID).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {

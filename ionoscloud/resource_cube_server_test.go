@@ -18,7 +18,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
-const bootCdromImageIdCube = "83f21679-3321-11eb-a681-1e659523cb7b"
+const bootCdromImageIDCube = "83f21679-3321-11eb-a681-1e659523cb7b"
 
 func TestAccCubeServerBasic(t *testing.T) {
 	var server ionoscloud.Server
@@ -66,7 +66,7 @@ func TestAccCubeServerBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDataSourceCubeServerMatchId,
+				Config: testAccDataSourceCubeServerMatchID,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceById, "name", constant.ServerCubeResource+"."+constant.ServerTestResource, "name"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceById, "hostname", constant.ServerCubeResource+"."+constant.ServerTestResource, "hostname"),
@@ -359,7 +359,7 @@ func testAccCheckCubeServerDestroyCheck(s *terraform.State) error {
 			continue
 		}
 
-		dcId := rs.Primary.Attributes["datacenter_id"]
+		dcID := rs.Primary.Attributes["datacenter_id"]
 		location := rs.Primary.Attributes["location"]
 
 		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
@@ -367,7 +367,7 @@ func testAccCheckCubeServerDestroyCheck(s *terraform.State) error {
 			return err
 		}
 
-		_, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, dcId, rs.Primary.ID).Execute()
+		_, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, dcID, rs.Primary.ID).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
@@ -483,7 +483,7 @@ resource ` + constant.ServerCubeResource + ` ` + constant.ServerTestResource + `
 }
 ` + ServerImagePasswordUpdated
 
-const testAccDataSourceCubeServerMatchId = testAccCheckCubeServerConfigBasic + `
+const testAccDataSourceCubeServerMatchID = testAccCheckCubeServerConfigBasic + `
 data ` + constant.ServerCubeResource + ` ` + constant.ServerDataSourceById + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   id			= ` + constant.ServerCubeResource + `.` + constant.ServerTestResource + `.id
@@ -525,7 +525,7 @@ resource ` + constant.ServerCubeResource + ` ` + constant.ServerTestResource + `
   name = "` + constant.ServerTestResource + `"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   availability_zone = "AUTO"
-  boot_cdrom = "` + bootCdromImageIdCube + `" 
+  boot_cdrom = "` + bootCdromImageIDCube + `" 
   volume {
     name = "` + constant.ServerTestResource + `"
     disk_type = "DAS"

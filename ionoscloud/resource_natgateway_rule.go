@@ -187,10 +187,10 @@ func resourceNatGatewayRuleCreate(ctx context.Context, d *schema.ResourceData, m
 		natGatewayRule.Properties.TargetPortRange.End = &end
 	}
 
-	ngId := d.Get("natgateway_id").(string)
-	dcId := d.Get("datacenter_id").(string)
+	ngID := d.Get("natgateway_id").(string)
+	dcID := d.Get("datacenter_id").(string)
 
-	natGatewayRuleResp, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesPost(ctx, dcId, ngId).NatGatewayRule(natGatewayRule).Execute()
+	natGatewayRuleResp, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesPost(ctx, dcID, ngID).NatGatewayRule(natGatewayRule).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -219,10 +219,10 @@ func resourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, met
 		return diag.FromErr(err)
 	}
 
-	dcId := d.Get("datacenter_id").(string)
-	ngId := d.Get("natgateway_id").(string)
+	dcID := d.Get("datacenter_id").(string)
+	ngID := d.Get("natgateway_id").(string)
 
-	natGatewayRule, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesFindByNatGatewayRuleId(ctx, dcId, ngId, d.Id()).Execute()
+	natGatewayRule, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesFindByNatGatewayRuleId(ctx, dcID, ngID, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -251,8 +251,8 @@ func resourceNatGatewayRuleUpdate(ctx context.Context, d *schema.ResourceData, m
 		Properties: &ionoscloud.NatGatewayRuleProperties{},
 	}
 
-	dcId := d.Get("datacenter_id").(string)
-	ngId := d.Get("natgateway_id").(string)
+	dcID := d.Get("datacenter_id").(string)
+	ngID := d.Get("natgateway_id").(string)
 
 	if d.HasChange("name") {
 		_, v := d.GetChange("name")
@@ -326,7 +326,7 @@ func resourceNatGatewayRuleUpdate(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	_, apiResponse, err := client.NATGatewaysApi.
-		DatacentersNatgatewaysRulesPatch(ctx, dcId, ngId, d.Id()).
+		DatacentersNatgatewaysRulesPatch(ctx, dcID, ngID, d.Id()).
 		NatGatewayRuleProperties(*request.Properties).
 		Execute()
 
@@ -350,10 +350,10 @@ func resourceNatGatewayRuleDelete(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	dcId := d.Get("datacenter_id").(string)
-	ngId := d.Get("natgateway_id").(string)
+	dcID := d.Get("datacenter_id").(string)
+	ngID := d.Get("natgateway_id").(string)
 
-	apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesDelete(ctx, dcId, ngId, d.Id()).Execute()
+	apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesDelete(ctx, dcID, ngID, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -386,31 +386,31 @@ func resourceNatGatewayRuleImport(ctx context.Context, d *schema.ResourceData, m
 		return nil, diagutil.ToError(d, fmt.Errorf("failed validating import identifier %q: %w", importID, err), nil)
 	}
 
-	dcId := parts[0]
-	natGatewayId := parts[1]
-	natGatewayRuleId := parts[2]
+	dcID := parts[0]
+	natGatewayID := parts[1]
+	natGatewayRuleID := parts[2]
 
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return nil, err
 	}
 
-	natGatewayRule, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesFindByNatGatewayRuleId(ctx, dcId, natGatewayId, natGatewayRuleId).Execute()
+	natGatewayRule, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesFindByNatGatewayRuleId(ctx, dcID, natGatewayID, natGatewayRuleID).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		tflog.Info(ctx, "nat gateway rule not found on import", map[string]any{"rule_id": natGatewayRuleId, "error": err.Error()})
+		tflog.Info(ctx, "nat gateway rule not found on import", map[string]any{"rule_id": natGatewayRuleID, "error": err.Error()})
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("unable to find nat gateway rule %q", natGatewayRuleId), nil)
+			return nil, diagutil.ToError(d, fmt.Errorf("unable to find nat gateway rule %q", natGatewayRuleID), nil)
 		}
-		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while retrieving nat gateway rule  %q: %w ", natGatewayRuleId, err), nil)
+		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while retrieving nat gateway rule  %q: %w ", natGatewayRuleID, err), nil)
 	}
 
-	if err := d.Set("datacenter_id", dcId); err != nil {
+	if err := d.Set("datacenter_id", dcID); err != nil {
 		return nil, diagutil.ToError(d, err, nil)
 	}
-	if err := d.Set("natgateway_id", natGatewayId); err != nil {
+	if err := d.Set("natgateway_id", natGatewayID); err != nil {
 		return nil, diagutil.ToError(d, err, nil)
 	}
 	if err := d.Set("location", location); err != nil {

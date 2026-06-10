@@ -126,10 +126,10 @@ func GetProviderDataCreate(d *schema.ResourceData) *certmanager.ProviderCreate {
 	server := d.Get("server").(string)
 	provider.Properties.Server = server
 	if _, ok := d.GetOk("external_account_binding"); ok {
-		keyId := d.Get("external_account_binding.0.key_id").(string)
+		keyID := d.Get("external_account_binding.0.key_id").(string)
 		keySecret := d.Get("external_account_binding.0.key_secret").(string)
 		provider.Properties.ExternalAccountBinding = &certmanager.ProviderExternalAccountBinding{
-			KeyId:     &keyId,
+			KeyId:     &keyID,
 			KeySecret: &keySecret,
 		}
 	}

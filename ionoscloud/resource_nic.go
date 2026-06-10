@@ -289,9 +289,9 @@ func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta any) di
 	nicID := d.Id()
 	if d.HasChange("flowlog") {
 		oldV, newV := d.GetChange("flowlog")
-		var firstFlowLogId = ""
+		var firstFlowLogID = ""
 		if oldV != nil && len(oldV.([]any)) > 0 {
-			firstFlowLogId = oldV.([]any)[0].(map[string]any)["id"].(string)
+			firstFlowLogID = oldV.([]any)[0].(map[string]any)["id"].(string)
 		}
 
 		if newV != nil && newV.([]any) != nil && len(newV.([]any)) > 0 {
@@ -302,11 +302,11 @@ func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta any) di
 						D:      d,
 						Client: client,
 					}
-					err = fw.CreateOrPatchForServer(ctx, dcID, srvID, nicID, firstFlowLogId, flowLog)
+					err = fw.CreateOrPatchForServer(ctx, dcID, srvID, nicID, firstFlowLogID, flowLog)
 					if err != nil {
 						// if we have a create that failed, we do not want to save in state
 						// saving in state would mean a diff that would force a re-create
-						if firstFlowLogId == "" {
+						if firstFlowLogID == "" {
 							_ = d.Set("flowlog", nil)
 						}
 						return diagutil.ToDiags(d, err, nil)
@@ -351,7 +351,7 @@ func resourceNicDelete(ctx context.Context, d *schema.ResourceData, meta any) di
 	nicid := d.Id()
 	apiResponse, err := ns.Delete(ctx, dcid, srvid, nicid)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while deleting a nic dcId %s %w", d.Get("datacenter_id").(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while deleting a nic dcID %s %w", d.Get("datacenter_id").(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	d.SetId("")
 	return nil
@@ -372,33 +372,33 @@ func resourceNicImport(ctx context.Context, d *schema.ResourceData, meta any) ([
 		return nil, diagutil.ToError(d, fmt.Errorf("failed validating import identifier %q: %w", importID, err), nil)
 	}
 
-	dcId := parts[0]
-	sId := parts[1]
-	nicId := parts[2]
+	dcID := parts[0]
+	sID := parts[1]
+	nicID := parts[2]
 
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return nil, err
 	}
 
-	nic, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, dcId, sId, nicId).Execute()
+	nic, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, dcID, sID, nicID).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("lan does not exist%q", nicId), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return nil, diagutil.ToError(d, fmt.Errorf("lan does not exist%q", nicID), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 
-		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the nic %q, error:%w", nicId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the nic %q, error:%w", nicID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 
 	}
 
-	err = d.Set("datacenter_id", dcId)
+	err = d.Set("datacenter_id", dcID)
 	if err != nil {
 		return nil, diagutil.ToError(d, err, nil)
 	}
-	err = d.Set("server_id", sId)
+	err = d.Set("server_id", sID)
 	if err != nil {
 		return nil, diagutil.ToError(d, err, nil)
 	}
@@ -410,7 +410,7 @@ func resourceNicImport(ctx context.Context, d *schema.ResourceData, meta any) ([
 		return nil, diagutil.ToError(d, err, nil)
 	}
 
-	tflog.Info(ctx, "nic found", map[string]any{"nic_id": nicId, "server_id": sId, "datacenter_id": dcId})
+	tflog.Info(ctx, "nic found", map[string]any{"nic_id": nicID, "server_id": sID, "datacenter_id": dcID})
 
 	return []*schema.ResourceData{d}, nil
 }

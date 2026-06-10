@@ -456,19 +456,19 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta any) 
 	if d.HasChange("user_id") {
 		oldValue, newValue := d.GetChange("user_id")
 
-		userIdToAdd := newValue.(string)
-		userIdToRemove := oldValue.(string)
+		userIDToAdd := newValue.(string)
+		userIDToRemove := oldValue.(string)
 
-		tflog.Info(ctx, "group user_id change", map[string]any{"user_to_add": userIdToAdd, "user_to_remove": userIdToRemove})
+		tflog.Info(ctx, "group user_id change", map[string]any{"user_to_add": userIDToAdd, "user_to_remove": userIDToRemove})
 
-		if userIdToAdd != "" {
-			if err := addUserToGroup(userIdToAdd, d.Id(), ctx, d, meta); err != nil {
+		if userIDToAdd != "" {
+			if err := addUserToGroup(userIDToAdd, d.Id(), ctx, d, meta); err != nil {
 				return diagutil.ToDiags(d, err, nil)
 			}
 		}
 
-		if userIdToRemove != "" {
-			if err := deleteUserFromGroup(userIdToRemove, d.Id(), ctx, d, meta); err != nil {
+		if userIDToRemove != "" {
+			if err := deleteUserFromGroup(userIDToRemove, d.Id(), ctx, d, meta); err != nil {
 				return diagutil.ToDiags(d, err, nil)
 			}
 		}
@@ -532,21 +532,21 @@ func resourceGroupImporter(ctx context.Context, d *schema.ResourceData, meta any
 		return nil, err
 	}
 
-	grpId := d.Id()
+	grpID := d.Id()
 
-	group, apiResponse, err := client.UserManagementApi.UmGroupsFindById(ctx, grpId).Execute()
+	group, apiResponse, err := client.UserManagementApi.UmGroupsFindById(ctx, grpID).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("group does not exist%q", grpId), nil)
+			return nil, diagutil.ToError(d, fmt.Errorf("group does not exist%q", grpID), nil)
 		}
 		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the group: %w", err), nil)
 
 	}
 
-	tflog.Info(ctx, "group found", map[string]any{"group_id": grpId})
+	tflog.Info(ctx, "group found", map[string]any{"group_id": grpID})
 
 	if err := d.Set("get_users_data", constant.DefaultGetUsersData); err != nil {
 		return nil, diagutil.ToError(d, fmt.Errorf("error while setting the default value for the 'get_users_data' attribute inside the import function, error: %w", err), nil)
@@ -795,23 +795,23 @@ func setGroupData(ctx context.Context, client *ionoscloud.APIClient, d *schema.R
 	return nil
 }
 
-func addUserToGroup(userId, groupId string, ctx context.Context, d *schema.ResourceData, meta any) error {
+func addUserToGroup(userID, groupID string, ctx context.Context, d *schema.ResourceData, meta any) error {
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return err
 	}
 	userToAdd := ionoscloud.UserGroupPost{
-		Id: &userId,
+		Id: &userID,
 	}
 
-	_, apiResponse, err := client.UserManagementApi.UmGroupsUsersPost(ctx, groupId).User(userToAdd).Execute()
+	_, apiResponse, err := client.UserManagementApi.UmGroupsUsersPost(ctx, groupID).User(userToAdd).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		return fmt.Errorf("an error occurred while adding %s user to group ID %s %w", userId, groupId, err)
+		return fmt.Errorf("an error occurred while adding %s user to group ID %s %w", userID, groupID, err)
 	}
 
-	tflog.Info(ctx, "added user to group", map[string]any{"user_id": userId, "group_id": groupId})
+	tflog.Info(ctx, "added user to group", map[string]any{"user_id": userID, "group_id": groupID})
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
 		return errState
@@ -820,20 +820,20 @@ func addUserToGroup(userId, groupId string, ctx context.Context, d *schema.Resou
 	return nil
 }
 
-func deleteUserFromGroup(userId, groupId string, ctx context.Context, d *schema.ResourceData, meta any) error {
+func deleteUserFromGroup(userID, groupID string, ctx context.Context, d *schema.ResourceData, meta any) error {
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return err
 	}
 
-	apiResponse, err := client.UserManagementApi.UmGroupsUsersDelete(ctx, groupId, userId).Execute()
+	apiResponse, err := client.UserManagementApi.UmGroupsUsersDelete(ctx, groupID, userID).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		return fmt.Errorf("an error occurred while deleting %s user from group ID %s %w", userId, groupId, err)
+		return fmt.Errorf("an error occurred while deleting %s user from group ID %s %w", userID, groupID, err)
 	}
 
-	tflog.Info(ctx, "deleted user from group", map[string]any{"user_id": userId, "group_id": groupId})
+	tflog.Info(ctx, "deleted user from group", map[string]any{"user_id": userID, "group_id": groupID})
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
 		return errState

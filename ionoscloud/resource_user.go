@@ -180,8 +180,8 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta any) d
 		tflog.Info(ctx, "adding user to groups", map[string]any{"group_ids": groupsList, "user_id": d.Id()})
 		if groupsList != nil {
 			for _, groupsItem := range groupsList {
-				groupId := groupsItem.(string)
-				if err := addUserToGroup(d.Id(), groupId, ctx, d, meta); err != nil {
+				groupID := groupsItem.(string)
+				if err := addUserToGroup(d.Id(), groupID, ctx, d, meta); err != nil {
 					return diagutil.ToDiags(d, err, nil)
 				}
 			}
@@ -295,8 +295,8 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta any) d
 
 		if newGroups != nil && len(newGroups) > 0 {
 			tflog.Info(ctx, "new groups to add user to", map[string]any{"group_ids": newGroups, "user_id": d.Id()})
-			for _, groupId := range newGroups {
-				if err := addUserToGroup(d.Id(), groupId, ctx, d, meta); err != nil {
+			for _, groupID := range newGroups {
+				if err := addUserToGroup(d.Id(), groupID, ctx, d, meta); err != nil {
 					return diagutil.ToDiags(d, err, nil)
 				}
 			}
@@ -304,8 +304,8 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta any) d
 
 		if deletedGroups != nil && len(deletedGroups) > 0 {
 			tflog.Info(ctx, "groups to remove user from", map[string]any{"group_ids": deletedGroups, "user_id": d.Id()})
-			for _, groupId := range deletedGroups {
-				if err := deleteUserFromGroup(d.Id(), groupId, ctx, d, meta); err != nil {
+			for _, groupID := range deletedGroups {
+				if err := deleteUserFromGroup(d.Id(), groupID, ctx, d, meta); err != nil {
 					return diagutil.ToDiags(d, err, nil)
 				}
 			}
@@ -356,15 +356,15 @@ func resourceUserImporter(ctx context.Context, d *schema.ResourceData, meta any)
 		return nil, err
 	}
 
-	userId := d.Id()
+	userID := d.Id()
 
-	user, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, userId).Depth(1).Execute()
+	user, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, userID).Depth(1).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("user does not exist%q", userId), nil)
+			return nil, diagutil.ToError(d, fmt.Errorf("user does not exist%q", userID), nil)
 		}
 		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the user: %w", err), nil)
 

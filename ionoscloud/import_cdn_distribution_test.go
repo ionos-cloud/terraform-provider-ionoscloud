@@ -22,7 +22,7 @@ func TestAccCDNDistributionImportBasic(t *testing.T) {
 			},
 			{
 				ResourceName:      constant.CDNDistributionResource + "." + constant.CDNDistributionTestResource,
-				ImportStateIdFunc: testAccCDNDistributionImportStateId,
+				ImportStateIdFunc: testAccCDNDistributionImportStateID,
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -30,7 +30,7 @@ func TestAccCDNDistributionImportBasic(t *testing.T) {
 	})
 }
 
-func testAccCDNDistributionImportStateId(s *terraform.State) (string, error) {
+func testAccCDNDistributionImportStateID(s *terraform.State) (string, error) {
 	importID := ""
 
 	for _, rs := range s.RootModule().Resources {

@@ -94,8 +94,8 @@ func convertIpFailoverList(ips *[]ionoscloud.IPFailover) []any {
 }
 
 func dataSourceLanRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	datacenterId, dcIdOk := d.GetOk("datacenter_id")
-	if !dcIdOk {
+	datacenterID, dcIDOk := d.GetOk("datacenter_id")
+	if !dcIDOk {
 		return diagutil.ToDiags(d, fmt.Errorf("no datacenter_id was specified"), nil)
 	}
 
@@ -120,7 +120,7 @@ func dataSourceLanRead(ctx context.Context, d *schema.ResourceData, meta any) di
 
 	if idOk {
 		/* search by ID */
-		lan, apiResponse, err = client.LANsApi.DatacentersLansFindById(ctx, datacenterId.(string), id.(string)).Execute()
+		lan, apiResponse, err = client.LANsApi.DatacentersLansFindById(ctx, datacenterID.(string), id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
 			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching lan with ID %s: %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
@@ -129,7 +129,7 @@ func dataSourceLanRead(ctx context.Context, d *schema.ResourceData, meta any) di
 		/* search by name */
 		var lans ionoscloud.Lans
 
-		lans, apiResponse, err := client.LANsApi.DatacentersLansGet(ctx, datacenterId.(string)).Depth(1).Execute()
+		lans, apiResponse, err := client.LANsApi.DatacentersLansGet(ctx, datacenterID.(string)).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
 			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching lans: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
@@ -141,7 +141,7 @@ func dataSourceLanRead(ctx context.Context, d *schema.ResourceData, meta any) di
 			for _, l := range *lans.Items {
 				if l.Properties != nil && l.Properties.Name != nil && *l.Properties.Name == name.(string) {
 					/* lan found */
-					lan, apiResponse, err = client.LANsApi.DatacentersLansFindById(ctx, datacenterId.(string), *l.Id).Execute()
+					lan, apiResponse, err = client.LANsApi.DatacentersLansFindById(ctx, datacenterID.(string), *l.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {
 						return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching lan %s: %w", *l.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
