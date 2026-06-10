@@ -364,7 +364,7 @@ func resourceUserImporter(ctx context.Context, d *schema.ResourceData, meta any)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("user does not exist%q", userID), nil)
+			return nil, diagutil.ToError(d, fmt.Errorf("user does not exist %q", userID), nil)
 		}
 		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the user: %w", err), nil)
 
