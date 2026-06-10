@@ -153,10 +153,10 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta an
 
 		if locationOk {
 			// Accept snapshots from the requested location or its parent location.
-			parentLocation := cloudapilocation.ResolveParentLocation(ctx, client, location.(string))
+			locationIDs := cloudapilocation.ResolveParentLocation(ctx, client, location.(string))
 			var locationResults []ionoscloud.Snapshot
 			for _, snp := range results {
-				if snp.Properties != nil && snp.Properties.Location != nil && cloudapilocation.LocationInSet(parentLocation.LocationIDs, *snp.Properties.Location) {
+				if snp.Properties != nil && snp.Properties.Location != nil && cloudapilocation.LocationInSet(locationIDs, *snp.Properties.Location) {
 					locationResults = append(locationResults, snp)
 				}
 			}

@@ -788,9 +788,9 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 				return image, imageAlias, fmt.Errorf("error fetching datacenter %s: (%w)", dcId, err)
 			}
 
-			parentLocation := cloudapilocation.ResolveParentLocation(ctx, client, *dc.Properties.Location)
+			locationIDs := cloudapilocation.ResolveParentLocation(ctx, client, *dc.Properties.Location)
 
-			img, rejectedImg := resolveVolumeImageName(imageName, images, parentLocation.LocationIDs)
+			img, rejectedImg := resolveVolumeImageName(imageName, images, locationIDs)
 			if img != nil {
 				image = *img.Id
 			}
@@ -801,7 +801,7 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 				if image != "" {
 					isSnapshot = true
 				} else {
-					imageAlias = cloudapiimage.GetImageAlias(imageName, images, parentLocation.LocationIDs)
+					imageAlias = cloudapiimage.GetImageAlias(imageName, images, locationIDs)
 					if imageAlias == "" {
 						if rejectedImg != nil {
 							return image, imageAlias, fmt.Errorf(
@@ -851,9 +851,9 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 					return image, imageAlias, fmt.Errorf("error fetching datacenter %s: (%w)", dcId, err)
 				}
 
-				parentLocation := cloudapilocation.ResolveParentLocation(ctx, client, *dc.Properties.Location)
+				locationIDs := cloudapilocation.ResolveParentLocation(ctx, client, *dc.Properties.Location)
 
-				img, rejectedImg := resolveVolumeImageName(imageName, images, parentLocation.LocationIDs)
+				img, rejectedImg := resolveVolumeImageName(imageName, images, locationIDs)
 				if rejectedImg != nil {
 					tflog.Debug(ctx, "image matched by name but filtered out", map[string]any{"name": *rejectedImg.Properties.Name, "type": *rejectedImg.Properties.ImageType, "location": *rejectedImg.Properties.Location})
 				}
@@ -946,10 +946,7 @@ func resolveVolumeImageName(imageName string, images []ionoscloud.Image, locatio
 
 	var partialMatch *ionoscloud.Image
 	var nameMatchWrongTypeOrLocation *ionoscloud.Image
-	for _, image := range images {
-		// go for loop variable semantics workaround: https://github.com/golang/go/discussions/56010
-		imageEntry := image
-
+	for _, imageEntry := range images {
 		if imageEntry.Properties != nil && imageEntry.Properties.Name != nil && *imageEntry.Properties.Name != "" {
 
 			nameMatches := (imageEntry.Id != nil && strings.EqualFold(imageName, *imageEntry.Id)) ||

@@ -34,38 +34,42 @@ func TestResolveParentLocation(t *testing.T) {
 		locationID      string
 		metroRegion     string
 		status          int
-		wantParentID    string
 		wantLocationIDs []string
 	}{
 		{
 			name: "child location returns its parent", locationID: "pc/txl/1", metroRegion: "de/txl", status: http.StatusOK,
-			wantParentID: "de/txl", wantLocationIDs: []string{"pc/txl/1", "de/txl"},
+			wantLocationIDs: []string{"pc/txl/1", "de/txl"},
 		},
 		{
 			name: "three-segment child", locationID: "de/fra/2", metroRegion: "de/fra", status: http.StatusOK,
-			wantParentID: "de/fra", wantLocationIDs: []string{"de/fra/2", "de/fra"},
+			wantLocationIDs: []string{"de/fra/2", "de/fra"},
 		},
 		{
 			name: "self-referential metroRegion is not a parent", locationID: "de/fra", metroRegion: "de/fra", status: http.StatusOK,
-			wantParentID: "", wantLocationIDs: []string{"de/fra"},
+			wantLocationIDs: []string{"de/fra"},
 		},
 		{
 			name: "no metroRegion", locationID: "us/las", metroRegion: "", status: http.StatusOK,
-			wantParentID: "", wantLocationIDs: []string{"us/las"},
+			wantLocationIDs: []string{"us/las"},
 		},
 		{
 			name: "fetch failure degrades to the requested location", locationID: "pc/txl/1", status: http.StatusNotFound,
-			wantParentID: "", wantLocationIDs: []string{"pc/txl/1"},
+			wantLocationIDs: []string{"pc/txl/1"},
 		},
 		{
 			name: "invalid location id", locationID: "wrong",
-			wantParentID: "", wantLocationIDs: []string{"wrong"},
+			wantLocationIDs: []string{"wrong"},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			client := newMockAPIClient(t, func(w http.ResponseWriter, r *http.Request) {
+				// Pin the URL shape: the region/id split must arrive intact even for
+				// child ids whose second segment contains an escaped slash (pc/txl%2F1).
+				if wantPath := "/cloudapi/v6/locations/" + tt.locationID; r.URL.Path != wantPath {
+					t.Errorf("request path = %q, want %q", r.URL.Path, wantPath)
+				}
 				if tt.status != http.StatusOK {
 					w.WriteHeader(tt.status)
 					fmt.Fprint(w, `{"messages":[{"errorCode":"309","message":"Resource does not exist"}]}`)
@@ -75,12 +79,9 @@ func TestResolveParentLocation(t *testing.T) {
 				fmt.Fprint(w, locationJSON(tt.locationID, tt.metroRegion))
 			})
 
-			info := ResolveParentLocation(context.Background(), client, tt.locationID)
-			if info.ParentID != tt.wantParentID {
-				t.Errorf("ParentID = %q, want %q", info.ParentID, tt.wantParentID)
-			}
-			if !slices.Equal(info.LocationIDs, tt.wantLocationIDs) {
-				t.Errorf("LocationIDs = %v, want %v", info.LocationIDs, tt.wantLocationIDs)
+			locationIDs := ResolveParentLocation(context.Background(), client, tt.locationID)
+			if !slices.Equal(locationIDs, tt.wantLocationIDs) {
+				t.Errorf("LocationIDs = %v, want %v", locationIDs, tt.wantLocationIDs)
 			}
 		})
 	}

@@ -22,7 +22,7 @@ type LocationProperties struct {
 	Features *[]string `json:"features,omitempty"`
 	// A list of image aliases available in the location.
 	ImageAliases *[]string `json:"imageAliases,omitempty"`
-	// The id of the parent metro region (e.g. `de/txl`) from which this location inherits images and image aliases. Only set on child locations that have no images/aliases of their own.
+	// The id of the metro region this location belongs to. Classic locations reference themselves (e.g. `de/fra` -> `de/fra`); a child location (e.g. `de/fra/2`) references the parent location it inherits images and image aliases from.
 	MetroRegion *string `json:"metroRegion,omitempty"`
 	// A list of available CPU types and related resources available in the location.
 	CpuArchitecture *[]CpuArchitectureProperties `json:"cpuArchitecture,omitempty"`

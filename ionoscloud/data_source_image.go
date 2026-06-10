@@ -219,10 +219,10 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta any) 
 
 	if locationOk && location != "" {
 		// Accept images from the requested location or its parent location.
-		parentLocation := cloudapilocation.ResolveParentLocation(ctx, client, location)
+		locationIDs := cloudapilocation.ResolveParentLocation(ctx, client, location)
 		var locationResults []ionoscloud.Image
 		for _, img := range results {
-			if img.Properties != nil && img.Properties.Location != nil && cloudapilocation.LocationInSet(parentLocation.LocationIDs, *img.Properties.Location) {
+			if img.Properties != nil && img.Properties.Location != nil && cloudapilocation.LocationInSet(locationIDs, *img.Properties.Location) {
 				locationResults = append(locationResults, img)
 			}
 		}

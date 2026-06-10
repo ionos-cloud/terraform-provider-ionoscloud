@@ -10,7 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapilocation"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 
@@ -103,32 +102,17 @@ func resourceIPBlockCreate(ctx context.Context, d *schema.ResourceData, meta any
 	sizeConverted := int32(size)
 	location := d.Get("location").(string)
 	name := d.Get("name").(string)
+	ipblock := ionoscloud.IpBlock{
+		Properties: &ionoscloud.IpBlockProperties{
+			Size:     &sizeConverted,
+			Location: &location,
+			Name:     &name,
+		},
+	}
 
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return diag.FromErr(err)
-	}
-
-	// Blocks for a child location must be reserved in its parent metro region; the
-	// user-facing "location" keeps the child value (see IpBlockSetData).
-	reserveLocation := location
-	parentLocation := cloudapilocation.ResolveParentLocation(ctx, client, location)
-	if parentLocation.ParentID != "" {
-		reserveLocation = parentLocation.ParentID
-		tflog.Debug(ctx, "reserving ip block in parent location", map[string]any{
-			"datacenter_location": location, "parent_location": reserveLocation,
-		})
-		if client, err = meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, reserveLocation); err != nil {
-			return diag.FromErr(err)
-		}
-	}
-
-	ipblock := ionoscloud.IpBlock{
-		Properties: &ionoscloud.IpBlockProperties{
-			Size:     &sizeConverted,
-			Location: &reserveLocation,
-			Name:     &name,
-		},
 	}
 
 	ipblock, apiResponse, err := client.IPBlocksApi.IpblocksPost(ctx).Ipblock(ipblock).Execute()
@@ -265,14 +249,6 @@ func resourceIpBlockImporter(ctx context.Context, d *schema.ResourceData, meta a
 
 	d.SetId(*ipBlock.Id)
 
-	// Keep the location from the import id over the (possibly parent metro-region) one
-	// the API reports; set before IpBlockSetData so that helper preserves it.
-	if location != "" {
-		if err := d.Set("location", location); err != nil {
-			return nil, diagutil.ToError(d, err, nil)
-		}
-	}
-
 	if err := IpBlockSetData(d, &ipBlock); err != nil {
 		return nil, diagutil.ToError(d, err, nil)
 	}
@@ -295,10 +271,7 @@ func IpBlockSetData(d *schema.ResourceData, ipBlock *ionoscloud.IpBlock) error {
 		}
 	}
 
-	// The API may report the parent metro region (see resourceIPBlockCreate); overwriting
-	// the user's child location would cause perpetual ForceNew drift, so only populate it
-	// when unknown (e.g. import by bare id).
-	if ipBlock.Properties.Location != nil && d.Get("location").(string) == "" {
+	if ipBlock.Properties.Location != nil {
 		if err := d.Set("location", *ipBlock.Properties.Location); err != nil {
 			return err
 		}
