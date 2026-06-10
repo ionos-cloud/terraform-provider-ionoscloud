@@ -4,15 +4,14 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstoragemanagement"
-	objectstorageservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstoragemanagement"
-	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
-
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	objstoragesdk "github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	objectstorageservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstoragemanagement"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 var _ datasource.DataSourceWithConfigure = (*accessKeyDataSource)(nil)
@@ -94,7 +93,7 @@ func (d *accessKeyDataSource) Read(ctx context.Context, req datasource.ReadReque
 		return
 	}
 
-	var data *objectstoragemanagement.AccessKeyDataSourceModel
+	var data *objectstorageservice.AccessKeyDataSourceModel
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
