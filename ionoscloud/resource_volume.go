@@ -6,6 +6,8 @@ import (
 	"strings"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapiimage"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapilocation"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 
@@ -774,6 +776,11 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 	}
 
 	if imageName != "" {
+		images, err := cloudapiimage.GetAllImages(ctx, client)
+		if err != nil {
+			return image, imageAlias, fmt.Errorf("error while fetching the list of images: %w", err)
+		}
+
 		if !utils.IsValidUUID(imageName) {
 			dc, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, dcId).Execute()
 			logApiRequestTime(apiResponse)
@@ -781,10 +788,9 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 				return image, imageAlias, fmt.Errorf("error fetching datacenter %s: (%w)", dcId, err)
 			}
 
-			img, rejectedImg, err := resolveVolumeImageName(ctx, client, imageName, *dc.Properties.Location)
-			if err != nil {
-				return image, imageAlias, err
-			}
+			parentLocation := cloudapilocation.ResolveParentLocation(ctx, client, *dc.Properties.Location)
+
+			img, rejectedImg := resolveVolumeImageName(imageName, images, parentLocation.LocationIDs)
 			if img != nil {
 				image = *img.Id
 			}
@@ -795,9 +801,7 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 				if image != "" {
 					isSnapshot = true
 				} else {
-					tflog.Info(ctx, "looking for an image alias", map[string]any{"image_name": imageName})
-
-					imageAlias = getImageAlias(ctx, client, imageName, *dc.Properties.Location)
+					imageAlias = cloudapiimage.GetImageAlias(imageName, images, parentLocation.LocationIDs)
 					if imageAlias == "" {
 						if rejectedImg != nil {
 							return image, imageAlias, fmt.Errorf(
@@ -847,13 +851,11 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 					return image, imageAlias, fmt.Errorf("error fetching datacenter %s: (%w)", dcId, err)
 				}
 
-				img, rejectedImg, err := resolveVolumeImageName(ctx, client, imageName, *dc.Properties.Location)
+				parentLocation := cloudapilocation.ResolveParentLocation(ctx, client, *dc.Properties.Location)
+
+				img, rejectedImg := resolveVolumeImageName(imageName, images, parentLocation.LocationIDs)
 				if rejectedImg != nil {
 					tflog.Debug(ctx, "image matched by name but filtered out", map[string]any{"name": *rejectedImg.Properties.Name, "type": *rejectedImg.Properties.ImageType, "location": *rejectedImg.Properties.Location})
-				}
-
-				if err != nil {
-					return image, imageAlias, err
 				}
 
 				if img != nil {
@@ -933,82 +935,42 @@ func getSnapshotId(ctx context.Context, client *ionoscloud.APIClient, snapshotNa
 	return ""
 }
 
-func getImageAlias(ctx context.Context, client *ionoscloud.APIClient, imageAlias string, location string) string {
-
-	if imageAlias == "" {
-		return ""
-	}
-	parts := strings.SplitN(location, "/", 2)
-	if len(parts) != 2 {
-		tflog.Error(ctx, "invalid location id", map[string]any{"location": location})
-	}
-
-	locations, apiResponse, err := client.LocationsApi.LocationsFindByRegionIdAndId(ctx, parts[0], parts[1]).Execute()
-	logApiRequestTime(apiResponse)
-
-	if err != nil {
-		tflog.Error(ctx, "error while fetching the list of locations", map[string]any{"error": err.Error()})
-	}
-
-	if len(*locations.Properties.ImageAliases) > 0 {
-		for _, i := range *locations.Properties.ImageAliases {
-			alias := ""
-			if i != "" {
-				alias = i
-			}
-
-			if alias != "" && strings.EqualFold(alias, imageAlias) {
-				return i
-			}
-		}
-	}
-	return ""
-}
-
-func resolveVolumeImageName(ctx context.Context, client *ionoscloud.APIClient, imageName string, location string) (match *ionoscloud.Image, skipped *ionoscloud.Image, err error) {
+// resolveVolumeImageName scans the given images for imageName: match is the HDD image in
+// one of the given locations matched by id or name (exact wins over partial), skipped is
+// a name match filtered out for wrong type/location.
+func resolveVolumeImageName(imageName string, images []ionoscloud.Image, locations []string) (match, skipped *ionoscloud.Image) {
 
 	if imageName == "" {
-		return nil, nil, fmt.Errorf("image name not supplied")
+		return nil, nil
 	}
 
-	images, apiResponse, err := client.ImagesApi.ImagesGet(ctx).Depth(1).Execute()
-	logApiRequestTime(apiResponse)
+	var partialMatch *ionoscloud.Image
+	var nameMatchWrongTypeOrLocation *ionoscloud.Image
+	for _, image := range images {
+		// go for loop variable semantics workaround: https://github.com/golang/go/discussions/56010
+		imageEntry := image
 
-	if err != nil {
-		tflog.Error(ctx, "error while fetching the list of images", map[string]any{"error": err.Error()})
-		return nil, nil, err
-	}
+		if imageEntry.Properties != nil && imageEntry.Properties.Name != nil && *imageEntry.Properties.Name != "" {
 
-	if len(*images.Items) > 0 {
-		var partialMatch *ionoscloud.Image
-		var nameMatchWrongTypeOrLocation *ionoscloud.Image
-		for _, image := range *images.Items {
-			// go for loop variable semantics workaround: https://github.com/golang/go/discussions/56010
-			imageEntry := image
+			nameMatches := (imageEntry.Id != nil && strings.EqualFold(imageName, *imageEntry.Id)) ||
+				strings.EqualFold(*imageEntry.Properties.Name, imageName) ||
+				strings.Contains(strings.ToLower(*imageEntry.Properties.Name), strings.ToLower(imageName))
 
-			if imageEntry.Properties != nil && imageEntry.Properties.Name != nil && *imageEntry.Properties.Name != "" {
-
-				nameMatches := (imageEntry.Id != nil && strings.EqualFold(imageName, *imageEntry.Id)) ||
-					strings.EqualFold(*imageEntry.Properties.Name, imageName) ||
-					strings.Contains(strings.ToLower(*imageEntry.Properties.Name), strings.ToLower(imageName))
-
-				if *imageEntry.Properties.ImageType != HDDImage || *imageEntry.Properties.Location != location {
-					if nameMatchWrongTypeOrLocation == nil && nameMatches {
-						nameMatchWrongTypeOrLocation = &imageEntry
-					}
-					continue
+			if *imageEntry.Properties.ImageType != HDDImage || !cloudapilocation.LocationInSet(locations, *imageEntry.Properties.Location) {
+				if nameMatchWrongTypeOrLocation == nil && nameMatches {
+					nameMatchWrongTypeOrLocation = &imageEntry
 				}
-				// Return the image entry if the name is an exact match
-				if strings.EqualFold(imageName, *imageEntry.Id) || strings.EqualFold(*imageEntry.Properties.Name, imageName) {
-					return &imageEntry, nil, err
-				}
-				// Save the first image entry which is a partial match and return it if no exact matches were found
-				if partialMatch == nil && strings.Contains(strings.ToLower(*imageEntry.Properties.Name), strings.ToLower(imageName)) {
-					partialMatch = &imageEntry
-				}
+				continue
+			}
+			// Return the image entry if the name is an exact match
+			if strings.EqualFold(imageName, *imageEntry.Id) || strings.EqualFold(*imageEntry.Properties.Name, imageName) {
+				return &imageEntry, nil
+			}
+			// Save the first image entry which is a partial match and return it if no exact matches were found
+			if partialMatch == nil && strings.Contains(strings.ToLower(*imageEntry.Properties.Name), strings.ToLower(imageName)) {
+				partialMatch = &imageEntry
 			}
 		}
-		return partialMatch, nameMatchWrongTypeOrLocation, err
 	}
-	return nil, nil, err
+	return partialMatch, nameMatchWrongTypeOrLocation
 }

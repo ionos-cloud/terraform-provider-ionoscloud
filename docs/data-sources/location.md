@@ -39,3 +39,4 @@ The following attributes are returned by the datasource:
   * `max_ram` - The maximum number of RAM in MB.
   * `vendor` - A valid CPU vendor name.
 * `image_aliases` - List of image aliases available for the location
+* `metro_region` - The id of the parent metro region (e.g. `de/txl`) this location inherits its images and image aliases from, if any.

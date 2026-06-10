@@ -9,6 +9,7 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapilocation"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
@@ -151,12 +152,13 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta an
 		}
 
 		if locationOk {
+			// Accept snapshots from the requested location or its parent location.
+			parentLocation := cloudapilocation.ResolveParentLocation(ctx, client, location.(string))
 			var locationResults []ionoscloud.Snapshot
 			for _, snp := range results {
-				if *snp.Properties.Location == location.(string) {
+				if snp.Properties != nil && snp.Properties.Location != nil && cloudapilocation.LocationInSet(parentLocation.LocationIDs, *snp.Properties.Location) {
 					locationResults = append(locationResults, snp)
 				}
-
 			}
 			results = locationResults
 		}

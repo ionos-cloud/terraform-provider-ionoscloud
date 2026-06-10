@@ -52,11 +52,17 @@ func dataSourceLocation() *schema.Resource {
 				},
 			},
 			"image_aliases": {
-				Type:     schema.TypeList,
-				Computed: true,
+				Type:        schema.TypeList,
+				Computed:    true,
+				Description: "A list of image aliases available in the location.",
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
+			},
+			"metro_region": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The id of the parent metro region (e.g. `de/txl`) this location inherits its images and image aliases from, if any.",
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
@@ -161,8 +167,14 @@ func setLocationData(d *schema.ResourceData, location *ionoscloud.Location) erro
 		}
 
 		var imageAliases []string
-		for _, imageAlias := range *location.Properties.ImageAliases {
-			imageAliases = append(imageAliases, imageAlias)
+		if location.Properties.ImageAliases != nil {
+			imageAliases = append(imageAliases, *location.Properties.ImageAliases...)
+		}
+
+		if location.Properties.MetroRegion != nil && *location.Properties.MetroRegion != "" {
+			if err := d.Set("metro_region", *location.Properties.MetroRegion); err != nil {
+				return fmt.Errorf("error while setting metro_region property for location %s: %w", d.Id(), err)
+			}
 		}
 
 		if len(imageAliases) > 0 {
