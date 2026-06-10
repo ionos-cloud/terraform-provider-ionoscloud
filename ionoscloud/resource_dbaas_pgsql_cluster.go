@@ -14,7 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
+	dbaasservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
@@ -272,7 +272,7 @@ func resourceDbaasPgSqlClusterCreate(ctx context.Context, d *schema.ResourceData
 		return diag.FromErr(err)
 	}
 
-	dbaasCluster, err := dbaasService.GetPgSqlClusterDataCreate(d)
+	dbaasCluster, err := dbaasservice.GetPgSqlClusterDataCreate(d)
 
 	if err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -311,7 +311,7 @@ func resourceDbaasPgSqlClusterRead(ctx context.Context, d *schema.ResourceData, 
 
 	tflog.Info(ctx, "retrieved PgSQL cluster", map[string]any{"cluster_id": d.Id()})
 
-	if err := dbaasService.SetPgSqlClusterData(d, cluster, false); err != nil {
+	if err := dbaasservice.SetPgSqlClusterData(d, cluster, false); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
 
@@ -324,7 +324,7 @@ func resourceDbaasPgSqlClusterUpdate(ctx context.Context, d *schema.ResourceData
 		return diag.FromErr(err)
 	}
 
-	cluster, diags := dbaasService.GetPgSqlClusterDataUpdate(d)
+	cluster, diags := dbaasservice.GetPgSqlClusterDataUpdate(d)
 	if diags != nil {
 		return diags
 	}
@@ -403,7 +403,7 @@ func resourceDbaasPgSqlClusterImport(ctx context.Context, d *schema.ResourceData
 
 	tflog.Info(ctx, "PgSQL cluster imported", map[string]any{"cluster_id": clusterId})
 
-	if err := dbaasService.SetPgSqlClusterData(d, dbaasCluster, false); err != nil {
+	if err := dbaasservice.SetPgSqlClusterData(d, dbaasCluster, false); err != nil {
 		return nil, diagutil.ToError(d, err, nil)
 	}
 

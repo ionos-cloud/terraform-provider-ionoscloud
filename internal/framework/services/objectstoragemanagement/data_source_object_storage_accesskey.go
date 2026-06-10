@@ -6,12 +6,12 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstoragemanagement"
-	objectStorageManagementService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstoragemanagement"
+	objectstorageservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstoragemanagement"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
-	objectstoragemanagementApi "github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2"
+	objstoragesdk "github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 )
 
@@ -23,7 +23,7 @@ func NewAccesskeyDataSource() datasource.DataSource {
 }
 
 type accessKeyDataSource struct {
-	client *objectStorageManagementService.Client
+	client *objectstorageservice.Client
 }
 
 // Metadata returns the metadata for the data source.
@@ -104,8 +104,8 @@ func (d *accessKeyDataSource) Read(ctx context.Context, req datasource.ReadReque
 	accessKeyID := data.AccessKey.ValueString()
 	description := data.Description.ValueString()
 
-	var accessKey objectstoragemanagementApi.AccessKeyRead
-	var accessKeys objectstoragemanagementApi.AccessKeyReadList
+	var accessKey objstoragesdk.AccessKeyRead
+	var accessKeys objstoragesdk.AccessKeyReadList
 	var apiResponse *shared.APIResponse
 	var err error
 	switch {
@@ -185,6 +185,6 @@ func (d *accessKeyDataSource) Read(ctx context.Context, req datasource.ReadReque
 		return
 	}
 
-	objectStorageManagementService.SetAccessKeyPropertiesToDataSourcePlan(data, accessKey)
+	objectstorageservice.SetAccessKeyPropertiesToDataSourcePlan(data, accessKey)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
-	objectStorageManagementService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstoragemanagement"
+	objectstorageservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstoragemanagement"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -21,7 +21,7 @@ func NewRegionDataSource() datasource.DataSource {
 }
 
 type regionDataSource struct {
-	client *objectStorageManagementService.Client
+	client *objectstorageservice.Client
 }
 
 // Metadata returns the metadata for the data source.
@@ -108,7 +108,7 @@ func (d *regionDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		return
 	}
 
-	var data *objectStorageManagementService.RegionDataSourceModel
+	var data *objectstorageservice.RegionDataSourceModel
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -125,5 +125,5 @@ func (d *regionDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		return
 	}
 
-	resp.Diagnostics.Append(resp.State.Set(ctx, objectStorageManagementService.BuildRegionModelFromAPIResponse(&region))...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, objectstorageservice.BuildRegionModelFromAPIResponse(&region))...)
 }

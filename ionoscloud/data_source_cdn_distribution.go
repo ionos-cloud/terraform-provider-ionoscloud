@@ -12,7 +12,7 @@ import (
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
-	cdnService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cdn"
+	cdnservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cdn"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
@@ -201,7 +201,7 @@ func dataSourceCDNDistributionRead(ctx context.Context, d *schema.ResourceData, 
 		}
 	}
 
-	if err := cdnService.SetDistributionData(d, distribution); err != nil {
+	if err := cdnservice.SetDistributionData(d, distribution); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
 
