@@ -132,7 +132,31 @@ This resource supports the following `Timeouts` configuration options:
 
 ## Import
 
-Resource DBaaS PostgreSQL v2 Cluster can be imported using the format `location:cluster_id`, e.g.
+In Terraform v1.12.0 and later, the [`import` block](https://developer.hashicorp.com/terraform/language/import) can be used with the `identity` attribute. For example:
+```hcl
+import {
+  to = ionoscloud_pg_cluster_v2.example
+  identity = {
+    id       = "cluster_uuid"
+    location = "de/txl"
+  }
+}
+
+resource "ionoscloud_pg_cluster_v2" "example" {
+  ### Configuration omitted for brevity ###
+}
+```
+
+### Identity Schema
+
+#### Required
+
+* `id` (String) The UUID of the cluster.
+* `location` (String) The location of the cluster (e.g. `de/txl`).
+
+---
+
+A cluster can also be imported using the format `location:cluster_id`:
 
 ```shell
 terraform import ionoscloud_pg_cluster_v2.mycluster de/txl:cluster_uuid
@@ -164,4 +188,4 @@ list "ionoscloud_pg_cluster_v2" "prod" {
 }
 ```
 
-See the [ionoscloud_pg_cluster_v2 list resource](../list-resources/psql_cluster.md) documentation for the full filter reference.
+See the [ionoscloud_pg_cluster_v2 list resource](../list-resources/psql_cluster_v2.md) documentation for the full filter reference.

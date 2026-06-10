@@ -67,3 +67,31 @@ terraform import ionoscloud_object_storage_accesskey.demo objectStorageAccesskey
 ```
 
 This can be helpful when you want to import Object Storage Accesskeys which you have already created manually or using other means, outside of terraform.
+
+## Query (List Resource)
+
+Object Storage Access Keys can be listed using `terraform query` (requires Terraform 1.14+). List blocks must be placed in a dedicated `tfquery.hcl` file.
+
+```hcl
+list "ionoscloud_object_storage_accesskey" "all" {
+  provider         = ionoscloud
+  include_resource = true
+}
+```
+
+Filter by description:
+
+```hcl
+list "ionoscloud_object_storage_accesskey" "filtered" {
+  provider         = ionoscloud
+  include_resource = true
+  config {
+    filters = [{
+      field_name  = "description"
+      field_value = "my-key"
+    }]
+  }
+}
+```
+
+See the [ionoscloud_object_storage_accesskey list resource](../list-resources/object_storage_accesskey.md) documentation for the full filter reference.

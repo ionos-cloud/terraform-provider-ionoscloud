@@ -93,3 +93,31 @@ The `region` can be omitted, in which case the bucket will be imported from the 
 ```shell
 terraform import ionoscloud_s3_bucket.example bucket_name
 ```
+
+## Query (List Resource)
+
+Object Storage buckets can be listed using `terraform query` (requires Terraform 1.14+). List blocks must be placed in a dedicated `tfquery.hcl` file.
+
+```hcl
+list "ionoscloud_s3_bucket" "all" {
+  provider         = ionoscloud
+  include_resource = true
+}
+```
+
+Filter by region:
+
+```hcl
+list "ionoscloud_s3_bucket" "eu_central" {
+  provider         = ionoscloud
+  include_resource = true
+  config {
+    filters = [{
+      field_name  = "region"
+      field_value = "eu-central-3"
+    }]
+  }
+}
+```
+
+See the [ionoscloud_s3_bucket list resource](../list-resources/s3_bucket.md) documentation for the full filter reference.
