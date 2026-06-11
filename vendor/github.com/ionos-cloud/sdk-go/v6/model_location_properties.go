@@ -22,8 +22,6 @@ type LocationProperties struct {
 	Features *[]string `json:"features,omitempty"`
 	// A list of image aliases available in the location.
 	ImageAliases *[]string `json:"imageAliases,omitempty"`
-	// The id of the metro region this location belongs to. Classic locations reference themselves (e.g. `de/fra` -> `de/fra`); a child location (e.g. `de/fra/2`) references the parent location it inherits images and image aliases from.
-	MetroRegion *string `json:"metroRegion,omitempty"`
 	// A list of available CPU types and related resources available in the location.
 	CpuArchitecture *[]CpuArchitectureProperties `json:"cpuArchitecture,omitempty"`
 	// The types of GPU cards that are available in the location.
@@ -162,44 +160,6 @@ func (o *LocationProperties) HasImageAliases() bool {
 	return false
 }
 
-// GetMetroRegion returns the MetroRegion field value
-// If the value is explicit nil, nil is returned
-func (o *LocationProperties) GetMetroRegion() *string {
-	if o == nil {
-		return nil
-	}
-
-	return o.MetroRegion
-
-}
-
-// GetMetroRegionOk returns a tuple with the MetroRegion field value
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *LocationProperties) GetMetroRegionOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-
-	return o.MetroRegion, true
-}
-
-// SetMetroRegion sets field value
-func (o *LocationProperties) SetMetroRegion(v string) {
-
-	o.MetroRegion = &v
-
-}
-
-// HasMetroRegion returns a boolean if a field has been set.
-func (o *LocationProperties) HasMetroRegion() bool {
-	if o != nil && o.MetroRegion != nil {
-		return true
-	}
-
-	return false
-}
-
 // GetCpuArchitecture returns the CpuArchitecture field value
 // If the value is explicit nil, nil is returned
 func (o *LocationProperties) GetCpuArchitecture() *[]CpuArchitectureProperties {
@@ -288,10 +248,6 @@ func (o LocationProperties) MarshalJSON() ([]byte, error) {
 
 	if o.ImageAliases != nil {
 		toSerialize["imageAliases"] = o.ImageAliases
-	}
-
-	if o.MetroRegion != nil {
-		toSerialize["metroRegion"] = o.MetroRegion
 	}
 
 	if o.CpuArchitecture != nil {
