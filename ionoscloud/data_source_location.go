@@ -3,6 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"slices"
 
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -168,9 +169,7 @@ func setLocationData(d *schema.ResourceData, location *ionoscloud.Location) erro
 
 		var imageAliases []string
 		if location.Properties.ImageAliases != nil {
-			for _, imageAlias := range *location.Properties.ImageAliases {
-				imageAliases = append(imageAliases, imageAlias)
-			}
+			imageAliases = slices.Clone(*location.Properties.ImageAliases)
 		}
 
 		if err := d.Set("metro_region", location.Properties.MetroRegion); err != nil {
