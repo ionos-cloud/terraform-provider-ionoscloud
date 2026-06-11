@@ -320,6 +320,14 @@ const (
 	DBaaSReplicaSetTestDataSourceByName = "test_dbaas_replicaset_name"
 	DBaaSInMemoryDBReplicaSetResource   = "ionoscloud_inmemorydb_replicaset"
 	DBaaSInMemoryDBSnapshotResource     = "ionoscloud_inmemorydb_snapshot"
+
+	// InMemoryDB v2 constants
+	InMemoryDBV2ClusterResource             = "ionoscloud_inmemorydb_cluster_v2"
+	InMemoryDBV2ClusterDataSource           = "ionoscloud_inmemorydb_cluster_v2"
+	InMemoryDBV2ClustersDataSource          = "ionoscloud_inmemorydb_clusters_v2"
+	InMemoryDBV2SnapshotsDataSource         = "ionoscloud_inmemorydb_snapshots_v2"
+	InMemoryDBV2SnapshotLocationsDataSource = "ionoscloud_inmemorydb_snapshot_locations_v2"
+	InMemoryDBV2VersionsDataSource          = "ionoscloud_inmemorydb_versions_v2"
 )
 
 // Locations slice represents the locations in which services are available.
