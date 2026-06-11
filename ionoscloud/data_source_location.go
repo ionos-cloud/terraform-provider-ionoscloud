@@ -167,14 +167,14 @@ func setLocationData(d *schema.ResourceData, location *ionoscloud.Location) erro
 		}
 
 		var imageAliases []string
-		for _, imageAlias := range *location.Properties.ImageAliases {
-			imageAliases = append(imageAliases, imageAlias)
+		if location.Properties.ImageAliases != nil {
+			for _, imageAlias := range *location.Properties.ImageAliases {
+				imageAliases = append(imageAliases, imageAlias)
+			}
 		}
 
-		if location.Properties.MetroRegion != nil && *location.Properties.MetroRegion != "" {
-			if err := d.Set("metro_region", *location.Properties.MetroRegion); err != nil {
-				return fmt.Errorf("error while setting metro_region property for location %s: %w", d.Id(), err)
-			}
+		if err := d.Set("metro_region", location.Properties.MetroRegion); err != nil {
+			return fmt.Errorf("error while setting metro_region property for location %s: %w", d.Id(), err)
 		}
 
 		if len(imageAliases) > 0 {
