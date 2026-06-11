@@ -40,16 +40,16 @@ func GetImageAlias(want string, images []ionoscloud.Image, locations []string) s
 			img.Properties.Location == nil || !cloudapilocation.LocationInSet(locations, *img.Properties.Location) {
 			continue
 		}
-		if alias := MatchImageAlias(*img.Properties.ImageAliases, want); alias != "" {
+		if alias := matchImageAlias(*img.Properties.ImageAliases, want); alias != "" {
 			return alias
 		}
 	}
 	return ""
 }
 
-// MatchImageAlias returns the alias from aliases that case-insensitively matches want,
+// matchImageAlias returns the alias from aliases that case-insensitively matches want,
 // preserving the alias' canonical casing, or "" when none matches.
-func MatchImageAlias(aliases []string, want string) string {
+func matchImageAlias(aliases []string, want string) string {
 	if want == "" {
 		return ""
 	}

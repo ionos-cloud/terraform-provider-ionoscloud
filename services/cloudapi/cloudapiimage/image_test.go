@@ -81,7 +81,7 @@ func TestMatchImageAlias(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := MatchImageAlias(tt.aliases, tt.want); got != tt.expect {
+			if got := matchImageAlias(tt.aliases, tt.want); got != tt.expect {
 				t.Fatalf("MatchImageAlias(%v, %q) = %q, want %q", tt.aliases, tt.want, got, tt.expect)
 			}
 		})
