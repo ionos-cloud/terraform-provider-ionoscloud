@@ -54,6 +54,7 @@ const (
 // products that have a location and will override the endpoint that is for each location
 const (
 	InMemoryDB    = "inmemorydb"
+	InMemoryDBV2  = "inmemorydbv2"
 	Kafka         = "kafka"
 	Logging       = "logging"
 	Mariadb       = "mariadb"
