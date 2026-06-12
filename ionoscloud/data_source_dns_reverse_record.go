@@ -101,26 +101,16 @@ func dataSourceReverseRecordRead(ctx context.Context, d *schema.ResourceData, me
 		var results []dns.ReverseRecordRead
 		if nameOk {
 			tflog.Info(ctx, "searching DNS reverse record by name", map[string]any{"name": recordName, "partial_match": partialMatch})
-			if partialMatch {
-				// In order to have an exact name match, we must retrieve all the DNS Reverse Records and then
-				// build a list of partial matches based on the response
-				records, apiResponse, err := client.ListReverseRecords(ctx, nil)
-				if err != nil {
-					return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching DNS Reverse Records: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
-				}
-				for _, recordItem := range records.Items {
+			records, apiResponse, err := client.ListReverseRecords(ctx, nil)
+			if err != nil {
+				return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching DNS Reverse Records: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			}
+			for _, recordItem := range records.Items {
+				if partialMatch {
 					if strings.Contains(recordItem.Properties.Name, recordName) {
 						results = append(results, recordItem)
 					}
-				}
-			} else {
-				// In order to have an exact name match, we must retrieve all the DNS Reverse Records and then
-				// build a list of exact matches based on the response
-				records, apiResponse, err := client.ListReverseRecords(ctx, nil)
-				if err != nil {
-					return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching DNS Reverse Records: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
-				}
-				for _, recordItem := range records.Items {
+				} else {
 					if strings.EqualFold(recordItem.Properties.Name, recordName) {
 						results = append(results, recordItem)
 					}
@@ -132,8 +122,8 @@ func dataSourceReverseRecordRead(ctx context.Context, d *schema.ResourceData, me
 				return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching DNS Reverse Records: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 			}
 			results = records.Items
-
 		}
+
 		var usedFilter string
 		if ipOk {
 			usedFilter = recordID
@@ -145,7 +135,7 @@ func dataSourceReverseRecordRead(ctx context.Context, d *schema.ResourceData, me
 		case len(results) == 0:
 			return diagutil.ToDiags(d, fmt.Errorf("no DNS Reverse Record found with the specified filter = %s", usedFilter), nil)
 		case len(results) > 1:
-			return diagutil.ToDiags(d, fmt.Errorf("more than one DNS Reverse Record found with the specified name = %s", usedFilter), nil)
+			return diagutil.ToDiags(d, fmt.Errorf("more than one DNS Reverse Record found with the specified filter = %s", usedFilter), nil)
 		default:
 			record = results[0]
 		}
