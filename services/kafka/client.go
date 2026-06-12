@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"os"
 	"runtime"
 
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -13,6 +14,7 @@ import (
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/configlog"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
@@ -36,6 +38,8 @@ func (c *Client) GetConfig() *shared.Configuration {
 var (
 	// AvailableLocations is a list of available locations for Kafka
 	AvailableLocations = []string{"de/fra", "de/fra/2", "de/txl", "fr/par", "es/vit", "gb/lhr", "gb/bhx", "us/las", "us/mci", "us/ewr"}
+
+	ionosAPIURLKafka = "IONOS_API_URL_KAFKA"
 
 	locationToURL = map[string]string{
 		"":         "https://kafka.de-fra.ionos.com",
@@ -76,6 +80,16 @@ func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *f
 // ChangeConfigURL changes the url in the config based on the location
 func (c *Client) ChangeConfigURL(ctx context.Context, location string) {
 	config := c.sdkClient.GetConfig()
+	if location == "" && os.Getenv(ionosAPIURLKafka) != "" {
+		url := utils.CleanURL(os.Getenv(ionosAPIURLKafka))
+		tflog.Debug(ctx, "Kafka: endpoint from env", map[string]any{"env": ionosAPIURLKafka, "url": url})
+		config.Servers = shared.ServerConfigurations{
+			{
+				URL: url,
+			},
+		}
+		return
+	}
 	url := locationToURL[location]
 	tflog.Debug(ctx, "Kafka: endpoint for location", map[string]any{"location": configlog.FormatLocation(location), "url": url})
 	config.Servers = shared.ServerConfigurations{
