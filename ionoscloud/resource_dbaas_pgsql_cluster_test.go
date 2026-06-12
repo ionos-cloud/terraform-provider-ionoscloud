@@ -59,7 +59,7 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDataSourceDBaaSPgSqlClusterMatchId,
+				Config: testAccDataSourceDBaaSPgSqlClusterMatchID,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceById, "display_name", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "display_name"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceById, "instances", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "instances"),
@@ -123,7 +123,7 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDataSourceDbaasPgSqlVersionsByClusterId,
+				Config: testAccDataSourceDbaasPgSqlVersionsByClusterID,
 				Check: resource.ComposeTestCheckFunc(
 					utils.TestNotEmptySlice(constant.PsqlVersionsResource, "postgres_versions.#"),
 				),
@@ -540,7 +540,7 @@ resource ` + constant.RandomPassword + ` "cluster_password" {
 }
 `
 
-const testAccDataSourceDBaaSPgSqlClusterMatchId = testAccCheckDbaasPgSqlClusterConfigBasic + `
+const testAccDataSourceDBaaSPgSqlClusterMatchID = testAccCheckDbaasPgSqlClusterConfigBasic + `
 data ` + constant.PsqlClusterResource + ` ` + constant.DBaaSClusterTestDataSourceById + ` {
   id	= ` + constant.PsqlClusterResource + `.` + constant.DBaaSClusterTestResource + `.id
 }
@@ -569,7 +569,7 @@ data ` + constant.PsqlVersionsResource + ` ` + constant.PsqlVersionsTest + ` {
 }
 `
 
-const testAccDataSourceDbaasPgSqlVersionsByClusterId = testAccCheckDbaasPgSqlClusterConfigBasic + `
+const testAccDataSourceDbaasPgSqlVersionsByClusterID = testAccCheckDbaasPgSqlClusterConfigBasic + `
 data ` + constant.PsqlVersionsResource + ` ` + constant.PsqlVersionsTest + ` {
 	cluster_id = ` + constant.PsqlClusterResource + `.` + constant.DBaaSClusterTestResource + `.id
 }

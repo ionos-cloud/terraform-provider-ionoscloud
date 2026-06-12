@@ -37,7 +37,7 @@ func TestAccLanBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDataSourceLanMatchId,
+				Config: testAccDataSourceLanMatchID,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.LanResource+"."+constant.LanDataSourceByID, "name", constant.LanResource+"."+constant.LanTestResource, "name"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.LanResource+"."+constant.LanDataSourceByID, "ip_failover.nic_uuid", constant.LanResource+"."+constant.LanTestResource, "ip_failover.nic_uuid"),
@@ -183,7 +183,7 @@ data ` + constant.LanResource + ` ` + constant.LanDataSourceByID + ` {
 }
 `
 
-const testAccDataSourceLanMatchId = testAccCheckLanConfigBasic + `
+const testAccDataSourceLanMatchID = testAccCheckLanConfigBasic + `
 data ` + constant.LanResource + ` ` + constant.LanDataSourceByID + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   id			= ` + constant.LanResource + `.` + constant.LanTestResource + `.id

@@ -11,8 +11,8 @@ import (
 	"github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2"
 )
 
-func (c *PsqlClient) GetClusterBackups(ctx context.Context, clusterId string) (psql.ClusterBackupList, *shared.APIResponse, error) {
-	backups, apiResponse, err := c.sdkClient.BackupsApi.ClusterBackupsGet(ctx, clusterId).Execute()
+func (c *PsqlClient) GetClusterBackups(ctx context.Context, clusterID string) (psql.ClusterBackupList, *shared.APIResponse, error) {
+	backups, apiResponse, err := c.sdkClient.BackupsApi.ClusterBackupsGet(ctx, clusterID).Execute()
 	apiResponse.LogInfo()
 	return backups, apiResponse, err
 
@@ -26,8 +26,8 @@ func (c *PsqlClient) GetAllBackups(ctx context.Context) (psql.ClusterBackupList,
 
 func SetPgSqlClusterBackupData(d *schema.ResourceData, clusterBackups *psql.ClusterBackupList) diag.Diagnostics {
 
-	resourceId := uuid.New()
-	d.SetId(resourceId.String())
+	resourceID := uuid.New()
+	d.SetId(resourceID.String())
 
 	if clusterBackups.Items != nil {
 		var backups []any

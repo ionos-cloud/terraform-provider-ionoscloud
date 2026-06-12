@@ -49,7 +49,7 @@ func TestAccContainerRegistryTokenBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: getConfigurationFromTemplate(testAccDataSourceContainerRegistryTokenMatchId, templateData),
+				Config: getConfigurationFromTemplate(testAccDataSourceContainerRegistryTokenMatchID, templateData),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestDataSourceById, "expiry_date", constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "expiry_date"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestDataSourceById, "scopes.0.actions.0", constant.ContainerRegistryTokenResource+"."+constant.ContainerRegistryTokenTestResource, "scopes.0.actions.0"),
@@ -221,7 +221,7 @@ resource ` + constant.ContainerRegistryTokenResource + ` ` + constant.ContainerR
 }
 `
 
-const testAccDataSourceContainerRegistryTokenMatchId = testAccCheckContainerRegistryTokenConfigBasic + `
+const testAccDataSourceContainerRegistryTokenMatchID = testAccCheckContainerRegistryTokenConfigBasic + `
 data ` + constant.ContainerRegistryTokenResource + ` ` + constant.ContainerRegistryTokenTestDataSourceById + ` {
   id = ` + constant.ContainerRegistryTokenResource + `.` + constant.ContainerRegistryTokenTestResource + `.id
   registry_id = ` + constant.ContainerRegistryResource + `.` + constant.ContainerRegistryTestResource + `.id

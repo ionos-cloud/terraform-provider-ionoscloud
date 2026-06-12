@@ -36,7 +36,7 @@ func TestAccNSGBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCheckNSGDataSourceMatchId,
+				Config: testAccCheckNSGDataSourceMatchID,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNSGExists(constant.NSGResource+"."+constant.NSGTestResource, &nsg),
 					resource.TestCheckResourceAttr(constant.NSGResource+"."+constant.NSGTestResource, "name", "testing-name"),
@@ -374,7 +374,7 @@ resource ` + constant.NSGResource + ` ` + constant.NSGTestResource + ` {
 }
 `
 
-const testAccCheckNSGDataSourceMatchId = testAccCheckNSGConfigBasic + `
+const testAccCheckNSGDataSourceMatchID = testAccCheckNSGConfigBasic + `
 data ` + constant.NSGResource + ` ` + constant.NGDataSourceByID + ` {
   id            = ` + constant.NSGResource + `.` + constant.NSGTestResource + `.id
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id

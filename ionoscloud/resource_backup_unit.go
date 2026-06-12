@@ -255,7 +255,7 @@ func resourceBackupUnitImport(ctx context.Context, d *schema.ResourceData, meta 
 		return nil, err
 	}
 
-	buId := d.Id()
+	buID := d.Id()
 
 	backupUnit, apiResponse, err := BackupUnitFindByID(ctx, d.Id(), client)
 	logApiRequestTime(apiResponse)
@@ -263,12 +263,12 @@ func resourceBackupUnitImport(ctx context.Context, d *schema.ResourceData, meta 
 	if err != nil {
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("unable to find Backup Unit %q", buId), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return nil, diagutil.ToError(d, fmt.Errorf("unable to find Backup Unit %q", buID), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 		return nil, diagutil.ToError(d, fmt.Errorf("unable to retrieve Backup Unit: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	tflog.Info(ctx, "backup unit imported", map[string]any{"backup_unit_id": buId})
+	tflog.Info(ctx, "backup unit imported", map[string]any{"backup_unit_id": buID})
 
 	contractResources, apiResponse, cErr := client.ContractResourcesApi.ContractsGet(ctx).Execute()
 	logApiRequestTime(apiResponse)

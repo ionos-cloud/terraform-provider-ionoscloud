@@ -82,8 +82,8 @@ func dataSourceNatGatewayRead(ctx context.Context, d *schema.ResourceData, meta 
 		return diag.FromErr(err)
 	}
 
-	datacenterId, dcIdOk := d.GetOk("datacenter_id")
-	if !dcIdOk {
+	datacenterID, dcIDOk := d.GetOk("datacenter_id")
+	if !dcIDOk {
 		return diagutil.ToDiags(d, fmt.Errorf("no datacenter_id was specified"), nil)
 	}
 
@@ -101,7 +101,7 @@ func dataSourceNatGatewayRead(ctx context.Context, d *schema.ResourceData, meta 
 
 	if idOk {
 		/* search by ID */
-		natGateway, apiResponse, err = client.NATGatewaysApi.DatacentersNatgatewaysFindByNatGatewayId(ctx, datacenterId.(string), id.(string)).Execute()
+		natGateway, apiResponse, err = client.NATGatewaysApi.DatacentersNatgatewaysFindByNatGatewayId(ctx, datacenterID.(string), id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
 			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the nat gateway %s: %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
@@ -110,7 +110,7 @@ func dataSourceNatGatewayRead(ctx context.Context, d *schema.ResourceData, meta 
 		/* search by name */
 		var natGateways ionoscloud.NatGateways
 
-		natGateways, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysGet(ctx, datacenterId.(string)).Depth(1).Execute()
+		natGateways, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysGet(ctx, datacenterID.(string)).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
 			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching nat gateway: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
@@ -120,7 +120,7 @@ func dataSourceNatGatewayRead(ctx context.Context, d *schema.ResourceData, meta 
 		if natGateways.Items != nil {
 			for _, ng := range *natGateways.Items {
 				if ng.Properties != nil && ng.Properties.Name != nil && strings.EqualFold(*ng.Properties.Name, name.(string)) {
-					tmpNatGateway, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysFindByNatGatewayId(ctx, datacenterId.(string), *ng.Id).Execute()
+					tmpNatGateway, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysFindByNatGatewayId(ctx, datacenterID.(string), *ng.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {
 						return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching nat gateway with ID %s: %w", *ng.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})

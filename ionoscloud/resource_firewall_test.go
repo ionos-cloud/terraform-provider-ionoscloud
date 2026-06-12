@@ -43,7 +43,7 @@ func TestAccFirewallBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDataSourceFirewallMatchId,
+				Config: testAccDataSourceFirewallMatchID,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.FirewallResource+"."+constant.FirewallDataSourceById, "name", constant.FirewallResource+"."+constant.FirewallTestResource, "name"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.FirewallResource+"."+constant.FirewallDataSourceById, "protocol", constant.FirewallResource+"."+constant.FirewallTestResource, "protocol"),
@@ -462,7 +462,7 @@ resource ` + constant.FirewallResource + ` ` + constant.FirewallTestResource + `
   icmp_code = 0
 }
 `
-const testAccDataSourceFirewallMatchId = testAccCheckFirewallConfigBasic + `
+const testAccDataSourceFirewallMatchID = testAccCheckFirewallConfigBasic + `
 data ` + constant.FirewallResource + ` ` + constant.FirewallDataSourceById + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id

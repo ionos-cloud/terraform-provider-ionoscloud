@@ -111,15 +111,15 @@ func dataSourceNIC() *schema.Resource {
 
 //nolint:gocyclo
 func dataSourceNicRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	t, dIdOk := d.GetOk("datacenter_id")
-	st, sIdOk := d.GetOk("server_id")
-	if !dIdOk || !sIdOk {
+	t, dIDOk := d.GetOk("datacenter_id")
+	st, sIDOk := d.GetOk("server_id")
+	if !dIDOk || !sIDOk {
 		return diagutil.ToDiags(d, fmt.Errorf("datacenter id and server id must be set"), nil)
 	}
-	var datacenterId, serverId string
+	var datacenterID, serverID string
 
-	datacenterId = t.(string)
-	serverId = st.(string)
+	datacenterID = t.(string)
+	serverID = st.(string)
 
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
@@ -140,7 +140,7 @@ func dataSourceNicRead(ctx context.Context, d *schema.ResourceData, meta any) di
 		return diagutil.ToDiags(d, fmt.Errorf("either id, or name must be set"), nil)
 	}
 	if idOk {
-		foundNic, apiResponse, err := ns.Get(ctx, datacenterId, serverId, id.(string), 3)
+		foundNic, apiResponse, err := ns.Get(ctx, datacenterID, serverID, id.(string), 3)
 		if err != nil {
 			return diagutil.ToDiags(d, fmt.Errorf("error getting nic with id %s %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
@@ -152,7 +152,7 @@ func dataSourceNicRead(ctx context.Context, d *schema.ResourceData, meta any) di
 		}
 		nic = *foundNic
 	} else {
-		nics, err := ns.List(ctx, datacenterId, serverId, 3)
+		nics, err := ns.List(ctx, datacenterID, serverID, 3)
 		if err != nil {
 			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching nics: %w ", err), nil)
 		}

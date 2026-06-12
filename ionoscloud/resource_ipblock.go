@@ -226,22 +226,22 @@ func resourceIpBlockImporter(ctx context.Context, d *schema.ResourceData, meta a
 		return nil, fmt.Errorf("failed validating import identifier %q: %w", importID, err)
 	}
 
-	ipBlockId := parts[0]
+	ipBlockID := parts[0]
 
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return nil, err
 	}
 
-	ipBlock, apiResponse, err := client.IPBlocksApi.IpblocksFindById(ctx, ipBlockId).Execute()
+	ipBlock, apiResponse, err := client.IPBlocksApi.IpblocksFindById(ctx, ipBlockID).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("ipBlock does not exist %q", ipBlockId), nil)
+			return nil, diagutil.ToError(d, fmt.Errorf("ipBlock does not exist %q", ipBlockID), nil)
 		}
-		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the ipBlock %q, error:%w", ipBlockId, err), nil)
+		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the ipBlock %q, error:%w", ipBlockID, err), nil)
 
 	}
 

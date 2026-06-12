@@ -82,56 +82,56 @@ type Service struct {
 	D      *schema.ResourceData
 }
 
-func (fw *Service) CreateOrPatchForServer(ctx context.Context, dcId, srvID, nicID, ID string, flowLog ionoscloud.FlowLog) error {
+func (fw *Service) CreateOrPatchForServer(ctx context.Context, dcID, srvID, nicID, ID string, flowLog ionoscloud.FlowLog) error {
 	if ID == "" {
-		_, _, err := fw.Client.FlowLogsApi.DatacentersServersNicsFlowlogsPost(ctx, dcId, srvID, nicID).Flowlog(flowLog).Execute()
+		_, _, err := fw.Client.FlowLogsApi.DatacentersServersNicsFlowlogsPost(ctx, dcID, srvID, nicID).Flowlog(flowLog).Execute()
 		if err != nil {
-			return fmt.Errorf("error occurred while creating flowlog in datacenter %s, server %s nic %s : %w", dcId, srvID, nicID, err)
+			return fmt.Errorf("error occurred while creating flowlog in datacenter %s, server %s nic %s : %w", dcID, srvID, nicID, err)
 		}
 	} else {
-		_, _, err := fw.Client.FlowLogsApi.DatacentersServersNicsFlowlogsPatch(ctx, dcId, srvID, nicID, ID).Flowlog(*flowLog.Properties).Execute()
+		_, _, err := fw.Client.FlowLogsApi.DatacentersServersNicsFlowlogsPatch(ctx, dcID, srvID, nicID, ID).Flowlog(*flowLog.Properties).Execute()
 		if err != nil {
-			return fmt.Errorf("error occurred while updating flowlog %s datacenter %s, server %s nic %s : %w", ID, dcId, srvID, nicID, err)
+			return fmt.Errorf("error occurred while updating flowlog %s datacenter %s, server %s nic %s : %w", ID, dcID, srvID, nicID, err)
 		}
 	}
 	return nil
 }
 
-func (fw *Service) CreateOrPatchForNLB(ctx context.Context, dcId, nlbID, ID string, flowLog ionoscloud.FlowLog) error {
+func (fw *Service) CreateOrPatchForNLB(ctx context.Context, dcID, nlbID, ID string, flowLog ionoscloud.FlowLog) error {
 	if ID == "" {
-		_, _, err := fw.Client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFlowlogsPost(ctx, dcId, nlbID).NetworkLoadBalancerFlowLog(flowLog).Execute()
+		_, _, err := fw.Client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFlowlogsPost(ctx, dcID, nlbID).NetworkLoadBalancerFlowLog(flowLog).Execute()
 		if err != nil {
-			return fmt.Errorf("error occurred while creating flowlog in datacenter %s, nlb %s : %w", dcId, nlbID, err)
+			return fmt.Errorf("error occurred while creating flowlog in datacenter %s, nlb %s : %w", dcID, nlbID, err)
 		}
 	} else {
-		_, _, err := fw.Client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFlowlogsPatch(ctx, dcId, nlbID, ID).NetworkLoadBalancerFlowLogProperties(*flowLog.Properties).Execute()
+		_, _, err := fw.Client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFlowlogsPatch(ctx, dcID, nlbID, ID).NetworkLoadBalancerFlowLogProperties(*flowLog.Properties).Execute()
 		if err != nil {
-			return fmt.Errorf("error occurred while updating flowlog %s datacenter %s, nlb %s : %w", ID, dcId, nlbID, err)
+			return fmt.Errorf("error occurred while updating flowlog %s datacenter %s, nlb %s : %w", ID, dcID, nlbID, err)
 		}
 	}
 	return nil
 }
 
-func (fw *Service) CreateOrPatchForALB(ctx context.Context, dcId, albID, ID string, flowLog ionoscloud.FlowLog) error {
+func (fw *Service) CreateOrPatchForALB(ctx context.Context, dcID, albID, ID string, flowLog ionoscloud.FlowLog) error {
 	if ID == "" {
-		_, _, err := fw.Client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFlowlogsPost(ctx, dcId, albID).ApplicationLoadBalancerFlowLog(flowLog).Execute()
+		_, _, err := fw.Client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFlowlogsPost(ctx, dcID, albID).ApplicationLoadBalancerFlowLog(flowLog).Execute()
 		if err != nil {
-			return fmt.Errorf("error occurred while creating flowlog in datacenter %s, alb %s : %w", dcId, albID, err)
+			return fmt.Errorf("error occurred while creating flowlog in datacenter %s, alb %s : %w", dcID, albID, err)
 		}
 	} else {
-		_, _, err := fw.Client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFlowlogsPatch(ctx, dcId, albID, ID).ApplicationLoadBalancerFlowLogProperties(*flowLog.Properties).Execute()
+		_, _, err := fw.Client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFlowlogsPatch(ctx, dcID, albID, ID).ApplicationLoadBalancerFlowLogProperties(*flowLog.Properties).Execute()
 		if err != nil {
-			return fmt.Errorf("error occurred while updating flowlog %s, datacenter %s, alb %s : %w", ID, dcId, albID, err)
+			return fmt.Errorf("error occurred while updating flowlog %s, datacenter %s, alb %s : %w", ID, dcID, albID, err)
 		}
 	}
 	return nil
 }
 
 // GetFlowLogForALB - there can be only one flowlog per alb
-func (fw *Service) GetFlowLogForALB(ctx context.Context, dcId, albID string, depth int32) (*ionoscloud.FlowLog, *ionoscloud.APIResponse, error) {
-	flowLogs, apiResponse, err := fw.Client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFlowlogsGet(ctx, dcId, albID).Depth(depth).Execute()
+func (fw *Service) GetFlowLogForALB(ctx context.Context, dcID, albID string, depth int32) (*ionoscloud.FlowLog, *ionoscloud.APIResponse, error) {
+	flowLogs, apiResponse, err := fw.Client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFlowlogsGet(ctx, dcID, albID).Depth(depth).Execute()
 	if err != nil {
-		return nil, apiResponse, fmt.Errorf("error occurred while finding datacenter %s, alb %s : %w", dcId, albID, err)
+		return nil, apiResponse, fmt.Errorf("error occurred while finding datacenter %s, alb %s : %w", dcID, albID, err)
 	}
 	if flowLogs.Items != nil && len(*flowLogs.Items) > 0 {
 		return &(*flowLogs.Items)[0], apiResponse, nil
@@ -140,10 +140,10 @@ func (fw *Service) GetFlowLogForALB(ctx context.Context, dcId, albID string, dep
 }
 
 // Delete - this method actually does not work for now
-func (fw *Service) Delete(ctx context.Context, dcId string, srvID string, nicID, ID string) error {
-	_, err := fw.Client.FlowLogsApi.DatacentersServersNicsFlowlogsDelete(ctx, dcId, srvID, nicID, ID).Execute()
+func (fw *Service) Delete(ctx context.Context, dcID string, srvID string, nicID, ID string) error {
+	_, err := fw.Client.FlowLogsApi.DatacentersServersNicsFlowlogsDelete(ctx, dcID, srvID, nicID, ID).Execute()
 	if err != nil {
-		return fmt.Errorf("error occurred while deleting flowlog %s datacenter %s, server %s nic %s : %w", ID, dcId, srvID, nicID, err)
+		return fmt.Errorf("error occurred while deleting flowlog %s datacenter %s, server %s nic %s : %w", ID, dcID, srvID, nicID, err)
 	}
 	return nil
 }

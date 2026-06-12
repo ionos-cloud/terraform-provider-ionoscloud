@@ -26,7 +26,7 @@ func TestAccUserImportBasic(t *testing.T) {
 
 			{
 				ResourceName:            constant.UserResource + "." + constant.UserTestResource,
-				ImportStateIdFunc:       testAccUserImportStateId,
+				ImportStateIdFunc:       testAccUserImportStateID,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"password"},
@@ -35,7 +35,7 @@ func TestAccUserImportBasic(t *testing.T) {
 	})
 }
 
-func testAccUserImportStateId(s *terraform.State) (string, error) {
+func testAccUserImportStateID(s *terraform.State) (string, error) {
 	importID := ""
 
 	for _, rs := range s.RootModule().Resources {

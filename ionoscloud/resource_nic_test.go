@@ -53,44 +53,44 @@ func TestAccNicBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDataSourceNicMatchId,
+				Config: testAccDataSourceNicMatchID,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "name", constant.FullNicResourceName, "name"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "dhcp", constant.FullNicResourceName, "dhcp"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "mac", constant.FullNicResourceName, "mac"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "dhcpv6", constant.FullNicResourceName, "dhcpv6"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "ipv6_cidr_block", constant.FullNicResourceName, "ipv6_cidr_block"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "firewall_active", constant.FullNicResourceName, "firewall_active"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "firewall_type", constant.FullNicResourceName, "firewall_type"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "mac", constant.FullNicResourceName, "mac"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "pci_slot", constant.FullNicResourceName, "pci_slot"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "lan", constant.FullNicResourceName, "lan"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "ips", constant.FullNicResourceName, "ips"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "ipv6_ips", constant.FullNicResourceName, "ipv6_ips"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "flowlog.0.name", constant.FullNicResourceName, "flowlog.0.name"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "flowlog.0.action", constant.FullNicResourceName, "flowlog.0.action"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "flowlog.0.direction", constant.FullNicResourceName, "flowlog.0.direction"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "flowlog.0.bucket", constant.FullNicResourceName, "flowlog.0.bucket"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicByID, "name", constant.FullNicResourceName, "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicByID, "dhcp", constant.FullNicResourceName, "dhcp"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicByID, "mac", constant.FullNicResourceName, "mac"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicByID, "dhcpv6", constant.FullNicResourceName, "dhcpv6"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicByID, "ipv6_cidr_block", constant.FullNicResourceName, "ipv6_cidr_block"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicByID, "firewall_active", constant.FullNicResourceName, "firewall_active"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicByID, "firewall_type", constant.FullNicResourceName, "firewall_type"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicByID, "mac", constant.FullNicResourceName, "mac"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicByID, "pci_slot", constant.FullNicResourceName, "pci_slot"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicByID, "lan", constant.FullNicResourceName, "lan"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicByID, "ips", constant.FullNicResourceName, "ips"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicByID, "ipv6_ips", constant.FullNicResourceName, "ipv6_ips"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicByID, "flowlog.0.name", constant.FullNicResourceName, "flowlog.0.name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicByID, "flowlog.0.action", constant.FullNicResourceName, "flowlog.0.action"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicByID, "flowlog.0.direction", constant.FullNicResourceName, "flowlog.0.direction"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicByID, "flowlog.0.bucket", constant.FullNicResourceName, "flowlog.0.bucket"),
 				),
 			},
 			{
 				Config: testAccDataSourceNicMatchName,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "name", constant.FullNicResourceName, "name"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "dhcp", constant.FullNicResourceName, "dhcp"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "dhcpv6", constant.FullNicResourceName, "dhcpv6"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "ipv6_cidr_block", constant.FullNicResourceName, "ipv6_cidr_block"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "firewall_active", constant.FullNicResourceName, "firewall_active"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "firewall_type", constant.FullNicResourceName, "firewall_type"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "mac", constant.FullNicResourceName, "mac"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "pci_slot", constant.FullNicResourceName, "pci_slot"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "lan", constant.FullNicResourceName, "lan"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "ips", constant.FullNicResourceName, "ips"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "ipv6_ips", constant.FullNicResourceName, "ipv6_ips"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "flowlog.0.name", constant.FullNicResourceName, "flowlog.0.name"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "flowlog.0.action", constant.FullNicResourceName, "flowlog.0.action"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "flowlog.0.direction", constant.FullNicResourceName, "flowlog.0.direction"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "flowlog.0.bucket", constant.FullNicResourceName, "flowlog.0.bucket"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicByID, "name", constant.FullNicResourceName, "name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicByID, "dhcp", constant.FullNicResourceName, "dhcp"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicByID, "dhcpv6", constant.FullNicResourceName, "dhcpv6"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicByID, "ipv6_cidr_block", constant.FullNicResourceName, "ipv6_cidr_block"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicByID, "firewall_active", constant.FullNicResourceName, "firewall_active"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicByID, "firewall_type", constant.FullNicResourceName, "firewall_type"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicByID, "mac", constant.FullNicResourceName, "mac"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicByID, "pci_slot", constant.FullNicResourceName, "pci_slot"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicByID, "lan", constant.FullNicResourceName, "lan"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicByID, "ips", constant.FullNicResourceName, "ips"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicByID, "ipv6_ips", constant.FullNicResourceName, "ipv6_ips"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicByID, "flowlog.0.name", constant.FullNicResourceName, "flowlog.0.name"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicByID, "flowlog.0.action", constant.FullNicResourceName, "flowlog.0.action"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicByID, "flowlog.0.direction", constant.FullNicResourceName, "flowlog.0.direction"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicByID, "flowlog.0.bucket", constant.FullNicResourceName, "flowlog.0.bucket"),
 				),
 			},
 			{
@@ -98,7 +98,7 @@ func TestAccNicBasic(t *testing.T) {
 				ExpectError: regexp.MustCompile(`no nic found with the specified criteria: name`),
 			},
 			{
-				Config:      testAccDataSourceNicMatchIdAndNameError,
+				Config:      testAccDataSourceNicMatchIDAndNameError,
 				ExpectError: regexp.MustCompile(`does not match expected name`),
 			},
 			{
@@ -118,8 +118,8 @@ func TestAccNicBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.FullNicResourceName, "firewall_active", "false"),
 					resource.TestCheckResourceAttr(constant.FullNicResourceName, "firewall_type", "BIDIRECTIONAL"),
 					resource.TestCheckResourceAttr(constant.FullNicResourceName, "security_groups_ids.#", "1"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "ipv6_cidr_block", constant.FullNicResourceName, "ipv6_cidr_block"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "ipv6_ips", constant.FullNicResourceName, "ipv6_ips"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicByID, "ipv6_cidr_block", constant.FullNicResourceName, "ipv6_cidr_block"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicByID, "ipv6_ips", constant.FullNicResourceName, "ipv6_ips"),
 					// Check if the IP is in the set of IPs, the order does not matter.
 					resource.TestCheckTypeSetElemAttrPair(constant.FullNicResourceName, "ips.*", "ionoscloud_ipblock.test_server", "ips.0"),
 					resource.TestCheckTypeSetElemAttrPair(constant.FullNicResourceName, "ips.*", "ionoscloud_ipblock.test_server", "ips.1"),
@@ -135,8 +135,8 @@ func TestAccNicBasic(t *testing.T) {
 			{
 				Config: testAccCheckNicConfigUpdateIpv6,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "ipv6_cidr_block", constant.FullNicResourceName, "ipv6_cidr_block"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicById, "ipv6_ips", constant.FullNicResourceName, "ipv6_ips"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicByID, "ipv6_cidr_block", constant.FullNicResourceName, "ipv6_cidr_block"),
+					resource.TestCheckResourceAttrPair(constant.DataSource+"."+dataSourceNicByID, "ipv6_ips", constant.FullNicResourceName, "ipv6_ips"),
 					resource.TestCheckNoResourceAttr(constant.FullNicResourceName, "flowlog.%"),
 				),
 			},
@@ -155,8 +155,8 @@ func testAccCheckNicDestroyCheck(s *terraform.State) error {
 			continue
 		}
 
-		dcId := rs.Primary.Attributes["datacenter_id"]
-		serverId := rs.Primary.Attributes["server_id"]
+		dcID := rs.Primary.Attributes["datacenter_id"]
+		serverID := rs.Primary.Attributes["server_id"]
 		location := rs.Primary.Attributes["location"]
 		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 		if err != nil {
@@ -164,7 +164,7 @@ func testAccCheckNicDestroyCheck(s *terraform.State) error {
 		}
 
 		_, apiResponse, err := client.NetworkInterfacesApi.
-			DatacentersServersNicsFindById(ctx, dcId, serverId, rs.Primary.ID).
+			DatacentersServersNicsFindById(ctx, dcID, serverID, rs.Primary.ID).
 			Execute()
 
 		if err != nil {
@@ -194,15 +194,15 @@ func testAccCheckNICExists(n string, nic *ionoscloud.Nic) resource.TestCheckFunc
 		if cancel != nil {
 			defer cancel()
 		}
-		dcId := rs.Primary.Attributes["datacenter_id"]
-		serverId := rs.Primary.Attributes["server_id"]
+		dcID := rs.Primary.Attributes["datacenter_id"]
+		serverID := rs.Primary.Attributes["server_id"]
 		location := rs.Primary.Attributes["location"]
 		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 		if err != nil {
 			return err
 		}
 
-		foundNic, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, dcId, serverId, rs.Primary.ID).Execute()
+		foundNic, apiResponse, err := client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, dcID, serverID, rs.Primary.ID).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
@@ -347,9 +347,9 @@ data ` + constant.NicResource + ` test_nic_data {
 }
 `
 
-const dataSourceNicById = constant.NicResource + ".test_nic_data"
+const dataSourceNicByID = constant.NicResource + ".test_nic_data"
 
-const testAccDataSourceNicMatchId = testAccCheckNicConfigBasic + `
+const testAccDataSourceNicMatchID = testAccCheckNicConfigBasic + `
 data ` + constant.NicResource + ` test_nic_data {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
@@ -371,7 +371,7 @@ data ` + constant.NicResource + ` test_nic_data {
   name = "DoesNotExist"
 }`
 
-const testAccDataSourceNicMatchIdAndNameError = testAccCheckNicConfigBasic + `
+const testAccDataSourceNicMatchIDAndNameError = testAccCheckNicConfigBasic + `
 data ` + constant.NicResource + ` test_nic_data {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id

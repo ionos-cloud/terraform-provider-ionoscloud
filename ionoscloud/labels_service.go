@@ -51,11 +51,11 @@ type LabelsService struct {
 	client *ionoscloud.APIClient
 }
 
-func (ls *LabelsService) datacentersServersLabelsGet(datacenterId, serverId string, isDataSource bool) ([]Label, error) {
-	labelsResponse, apiResponse, err := ls.client.LabelsApi.DatacentersServersLabelsGet(ls.ctx, datacenterId, serverId).Depth(1).Execute()
+func (ls *LabelsService) datacentersServersLabelsGet(datacenterID, serverID string, isDataSource bool) ([]Label, error) {
+	labelsResponse, apiResponse, err := ls.client.LabelsApi.DatacentersServersLabelsGet(ls.ctx, datacenterID, serverID).Depth(1).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
-		return nil, fmt.Errorf("error occurred while fetching labels for server with ID: %s, datacenter ID: %s, error: %w", serverId, datacenterId, err)
+		return nil, fmt.Errorf("error occurred while fetching labels for server with ID: %s, datacenter ID: %s, error: %w", serverID, datacenterID, err)
 	}
 	labels, err := processLabelsData(labelsResponse, isDataSource)
 	if err != nil {
@@ -64,7 +64,7 @@ func (ls *LabelsService) datacentersServersLabelsGet(datacenterId, serverId stri
 	return labels, nil
 }
 
-func (ls *LabelsService) datacentersServersLabelsCreate(datacenterId, serverId string, labelsData any) error {
+func (ls *LabelsService) datacentersServersLabelsCreate(datacenterID, serverID string, labelsData any) error {
 	if labelsData, ok := labelsData.(*schema.Set); ok {
 		for _, labelData := range labelsData.List() {
 			if label, ok := labelData.(map[string]any); ok {
@@ -73,10 +73,10 @@ func (ls *LabelsService) datacentersServersLabelsCreate(datacenterId, serverId s
 				labelResource := ionoscloud.LabelResource{
 					Properties: &ionoscloud.LabelResourceProperties{Key: &labelKey, Value: &labelValue},
 				}
-				_, apiResponse, err := ls.client.LabelsApi.DatacentersServersLabelsPost(ls.ctx, datacenterId, serverId).Label(labelResource).Execute()
+				_, apiResponse, err := ls.client.LabelsApi.DatacentersServersLabelsPost(ls.ctx, datacenterID, serverID).Label(labelResource).Execute()
 				apiResponse.LogInfo()
 				if err != nil {
-					return fmt.Errorf("error occurred while creating label for server with ID: %s, datacenter ID: %s, error: (%w)", serverId, datacenterId, err)
+					return fmt.Errorf("error occurred while creating label for server with ID: %s, datacenter ID: %s, error: (%w)", serverID, datacenterID, err)
 				}
 			}
 		}
@@ -84,18 +84,18 @@ func (ls *LabelsService) datacentersServersLabelsCreate(datacenterId, serverId s
 	return nil
 }
 
-func (ls *LabelsService) datacentersServersLabelsDelete(datacenterId, serverId string, labelsData any) error {
+func (ls *LabelsService) datacentersServersLabelsDelete(datacenterID, serverID string, labelsData any) error {
 	if labelsData, ok := labelsData.(*schema.Set); ok {
 		for _, labelData := range labelsData.List() {
 			if label, ok := labelData.(map[string]any); ok {
 				labelKey := label["key"].(string)
-				apiResponse, err := ls.client.LabelsApi.DatacentersServersLabelsDelete(ls.ctx, datacenterId, serverId, labelKey).Execute()
+				apiResponse, err := ls.client.LabelsApi.DatacentersServersLabelsDelete(ls.ctx, datacenterID, serverID, labelKey).Execute()
 				apiResponse.LogInfo()
 				if err != nil {
 					if httpNotFound(apiResponse) {
-						tflog.Warn(ls.ctx, "label has been already removed from server", map[string]any{"key": labelKey, "server_id": serverId})
+						tflog.Warn(ls.ctx, "label has been already removed from server", map[string]any{"key": labelKey, "server_id": serverID})
 					} else {
-						return fmt.Errorf("[label update] an error occurred while deleting label with key: %s, server ID: %s, error: %w", labelKey, serverId, err)
+						return fmt.Errorf("[label update] an error occurred while deleting label with key: %s, server ID: %s, error: %w", labelKey, serverID, err)
 					}
 				}
 			}

@@ -45,9 +45,9 @@ func ResourceCommonServerDelete(ctx context.Context, d *schema.ResourceData, met
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	dcId := d.Get("datacenter_id").(string)
+	dcID := d.Get("datacenter_id").(string)
 
-	apiResponse, err := client.ServersApi.DatacentersServersDelete(ctx, dcId, d.Id()).Execute()
+	apiResponse, err := client.ServersApi.DatacentersServersDelete(ctx, dcID, d.Id()).Execute()
 	if apiResponse != nil {
 		tflog.Debug(ctx, "api request completed", map[string]any{
 			"request_time": apiResponse.RequestTime.String(),

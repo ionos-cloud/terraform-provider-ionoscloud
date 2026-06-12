@@ -10,26 +10,26 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
-func (c *PsqlClient) CreateDatabase(ctx context.Context, clusterId string, database pgsql.Database) (pgsql.DatabaseResource, *shared.APIResponse, error) {
-	databaseResponse, apiResponse, err := c.sdkClient.DatabasesApi.DatabasesPost(ctx, clusterId).Database(database).Execute()
+func (c *PsqlClient) CreateDatabase(ctx context.Context, clusterID string, database pgsql.Database) (pgsql.DatabaseResource, *shared.APIResponse, error) {
+	databaseResponse, apiResponse, err := c.sdkClient.DatabasesApi.DatabasesPost(ctx, clusterID).Database(database).Execute()
 	apiResponse.LogInfo()
 	return databaseResponse, apiResponse, err
 }
 
-func (c *PsqlClient) DeleteDatabase(ctx context.Context, clusterId, name string) (*shared.APIResponse, error) {
-	apiResponse, err := c.sdkClient.DatabasesApi.DatabasesDelete(ctx, clusterId, name).Execute()
+func (c *PsqlClient) DeleteDatabase(ctx context.Context, clusterID, name string) (*shared.APIResponse, error) {
+	apiResponse, err := c.sdkClient.DatabasesApi.DatabasesDelete(ctx, clusterID, name).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
 }
 
-func (c *PsqlClient) FindDatabaseByName(ctx context.Context, clusterId, name string) (pgsql.DatabaseResource, *shared.APIResponse, error) {
-	database, apiResponse, err := c.sdkClient.DatabasesApi.DatabasesGet(ctx, clusterId, name).Execute()
+func (c *PsqlClient) FindDatabaseByName(ctx context.Context, clusterID, name string) (pgsql.DatabaseResource, *shared.APIResponse, error) {
+	database, apiResponse, err := c.sdkClient.DatabasesApi.DatabasesGet(ctx, clusterID, name).Execute()
 	apiResponse.LogInfo()
 	return database, apiResponse, err
 }
 
-func (c *PsqlClient) GetDatabases(ctx context.Context, clusterId string) (pgsql.DatabaseList, *shared.APIResponse, error) {
-	databases, apiResponse, err := c.sdkClient.DatabasesApi.DatabasesList(ctx, clusterId).Execute()
+func (c *PsqlClient) GetDatabases(ctx context.Context, clusterID string) (pgsql.DatabaseList, *shared.APIResponse, error) {
+	databases, apiResponse, err := c.sdkClient.DatabasesApi.DatabasesList(ctx, clusterID).Execute()
 	apiResponse.LogInfo()
 	return databases, apiResponse, err
 }

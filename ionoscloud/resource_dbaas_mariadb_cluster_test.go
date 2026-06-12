@@ -75,7 +75,7 @@ func TestAccDBaaSMariaDBClusterBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: mariaDBClusterDataSourceMatchId,
+				Config: mariaDBClusterDataSourceMatchID,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestDataSourceById, clusterVersionAttribute, clusterVersionValue),
 					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.DBaaSMariaDBClusterResource+"."+constant.DBaaSClusterTestDataSourceById, clusterInstancesAttribute, clusterInstancesValue),
@@ -123,7 +123,7 @@ func TestAccDBaaSMariaDBClusterBasic(t *testing.T) {
 				ExpectError: regexp.MustCompile("no MariaDB cluster found with the specified display name"),
 			},
 			{
-				Config:      mariaDBClusterDataSourceWrongId,
+				Config:      mariaDBClusterDataSourceWrongID,
 				ExpectError: regexp.MustCompile("an error occurred while fetching the MariaDB cluster with ID"),
 			},
 			{
@@ -314,7 +314,7 @@ resource ` + constant.DBaaSMariaDBClusterResource + ` ` + constant.DBaaSClusterT
 }
 `
 
-const mariaDBClusterDataSourceMatchId = mariaDBClusterConfigBasic + `
+const mariaDBClusterDataSourceMatchID = mariaDBClusterConfigBasic + `
 data ` + constant.DBaaSMariaDBClusterResource + ` ` + constant.DBaaSClusterTestDataSourceById + ` {
 	id = ` + constant.DBaaSMariaDBClusterResource + `.` + constant.DBaaSClusterTestResource + `.id
     ` + clusterLocationAttribute + ` = "` + clusterLocationValue + `"
@@ -344,7 +344,7 @@ data ` + constant.DBaaSMariaDBClusterResource + ` ` + constant.DBaaSClusterTestD
 `
 
 // Any valid UUID can be used here since there is no cluster created, so no cluster will be found
-const mariaDBClusterDataSourceWrongId = `
+const mariaDBClusterDataSourceWrongID = `
 data ` + constant.DBaaSMariaDBClusterResource + ` ` + constant.DBaaSClusterTestDataSourceById + ` {
   id = "178d6a7d-5ed4-44de-88f0-27f1182d8ae8"
   ` + clusterLocationAttribute + ` = "` + clusterLocationValue + `"

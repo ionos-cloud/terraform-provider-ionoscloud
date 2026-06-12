@@ -25,7 +25,7 @@ func TestAccSnapshotImportBasic(t *testing.T) {
 
 			{
 				ResourceName:            constant.SnapshotResource + "." + constant.SnapshotTestResource,
-				ImportStateIdFunc:       testAccSnapshotImportStateId,
+				ImportStateIdFunc:       testAccSnapshotImportStateID,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"datacenter_id", "volume_id", "location"},
@@ -34,7 +34,7 @@ func TestAccSnapshotImportBasic(t *testing.T) {
 	})
 }
 
-func testAccSnapshotImportStateId(s *terraform.State) (string, error) {
+func testAccSnapshotImportStateID(s *terraform.State) (string, error) {
 	importID := ""
 
 	for _, rs := range s.RootModule().Resources {

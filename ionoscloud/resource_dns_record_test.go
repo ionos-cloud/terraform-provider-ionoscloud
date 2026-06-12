@@ -120,15 +120,15 @@ func testAccDNSRecordDestroyCheck(s *terraform.State) error {
 		if rs.Type != constant.DNSRecordResource {
 			continue
 		}
-		zoneId := rs.Primary.Attributes["zone_id"]
-		recordId := rs.Primary.ID
-		_, apiResponse, err := client.GetRecordById(ctx, zoneId, recordId)
+		zoneID := rs.Primary.Attributes["zone_id"]
+		recordID := rs.Primary.ID
+		_, apiResponse, err := client.GetRecordById(ctx, zoneID, recordID)
 		if err != nil {
 			if !apiResponse.HttpNotFound() {
-				return fmt.Errorf("an error occurred while checking the destruction of DNS Record with ID: %s, zone ID: %s, error: %w", recordId, zoneId, err)
+				return fmt.Errorf("an error occurred while checking the destruction of DNS Record with ID: %s, zone ID: %s, error: %w", recordID, zoneID, err)
 			}
 		} else {
-			return fmt.Errorf("DNS Record with ID: %s still exists, zone ID: %s", recordId, zoneId)
+			return fmt.Errorf("DNS Record with ID: %s still exists, zone ID: %s", recordID, zoneID)
 		}
 	}
 	return nil
@@ -147,11 +147,11 @@ func testAccDNSRecordExistenceCheck(path string, record *dns.RecordRead) resourc
 		}
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 		defer cancel()
-		zoneId := rs.Primary.Attributes["zone_id"]
-		recordId := rs.Primary.ID
-		recordResponse, _, err := client.GetRecordById(ctx, zoneId, recordId)
+		zoneID := rs.Primary.Attributes["zone_id"]
+		recordID := rs.Primary.ID
+		recordResponse, _, err := client.GetRecordById(ctx, zoneID, recordID)
 		if err != nil {
-			return fmt.Errorf("an error occurred while fetching DNS Record with ID: %s, zone ID: %s, error: %w", recordId, zoneId, err)
+			return fmt.Errorf("an error occurred while fetching DNS Record with ID: %s, zone ID: %s, error: %w", recordID, zoneID, err)
 		}
 		record = &recordResponse
 		return nil

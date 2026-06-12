@@ -73,18 +73,18 @@ func testAccCheckShareDestroyCheck(s *terraform.State) error {
 			continue
 		}
 
-		grpId := rs.Primary.Attributes["group_id"]
-		resourceId := rs.Primary.Attributes["resource_id"]
+		grpID := rs.Primary.Attributes["group_id"]
+		resourceID := rs.Primary.Attributes["resource_id"]
 
-		_, apiResponse, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(ctx, grpId, resourceId).Execute()
+		_, apiResponse, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(ctx, grpID, resourceID).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
 			if !httpNotFound(apiResponse) {
-				return fmt.Errorf("an error occurred while checking the destruction of resource %s in group %s: %w", resourceId, grpId, err)
+				return fmt.Errorf("an error occurred while checking the destruction of resource %s in group %s: %w", resourceID, grpID, err)
 			}
 		} else {
-			return fmt.Errorf("share for resource %s still exists in group %s", resourceId, grpId)
+			return fmt.Errorf("share for resource %s still exists in group %s", resourceID, grpID)
 		}
 
 	}
@@ -109,9 +109,9 @@ func testAccCheckShareExists(n string, share *ionoscloud.GroupShare) resource.Te
 			return fmt.Errorf("no Record ID is set")
 		}
 
-		grpId := rs.Primary.Attributes["group_id"]
-		resourceId := rs.Primary.Attributes["resource_id"]
-		foundshare, apiResponse, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(context.TODO(), grpId, resourceId).Execute()
+		grpID := rs.Primary.Attributes["group_id"]
+		resourceID := rs.Primary.Attributes["resource_id"]
+		foundshare, apiResponse, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(context.TODO(), grpID, resourceID).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {

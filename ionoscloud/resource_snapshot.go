@@ -138,8 +138,8 @@ func resourceSnapshotCreate(ctx context.Context, d *schema.ResourceData, meta an
 		return diag.FromErr(err)
 	}
 
-	dcId := d.Get("datacenter_id").(string)
-	volumeId := d.Get("volume_id").(string)
+	dcID := d.Get("datacenter_id").(string)
+	volumeID := d.Get("volume_id").(string)
 	name := d.Get("name").(string)
 	snapshot := ionoscloud.NewCreateSnapshot()
 	snapshot.Properties = ionoscloud.NewCreateSnapshotProperties()
@@ -154,7 +154,7 @@ func resourceSnapshotCreate(ctx context.Context, d *schema.ResourceData, meta an
 	if v, ok := d.GetOk("sec_auth_protection"); ok {
 		props.SecAuthProtection = new(v.(bool))
 	}
-	rsp, apiResponse, err := client.VolumesApi.DatacentersVolumesCreateSnapshotPost(ctx, dcId, volumeId).Snapshot(*snapshot).Execute()
+	rsp, apiResponse, err := client.VolumesApi.DatacentersVolumesCreateSnapshotPost(ctx, dcID, volumeID).Snapshot(*snapshot).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		requestLocation, _ := apiResponse.SafeLocation()

@@ -472,7 +472,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta any)
 		return diag.FromErr(err)
 	}
 
-	datacenterId := d.Get("datacenter_id").(string)
+	datacenterID := d.Get("datacenter_id").(string)
 
 	serverReq, err := initializeCreateRequests(d)
 	if err != nil {
@@ -581,7 +581,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta any)
 		}
 	}
 
-	postServer, apiResponse, err := client.ServersApi.DatacentersServersPost(ctx, datacenterId).Server(serverReq).Execute()
+	postServer, apiResponse, err := client.ServersApi.DatacentersServersPost(ctx, datacenterID).Server(serverReq).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		requestLocation, _ := apiResponse.SafeLocation()
@@ -610,12 +610,12 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta any)
 
 	// Logic for labels creation
 	ls := LabelsService{ctx: ctx, client: client}
-	if err := ls.datacentersServersLabelsCreate(datacenterId, *postServer.Id, d.Get("label")); err != nil {
+	if err := ls.datacentersServersLabelsCreate(datacenterID, *postServer.Id, d.Get("label")); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
 
 	// get additional data for schema
-	foundServer, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, datacenterId, *postServer.Id).Depth(4).Execute()
+	foundServer, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, datacenterID, *postServer.Id).Depth(4).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -626,7 +626,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta any)
 		if len(*foundServer.Entities.Nics.Items) > 0 {
 			// what we get from backend
 			foundFirstNic := (*foundServer.Entities.Nics.Items)[0]
-			var orderedRuleIds []string
+			var orderedRuleIDs []string
 			if foundFirstNic.Entities != nil && foundFirstNic.Entities.Firewallrules != nil && foundFirstNic.Entities.Firewallrules.Items != nil {
 				// Finding a NIC does not guarantee that we have sent one. In some scenarios, the API automatically creates a NIC.
 				// This check fixes Github issue #872.
@@ -637,15 +637,15 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta any)
 					if sentFirstNic.Entities != nil && sentFirstNic.Entities.Firewallrules != nil && sentFirstNic.Entities.Firewallrules.Items != nil {
 						sentRules := *sentFirstNic.Entities.Firewallrules.Items
 						foundRules := *foundFirstNic.Entities.Firewallrules.Items
-						orderedRuleIds = cloudapifirewall.ExtractOrderedFirewallIds(foundRules, sentRules)
-						if len(orderedRuleIds) > 0 {
-							if err := d.Set("firewallrule_id", orderedRuleIds[0]); err != nil {
+						orderedRuleIDs = cloudapifirewall.ExtractOrderedFirewallIDs(foundRules, sentRules)
+						if len(orderedRuleIDs) > 0 {
+							if err := d.Set("firewallrule_id", orderedRuleIDs[0]); err != nil {
 								return diagutil.ToDiags(d, err, nil)
 							}
 						}
 					}
-					if len(orderedRuleIds) > 0 {
-						if err := cloudapifirewall.SetIdsInSchema(d, orderedRuleIds); err != nil {
+					if len(orderedRuleIDs) > 0 {
+						if err := cloudapifirewall.SetIdsInSchema(d, orderedRuleIDs); err != nil {
 							return diagutil.ToDiags(d, err, nil)
 						}
 					}
@@ -706,12 +706,12 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta any)
 
 	// Set inline volumes
 	if foundServer.Entities.Volumes != nil && foundServer.Entities.Volumes.Items != nil {
-		var inlineVolumeIds []string
+		var inlineVolumeIDs []string
 		for _, volume := range *foundServer.Entities.Volumes.Items {
-			inlineVolumeIds = append(inlineVolumeIds, *volume.Id)
+			inlineVolumeIDs = append(inlineVolumeIDs, *volume.Id)
 		}
 
-		if err := d.Set("inline_volume_ids", inlineVolumeIds); err != nil {
+		if err := d.Set("inline_volume_ids", inlineVolumeIDs); err != nil {
 			return diagutil.ToDiags(d, utils.GenerateSetError("server", "inline_volume_ids", err), nil)
 		}
 	}
@@ -721,7 +721,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta any)
 		initialState := initialState.(string)
 
 		if !strings.EqualFold(initialState, constant.VMStateStart) {
-			err := ss.Stop(ctx, datacenterId, d.Id(), serverType)
+			err := ss.Stop(ctx, datacenterID, d.Id(), serverType)
 			if err != nil {
 				return diagutil.ToDiags(d, err, nil)
 			}
@@ -738,14 +738,14 @@ func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta any) d
 		return diag.FromErr(err)
 	}
 
-	dcId := d.Get("datacenter_id").(string)
-	serverId := d.Id()
+	dcID := d.Get("datacenter_id").(string)
+	serverID := d.Id()
 
-	server, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, dcId, serverId).Depth(4).Execute()
+	server, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, dcID, serverID).Depth(4).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		if httpNotFound(apiResponse) {
-			tflog.Debug(ctx, "cannot find server by id", map[string]any{"server_id": serverId})
+			tflog.Debug(ctx, "cannot find server by id", map[string]any{"server_id": serverID})
 			d.SetId("")
 			return nil
 		}
@@ -802,10 +802,10 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta any)
 	}
 	ss := cloudapiserver.Service{Client: client, Meta: meta, D: d}
 
-	dcId := d.Get("datacenter_id").(string)
+	dcID := d.Get("datacenter_id").(string)
 	request := ionoscloud.ServerProperties{}
 
-	currentVmState, err := ss.GetVmState(ctx, dcId, d.Id())
+	currentVmState, err := ss.GetVmState(ctx, dcID, d.Id())
 	if err != nil {
 		return diagutil.ToDiags(d, fmt.Errorf("could not retrieve server vmState: %w", err), nil)
 	}
@@ -815,7 +815,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta any)
 
 	if d.HasChange("vm_state") {
 		_, newState := d.GetChange("vm_state")
-		err := ss.UpdateVmState(ctx, dcId, d.Id(), newState.(string))
+		err := ss.UpdateVmState(ctx, dcID, d.Id(), newState.(string))
 		if err != nil && !errors.Is(err, cloudapiserver.ErrSuspendCubeLast) {
 			return diagutil.ToDiags(d, err, nil)
 		}
@@ -859,7 +859,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta any)
 
 		if utils.IsValidUUID(bootCdrom) {
 			ss := cloudapiserver.Service{Client: client, Meta: meta, D: d}
-			ss.UpdateBootDevice(ctx, dcId, d.Id(), bootCdrom)
+			ss.UpdateBootDevice(ctx, dcID, d.Id(), bootCdrom)
 		}
 	}
 
@@ -869,7 +869,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta any)
 		request.NicMultiQueue = &nicMultiQueue
 	}
 
-	server, apiResponse, err := client.ServersApi.DatacentersServersPatch(ctx, dcId, d.Id()).Server(request).Depth(3).Execute()
+	server, apiResponse, err := client.ServersApi.DatacentersServersPatch(ctx, dcID, d.Id()).Server(request).Depth(3).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -894,18 +894,18 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta any)
 	// Volume stuff
 	if d.HasChange("volume") {
 		properties := ionoscloud.VolumeProperties{}
-		inlineVolumeIds := d.Get("inline_volume_ids")
+		inlineVolumeIDs := d.Get("inline_volume_ids")
 
-		if inlineVolumeIds != nil {
-			inlineVolumeIds := inlineVolumeIds.([]any)
-			for i, volumeId := range inlineVolumeIds {
-				volumeIdStr := volumeId.(string)
+		if inlineVolumeIDs != nil {
+			inlineVolumeIDs := inlineVolumeIDs.([]any)
+			for i, volumeID := range inlineVolumeIDs {
+				volumeIDStr := volumeID.(string)
 				volumePath := fmt.Sprintf("volume.%d.", i)
-				_, apiResponse, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, dcId, d.Id(), volumeIdStr).Execute()
+				_, apiResponse, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, dcID, d.Id(), volumeIDStr).Execute()
 				logApiRequestTime(apiResponse)
 				if err != nil {
 					requestLocation, _ := apiResponse.SafeLocation()
-					return diagutil.ToDiags(d, fmt.Errorf("an error occurred while getting a volume dcId: %s ID: %s Response: %w", dcId, volumeId, err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
+					return diagutil.ToDiags(d, fmt.Errorf("an error occurred while getting a volume dcID: %s ID: %s Response: %w", dcID, volumeID, err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 				}
 				if v, ok := d.GetOk(volumePath + "name"); ok {
 					vStr := v.(string)
@@ -930,7 +930,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta any)
 					properties.RequireLegacyBios = &requireLegacyBios
 				}
 
-				_, apiResponse, err = client.VolumesApi.DatacentersVolumesPatch(ctx, d.Get("datacenter_id").(string), volumeIdStr).Volume(properties).Execute()
+				_, apiResponse, err = client.VolumesApi.DatacentersVolumesPatch(ctx, d.Get("datacenter_id").(string), volumeIDStr).Volume(properties).Execute()
 				logApiRequestTime(apiResponse)
 
 				if err != nil {
@@ -1035,7 +1035,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta any)
 			if nic != nil && nic.Id != nil {
 				nicID = *nic.Id
 			}
-			firewallRules, fwRuleIds, diagResp := fs.GetAndUpdateFirewalls(ctx, dcId, *server.Id, nicID, firstNicFirewallPath)
+			firewallRules, fwRuleIDs, diagResp := fs.GetAndUpdateFirewalls(ctx, dcID, *server.Id, nicID, firstNicFirewallPath)
 			if diagResp != nil {
 				return diagResp
 			}
@@ -1080,9 +1080,9 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta any)
 				if err != nil {
 					return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching firewall rules: %w", err), nil)
 				}
-				fwRuleIds = cloudapifirewall.ExtractOrderedFirewallIds(foundRules, firewallRules)
+				fwRuleIDs = cloudapifirewall.ExtractOrderedFirewallIDs(foundRules, firewallRules)
 			}
-			if err := cloudapifirewall.SetIdsInSchema(d, fwRuleIds); err != nil {
+			if err := cloudapifirewall.SetIdsInSchema(d, fwRuleIDs); err != nil {
 				return diagutil.ToDiags(d, err, nil)
 			}
 
@@ -1104,25 +1104,25 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta any)
 		labelsToBeCreated := newLabelsData.(*schema.Set).Difference(oldLabelsData.(*schema.Set))
 		labelsToBeDeleted := oldLabelsData.(*schema.Set).Difference(newLabelsData.(*schema.Set))
 
-		if err := ls.datacentersServersLabelsDelete(dcId, d.Id(), labelsToBeDeleted); err != nil {
+		if err := ls.datacentersServersLabelsDelete(dcID, d.Id(), labelsToBeDeleted); err != nil {
 			return diagutil.ToDiags(d, err, nil)
 		}
 
-		if err := ls.datacentersServersLabelsCreate(dcId, d.Id(), labelsToBeCreated); err != nil {
+		if err := ls.datacentersServersLabelsCreate(dcID, d.Id(), labelsToBeCreated); err != nil {
 			return diagutil.ToDiags(d, err, nil)
 		}
 	}
 
 	// Suspend a Cube server last, after applying other changes
 	if d.HasChange("vm_state") {
-		serverType, err := ss.GetServerType(ctx, dcId, d.Id())
+		serverType, err := ss.GetServerType(ctx, dcID, d.Id())
 		if err != nil {
 			return diagutil.ToDiags(d, err, nil)
 		}
 
 		_, newVmState := d.GetChange("vm_state")
 		if strings.EqualFold(serverType, constant.CubeType) && strings.EqualFold(newVmState.(string), constant.CubeVMStateStop) {
-			err := ss.Stop(ctx, dcId, d.Id(), constant.CubeType)
+			err := ss.Stop(ctx, dcID, d.Id(), constant.CubeType)
 			if err != nil {
 				return diagutil.ToDiags(d, err, nil)
 			}
@@ -1133,19 +1133,19 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta any)
 }
 
 func deleteInlineVolumes(ctx context.Context, d *schema.ResourceData, meta any, client *ionoscloud.APIClient) diag.Diagnostics {
-	dcId := d.Get("datacenter_id").(string)
+	dcID := d.Get("datacenter_id").(string)
 
-	volumeIds := d.Get("inline_volume_ids").([]any)
-	for _, volumeId := range volumeIds {
-		apiResponse, err := client.VolumesApi.DatacentersVolumesDelete(ctx, dcId, volumeId.(string)).Execute()
+	volumeIDs := d.Get("inline_volume_ids").([]any)
+	for _, volumeID := range volumeIDs {
+		apiResponse, err := client.VolumesApi.DatacentersVolumesDelete(ctx, dcID, volumeID.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
 			if apiResponse.HttpNotFound() {
-				tflog.Info(ctx, "volume not found during deletion", map[string]any{"volume_id": volumeId.(string), "datacenter_id": dcId, "server_id": d.Id()})
+				tflog.Info(ctx, "volume not found during deletion", map[string]any{"volume_id": volumeID.(string), "datacenter_id": dcID, "server_id": d.Id()})
 				continue
 			}
 			requestLocation, _ := apiResponse.SafeLocation()
-			return diagutil.ToDiags(d, fmt.Errorf("error occurred while deleting volume with ID: %s %w", volumeId.(string), err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
+			return diagutil.ToDiags(d, fmt.Errorf("error occurred while deleting volume with ID: %s %w", volumeID.(string), err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 		}
 
 		if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
@@ -1163,9 +1163,9 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta any)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	dcId := d.Get("datacenter_id").(string)
+	dcID := d.Get("datacenter_id").(string)
 	// A bigger depth is required since we need all volumes items.
-	server, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, dcId, d.Id()).Depth(2).Execute()
+	server, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, dcID, d.Id()).Depth(2).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -1180,7 +1180,7 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta any)
 		}
 	}
 
-	apiResponse, err = client.ServersApi.DatacentersServersDelete(ctx, dcId, d.Id()).Execute()
+	apiResponse, err = client.ServersApi.DatacentersServersDelete(ctx, dcID, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		requestLocation, _ := apiResponse.SafeLocation()
@@ -1213,31 +1213,31 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta any)
 		return nil, diagutil.ToError(d, fmt.Errorf("failed validating import identifier %q: %w", importID, err), nil)
 	}
 
-	datacenterId := parts[0]
-	serverId := parts[1]
+	datacenterID := parts[0]
+	serverID := parts[1]
 
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return nil, err
 	}
 
-	server, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, datacenterId, serverId).Depth(3).Execute()
+	server, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, datacenterID, serverID).Depth(3).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("unable to find server %q", serverId), nil)
+			return nil, diagutil.ToError(d, fmt.Errorf("unable to find server %q", serverID), nil)
 		}
 		return nil, diagutil.ToError(d, fmt.Errorf("error occurred while fetching a server ID %s %w", importID, err), nil)
 	}
 	var primaryNic ionoscloud.Nic
 	d.SetId(*server.Id)
-	primaryNicId := ""
+	primaryNicID := ""
 	// first we try to get primary nic from parts, then if that fails, we get it from entities.
 	if len(parts) > 2 {
-		primaryNicId = parts[2]
-		if err := d.Set("primary_nic", primaryNicId); err != nil {
+		primaryNicID = parts[2]
+		if err := d.Set("primary_nic", primaryNicID); err != nil {
 			return nil, diagutil.ToError(d, fmt.Errorf("error setting primary_nic id %w", err), nil)
 		}
 	} else {
@@ -1245,10 +1245,10 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta any)
 			primaryNic = (*server.Entities.Nics.Items)[0]
 		}
 	}
-	if primaryNicId != "" {
+	if primaryNicID != "" {
 		if server.Entities != nil && server.Entities.Nics != nil && server.Entities.Nics.Items != nil {
 			for _, nic := range *server.Entities.Nics.Items {
-				if *nic.Id == primaryNicId {
+				if *nic.Id == primaryNicID {
 					primaryNic = nic
 					if primaryNic.Properties != nil && *nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
 						tflog.Debug(ctx, "setting primary_ip", map[string]any{"primary_ip": (*primaryNic.Properties.Ips)[0]})
@@ -1262,7 +1262,7 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta any)
 		}
 	}
 
-	if err := d.Set("datacenter_id", datacenterId); err != nil {
+	if err := d.Set("datacenter_id", datacenterID); err != nil {
 		return nil, diagutil.ToError(d, err, nil)
 	}
 	if err := d.Set("location", location); err != nil {
@@ -1427,15 +1427,15 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 	if _, ok := d.GetOk("inline_volume_ids"); !ok {
 		if bootVolumeItf, ok := d.GetOk("boot_volume"); ok {
 			bootVolume := bootVolumeItf.(string)
-			var inlineVolumeIds []string
-			inlineVolumeIds = append(inlineVolumeIds, bootVolume)
-			if err := d.Set("inline_volume_ids", inlineVolumeIds); err != nil {
+			var inlineVolumeIDs []string
+			inlineVolumeIDs = append(inlineVolumeIDs, bootVolume)
+			if err := d.Set("inline_volume_ids", inlineVolumeIDs); err != nil {
 				return utils.GenerateSetError("server", "inline_volume_ids", err)
 			}
 		}
 	}
 
-	datacenterId := d.Get("datacenter_id").(string)
+	datacenterID := d.Get("datacenter_id").(string)
 	if server.Properties != nil {
 		if server.Properties.Name != nil {
 			if err := d.Set("name", *server.Properties.Name); err != nil {
@@ -1522,16 +1522,16 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 		return fmt.Errorf("server entities cannot be empty for %s", d.Id())
 	}
 
-	inlineVolumeIds := d.Get("inline_volume_ids")
-	if inlineVolumeIds != nil {
-		inlineVolumeIds := inlineVolumeIds.([]any)
+	inlineVolumeIDs := d.Get("inline_volume_ids")
+	if inlineVolumeIDs != nil {
+		inlineVolumeIDs := inlineVolumeIDs.([]any)
 		var volumes []any
-		for i, volumeId := range inlineVolumeIds {
-			volume, apiResponse, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, datacenterId, d.Id(), volumeId.(string)).Execute()
+		for i, volumeID := range inlineVolumeIDs {
+			volume, apiResponse, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, datacenterID, d.Id(), volumeID.(string)).Execute()
 			logApiRequestTime(apiResponse)
 			if err != nil {
 				if apiResponse.HttpNotFound() {
-					tflog.Info(ctx, "inline volume not found", map[string]any{"volume_id": volumeId.(string), "datacenter_id": datacenterId, "server_id": d.Id()})
+					tflog.Info(ctx, "inline volume not found", map[string]any{"volume_id": volumeID.(string), "datacenter_id": datacenterID, "server_id": d.Id()})
 					continue
 				}
 				return fmt.Errorf("error retrieving inline volume %w", err)
@@ -1553,17 +1553,17 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 	}
 
 	// take nic and firewall from schema if set is used in resource read, else take it from entities
-	var nicId string
-	firewallRuleIds := d.Get("firewallrule_ids").([]any)
+	var nicID string
+	firewallRuleIDs := d.Get("firewallrule_ids").([]any)
 
 	if nicIntf, primaryNicOk := d.GetOk("primary_nic"); primaryNicOk {
-		nicId = nicIntf.(string)
+		nicID = nicIntf.(string)
 		ns := cloudapinic.Service{Client: client, Meta: nil, D: d}
-		nic, apiResponse, err := ns.Get(ctx, datacenterId, d.Id(), nicId, 2)
+		nic, apiResponse, err := ns.Get(ctx, datacenterID, d.Id(), nicID, 2)
 		if err != nil {
 			// fixes #467
 			if apiResponse.HttpNotFound() {
-				tflog.Debug(ctx, "primary nic not found, clearing primary_nic/primary_ip/nic", map[string]any{"nic_id": nicId})
+				tflog.Debug(ctx, "primary nic not found, clearing primary_nic/primary_ip/nic", map[string]any{"nic_id": nicID})
 				if err := d.Set("primary_nic", ""); err != nil {
 					return err
 				}
@@ -1591,8 +1591,8 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 			nicEntry["id"] = *nic.Id
 			fs := cloudapifirewall.Service{Client: client, D: d}
 
-			for _, id := range firewallRuleIds {
-				firewallEntry, err := fs.AddToMapIfRuleExists(ctx, datacenterId, d.Id(), nicId, id.(string))
+			for _, id := range firewallRuleIDs {
+				firewallEntry, err := fs.AddToMapIfRuleExists(ctx, datacenterID, d.Id(), nicID, id.(string))
 				if err != nil {
 					return err
 				}
@@ -1622,18 +1622,18 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 			return fmt.Errorf("error settings nics %w", err)
 		}
 	}
-	if len(firewallRuleIds) == 0 {
+	if len(firewallRuleIDs) == 0 {
 		if err := d.Set("firewallrule_id", ""); err != nil {
 			return err
 		}
 	}
-	if err := d.Set("firewallrule_ids", firewallRuleIds); err != nil {
+	if err := d.Set("firewallrule_ids", firewallRuleIDs); err != nil {
 		return err
 	}
 
 	// Labels logic
 	ls := LabelsService{ctx: ctx, client: client}
-	labels, err := ls.datacentersServersLabelsGet(datacenterId, d.Id(), false)
+	labels, err := ls.datacentersServersLabelsGet(datacenterID, d.Id(), false)
 	if err != nil {
 		return err
 	}

@@ -58,14 +58,14 @@ func testAccCheckLoadbalancerDestroyCheck(s *terraform.State) error {
 			continue
 		}
 
-		dcId := rs.Primary.Attributes["datacenter_id"]
+		dcID := rs.Primary.Attributes["datacenter_id"]
 		location := rs.Primary.Attributes["location"]
 		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 		if err != nil {
 			return err
 		}
 
-		_, apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersFindById(ctx, dcId, rs.Primary.ID).Execute()
+		_, apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersFindById(ctx, dcID, rs.Primary.ID).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
@@ -111,13 +111,13 @@ func testAccCheckLoadbalancerExists(n string, loadbalancer *ionoscloud.Loadbalan
 		if cancel != nil {
 			defer cancel()
 		}
-		dcId := rs.Primary.Attributes["datacenter_id"]
+		dcID := rs.Primary.Attributes["datacenter_id"]
 		location := rs.Primary.Attributes["location"]
 		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 		if err != nil {
 			return err
 		}
-		foundLB, apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersFindById(ctx, dcId, rs.Primary.ID).Execute()
+		foundLB, apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersFindById(ctx, dcID, rs.Primary.ID).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {

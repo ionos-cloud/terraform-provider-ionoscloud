@@ -81,12 +81,12 @@ func pgSqlDatabaseExistsCheck(path string, database *pgsql.DatabaseResource) res
 		if err != nil {
 			return err
 		}
-		clusterId := rs.Primary.Attributes["cluster_id"]
+		clusterID := rs.Primary.Attributes["cluster_id"]
 		name := rs.Primary.Attributes["name"]
-		foundDatabase, apiResponse, err := client.FindDatabaseByName(ctx, clusterId, name)
+		foundDatabase, apiResponse, err := client.FindDatabaseByName(ctx, clusterID, name)
 		apiResponse.LogInfo()
 		if err != nil {
-			return fmt.Errorf("error occurred while fetching the PgSql database: %s, cluster ID: %s, error: %w", name, clusterId, err)
+			return fmt.Errorf("error occurred while fetching the PgSql database: %s, cluster ID: %s, error: %w", name, clusterID, err)
 		}
 		database = &foundDatabase
 		return nil
@@ -105,16 +105,16 @@ func pgSqlDatabaseDestroyCheck(s *terraform.State) error {
 		if err != nil {
 			return err
 		}
-		clusterId := rs.Primary.Attributes["cluster_id"]
+		clusterID := rs.Primary.Attributes["cluster_id"]
 		name := rs.Primary.Attributes["name"]
-		_, apiResponse, err := client.FindDatabaseByName(ctx, clusterId, name)
+		_, apiResponse, err := client.FindDatabaseByName(ctx, clusterID, name)
 		apiResponse.LogInfo()
 		if err != nil {
 			if !apiResponse.HttpNotFound() {
-				return fmt.Errorf("an error occurred while checking the deletion of PgSql database: %s, cluster ID: %s, error: %w", name, clusterId, err)
+				return fmt.Errorf("an error occurred while checking the deletion of PgSql database: %s, cluster ID: %s, error: %w", name, clusterID, err)
 			}
 		} else {
-			return fmt.Errorf("PgSql database %s still exists in the cluster with ID: %s", name, clusterId)
+			return fmt.Errorf("PgSql database %s still exists in the cluster with ID: %s", name, clusterID)
 		}
 	}
 	return nil
@@ -124,7 +124,7 @@ func pgSqlDatabaseDestroyCheck(s *terraform.State) error {
 
 const PgSqlDatabaseConfig = PgSqlUserConfig + `
 resource ` + constant.PsqlDatabaseResource + ` ` + constant.PsqlDatabaseTestResource + ` {
-  ` + clusterIdAttribute + ` = ` + constant.PsqlClusterResource + `.` + constant.DBaaSClusterTestResource + `.id  
+  ` + clusterIDAttribute + ` = ` + constant.PsqlClusterResource + `.` + constant.DBaaSClusterTestResource + `.id  
   ` + databaseNameAttribute + ` = "` + databaseNameValue + `"
   ` + databaseOwnerAttribute + ` = ` + constant.PsqlUserResource + `.` + constant.UserTestResource + `.username
 }
@@ -132,27 +132,27 @@ resource ` + constant.PsqlDatabaseResource + ` ` + constant.PsqlDatabaseTestReso
 
 const PgSqlDatabaseDataSource = PgSqlDatabaseConfig + `
 data ` + constant.PsqlDatabaseResource + ` ` + constant.PsqlDatabaseDataSourceByName + ` {
-  ` + clusterIdAttribute + ` = ` + constant.PsqlClusterResource + `.` + constant.DBaaSClusterTestResource + `.id   
+  ` + clusterIDAttribute + ` = ` + constant.PsqlClusterResource + `.` + constant.DBaaSClusterTestResource + `.id   
   ` + databaseNameAttribute + ` = ` + constant.PsqlDatabaseResource + `.` + constant.PsqlDatabaseTestResource + `.name
 }
 `
 
 const PgSqlDatabaseDataSourceWrongName = PgSqlDatabaseConfig + `
 data ` + constant.PsqlDatabaseResource + ` ` + constant.PsqlDatabaseDataSourceByName + ` {
-  ` + clusterIdAttribute + ` = ` + constant.PsqlClusterResource + `.` + constant.DBaaSClusterTestResource + `.id   
+  ` + clusterIDAttribute + ` = ` + constant.PsqlClusterResource + `.` + constant.DBaaSClusterTestResource + `.id   
   ` + databaseNameAttribute + ` = "nonexistent"
 }
 `
 
 const PgSqlAllDatabasesDataSource = PgSqlDatabaseConfig + `
 data ` + constant.PsqlDatabasesResource + ` ` + constant.PsqlDatabasesDataSource + ` {
-  ` + clusterIdAttribute + ` = ` + constant.PsqlClusterResource + `.` + constant.DBaaSClusterTestResource + `.id   
+  ` + clusterIDAttribute + ` = ` + constant.PsqlClusterResource + `.` + constant.DBaaSClusterTestResource + `.id   
 }
 `
 
 const PgSqlAllDatabasesFilterByOwnerDataSource = PgSqlDatabaseConfig + `
 data ` + constant.PsqlDatabasesResource + ` ` + constant.PsqlDatabasesDataSource + ` {
-  ` + clusterIdAttribute + ` = ` + constant.PsqlClusterResource + `.` + constant.DBaaSClusterTestResource + `.id 
+  ` + clusterIDAttribute + ` = ` + constant.PsqlClusterResource + `.` + constant.DBaaSClusterTestResource + `.id 
   ` + databaseOwnerAttribute + ` = "` + databaseOwnerValue + `"
 }
 `
