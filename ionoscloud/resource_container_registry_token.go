@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
-	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
+	crservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
@@ -117,7 +117,7 @@ func resourceContainerRegistryTokenCreate(ctx context.Context, d *schema.Resourc
 
 	registryID := d.Get("registry_id").(string)
 	fileStr := d.Get("save_password_to_file").(string)
-	registryToken, err := crService.GetTokenDataCreate(d)
+	registryToken, err := crservice.GetTokenDataCreate(d)
 
 	if err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -135,12 +135,12 @@ func resourceContainerRegistryTokenCreate(ctx context.Context, d *schema.Resourc
 		}
 	}
 
-	if err = crService.SetTokenData(d, registryTokenResponse.Properties); err != nil {
+	if err = crservice.SetTokenData(d, registryTokenResponse.Properties); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
 
 	var credentials []any
-	credentialsEntry := crService.SetCredentials(registryTokenResponse.Properties.Credentials)
+	credentialsEntry := crservice.SetCredentials(registryTokenResponse.Properties.Credentials)
 	credentials = append(credentials, credentialsEntry)
 	if err := d.Set("credentials", credentials); err != nil {
 		return diagutil.ToDiags(d, utils.GenerateSetError("token", "credentials", err), nil)
@@ -169,7 +169,7 @@ func resourceContainerRegistryTokenRead(ctx context.Context, d *schema.ResourceD
 
 	tflog.Info(ctx, "retrieved container registry token", map[string]any{"token_id": d.Id()})
 
-	if err := crService.SetTokenData(d, registryToken.Properties); err != nil {
+	if err := crservice.SetTokenData(d, registryToken.Properties); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
 
@@ -185,7 +185,7 @@ func resourceContainerRegistryTokenUpdate(ctx context.Context, d *schema.Resourc
 
 	registryID := d.Get("registry_id").(string)
 	registryTokenID := d.Id()
-	registryToken, err := crService.GetTokenDataUpdate(d)
+	registryToken, err := crservice.GetTokenDataUpdate(d)
 	if err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
@@ -266,7 +266,7 @@ func resourceContainerRegistryTokenImport(ctx context.Context, d *schema.Resourc
 		return nil, err
 	}
 
-	if err := crService.SetTokenData(d, registryToken.Properties); err != nil {
+	if err := crservice.SetTokenData(d, registryToken.Properties); err != nil {
 		return nil, diagutil.ToError(d, err, nil)
 	}
 

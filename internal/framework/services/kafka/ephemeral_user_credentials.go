@@ -13,7 +13,7 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/validators"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
-	kafkaService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/kafka"
+	kafkaservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/kafka"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
@@ -21,7 +21,7 @@ var _ ephemeral.EphemeralResourceWithConfigure = (*userCredentialsEphemeral)(nil
 var _ ephemeral.EphemeralResourceWithConfigValidators = (*userCredentialsEphemeral)(nil)
 
 type userCredentialsEphemeral struct {
-	client *kafkaService.Client
+	client *kafkaservice.Client
 }
 
 type userCredentialsEphemeralModel struct {

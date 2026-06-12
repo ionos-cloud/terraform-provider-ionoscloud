@@ -8,11 +8,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	cr "github.com/ionos-cloud/sdk-go-bundle/products/containerregistry/v2"
+	crsdk "github.com/ionos-cloud/sdk-go-bundle/products/containerregistry/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
-	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
+	crservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
@@ -143,7 +143,7 @@ func dataSourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData
 		return diagutil.ToDiags(d, fmt.Errorf("please provide the registry id, name or location"), nil)
 	}
 
-	var registry cr.RegistryResponse
+	var registry crsdk.RegistryResponse
 	var apiResponse *shared.APIResponse
 
 	if idOk {
@@ -153,7 +153,7 @@ func dataSourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData
 			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the registry with ID %s: %w", id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 	} else {
-		var results []cr.RegistryResponse
+		var results []crsdk.RegistryResponse
 
 		registries, apiResponse, err := client.ListRegistries(ctx)
 		if err != nil {
@@ -167,7 +167,7 @@ func dataSourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData
 			tflog.Info(ctx, "searching container registry by name", map[string]any{"partial_match": partialMatch, "name": name})
 
 			if registries.Items != nil && len(registries.Items) > 0 {
-				var registriesByName []cr.RegistryResponse
+				var registriesByName []crsdk.RegistryResponse
 				for _, registryItem := range registries.Items {
 					if partialMatch && strings.Contains(registryItem.Properties.Name, name) ||
 						!partialMatch && strings.EqualFold(registryItem.Properties.Name, name) {
@@ -183,7 +183,7 @@ func dataSourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData
 		}
 
 		if locationOk {
-			var registriesByLocation []cr.RegistryResponse
+			var registriesByLocation []crsdk.RegistryResponse
 			for _, registryItem := range results {
 				if strings.EqualFold(registryItem.Properties.Location, location) {
 					registriesByLocation = append(registriesByLocation, registryItem)
@@ -206,7 +206,7 @@ func dataSourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData
 		}
 	}
 
-	if err := crService.SetRegistryData(d, registry); err != nil {
+	if err := crservice.SetRegistryData(d, registry); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
 

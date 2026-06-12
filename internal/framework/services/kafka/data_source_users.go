@@ -9,11 +9,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	kafkaSDK "github.com/ionos-cloud/sdk-go-bundle/products/kafka/v2"
+	kafkasdk "github.com/ionos-cloud/sdk-go-bundle/products/kafka/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/validators"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
-	kafkaService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/kafka"
+	kafkaservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/kafka"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
@@ -21,7 +21,7 @@ import (
 var _ datasource.DataSourceWithConfigure = (*usersDataSource)(nil)
 
 type usersDataSource struct {
-	client *kafkaService.Client
+	client *kafkaservice.Client
 }
 
 type usersDataSourceModel struct {
@@ -132,7 +132,7 @@ func (d *usersDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 }
 
 // buildUsersFromAPIResp converts the users info from the API response into a slice of user data source models.
-func buildUsersFromAPIResp(users kafkaSDK.UserReadList) []userDataSourceModel {
+func buildUsersFromAPIResp(users kafkasdk.UserReadList) []userDataSourceModel {
 	result := make([]userDataSourceModel, 0, len(users.Items))
 	for _, user := range users.Items {
 		result = append(result, buildUserModelFromAPIResp(user))
@@ -141,7 +141,7 @@ func buildUsersFromAPIResp(users kafkaSDK.UserReadList) []userDataSourceModel {
 }
 
 // buildUserModelFromAPIResp converts the user info from the API response into a user data source model.
-func buildUserModelFromAPIResp(user kafkaSDK.UserRead) userDataSourceModel {
+func buildUserModelFromAPIResp(user kafkasdk.UserRead) userDataSourceModel {
 	return userDataSourceModel{
 		ID:       types.StringValue(user.Id),
 		Username: types.StringValue(user.Properties.Name),

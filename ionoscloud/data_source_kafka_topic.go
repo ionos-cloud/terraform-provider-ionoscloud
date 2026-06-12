@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	kafkaSdk "github.com/ionos-cloud/sdk-go-bundle/products/kafka/v2"
+	kafkasdk "github.com/ionos-cloud/sdk-go-bundle/products/kafka/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
@@ -94,7 +94,7 @@ func dataSourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, meta 
 
 	partialMatch := d.Get("partial_match").(bool)
 
-	var topic kafkaSdk.TopicRead
+	var topic kafkasdk.TopicRead
 	var apiResponse *shared.APIResponse
 	var err error
 	if idOk {
@@ -103,7 +103,7 @@ func dataSourceKafkaTopicRead(ctx context.Context, d *schema.ResourceData, meta 
 			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the Kafka Cluster Topic with ID: %s, error: %w", id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 	} else {
-		var results []kafkaSdk.TopicRead
+		var results []kafkasdk.TopicRead
 
 		topics, apiResponse, err := client.ListTopics(ctx, clusterID, location)
 		if err != nil {

@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	ionoscloudcdn "github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2"
+	cdnsdk "github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
-	cdnService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cdn"
+	cdnservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cdn"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 
@@ -143,8 +143,8 @@ func resourceCDNDistributionCreate(ctx context.Context, d *schema.ResourceData, 
 
 	distributionDomain := d.Get("domain").(string)
 
-	distribution := ionoscloudcdn.DistributionCreate{
-		Properties: ionoscloudcdn.DistributionProperties{
+	distribution := cdnsdk.DistributionCreate{
+		Properties: cdnsdk.DistributionProperties{
 			Domain: distributionDomain,
 		},
 	}
@@ -154,7 +154,7 @@ func resourceCDNDistributionCreate(ctx context.Context, d *schema.ResourceData, 
 		distribution.Properties.CertificateId = &attrStr
 	}
 
-	if routingRules, err := cdnService.GetRoutingRulesData(d); err == nil {
+	if routingRules, err := cdnservice.GetRoutingRulesData(d); err == nil {
 		distribution.Properties.RoutingRules = *routingRules
 	} else {
 		return diagutil.ToDiags(d, err, nil)
@@ -190,7 +190,7 @@ func resourceCDNDistributionRead(ctx context.Context, d *schema.ResourceData, me
 
 	tflog.Info(ctx, "retrieved CDN distribution", map[string]any{"distribution_id": d.Id()})
 
-	if err := cdnService.SetDistributionData(d, distribution); err != nil {
+	if err := cdnservice.SetDistributionData(d, distribution); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
 
@@ -202,9 +202,9 @@ func resourceCDNDistributionUpdate(ctx context.Context, d *schema.ResourceData, 
 
 	distributionDomain := d.Get("domain").(string)
 
-	request := ionoscloudcdn.DistributionUpdate{
+	request := cdnsdk.DistributionUpdate{
 		Id: d.Id(),
-		Properties: ionoscloudcdn.DistributionProperties{
+		Properties: cdnsdk.DistributionProperties{
 			Domain: distributionDomain,
 		},
 	}
@@ -214,7 +214,7 @@ func resourceCDNDistributionUpdate(ctx context.Context, d *schema.ResourceData, 
 		request.Properties.CertificateId = &attrStr
 	}
 
-	if routingRules, err := cdnService.GetRoutingRulesData(d); err == nil {
+	if routingRules, err := cdnservice.GetRoutingRulesData(d); err == nil {
 		request.Properties.RoutingRules = *routingRules
 	} else {
 		return diagutil.ToDiags(d, err, nil)
@@ -264,7 +264,7 @@ func resourceCDNDistributionImport(ctx context.Context, d *schema.ResourceData, 
 
 	tflog.Info(ctx, "CDN distribution imported", map[string]any{"distribution_id": distributionID})
 
-	if err := cdnService.SetDistributionData(d, distribution); err != nil {
+	if err := cdnservice.SetDistributionData(d, distribution); err != nil {
 		return nil, diagutil.ToError(d, err, nil)
 	}
 

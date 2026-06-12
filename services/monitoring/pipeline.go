@@ -13,11 +13,11 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/loadedconfig"
 
-	monitoringSDK "github.com/ionos-cloud/sdk-go-bundle/products/monitoring/v2"
+	monitoringsdk "github.com/ionos-cloud/sdk-go-bundle/products/monitoring/v2"
 )
 
 // CreatePipeline creates a new pipeline.
-func (c *Client) CreatePipeline(ctx context.Context, createReq monitoringSDK.PipelineCreate, location string) (monitoringSDK.PipelineRead, *shared.APIResponse, error) {
+func (c *Client) CreatePipeline(ctx context.Context, createReq monitoringsdk.PipelineCreate, location string) (monitoringsdk.PipelineRead, *shared.APIResponse, error) {
 	loadedconfig.SetClientOptionsFromConfig(ctx, c, fileconfiguration.Monitoring, location)
 	pipeline, apiResponse, err := c.sdkClient.PipelinesApi.PipelinesPost(ctx).PipelineCreate(createReq).Execute()
 	apiResponse.LogInfo()
@@ -33,7 +33,7 @@ func (c *Client) DeletePipeline(ctx context.Context, pipelineID, location string
 }
 
 // UpdatePipeline updates a pipeline using its ID.
-func (c *Client) UpdatePipeline(ctx context.Context, updateReq monitoringSDK.PipelineEnsure, pipelineID, location string) (monitoringSDK.PipelineRead, *shared.APIResponse, error) {
+func (c *Client) UpdatePipeline(ctx context.Context, updateReq monitoringsdk.PipelineEnsure, pipelineID, location string) (monitoringsdk.PipelineRead, *shared.APIResponse, error) {
 	loadedconfig.SetClientOptionsFromConfig(ctx, c, fileconfiguration.Monitoring, location)
 	pipeline, apiResponse, err := c.sdkClient.PipelinesApi.PipelinesPut(ctx, pipelineID).PipelineEnsure(updateReq).Execute()
 	apiResponse.LogInfo()
@@ -41,7 +41,7 @@ func (c *Client) UpdatePipeline(ctx context.Context, updateReq monitoringSDK.Pip
 }
 
 // GetPipelineByID retrieves a pipeline using its ID.
-func (c *Client) GetPipelineByID(ctx context.Context, pipelineID, location string) (monitoringSDK.PipelineRead, *shared.APIResponse, error) {
+func (c *Client) GetPipelineByID(ctx context.Context, pipelineID, location string) (monitoringsdk.PipelineRead, *shared.APIResponse, error) {
 	loadedconfig.SetClientOptionsFromConfig(ctx, c, fileconfiguration.Monitoring, location)
 	pipeline, apiResponse, err := c.sdkClient.PipelinesApi.PipelinesFindById(ctx, pipelineID).Execute()
 	apiResponse.LogInfo()
@@ -49,7 +49,7 @@ func (c *Client) GetPipelineByID(ctx context.Context, pipelineID, location strin
 }
 
 // GetPipelines retrieves all pipelines from a location.
-func (c *Client) GetPipelines(ctx context.Context, location string) ([]monitoringSDK.PipelineRead, *shared.APIResponse, error) {
+func (c *Client) GetPipelines(ctx context.Context, location string) ([]monitoringsdk.PipelineRead, *shared.APIResponse, error) {
 	loadedconfig.SetClientOptionsFromConfig(ctx, c, fileconfiguration.Monitoring, location)
 	pipelines, apiResponse, err := c.sdkClient.PipelinesApi.PipelinesGet(ctx).Execute()
 	apiResponse.LogInfo()

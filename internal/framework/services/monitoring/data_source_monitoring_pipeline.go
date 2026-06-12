@@ -10,11 +10,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	monitoringSDK "github.com/ionos-cloud/sdk-go-bundle/products/monitoring/v2"
+	monitoringsdk "github.com/ionos-cloud/sdk-go-bundle/products/monitoring/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
-	monitoringService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/monitoring"
+	monitoringservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/monitoring"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
@@ -22,7 +22,7 @@ var _ datasource.DataSourceWithConfigure = (*pipelineDataSource)(nil)
 var _ datasource.DataSourceWithConfigValidators = (*pipelineDataSource)(nil)
 
 type pipelineDataSource struct {
-	client *monitoringService.Client
+	client *monitoringservice.Client
 }
 
 type pipelineDataSourceModel struct {
@@ -118,8 +118,8 @@ func (d *pipelineDataSource) Read(ctx context.Context, req datasource.ReadReques
 	pipelineName := data.Name.ValueString()
 	location := data.Location.ValueString()
 
-	var pipeline monitoringSDK.PipelineRead
-	var pipelines []monitoringSDK.PipelineRead
+	var pipeline monitoringsdk.PipelineRead
+	var pipelines []monitoringsdk.PipelineRead
 	var err error
 	var apiResponse *shared.APIResponse
 

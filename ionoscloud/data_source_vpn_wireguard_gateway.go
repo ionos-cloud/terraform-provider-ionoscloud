@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	vpnSdk "github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2"
+	vpnsdk "github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
@@ -133,7 +133,7 @@ func dataSourceVpnWireguardGatewayRead(ctx context.Context, d *schema.ResourceDa
 		return diagutil.ToDiags(d, fmt.Errorf("please provide either the WireGuard Gateway ID or name"), nil)
 	}
 
-	var wireguardGw vpnSdk.WireguardGatewayRead
+	var wireguardGw vpnsdk.WireguardGatewayRead
 	var apiResponse *shared.APIResponse
 	var err error
 	if idOk {
@@ -142,7 +142,7 @@ func dataSourceVpnWireguardGatewayRead(ctx context.Context, d *schema.ResourceDa
 			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the WireGuard Gateway with ID: %s, error: %w", id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 	} else {
-		var results []vpnSdk.WireguardGatewayRead
+		var results []vpnsdk.WireguardGatewayRead
 		gateways, apiResponse, err := client.ListWireguardGateways(ctx, location)
 		if err != nil {
 			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching WireGuard Gateways: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})

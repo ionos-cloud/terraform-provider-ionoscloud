@@ -10,14 +10,14 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	certSDK "github.com/ionos-cloud/sdk-go-bundle/products/cert/v2"
+	certsdk "github.com/ionos-cloud/sdk-go-bundle/products/cert/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
 func TestAccCertificateManagerProvider(t *testing.T) {
-	var provider certSDK.ProviderRead
+	var provider certsdk.ProviderRead
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -116,7 +116,7 @@ func testAccCMProviderDestroyCheck(s *terraform.State) error {
 	return nil
 }
 
-func CMProviderExistenceCheck(path string, provider *certSDK.ProviderRead) resource.TestCheckFunc {
+func CMProviderExistenceCheck(path string, provider *certsdk.ProviderRead) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(bundleclient.SdkBundle).CertManagerClient
 		rs, ok := s.RootModule().Resources[path]
