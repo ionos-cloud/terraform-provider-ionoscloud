@@ -45,6 +45,7 @@ func resourceNetworkLoadBalancer() *schema.Resource {
 					"listenerLan must be a customer reserved IP for the public load balancer and private IP " +
 					"for the private load balancer.",
 				Optional: true,
+				Computed: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},

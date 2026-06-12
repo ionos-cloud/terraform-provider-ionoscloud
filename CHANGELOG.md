@@ -4,6 +4,9 @@
 - New list resource: `ionoscloud_pg_cluster_v2` — list PostgreSQL v2 clusters via `terraform query`, with optional filtering using `name` or `location` (requires Terraform 1.14+).
 - Support child locations (e.g. `de/fra/2`): image and image alias resolution for `ionoscloud_server`, `ionoscloud_cube_server`, `ionoscloud_gpu_server` and `ionoscloud_volume` also considers the parent location the child inherits images from; the `ionoscloud_image` and `ionoscloud_snapshot` data sources accept results from the parent location; new `metro_region` attribute on the `ionoscloud_location` data source.
 
+### Fixes
+- Fix `ionoscloud_networkloadbalancer`: re-apply no longer fails with "you can not empty the ips field" when the optional `ips` attribute is omitted from the configuration
+
 ## 6.7.30
 
 ### Features
