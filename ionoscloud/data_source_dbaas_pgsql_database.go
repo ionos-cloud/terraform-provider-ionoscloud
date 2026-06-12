@@ -49,15 +49,15 @@ func dataSourceDbaasPgSqlReadDatabase(ctx context.Context, d *schema.ResourceDat
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	clusterId := d.Get("cluster_id").(string)
+	clusterID := d.Get("cluster_id").(string)
 	name := d.Get("name").(string)
 
-	database, apiResponse, err := client.FindDatabaseByName(ctx, clusterId, name)
+	database, apiResponse, err := client.FindDatabaseByName(ctx, clusterID, name)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
-			return diagutil.ToDiags(d, fmt.Errorf("no PgSql database found with the specified name: %s and cluster ID: %s", name, clusterId), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return diagutil.ToDiags(d, fmt.Errorf("no PgSql database found with the specified name: %s and cluster ID: %s", name, clusterID), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the PgSql database: %s, cluster ID: %s, err: %w", name, clusterId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the PgSql database: %s, cluster ID: %s, err: %w", name, clusterID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	if err := dbaas.SetDatabasePgSqlData(d, &database); err != nil {
 		return diagutil.ToDiags(d, err, nil)

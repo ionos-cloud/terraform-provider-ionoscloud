@@ -54,9 +54,9 @@ func reverseRecordCreate(ctx context.Context, d *schema.ResourceData, meta any) 
 
 func reverseRecordRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).DNSClient
-	recordId := d.Id()
+	recordID := d.Id()
 
-	record, apiResponse, err := client.GetReverseRecordById(ctx, recordId)
+	record, apiResponse, err := client.GetReverseRecordById(ctx, recordID)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
@@ -64,7 +64,7 @@ func reverseRecordRead(ctx context.Context, d *schema.ResourceData, meta any) di
 		}
 		return diagutil.ToDiags(d, fmt.Errorf("error while fetching the DNS Reverse Record: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
-	tflog.Info(ctx, "retrieved DNS reverse record", map[string]any{"record_id": recordId})
+	tflog.Info(ctx, "retrieved DNS reverse record", map[string]any{"record_id": recordID})
 	if err := client.SetReverseRecordData(d, record); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
@@ -73,9 +73,9 @@ func reverseRecordRead(ctx context.Context, d *schema.ResourceData, meta any) di
 
 func reverseRecordUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).DNSClient
-	recordId := d.Id()
+	recordID := d.Id()
 
-	_, apiResponse, err := client.UpdateReverseRecord(ctx, recordId, d)
+	_, apiResponse, err := client.UpdateReverseRecord(ctx, recordID, d)
 	if err != nil {
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating the DNS Reverse Record: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
@@ -84,9 +84,9 @@ func reverseRecordUpdate(ctx context.Context, d *schema.ResourceData, meta any) 
 
 func reverseRecordDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).DNSClient
-	recordId := d.Id()
+	recordID := d.Id()
 
-	apiResponse, err := client.DeleteReverseRecord(ctx, recordId)
+	apiResponse, err := client.DeleteReverseRecord(ctx, recordID)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
@@ -104,17 +104,17 @@ func reverseRecordDelete(ctx context.Context, d *schema.ResourceData, meta any) 
 func reverseRecordImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	client := meta.(bundleclient.SdkBundle).DNSClient
 
-	recordId := d.Id()
+	recordID := d.Id()
 
-	record, apiResponse, err := client.GetReverseRecordById(ctx, recordId)
+	record, apiResponse, err := client.GetReverseRecordById(ctx, recordID)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("DNS Reverse Record with ID: %s does not exist", recordId), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return nil, diagutil.ToError(d, fmt.Errorf("DNS Reverse Record with ID: %s does not exist", recordID), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to import the DNS Reverse Record: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
-	tflog.Info(ctx, "DNS reverse record imported", map[string]any{"record_id": recordId})
+	tflog.Info(ctx, "DNS reverse record imported", map[string]any{"record_id": recordID})
 	if err := client.SetReverseRecordData(d, record); err != nil {
 		return nil, diagutil.ToError(d, err, nil)
 	}

@@ -23,64 +23,64 @@ type Service struct {
 	D      *schema.ResourceData
 }
 
-func (fs *Service) Get(ctx context.Context, datacenterId, serverId, nicId string, depth int32) ([]ionoscloud.FirewallRule, error) {
-	firewallRules, apiResponse, err := fs.Client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, datacenterId, serverId, nicId).Depth(depth).Execute()
+func (fs *Service) Get(ctx context.Context, datacenterID, serverID, nicID string, depth int32) ([]ionoscloud.FirewallRule, error) {
+	firewallRules, apiResponse, err := fs.Client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, datacenterID, serverID, nicID).Depth(depth).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
 		return nil, err
 	}
 	if apiResponse.HttpNotFound() || firewallRules.Items == nil || len(*firewallRules.Items) == 0 {
-		tflog.Debug(ctx, "no firewalls found", map[string]any{"datacenter_id": datacenterId, "server_id": serverId, "nic_id": nicId})
+		tflog.Debug(ctx, "no firewalls found", map[string]any{"datacenter_id": datacenterID, "server_id": serverID, "nic_id": nicID})
 		return nil, nil
 	}
 	return *firewallRules.Items, nil
 }
 
-func (fs *Service) FindById(ctx context.Context, datacenterId, serverId, nicId, firewallId string) (*ionoscloud.FirewallRule, *ionoscloud.APIResponse, error) {
-	firewallRule, apiResponse, err := fs.Client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterId, serverId, nicId, firewallId).Depth(1).Execute()
+func (fs *Service) FindById(ctx context.Context, datacenterID, serverID, nicID, firewallID string) (*ionoscloud.FirewallRule, *ionoscloud.APIResponse, error) {
+	firewallRule, apiResponse, err := fs.Client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterID, serverID, nicID, firewallID).Depth(1).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
 		return nil, apiResponse, err
 	}
 	if apiResponse.HttpNotFound() {
-		tflog.Debug(ctx, "no firewall rule found", map[string]any{"datacenter_id": datacenterId, "server_id": serverId, "nic_id": nicId})
+		tflog.Debug(ctx, "no firewall rule found", map[string]any{"datacenter_id": datacenterID, "server_id": serverID, "nic_id": nicID})
 		return nil, apiResponse, nil
 	}
 	return &firewallRule, apiResponse, nil
 }
 
-func (fs *Service) Delete(ctx context.Context, datacenterId, serverId, nicId, firewallId string) (*ionoscloud.APIResponse, error) {
-	apiResponse, err := fs.Client.FirewallRulesApi.DatacentersServersNicsFirewallrulesDelete(ctx, datacenterId, serverId, nicId, firewallId).Execute()
+func (fs *Service) Delete(ctx context.Context, datacenterID, serverID, nicID, firewallID string) (*ionoscloud.APIResponse, error) {
+	apiResponse, err := fs.Client.FirewallRulesApi.DatacentersServersNicsFirewallrulesDelete(ctx, datacenterID, serverID, nicID, firewallID).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
 		return apiResponse, err
 	}
 	if errState := bundleclient.WaitForStateChange(ctx, fs.Meta, fs.D, apiResponse, schema.TimeoutDelete); errState != nil {
-		return apiResponse, fmt.Errorf("on delete an error occurred while waiting for state change dcId: %s, server_id: %s, nic_id: %s, ID: %s, Response: (%w)", datacenterId, serverId, nicId, firewallId, errState)
+		return apiResponse, fmt.Errorf("on delete an error occurred while waiting for state change dcID: %s, server_id: %s, nic_id: %s, ID: %s, Response: (%w)", datacenterID, serverID, nicID, firewallID, errState)
 	}
 	return apiResponse, nil
 }
 
-func (fs *Service) Create(ctx context.Context, datacenterId, serverId, nicId string, firewallrule ionoscloud.FirewallRule) (*ionoscloud.FirewallRule, *ionoscloud.APIResponse, error) {
-	firewall, apiResponse, err := fs.Client.FirewallRulesApi.DatacentersServersNicsFirewallrulesPost(ctx, datacenterId, serverId, nicId).Firewallrule(firewallrule).Execute()
+func (fs *Service) Create(ctx context.Context, datacenterID, serverID, nicID string, firewallrule ionoscloud.FirewallRule) (*ionoscloud.FirewallRule, *ionoscloud.APIResponse, error) {
+	firewall, apiResponse, err := fs.Client.FirewallRulesApi.DatacentersServersNicsFirewallrulesPost(ctx, datacenterID, serverID, nicID).Firewallrule(firewallrule).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
-		return nil, apiResponse, fmt.Errorf("an error occurred while creating firewall rule for dcId: %s, server_id: %s, nic_id: %s, Response: (%w)", datacenterId, serverId, nicId, err)
+		return nil, apiResponse, fmt.Errorf("an error occurred while creating firewall rule for dcID: %s, server_id: %s, nic_id: %s, Response: (%w)", datacenterID, serverID, nicID, err)
 	}
 	if errState := bundleclient.WaitForStateChange(ctx, fs.Meta, fs.D, apiResponse, schema.TimeoutCreate); errState != nil {
-		return nil, apiResponse, fmt.Errorf("on create an error occurred while waiting for state change dcId: %s, server_id: %s, nic_id: %s, Response: (%w)", datacenterId, serverId, nicId, errState)
+		return nil, apiResponse, fmt.Errorf("on create an error occurred while waiting for state change dcID: %s, server_id: %s, nic_id: %s, Response: (%w)", datacenterID, serverID, nicID, errState)
 	}
 	return &firewall, apiResponse, nil
 }
 
-func (fs *Service) Update(ctx context.Context, datacenterId, serverId, nicId, id string, firewallrule ionoscloud.FirewallRule) (*ionoscloud.FirewallRule, *ionoscloud.APIResponse, error) {
-	firewall, apiResponse, err := fs.Client.FirewallRulesApi.DatacentersServersNicsFirewallrulesPut(ctx, datacenterId, serverId, nicId, id).Firewallrule(firewallrule).Execute()
+func (fs *Service) Update(ctx context.Context, datacenterID, serverID, nicID, id string, firewallrule ionoscloud.FirewallRule) (*ionoscloud.FirewallRule, *ionoscloud.APIResponse, error) {
+	firewall, apiResponse, err := fs.Client.FirewallRulesApi.DatacentersServersNicsFirewallrulesPut(ctx, datacenterID, serverID, nicID, id).Firewallrule(firewallrule).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
-		return nil, apiResponse, fmt.Errorf("an error occurred while updating firewall rule for dcId: %s, server_id: %s, nic_id: %s, id %s, Response: (%w)", datacenterId, serverId, nicId, id, err)
+		return nil, apiResponse, fmt.Errorf("an error occurred while updating firewall rule for dcID: %s, server_id: %s, nic_id: %s, id %s, Response: (%w)", datacenterID, serverID, nicID, id, err)
 	}
 	if errState := bundleclient.WaitForStateChange(ctx, fs.Meta, fs.D, apiResponse, schema.TimeoutUpdate); errState != nil {
-		return nil, apiResponse, fmt.Errorf("on update an error occurred while waiting for state change dcId: %s, server_id: %s, nic_id: %s, Response: (%w)", datacenterId, serverId, nicId, errState)
+		return nil, apiResponse, fmt.Errorf("on update an error occurred while waiting for state change dcID: %s, server_id: %s, nic_id: %s, Response: (%w)", datacenterID, serverID, nicID, errState)
 	}
 	return &firewall, apiResponse, nil
 }
@@ -139,8 +139,8 @@ func PropUnsetSetFieldIfNotSetInSchema(fwProp *ionoscloud.FirewallruleProperties
 }
 
 // GetAndUpdateFirewalls - checks in schema and returns modified firewall rules as a slice of ionoscloud.FirewallRule and also returns a slice of firewall rule ids
-func (fs *Service) GetAndUpdateFirewalls(ctx context.Context, dcId, serverId, nicId, path string) (firewallRules []ionoscloud.FirewallRule, firewallRuleIds []string, diags diag.Diagnostics) {
-	firewallRuleIds = []string{}
+func (fs *Service) GetAndUpdateFirewalls(ctx context.Context, dcID, serverID, nicID, path string) (firewallRules []ionoscloud.FirewallRule, firewallRuleIDs []string, diags diag.Diagnostics) {
+	firewallRuleIDs = []string{}
 	if fs.D.HasChange(path) {
 		oldValues, newValues := fs.D.GetChange(path)
 		oldValuesIntf := oldValues.([]any)
@@ -149,27 +149,27 @@ func (fs *Service) GetAndUpdateFirewalls(ctx context.Context, dcId, serverId, ni
 		onlyNew := slice.Difference(newValuesIntf, oldValuesIntf)
 		oldFirewalls, newFirewalls, err := DecodeTo(ctx, onlyOld, onlyNew)
 		if err != nil {
-			return firewallRules, firewallRuleIds, diag.FromErr(fmt.Errorf("could not get changes for firewall rules %w", err))
+			return firewallRules, firewallRuleIDs, diag.FromErr(fmt.Errorf("could not get changes for firewall rules %w", err))
 		}
 
 		firewallRuleIdsIntf := fs.D.Get("firewallrule_ids").([]any)
-		firewallRuleIds = slice.AnyToString(firewallRuleIdsIntf)
+		firewallRuleIDs = slice.AnyToString(firewallRuleIdsIntf)
 
-		if nicId != "" {
+		if nicID != "" {
 			// delete old rules
 			for idx := range oldFirewalls {
 				// we need the id, but we can't get it from oldFirewalls because it's only the property
-				oldId := onlyOld[idx].(map[string]any)["id"].(string)
+				oldID := onlyOld[idx].(map[string]any)["id"].(string)
 
-				if deleteRule := !utils.IsValueInSliceOfMap(onlyNew, "id", oldId); deleteRule {
-					_, err = fs.Delete(ctx, dcId, serverId, nicId, oldId)
+				if deleteRule := !utils.IsValueInSliceOfMap(onlyNew, "id", oldID); deleteRule {
+					_, err = fs.Delete(ctx, dcID, serverID, nicID, oldID)
 					if err != nil {
-						return firewallRules, []string{}, diag.FromErr(fmt.Errorf("an error occurred while deleting firewall prop for dcId: %s, server_id: %s, "+
-							"nic_id %s, ID: %s, (%w)", dcId, serverId, nicId, oldId, err))
+						return firewallRules, []string{}, diag.FromErr(fmt.Errorf("an error occurred while deleting firewall prop for dcID: %s, server_id: %s, "+
+							"nic_id %s, ID: %s, (%w)", dcID, serverID, nicID, oldID, err))
 					}
 
-					if slice.Contains(firewallRuleIds, oldId) {
-						firewallRuleIds = slice.DeleteFrom(firewallRuleIds, oldId)
+					if slice.Contains(firewallRuleIDs, oldID) {
+						firewallRuleIDs = slice.DeleteFrom(firewallRuleIDs, oldID)
 					}
 				}
 			}
@@ -183,27 +183,27 @@ func (fs *Service) GetAndUpdateFirewalls(ctx context.Context, dcId, serverId, ni
 				Properties: &prop,
 			}
 			var firewall *ionoscloud.FirewallRule
-			if nicId != "" {
+			if nicID != "" {
 				if id, ok := onlyNew[idx].(map[string]any)["id"]; ok && id != "" {
 					// do not send protocol, it's an update
 					*fwRule.Properties = SetNullableFields(*fwRule.Properties)
 					fwRule.Properties.Protocol = nil
-					firewall, _, err = fs.Update(ctx, dcId, serverId, nicId, id.(string), fwRule)
+					firewall, _, err = fs.Update(ctx, dcID, serverID, nicID, id.(string), fwRule)
 					if err != nil {
 						return firewallRules, []string{}, diag.FromErr(err)
 					}
 				} else {
-					firewall, _, err = fs.Create(ctx, dcId, serverId, nicId, fwRule)
+					firewall, _, err = fs.Create(ctx, dcID, serverID, nicID, fwRule)
 					if err != nil {
 						return firewallRules, []string{}, diag.FromErr(err)
 					}
-					firewallRuleIds = append(firewallRuleIds, *firewall.Id)
+					firewallRuleIDs = append(firewallRuleIDs, *firewall.Id)
 				}
 			}
 			firewallRules = append(firewallRules, fwRule)
 		}
 	}
-	return firewallRules, firewallRuleIds, nil
+	return firewallRules, firewallRuleIDs, nil
 }
 
 func SetNullableFields(prop ionoscloud.FirewallruleProperties) ionoscloud.FirewallruleProperties {
@@ -228,17 +228,17 @@ func SetNullableFields(prop ionoscloud.FirewallruleProperties) ionoscloud.Firewa
 	return prop
 }
 
-func (fs *Service) AddToMapIfRuleExists(ctx context.Context, datacenterId, serverId, nicId, ruleId string) (map[string]any, error) {
+func (fs *Service) AddToMapIfRuleExists(ctx context.Context, datacenterID, serverID, nicID, ruleID string) (map[string]any, error) {
 	var firewallEntry map[string]any
-	if datacenterId == "" || serverId == "" || nicId == "" || ruleId == "" {
-		tflog.Debug(ctx, "cannot search for firewall rules: missing IDs", map[string]any{"datacenter_id": datacenterId, "server_id": serverId, "nic_id": nicId, "rule_id": ruleId})
+	if datacenterID == "" || serverID == "" || nicID == "" || ruleID == "" {
+		tflog.Debug(ctx, "cannot search for firewall rules: missing IDs", map[string]any{"datacenter_id": datacenterID, "server_id": serverID, "nic_id": nicID, "rule_id": ruleID})
 		return firewallEntry, nil
 	}
 
-	firewall, apiResponse, err := fs.FindById(ctx, datacenterId, serverId, nicId, ruleId)
+	firewall, apiResponse, err := fs.FindById(ctx, datacenterID, serverID, nicID, ruleID)
 	if err != nil {
 		if !apiResponse.HttpNotFound() {
-			return firewallEntry, fmt.Errorf("error, while searching for firewall rule with id %s (%w)", ruleId, err)
+			return firewallEntry, fmt.Errorf("error, while searching for firewall rule with id %s (%w)", ruleID, err)
 		}
 	}
 	if firewall == nil {
@@ -253,27 +253,27 @@ func (fs *Service) AddToMapIfRuleExists(ctx context.Context, datacenterId, serve
 	return firewallEntry, nil
 }
 
-func SetIdsInSchema(d *schema.ResourceData, firewallRuleIds []string) error {
-	if len(firewallRuleIds) == 0 {
+func SetIdsInSchema(d *schema.ResourceData, firewallRuleIDs []string) error {
+	if len(firewallRuleIDs) == 0 {
 		return nil
 	}
-	if err := d.Set("firewallrule_id", firewallRuleIds[0]); err != nil {
+	if err := d.Set("firewallrule_id", firewallRuleIDs[0]); err != nil {
 		return utils.GenerateSetError(constant.ServerResource, "firewallrule_id", err)
 	}
-	if err := d.Set("firewallrule_ids", slice.ToAnyList(firewallRuleIds)); err != nil {
+	if err := d.Set("firewallrule_ids", slice.ToAnyList(firewallRuleIDs)); err != nil {
 		return utils.GenerateSetError(constant.ServerResource, "firewallrule_ids", err)
 	}
 	return nil
 }
 
-func ExtractOrderedFirewallIds(foundRules, sentRules []ionoscloud.FirewallRule) []string {
-	var ruleIds = []string{}
+func ExtractOrderedFirewallIDs(foundRules, sentRules []ionoscloud.FirewallRule) []string {
+	var ruleIDs = []string{}
 
 	if len(sentRules) == 0 || len(foundRules) == 0 {
 		return []string{}
 	}
 
-	// keep order of ruleIds
+	// keep order of ruleIDs
 	for _, rule := range sentRules {
 		for _, foundRule := range foundRules {
 			// computed, make equal for comparison
@@ -283,20 +283,20 @@ func ExtractOrderedFirewallIds(foundRules, sentRules []ionoscloud.FirewallRule) 
 			}
 			// we need deepEqual here, because the structures contain pointers and cannot be compared using the stricter `==`
 			if reflect.DeepEqual(rule.Properties, foundRule.Properties) {
-				ruleIds = append(ruleIds, *foundRule.Id)
+				ruleIDs = append(ruleIDs, *foundRule.Id)
 			}
 		}
 	}
-	return ruleIds
+	return ruleIDs
 }
 
 func SetFwRuleIdsInSchemaInCaseOfProviderUpdate(d *schema.ResourceData) error {
 	if _, ok := d.GetOk("firewallrule_ids"); !ok {
 		if fwRuleItf, ok := d.GetOk("firewallrule_id"); ok {
 			firewallRule := fwRuleItf.(string)
-			var firewallRuleIds []string
-			firewallRuleIds = append(firewallRuleIds, firewallRule)
-			if err := d.Set("firewallrule_ids", firewallRuleIds); err != nil {
+			var firewallRuleIDs []string
+			firewallRuleIDs = append(firewallRuleIDs, firewallRule)
+			if err := d.Set("firewallrule_ids", firewallRuleIDs); err != nil {
 				return utils.GenerateSetError("server", "firewallrule_ids", err)
 			}
 		}

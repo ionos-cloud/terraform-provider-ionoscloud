@@ -267,7 +267,7 @@ func resourceLanUpdate(ctx context.Context, d *schema.ResourceData, meta any) di
 }
 
 func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	dcId := d.Get("datacenter_id").(string)
+	dcID := d.Get("datacenter_id").(string)
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
@@ -279,7 +279,7 @@ func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta any) di
 	}
 
 	err = retry.RetryContext(ctx, d.Timeout(schema.TimeoutDelete), func() *retry.RetryError {
-		apiResponse, err := client.LANsApi.DatacentersLansDelete(ctx, dcId, d.Id()).Execute()
+		apiResponse, err := client.LANsApi.DatacentersLansDelete(ctx, dcID, d.Id()).Execute()
 		if err != nil {
 			if isDeleteProtected(apiResponse, err.Error()) {
 				tflog.Info(ctx, "LAN is delete-protected, keep trying", map[string]any{"lan_id": d.Id()})
@@ -289,13 +289,13 @@ func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta any) di
 				tflog.Info(ctx, "LAN already deleted", map[string]any{"lan_id": d.Id()})
 				return nil
 			}
-			return retry.NonRetryableError(fmt.Errorf("an error occurred while deleting lan dcId %s ID %s %w", dcId, d.Id(), err))
+			return retry.NonRetryableError(fmt.Errorf("an error occurred while deleting lan dcID %s ID %s %w", dcID, d.Id(), err))
 		}
 		tflog.Debug(ctx, "deletion started for LAN", map[string]any{"lan_id": d.Id()})
 		return nil
 	})
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while deleting lan dcId %s %w", dcId, err), nil)
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while deleting lan dcID %s %w", dcID, err), nil)
 	}
 
 	if err := waitForLanDeletion(ctx, client, d); err != nil {
@@ -329,29 +329,29 @@ func resourceLanImport(ctx context.Context, d *schema.ResourceData, meta any) ([
 		return nil, diagutil.ToError(d, fmt.Errorf("failed validating import identifier %q: %w", importID, err), nil)
 	}
 
-	datacenterId := parts[0]
-	lanId := parts[1]
+	datacenterID := parts[0]
+	lanID := parts[1]
 
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return nil, err
 	}
 
-	lan, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, datacenterId, lanId).Execute()
+	lan, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, datacenterID, lanID).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("unable to find lan %q", lanId), nil)
+			return nil, diagutil.ToError(d, fmt.Errorf("unable to find lan %q", lanID), nil)
 		}
-		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while retrieving the lan %q, %w", lanId, err), nil)
+		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while retrieving the lan %q, %w", lanID, err), nil)
 	}
 
-	tflog.Info(ctx, "LAN imported", map[string]any{"lan_id": d.Id(), "datacenter_id": datacenterId})
+	tflog.Info(ctx, "LAN imported", map[string]any{"lan_id": d.Id(), "datacenter_id": datacenterID})
 
-	if err := d.Set("datacenter_id", datacenterId); err != nil {
-		return nil, diagutil.ToError(d, fmt.Errorf("error while setting datacenter_id property for lan %q: %w", lanId, err), nil)
+	if err := d.Set("datacenter_id", datacenterID); err != nil {
+		return nil, diagutil.ToError(d, fmt.Errorf("error while setting datacenter_id property for lan %q: %w", lanID, err), nil)
 	}
 	if err := d.Set("location", location); err != nil {
 		return nil, err
@@ -405,8 +405,8 @@ func setLanData(d *schema.ResourceData, lan *ionoscloud.Lan) error {
 }
 
 func lanAvailable(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
-	dcId := d.Get("datacenter_id").(string)
-	rsp, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, dcId, d.Id()).Execute()
+	dcID := d.Get("datacenter_id").(string)
+	rsp, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, dcID, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -421,9 +421,9 @@ func lanAvailable(ctx context.Context, client *ionoscloud.APIClient, d *schema.R
 }
 
 func lanDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
-	dcId := d.Get("datacenter_id").(string)
+	dcID := d.Get("datacenter_id").(string)
 
-	_, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, dcId, d.Id()).Execute()
+	_, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, dcID, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -438,7 +438,7 @@ func lanDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.Res
 		return false, fmt.Errorf("error checking LAN deletion status: %w", err)
 	}
 
-	tflog.Info(ctx, "LAN not yet deleted from the datacenter", map[string]any{"lan_id": d.Id(), "datacenter_id": dcId})
+	tflog.Info(ctx, "LAN not yet deleted from the datacenter", map[string]any{"lan_id": d.Id(), "datacenter_id": dcID})
 
 	return false, nil
 }
@@ -470,13 +470,13 @@ func waitForLanDeletion(ctx context.Context, client *ionoscloud.APIClient, d *sc
 }
 
 func lanNicsDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
-	dcId := d.Get("datacenter_id").(string)
+	dcID := d.Get("datacenter_id").(string)
 
-	nics, apiResponse, err := client.LANsApi.DatacentersLansNicsGet(ctx, dcId, d.Id()).Execute()
+	nics, apiResponse, err := client.LANsApi.DatacentersLansNicsGet(ctx, dcID, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		return false, fmt.Errorf("an error occurred while searching for nics in datacenter with id: %s for lan with: id %s %w", dcId, d.Id(), err)
+		return false, fmt.Errorf("an error occurred while searching for nics in datacenter with id: %s for lan with: id %s %w", dcID, d.Id(), err)
 	}
 
 	if nics.Items != nil && len(*nics.Items) > 0 {

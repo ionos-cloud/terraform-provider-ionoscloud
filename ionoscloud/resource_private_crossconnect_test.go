@@ -36,7 +36,7 @@ func TestAccPrivateCrossConnectBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDataSourcePccMatchId,
+				Config: testAccDataSourcePccMatchID,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PCCResource+"."+constant.PCCDataSourceById, "name", constant.PCCResource+"."+constant.PCCTestResource, "name"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PCCResource+"."+constant.PCCDataSourceById, "description", constant.PCCResource+"."+constant.PCCTestResource, "description"),
@@ -148,7 +148,7 @@ resource ` + constant.PCCResource + ` ` + constant.PCCTestResource + ` {
   description = "` + constant.UpdatedResources + `"
 }`
 
-const testAccDataSourcePccMatchId = testAccCheckPrivateCrossConnectConfigBasic + `
+const testAccDataSourcePccMatchID = testAccCheckPrivateCrossConnectConfigBasic + `
 data ` + constant.PCCResource + ` ` + constant.PCCDataSourceById + ` {
   id			= ` + constant.PCCResource + `.` + constant.PCCTestResource + `.id
 }

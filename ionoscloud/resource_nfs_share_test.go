@@ -60,7 +60,7 @@ func TestAccNFSShareBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDataSourceNFSShareMatchId,
+				Config: testAccDataSourceNFSShareMatchID,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair("data.ionoscloud_nfs_share.share_data_example", "name", "ionoscloud_nfs_share.example", "name"),
 					resource.TestCheckResourceAttrPair("data.ionoscloud_nfs_share.share_data_example", "quota", "ionoscloud_nfs_share.example", "quota"),
@@ -164,7 +164,7 @@ resource "ionoscloud_nfs_share" "example" {
 }
 `
 
-const testAccDataSourceNFSShareMatchId = testAccCheckNFSShareConfigUpdate + `
+const testAccDataSourceNFSShareMatchID = testAccCheckNFSShareConfigUpdate + `
 data "ionoscloud_nfs_share" "share_data_example" {
   location = ionoscloud_nfs_cluster.example.location
   cluster_id = ionoscloud_nfs_cluster.example.id

@@ -179,9 +179,9 @@ func resourceContainerRegistryUpdate(ctx context.Context, d *schema.ResourceData
 		warnings = diag.Diagnostics{}
 	}
 
-	registryId := d.Id()
+	registryID := d.Id()
 
-	_, apiResponse, err := client.PatchRegistry(ctx, registryId, *containerRegistry)
+	_, apiResponse, err := client.PatchRegistry(ctx, registryID, *containerRegistry)
 	if err != nil {
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating a registry: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
@@ -200,16 +200,16 @@ func resourceContainerRegistryDelete(ctx context.Context, d *schema.ResourceData
 		return diag.FromErr(err)
 	}
 
-	registryId := d.Id()
+	registryID := d.Id()
 
-	apiResponse, err := client.DeleteRegistry(ctx, registryId)
+	apiResponse, err := client.DeleteRegistry(ctx, registryID)
 
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while deleting registry %s: %w", registryId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return diagutil.ToDiags(d, fmt.Errorf("error while deleting registry %s: %w", registryID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	return diagutil.ToDiags(d, utils.WaitForResourceToBeDeleted(ctx, d, client.IsRegistryDeleted), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String()})
@@ -230,19 +230,19 @@ func resourceContainerRegistryImport(ctx context.Context, d *schema.ResourceData
 		return nil, err
 	}
 
-	registryId := parts[0]
+	registryID := parts[0]
 
-	containerRegistry, apiResponse, err := client.GetRegistry(ctx, registryId)
+	containerRegistry, apiResponse, err := client.GetRegistry(ctx, registryID)
 
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("registry does not exist %q", registryId), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return nil, diagutil.ToError(d, fmt.Errorf("registry does not exist %q", registryID), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
-		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the import of registry %q, error:%w", registryId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the import of registry %q, error:%w", registryID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	tflog.Info(ctx, "container registry imported", map[string]any{"registry_id": registryId})
+	tflog.Info(ctx, "container registry imported", map[string]any{"registry_id": registryID})
 
 	if err := crService.SetRegistryData(d, containerRegistry); err != nil {
 		return nil, diagutil.ToError(d, err, nil)

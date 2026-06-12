@@ -71,12 +71,12 @@ func resourceLoadbalancerCreate(ctx context.Context, d *schema.ResourceData, met
 		return diag.FromErr(err)
 	}
 
-	rawIds := d.Get("nic_ids").([]any)
-	var nicIds []ionoscloud.Nic
+	rawIDs := d.Get("nic_ids").([]any)
+	var nicIDs []ionoscloud.Nic
 
-	for _, id := range rawIds {
+	for _, id := range rawIDs {
 		id := id.(string)
-		nicIds = append(nicIds, ionoscloud.Nic{Id: &id})
+		nicIDs = append(nicIDs, ionoscloud.Nic{Id: &id})
 	}
 
 	name := d.Get("name").(string)
@@ -86,7 +86,7 @@ func resourceLoadbalancerCreate(ctx context.Context, d *schema.ResourceData, met
 		},
 		Entities: &ionoscloud.LoadbalancerEntities{
 			Balancednics: &ionoscloud.BalancedNics{
-				Items: &nicIds,
+				Items: &nicIDs,
 			},
 		},
 	}
@@ -191,9 +191,9 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 	}
 
 	if d.HasChange("nic_ids") {
-		oldNicIds, newNicIds := d.GetChange("nic_ids")
+		oldNicIDs, newNicIDs := d.GetChange("nic_ids")
 
-		oldList := oldNicIds.([]any)
+		oldList := oldNicIDs.([]any)
 
 		for _, o := range oldList {
 			apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersBalancednicsDelete(context.TODO(),
@@ -215,7 +215,7 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 			}
 		}
 
-		newList := newNicIds.([]any)
+		newList := newNicIDs.([]any)
 
 		for _, o := range newList {
 			id := o.(string)
@@ -277,30 +277,30 @@ func resourceLoadbalancerImporter(ctx context.Context, d *schema.ResourceData, m
 		return nil, diagutil.ToError(d, fmt.Errorf("failed validating import identifier %q: %w", importID, err), nil)
 	}
 
-	dcId := parts[0]
-	lbId := parts[1]
+	dcID := parts[0]
+	lbID := parts[1]
 
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return nil, err
 	}
 
-	loadbalancer, apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersFindById(ctx, dcId, lbId).Execute()
+	loadbalancer, apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersFindById(ctx, dcID, lbID).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("loadbalancer does not exist %q", lbId), nil)
+			return nil, diagutil.ToError(d, fmt.Errorf("loadbalancer does not exist %q", lbID), nil)
 		}
-		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the loadbalancer %q, error:%w", lbId, err), nil)
+		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the loadbalancer %q, error:%w", lbID, err), nil)
 	}
 
-	tflog.Info(ctx, "loadbalancer found", map[string]any{"loadbalancer_id": *loadbalancer.Id, "datacenter_id": dcId})
+	tflog.Info(ctx, "loadbalancer found", map[string]any{"loadbalancer_id": *loadbalancer.Id, "datacenter_id": dcID})
 
 	d.SetId(*loadbalancer.Id)
 
-	if err := d.Set("datacenter_id", dcId); err != nil {
+	if err := d.Set("datacenter_id", dcID); err != nil {
 		return nil, diagutil.ToError(d, err, nil)
 	}
 	if err := d.Set("location", location); err != nil {

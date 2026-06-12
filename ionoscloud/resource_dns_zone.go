@@ -69,19 +69,19 @@ func zoneCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diag
 
 func zoneRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).DNSClient
-	zoneId := d.Id()
-	zone, apiResponse, err := client.GetZoneById(ctx, zoneId)
+	zoneID := d.Id()
+	zone, apiResponse, err := client.GetZoneById(ctx, zoneID)
 
 	if err != nil {
 		if apiResponse.HttpNotFound() {
-			tflog.Info(ctx, "DNS zone not found", map[string]any{"zone_id": zoneId})
+			tflog.Info(ctx, "DNS zone not found", map[string]any{"zone_id": zoneID})
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while fetching DNS Zone with ID: %s, error: %w", zoneId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return diagutil.ToDiags(d, fmt.Errorf("error while fetching DNS Zone with ID: %s, error: %w", zoneID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	tflog.Info(ctx, "retrieved DNS zone", map[string]any{"zone_id": zoneId})
+	tflog.Info(ctx, "retrieved DNS zone", map[string]any{"zone_id": zoneID})
 
 	if err := client.SetZoneData(d, zone); err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -91,11 +91,11 @@ func zoneRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagno
 
 func zoneUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).DNSClient
-	zoneId := d.Id()
+	zoneID := d.Id()
 
-	zoneResponse, apiResponse, err := client.UpdateZone(ctx, zoneId, d)
+	zoneResponse, apiResponse, err := client.UpdateZone(ctx, zoneID, d)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating the DNS Zone with ID: %s, error: %w", zoneId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating the DNS Zone with ID: %s, error: %w", zoneID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	if zoneResponse.Metadata.State == dns.PROVISIONINGSTATE_FAILED {
 		// This is a temporary error message since right now the API is not returning errors that we can work with.
@@ -107,37 +107,37 @@ func zoneUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diag
 
 func zoneDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).DNSClient
-	zoneId := d.Id()
+	zoneID := d.Id()
 
-	apiResponse, err := client.DeleteZone(ctx, zoneId)
+	apiResponse, err := client.DeleteZone(ctx, zoneID)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while deleting DNS Zone with ID: %s, error: %w", zoneId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return diagutil.ToDiags(d, fmt.Errorf("error while deleting DNS Zone with ID: %s, error: %w", zoneID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsZoneDeleted)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while waiting for the DNS Zone with ID: %s to be deleted, error: %w", zoneId, err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String()})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while waiting for the DNS Zone with ID: %s to be deleted, error: %w", zoneID, err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String()})
 	}
 	return nil
 }
 
 func zoneImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	client := meta.(bundleclient.SdkBundle).DNSClient
-	zoneId := d.Id()
+	zoneID := d.Id()
 
-	zone, apiResponse, err := client.GetZoneById(ctx, zoneId)
+	zone, apiResponse, err := client.GetZoneById(ctx, zoneID)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("DNS Zone with ID: %s does not exist", zoneId), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return nil, diagutil.ToError(d, fmt.Errorf("DNS Zone with ID: %s does not exist", zoneID), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
-		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to import the DNS Zone with ID: %s, error: %w", zoneId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to import the DNS Zone with ID: %s, error: %w", zoneID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
-	tflog.Info(ctx, "DNS zone imported", map[string]any{"zone_id": zoneId})
+	tflog.Info(ctx, "DNS zone imported", map[string]any{"zone_id": zoneID})
 
 	if err := client.SetZoneData(d, zone); err != nil {
 		return nil, diagutil.ToError(d, err, nil)

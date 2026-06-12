@@ -47,7 +47,7 @@ func TestAccSnapshotBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDataSourceSnapshotMatchId,
+				Config: testAccDataSourceSnapshotMatchID,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceById, "name", constant.SnapshotResource+"."+constant.SnapshotTestResource, "name"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.SnapshotResource+"."+constant.SnapshotDataSourceById, "location", constant.SnapshotResource+"."+constant.SnapshotTestResource, "location"),
@@ -220,7 +220,7 @@ resource ` + constant.SnapshotResource + ` ` + constant.SnapshotTestResource + `
   require_legacy_bios = true
 }`
 
-const testAccDataSourceSnapshotMatchId = testAccCheckSnapshotConfigBasic + `
+const testAccDataSourceSnapshotMatchID = testAccCheckSnapshotConfigBasic + `
 data ` + constant.SnapshotResource + ` ` + constant.SnapshotDataSourceById + ` {
   id = ` + constant.SnapshotResource + `.` + constant.SnapshotTestResource + `.id
 }`

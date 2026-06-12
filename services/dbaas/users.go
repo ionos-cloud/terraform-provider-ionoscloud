@@ -82,10 +82,10 @@ func (c *PsqlClient) DeleteUser(ctx context.Context, clusterID, username string)
 // IsUserReady - checks the cluster, as it will move to busy while the user is created or updated
 // There is no metadata state on the user
 func (c *MongoClient) IsUserReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
-	clusterIdIf, idOk := d.GetOk("cluster_id")
+	clusterIDIf, idOk := d.GetOk("cluster_id")
 	usernameIf, _ := d.GetOk("username")
 	username := usernameIf.(string)
-	clusterID := clusterIdIf.(string)
+	clusterID := clusterIDIf.(string)
 	if !idOk {
 		return false, fmt.Errorf("id missing from schema for cluster with id %s", d.Id())
 	}
@@ -107,7 +107,7 @@ func (c *MongoClient) IsUserReady(ctx context.Context, d *schema.ResourceData) (
 
 // IsUserDeleted - checks if the mongo user is deleted
 func (c *MongoClient) IsUserDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
-	clusterIdIf, idOk := d.GetOk("cluster_id")
+	clusterIDIf, idOk := d.GetOk("cluster_id")
 	usernameIf, nameOk := d.GetOk("username")
 	if !nameOk {
 		return false, fmt.Errorf("username missing from schema for user with id %s", d.Id())
@@ -115,7 +115,7 @@ func (c *MongoClient) IsUserDeleted(ctx context.Context, d *schema.ResourceData)
 	if !idOk {
 		return false, fmt.Errorf("id missing from schema for user with id %s", d.Id())
 	}
-	_, apiResponse, err := c.sdkClient.UsersApi.ClustersUsersFindById(ctx, clusterIdIf.(string), usernameIf.(string)).Execute()
+	_, apiResponse, err := c.sdkClient.UsersApi.ClustersUsersFindById(ctx, clusterIDIf.(string), usernameIf.(string)).Execute()
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			return true, nil

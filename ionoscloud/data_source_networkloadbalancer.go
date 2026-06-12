@@ -99,11 +99,11 @@ func dataSourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceDa
 		return diag.FromErr(err)
 	}
 
-	datacenterId, dcIdOk := d.GetOk("datacenter_id")
-	if !dcIdOk {
+	datacenterID, dcIDOk := d.GetOk("datacenter_id")
+	if !dcIDOk {
 		return diagutil.ToDiags(d, fmt.Errorf("no datacenter_id was specified"), nil)
 	}
-	dcID := datacenterId.(string)
+	dcID := datacenterID.(string)
 
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")

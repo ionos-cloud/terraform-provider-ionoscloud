@@ -17,19 +17,19 @@ import (
 var recordResourceName = "DNS Record"
 
 // CreateRecord creates a new record
-func (c *Client) CreateRecord(ctx context.Context, zoneId string, d *schema.ResourceData) (recordResponse dns.RecordRead, responseInfo *shared.APIResponse, err error) {
+func (c *Client) CreateRecord(ctx context.Context, zoneID string, d *schema.ResourceData) (recordResponse dns.RecordRead, responseInfo *shared.APIResponse, err error) {
 	recordUUID := uuidgen.ResourceUuid()
 	request := setRecordPutRequest(d)
-	recordResponse, apiResponse, err := c.sdkClient.RecordsApi.ZonesRecordsPut(ctx, zoneId, recordUUID.String()).RecordEnsure(request).Execute()
+	recordResponse, apiResponse, err := c.sdkClient.RecordsApi.ZonesRecordsPut(ctx, zoneID, recordUUID.String()).RecordEnsure(request).Execute()
 	apiResponse.LogInfo()
 	return recordResponse, apiResponse, err
 }
 
 // IsRecordCreated checks if record is created
 func (c *Client) IsRecordCreated(ctx context.Context, d *schema.ResourceData) (bool, error) {
-	zoneId := d.Get("zone_id").(string)
+	zoneID := d.Get("zone_id").(string)
 	recordID := d.Id()
-	record, _, err := c.GetRecordById(ctx, zoneId, recordID)
+	record, _, err := c.GetRecordById(ctx, zoneID, recordID)
 	if err != nil {
 		return false, err
 	}
@@ -40,8 +40,8 @@ func (c *Client) IsRecordCreated(ctx context.Context, d *schema.ResourceData) (b
 }
 
 // GetRecordById gets a record by ID
-func (c *Client) GetRecordById(ctx context.Context, zoneId, recordID string) (dns.RecordRead, *shared.APIResponse, error) {
-	record, apiResponse, err := c.sdkClient.RecordsApi.ZonesRecordsFindById(ctx, zoneId, recordID).Execute()
+func (c *Client) GetRecordById(ctx context.Context, zoneID, recordID string) (dns.RecordRead, *shared.APIResponse, error) {
+	record, apiResponse, err := c.sdkClient.RecordsApi.ZonesRecordsFindById(ctx, zoneID, recordID).Execute()
 	apiResponse.LogInfo()
 	return record, apiResponse, err
 }
@@ -97,23 +97,23 @@ func (c *Client) SetRecordData(d *schema.ResourceData, record dns.RecordRead) er
 	return nil
 }
 
-func (c *Client) DeleteRecord(ctx context.Context, zoneId, recordID string) (*shared.APIResponse, error) {
-	_, apiResponse, err := c.sdkClient.RecordsApi.ZonesRecordsDelete(ctx, zoneId, recordID).Execute()
+func (c *Client) DeleteRecord(ctx context.Context, zoneID, recordID string) (*shared.APIResponse, error) {
+	_, apiResponse, err := c.sdkClient.RecordsApi.ZonesRecordsDelete(ctx, zoneID, recordID).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
 }
 
 func (c *Client) IsRecordDeleted(ctx context.Context, d *schema.ResourceData) (bool, error) {
-	zoneId := d.Get("zone_id").(string)
+	zoneID := d.Get("zone_id").(string)
 	recordID := d.Id()
-	_, apiResponse, err := c.sdkClient.RecordsApi.ZonesRecordsFindById(ctx, zoneId, recordID).Execute()
+	_, apiResponse, err := c.sdkClient.RecordsApi.ZonesRecordsFindById(ctx, zoneID, recordID).Execute()
 	apiResponse.LogInfo()
 	return apiResponse.HttpNotFound(), err
 }
 
-func (c *Client) UpdateRecord(ctx context.Context, zoneId, recordID string, d *schema.ResourceData) (dns.RecordRead, *shared.APIResponse, error) {
+func (c *Client) UpdateRecord(ctx context.Context, zoneID, recordID string, d *schema.ResourceData) (dns.RecordRead, *shared.APIResponse, error) {
 	request := setRecordPutRequest(d)
-	recordResponse, apiResponse, err := c.sdkClient.RecordsApi.ZonesRecordsPut(ctx, zoneId, recordID).RecordEnsure(request).Execute()
+	recordResponse, apiResponse, err := c.sdkClient.RecordsApi.ZonesRecordsPut(ctx, zoneID, recordID).RecordEnsure(request).Execute()
 	apiResponse.LogInfo()
 	return recordResponse, apiResponse, err
 }

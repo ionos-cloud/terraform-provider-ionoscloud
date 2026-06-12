@@ -37,12 +37,12 @@ func (fs *Service) List(ctx context.Context, datacenterID, serverID string, dept
 	return *nics.Items, nil
 }
 
-func (fs *Service) Get(ctx context.Context, datacenterId, serverId, ID string, depth int32) (*ionoscloud.Nic, *ionoscloud.APIResponse, error) {
-	nic, apiResponse, err := fs.Client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, datacenterId, serverId, ID).Depth(depth).Execute()
+func (fs *Service) Get(ctx context.Context, datacenterID, serverID, ID string, depth int32) (*ionoscloud.Nic, *ionoscloud.APIResponse, error) {
+	nic, apiResponse, err := fs.Client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, datacenterID, serverID, ID).Depth(depth).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
 		if apiResponse.HttpNotFound() {
-			tflog.Debug(ctx, "no nic found", map[string]any{"datacenter_id": datacenterId, "server_id": serverId})
+			tflog.Debug(ctx, "no nic found", map[string]any{"datacenter_id": datacenterID, "server_id": serverID})
 		}
 		return nil, apiResponse, err
 	}
@@ -56,7 +56,7 @@ func (fs *Service) Delete(ctx context.Context, datacenterID, serverID, ID string
 		return apiResponse, err
 	}
 	if errState := bundleclient.WaitForStateChange(ctx, fs.Meta, fs.D, apiResponse, schema.TimeoutDelete); errState != nil {
-		return apiResponse, fmt.Errorf("an error occurred while waiting for nic state change on delete dcId: %s, server_id: %s, ID: %s, Response: (%w)", datacenterID, serverID, ID, errState)
+		return apiResponse, fmt.Errorf("an error occurred while waiting for nic state change on delete dcID: %s, server_id: %s, ID: %s, Response: (%w)", datacenterID, serverID, ID, errState)
 	}
 	return apiResponse, nil
 }
@@ -66,13 +66,13 @@ func (fs *Service) Create(ctx context.Context, datacenterID, serverID string, ni
 	val, apiResponse, err := fs.Client.NetworkInterfacesApi.DatacentersServersNicsPost(ctx, datacenterID, serverID).Nic(nic).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
-		return nil, apiResponse, fmt.Errorf("an error occurred while creating nic for dcId: %s, server_id: %s, Response: (%w)", datacenterID, serverID, err)
+		return nil, apiResponse, fmt.Errorf("an error occurred while creating nic for dcID: %s, server_id: %s, Response: (%w)", datacenterID, serverID, err)
 	}
 	if errState := bundleclient.WaitForStateChange(ctx, fs.Meta, fs.D, apiResponse, schema.TimeoutCreate); errState != nil {
 		if bundleclient.IsRequestFailed(errState) {
 			fs.D.SetId("")
 		}
-		return nil, apiResponse, fmt.Errorf("an error occurred while waiting for nic state change on create dcId: %s, server_id: %s, Response: (%w)", datacenterID, serverID, errState)
+		return nil, apiResponse, fmt.Errorf("an error occurred while waiting for nic state change on create dcID: %s, server_id: %s, Response: (%w)", datacenterID, serverID, errState)
 	}
 	return &val, apiResponse, nil
 }
@@ -81,10 +81,10 @@ func (fs *Service) Update(ctx context.Context, datacenterID, serverID, ID string
 	updatedNic, apiResponse, err := fs.Client.NetworkInterfacesApi.DatacentersServersNicsPatch(ctx, datacenterID, serverID, ID).Nic(nicProperties).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
-		return nil, apiResponse, fmt.Errorf("an error occurred while updating nic for dcId: %s, server_id: %s, id %s, Response: (%w)", datacenterID, serverID, ID, err)
+		return nil, apiResponse, fmt.Errorf("an error occurred while updating nic for dcID: %s, server_id: %s, id %s, Response: (%w)", datacenterID, serverID, ID, err)
 	}
 	if errState := bundleclient.WaitForStateChange(ctx, fs.Meta, fs.D, apiResponse, schema.TimeoutUpdate); errState != nil {
-		return nil, apiResponse, fmt.Errorf("an error occurred while waiting for nic state change on update dcId: %s, server_id: %s, ID: %s, Response: (%w)", datacenterID, serverID, ID, errState)
+		return nil, apiResponse, fmt.Errorf("an error occurred while waiting for nic state change on update dcID: %s, server_id: %s, ID: %s, Response: (%w)", datacenterID, serverID, ID, errState)
 	}
 	return &updatedNic, apiResponse, nil
 }

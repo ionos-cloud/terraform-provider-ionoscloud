@@ -38,7 +38,7 @@ func TestAccDataCenterBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDataSourceDatacenterMatchId,
+				Config: testAccDataSourceDatacenterMatchID,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DatacenterResource+"."+constant.DatacenterDataSourceById, "name", constant.DatacenterResource+"."+constant.DatacenterTestResource, "name"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DatacenterResource+"."+constant.DatacenterDataSourceById, "location", constant.DatacenterResource+"."+constant.DatacenterTestResource, "location"),
@@ -180,7 +180,7 @@ resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource
 	sec_auth_protection = false
 }`
 
-const testAccDataSourceDatacenterMatchId = testAccCheckDatacenterConfigBasic + `
+const testAccDataSourceDatacenterMatchID = testAccCheckDatacenterConfigBasic + `
 data ` + constant.DatacenterResource + ` ` + constant.DatacenterDataSourceById + ` {
   id			= ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
 }`

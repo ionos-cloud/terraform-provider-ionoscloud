@@ -86,15 +86,15 @@ func dataSourceDBaaSMariaDBBackups() *schema.Resource {
 func dataSourceDBaaSMariaDBReadBackups(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).MariaDBClient
 
-	clusterIdIntf, clusterIdOk := d.GetOk("cluster_id")
-	clusterId := clusterIdIntf.(string)
-	backupIdIntf, backupIdOk := d.GetOk("backup_id")
-	backupId := backupIdIntf.(string)
+	clusterIDIntf, clusterIDOk := d.GetOk("cluster_id")
+	clusterID := clusterIDIntf.(string)
+	backupIDIntf, backupIDOk := d.GetOk("backup_id")
+	backupID := backupIDIntf.(string)
 
-	if !clusterIdOk && !backupIdOk {
+	if !clusterIDOk && !backupIDOk {
 		return diagutil.ToDiags(d, fmt.Errorf("please provide either the 'cluster_id' or 'backup_id'"), nil)
 	}
-	if clusterIdOk && backupIdOk {
+	if clusterIDOk && backupIDOk {
 		return diagutil.ToDiags(d, fmt.Errorf("'cluster_id' and 'backup_id' cannot be specified at the same time"), nil)
 	}
 
@@ -103,24 +103,24 @@ func dataSourceDBaaSMariaDBReadBackups(ctx context.Context, d *schema.ResourceDa
 	var backups []mariadbSDK.BackupResponse
 	var apiResponse *shared.APIResponse
 	var err error
-	if clusterIdOk {
+	if clusterIDOk {
 		var backupsResponse mariadbSDK.BackupList
-		backupsResponse, apiResponse, err = client.GetClusterBackups(ctx, clusterId, location)
+		backupsResponse, apiResponse, err = client.GetClusterBackups(ctx, clusterID, location)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching backups for cluster with ID %s: %w", clusterId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching backups for cluster with ID %s: %w", clusterID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 		if backupsResponse.Items == nil {
-			return diagutil.ToDiags(d, fmt.Errorf("expected valid properties in the API response for cluster backups, but received 'nil' instead, cluster ID: %s", clusterId), nil)
+			return diagutil.ToDiags(d, fmt.Errorf("expected valid properties in the API response for cluster backups, but received 'nil' instead, cluster ID: %s", clusterID), nil)
 		}
 		backups = backupsResponse.Items
 	} else {
 		var backup mariadbSDK.BackupResponse
-		backup, apiResponse, err = client.FindBackupByID(ctx, backupId, location)
+		backup, apiResponse, err = client.FindBackupByID(ctx, backupID, location)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching backup with ID %s: %w", backupId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching backup with ID %s: %w", backupID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 		if backup.Properties == nil {
-			return diagutil.ToDiags(d, fmt.Errorf("expected valid properties in the API response for backup, but received 'nil' instead, backup ID: %s", backupId), nil)
+			return diagutil.ToDiags(d, fmt.Errorf("expected valid properties in the API response for backup, but received 'nil' instead, backup ID: %s", backupID), nil)
 		}
 		backups = append(backups, backup)
 	}

@@ -31,8 +31,8 @@ func (c *Client) FindBackupByID(ctx context.Context, backupID, location string) 
 
 // SetMariaDBClusterBackupsData sets the data for the backups attribute in the MariaDB backup data source.
 func SetMariaDBClusterBackupsData(d *schema.ResourceData, retrievedBackups []mariadb.BackupResponse) diag.Diagnostics {
-	resourceId := uuid.New()
-	d.SetId(resourceId.String())
+	resourceID := uuid.New()
+	d.SetId(resourceID.String())
 
 	var backupsToBeSet []any
 	for _, retrievedBackup := range retrievedBackups {

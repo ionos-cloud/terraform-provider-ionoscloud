@@ -38,7 +38,7 @@ func TestAccUserMongoBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDataSourceMongoUserMatchId,
+				Config: testAccDataSourceMongoUserMatchID,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaasMongoUserResource+"."+constant.UserDataSourceById, "username", constant.DBaasMongoUserResource+"."+constant.UserTestResource, "username"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaasMongoUserResource+"."+constant.UserDataSourceById, "roles.#", constant.DBaasMongoUserResource+"."+constant.UserTestResource, "roles.#"),
@@ -83,9 +83,9 @@ func testAccCheckMongoUserDestroyCheck(s *terraform.State) error {
 		if err != nil {
 			return err
 		}
-		clusterId := rs.Primary.Attributes["cluster_id"]
+		clusterID := rs.Primary.Attributes["cluster_id"]
 		username := rs.Primary.Attributes["username"]
-		_, apiResponse, err := client.FindUserByUsername(ctx, clusterId, username)
+		_, apiResponse, err := client.FindUserByUsername(ctx, clusterID, username)
 		apiResponse.LogInfo()
 		if err != nil {
 			if !apiResponse.HttpNotFound() {
@@ -122,9 +122,9 @@ func testAccCheckMongoUserExists(n string, user *mongo.User) resource.TestCheckF
 			return err
 		}
 
-		clusterId := rs.Primary.Attributes["cluster_id"]
+		clusterID := rs.Primary.Attributes["cluster_id"]
 		username := rs.Primary.Attributes["username"]
-		foundUser, apiResponse, err := client.FindUserByUsername(ctx, clusterId, username)
+		foundUser, apiResponse, err := client.FindUserByUsername(ctx, clusterID, username)
 		apiResponse.LogInfo()
 		if err != nil {
 			return fmt.Errorf("error occurred while fetching User: %s %w", rs.Primary.ID, err)
@@ -232,7 +232,7 @@ resource ` + constant.RandomPassword + ` "user_password_updated" {
 }
 `
 
-var testAccDataSourceMongoUserMatchId = testAccCheckMongoUserConfigBasic + `
+var testAccDataSourceMongoUserMatchID = testAccCheckMongoUserConfigBasic + `
 data ` + constant.DBaasMongoUserResource + ` ` + constant.UserDataSourceById + ` {
   cluster_id = ` + constant.DBaasMongoUserResource + `.` + constant.UserTestResource + `.cluster_id
   username = ` + constant.DBaasMongoUserResource + `.` + constant.UserTestResource + `.username

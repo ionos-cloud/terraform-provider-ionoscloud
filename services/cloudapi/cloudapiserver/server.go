@@ -77,7 +77,7 @@ func (ss *Service) Delete(ctx context.Context, datacenterID, serverID, ID string
 		return apiResponse, err
 	}
 	if errState := bundleclient.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutDelete); errState != nil {
-		return apiResponse, fmt.Errorf("an error occurred while waiting for server state change on delete dcId: %s, server_id: %s, ID: %s, Response: (%w)", datacenterID, serverID, ID, errState)
+		return apiResponse, fmt.Errorf("an error occurred while waiting for server state change on delete dcID: %s, server_id: %s, ID: %s, Response: (%w)", datacenterID, serverID, ID, errState)
 	}
 	return apiResponse, nil
 }
@@ -86,13 +86,13 @@ func (ss *Service) Create(ctx context.Context, datacenterID string) (*ionoscloud
 	server, apiResponse, err := ss.Client.ServersApi.DatacentersServersPost(ctx, datacenterID).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
-		return nil, apiResponse, fmt.Errorf("an error occurred while creating server for dcId: %s, Response: (%w)", datacenterID, err)
+		return nil, apiResponse, fmt.Errorf("an error occurred while creating server for dcID: %s, Response: (%w)", datacenterID, err)
 	}
 	if errState := bundleclient.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutCreate); errState != nil {
 		if bundleclient.IsRequestFailed(errState) {
 			ss.D.SetId("")
 		}
-		return nil, apiResponse, fmt.Errorf("an error occurred while waiting for server state change on create dcId: %s, Response: (%w)", datacenterID, errState)
+		return nil, apiResponse, fmt.Errorf("an error occurred while waiting for server state change on create dcID: %s, Response: (%w)", datacenterID, errState)
 	}
 	return &server, apiResponse, nil
 }
@@ -101,23 +101,23 @@ func (ss *Service) Update(ctx context.Context, datacenterID, serverID string, se
 	updatedServer, apiResponse, err := ss.Client.ServersApi.DatacentersServersPatch(ctx, datacenterID, serverID).Server(serverProperties).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
-		return nil, apiResponse, fmt.Errorf("an error occurred while updating server for dcId: %s, server_id: %s, Response: (%w)", datacenterID, serverID, err)
+		return nil, apiResponse, fmt.Errorf("an error occurred while updating server for dcID: %s, server_id: %s, Response: (%w)", datacenterID, serverID, err)
 	}
 	if errState := bundleclient.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutUpdate); errState != nil {
-		return nil, apiResponse, fmt.Errorf("an error occurred while waiting for server state change on update dcId: %s, server_id: %s, Response: (%w)", datacenterID, serverID, errState)
+		return nil, apiResponse, fmt.Errorf("an error occurred while waiting for server state change on update dcID: %s, server_id: %s, Response: (%w)", datacenterID, serverID, errState)
 	}
 	return &updatedServer, apiResponse, nil
 }
 
 func (ss *Service) GetAttachedVolumes(ctx context.Context, datacenterID, serverID string) ([]*ionoscloud.Volume, *ionoscloud.APIResponse, error) {
 
-	attachedVolumeIds, apiResponse, err := ss.Client.ServersApi.DatacentersServersVolumesGet(ctx, datacenterID, serverID).Execute()
+	attachedVolumeIDs, apiResponse, err := ss.Client.ServersApi.DatacentersServersVolumesGet(ctx, datacenterID, serverID).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
-		return nil, apiResponse, fmt.Errorf("an error occurred while fetching attached volumes for server, dcId: %s, serverId: %s, Response: (%w)", datacenterID, serverID, err)
+		return nil, apiResponse, fmt.Errorf("an error occurred while fetching attached volumes for server, dcID: %s, serverID: %s, Response: (%w)", datacenterID, serverID, err)
 	}
 	attachedVolumes := []*ionoscloud.Volume{}
-	for _, v := range *attachedVolumeIds.Items {
+	for _, v := range *attachedVolumeIDs.Items {
 		volume, apiResponse, err := ss.Client.ServersApi.DatacentersServersVolumesFindById(ctx, datacenterID, serverID, *v.Id).Execute()
 		if err != nil {
 			return nil, apiResponse, err
@@ -128,8 +128,8 @@ func (ss *Service) GetAttachedVolumes(ctx context.Context, datacenterID, serverI
 	return attachedVolumes, apiResponse, nil
 }
 
-func (ss *Service) GetDefaultBootVolume(ctx context.Context, datacenterId, serverId string) (*ionoscloud.Volume, error) {
-	attachedVolumes, _, err := ss.GetAttachedVolumes(ctx, datacenterId, serverId)
+func (ss *Service) GetDefaultBootVolume(ctx context.Context, datacenterID, serverID string) (*ionoscloud.Volume, error) {
+	attachedVolumes, _, err := ss.GetAttachedVolumes(ctx, datacenterID, serverID)
 	if err != nil {
 		return nil, err
 	}
@@ -145,8 +145,8 @@ func (ss *Service) GetDefaultBootVolume(ctx context.Context, datacenterId, serve
 	return &defaultBootVolume, nil
 }
 
-func (ss *Service) GetCurrentBootDeviceID(ctx context.Context, datacenterId, serverId string) (string, string, error) {
-	server, err := ss.FindById(ctx, datacenterId, serverId, 3)
+func (ss *Service) GetCurrentBootDeviceID(ctx context.Context, datacenterID, serverID string) (string, string, error) {
+	server, err := ss.FindById(ctx, datacenterID, serverID, 3)
 	if err != nil {
 		return "", "", err
 	}
@@ -322,7 +322,7 @@ func (ss *Service) Start(ctx context.Context, datacenterID, serverID, serverType
 			return err
 		}
 		if errState := bundleclient.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutUpdate); errState != nil {
-			return fmt.Errorf("an error occurred while waiting for server state change on VM POWER ON dcId: %s, server_id: %s, Response: (%w)", datacenterID, serverID, errState)
+			return fmt.Errorf("an error occurred while waiting for server state change on VM POWER ON dcID: %s, server_id: %s, Response: (%w)", datacenterID, serverID, errState)
 		}
 		tflog.Debug(ctx, "server powered on", map[string]any{"server_type": serverType, "server_id": serverID})
 		return nil
@@ -337,7 +337,7 @@ func (ss *Service) Start(ctx context.Context, datacenterID, serverID, serverType
 			return err
 		}
 		if errState := bundleclient.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutUpdate); errState != nil {
-			return fmt.Errorf("an error occurred while waiting for server state change on VM RESUME dcId: %s, server_id: %s, Response: (%w)", datacenterID, serverID, errState)
+			return fmt.Errorf("an error occurred while waiting for server state change on VM RESUME dcID: %s, server_id: %s, Response: (%w)", datacenterID, serverID, errState)
 		}
 		tflog.Debug(ctx, "server unsuspended", map[string]any{"server_type": serverType, "server_id": serverID})
 		return nil
@@ -362,7 +362,7 @@ func (ss *Service) Stop(ctx context.Context, datacenterID, serverID, serverType 
 			return err
 		}
 		if errState := bundleclient.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutUpdate); errState != nil {
-			return fmt.Errorf("an error occurred while waiting for server state change on VM SHUTOFF dcId: %s, server_id: %s, Response: (%w)", datacenterID, serverID, errState)
+			return fmt.Errorf("an error occurred while waiting for server state change on VM SHUTOFF dcID: %s, server_id: %s, Response: (%w)", datacenterID, serverID, errState)
 		}
 		tflog.Debug(ctx, "server powered off", map[string]any{"server_type": serverType, "server_id": serverID})
 		return nil
@@ -377,7 +377,7 @@ func (ss *Service) Stop(ctx context.Context, datacenterID, serverID, serverType 
 			return err
 		}
 		if errState := bundleclient.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutUpdate); errState != nil {
-			return fmt.Errorf("an error occurred while waiting for server state change on VM SUSPEND dcId: %s, server_id: %s, Response: (%w)", datacenterID, serverID, errState)
+			return fmt.Errorf("an error occurred while waiting for server state change on VM SUSPEND dcID: %s, server_id: %s, Response: (%w)", datacenterID, serverID, errState)
 		}
 		tflog.Debug(ctx, "server suspended", map[string]any{"server_type": serverType, "server_id": serverID})
 		return nil
@@ -399,7 +399,7 @@ func (ss *Service) Reboot(ctx context.Context, datacenterID, serverID string) er
 		return err
 	}
 	if errState := bundleclient.WaitForStateChange(ctx, ss.Meta, ss.D, apiResponse, schema.TimeoutUpdate); errState != nil {
-		return fmt.Errorf("an error occurred while waiting for server state change on reboot dcId: %s, server_id: %s, Response: (%w)", datacenterID, serverID, errState)
+		return fmt.Errorf("an error occurred while waiting for server state change on reboot dcID: %s, server_id: %s, Response: (%w)", datacenterID, serverID, errState)
 	}
 	tflog.Debug(ctx, "server reboot finished", map[string]any{"server_id": serverID})
 	return nil

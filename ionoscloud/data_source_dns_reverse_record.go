@@ -60,7 +60,7 @@ func dataSourceReverseRecordRead(ctx context.Context, d *schema.ResourceData, me
 	idValue, idOk := d.GetOk("id")
 	nameValue, nameOk := d.GetOk("name")
 	ipValue, ipOk := d.GetOk("ip")
-	recordId := idValue.(string)
+	recordID := idValue.(string)
 	recordName := nameValue.(string)
 	recordIp := ipValue.(string)
 
@@ -92,9 +92,9 @@ func dataSourceReverseRecordRead(ctx context.Context, d *schema.ResourceData, me
 	var err error
 
 	if idOk {
-		record, apiResponse, err = client.GetReverseRecordById(ctx, recordId)
+		record, apiResponse, err = client.GetReverseRecordById(ctx, recordID)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the DNS Reverse Record with ID: %s, error: %w", recordId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the DNS Reverse Record with ID: %s, error: %w", recordID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 	} else {
 
@@ -136,7 +136,7 @@ func dataSourceReverseRecordRead(ctx context.Context, d *schema.ResourceData, me
 		}
 		var usedFilter string
 		if ipOk {
-			usedFilter = recordId
+			usedFilter = recordID
 		} else if nameOk {
 			usedFilter = recordName
 		}

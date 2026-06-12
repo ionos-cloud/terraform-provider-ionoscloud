@@ -39,7 +39,7 @@ func TestAccBackupUnitBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDataSourceBackupUnitMatchId,
+				Config: testAccDataSourceBackupUnitMatchID,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.BackupUnitResource+"."+constant.BackupUnitDataSourceById, "name", constant.BackupUnitResource+"."+constant.BackupUnitTestResource, "name"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.BackupUnitResource+"."+constant.BackupUnitDataSourceById, "email", constant.BackupUnitResource+"."+constant.BackupUnitTestResource, "email"),
@@ -177,7 +177,7 @@ resource ` + constant.RandomPassword + ` "backup_unit_password_updated" {
   override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 `
-const testAccDataSourceBackupUnitMatchId = testAccCheckBackupUnitConfigBasic + `
+const testAccDataSourceBackupUnitMatchID = testAccCheckBackupUnitConfigBasic + `
 data ` + constant.BackupUnitResource + ` ` + constant.BackupUnitDataSourceById + ` {
   id			= ` + constant.BackupUnitResource + `.` + constant.BackupUnitTestResource + `.id
 }

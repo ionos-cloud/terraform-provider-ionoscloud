@@ -12,14 +12,14 @@ import (
 )
 
 // GetGroupServer returns a group server given an ID
-func (c *Client) GetGroupServer(ctx context.Context, groupId string, serverId string) (autoscaling.Server, *shared.APIResponse, error) {
-	server, apiResponse, err := c.sdkClient.AutoScalingGroupsApi.GroupsServersFindById(ctx, serverId, groupId).Execute()
+func (c *Client) GetGroupServer(ctx context.Context, groupID string, serverID string) (autoscaling.Server, *shared.APIResponse, error) {
+	server, apiResponse, err := c.sdkClient.AutoScalingGroupsApi.GroupsServersFindById(ctx, serverID, groupID).Execute()
 	return server, apiResponse, err
 }
 
 // GetAllGroupServers returns a list of all group servers
-func (c *Client) GetAllGroupServers(ctx context.Context, groupId string) (autoscaling.ServerCollection, *shared.APIResponse, error) {
-	servers, apiResponse, err := c.sdkClient.AutoScalingGroupsApi.GroupsServersGet(ctx, groupId).Execute()
+func (c *Client) GetAllGroupServers(ctx context.Context, groupID string) (autoscaling.ServerCollection, *shared.APIResponse, error) {
+	servers, apiResponse, err := c.sdkClient.AutoScalingGroupsApi.GroupsServersGet(ctx, groupID).Execute()
 	return servers, apiResponse, err
 }
 
@@ -38,12 +38,12 @@ func SetAutoscalingServersData(d *schema.ResourceData, groupServers autoscaling.
 		}
 	}
 
-	resourceId, err := uuid.GenerateUUID()
+	resourceID, err := uuid.GenerateUUID()
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	d.SetId(resourceId)
+	d.SetId(resourceID)
 
 	return nil
 }
