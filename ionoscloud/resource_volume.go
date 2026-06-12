@@ -776,12 +776,12 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 	}
 
 	if imageName != "" {
-		images, err := cloudapiimage.GetAllImages(ctx, client)
-		if err != nil {
-			return image, imageAlias, fmt.Errorf("error while fetching the list of images: %w", err)
-		}
-
 		if !utils.IsValidUUID(imageName) {
+			images, err := cloudapiimage.GetAllImages(ctx, client)
+			if err != nil {
+				return image, imageAlias, fmt.Errorf("error while fetching the list of images: %w", err)
+			}
+
 			dc, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, dcId).Execute()
 			logApiRequestTime(apiResponse)
 			if err != nil {
@@ -852,6 +852,11 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 				}
 
 				locationIDs := cloudapilocation.ResolveParentLocation(ctx, client, *dc.Properties.Location)
+
+				images, err := cloudapiimage.GetAllImages(ctx, client)
+				if err != nil {
+					return image, imageAlias, fmt.Errorf("error while fetching the list of images: %w", err)
+				}
 
 				img, rejectedImg := resolveVolumeImageName(imageName, images, locationIDs)
 				if rejectedImg != nil {
