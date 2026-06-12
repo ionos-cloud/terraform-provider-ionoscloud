@@ -87,9 +87,9 @@ func dataSourceDBaaSMariaDBReadBackups(ctx context.Context, d *schema.ResourceDa
 	client := meta.(bundleclient.SdkBundle).MariaDBClient
 
 	clusterIdIntf, clusterIdOk := d.GetOk("cluster_id")
-	clusterId := clusterIdIntf.(string)
+	clusterID := clusterIdIntf.(string)
 	backupIdIntf, backupIdOk := d.GetOk("backup_id")
-	backupId := backupIdIntf.(string)
+	backupID := backupIdIntf.(string)
 
 	if !clusterIdOk && !backupIdOk {
 		return diagutil.ToDiags(d, fmt.Errorf("please provide either the 'cluster_id' or 'backup_id'"), nil)
@@ -105,7 +105,7 @@ func dataSourceDBaaSMariaDBReadBackups(ctx context.Context, d *schema.ResourceDa
 	var err error
 	if clusterIdOk {
 		var backupsResponse mariadbsdk.BackupList
-		backupsResponse, apiResponse, err = client.GetClusterBackups(ctx, clusterId, location)
+		backupsResponse, apiResponse, err = client.GetClusterBackups(ctx, clusterID, location)
 		if err != nil {
 			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching backups for cluster with ID %s: %w", clusterID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
@@ -115,7 +115,7 @@ func dataSourceDBaaSMariaDBReadBackups(ctx context.Context, d *schema.ResourceDa
 		backups = backupsResponse.Items
 	} else {
 		var backup mariadbsdk.BackupResponse
-		backup, apiResponse, err = client.FindBackupByID(ctx, backupId, location)
+		backup, apiResponse, err = client.FindBackupByID(ctx, backupID, location)
 		if err != nil {
 			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching backup with ID %s: %w", backupID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
