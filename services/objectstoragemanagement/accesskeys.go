@@ -72,7 +72,7 @@ func (c *Client) ListAccessKeys(ctx context.Context) (objectstoragemanagement.Ac
 	return accessKeys, apiResponse, err
 }
 
-// ListAccessKeysFilter retrieves accesskeys using the accessKeyId filter
+// ListAccessKeysFilter retrieves accesskeys using the accessKeyID filter
 func (c *Client) ListAccessKeysFilter(ctx context.Context, accessKeyID string) (objectstoragemanagement.AccessKeyReadList, *shared.APIResponse, error) {
 	c.modifyConfigURL()
 	accessKeys, apiResponse, err := c.client.AccesskeysApi.AccesskeysGet(ctx).FilterAccesskeyId(accessKeyID).Execute()

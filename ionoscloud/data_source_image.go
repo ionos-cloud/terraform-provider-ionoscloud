@@ -11,6 +11,7 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapilocation"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
@@ -217,9 +218,11 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta any) 
 	}
 
 	if locationOk && location != "" {
+		// Accept images from the requested location or its parent location.
+		locationIDs := cloudapilocation.ResolveParentLocation(ctx, client, location)
 		var locationResults []ionoscloud.Image
 		for _, img := range results {
-			if img.Properties != nil && img.Properties.Location != nil && strings.EqualFold(*img.Properties.Location, location) {
+			if img.Properties != nil && img.Properties.Location != nil && cloudapilocation.LocationInSet(locationIDs, *img.Properties.Location) {
 				locationResults = append(locationResults, img)
 			}
 		}

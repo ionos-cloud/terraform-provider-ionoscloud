@@ -3,6 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"slices"
 
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -52,11 +53,17 @@ func dataSourceLocation() *schema.Resource {
 				},
 			},
 			"image_aliases": {
-				Type:     schema.TypeList,
-				Computed: true,
+				Type:        schema.TypeList,
+				Computed:    true,
+				Description: "A list of image aliases available in the location.",
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
+			},
+			"metro_region": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The id of the metro region this location belongs to. For a child location (e.g. `de/fra/2`) this is the parent location it inherits images and image aliases from; classic locations reference themselves.",
 			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
@@ -161,8 +168,12 @@ func setLocationData(d *schema.ResourceData, location *ionoscloud.Location) erro
 		}
 
 		var imageAliases []string
-		for _, imageAlias := range *location.Properties.ImageAliases {
-			imageAliases = append(imageAliases, imageAlias)
+		if location.Properties.ImageAliases != nil {
+			imageAliases = slices.Clone(*location.Properties.ImageAliases)
+		}
+
+		if err := d.Set("metro_region", location.Properties.MetroRegion); err != nil {
+			return fmt.Errorf("error while setting metro_region property for location %s: %w", d.Id(), err)
 		}
 
 		if len(imageAliases) > 0 {

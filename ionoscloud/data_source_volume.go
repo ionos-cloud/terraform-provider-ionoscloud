@@ -126,8 +126,8 @@ func dataSourceVolume() *schema.Resource {
 }
 
 func dataSourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	datacenterId, dcIdOk := d.GetOk("datacenter_id")
-	if !dcIdOk {
+	datacenterID, dcIDOk := d.GetOk("datacenter_id")
+	if !dcIDOk {
 		return diagutil.ToDiags(d, fmt.Errorf("no datacenter_id was specified"), nil)
 	}
 
@@ -153,7 +153,7 @@ func dataSourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta any)
 	if idOk {
 		/* search by ID */
 
-		volume, apiResponse, err = client.VolumesApi.DatacentersVolumesFindById(ctx, datacenterId.(string), id.(string)).Execute()
+		volume, apiResponse, err = client.VolumesApi.DatacentersVolumesFindById(ctx, datacenterID.(string), id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
 			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching volume with ID %s: %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
@@ -161,7 +161,7 @@ func dataSourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta any)
 	} else {
 		/* search by name */
 		var volumes ionoscloud.Volumes
-		volumes, apiResponse, err = client.VolumesApi.DatacentersVolumesGet(ctx, datacenterId.(string)).Depth(1).Execute()
+		volumes, apiResponse, err = client.VolumesApi.DatacentersVolumesGet(ctx, datacenterID.(string)).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
@@ -173,7 +173,7 @@ func dataSourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta any)
 			for _, v := range *volumes.Items {
 				if v.Properties != nil && v.Properties.Name != nil && *v.Properties.Name == name.(string) {
 					/* volume found */
-					volume, apiResponse, err = client.VolumesApi.DatacentersVolumesFindById(ctx, datacenterId.(string), *v.Id).Execute()
+					volume, apiResponse, err = client.VolumesApi.DatacentersVolumesFindById(ctx, datacenterID.(string), *v.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {
 						return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching volume %s: %w", *v.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})

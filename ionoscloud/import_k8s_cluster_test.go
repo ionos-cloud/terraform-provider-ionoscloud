@@ -23,7 +23,7 @@ func TestAcck8sClusterImportBasic(t *testing.T) {
 			},
 			{
 				ResourceName:            constant.K8sClusterResource + "." + constant.K8sClusterTestResource,
-				ImportStateIdFunc:       testAccK8sClusterImportStateId,
+				ImportStateIdFunc:       testAccK8sClusterImportStateID,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"allow_replace", "location"},
@@ -32,7 +32,7 @@ func TestAcck8sClusterImportBasic(t *testing.T) {
 	})
 }
 
-func testAccK8sClusterImportStateId(s *terraform.State) (string, error) {
+func testAccK8sClusterImportStateID(s *terraform.State) (string, error) {
 	importID := ""
 
 	for _, rs := range s.RootModule().Resources {

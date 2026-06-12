@@ -63,7 +63,7 @@ func resourceDbaasPgSqlUserCreate(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	clusterId := d.Get("cluster_id").(string)
+	clusterID := d.Get("cluster_id").(string)
 	username := d.Get("username").(string)
 	password := d.Get("password").(string)
 
@@ -73,16 +73,16 @@ func resourceDbaasPgSqlUserCreate(ctx context.Context, d *schema.ResourceData, m
 	request.Properties.Username = username
 	request.Properties.Password = &password
 
-	user, apiResponse, err := client.CreateUser(ctx, clusterId, request)
+	user, apiResponse, err := client.CreateUser(ctx, clusterID, request)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while adding the user: %s to the PgSql cluster with ID: %s, error: %w", username, clusterId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while adding the user: %s to the PgSql cluster with ID: %s, error: %w", username, clusterID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	d.SetId(user.Id)
 	// Wait for the cluster to be ready again (when creating/updating the user, the cluster enters
 	// 'BUSY' state).
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsClusterReady)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error while waiting for PgSql cluster with ID: %s to be ready, error: %w", clusterId, err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String()})
+		return diagutil.ToDiags(d, fmt.Errorf("error while waiting for PgSql cluster with ID: %s to be ready, error: %w", clusterID, err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String()})
 	}
 	return diagutil.ToDiags(d, dbaas.SetUserPgSqlData(d, &user), nil)
 }
@@ -97,7 +97,7 @@ func resourceDbaasPgSqlUserUpdate(ctx context.Context, d *schema.ResourceData, m
 		Properties: *pgsql.NewPatchUserProperties(),
 	}
 
-	clusterId := d.Get("cluster_id").(string)
+	clusterID := d.Get("cluster_id").(string)
 	username := d.Get("username").(string)
 
 	if d.HasChange("password") {
@@ -106,15 +106,15 @@ func resourceDbaasPgSqlUserUpdate(ctx context.Context, d *schema.ResourceData, m
 		request.Properties.Password = &password
 	}
 
-	user, apiResponse, err := client.UpdateUser(ctx, clusterId, username, request)
+	user, apiResponse, err := client.UpdateUser(ctx, clusterID, username, request)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating a PgSql user, username: %s, cluster ID: %s, error: %w", username, clusterId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating a PgSql user, username: %s, cluster ID: %s, error: %w", username, clusterID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	// Wait for the cluster to be ready again (when creating/updating the user, the cluster enters
 	// 'BUSY' state).
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsClusterReady)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error while waiting for PgSql cluster with ID: %s to be ready after user: %s update, error: %w", clusterId, username, err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String()})
+		return diagutil.ToDiags(d, fmt.Errorf("error while waiting for PgSql cluster with ID: %s to be ready after user: %s update, error: %w", clusterID, username, err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String()})
 	}
 	return diagutil.ToDiags(d, dbaas.SetUserPgSqlData(d, &user), nil)
 }
@@ -124,10 +124,10 @@ func resourceDbaasPgSqlUserRead(ctx context.Context, d *schema.ResourceData, met
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	clusterId := d.Get("cluster_id").(string)
+	clusterID := d.Get("cluster_id").(string)
 	username := d.Get("username").(string)
 
-	user, apiResponse, err := client.FindUserByUsername(ctx, clusterId, username)
+	user, apiResponse, err := client.FindUserByUsername(ctx, clusterID, username)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
@@ -149,9 +149,9 @@ func resourceDbaaSPgSqlUserDelete(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	clusterId := d.Get("cluster_id").(string)
+	clusterID := d.Get("cluster_id").(string)
 	username := d.Get("username").(string)
-	apiResponse, err := client.DeleteUser(ctx, clusterId, username)
+	apiResponse, err := client.DeleteUser(ctx, clusterID, username)
 	if err != nil {
 		return diagutil.ToDiags(d, err, &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
@@ -178,21 +178,21 @@ func resourceDbaasPgSqlUserImporter(ctx context.Context, d *schema.ResourceData,
 		return nil, err
 	}
 
-	clusterId := parts[0]
+	clusterID := parts[0]
 	username := parts[1]
 
-	user, apiResponse, err := client.FindUserByUsername(ctx, clusterId, username)
+	user, apiResponse, err := client.FindUserByUsername(ctx, clusterID, username)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("unable to find PgSql username: %s, cluster ID: %s", username, clusterId), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return nil, diagutil.ToError(d, fmt.Errorf("unable to find PgSql username: %s, cluster ID: %s", username, clusterID), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
-		return nil, diagutil.ToError(d, fmt.Errorf("error occurred while fetching PgSql username: %s, cluster ID: %s, error: %w", username, clusterId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return nil, diagutil.ToError(d, fmt.Errorf("error occurred while fetching PgSql username: %s, cluster ID: %s, error: %w", username, clusterID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	if err := dbaas.SetUserPgSqlData(d, &user); err != nil {
 		return nil, diagutil.ToError(d, err, nil)
 	}
-	if err := d.Set("cluster_id", clusterId); err != nil {
+	if err := d.Set("cluster_id", clusterID); err != nil {
 		return nil, utils.GenerateSetError("PgSQL user", "cluster_id", err)
 	}
 	if err := d.Set("location", location); err != nil {

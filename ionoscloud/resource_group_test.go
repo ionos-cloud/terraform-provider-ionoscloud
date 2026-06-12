@@ -124,7 +124,7 @@ func TestAccGroupBasic(t *testing.T) {
 					utils.TestNotEmptySlice(constant.GroupResource, "users")),
 			},
 			{
-				Config: testAccDataSourceGroupMatchId,
+				Config: testAccDataSourceGroupMatchID,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceById, "name",
 						constant.GroupResource+"."+constant.GroupTestResource, "name"),
@@ -154,7 +154,7 @@ func TestAccGroupBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDataSourceGroupMatchIdGetUsersData,
+				Config: testAccDataSourceGroupMatchIDGetUsersData,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceById, "name",
 						constant.GroupResource+"."+constant.GroupTestResource, "name"),
@@ -184,7 +184,7 @@ func TestAccGroupBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDataSourceGroupMatchIdNoUsersData,
+				Config: testAccDataSourceGroupMatchIDNoUsersData,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.GroupResource+"."+constant.GroupDataSourceById, "name",
 						constant.GroupResource+"."+constant.GroupTestResource, "name"),
@@ -351,7 +351,7 @@ func TestAccGroupBasic(t *testing.T) {
 					utils.TestNotEmptySlice(constant.GroupResource, "users")),
 			},
 			{
-				Config: testAccCheckGroupUpdateMigrateToUserIds,
+				Config: testAccCheckGroupUpdateMigrateToUserIDs,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGroupExists(constant.GroupResource+"."+constant.GroupTestResource, &group),
 					resource.TestCheckResourceAttr(constant.GroupResource+"."+constant.GroupTestResource, "name", constant.UpdatedResources),
@@ -600,20 +600,20 @@ resource ` + constant.GroupResource + ` ` + constant.GroupTestResource + ` {
 }
 `
 
-var testAccDataSourceGroupMatchId = testAccCheckGroupConfigBasic + `
+var testAccDataSourceGroupMatchID = testAccCheckGroupConfigBasic + `
 data ` + constant.GroupResource + ` ` + constant.GroupDataSourceById + ` {
   id			= ` + constant.GroupResource + `.` + constant.GroupTestResource + `.id
 }
 `
 
-var testAccDataSourceGroupMatchIdGetUsersData = testAccCheckGroupConfigBasic + `
+var testAccDataSourceGroupMatchIDGetUsersData = testAccCheckGroupConfigBasic + `
 data ` + constant.GroupResource + ` ` + constant.GroupDataSourceById + ` {
   id			= ` + constant.GroupResource + `.` + constant.GroupTestResource + `.id
   get_users_data = true
 }
 `
 
-var testAccDataSourceGroupMatchIdNoUsersData = testAccCheckGroupConfigBasic + `
+var testAccDataSourceGroupMatchIDNoUsersData = testAccCheckGroupConfigBasic + `
 data ` + constant.GroupResource + ` ` + constant.GroupDataSourceById + ` {
   id			= ` + constant.GroupResource + `.` + constant.GroupTestResource + `.id
   get_users_data = false
@@ -763,7 +763,7 @@ resource ` + constant.RandomPassword + ` "user3_password" {
 }
 `
 
-var testAccCheckGroupUpdateMigrateToUserIds = testAccCheckGroupCreateUsers + `
+var testAccCheckGroupUpdateMigrateToUserIDs = testAccCheckGroupCreateUsers + `
 resource ` + constant.UserResource + ` ` + constant.UserTestResource + `3 {
   first_name = "user"
   last_name = "test"

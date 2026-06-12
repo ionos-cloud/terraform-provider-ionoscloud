@@ -25,7 +25,7 @@ func TestAccVolumeImportBasic(t *testing.T) {
 			},
 			{
 				ResourceName:            constant.VolumeResource + "." + constant.VolumeTestResource,
-				ImportStateIdFunc:       testAccVolumeImportStateId,
+				ImportStateIdFunc:       testAccVolumeImportStateID,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"image_password", "ssh_key_path.#", "image_name", "user_data", "backup_unit_id", "location"},
@@ -34,7 +34,7 @@ func TestAccVolumeImportBasic(t *testing.T) {
 	})
 }
 
-func testAccVolumeImportStateId(s *terraform.State) (string, error) {
+func testAccVolumeImportStateID(s *terraform.State) (string, error) {
 	importID := ""
 
 	for _, rs := range s.RootModule().Resources {

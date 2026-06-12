@@ -180,7 +180,7 @@ func (d *accessKeyDataSource) Read(ctx context.Context, req datasource.ReadReque
 			return
 		}
 	default:
-		resp.Diagnostics.AddError("ID, accesskeyId or description must be set", "ID, accesskeyId or description must be set")
+		resp.Diagnostics.AddError("ID, accesskeyID or description must be set", "ID, accesskeyID or description must be set")
 		return
 	}
 

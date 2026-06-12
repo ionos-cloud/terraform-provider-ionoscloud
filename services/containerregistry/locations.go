@@ -19,8 +19,8 @@ func (c *Client) GetAllLocations(ctx context.Context) (cr.LocationsResponse, *sh
 
 func SetCRLocationsData(d *schema.ResourceData, locations cr.LocationsResponse) diag.Diagnostics {
 
-	resourceId := uuid.New()
-	d.SetId(resourceId.String())
+	resourceID := uuid.New()
+	d.SetId(resourceID.String())
 
 	if locations.Items != nil {
 		var locationList []string

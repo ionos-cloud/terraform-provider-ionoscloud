@@ -95,9 +95,9 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta an
 		return diag.FromErr(err)
 	}
 
-	datacenterId := d.Get("datacenter_id").(string)
-	serverId := d.Get("server_id").(string)
-	nicId := d.Get("nic_id").(string)
+	datacenterID := d.Get("datacenter_id").(string)
+	serverID := d.Get("server_id").(string)
+	nicID := d.Get("nic_id").(string)
 
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")
@@ -113,7 +113,7 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta an
 
 	if idOk {
 		/* search by ID */
-		firewall, apiResponse, err = client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterId, serverId, nicId, id.(string)).Execute()
+		firewall, apiResponse, err = client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterID, serverID, nicID, id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
 			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the firewall rule %s: %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
@@ -122,7 +122,7 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta an
 		/* search by name */
 		var firewalls ionoscloud.FirewallRules
 
-		firewalls, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, datacenterId, serverId, nicId).Depth(1).Execute()
+		firewalls, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, datacenterID, serverID, nicID).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
@@ -134,7 +134,7 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta an
 		if firewalls.Items != nil {
 			for _, fr := range *firewalls.Items {
 				if fr.Properties != nil && fr.Properties.Name != nil && *fr.Properties.Name == name.(string) {
-					tmpFirewall, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterId, serverId, nicId, *fr.Id).Execute()
+					tmpFirewall, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterID, serverID, nicID, *fr.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {
 						return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching firewall rule with ID %s: %w", *fr.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})

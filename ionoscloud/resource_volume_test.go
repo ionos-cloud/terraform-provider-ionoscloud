@@ -52,7 +52,7 @@ func TestAccVolumeBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDataSourceVolumeMatchId,
+				Config: testAccDataSourceVolumeMatchID,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceById, "name", constant.VolumeResource+"."+constant.VolumeTestResource, "name"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.VolumeResource+"."+constant.VolumeDataSourceById, "image", constant.VolumeResource+"."+constant.VolumeTestResource, "image"),
@@ -345,7 +345,7 @@ resource ` + constant.VolumeResource + ` ` + constant.VolumeTestResource + ` {
 }
 ` + ServerImagePassword + ServerImagePasswordUpdated
 
-var testAccDataSourceVolumeMatchId = testAccCheckVolumeConfigBasic + `
+var testAccDataSourceVolumeMatchID = testAccCheckVolumeConfigBasic + `
 data ` + constant.VolumeResource + ` ` + constant.VolumeDataSourceById + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   id			= ` + constant.VolumeResource + `.` + constant.VolumeTestResource + `.id

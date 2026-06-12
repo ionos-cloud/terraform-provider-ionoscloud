@@ -389,19 +389,19 @@ func resourceDbaasPgSqlClusterImport(ctx context.Context, d *schema.ResourceData
 		return nil, err
 	}
 
-	clusterId := parts[0]
+	clusterID := parts[0]
 
-	dbaasCluster, apiResponse, err := client.GetCluster(ctx, clusterId)
+	dbaasCluster, apiResponse, err := client.GetCluster(ctx, clusterID)
 
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("dbaas cluster does not exist %q", clusterId), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return nil, diagutil.ToError(d, fmt.Errorf("dbaas cluster does not exist %q", clusterID), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
-		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the import of dbaas cluster %q, error:%w", clusterId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the import of dbaas cluster %q, error:%w", clusterID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	tflog.Info(ctx, "PgSQL cluster imported", map[string]any{"cluster_id": clusterId})
+	tflog.Info(ctx, "PgSQL cluster imported", map[string]any{"cluster_id": clusterID})
 
 	if err := dbaasservice.SetPgSqlClusterData(d, dbaasCluster, false); err != nil {
 		return nil, diagutil.ToError(d, err, nil)

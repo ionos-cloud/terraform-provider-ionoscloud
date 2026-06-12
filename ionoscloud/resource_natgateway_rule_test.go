@@ -18,7 +18,7 @@ import (
 )
 
 const resourceNatGatewayRuleResource = constant.NatGatewayRuleResource + "." + constant.NatGatewayRuleTestResource
-const dataSourceIdNatGatewayRuleResource = constant.DataSource + "." + constant.NatGatewayRuleResource + "." + constant.NatGatewayDataSourceById
+const dataSourceIDNatGatewayRuleResource = constant.DataSource + "." + constant.NatGatewayRuleResource + "." + constant.NatGatewayDataSourceById
 const dataSourceNameNatGatewayRuleResource = constant.DataSource + "." + constant.NatGatewayRuleResource + "." + constant.NatGatewayDataSourceByName
 
 func TestAccNatGatewayRuleBasic(t *testing.T) {
@@ -46,16 +46,16 @@ func TestAccNatGatewayRuleBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: fmt.Sprintf(testAccDataSourceNatGatewayRuleMatchId, constant.NatGatewayRuleTestResource),
+				Config: fmt.Sprintf(testAccDataSourceNatGatewayRuleMatchID, constant.NatGatewayRuleTestResource),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(dataSourceIdNatGatewayRuleResource, "name", resourceNatGatewayRuleResource, "name"),
-					resource.TestCheckResourceAttrPair(dataSourceIdNatGatewayRuleResource, "type", resourceNatGatewayRuleResource, "type"),
-					resource.TestCheckResourceAttrPair(dataSourceIdNatGatewayRuleResource, "protocol", resourceNatGatewayRuleResource, "protocol"),
-					resource.TestCheckResourceAttrPair(dataSourceIdNatGatewayRuleResource, "source_subnet", resourceNatGatewayRuleResource, "source_subnet"),
-					resource.TestCheckResourceAttrPair(dataSourceIdNatGatewayRuleResource, "public_ip", resourceNatGatewayRuleResource, "public_ip"),
-					resource.TestCheckResourceAttrPair(dataSourceIdNatGatewayRuleResource, "target_subnet", resourceNatGatewayRuleResource, "target_subnet"),
-					resource.TestCheckResourceAttrPair(dataSourceIdNatGatewayRuleResource, "target_port_range.0.start", resourceNatGatewayRuleResource, "target_port_range.0.start"),
-					resource.TestCheckResourceAttrPair(dataSourceIdNatGatewayRuleResource, "target_port_range.0.end", resourceNatGatewayRuleResource, "target_port_range.0.end"),
+					resource.TestCheckResourceAttrPair(dataSourceIDNatGatewayRuleResource, "name", resourceNatGatewayRuleResource, "name"),
+					resource.TestCheckResourceAttrPair(dataSourceIDNatGatewayRuleResource, "type", resourceNatGatewayRuleResource, "type"),
+					resource.TestCheckResourceAttrPair(dataSourceIDNatGatewayRuleResource, "protocol", resourceNatGatewayRuleResource, "protocol"),
+					resource.TestCheckResourceAttrPair(dataSourceIDNatGatewayRuleResource, "source_subnet", resourceNatGatewayRuleResource, "source_subnet"),
+					resource.TestCheckResourceAttrPair(dataSourceIDNatGatewayRuleResource, "public_ip", resourceNatGatewayRuleResource, "public_ip"),
+					resource.TestCheckResourceAttrPair(dataSourceIDNatGatewayRuleResource, "target_subnet", resourceNatGatewayRuleResource, "target_subnet"),
+					resource.TestCheckResourceAttrPair(dataSourceIDNatGatewayRuleResource, "target_port_range.0.start", resourceNatGatewayRuleResource, "target_port_range.0.start"),
+					resource.TestCheckResourceAttrPair(dataSourceIDNatGatewayRuleResource, "target_port_range.0.end", resourceNatGatewayRuleResource, "target_port_range.0.end"),
 				),
 			},
 			{
@@ -253,7 +253,7 @@ resource ` + constant.NatGatewayRuleResource + ` ` + constant.NatGatewayRuleTest
   }
 }`
 
-const testAccDataSourceNatGatewayRuleMatchId = testAccCheckNatGatewayRuleConfigBasic + `
+const testAccDataSourceNatGatewayRuleMatchID = testAccCheckNatGatewayRuleConfigBasic + `
 data ` + constant.NatGatewayRuleResource + ` ` + constant.NatGatewayRuleDataSourceById + ` {
   datacenter_id = ` + constant.DatacenterResource + `.natgateway_rule_datacenter.id
   natgateway_id = ` + constant.NatGatewayResource + `.natgateway.id

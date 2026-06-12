@@ -102,14 +102,14 @@ func testAccDNSZoneDestroyCheck(s *terraform.State) error {
 		if rs.Type != constant.DNSZoneResource {
 			continue
 		}
-		zoneId := rs.Primary.ID
-		_, apiResponse, err := client.GetZoneById(ctx, zoneId)
+		zoneID := rs.Primary.ID
+		_, apiResponse, err := client.GetZoneById(ctx, zoneID)
 		if err != nil {
 			if !apiResponse.HttpNotFound() {
-				return fmt.Errorf("an error occurred while checking the destruction of DNS Zone with ID: %s, error: %w", zoneId, err)
+				return fmt.Errorf("an error occurred while checking the destruction of DNS Zone with ID: %s, error: %w", zoneID, err)
 			}
 		} else {
-			return fmt.Errorf("DNS Zone with ID: %s still exists", zoneId)
+			return fmt.Errorf("DNS Zone with ID: %s still exists", zoneID)
 		}
 	}
 	return nil
@@ -128,11 +128,11 @@ func testAccDNSZoneExistenceCheck(path string, zone *dns.ZoneRead) resource.Test
 		}
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 		defer cancel()
-		zoneId := rs.Primary.ID
-		zoneResponse, _, err := client.GetZoneById(ctx, zoneId)
+		zoneID := rs.Primary.ID
+		zoneResponse, _, err := client.GetZoneById(ctx, zoneID)
 
 		if err != nil {
-			return fmt.Errorf("an error occurred while fetching DNS Zone with ID: %s, error: %w", zoneId, err)
+			return fmt.Errorf("an error occurred while fetching DNS Zone with ID: %s, error: %w", zoneID, err)
 		}
 		zone = &zoneResponse
 		return nil

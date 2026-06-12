@@ -13,7 +13,7 @@ import (
 
 func TestAccDataSourceDBaaSMongoTemplate(t *testing.T) {
 	checkFunction := resource.ComposeTestCheckFunc(
-		resource.TestCheckResourceAttr(dataSourceAccess, "id", expectedId),
+		resource.TestCheckResourceAttr(dataSourceAccess, "id", expectedID),
 		resource.TestCheckResourceAttr(dataSourceAccess, "name", expectedName),
 		resource.TestCheckResourceAttr(dataSourceAccess, "edition", expectedEdition),
 		resource.TestCheckResourceAttr(dataSourceAccess, "cores", expectedCores),
@@ -28,15 +28,15 @@ func TestAccDataSourceDBaaSMongoTemplate(t *testing.T) {
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
 		Steps: []resource.TestStep{
 			{
-				Config:      invalidMissingBothIdAndName,
+				Config:      invalidMissingBothIDAndName,
 				ExpectError: regexp.MustCompile("please provide a template ID or name"),
 			},
 			{
-				Config:      invalidProvidingBothIdAndName,
+				Config:      invalidProvidingBothIDAndName,
 				ExpectError: regexp.MustCompile("name and ID cannot be both specified at the same time"),
 			},
 			{
-				Config:      invalidGetByIdNonExistentTemplate,
+				Config:      invalidGetByIDNonExistentTemplate,
 				ExpectError: regexp.MustCompile("no DBaaS Mongo Template found with the specified criteria"),
 			},
 			{
@@ -48,7 +48,7 @@ func TestAccDataSourceDBaaSMongoTemplate(t *testing.T) {
 				ExpectError: regexp.MustCompile("more than one DBaaS Mongo Template found for the specified search criteria"),
 			},
 			{
-				Config: validGetById,
+				Config: validGetByID,
 				Check:  checkFunction,
 			},
 			{
@@ -63,7 +63,7 @@ func TestAccDataSourceDBaaSMongoTemplate(t *testing.T) {
 	})
 }
 
-const invalidMissingBothIdAndName = `
+const invalidMissingBothIDAndName = `
 data ` + constant.DBaaSMongoTemplateResource + ` ` + constant.DBaaSMongoTemplateTestDataSource + ` {
 }`
 
@@ -71,13 +71,13 @@ data ` + constant.DBaaSMongoTemplateResource + ` ` + constant.DBaaSMongoTemplate
 // enough because we would have to check that the value doesn't really exist, but given the fact
 // that the UUID consists of several characters, the probability of generating an UUID that already
 // exists is very small, so we don't need any additional check.
-const invalidProvidingBothIdAndName = resourceRandomUUID + resourceRandomString + `
+const invalidProvidingBothIDAndName = resourceRandomUUID + resourceRandomString + `
 data ` + constant.DBaaSMongoTemplateResource + ` ` + constant.DBaaSMongoTemplateTestDataSource + ` {
 	id = random_uuid.uuid.result
 	name = random_string.simple_string.result
 }`
 
-const invalidGetByIdNonExistentTemplate = resourceRandomUUID + `
+const invalidGetByIDNonExistentTemplate = resourceRandomUUID + `
 data ` + constant.DBaaSMongoTemplateResource + ` ` + constant.DBaaSMongoTemplateTestDataSource + ` {
 	id = random_uuid.uuid.result
 }`
@@ -95,7 +95,7 @@ data ` + constant.DBaaSMongoTemplateResource + ` ` + constant.DBaaSMongoTemplate
 
 const dataSourceAccess = constant.DataSource + "." + constant.DBaaSMongoTemplateResource + "." + constant.DBaaSMongoTemplateTestDataSource
 
-const validGetById = `
+const validGetByID = `
 data ` + constant.DBaaSMongoTemplateResource + ` ` + constant.DBaaSMongoTemplateTestDataSource + ` {
 	id = "ea320e28-b973-457a-86c5-68c19dd06d3d"
 }`
@@ -113,7 +113,7 @@ data ` + constant.DBaaSMongoTemplateResource + ` ` + constant.DBaaSMongoTemplate
 
 // We are testing using the same template, so we can just define the expected values as constants
 // and re-use them.
-const expectedId = "ea320e28-b973-457a-86c5-68c19dd06d3d"
+const expectedID = "ea320e28-b973-457a-86c5-68c19dd06d3d"
 const expectedName = "MongoDB Business 4XL_S"
 const expectedEdition = "business"
 const expectedCores = "32"

@@ -8,8 +8,8 @@ import (
 )
 
 // GetGroup returns a group given an ID
-func (c *Client) GetGroup(ctx context.Context, groupId string, depth float32) (autoscaling.Group, *shared.APIResponse, error) {
-	group, apiResponse, err := c.sdkClient.AutoScalingGroupsApi.GroupsFindById(ctx, groupId).Depth(depth).Execute()
+func (c *Client) GetGroup(ctx context.Context, groupID string, depth float32) (autoscaling.Group, *shared.APIResponse, error) {
+	group, apiResponse, err := c.sdkClient.AutoScalingGroupsApi.GroupsFindById(ctx, groupID).Depth(depth).Execute()
 	apiResponse.LogInfo()
 	return group, apiResponse, err
 }
@@ -29,15 +29,15 @@ func (c *Client) CreateGroup(ctx context.Context, group autoscaling.GroupPost) (
 }
 
 // UpdateGroup updates a group given an ID
-func (c *Client) UpdateGroup(ctx context.Context, groupId string, group autoscaling.GroupPut) (autoscaling.Group, *shared.APIResponse, error) {
-	groupResponse, apiResponse, err := c.sdkClient.AutoScalingGroupsApi.GroupsPut(ctx, groupId).GroupPut(group).Execute()
+func (c *Client) UpdateGroup(ctx context.Context, groupID string, group autoscaling.GroupPut) (autoscaling.Group, *shared.APIResponse, error) {
+	groupResponse, apiResponse, err := c.sdkClient.AutoScalingGroupsApi.GroupsPut(ctx, groupID).GroupPut(group).Execute()
 	apiResponse.LogInfo()
 	return groupResponse, apiResponse, err
 }
 
 // DeleteGroup deletes a group given an ID
-func (c *Client) DeleteGroup(ctx context.Context, groupId string) (*shared.APIResponse, error) {
-	apiResponse, err := c.sdkClient.AutoScalingGroupsApi.GroupsDelete(ctx, groupId).Execute()
+func (c *Client) DeleteGroup(ctx context.Context, groupID string) (*shared.APIResponse, error) {
+	apiResponse, err := c.sdkClient.AutoScalingGroupsApi.GroupsDelete(ctx, groupID).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
 }

@@ -19,7 +19,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
-const bootCdromImageId = "aa97f2f4-ca28-11ec-925c-46570854dba1"
+const bootCdromImageID = "aa97f2f4-ca28-11ec-925c-46570854dba1"
 
 // ToDo: add backup unit back in tests when stable
 
@@ -134,7 +134,7 @@ func TestAccServerBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDataSourceServerMatchId,
+				Config: testAccDataSourceServerMatchID,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerResource+"."+constant.ServerDataSourceById, "name", constant.ServerResource+"."+constant.ServerTestResource, "name"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerResource+"."+constant.ServerDataSourceById, "hostname", constant.ServerResource+"."+constant.ServerTestResource, "hostname"),
@@ -927,14 +927,14 @@ func testAccCheckServerDestroyCheck(s *terraform.State) error {
 			continue
 		}
 
-		dcId := rs.Primary.Attributes["datacenter_id"]
+		dcID := rs.Primary.Attributes["datacenter_id"]
 		location := rs.Primary.Attributes["location"]
 		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 		if err != nil {
 			return err
 		}
 
-		_, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, dcId, rs.Primary.ID).Execute()
+		_, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, dcID, rs.Primary.ID).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
@@ -960,7 +960,7 @@ func testAccCheckServerAndVolumesDestroyed(dcName string) resource.TestCheckFunc
 			return fmt.Errorf("can not get data center resource named: %s", dcName)
 		}
 
-		dcId := datacenterResourceState.Primary.ID
+		dcID := datacenterResourceState.Primary.ID
 		location := datacenterResourceState.Primary.Attributes["location"]
 		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 		if err != nil {
@@ -969,24 +969,24 @@ func testAccCheckServerAndVolumesDestroyed(dcName string) resource.TestCheckFunc
 
 		// Since we are creating only ONE server in the data center, we can use
 		// DatacentersServersGet to check if the server was deleted properly.
-		servers, apiResponse, err := client.ServersApi.DatacentersServersGet(ctx, dcId).Execute()
+		servers, apiResponse, err := client.ServersApi.DatacentersServersGet(ctx, dcID).Execute()
 		logApiRequestTime(apiResponse)
 		if err == nil {
 			if serverItems, ok := servers.GetItemsOk(); ok {
 				if len(*serverItems) > 0 {
-					return fmt.Errorf("server still exists for data center with ID: %s", dcId)
+					return fmt.Errorf("server still exists for data center with ID: %s", dcID)
 				}
 			}
 		} else {
 			return err
 		}
 
-		volumes, apiResponse, err := client.VolumesApi.DatacentersVolumesGet(ctx, dcId).Execute()
+		volumes, apiResponse, err := client.VolumesApi.DatacentersVolumesGet(ctx, dcID).Execute()
 		logApiRequestTime(apiResponse)
 		if err == nil {
 			if volItems, ok := volumes.GetItemsOk(); ok {
 				if len(*volItems) > 0 {
-					return fmt.Errorf("volumes still exists for data center with ID: %s", dcId)
+					return fmt.Errorf("volumes still exists for data center with ID: %s", dcID)
 				}
 			}
 		} else {
@@ -1094,7 +1094,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
 }
 ` + ServerImagePasswordUpdated + testSecurityGroups
 
-const testAccDataSourceServerMatchId = testAccCheckServerConfigBasic + `
+const testAccDataSourceServerMatchID = testAccCheckServerConfigBasic + `
 data ` + constant.ServerResource + ` ` + constant.ServerDataSourceById + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   id			= ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
@@ -1140,7 +1140,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
-  boot_cdrom = "` + bootCdromImageId + `" 
+  boot_cdrom = "` + bootCdromImageID + `" 
   volume {
     name = "` + constant.ServerTestResource + `"
     size = 5
@@ -1194,7 +1194,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
-  boot_cdrom = "` + bootCdromImageId + `" 
+  boot_cdrom = "` + bootCdromImageID + `" 
   volume {
     name = "` + constant.ServerTestResource + `"
     size = 5
@@ -1239,7 +1239,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
-  boot_cdrom = "` + bootCdromImageId + `" 
+  boot_cdrom = "` + bootCdromImageID + `" 
   volume {
     name = "` + constant.ServerTestResource + `"
     size = 5
@@ -1287,7 +1287,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
-  boot_cdrom = "` + bootCdromImageId + `" 
+  boot_cdrom = "` + bootCdromImageID + `" 
   volume {
     name = "` + constant.ServerTestResource + `"
     size = 5
@@ -1322,7 +1322,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
-  boot_cdrom = "` + bootCdromImageId + `" 
+  boot_cdrom = "` + bootCdromImageID + `" 
   volume {
     name = "` + constant.ServerTestResource + `"
     size = 5

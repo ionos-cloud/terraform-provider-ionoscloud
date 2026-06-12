@@ -183,9 +183,9 @@ func resourceNetworkLoadBalancerCreate(ctx context.Context, d *schema.ResourceDa
 			}
 		}
 	}
-	dcId := d.Get("datacenter_id").(string)
+	dcID := d.Get("datacenter_id").(string)
 
-	networkLoadBalancerResp, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersPost(ctx, dcId).NetworkLoadBalancer(networkLoadBalancer).Execute()
+	networkLoadBalancerResp, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersPost(ctx, dcID).NetworkLoadBalancer(networkLoadBalancer).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -214,9 +214,9 @@ func resourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceData
 		return diag.FromErr(err)
 	}
 
-	dcId := d.Get("datacenter_id").(string)
+	dcID := d.Get("datacenter_id").(string)
 
-	networkLoadBalancer, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFindByNetworkLoadBalancerId(ctx, dcId, d.Id()).Depth(3).Execute()
+	networkLoadBalancer, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFindByNetworkLoadBalancerId(ctx, dcID, d.Id()).Depth(3).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -246,7 +246,7 @@ func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceDa
 		Properties: &ionoscloud.NetworkLoadBalancerProperties{},
 	}
 
-	dcId := d.Get("datacenter_id").(string)
+	dcID := d.Get("datacenter_id").(string)
 
 	if d.HasChange("name") {
 		_, v := d.GetChange("name")
@@ -313,9 +313,9 @@ func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceDa
 
 	if d.HasChange("flowlog") {
 		old, newV := d.GetChange("flowlog")
-		var firstFlowLogId = ""
+		var firstFlowLogID = ""
 		if old != nil && len(old.([]any)) > 0 {
-			firstFlowLogId = old.([]any)[0].(map[string]any)["id"].(string)
+			firstFlowLogID = old.([]any)[0].(map[string]any)["id"].(string)
 		}
 
 		if newV.([]any) != nil && len(newV.([]any)) > 0 {
@@ -326,11 +326,11 @@ func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceDa
 						D:      d,
 						Client: client,
 					}
-					err := fw.CreateOrPatchForNLB(ctx, dcId, d.Id(), firstFlowLogId, flowLog)
+					err := fw.CreateOrPatchForNLB(ctx, dcID, d.Id(), firstFlowLogID, flowLog)
 					if err != nil {
 						// if we have a create that failed, we do not want to save in state
 						// saving in state would mean a diff that would force a re-create
-						if firstFlowLogId == "" {
+						if firstFlowLogID == "" {
 							_ = d.Set("flowlog", nil)
 						}
 						return diagutil.ToDiags(d, err, nil)
@@ -340,7 +340,7 @@ func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceDa
 		}
 	}
 
-	_, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersPatch(ctx, dcId, d.Id()).NetworkLoadBalancerProperties(*request.Properties).Execute()
+	_, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersPatch(ctx, dcID, d.Id()).NetworkLoadBalancerProperties(*request.Properties).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -363,9 +363,9 @@ func resourceNetworkLoadBalancerDelete(ctx context.Context, d *schema.ResourceDa
 		return diag.FromErr(err)
 	}
 
-	dcId := d.Get("datacenter_id").(string)
+	dcID := d.Get("datacenter_id").(string)
 
-	apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersDelete(ctx, dcId, d.Id()).Execute()
+	apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersDelete(ctx, dcID, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -398,27 +398,27 @@ func resourceNetworkLoadBalancerImport(ctx context.Context, d *schema.ResourceDa
 		return nil, diagutil.ToError(d, fmt.Errorf("failed validating import identifier %q: %w", importID, err), nil)
 	}
 
-	dcId := parts[0]
-	networkLoadBalancerId := parts[1]
+	dcID := parts[0]
+	networkLoadBalancerID := parts[1]
 
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return nil, err
 	}
 
-	networkLoadBalancer, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFindByNetworkLoadBalancerId(ctx, dcId, networkLoadBalancerId).Execute()
+	networkLoadBalancer, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFindByNetworkLoadBalancerId(ctx, dcID, networkLoadBalancerID).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		tflog.Info(ctx, "network load balancer not found on import", map[string]any{"nlb_id": networkLoadBalancerId, "error": err.Error()})
+		tflog.Info(ctx, "network load balancer not found on import", map[string]any{"nlb_id": networkLoadBalancerID, "error": err.Error()})
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("unable to find network load balancer %q", networkLoadBalancerId), nil)
+			return nil, diagutil.ToError(d, fmt.Errorf("unable to find network load balancer %q", networkLoadBalancerID), nil)
 		}
-		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while retrieving network load balancer  %q: %w ", networkLoadBalancerId, err), nil)
+		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while retrieving network load balancer  %q: %w ", networkLoadBalancerID, err), nil)
 	}
 
-	if err := d.Set("datacenter_id", dcId); err != nil {
+	if err := d.Set("datacenter_id", dcID); err != nil {
 		return nil, diagutil.ToError(d, err, nil)
 	}
 	if err := d.Set("location", location); err != nil {

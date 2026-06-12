@@ -18,7 +18,7 @@ import (
 )
 
 var resourceNameAlbRule = constant.ALBForwardingRuleResource + "." + constant.ALBForwardingRuleTestResource
-var dataSourceNameAlbRuleById = constant.DataSource + "." + constant.ALBForwardingRuleResource + "." + constant.ALBForwardingRuleDataSourceById
+var dataSourceNameAlbRuleByID = constant.DataSource + "." + constant.ALBForwardingRuleResource + "." + constant.ALBForwardingRuleDataSourceById
 var dataSourceNameAlbRuleByName = constant.DataSource + "." + constant.ALBForwardingRuleResource + "." + constant.ALBForwardingRuleDataSourceByName
 
 func TestAccApplicationLoadBalancerForwardingRuleBasic(t *testing.T) {
@@ -52,22 +52,22 @@ func TestAccApplicationLoadBalancerForwardingRuleBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDataSourceApplicationLoadBalancerForwardingRuleMatchId,
+				Config: testAccDataSourceApplicationLoadBalancerForwardingRuleMatchID,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleById, "name", resourceNameAlbRule, "name"),
-					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleById, "protocol", resourceNameAlbRule, "protocol"),
-					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleById, "listener_ip", resourceNameAlbRule, "listener_ip"),
-					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleById, "listener_port", resourceNameAlbRule, "listener_port"),
-					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleById, "http_rules.0.name", resourceNameAlbRule, "http_rules.0.name"),
-					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleById, "http_rules.0.type", resourceNameAlbRule, "http_rules.0.type"),
-					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleById, "http_rules.0.location", resourceNameAlbRule, "http_rules.0.location"),
-					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleById, "http_rules.0.conditions.0.type", resourceNameAlbRule, "http_rules.0.conditions.0.type"),
-					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleById, "http_rules.0.conditions.0.condition", resourceNameAlbRule, "http_rules.0.conditions.0.condition"),
-					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleById, "http_rules.0.conditions.0.value", resourceNameAlbRule, "http_rules.0.conditions.0.value"),
-					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleById, "http_rules.0.name", resourceNameAlbRule, "http_rules.0.name"),
-					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleById, "http_rules.1.type", resourceNameAlbRule, "http_rules.1.type"),
-					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleById, "http_rules.1.conditions.0.type", resourceNameAlbRule, "http_rules.1.conditions.0.type"),
-					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleById, "http_rules.1.conditions.0.value", resourceNameAlbRule, "http_rules.1.conditions.0.value"),
+					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleByID, "name", resourceNameAlbRule, "name"),
+					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleByID, "protocol", resourceNameAlbRule, "protocol"),
+					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleByID, "listener_ip", resourceNameAlbRule, "listener_ip"),
+					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleByID, "listener_port", resourceNameAlbRule, "listener_port"),
+					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleByID, "http_rules.0.name", resourceNameAlbRule, "http_rules.0.name"),
+					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleByID, "http_rules.0.type", resourceNameAlbRule, "http_rules.0.type"),
+					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleByID, "http_rules.0.location", resourceNameAlbRule, "http_rules.0.location"),
+					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleByID, "http_rules.0.conditions.0.type", resourceNameAlbRule, "http_rules.0.conditions.0.type"),
+					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleByID, "http_rules.0.conditions.0.condition", resourceNameAlbRule, "http_rules.0.conditions.0.condition"),
+					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleByID, "http_rules.0.conditions.0.value", resourceNameAlbRule, "http_rules.0.conditions.0.value"),
+					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleByID, "http_rules.0.name", resourceNameAlbRule, "http_rules.0.name"),
+					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleByID, "http_rules.1.type", resourceNameAlbRule, "http_rules.1.type"),
+					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleByID, "http_rules.1.conditions.0.type", resourceNameAlbRule, "http_rules.1.conditions.0.type"),
+					resource.TestCheckResourceAttrPair(dataSourceNameAlbRuleByID, "http_rules.1.conditions.0.value", resourceNameAlbRule, "http_rules.1.conditions.0.value"),
 				),
 			},
 			{
@@ -183,9 +183,9 @@ func testAccCheckApplicationLoadBalancerForwardingRuleDestroyCheck(s *terraform.
 			continue
 		}
 
-		dcId := rs.Primary.Attributes["datacenter_id"]
-		albId := rs.Primary.Attributes["application_loadbalancer_id"]
-		ruleId := rs.Primary.ID
+		dcID := rs.Primary.Attributes["datacenter_id"]
+		albID := rs.Primary.Attributes["application_loadbalancer_id"]
+		ruleID := rs.Primary.ID
 		location := rs.Primary.Attributes["location"]
 
 		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
@@ -193,7 +193,7 @@ func testAccCheckApplicationLoadBalancerForwardingRuleDestroyCheck(s *terraform.
 			return err
 		}
 
-		_, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesFindByForwardingRuleId(ctx, dcId, albId, ruleId).Execute()
+		_, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesFindByForwardingRuleId(ctx, dcID, albID, ruleID).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
@@ -226,9 +226,9 @@ func testAccCheckApplicationLoadBalancerForwardingRuleExists(n string, alb *iono
 			defer cancel()
 		}
 
-		dcId := rs.Primary.Attributes["datacenter_id"]
-		albId := rs.Primary.Attributes["application_loadbalancer_id"]
-		ruleId := rs.Primary.ID
+		dcID := rs.Primary.Attributes["datacenter_id"]
+		albID := rs.Primary.Attributes["application_loadbalancer_id"]
+		ruleID := rs.Primary.ID
 		location := rs.Primary.Attributes["location"]
 
 		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
@@ -236,7 +236,7 @@ func testAccCheckApplicationLoadBalancerForwardingRuleExists(n string, alb *iono
 			return err
 		}
 
-		foundAlbFw, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesFindByForwardingRuleId(ctx, dcId, albId, ruleId).Execute()
+		foundAlbFw, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesFindByForwardingRuleId(ctx, dcID, albID, ruleID).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
@@ -349,7 +349,7 @@ resource ` + constant.ALBForwardingRuleResource + ` ` + constant.ALBForwardingRu
  }
 }`
 
-const testAccDataSourceApplicationLoadBalancerForwardingRuleMatchId = testAccCheckApplicationLoadBalancerForwardingRuleConfigBasic + `
+const testAccDataSourceApplicationLoadBalancerForwardingRuleMatchID = testAccCheckApplicationLoadBalancerForwardingRuleConfigBasic + `
 data ` + constant.ALBForwardingRuleResource + ` ` + constant.ALBForwardingRuleDataSourceById + ` {
   datacenter_id = ` + constant.DatacenterResource + `.alb_datacenter.id
   application_loadbalancer_id = ` + constant.ALBResource + `.` + constant.ALBTestResource + `.id

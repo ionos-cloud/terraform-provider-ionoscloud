@@ -58,7 +58,7 @@ func TestAccGpuServerBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDataSourceGpuServerMatchId,
+				Config: testAccDataSourceGpuServerMatchID,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerGPUResource+"."+constant.ServerDataSourceById, "name", constant.ServerGPUResource+"."+constant.ServerTestResource, "name"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerGPUResource+"."+constant.ServerDataSourceById, "hostname", constant.ServerGPUResource+"."+constant.ServerTestResource, "hostname"),
@@ -166,14 +166,14 @@ func testAccCheckGpuServerDestroyCheck(s *terraform.State) error {
 			continue
 		}
 
-		dcId := rs.Primary.Attributes["datacenter_id"]
+		dcID := rs.Primary.Attributes["datacenter_id"]
 		location := rs.Primary.Attributes["location"]
 		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 		if err != nil {
 			return err
 		}
 
-		_, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, dcId, rs.Primary.ID).Execute()
+		_, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, dcID, rs.Primary.ID).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
@@ -341,7 +341,7 @@ resource ` + constant.ServerGPUResource + ` ` + constant.ServerTestResource + ` 
 }
 ` + ServerImagePasswordUpdated
 
-const testAccDataSourceGpuServerMatchId = testAccCheckGpuServerConfigBasic + `
+const testAccDataSourceGpuServerMatchID = testAccCheckGpuServerConfigBasic + `
 data ` + constant.ServerGPUResource + ` ` + constant.ServerDataSourceById + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   id = ` + constant.ServerGPUResource + `.` + constant.ServerTestResource + `.id

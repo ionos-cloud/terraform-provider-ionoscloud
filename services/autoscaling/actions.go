@@ -8,15 +8,15 @@ import (
 )
 
 // GetAction returns an action given an ID
-func (c *Client) GetAction(ctx context.Context, groupId string, actionId string) (autoscaling.Action, *shared.APIResponse, error) {
-	action, apiResponse, err := c.sdkClient.AutoScalingGroupsApi.GroupsActionsFindById(ctx, actionId, groupId).Execute()
+func (c *Client) GetAction(ctx context.Context, groupID string, actionID string) (autoscaling.Action, *shared.APIResponse, error) {
+	action, apiResponse, err := c.sdkClient.AutoScalingGroupsApi.GroupsActionsFindById(ctx, actionID, groupID).Execute()
 	apiResponse.LogInfo()
 	return action, apiResponse, err
 }
 
 // GetAllActions returns a list of all actions
-func (c *Client) GetAllActions(ctx context.Context, groupId string) (autoscaling.ActionCollection, *shared.APIResponse, error) {
-	actions, apiResponse, err := c.sdkClient.AutoScalingGroupsApi.GroupsActionsGet(ctx, groupId).Execute()
+func (c *Client) GetAllActions(ctx context.Context, groupID string) (autoscaling.ActionCollection, *shared.APIResponse, error) {
+	actions, apiResponse, err := c.sdkClient.AutoScalingGroupsApi.GroupsActionsGet(ctx, groupID).Execute()
 	apiResponse.LogInfo()
 	return actions, apiResponse, err
 }
