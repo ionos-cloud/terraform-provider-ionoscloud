@@ -7,7 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	vpnSdk "github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2"
+	vpnsdk "github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
@@ -90,7 +90,7 @@ func dataSourceVpnWireguardPeerRead(ctx context.Context, d *schema.ResourceData,
 		return diagutil.ToDiags(d, fmt.Errorf("please provide either the WireGuard Peer ID or name"), nil)
 	}
 
-	var peer vpnSdk.WireguardPeerRead
+	var peer vpnsdk.WireguardPeerRead
 	var apiResponse *shared.APIResponse
 	var err error
 	if idOk {
@@ -101,7 +101,7 @@ func dataSourceVpnWireguardPeerRead(ctx context.Context, d *schema.ResourceData,
 		}
 	} else {
 		name := nameValue.(string)
-		var results []vpnSdk.WireguardPeerRead
+		var results []vpnsdk.WireguardPeerRead
 		peers, apiResponse, err := client.ListWireguardPeers(ctx, gatewayID, location)
 		if err != nil {
 			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching WireGuard Peers: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})

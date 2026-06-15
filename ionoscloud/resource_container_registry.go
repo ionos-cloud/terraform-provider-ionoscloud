@@ -14,7 +14,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 
-	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
+	crservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
 )
 
 func resourceContainerRegistry() *schema.Resource {
@@ -116,12 +116,12 @@ func resourceContainerRegistryCreate(ctx context.Context, d *schema.ResourceData
 		return diag.FromErr(err)
 	}
 
-	containerRegistry, err := crService.GetRegistryDataCreate(ctx, d)
+	containerRegistry, err := crservice.GetRegistryDataCreate(ctx, d)
 	if err != nil {
 		return diagutil.ToDiags(d, fmt.Errorf("error occurred while getting container registry from schema: %w", err), nil)
 	}
 
-	containerRegistryFeatures, warnings := crService.GetRegistryFeatures(d)
+	containerRegistryFeatures, warnings := crservice.GetRegistryFeatures(d)
 	containerRegistry.Properties.Features = containerRegistryFeatures
 
 	containerRegistryResponse, apiResponse, err := client.CreateRegistry(ctx, *containerRegistry)
@@ -154,7 +154,7 @@ func resourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData, 
 
 	tflog.Info(ctx, "retrieved container registry", map[string]any{"registry_id": d.Id()})
 
-	if err := crService.SetRegistryData(d, registry); err != nil {
+	if err := crservice.SetRegistryData(d, registry); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
 
@@ -168,11 +168,11 @@ func resourceContainerRegistryUpdate(ctx context.Context, d *schema.ResourceData
 		return diag.FromErr(err)
 	}
 
-	containerRegistry, err := crService.GetRegistryDataUpdate(ctx, d)
+	containerRegistry, err := crservice.GetRegistryDataUpdate(ctx, d)
 	if err != nil {
 		return diagutil.ToDiags(d, fmt.Errorf("error occurred while getting container registry from schema: %w", err), nil)
 	}
-	containerRegistryFeatures, warnings := crService.GetRegistryFeatures(d)
+	containerRegistryFeatures, warnings := crservice.GetRegistryFeatures(d)
 	containerRegistry.Features = containerRegistryFeatures
 	// suppress warnings if there are no changes to the features set
 	if !d.HasChange("features") {
@@ -244,7 +244,7 @@ func resourceContainerRegistryImport(ctx context.Context, d *schema.ResourceData
 
 	tflog.Info(ctx, "container registry imported", map[string]any{"registry_id": registryID})
 
-	if err := crService.SetRegistryData(d, containerRegistry); err != nil {
+	if err := crservice.SetRegistryData(d, containerRegistry); err != nil {
 		return nil, diagutil.ToError(d, err, nil)
 	}
 

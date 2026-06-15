@@ -12,7 +12,7 @@ import (
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
-	certService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
+	certservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
@@ -117,7 +117,7 @@ func dataSourceAutoCertificateRead(ctx context.Context, d *schema.ResourceData, 
 		autoCertificate = results[0]
 	}
 
-	if err := certService.SetAutoCertificateData(d, autoCertificate); err != nil {
+	if err := certservice.SetAutoCertificateData(d, autoCertificate); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
 	return nil

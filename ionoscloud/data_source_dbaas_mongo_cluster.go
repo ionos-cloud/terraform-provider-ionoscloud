@@ -8,11 +8,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	mongo "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
-	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
+	dbaasservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
@@ -184,7 +184,7 @@ func dataSourceDbaasMongoCluster() *schema.Resource {
 			//			},
 			//		},
 			//	},
-			//},
+			// },
 			"backup": {
 				Type:        schema.TypeList,
 				Computed:    true,
@@ -192,17 +192,17 @@ func dataSourceDbaasMongoCluster() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						// will be added at a later date
-						//"snapshot_interval_hours": {
+						// "snapshot_interval_hours": {
 						//	Type:        schema.TypeInt,
 						//	Computed:    true,
 						//	Description: "Number of hours between snapshots.",
-						//},
-						//"point_in_time_window_hours": {
+						// },
+						// "point_in_time_window_hours": {
 						//	Type:        schema.TypeInt,
 						//	Computed:    true,
 						//	Description: "Number of hours in the past for which a point-in-time snapshot can be created.",
-						//},
-						//"backup_retention": {
+						// },
+						// "backup_retention": {
 						//	Type:        schema.TypeList,
 						//	Description: "Backup retention related properties.",
 						//	Elem: &schema.Resource{
@@ -233,7 +233,7 @@ func dataSourceDbaasMongoCluster() *schema.Resource {
 						//			},
 						//		},
 						//	},
-						//},
+						// },
 						"location": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -301,7 +301,7 @@ func dataSourceDbaasMongoReadCluster(ctx context.Context, d *schema.ResourceData
 
 	}
 
-	if err := dbaasService.SetMongoDBClusterData(d, cluster); err != nil {
+	if err := dbaasservice.SetMongoDBClusterData(d, cluster); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
 

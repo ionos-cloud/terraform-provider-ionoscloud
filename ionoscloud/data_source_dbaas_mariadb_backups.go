@@ -6,7 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	mariadbSDK "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb/v2"
+	mariadbsdk "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
@@ -86,8 +86,8 @@ func dataSourceDBaaSMariaDBBackups() *schema.Resource {
 func dataSourceDBaaSMariaDBReadBackups(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).MariaDBClient
 
-	clusterIDIntf, clusterIDOk := d.GetOk("cluster_id")
-	clusterID := clusterIDIntf.(string)
+	clusterIdIntf, clusterIDOk := d.GetOk("cluster_id")
+	clusterID := clusterIdIntf.(string)
 	backupIDIntf, backupIDOk := d.GetOk("backup_id")
 	backupID := backupIDIntf.(string)
 
@@ -100,11 +100,11 @@ func dataSourceDBaaSMariaDBReadBackups(ctx context.Context, d *schema.ResourceDa
 
 	location := d.Get("location").(string)
 
-	var backups []mariadbSDK.BackupResponse
+	var backups []mariadbsdk.BackupResponse
 	var apiResponse *shared.APIResponse
 	var err error
 	if clusterIDOk {
-		var backupsResponse mariadbSDK.BackupList
+		var backupsResponse mariadbsdk.BackupList
 		backupsResponse, apiResponse, err = client.GetClusterBackups(ctx, clusterID, location)
 		if err != nil {
 			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching backups for cluster with ID %s: %w", clusterID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
@@ -114,7 +114,7 @@ func dataSourceDBaaSMariaDBReadBackups(ctx context.Context, d *schema.ResourceDa
 		}
 		backups = backupsResponse.Items
 	} else {
-		var backup mariadbSDK.BackupResponse
+		var backup mariadbsdk.BackupResponse
 		backup, apiResponse, err = client.FindBackupByID(ctx, backupID, location)
 		if err != nil {
 			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching backup with ID %s: %w", backupID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
