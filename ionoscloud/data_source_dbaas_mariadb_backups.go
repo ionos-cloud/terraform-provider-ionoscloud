@@ -86,15 +86,15 @@ func dataSourceDBaaSMariaDBBackups() *schema.Resource {
 func dataSourceDBaaSMariaDBReadBackups(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).MariaDBClient
 
-	clusterIdIntf, clusterIdOk := d.GetOk("cluster_id")
+	clusterIdIntf, clusterIDOk := d.GetOk("cluster_id")
 	clusterID := clusterIdIntf.(string)
-	backupIdIntf, backupIdOk := d.GetOk("backup_id")
-	backupID := backupIdIntf.(string)
+	backupIDIntf, backupIDOk := d.GetOk("backup_id")
+	backupID := backupIDIntf.(string)
 
-	if !clusterIdOk && !backupIdOk {
+	if !clusterIDOk && !backupIDOk {
 		return diagutil.ToDiags(d, fmt.Errorf("please provide either the 'cluster_id' or 'backup_id'"), nil)
 	}
-	if clusterIdOk && backupIdOk {
+	if clusterIDOk && backupIDOk {
 		return diagutil.ToDiags(d, fmt.Errorf("'cluster_id' and 'backup_id' cannot be specified at the same time"), nil)
 	}
 
@@ -103,7 +103,7 @@ func dataSourceDBaaSMariaDBReadBackups(ctx context.Context, d *schema.ResourceDa
 	var backups []mariadbsdk.BackupResponse
 	var apiResponse *shared.APIResponse
 	var err error
-	if clusterIdOk {
+	if clusterIDOk {
 		var backupsResponse mariadbsdk.BackupList
 		backupsResponse, apiResponse, err = client.GetClusterBackups(ctx, clusterID, location)
 		if err != nil {
