@@ -82,16 +82,16 @@ type Service struct {
 	D      *schema.ResourceData
 }
 
-func (fw *Service) CreateOrPatchForServer(ctx context.Context, dcId, srvID, nicID, id string, flowLog ionoscloud.FlowLog) error {
+func (fw *Service) CreateOrPatchForServer(ctx context.Context, dcID, srvID, nicID, id string, flowLog ionoscloud.FlowLog) error {
 	if id == "" {
-		_, _, err := fw.Client.FlowLogsApi.DatacentersServersNicsFlowlogsPost(ctx, dcId, srvID, nicID).Flowlog(flowLog).Execute()
+		_, _, err := fw.Client.FlowLogsApi.DatacentersServersNicsFlowlogsPost(ctx, dcID, srvID, nicID).Flowlog(flowLog).Execute()
 		if err != nil {
-			return fmt.Errorf("error occurred while creating flowlog in datacenter %s, server %s nic %s : %w", dcId, srvID, nicID, err)
+			return fmt.Errorf("error occurred while creating flowlog in datacenter %s, server %s nic %s : %w", dcID, srvID, nicID, err)
 		}
 	} else {
-		_, _, err := fw.Client.FlowLogsApi.DatacentersServersNicsFlowlogsPatch(ctx, dcId, srvID, nicID, id).Flowlog(*flowLog.Properties).Execute()
+		_, _, err := fw.Client.FlowLogsApi.DatacentersServersNicsFlowlogsPatch(ctx, dcID, srvID, nicID, id).Flowlog(*flowLog.Properties).Execute()
 		if err != nil {
-			return fmt.Errorf("error occurred while updating flowlog %s datacenter %s, server %s nic %s : %w", id, dcId, srvID, nicID, err)
+			return fmt.Errorf("error occurred while updating flowlog %s datacenter %s, server %s nic %s : %w", id, dcID, srvID, nicID, err)
 		}
 	}
 	return nil
@@ -140,10 +140,10 @@ func (fw *Service) GetFlowLogForALB(ctx context.Context, dcID, albID string, dep
 }
 
 // Delete - this method actually does not work for now
-func (fw *Service) Delete(ctx context.Context, dcId string, srvID string, nicID, id string) error {
-	_, err := fw.Client.FlowLogsApi.DatacentersServersNicsFlowlogsDelete(ctx, dcId, srvID, nicID, id).Execute()
+func (fw *Service) Delete(ctx context.Context, dcID string, srvID string, nicID, id string) error {
+	_, err := fw.Client.FlowLogsApi.DatacentersServersNicsFlowlogsDelete(ctx, dcID, srvID, nicID, id).Execute()
 	if err != nil {
-		return fmt.Errorf("error occurred while deleting flowlog %s datacenter %s, server %s nic %s : %w", id, dcId, srvID, nicID, err)
+		return fmt.Errorf("error occurred while deleting flowlog %s datacenter %s, server %s nic %s : %w", id, dcID, srvID, nicID, err)
 	}
 	return nil
 }
