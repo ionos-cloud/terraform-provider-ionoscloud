@@ -97,6 +97,22 @@ func TestAccVolumeBasic(t *testing.T) {
 				ExpectError: regexp.MustCompile(`no volume found with the specified criteria: name`),
 			},
 			{
+				Config:      testAccDataSourceVolumeBothIdAndNameError,
+				ExpectError: regexp.MustCompile(`ID and name cannot be both specified in the same time`),
+			},
+			{
+				Config:      testAccDataSourceVolumeNoIdNoNameError,
+				ExpectError: regexp.MustCompile(`please provide either the volume ID or name`),
+			},
+			{
+				Config:      testAccDataSourceVolumeWrongIdError,
+				ExpectError: regexp.MustCompile(`an error occurred while fetching volume with ID`),
+			},
+			{
+				Config:      testAccDataSourceVolumeMultipleResultsError,
+				ExpectError: regexp.MustCompile(`more than one volume found with the specified criteria: name`),
+			},
+			{
 				Config: testAccCheckVolumeConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "name", constant.UpdatedResources),
@@ -363,6 +379,45 @@ var testAccDataSourceVolumeWrongNameError = testAccCheckVolumeConfigBasic + `
 data ` + constant.VolumeResource + ` ` + constant.VolumeDataSourceByName + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   name			= "wrong_name"
+}
+`
+
+var testAccDataSourceVolumeBothIdAndNameError = testAccCheckVolumeConfigBasic + `
+data ` + constant.VolumeResource + ` ` + constant.VolumeDataSourceByName + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  id            = ` + constant.VolumeResource + `.` + constant.VolumeTestResource + `.id
+  name          = "` + constant.VolumeTestResource + `"
+}
+`
+
+var testAccDataSourceVolumeNoIdNoNameError = testAccCheckVolumeConfigBasic + `
+data ` + constant.VolumeResource + ` ` + constant.VolumeDataSourceByName + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+}
+`
+
+var testAccDataSourceVolumeWrongIdError = testAccCheckVolumeConfigBasic + `
+data ` + constant.VolumeResource + ` ` + constant.VolumeDataSourceById + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  id            = "00000000-0000-0000-0000-000000000000"
+}
+`
+
+var testAccDataSourceVolumeMultipleResultsError = testAccCheckVolumeConfigBasic + `
+resource ` + constant.VolumeResource + ` ` + constant.VolumeTestResource + `_same_name {
+  datacenter_id  = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  server_id      = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
+  name           = "` + constant.VolumeTestResource + `"
+  size           = 5
+  disk_type      = "SSD Standard"
+  bus            = "VIRTIO"
+  licence_type   = "LINUX"
+}
+
+data ` + constant.VolumeResource + ` ` + constant.VolumeDataSourceByName + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  name          = "` + constant.VolumeTestResource + `"
+  depends_on    = [` + constant.VolumeResource + `.` + constant.VolumeTestResource + `_same_name]
 }
 `
 
