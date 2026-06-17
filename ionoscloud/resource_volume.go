@@ -896,12 +896,12 @@ func findSnapshotIDByName(ctx context.Context, client *ionoscloud.APIClient, sna
 
 	snapshots, apiResponse, err := client.SnapshotsApi.SnapshotsGet(ctx).Depth(1).Execute()
 	logApiRequestTime(apiResponse)
-
 	if err != nil {
 		tflog.Error(ctx, "error while fetching the list of snapshots", map[string]any{"error": err.Error()})
+		return ""
 	}
 
-	if len(*snapshots.Items) > 0 {
+	if snapshots.Items != nil {
 		for _, i := range *snapshots.Items {
 			imgName := ""
 			if i.Properties != nil && i.Properties.Name != nil && *i.Properties.Name != "" {
