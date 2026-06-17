@@ -1,4 +1,7 @@
-## Upcoming 
+## Upcoming release
+
+### Testing
+- Add more test cases for `compute` data sources.
 
 ### Refactor
 - Refactor getImage, split into smaller functions and add unit tests

@@ -69,6 +69,18 @@ func TestAccDataSourceImageBasic(t *testing.T) {
 				Config:      testAccDataSourceImageWrongCloudInit,
 				ExpectError: regexp.MustCompile("no image found with the specified criteria"),
 			},
+			{
+				Config:      testAccDataSourceImageWrongNameOnlyError,
+				ExpectError: regexp.MustCompile(`no image found with the specified criteria: name wrong_name`),
+			},
+			{
+				Config:      testAccDataSourceImageWrongNameVersionError,
+				ExpectError: regexp.MustCompile(`no image found with the specified criteria: name ubuntu and version wrong_version`),
+			},
+			{
+				Config:      testAccDataSourceImageNoCriteriaMultipleError,
+				ExpectError: regexp.MustCompile(`more than one image found`),
+			},
 		},
 	})
 
@@ -145,5 +157,23 @@ const testAccDataSourceImageWrongCloudInit = `
 	  version = "18.04.3-live-server-amd64.iso"
 	  location = "de/fkb"
 	  cloud_init = "wrong_cloud_init"
+	}
+`
+
+const testAccDataSourceImageWrongNameOnlyError = `
+	data ` + constant.ImageResource + ` ` + constant.ImageTestResource + ` {
+	  name = "wrong_name"
+	}
+`
+
+const testAccDataSourceImageWrongNameVersionError = `
+	data ` + constant.ImageResource + ` ` + constant.ImageTestResource + ` {
+	  name    = "ubuntu"
+	  version = "wrong_version"
+	}
+`
+
+const testAccDataSourceImageNoCriteriaMultipleError = `
+	data ` + constant.ImageResource + ` ` + constant.ImageTestResource + ` {
 	}
 `
