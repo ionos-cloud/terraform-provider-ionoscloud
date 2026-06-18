@@ -94,9 +94,9 @@ func resourceServer() *schema.Resource {
 				Type:             schema.TypeString,
 				Optional:         true,
 				Computed:         true,
-				Description:      "server usages: ENTERPRISE or CUBE",
+				Description:      "server usages: ENTERPRISE, VCPU or CUBE",
 				DiffSuppressFunc: utils.DiffToLower,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"CUBE", "ENTERPRISE"}, true)),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"CUBE", "VCPU", "ENTERPRISE"}, true)),
 			},
 			"boot_image": {
 				Type:     schema.TypeString,
