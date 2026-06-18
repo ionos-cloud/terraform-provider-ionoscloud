@@ -1,5 +1,3 @@
-//go:build all || k8s
-
 package ionoscloud
 
 import (
@@ -14,6 +12,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
@@ -52,6 +51,16 @@ func TestAccK8sNodePoolBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "labels.color", "green"),
 					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "annotations.ann1", "value1"),
 					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "annotations.ann2", "value2"),
+					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "taints.#", "2"),
+					resource.TestCheckTypeSetElemNestedAttrs(constant.ResourceNameK8sNodePool, "taints.*", map[string]string{
+						"key":    "taint-key",
+						"value":  "taint-value",
+						"effect": "NoSchedule",
+					}),
+					resource.TestCheckTypeSetElemNestedAttrs(constant.ResourceNameK8sNodePool, "taints.*", map[string]string{
+						"key":    "taint-no-value",
+						"effect": "NoExecute",
+					}),
 				),
 			},
 			{
@@ -81,6 +90,7 @@ func TestAccK8sNodePoolBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DataSourceK8sNodePoolId, "labels.color", constant.ResourceNameK8sNodePool, "labels.color"),
 					resource.TestCheckResourceAttrPair(constant.DataSourceK8sNodePoolId, "annotations.ann1", constant.ResourceNameK8sNodePool, "annotations.ann1"),
 					resource.TestCheckResourceAttrPair(constant.DataSourceK8sNodePoolId, "annotations.ann2", constant.ResourceNameK8sNodePool, "annotations.ann2"),
+					resource.TestCheckResourceAttrPair(constant.DataSourceK8sNodePoolId, "taints.#", constant.ResourceNameK8sNodePool, "taints.#"),
 				),
 			},
 			{
@@ -102,6 +112,7 @@ func TestAccK8sNodePoolBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DataSourceK8sNodePoolName, "labels.color", constant.ResourceNameK8sNodePool, "labels.color"),
 					resource.TestCheckResourceAttrPair(constant.DataSourceK8sNodePoolName, "annotations.ann1", constant.ResourceNameK8sNodePool, "annotations.ann1"),
 					resource.TestCheckResourceAttrPair(constant.DataSourceK8sNodePoolName, "annotations.ann2", constant.ResourceNameK8sNodePool, "annotations.ann2"),
+					resource.TestCheckResourceAttrPair(constant.DataSourceK8sNodePoolName, "taints.#", constant.ResourceNameK8sNodePool, "taints.#"),
 				),
 			},
 			{
@@ -143,6 +154,12 @@ func TestAccK8sNodePoolBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "annotations.ann1", "value1Changed"),
 					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "annotations.ann2", "value2Changed"),
 					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "annotations.ann3", "newValue"),
+					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "taints.#", "1"),
+					resource.TestCheckTypeSetElemNestedAttrs(constant.ResourceNameK8sNodePool, "taints.*", map[string]string{
+						"key":    "taint-key",
+						"value":  "taint-value-updated",
+						"effect": "NoExecute",
+					}),
 				),
 			},
 			{
@@ -163,6 +180,7 @@ func TestAccK8sNodePoolBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "storage_size", "40"),
 					// resource.TestCheckNoResourceAttr(ResourceNameK8sNodePool, "public_ips"),
 					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "lans.#", "0"),
+					resource.TestCheckResourceAttr(constant.ResourceNameK8sNodePool, "taints.#", "0"),
 					// resource.TestCheckNoResourceAttr(ResourceNameK8sNodePool, "labels"),
 					// resource.TestCheckNoResourceAttr(ResourceNameK8sNodePool, "annotations")
 				),
@@ -418,6 +436,85 @@ func testAccCheckK8sNodePoolExists(n string, k8sNodepool *ionoscloud.KubernetesN
 	}
 }
 
+// TestK8sNodePoolGetTaintsDataUnit verifies the conversion from the Terraform schema set into the SDK taint slice.
+func TestK8sNodePoolGetTaintsDataUnit(t *testing.T) {
+	taintsSchema := resourceK8sNodePool().Schema["taints"]
+	elem := taintsSchema.Elem.(*schema.Resource)
+	set := schema.NewSet(schema.HashResource(elem), []any{
+		map[string]any{"key": "dedicated", "value": "gpu", "effect": "NoSchedule"},
+		map[string]any{"key": "spot", "value": "", "effect": "NoExecute"},
+	})
+
+	taints := getK8sNodePoolTaintsData(context.Background(), set)
+
+	if len(taints) != 2 {
+		t.Fatalf("expected 2 taints, got %d", len(taints))
+	}
+
+	byKey := make(map[string]ionoscloud.KubernetesNodePoolTaint, len(taints))
+	for _, taint := range taints {
+		if taint.Key == nil {
+			t.Fatalf("taint key should not be nil")
+		}
+		byKey[*taint.Key] = taint
+	}
+
+	dedicated, ok := byKey["dedicated"]
+	if !ok {
+		t.Fatalf("expected a taint with key 'dedicated'")
+	}
+	if dedicated.Value == nil || *dedicated.Value != "gpu" {
+		t.Errorf("expected value 'gpu', got %v", dedicated.Value)
+	}
+	if dedicated.Effect == nil || *dedicated.Effect != ionoscloud.NO_SCHEDULE {
+		t.Errorf("expected effect NoSchedule, got %v", dedicated.Effect)
+	}
+
+	spot, ok := byKey["spot"]
+	if !ok {
+		t.Fatalf("expected a taint with key 'spot'")
+	}
+	// an empty value must be treated as unset so it is not serialized
+	if spot.Value != nil {
+		t.Errorf("expected nil value for empty taint value, got %q", *spot.Value)
+	}
+	if spot.Effect == nil || *spot.Effect != ionoscloud.NO_EXECUTE {
+		t.Errorf("expected effect NoExecute, got %v", spot.Effect)
+	}
+}
+
+// TestK8sNodePoolSetTaintsUnit verifies the conversion from the SDK taint slice into the Terraform state representation.
+func TestK8sNodePoolSetTaintsUnit(t *testing.T) {
+	key1, val1 := "dedicated", "gpu"
+	effect1 := ionoscloud.NO_SCHEDULE
+	key2 := "spot"
+	effect2 := ionoscloud.PREFER_NO_SCHEDULE
+
+	taints := []ionoscloud.KubernetesNodePoolTaint{
+		{Key: &key1, Value: &val1, Effect: &effect1},
+		{Key: &key2, Effect: &effect2},
+	}
+
+	result := setK8sNodePoolTaints(taints)
+	if len(result) != 2 {
+		t.Fatalf("expected 2 taints, got %d", len(result))
+	}
+
+	first := result[0].(map[string]any)
+	if first["key"] != "dedicated" || first["value"] != "gpu" || first["effect"] != "NoSchedule" {
+		t.Errorf("unexpected first taint: %v", first)
+	}
+
+	second := result[1].(map[string]any)
+	if second["key"] != "spot" || second["effect"] != "PreferNoSchedule" {
+		t.Errorf("unexpected second taint: %v", second)
+	}
+	// a nil SDK value must not produce a "value" key in state
+	if _, ok := second["value"]; ok {
+		t.Errorf("expected no value key for taint without value, got %v", second["value"])
+	}
+}
+
 const testAccCheckK8sNodePoolConfigBasic = `
 resource ` + constant.DatacenterResource + ` "terraform_acctest" {
   name        = "terraform_acctest"
@@ -473,6 +570,15 @@ resource ` + constant.K8sNodePoolResource + ` ` + constant.K8sNodePoolTestResour
   annotations = {
     ann1 = "value1"
     ann2 = "value2"
+  }
+  taints {
+    key    = "taint-key"
+    value  = "taint-value"
+    effect = "NoSchedule"
+  }
+  taints {
+    key    = "taint-no-value"
+    effect = "NoExecute"
   }
 }`
 
@@ -555,6 +661,11 @@ resource ` + constant.K8sNodePoolResource + ` ` + constant.K8sNodePoolTestResour
     ann1 = "value1Changed"
     ann2 = "value2Changed"
     ann3 = "newValue"
+  }
+  taints {
+    key    = "taint-key"
+    value  = "taint-value-updated"
+    effect = "NoExecute"
   }
 }`
 

@@ -1,5 +1,8 @@
 ## Upcoming release
 
+### Features
+- Add `taints` support to the `ionoscloud_k8s_node_pool` resource and data source. Each taint has a `key`, optional `value`, and `effect` (`NoSchedule`, `NoExecute`, or `PreferNoSchedule`).
+
 ### Testing
 - Add more test cases for `compute` data sources.
 
