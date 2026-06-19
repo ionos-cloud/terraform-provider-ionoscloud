@@ -760,159 +760,135 @@ func getVolumeData(ctx context.Context, d *schema.ResourceData, path, serverType
 	return &volume, nil
 }
 
-// getImage is used for the entire logic for finding the image/snapshot provided by the user
+func hasImageCredentials(volume ionoscloud.VolumeProperties) bool {
+	return volume.ImagePassword != nil || (volume.SshKeys != nil && len(*volume.SshKeys) > 0)
+}
+
 func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData, volume ionoscloud.VolumeProperties) (image, imageAlias string, err error) {
-	var imageName string
+	var imageInput string
 	dcID := d.Get("datacenter_id").(string)
-	isSnapshot := false
 
 	if v, ok := d.GetOk("volume.0.image_name"); ok {
-		imageName = v.(string)
+		imageInput = v.(string)
 		if err := d.Set("image_name", v.(string)); err != nil {
 			return image, imageAlias, err
 		}
 	} else if v, ok := d.GetOk("image_name"); ok {
-		imageName = v.(string)
+		imageInput = v.(string)
 	}
 
-	if imageName != "" {
-		if !utils.IsValidUUID(imageName) {
-			images, err := cloudapiimage.GetAllImages(ctx, client)
-			if err != nil {
-				return image, imageAlias, fmt.Errorf("error while fetching the list of images: %w", err)
-			}
-
-			dc, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, dcID).Execute()
-			logApiRequestTime(apiResponse)
-			if err != nil {
-				return image, imageAlias, fmt.Errorf("error fetching datacenter %s: (%w)", dcID, err)
-			}
-
-			locationIDs := cloudapilocation.ResolveParentLocation(ctx, client, *dc.Properties.Location)
-
-			img, rejectedImg := resolveVolumeImageName(imageName, images, locationIDs)
-			if img != nil {
-				image = *img.Id
-			}
-			// if no image id was found with that name we look for a matching snapshot
-			if image == "" {
-				tflog.Debug(ctx, "looking for a snapshot by name", map[string]any{"image_name": imageName})
-				image = getSnapshotID(ctx, client, imageName)
-				if image != "" {
-					isSnapshot = true
-				} else {
-					imageAlias = cloudapiimage.GetImageAlias(imageName, images, locationIDs)
-					if imageAlias == "" {
-						if rejectedImg != nil {
-							return image, imageAlias, fmt.Errorf(
-								"image '%s' was found (name: '%s') with type '%s' in location '%s'; "+
-									"volume requires an image of type '%s' in location '%s'",
-								imageName, *rejectedImg.Properties.Name, *rejectedImg.Properties.ImageType,
-								*rejectedImg.Properties.Location, HDDImage, *dc.Properties.Location)
-						}
-						return image, imageAlias, fmt.Errorf("could not find an image/imagealias/snapshot that matches %s", imageName)
-					}
-				}
-			}
-
-			if volume.ImagePassword == nil && (volume.SshKeys == nil || len(*volume.SshKeys) == 0) && isSnapshot == false &&
-				(img == nil || (img.Properties.Public != nil && *img.Properties.Public)) {
-				return image, imageAlias, fmt.Errorf("volume, either 'image_password' or 'ssh_key_path'/'ssh_keys' must be provided")
-			}
+	if imageInput != "" {
+		if !utils.IsValidUUID(imageInput) {
+			image, imageAlias, err = getImageByName(ctx, client, dcID, imageInput, volume)
 		} else {
-			img, apiResponse, err := client.ImagesApi.ImagesFindById(ctx, imageName).Execute()
-			logApiRequestTime(apiResponse)
-			// here we search for snapshot if we do not find img based on imageName
-			if apiResponse.SafeStatusCode() == 404 {
-
-				snapshot, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, imageName).Execute()
-				logApiRequestTime(apiResponse)
-				if err != nil {
-					return image, imageAlias, fmt.Errorf("could not fetch image/snapshot: %w", err)
-				}
-
-				isSnapshot = true
-				if snapshot.Id != nil {
-					image = *snapshot.Id
-				}
-			} else if err != nil {
-				return image, imageAlias, fmt.Errorf("error fetching image/snapshot: %w", err)
-			}
-
-			if isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public == true {
-
-				if volume.ImagePassword == nil && (volume.SshKeys == nil || len(*volume.SshKeys) == 0) {
-					return image, imageAlias, fmt.Errorf("public image, either 'image_password' or 'ssh_key_path'/'ssh_keys' must be provided")
-				}
-
-				dc, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, dcID).Execute()
-				logApiRequestTime(apiResponse)
-				if err != nil {
-					return image, imageAlias, fmt.Errorf("error fetching datacenter %s: (%w)", dcID, err)
-				}
-
-				locationIDs := cloudapilocation.ResolveParentLocation(ctx, client, *dc.Properties.Location)
-
-				images, err := cloudapiimage.GetAllImages(ctx, client)
-				if err != nil {
-					return image, imageAlias, fmt.Errorf("error while fetching the list of images: %w", err)
-				}
-
-				img, rejectedImg := resolveVolumeImageName(imageName, images, locationIDs)
-				if rejectedImg != nil {
-					tflog.Debug(ctx, "image matched by name but filtered out", map[string]any{"name": *rejectedImg.Properties.Name, "type": *rejectedImg.Properties.ImageType, "location": *rejectedImg.Properties.Location})
-				}
-
-				if img != nil {
-					image = *img.Id
-				}
-			} else {
-				img, apiResponse, err := client.ImagesApi.ImagesFindById(ctx, imageName).Execute()
-
-				logApiRequestTime(apiResponse)
-				if err != nil {
-					// we want to search for snapshot again, but we check for
-					// image != "" to be sure we didn't find it when we searched above for it
-					if apiResponse.SafeStatusCode() == 404 && image != "" {
-						snapshot, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, imageName).Execute()
-						logApiRequestTime(apiResponse)
-						if err != nil {
-							return image, imageAlias, fmt.Errorf("error fetching image/snapshot: %w", err)
-						}
-						if snapshot.Id != nil {
-							image = *snapshot.Id
-						}
-						isSnapshot = true
-					} else {
-						return image, imageAlias, err
-					}
-
-				} else {
-					if isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public == true {
-						if volume.ImagePassword == nil && (volume.SshKeys == nil || len(*volume.SshKeys) == 0) {
-							return image, imageAlias, fmt.Errorf("either 'image_password' or 'ssh_key_path'/'ssh_keys' must be provided for imageName %s ", imageName)
-						}
-						image = imageName
-					} else {
-						image = imageName
-					}
-				}
-			}
+			image, err = getImageByUUID(ctx, client, dcID, imageInput, volume)
+		}
+		if err != nil {
+			return image, imageAlias, err
 		}
 	}
 
-	if image == "" && volume.LicenceType == nil && imageAlias == "" && !isSnapshot {
+	if image == "" && volume.LicenceType == nil && imageAlias == "" {
 		return image, imageAlias, fmt.Errorf("either 'image_name', 'licence_type', or 'image_alias' must be set")
-	}
-
-	if isSnapshot == true && (volume.ImagePassword != nil || volume.SshKeys != nil && len(*volume.SshKeys) > 0) {
-		return image, imageAlias, fmt.Errorf("passwords/SSH keys are not supported for snapshots")
 	}
 
 	return image, imageAlias, nil
 }
 
-func getSnapshotID(ctx context.Context, client *ionoscloud.APIClient, snapshotName string) string {
+func getImageByName(ctx context.Context, client *ionoscloud.APIClient, dcID, imageName string, volume ionoscloud.VolumeProperties) (image, imageAlias string, err error) {
+	images, err := cloudapiimage.GetAllImages(ctx, client)
+	if err != nil {
+		return "", "", fmt.Errorf("error while fetching the list of images: %w", err)
+	}
+
+	dc, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, dcID).Execute()
+	logApiRequestTime(apiResponse)
+	if err != nil {
+		return "", "", fmt.Errorf("error fetching datacenter %s: (%w)", dcID, err)
+	}
+
+	locationIDs := cloudapilocation.ResolveParentLocation(ctx, client, *dc.Properties.Location)
+
+	matchedImage, rejectedImage := findCompatibleVolumeImage(imageName, images, locationIDs)
+	if matchedImage != nil {
+		image = *matchedImage.Id
+	}
+
+	if image == "" {
+		tflog.Debug(ctx, "looking for a snapshot by name", map[string]any{"image_name": imageName})
+		image = findSnapshotIDByName(ctx, client, imageName)
+		if image != "" {
+			if hasImageCredentials(volume) {
+				return "", "", fmt.Errorf("passwords/SSH keys are not supported for snapshots")
+			}
+			return image, "", nil
+		}
+		imageAlias = cloudapiimage.GetImageAlias(imageName, images, locationIDs)
+		if imageAlias == "" {
+			if rejectedImage != nil {
+				return "", "", fmt.Errorf(
+					"image '%s' was found (name: '%s') with type '%s' in location '%s'; "+
+						"volume requires an image of type '%s' in location '%s'",
+					imageName, *rejectedImage.Properties.Name, *rejectedImage.Properties.ImageType,
+					*rejectedImage.Properties.Location, HDDImage, *dc.Properties.Location)
+			}
+			return "", "", fmt.Errorf("could not find an image/imagealias/snapshot that matches %s", imageName)
+		}
+	}
+
+	if !hasImageCredentials(volume) && (matchedImage == nil || (matchedImage.Properties.Public != nil && *matchedImage.Properties.Public)) {
+		return "", "", fmt.Errorf("volume, either 'image_password' or 'ssh_key_path'/'ssh_keys' must be provided")
+	}
+
+	return image, imageAlias, nil
+}
+
+func getImageByUUID(ctx context.Context, client *ionoscloud.APIClient, dcID, imageID string, volume ionoscloud.VolumeProperties) (resolvedImage string, err error) {
+	img, apiResponse, err := client.ImagesApi.ImagesFindById(ctx, imageID).Execute()
+	logApiRequestTime(apiResponse)
+	if apiResponse.HttpNotFound() {
+		snapshot, apiResponse, err := client.SnapshotsApi.SnapshotsFindById(ctx, imageID).Execute()
+		apiResponse.LogInfo()
+		if err != nil {
+			return "", fmt.Errorf("could not fetch image/snapshot: %w", err)
+		}
+		if hasImageCredentials(volume) {
+			return "", fmt.Errorf("passwords/SSH keys are not supported for snapshots")
+		}
+		if snapshot.Id != nil {
+			resolvedImage = *snapshot.Id
+		}
+		return resolvedImage, nil
+	}
+	if err != nil {
+		return "", fmt.Errorf("error fetching image/snapshot: %w", err)
+	}
+
+	if img.Properties != nil && img.Properties.Public != nil && *img.Properties.Public {
+		if !hasImageCredentials(volume) {
+			return "", fmt.Errorf("public image, either 'image_password' or 'ssh_key_path'/'ssh_keys' must be provided")
+		}
+
+		dc, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, dcID).Execute()
+		apiResponse.LogInfo()
+		if err != nil {
+			return "", fmt.Errorf("error fetching datacenter %s: (%w)", dcID, err)
+		}
+
+		locationIDs := cloudapilocation.ResolveParentLocation(ctx, client, *dc.Properties.Location)
+
+		if img.Properties.ImageType == nil || *img.Properties.ImageType != HDDImage ||
+			img.Properties.Location == nil || !cloudapilocation.LocationInSet(locationIDs, *img.Properties.Location) {
+			tflog.Debug(ctx, "public image filtered out (wrong type or location)",
+				map[string]any{"id": imageID, "type": img.Properties.ImageType, "location": img.Properties.Location})
+			return "", nil
+		}
+	}
+
+	return imageID, nil
+}
+
+func findSnapshotIDByName(ctx context.Context, client *ionoscloud.APIClient, snapshotName string) string {
 
 	if snapshotName == "" {
 		return ""
@@ -920,12 +896,12 @@ func getSnapshotID(ctx context.Context, client *ionoscloud.APIClient, snapshotNa
 
 	snapshots, apiResponse, err := client.SnapshotsApi.SnapshotsGet(ctx).Depth(1).Execute()
 	logApiRequestTime(apiResponse)
-
 	if err != nil {
 		tflog.Error(ctx, "error while fetching the list of snapshots", map[string]any{"error": err.Error()})
+		return ""
 	}
 
-	if len(*snapshots.Items) > 0 {
+	if snapshots.Items != nil {
 		for _, i := range *snapshots.Items {
 			imgName := ""
 			if i.Properties != nil && i.Properties.Name != nil && *i.Properties.Name != "" {
@@ -940,10 +916,10 @@ func getSnapshotID(ctx context.Context, client *ionoscloud.APIClient, snapshotNa
 	return ""
 }
 
-// resolveVolumeImageName scans the given images for imageName: match is the HDD image in
+// findCompatibleVolumeImage scans the given images for imageName: match is the HDD image in
 // one of the given locations matched by id or name (exact wins over partial), skipped is
 // a name match filtered out for wrong type/location.
-func resolveVolumeImageName(imageName string, images []ionoscloud.Image, locations []string) (match, skipped *ionoscloud.Image) {
+func findCompatibleVolumeImage(imageName string, images []ionoscloud.Image, locations []string) (match, skipped *ionoscloud.Image) {
 
 	if imageName == "" {
 		return nil, nil
