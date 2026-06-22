@@ -1,5 +1,8 @@
 ## Upcoming release
 
+### Fixes
+- `ionoscloud_pg_cluster`: remove schema-level validation on `synchronization_mode` to preserve backward compatibility with existing clusters; validation is delegated to the API.
+
 ### Testing
 - Add more test cases for `compute` data sources.
 
