@@ -192,10 +192,9 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 				},
 			},
 			"synchronization_mode": {
-				Type:             schema.TypeString,
-				Description:      "Represents different modes of replication.",
-				Required:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"ASYNCHRONOUS", "STRICTLY_SYNCHRONOUS"}, false)),
+				Type:        schema.TypeString,
+				Description: "Represents different modes of replication.",
+				Required:    true,
 			},
 			"from_backup": {
 				Type:        schema.TypeList,

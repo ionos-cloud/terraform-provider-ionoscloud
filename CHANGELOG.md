@@ -1,7 +1,7 @@
 ## Upcoming release
 
 ### Fixes
-- `ionoscloud_pg_cluster`: remove deprecated `SYNCHRONOUS` synchronization mode from schema validation; only `ASYNCHRONOUS` and `STRICTLY_SYNCHRONOUS` are accepted for new clusters.
+- `ionoscloud_pg_cluster`: remove schema-level validation on `synchronization_mode` to preserve backward compatibility with existing clusters; validation is delegated to the API.
 
 ### Testing
 - Add more test cases for `compute` data sources.
