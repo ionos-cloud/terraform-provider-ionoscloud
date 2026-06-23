@@ -5,15 +5,19 @@
 
 ### Testing
 - Add more test cases for `compute` data sources.
-
+- Add more test cases for `pg_cluster` resource with `STRINCTLY-SYNCHRONOUS` synchronization mode.
 ### Refactor
 - Refactor getImage, split into smaller functions and add unit tests
+
+### Documentation
+- Add migration guide for `ionoscloud_pg_cluster` to `ionoscloud_pg_cluster_v2` resource.
 
 ## 6.7.31
 
 ### Features
 - New list resource: `ionoscloud_pg_cluster_v2` — list PostgreSQL v2 clusters via `terraform query`, with optional filtering using `name` or `location` (requires Terraform 1.14+).
 - Support child locations (e.g. `de/fra/2`): image and image alias resolution for `ionoscloud_server`, `ionoscloud_cube_server`, `ionoscloud_gpu_server` and `ionoscloud_volume` also considers the parent location the child inherits images from; the `ionoscloud_image` and `ionoscloud_snapshot` data sources accept results from the parent location; new `metro_region` attribute on the `ionoscloud_location` data source.
+
 
 ## 6.7.30
 
