@@ -284,7 +284,7 @@ func (c SdkBundle) NewPgSQLV2Client(ctx context.Context, location string) (*psql
 }
 
 // NewInMemoryDBV2Client creates a new InMemoryDB v2 client for a specific location.
-func (c SdkBundle) NewInMemoryDBV2Client(location string) (*inmemorydbv2Service.Client, error) {
+func (c SdkBundle) NewInMemoryDBV2Client(ctx context.Context, location string) (*inmemorydbv2Service.Client, error) {
 	config := c.newBundleClientConfig(fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go-dbaas-in-memory-db-v2/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		c.clientOptions.Version, inmemorydbv3sdk.SDKVersion, c.clientOptions.TerraformVersion,
@@ -294,7 +294,7 @@ func (c SdkBundle) NewInMemoryDBV2Client(location string) (*inmemorydbv2Service.
 	if c.fileConfig != nil {
 		endpoint := c.fileConfig.GetProductLocationOverrides(fileconfiguration.InMemoryDBV2, location)
 		if endpoint == nil {
-			log.Printf("[WARN] product %q is missing from config file or location %q is not defined for product %q, using internal locations map to configure the endpoint", fileconfiguration.InMemoryDBV2, location, fileconfiguration.InMemoryDBV2)
+			tflog.Warn(ctx, "product missing from config file or location not defined, using internal locations map to configure endpoint", map[string]any{"product": fileconfiguration.InMemoryDBV2, "location": location})
 		} else {
 			config.Servers = shared.ServerConfigurations{
 				{

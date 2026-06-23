@@ -327,6 +327,7 @@ func (p *IonosCloudProvider) ListResources(_ context.Context) []func() list.List
 		objectstorage.ListResources(),
 		objectstoragemanagement.ListResources(),
 		pgsqlv2.ListResources(),
+		inmemorydbv2.ListResources(),
 	}
 
 	for _, r := range listResources {

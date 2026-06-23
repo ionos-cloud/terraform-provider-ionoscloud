@@ -141,7 +141,7 @@ func checkClusterExists(resourceAddr string) resource.TestCheckFunc {
 		if !ok {
 			return fmt.Errorf("not found: %s", resourceAddr)
 		}
-		client, err := acctest.NewTestBundleClientFromEnv().NewInMemoryDBV2Client(testLocation)
+		client, err := acctest.NewTestBundleClientFromEnv().NewInMemoryDBV2Client(context.Background(), testLocation)
 		if err != nil {
 			return fmt.Errorf("failed to create InMemoryDB v2 client: %w", err)
 		}
@@ -159,7 +159,7 @@ func checkClusterDestroy(s *terraform.State) error {
 			continue
 		}
 		location := rs.Primary.Attributes["location"]
-		client, err := acctest.NewTestBundleClientFromEnv().NewInMemoryDBV2Client(location)
+		client, err := acctest.NewTestBundleClientFromEnv().NewInMemoryDBV2Client(context.Background(), location)
 		if err != nil {
 			return fmt.Errorf("failed to create InMemoryDB v2 client: %w", err)
 		}

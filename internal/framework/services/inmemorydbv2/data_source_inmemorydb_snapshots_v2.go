@@ -108,7 +108,7 @@ func (d *snapshotsDataSource) Read(ctx context.Context, req datasource.ReadReque
 	}
 
 	location := data.Location.ValueString()
-	client, err := d.bundle.NewInMemoryDBV2Client(location)
+	client, err := d.bundle.NewInMemoryDBV2Client(ctx, location)
 	if err != nil {
 		resp.Diagnostics.AddError("failed to create InMemoryDB v2 client", err.Error())
 		return

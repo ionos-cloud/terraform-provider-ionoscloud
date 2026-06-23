@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -26,7 +27,13 @@ import (
 var (
 	_ resource.ResourceWithImportState = (*clusterResource)(nil)
 	_ resource.ResourceWithConfigure   = (*clusterResource)(nil)
+	_ resource.ResourceWithIdentity    = (*clusterResource)(nil)
 )
+
+type clusterIdentityModel struct {
+	ID       types.String `tfsdk:"id"`
+	Location types.String `tfsdk:"location"`
+}
 
 type clusterResource struct {
 	bundle *bundleclient.SdkBundle
@@ -99,6 +106,15 @@ func NewClusterResource() resource.Resource {
 // Metadata returns the resource type name.
 func (r *clusterResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_inmemorydb_cluster_v2"
+}
+
+func (r *clusterResource) IdentitySchema(_ context.Context, _ resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
+	resp.IdentitySchema = identityschema.Schema{
+		Attributes: map[string]identityschema.Attribute{
+			"id":       identityschema.StringAttribute{RequiredForImport: true},
+			"location": identityschema.StringAttribute{RequiredForImport: true},
+		},
+	}
 }
 
 // Schema returns the schema for the InMemoryDB v2 cluster resource.
@@ -310,7 +326,7 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 	}
 
 	location := plan.Location.ValueString()
-	client, err := r.bundle.NewInMemoryDBV2Client(location)
+	client, err := r.bundle.NewInMemoryDBV2Client(ctx, location)
 	if err != nil {
 		resp.Diagnostics.AddError("failed to create InMemoryDB v2 client", err.Error())
 		return
@@ -356,6 +372,7 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
+	resp.Diagnostics.Append(resp.Identity.Set(ctx, &clusterIdentityModel{ID: plan.ID, Location: plan.Location})...)
 }
 
 // Read reads the InMemoryDB v2 cluster state.
@@ -369,7 +386,7 @@ func (r *clusterResource) Read(ctx context.Context, req resource.ReadRequest, re
 	clusterID := state.ID.ValueString()
 	location := state.Location.ValueString()
 
-	client, err := r.bundle.NewInMemoryDBV2Client(location)
+	client, err := r.bundle.NewInMemoryDBV2Client(ctx, location)
 	if err != nil {
 		resp.Diagnostics.AddError("failed to create InMemoryDB v2 client", err.Error())
 		return
@@ -391,6 +408,7 @@ func (r *clusterResource) Read(ctx context.Context, req resource.ReadRequest, re
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
+	resp.Diagnostics.Append(resp.Identity.Set(ctx, &clusterIdentityModel{ID: state.ID, Location: state.Location})...)
 }
 
 // Update updates the InMemoryDB v2 cluster using PUT semantics.
@@ -406,7 +424,7 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 	clusterID := state.ID.ValueString()
 	location := plan.Location.ValueString()
 
-	client, err := r.bundle.NewInMemoryDBV2Client(location)
+	client, err := r.bundle.NewInMemoryDBV2Client(ctx, location)
 	if err != nil {
 		resp.Diagnostics.AddError("failed to create InMemoryDB v2 client", err.Error())
 		return
@@ -455,6 +473,7 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
+	resp.Diagnostics.Append(resp.Identity.Set(ctx, &clusterIdentityModel{ID: plan.ID, Location: plan.Location})...)
 }
 
 // Delete deletes the InMemoryDB v2 cluster.
@@ -468,7 +487,7 @@ func (r *clusterResource) Delete(ctx context.Context, req resource.DeleteRequest
 	clusterID := state.ID.ValueString()
 	location := state.Location.ValueString()
 
-	client, err := r.bundle.NewInMemoryDBV2Client(location)
+	client, err := r.bundle.NewInMemoryDBV2Client(ctx, location)
 	if err != nil {
 		resp.Diagnostics.AddError("failed to create InMemoryDB v2 client", err.Error())
 		return
@@ -495,8 +514,19 @@ func (r *clusterResource) Delete(ctx context.Context, req resource.DeleteRequest
 	}
 }
 
-// ImportState imports an InMemoryDB v2 cluster using "location:cluster_id" format.
+// ImportState imports an InMemoryDB v2 cluster. Supports identity-based import (from terraform query)
+// and legacy string import using "location:cluster_id" format.
 func (r *clusterResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	if req.Identity != nil {
+		var id *clusterIdentityModel
+		resp.Diagnostics.Append(req.Identity.Get(ctx, &id)...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("location"), id.Location)...)
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), id.ID)...)
+		return
+	}
 	parts := strings.Split(req.ID, ":")
 	if len(parts) != 2 {
 		resp.Diagnostics.AddError(
