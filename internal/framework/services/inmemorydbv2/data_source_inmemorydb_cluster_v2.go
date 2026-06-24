@@ -206,6 +206,16 @@ func mapClusterResponseToDataSourceModel(ctx context.Context, cluster *inmemoryd
 	return diagnostics
 }
 
+// clusterListItemAttributes returns the schema for a cluster item inside the clusters list data source.
+// All attributes are Computed since items are fully returned by the API.
+func clusterListItemAttributes() map[string]schema.Attribute {
+	attrs := clusterDataSourceAttributes()
+	attrs["id"] = schema.StringAttribute{Computed: true, Description: "The ID (UUID) of the cluster."}
+	attrs["name"] = schema.StringAttribute{Computed: true, Description: "The name of the cluster."}
+	attrs["location"] = schema.StringAttribute{Computed: true, Description: "The location of the cluster."}
+	return attrs
+}
+
 func clusterDataSourceAttributes() map[string]schema.Attribute {
 	return map[string]schema.Attribute{
 		"connections": schema.SingleNestedAttribute{
@@ -219,7 +229,7 @@ func clusterDataSourceAttributes() map[string]schema.Attribute {
 		},
 		"description": schema.StringAttribute{
 			Computed:    true,
-			Description: "Human-readable description of the cluster.",
+			Description: "Human-readable description for the cluster.",
 		},
 		"dns_name": schema.StringAttribute{
 			Computed:    true,

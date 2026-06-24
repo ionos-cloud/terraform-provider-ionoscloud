@@ -106,7 +106,7 @@ The following arguments are supported:
 | Attribute | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `location` | String | Yes | Object Storage location for snapshots. |
-| `retention_days` | Number | No | Days to retain snapshots (1–365, default 7). |
+| `retention_days` | Number | Yes | Days to retain snapshots (1–365). |
 | `snapshot_hours` | List(Number) | Yes | UTC hours for scheduled snapshots (0–23). At least one hour must be specified. |
 
 ### `maintenance_window` block (required)
@@ -127,21 +127,21 @@ The following arguments are supported:
 
 | Attribute | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `algorithm` | String | No | Hash algorithm (`SHA-256`). |
+| `algorithm` | String | Yes | Hash algorithm (`SHA-256`). |
 | `hash` | String | Yes | **Sensitive.** Hex-encoded SHA-256 hash (64 lowercase hex chars). |
 
-### `restore_from_snapshot` block (optional, write-only)
+### `restore_from_snapshot` block (optional)
 
 | Attribute | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `source_snapshot_id` | String | No | UUID of the snapshot to restore from. Required for create-time restore; not used for in-place restore via update. |
 | `recovery_target_datetime` | String | No | ISO 8601 timestamp to restore from the most recent snapshot at or before that time. Optional for create-time restore; required for in-place restore via update. |
 
-> **Note:** This block is write-only and is not returned by the API after apply.
+> **Note:** This block is not returned by the API. The values are stored in state as configured but will be null after `terraform import`.
 
 ### `timeouts` block
 
-Standard Terraform timeouts: `create`, `read`, `update`, `delete`.
+Standard Terraform timeouts: `create`, `update`, `delete`.
 
 ## Attributes Reference
 

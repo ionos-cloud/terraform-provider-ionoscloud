@@ -7,6 +7,8 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/querycheck"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/acctest"
 )
@@ -54,27 +56,10 @@ func TestAccInMemoryDBV2Cluster(t *testing.T) {
 					resource.TestCheckResourceAttr(clusterResourceAddr, "credentials.username", "cacheadmin"),
 				),
 			},
-			// TODO -- After manual testing, review this update configuration
-			{
-				Config: clusterUpdateConfig,
-				Check: resource.ComposeTestCheckFunc(
-					checkClusterExists(clusterResourceAddr),
-					resource.TestCheckResourceAttr(clusterResourceAddr, "name", "tf-test-inmemorydbv2-updated"),
-					resource.TestCheckResourceAttr(clusterResourceAddr, "description", "Updated InMemoryDB v2 cluster"),
-					resource.TestCheckResourceAttr(clusterResourceAddr, "eviction_policy", "allkeys-lfu"),
-					resource.TestCheckResourceAttr(clusterResourceAddr, "logs_enabled", "false"),
-					resource.TestCheckResourceAttr(clusterResourceAddr, "metrics_enabled", "false"),
-					resource.TestCheckResourceAttr(clusterResourceAddr, "instances.cores", "2"),
-					resource.TestCheckResourceAttr(clusterResourceAddr, "instances.ram", "8"),
-					resource.TestCheckResourceAttr(clusterResourceAddr, "snapshot.retention_days", "14"),
-					resource.TestCheckResourceAttr(clusterResourceAddr, "maintenance_window.time", "12:00:00"),
-					resource.TestCheckResourceAttr(clusterResourceAddr, "maintenance_window.day_of_the_week", "Wednesday"),
-				),
-			},
 			// TODO -- For this step we will add another cluster because we are also testing some filtering
 			// TODO -- This step needs to be reviewed thoroughly
 			{
-				Config: clusterUpdateConfig + clusterDataSourcesConfig,
+				Config: clusterCreateConfig + clusterDataSourcesConfig,
 				Check: resource.ComposeTestCheckFunc(
 					// by ID
 					resource.TestCheckResourceAttrPair(clusterDSByIDAddr, "id", clusterResourceAddr, "id"),
@@ -105,6 +90,68 @@ func TestAccInMemoryDBV2Cluster(t *testing.T) {
 					resource.TestCheckResourceAttrSet(versionsDSAddr, "items.#"),
 				),
 			},
+			// List without filters — confirms the cluster appears in results.
+			{
+				Query: true,
+				Config: `list "ionoscloud_inmemorydb_cluster_v2" "test" {
+  provider = ionoscloud
+}`,
+				QueryResultChecks: []querycheck.QueryResultCheck{
+					querycheck.ExpectIdentity(clusterResourceAddr, map[string]knownvalue.Check{
+						"id":       knownvalue.NotNull(),
+						"location": knownvalue.StringExact(testLocation),
+					}),
+				},
+			},
+			// Filter by name + correct location: unique name guarantees exactly 1 result.
+			{
+				Query: true,
+				Config: `list "ionoscloud_inmemorydb_cluster_v2" "test" {
+  provider = ionoscloud
+  config {
+    filters = [
+      { field_name = "name",     field_value = "tf-test-inmemorydbv2" },
+      { field_name = "location", field_value = "` + testLocation + `" },
+    ]
+  }
+}`,
+				QueryResultChecks: []querycheck.QueryResultCheck{
+					querycheck.ExpectLength(clusterResourceAddr, 1),
+				},
+			},
+			// Filter by name + wrong location: must return 0, proving location filter is evaluated.
+			{
+				Query: true,
+				Config: `list "ionoscloud_inmemorydb_cluster_v2" "test" {
+  provider = ionoscloud
+  config {
+    filters = [
+      { field_name = "name",     field_value = "tf-test-inmemorydbv2" },
+      { field_name = "location", field_value = "` + testLocationOther + `" },
+    ]
+  }
+}`,
+				QueryResultChecks: []querycheck.QueryResultCheck{
+					querycheck.ExpectLength(clusterResourceAddr, 0),
+				},
+			},
+			// TODO -- After manual testing, review this update configuration
+			{
+				Config: clusterUpdateConfig,
+				Check: resource.ComposeTestCheckFunc(
+					checkClusterExists(clusterResourceAddr),
+					resource.TestCheckResourceAttr(clusterResourceAddr, "name", "tf-test-inmemorydbv2-updated"),
+					resource.TestCheckResourceAttr(clusterResourceAddr, "description", "Updated InMemoryDB v2 cluster"),
+					resource.TestCheckResourceAttr(clusterResourceAddr, "eviction_policy", "allkeys-lfu"),
+					resource.TestCheckResourceAttr(clusterResourceAddr, "logs_enabled", "false"),
+					resource.TestCheckResourceAttr(clusterResourceAddr, "metrics_enabled", "false"),
+					resource.TestCheckResourceAttr(clusterResourceAddr, "instances.cores", "2"),
+					resource.TestCheckResourceAttr(clusterResourceAddr, "instances.ram", "8"),
+					resource.TestCheckResourceAttr(clusterResourceAddr, "snapshot.retention_days", "14"),
+					resource.TestCheckResourceAttr(clusterResourceAddr, "maintenance_window.time", "12:00:00"),
+					resource.TestCheckResourceAttr(clusterResourceAddr, "maintenance_window.day_of_the_week", "Wednesday"),
+				),
+			},
 			// TODO -- Review this step
 			{
 				ResourceName:      clusterResourceAddr,
@@ -113,7 +160,7 @@ func TestAccInMemoryDBV2Cluster(t *testing.T) {
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{
 					"credentials.password.hash",
-					"restore_from_snapshot",
+					"credentials.password.algorithm",
 					"timeouts",
 				},
 			},

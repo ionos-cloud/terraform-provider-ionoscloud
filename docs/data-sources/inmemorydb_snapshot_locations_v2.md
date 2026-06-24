@@ -15,7 +15,7 @@ Lists all IONOS Cloud In-Memory DB v2 Snapshot Locations available for a given A
 
 ```hcl
 data "ionoscloud_inmemorydb_snapshot_locations_v2" "example" {
-  api_location = "de/txl"
+  location = "de/txl"
 }
 
 output "available_snapshot_locations" {
@@ -27,7 +27,7 @@ output "available_snapshot_locations" {
 
 | Attribute | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `api_location` | String | Yes | The API endpoint location to query. |
+| `location` | String | Yes | The InMemoryDB API endpoint location to query. |
 
 ## Attributes Reference
 

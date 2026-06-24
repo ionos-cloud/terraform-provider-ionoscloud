@@ -48,9 +48,9 @@ type snapshotsDataSource struct {
 }
 
 type snapshotsDataSourceModel struct {
-	Location        types.String              `tfsdk:"location"`
+	Location  types.String              `tfsdk:"location"`
 	ClusterID types.String              `tfsdk:"cluster_id"`
-	Items           []snapshotDataSourceModel `tfsdk:"items"`
+	Items     []snapshotDataSourceModel `tfsdk:"items"`
 }
 
 // NewSnapshotsDataSource creates a new data source for listing InMemoryDB v2 snapshots.

@@ -19,8 +19,8 @@ data "ionoscloud_inmemorydb_snapshots_v2" "all" {
 }
 
 data "ionoscloud_inmemorydb_snapshots_v2" "for_cluster" {
-  location          = "de/txl"
-  filter_cluster_id = "e69b22a5-8fee-56b1-b6fb-4a07e4205ead"
+  location   = "de/txl"
+  cluster_id = "e69b22a5-8fee-56b1-b6fb-4a07e4205ead"
 }
 ```
 
@@ -29,7 +29,7 @@ data "ionoscloud_inmemorydb_snapshots_v2" "for_cluster" {
 | Attribute | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `location` | String | Yes | The location to query. |
-| `filter_cluster_id` | String | No | Filter snapshots by cluster UUID. |
+| `cluster_id` | String | No | Filter snapshots by cluster UUID. |
 
 ## Attributes Reference
 

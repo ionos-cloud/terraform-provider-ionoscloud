@@ -32,7 +32,7 @@ type snapshotLocationsDataSource struct {
 
 type snapshotLocationsDataSourceModel struct {
 	Location types.String                      `tfsdk:"location"`
-	Items       []snapshotLocationDataSourceModel `tfsdk:"items"`
+	Items    []snapshotLocationDataSourceModel `tfsdk:"items"`
 }
 
 // NewSnapshotLocationsDataSource creates a data source for listing snapshot locations.

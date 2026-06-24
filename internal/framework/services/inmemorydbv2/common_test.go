@@ -14,15 +14,16 @@ import (
 )
 
 const (
-	testLocation = "de/txl"
+	testLocation      = "de/txl"
+	testLocationOther = "de/fra"
 
-	clusterResourceAddr         = constant.InMemoryDBV2ClusterResource + ".test"
-	clusterDSByIDAddr           = "data." + constant.InMemoryDBV2ClusterDataSource + ".by_id"
-	clusterDSByNameAddr         = "data." + constant.InMemoryDBV2ClusterDataSource + ".by_name"
-	clustersDSAddr    = "data." + constant.InMemoryDBV2ClustersDataSource + ".test"
-	clustersAllDSAddr = "data." + constant.InMemoryDBV2ClustersDataSource + ".all"
-	snapshotsDSAddr    = "data." + constant.InMemoryDBV2SnapshotsDataSource + ".test"
-	snapshotsAllDSAddr = "data." + constant.InMemoryDBV2SnapshotsDataSource + ".all"
+	clusterResourceAddr     = constant.InMemoryDBV2ClusterResource + ".test"
+	clusterDSByIDAddr       = "data." + constant.InMemoryDBV2ClusterDataSource + ".by_id"
+	clusterDSByNameAddr     = "data." + constant.InMemoryDBV2ClusterDataSource + ".by_name"
+	clustersDSAddr          = "data." + constant.InMemoryDBV2ClustersDataSource + ".test"
+	clustersAllDSAddr       = "data." + constant.InMemoryDBV2ClustersDataSource + ".all"
+	snapshotsDSAddr         = "data." + constant.InMemoryDBV2SnapshotsDataSource + ".test"
+	snapshotsAllDSAddr      = "data." + constant.InMemoryDBV2SnapshotsDataSource + ".all"
 	snapshotLocationsDSAddr = "data." + constant.InMemoryDBV2SnapshotLocationsDataSource + ".test"
 	versionsDSAddr          = "data." + constant.InMemoryDBV2VersionsDataSource + ".test"
 )
@@ -141,7 +142,8 @@ func checkClusterExists(resourceAddr string) resource.TestCheckFunc {
 		if !ok {
 			return fmt.Errorf("not found: %s", resourceAddr)
 		}
-		client, err := acctest.NewTestBundleClientFromEnv().NewInMemoryDBV2Client(context.Background(), testLocation)
+		location := rs.Primary.Attributes["location"]
+		client, err := acctest.NewTestBundleClientFromEnv().NewInMemoryDBV2Client(context.Background(), location)
 		if err != nil {
 			return fmt.Errorf("failed to create InMemoryDB v2 client: %w", err)
 		}

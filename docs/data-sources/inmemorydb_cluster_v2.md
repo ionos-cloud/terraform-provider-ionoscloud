@@ -39,4 +39,26 @@ Exactly one of `id` or `name` must be provided.
 
 ## Attributes Reference
 
-All resource attributes are exported. See the resource documentation for the full list.
+| Attribute | Description |
+|-----------|-------------|
+| `id` | The UUID of the cluster. |
+| `name` | The name of the cluster. |
+| `location` | The location of the cluster. |
+| `description` | Human-readable description for the cluster. |
+| `version` | The In-Memory DB version. |
+| `persistence_mode` | The data persistence mode. |
+| `eviction_policy` | The key eviction strategy. |
+| `logs_enabled` | Whether log collection is enabled. |
+| `metrics_enabled` | Whether metrics collection is enabled. |
+| `dns_name` | The DNS name for connecting to the cluster's primary instance. |
+| `instances.count` | Number of instances. |
+| `instances.cores` | CPU cores per instance. |
+| `instances.ram` | RAM per instance in GB. |
+| `connections.datacenter_id` | The Virtual Data Center ID. |
+| `connections.lan_id` | The numeric LAN ID. |
+| `connections.primary_instance_address` | The primary instance IP in CIDR notation. |
+| `snapshot.location` | Object Storage location for snapshots. |
+| `snapshot.retention_days` | Days snapshots are retained. |
+| `snapshot.snapshot_hours` | UTC hours at which snapshots are taken. |
+| `maintenance_window.time` | Maintenance window start time in UTC (HH:MM:SS). |
+| `maintenance_window.day_of_the_week` | Maintenance window day of the week. |

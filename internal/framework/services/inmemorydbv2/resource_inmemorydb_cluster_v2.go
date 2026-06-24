@@ -17,6 +17,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	inmemorydbv3 "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/inmemorydb/v3"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
@@ -252,7 +253,6 @@ func (r *clusterResource) Schema(ctx context.Context, req resource.SchemaRequest
 			},
 			"restore_from_snapshot": schema.SingleNestedAttribute{
 				Optional:    true,
-				WriteOnly:   true,
 				Description: "Restores the cluster data from a snapshot.",
 				Attributes: map[string]schema.Attribute{
 					"source_snapshot_id": schema.StringAttribute{
@@ -322,6 +322,14 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 	var plan clusterResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if plan.RestoreFromSnapshot != nil && plan.RestoreFromSnapshot.SourceSnapshotID.IsNull() {
+		resp.Diagnostics.AddError(
+			"missing source_snapshot_id",
+			"source_snapshot_id is required when restore_from_snapshot is set during cluster creation.",
+		)
 		return
 	}
 
@@ -421,6 +429,19 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
+	if plan.RestoreFromSnapshot != nil {
+		if plan.RestoreFromSnapshot.RecoveryTargetDatetime.IsNull() {
+			resp.Diagnostics.AddError(
+				"missing recovery_target_datetime",
+				"recovery_target_datetime is required when restore_from_snapshot is set during cluster update.",
+			)
+			return
+		}
+		if !plan.RestoreFromSnapshot.SourceSnapshotID.IsNull() {
+			tflog.Warn(ctx, "source_snapshot_id is set in restore_from_snapshot during update but has no effect — the restore source is inferred automatically for in-place restore")
+		}
+	}
+
 	clusterID := state.ID.ValueString()
 	location := plan.Location.ValueString()
 
@@ -514,8 +535,7 @@ func (r *clusterResource) Delete(ctx context.Context, req resource.DeleteRequest
 	}
 }
 
-// ImportState imports an InMemoryDB v2 cluster. Supports identity-based import (from terraform query)
-// and legacy string import using "location:cluster_id" format.
+// ImportState imports an InMemoryDB v2 cluster. Supports identity-based import and legacy string import using "location:cluster_id" format.
 func (r *clusterResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	if req.Identity != nil {
 		var id *clusterIdentityModel
@@ -643,14 +663,12 @@ func buildClusterUpdateProperties(ctx context.Context, plan *clusterResourceMode
 		props.MetricsEnabled = plan.MetricsEnabled.ValueBoolPointer()
 	}
 
-	if plan.Credentials != nil {
-		props.Credentials = &inmemorydbv3.ClusterCredentials{
-			Username: plan.Credentials.Username.ValueString(),
-			Password: inmemorydbv3.HashedPassword{
-				Algorithm: plan.Credentials.Password.Algorithm.ValueString(),
-				Hash:      plan.Credentials.Password.Hash.ValueString(),
-			},
-		}
+	props.Credentials = &inmemorydbv3.ClusterCredentials{
+		Username: plan.Credentials.Username.ValueString(),
+		Password: inmemorydbv3.HashedPassword{
+			Algorithm: plan.Credentials.Password.Algorithm.ValueString(),
+			Hash:      plan.Credentials.Password.Hash.ValueString(),
+		},
 	}
 
 	if plan.RestoreFromSnapshot != nil && !plan.RestoreFromSnapshot.RecoveryTargetDatetime.IsNull() && !plan.RestoreFromSnapshot.RecoveryTargetDatetime.IsUnknown() {
@@ -737,9 +755,12 @@ func mapClusterResponseToModel(ctx context.Context, cluster *inmemorydbv3.Cluste
 	model.Snapshot = snapshotModel
 
 	// The API never returns the password hash.
-	// Preserve username and password from the existing model (state/plan).
-	if props.Credentials != nil && model.Credentials != nil {
-		existingPassword := model.Credentials.Password
+	// Preserve the existing password from state/plan; initialize credentials if nil (e.g. after import).
+	if props.Credentials != nil {
+		var existingPassword *passwordModel
+		if model.Credentials != nil {
+			existingPassword = model.Credentials.Password
+		}
 		model.Credentials = &credentialsModel{
 			Username: types.StringValue(props.Credentials.Username),
 			Password: existingPassword,

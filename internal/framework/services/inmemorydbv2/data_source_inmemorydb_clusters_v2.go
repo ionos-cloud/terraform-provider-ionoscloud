@@ -64,7 +64,7 @@ func (d *clustersDataSource) Schema(_ context.Context, _ datasource.SchemaReques
 				Computed:    true,
 				Description: "The list of clusters.",
 				NestedObject: schema.NestedAttributeObject{
-					Attributes: clusterDataSourceAttributes(),
+					Attributes: clusterListItemAttributes(),
 				},
 			},
 		},
@@ -95,7 +95,10 @@ func (d *clustersDataSource) Read(ctx context.Context, req datasource.ReadReques
 	for i := range list.Items {
 		var item clusterDataSourceModel
 		item.Location = data.Location
-		mapClusterResponseToDataSourceModel(ctx, &list.Items[i], &item)
+		resp.Diagnostics.Append(mapClusterResponseToDataSourceModel(ctx, &list.Items[i], &item)...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
 		items = append(items, item)
 	}
 	data.Items = items

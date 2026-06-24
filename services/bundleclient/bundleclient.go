@@ -286,7 +286,7 @@ func (c SdkBundle) NewPgSQLV2Client(ctx context.Context, location string) (*psql
 // NewInMemoryDBV2Client creates a new InMemoryDB v2 client for a specific location.
 func (c SdkBundle) NewInMemoryDBV2Client(ctx context.Context, location string) (*inmemorydbv2Service.Client, error) {
 	config := c.newBundleClientConfig(fmt.Sprintf(
-		"terraform-provider/%s_ionos-cloud-sdk-go-dbaas-in-memory-db-v2/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
+		"terraform-provider/%s_ionos-cloud-sdk-go-bundle-dbaas-inmemorydb/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		c.clientOptions.Version, inmemorydbv3sdk.SDKVersion, c.clientOptions.TerraformVersion,
 		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
 	))
