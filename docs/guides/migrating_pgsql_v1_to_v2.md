@@ -41,8 +41,8 @@ Create a query file, for example `migrate.tfquery.hcl`:
 
 ```hcl
 list "ionoscloud_pg_cluster_v2" "all" {
-  provider = ionoscloud
-
+  provider         = ionoscloud
+  include_resource = true
   # Optional: scope discovery to a single region.
   # config {
   #   filters = [
