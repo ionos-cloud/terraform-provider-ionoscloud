@@ -14,7 +14,7 @@ import (
 	inmemorydbv3 "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/inmemorydb/v3"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/identity"
-	inmemorydbv2Service "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/inmemorydbv2"
+	inmemorydbv2service "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/inmemorydbv2"
 )
 
 var (
@@ -50,7 +50,7 @@ func (r *clusterResource) List(ctx context.Context, req list.ListRequest, stream
 
 			nameFilter := identity.FilterValue(filters, "name")
 
-			locations := inmemorydbv2Service.AvailableLocations()
+			locations := inmemorydbv2service.AvailableLocations()
 			if loc := identity.FilterValue(filters, "location"); loc != "" {
 				locations = []string{loc}
 			}

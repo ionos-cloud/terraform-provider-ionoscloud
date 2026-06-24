@@ -21,8 +21,9 @@ import (
 	inmemorydbv3 "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/inmemorydb/v3"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
-	inmemorydbv2Service "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/inmemorydbv2"
+	inmemorydbv2service "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/inmemorydbv2"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 var (
@@ -208,7 +209,7 @@ func (r *clusterResource) Schema(ctx context.Context, req resource.SchemaRequest
 			},
 			"location": schema.StringAttribute{
 				Required:    true,
-				Description: "The location of the cluster. Used to route to the correct regional API endpoint. Available locations: " + inmemorydbv2Service.AvailableLocationsString() + ".",
+				Description: "The location of the cluster. Used to route to the correct regional API endpoint. Available locations: " + inmemorydbv2service.AvailableLocationsString() + ".",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
@@ -271,7 +272,7 @@ func (r *clusterResource) Schema(ctx context.Context, req resource.SchemaRequest
 				Attributes: map[string]schema.Attribute{
 					"location": schema.StringAttribute{
 						Required:    true,
-						Description: "The Object Storage location where snapshots will be stored.",
+						Description: "The Object Storage location where snapshots will be stored (e.g. eu-central-3).",
 					},
 					"retention_days": schema.Int32Attribute{
 						Required:    true,
@@ -352,9 +353,12 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	clusterResponse, _, err := client.CreateCluster(ctx, inmemorydbv3.ClusterCreate{Properties: createProps})
+	clusterResponse, apiResponse, err := client.CreateCluster(ctx, inmemorydbv3.ClusterCreate{Properties: createProps})
 	if err != nil {
-		resp.Diagnostics.AddError("failed to create InMemoryDB v2 cluster", err.Error())
+		resp.Diagnostics.AddError("failed to create InMemoryDB v2 cluster", diagutil.WrapError(err, &diagutil.ErrorContext{
+			ResourceName: plan.Name.ValueString(),
+			StatusCode:   apiResponse.SafeStatusCode(),
+		}).Error())
 		return
 	}
 
@@ -368,9 +372,13 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	cluster, _, err := client.GetCluster(ctx, clusterID)
+	cluster, apiResponseGet, err := client.GetCluster(ctx, clusterID)
 	if err != nil {
-		resp.Diagnostics.AddError("error reading InMemoryDB v2 cluster after creation", err.Error())
+		resp.Diagnostics.AddError("error reading InMemoryDB v2 cluster after creation", diagutil.WrapError(err, &diagutil.ErrorContext{
+			ResourceID:   clusterID,
+			ResourceName: plan.Name.ValueString(),
+			StatusCode:   apiResponseGet.SafeStatusCode(),
+		}).Error())
 		return
 	}
 
@@ -402,11 +410,15 @@ func (r *clusterResource) Read(ctx context.Context, req resource.ReadRequest, re
 
 	cluster, apiResponse, err := client.GetCluster(ctx, clusterID)
 	if err != nil {
-		if apiResponse != nil && apiResponse.HttpNotFound() {
+		if apiResponse.HttpNotFound() {
 			resp.State.RemoveResource(ctx)
 			return
 		}
-		resp.Diagnostics.AddError("error reading InMemoryDB v2 cluster", fmt.Sprintf("cluster ID: %s, error: %v", clusterID, err))
+		resp.Diagnostics.AddError("error reading InMemoryDB v2 cluster", diagutil.WrapError(err, &diagutil.ErrorContext{
+			ResourceID:   clusterID,
+			ResourceName: state.Name.ValueString(),
+			StatusCode:   apiResponse.SafeStatusCode(),
+		}).Error())
 		return
 	}
 
@@ -468,9 +480,13 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 		Properties: updateProps,
 	}
 
-	_, _, err = client.UpdateCluster(ctx, updateReq, clusterID)
+	_, apiResponseUpdate, err := client.UpdateCluster(ctx, updateReq, clusterID)
 	if err != nil {
-		resp.Diagnostics.AddError("error updating InMemoryDB v2 cluster", fmt.Sprintf("cluster ID: %s, error: %v", clusterID, err))
+		resp.Diagnostics.AddError("error updating InMemoryDB v2 cluster", diagutil.WrapError(err, &diagutil.ErrorContext{
+			ResourceID:   clusterID,
+			ResourceName: state.Name.ValueString(),
+			StatusCode:   apiResponseUpdate.SafeStatusCode(),
+		}).Error())
 		return
 	}
 
@@ -482,9 +498,13 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	cluster, _, err := client.GetCluster(ctx, clusterID)
+	cluster, apiResponseGetAfterUpdate, err := client.GetCluster(ctx, clusterID)
 	if err != nil {
-		resp.Diagnostics.AddError("error reading InMemoryDB v2 cluster after update", err.Error())
+		resp.Diagnostics.AddError("error reading InMemoryDB v2 cluster after update", diagutil.WrapError(err, &diagutil.ErrorContext{
+			ResourceID:   clusterID,
+			ResourceName: state.Name.ValueString(),
+			StatusCode:   apiResponseGetAfterUpdate.SafeStatusCode(),
+		}).Error())
 		return
 	}
 
@@ -520,9 +540,13 @@ func (r *clusterResource) Delete(ctx context.Context, req resource.DeleteRequest
 		return
 	}
 
-	_, err = client.DeleteCluster(ctx, clusterID)
+	apiResponseDelete, err := client.DeleteCluster(ctx, clusterID)
 	if err != nil {
-		resp.Diagnostics.AddError("error deleting InMemoryDB v2 cluster", fmt.Sprintf("cluster ID: %s, error: %v", clusterID, err))
+		resp.Diagnostics.AddError("error deleting InMemoryDB v2 cluster", diagutil.WrapError(err, &diagutil.ErrorContext{
+			ResourceID:   clusterID,
+			ResourceName: state.Name.ValueString(),
+			StatusCode:   apiResponseDelete.SafeStatusCode(),
+		}).Error())
 		return
 	}
 

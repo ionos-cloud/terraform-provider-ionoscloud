@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
-	inmemorydbv2Service "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/inmemorydbv2"
+	inmemorydbv2service "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/inmemorydbv2"
 )
 
 var _ datasource.DataSourceWithConfigure = (*snapshotsDataSource)(nil)
@@ -96,7 +96,7 @@ func (d *snapshotsDataSource) Schema(_ context.Context, _ datasource.SchemaReque
 			},
 			"location": schema.StringAttribute{
 				Required:    true,
-				Description: "The location to query. Available locations: " + inmemorydbv2Service.AvailableLocationsString() + ".",
+				Description: "The location to query. Available locations: " + inmemorydbv2service.AvailableLocationsString() + ".",
 			},
 		},
 	}

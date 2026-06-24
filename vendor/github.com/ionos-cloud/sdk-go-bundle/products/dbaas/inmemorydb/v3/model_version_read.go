@@ -26,14 +26,14 @@ type VersionRead struct {
 	// The URL of the Version.
 	Href       string                 `json:"href"`
 	Metadata   map[string]interface{} `json:"metadata"`
-	Properties Version                `json:"properties"`
+	Properties SupportedVersion       `json:"properties"`
 }
 
 // NewVersionRead instantiates a new VersionRead object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewVersionRead(id string, type_ string, href string, metadata map[string]interface{}, properties Version) *VersionRead {
+func NewVersionRead(id string, type_ string, href string, metadata map[string]interface{}, properties SupportedVersion) *VersionRead {
 	this := VersionRead{}
 
 	this.Id = id
@@ -150,9 +150,9 @@ func (o *VersionRead) SetMetadata(v map[string]interface{}) {
 }
 
 // GetProperties returns the Properties field value
-func (o *VersionRead) GetProperties() Version {
+func (o *VersionRead) GetProperties() SupportedVersion {
 	if o == nil {
-		var ret Version
+		var ret SupportedVersion
 		return ret
 	}
 
@@ -161,7 +161,7 @@ func (o *VersionRead) GetProperties() Version {
 
 // GetPropertiesOk returns a tuple with the Properties field value
 // and a boolean to check if the value has been set.
-func (o *VersionRead) GetPropertiesOk() (*Version, bool) {
+func (o *VersionRead) GetPropertiesOk() (*SupportedVersion, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -169,7 +169,7 @@ func (o *VersionRead) GetPropertiesOk() (*Version, bool) {
 }
 
 // SetProperties sets field value
-func (o *VersionRead) SetProperties(v Version) {
+func (o *VersionRead) SetProperties(v SupportedVersion) {
 	o.Properties = v
 }
 

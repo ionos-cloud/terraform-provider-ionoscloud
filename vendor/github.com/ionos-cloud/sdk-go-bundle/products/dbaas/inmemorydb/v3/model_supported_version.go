@@ -14,11 +14,11 @@ import (
 	"encoding/json"
 )
 
-// checks if the Version type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &Version{}
+// checks if the SupportedVersion type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &SupportedVersion{}
 
-// Version A supported version available for provisioning or upgrading clusters.
-type Version struct {
+// SupportedVersion A supported version available for provisioning or upgrading clusters.
+type SupportedVersion struct {
 	// The version for the cluster. Use GET /versions to retrieve the list of supported versions. To upgrade, provide a version listed in canUpgradeTo for the current version. Downgrades are not supported.
 	Version *string `json:"version,omitempty"`
 	// The support status of the version.
@@ -29,26 +29,26 @@ type Version struct {
 	CanUpgradeTo []string `json:"canUpgradeTo,omitempty"`
 }
 
-// NewVersion instantiates a new Version object
+// NewSupportedVersion instantiates a new SupportedVersion object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewVersion() *Version {
-	this := Version{}
+func NewSupportedVersion() *SupportedVersion {
+	this := SupportedVersion{}
 
 	return &this
 }
 
-// NewVersionWithDefaults instantiates a new Version object
+// NewSupportedVersionWithDefaults instantiates a new SupportedVersion object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewVersionWithDefaults() *Version {
-	this := Version{}
+func NewSupportedVersionWithDefaults() *SupportedVersion {
+	this := SupportedVersion{}
 	return &this
 }
 
 // GetVersion returns the Version field value if set, zero value otherwise.
-func (o *Version) GetVersion() string {
+func (o *SupportedVersion) GetVersion() string {
 	if o == nil || IsNil(o.Version) {
 		var ret string
 		return ret
@@ -58,7 +58,7 @@ func (o *Version) GetVersion() string {
 
 // GetVersionOk returns a tuple with the Version field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Version) GetVersionOk() (*string, bool) {
+func (o *SupportedVersion) GetVersionOk() (*string, bool) {
 	if o == nil || IsNil(o.Version) {
 		return nil, false
 	}
@@ -66,7 +66,7 @@ func (o *Version) GetVersionOk() (*string, bool) {
 }
 
 // HasVersion returns a boolean if a field has been set.
-func (o *Version) HasVersion() bool {
+func (o *SupportedVersion) HasVersion() bool {
 	if o != nil && !IsNil(o.Version) {
 		return true
 	}
@@ -75,12 +75,12 @@ func (o *Version) HasVersion() bool {
 }
 
 // SetVersion gets a reference to the given string and assigns it to the Version field.
-func (o *Version) SetVersion(v string) {
+func (o *SupportedVersion) SetVersion(v string) {
 	o.Version = &v
 }
 
 // GetStatus returns the Status field value if set, zero value otherwise.
-func (o *Version) GetStatus() string {
+func (o *SupportedVersion) GetStatus() string {
 	if o == nil || IsNil(o.Status) {
 		var ret string
 		return ret
@@ -90,7 +90,7 @@ func (o *Version) GetStatus() string {
 
 // GetStatusOk returns a tuple with the Status field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Version) GetStatusOk() (*string, bool) {
+func (o *SupportedVersion) GetStatusOk() (*string, bool) {
 	if o == nil || IsNil(o.Status) {
 		return nil, false
 	}
@@ -98,7 +98,7 @@ func (o *Version) GetStatusOk() (*string, bool) {
 }
 
 // HasStatus returns a boolean if a field has been set.
-func (o *Version) HasStatus() bool {
+func (o *SupportedVersion) HasStatus() bool {
 	if o != nil && !IsNil(o.Status) {
 		return true
 	}
@@ -107,12 +107,12 @@ func (o *Version) HasStatus() bool {
 }
 
 // SetStatus gets a reference to the given string and assigns it to the Status field.
-func (o *Version) SetStatus(v string) {
+func (o *SupportedVersion) SetStatus(v string) {
 	o.Status = &v
 }
 
 // GetComment returns the Comment field value if set, zero value otherwise.
-func (o *Version) GetComment() string {
+func (o *SupportedVersion) GetComment() string {
 	if o == nil || IsNil(o.Comment) {
 		var ret string
 		return ret
@@ -122,7 +122,7 @@ func (o *Version) GetComment() string {
 
 // GetCommentOk returns a tuple with the Comment field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Version) GetCommentOk() (*string, bool) {
+func (o *SupportedVersion) GetCommentOk() (*string, bool) {
 	if o == nil || IsNil(o.Comment) {
 		return nil, false
 	}
@@ -130,7 +130,7 @@ func (o *Version) GetCommentOk() (*string, bool) {
 }
 
 // HasComment returns a boolean if a field has been set.
-func (o *Version) HasComment() bool {
+func (o *SupportedVersion) HasComment() bool {
 	if o != nil && !IsNil(o.Comment) {
 		return true
 	}
@@ -139,12 +139,12 @@ func (o *Version) HasComment() bool {
 }
 
 // SetComment gets a reference to the given string and assigns it to the Comment field.
-func (o *Version) SetComment(v string) {
+func (o *SupportedVersion) SetComment(v string) {
 	o.Comment = &v
 }
 
 // GetCanUpgradeTo returns the CanUpgradeTo field value if set, zero value otherwise.
-func (o *Version) GetCanUpgradeTo() []string {
+func (o *SupportedVersion) GetCanUpgradeTo() []string {
 	if o == nil || IsNil(o.CanUpgradeTo) {
 		var ret []string
 		return ret
@@ -154,7 +154,7 @@ func (o *Version) GetCanUpgradeTo() []string {
 
 // GetCanUpgradeToOk returns a tuple with the CanUpgradeTo field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Version) GetCanUpgradeToOk() ([]string, bool) {
+func (o *SupportedVersion) GetCanUpgradeToOk() ([]string, bool) {
 	if o == nil || IsNil(o.CanUpgradeTo) {
 		return nil, false
 	}
@@ -162,7 +162,7 @@ func (o *Version) GetCanUpgradeToOk() ([]string, bool) {
 }
 
 // HasCanUpgradeTo returns a boolean if a field has been set.
-func (o *Version) HasCanUpgradeTo() bool {
+func (o *SupportedVersion) HasCanUpgradeTo() bool {
 	if o != nil && !IsNil(o.CanUpgradeTo) {
 		return true
 	}
@@ -171,11 +171,11 @@ func (o *Version) HasCanUpgradeTo() bool {
 }
 
 // SetCanUpgradeTo gets a reference to the given []string and assigns it to the CanUpgradeTo field.
-func (o *Version) SetCanUpgradeTo(v []string) {
+func (o *SupportedVersion) SetCanUpgradeTo(v []string) {
 	o.CanUpgradeTo = v
 }
 
-func (o Version) MarshalJSON() ([]byte, error) {
+func (o SupportedVersion) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -183,7 +183,7 @@ func (o Version) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o Version) ToMap() (map[string]interface{}, error) {
+func (o SupportedVersion) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Version) {
 		toSerialize["version"] = o.Version
@@ -200,38 +200,38 @@ func (o Version) ToMap() (map[string]interface{}, error) {
 	return toSerialize, nil
 }
 
-type NullableVersion struct {
-	value *Version
+type NullableSupportedVersion struct {
+	value *SupportedVersion
 	isSet bool
 }
 
-func (v NullableVersion) Get() *Version {
+func (v NullableSupportedVersion) Get() *SupportedVersion {
 	return v.value
 }
 
-func (v *NullableVersion) Set(val *Version) {
+func (v *NullableSupportedVersion) Set(val *SupportedVersion) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableVersion) IsSet() bool {
+func (v NullableSupportedVersion) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableVersion) Unset() {
+func (v *NullableSupportedVersion) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableVersion(val *Version) *NullableVersion {
-	return &NullableVersion{value: val, isSet: true}
+func NewNullableSupportedVersion(val *SupportedVersion) *NullableSupportedVersion {
+	return &NullableSupportedVersion{value: val, isSet: true}
 }
 
-func (v NullableVersion) MarshalJSON() ([]byte, error) {
+func (v NullableSupportedVersion) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableVersion) UnmarshalJSON(src []byte) error {
+func (v *NullableSupportedVersion) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

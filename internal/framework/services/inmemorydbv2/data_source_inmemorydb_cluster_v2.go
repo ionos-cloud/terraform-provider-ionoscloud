@@ -13,7 +13,7 @@ import (
 	inmemorydbv3 "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/inmemorydb/v3"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
-	inmemorydbv2Service "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/inmemorydbv2"
+	inmemorydbv2service "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/inmemorydbv2"
 )
 
 var (
@@ -255,7 +255,7 @@ func clusterDataSourceAttributes() map[string]schema.Attribute {
 		},
 		"location": schema.StringAttribute{
 			Required:    true,
-			Description: "The location of the cluster. Available locations: " + inmemorydbv2Service.AvailableLocationsString() + ".",
+			Description: "The location of the cluster. Available locations: " + inmemorydbv2service.AvailableLocationsString() + ".",
 		},
 		"logs_enabled": schema.BoolAttribute{
 			Computed:    true,

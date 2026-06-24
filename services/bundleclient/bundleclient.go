@@ -28,7 +28,7 @@ import (
 	crservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
 	dbaasservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/inmemorydb"
-	inmemorydbv2Service "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/inmemorydbv2"
+	inmemorydbv2service "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/inmemorydbv2"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/mariadb"
 	psqlv2service "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/pgsqlv2"
 	dnsservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dns"
@@ -284,10 +284,10 @@ func (c SdkBundle) NewPgSQLV2Client(ctx context.Context, location string) (*psql
 }
 
 // NewInMemoryDBV2Client creates a new InMemoryDB v2 client for a specific location.
-func (c SdkBundle) NewInMemoryDBV2Client(ctx context.Context, location string) (*inmemorydbv2Service.Client, error) {
+func (c SdkBundle) NewInMemoryDBV2Client(ctx context.Context, location string) (*inmemorydbv2service.Client, error) {
 	config := c.newBundleClientConfig(fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go-bundle-dbaas-inmemorydb/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-		c.clientOptions.Version, inmemorydbv3sdk.SDKVersion, c.clientOptions.TerraformVersion,
+		c.clientOptions.Version, inmemorydbv3sdk.Version, c.clientOptions.TerraformVersion,
 		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
 	))
 
@@ -304,13 +304,13 @@ func (c SdkBundle) NewInMemoryDBV2Client(ctx context.Context, location string) (
 			}
 			config.HTTPClient = &http.Client{}
 			config.HTTPClient.Transport = shared.CreateTransport(endpoint.SkipTLSVerify, endpoint.CertificateAuthData)
-			return inmemorydbv2Service.NewClientFromConfig(config), nil
+			return inmemorydbv2service.NewClientFromConfig(config), nil
 		}
 	}
 
-	endpoint := inmemorydbv2Service.LocationToURL[location]
+	endpoint := inmemorydbv2service.LocationToURL[location]
 	if endpoint == "" {
-		return nil, fmt.Errorf("can't configure endpoint for location %q, available locations: %s", location, strings.Join(inmemorydbv2Service.AvailableLocations(), ", "))
+		return nil, fmt.Errorf("can't configure endpoint for location %q, available locations: %s", location, strings.Join(inmemorydbv2service.AvailableLocations(), ", "))
 	}
 	config.Servers = shared.ServerConfigurations{
 		{
@@ -318,7 +318,7 @@ func (c SdkBundle) NewInMemoryDBV2Client(ctx context.Context, location string) (
 			Description: "endpoint from the internal locations map, location: " + location,
 		},
 	}
-	return inmemorydbv2Service.NewClientFromConfig(config), nil
+	return inmemorydbv2service.NewClientFromConfig(config), nil
 }
 
 // newCloudAPIClientConfig creates a new *ionoscloud.Configuration using the client options defined in the SdkBundle struct.

@@ -11,7 +11,7 @@ import (
 	inmemorydbv3 "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/inmemorydb/v3"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
-	inmemorydbv2Service "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/inmemorydbv2"
+	inmemorydbv2service "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/inmemorydbv2"
 )
 
 var _ datasource.DataSourceWithConfigure = (*versionsDataSource)(nil)
@@ -80,7 +80,7 @@ func (d *versionsDataSource) Schema(_ context.Context, _ datasource.SchemaReques
 			},
 			"location": schema.StringAttribute{
 				Required:    true,
-				Description: "The location to query. Available locations: " + inmemorydbv2Service.AvailableLocationsString() + ".",
+				Description: "The location to query. Available locations: " + inmemorydbv2service.AvailableLocationsString() + ".",
 			},
 		},
 	}
@@ -122,7 +122,7 @@ func (d *versionsDataSource) Read(ctx context.Context, req datasource.ReadReques
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func mapVersionToModel(ctx context.Context, props *inmemorydbv3.Version, model *versionDataSourceModel) diag.Diagnostics {
+func mapVersionToModel(ctx context.Context, props *inmemorydbv3.SupportedVersion, model *versionDataSourceModel) diag.Diagnostics {
 	var diagnostics diag.Diagnostics
 
 	model.Version = types.StringPointerValue(props.Version)

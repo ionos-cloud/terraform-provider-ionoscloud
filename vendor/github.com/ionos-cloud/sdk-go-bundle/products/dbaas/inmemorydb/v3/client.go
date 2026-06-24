@@ -52,7 +52,7 @@ const (
 	RequestStatusFailed  = "FAILED"
 	RequestStatusDone    = "DONE"
 
-	SDKVersion            = "1.0.0"
+	Version               = "1.0.0"
 	DefaultIonosServerUrl = "https://in-memory-db.de-fra.ionos.com/v2"
 	DefaultIonosBasePath  = "/v2"
 )
