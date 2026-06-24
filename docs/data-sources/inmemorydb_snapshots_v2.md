@@ -40,6 +40,7 @@ Each item in `items` contains:
 | `id` | The UUID of the snapshot. |
 | `location` | The location of the snapshot. |
 | `cluster_id` | The ID of the cluster this snapshot belongs to. |
+| `cluster_name` | The name of the cluster this snapshot belongs to. |
 | `datacenter_id` | The ID of the data center where the snapshot was created. |
 | `earliest_recovery_target_time` | The earliest time for which a snapshot is available to restore from (RFC3339). |
 | `latest_recovery_target_time` | The most recent time for which a snapshot is available to restore from (RFC3339). Empty if available up to the current time. |

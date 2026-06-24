@@ -23,6 +23,8 @@ var _ MappedNullable = &Snapshot{}
 type Snapshot struct {
 	// The ID of the cluster this snapshot belongs to.
 	ClusterId *string `json:"clusterId,omitempty"`
+	// The name of the In-Memory DB cluster this snapshot belongs to.
+	ClusterName *string `json:"clusterName,omitempty"`
 	// The ID of the data center where the snapshot was created. Snapshots are not available across data centers.
 	DatacenterId *string `json:"datacenterId,omitempty"`
 	// The earliest time for which a snapshot is available to restore from.
@@ -87,6 +89,38 @@ func (o *Snapshot) HasClusterId() bool {
 // SetClusterId gets a reference to the given string and assigns it to the ClusterId field.
 func (o *Snapshot) SetClusterId(v string) {
 	o.ClusterId = &v
+}
+
+// GetClusterName returns the ClusterName field value if set, zero value otherwise.
+func (o *Snapshot) GetClusterName() string {
+	if o == nil || IsNil(o.ClusterName) {
+		var ret string
+		return ret
+	}
+	return *o.ClusterName
+}
+
+// GetClusterNameOk returns a tuple with the ClusterName field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Snapshot) GetClusterNameOk() (*string, bool) {
+	if o == nil || IsNil(o.ClusterName) {
+		return nil, false
+	}
+	return o.ClusterName, true
+}
+
+// HasClusterName returns a boolean if a field has been set.
+func (o *Snapshot) HasClusterName() bool {
+	if o != nil && !IsNil(o.ClusterName) {
+		return true
+	}
+
+	return false
+}
+
+// SetClusterName gets a reference to the given string and assigns it to the ClusterName field.
+func (o *Snapshot) SetClusterName(v string) {
+	o.ClusterName = &v
 }
 
 // GetDatacenterId returns the DatacenterId field value if set, zero value otherwise.
@@ -336,6 +370,9 @@ func (o Snapshot) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.ClusterId) {
 		toSerialize["clusterId"] = o.ClusterId
+	}
+	if !IsNil(o.ClusterName) {
+		toSerialize["clusterName"] = o.ClusterName
 	}
 	if !IsNil(o.DatacenterId) {
 		toSerialize["datacenterId"] = o.DatacenterId

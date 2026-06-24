@@ -19,6 +19,7 @@ type snapshotDataSourceModel struct {
 	ID                         types.String  `tfsdk:"id"`
 	Location                   types.String  `tfsdk:"location"`
 	ClusterID                  types.String  `tfsdk:"cluster_id"`
+	ClusterName                types.String  `tfsdk:"cluster_name"`
 	DatacenterID               types.String  `tfsdk:"datacenter_id"`
 	EarliestRecoveryTargetTime types.String  `tfsdk:"earliest_recovery_target_time"`
 	LatestRecoveryTargetTime   types.String  `tfsdk:"latest_recovery_target_time"`
@@ -31,6 +32,7 @@ type snapshotDataSourceModel struct {
 func snapshotDataSourceAttributes() map[string]schema.Attribute {
 	return map[string]schema.Attribute{
 		"cluster_id":                    schema.StringAttribute{Computed: true, Description: "The ID of the cluster this snapshot belongs to."},
+		"cluster_name":                  schema.StringAttribute{Computed: true, Description: "The name of the cluster this snapshot belongs to."},
 		"cluster_version":               schema.StringAttribute{Computed: true, Description: "The version for the cluster."},
 		"datacenter_id":                 schema.StringAttribute{Computed: true, Description: "The ID of the data center where the snapshot was created."},
 		"earliest_recovery_target_time": schema.StringAttribute{Computed: true, Description: "The earliest time for which a snapshot is available to restore from."},
@@ -128,6 +130,7 @@ func (d *snapshotsDataSource) Read(ctx context.Context, req datasource.ReadReque
 		}
 		props := &s.Properties
 		item.ClusterID = types.StringPointerValue(props.ClusterId)
+		item.ClusterName = types.StringPointerValue(props.ClusterName)
 		item.DatacenterID = types.StringPointerValue(props.DatacenterId)
 		if props.EarliestRecoveryTargetTime != nil {
 			item.EarliestRecoveryTargetTime = types.StringValue(props.EarliestRecoveryTargetTime.Time.Format(time.RFC3339))
