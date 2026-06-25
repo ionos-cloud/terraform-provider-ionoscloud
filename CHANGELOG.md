@@ -5,9 +5,13 @@
 
 ### Testing
 - Add more test cases for `compute` data sources.
+- Add more test cases for `ionoscloud_pg_cluster` resource with `STRICTLY_SYNCHRONOUS` synchronization mode.
 
 ### Refactor
 - Refactor getImage, split into smaller functions and add unit tests
+
+### Documentation
+- Add migration guide for `ionoscloud_pg_cluster` to `ionoscloud_pg_cluster_v2` resource.
 
 ## 6.7.31
 
