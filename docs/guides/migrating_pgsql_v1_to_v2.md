@@ -83,12 +83,15 @@ Delete the corresponding `resource "ionoscloud_pg_cluster" "example" { … }` co
 A few attributes are not part of the cluster's readable state and must be added by hand to the
 generated `ionoscloud_pg_cluster_v2` blocks:
 
-| Attribute | Why it's missing | What to do |
-|-----------|------------------|------------|
-| `credentials.password` | Write-only; the API never returns it. | Set it (reuse the same value, e.g. via a variable or `random_password`). |
-| `credentials.password_version` | Provider-side marker with no v1 equivalent. | Set an initial value such as `"v1"`. |
-| `restore_from_backup` | Create-time-only; not part of steady state. | Omit it (only needed when initializing a brand-new cluster from a backup). |
-| `timeouts` | Optional; not generated. | Add only if you previously customized timeouts. |
+| Attribute                      | Why it's missing                            | What to do                                                                 |
+|--------------------------------|---------------------------------------------|----------------------------------------------------------------------------|
+| `credentials.password`         | Write-only; the API never returns it.       | Set it (reuse the same value, e.g. via a variable or `random_password`).   |
+| `credentials.password_version` | Provider-side marker with no v1 equivalent. | Set an initial value such as `"v1"`.                                       |
+| `timeouts`                     | Optional; not generated.                    | Add only if you previously customized timeouts.                            |
+
+`restore_from_backup` is create-time-only and not part of a cluster's readable state, so config
+generation never emits it and you do not need it when adopting an existing cluster. Leave it out
+(it is only relevant when initializing a brand-new cluster from a backup).
 
 ### 4. Apply
 
