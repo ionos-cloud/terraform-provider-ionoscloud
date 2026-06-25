@@ -26,20 +26,25 @@ type clusterDataSource struct {
 }
 
 type clusterDataSourceModel struct {
-	ID                types.String            `tfsdk:"id"`
-	Location          types.String            `tfsdk:"location"`
-	Name              types.String            `tfsdk:"name"`
-	Description       types.String            `tfsdk:"description"`
-	Version           types.String            `tfsdk:"version"`
-	PersistenceMode   types.String            `tfsdk:"persistence_mode"`
-	EvictionPolicy    types.String            `tfsdk:"eviction_policy"`
-	LogsEnabled       types.Bool              `tfsdk:"logs_enabled"`
-	MetricsEnabled    types.Bool              `tfsdk:"metrics_enabled"`
-	DNSName           types.String            `tfsdk:"dns_name"`
-	Instances         *instancesModel         `tfsdk:"instances"`
-	Connections       *connectionModel        `tfsdk:"connections"`
-	Snapshot          *snapshotConfigModel    `tfsdk:"snapshot"`
-	MaintenanceWindow *maintenanceWindowModel `tfsdk:"maintenance_window"`
+	ID                types.String                    `tfsdk:"id"`
+	Location          types.String                    `tfsdk:"location"`
+	Name              types.String                    `tfsdk:"name"`
+	Description       types.String                    `tfsdk:"description"`
+	Version           types.String                    `tfsdk:"version"`
+	PersistenceMode   types.String                    `tfsdk:"persistence_mode"`
+	EvictionPolicy    types.String                    `tfsdk:"eviction_policy"`
+	LogsEnabled       types.Bool                      `tfsdk:"logs_enabled"`
+	MetricsEnabled    types.Bool                      `tfsdk:"metrics_enabled"`
+	DNSName           types.String                    `tfsdk:"dns_name"`
+	Instances         *instancesModel                 `tfsdk:"instances"`
+	Connections       *connectionModel                `tfsdk:"connections"`
+	Snapshot          *snapshotConfigModel            `tfsdk:"snapshot"`
+	MaintenanceWindow *maintenanceWindowModel         `tfsdk:"maintenance_window"`
+	Credentials       *credentialsDataSourceModel     `tfsdk:"credentials"`
+}
+
+type credentialsDataSourceModel struct {
+	Username types.String `tfsdk:"username"`
 }
 
 // NewClusterDataSource creates a new data source for reading a single InMemoryDB v2 cluster.
@@ -203,6 +208,13 @@ func mapClusterResponseToDataSourceModel(ctx context.Context, cluster *inmemoryd
 	}
 	snapshotModel.SnapshotHours = listVal
 	model.Snapshot = snapshotModel
+
+	if props.Credentials != nil {
+		model.Credentials = &credentialsDataSourceModel{
+			Username: types.StringValue(props.Credentials.Username),
+		}
+	}
+
 	return diagnostics
 }
 
@@ -294,6 +306,13 @@ func clusterDataSourceAttributes() map[string]schema.Attribute {
 		"version": schema.StringAttribute{
 			Computed:    true,
 			Description: "The In-Memory DB version.",
+		},
+		"credentials": schema.SingleNestedAttribute{
+			Computed:    true,
+			Description: "Credentials for the user with access to the cluster.",
+			Attributes: map[string]schema.Attribute{
+				"username": schema.StringAttribute{Computed: true, Description: "The username for the In-Memory DB user."},
+			},
 		},
 	}
 }

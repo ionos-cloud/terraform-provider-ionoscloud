@@ -62,3 +62,4 @@ Exactly one of `id` or `name` must be provided.
 | `snapshot.snapshot_hours` | UTC hours at which snapshots are taken. |
 | `maintenance_window.time` | Maintenance window start time in UTC (HH:MM:SS). |
 | `maintenance_window.day_of_the_week` | Maintenance window day of the week. |
+| `credentials.username` | The username for the In-Memory DB user. |

@@ -93,18 +93,18 @@ resource "ionoscloud_inmemorydb_cluster_v2" "test" {
 var clusterUpdateConfig = infraConfig + fmt.Sprintf(`
 resource "ionoscloud_inmemorydb_cluster_v2" "test" {
   location         = "%[1]s"
-  name             = "tf-test-inmemorydbv2-updated"
-  description      = "Updated InMemoryDB v2 cluster"
+  name             = "tf-test-inmemorydbv2"
+  description      = "Test InMemoryDB v2 cluster"
   version          = "9.0"
   persistence_mode = "None"
-  eviction_policy  = "allkeys-lfu"
-  logs_enabled     = false
-  metrics_enabled  = false
+  eviction_policy  = "allkeys-lru"
+  logs_enabled     = true
+  metrics_enabled  = true
 
   instances = {
     count = 1
-    cores = 2
-    ram   = 8
+    cores = 1
+    ram   = 4
   }
 
   connections = {

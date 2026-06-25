@@ -272,7 +272,10 @@ func (r *clusterResource) Schema(ctx context.Context, req resource.SchemaRequest
 				Attributes: map[string]schema.Attribute{
 					"location": schema.StringAttribute{
 						Required:    true,
-						Description: "The Object Storage location where snapshots will be stored (e.g. eu-central-3).",
+						Description: "The Object Storage location where snapshots will be stored (e.g. eu-central-3). Changing this forces the re-creation of the cluster.",
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.RequiresReplace(),
+						},
 					},
 					"retention_days": schema.Int32Attribute{
 						Required:    true,
@@ -567,9 +570,11 @@ func (r *clusterResource) ImportState(ctx context.Context, req resource.ImportSt
 		if resp.Diagnostics.HasError() {
 			return
 		}
-		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("location"), id.Location)...)
-		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), id.ID)...)
-		return
+		if id != nil {
+			resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("location"), id.Location)...)
+			resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), id.ID)...)
+			return
+		}
 	}
 	parts := strings.Split(req.ID, ":")
 	if len(parts) != 2 {
@@ -640,8 +645,7 @@ func buildClusterCreateProperties(ctx context.Context, plan *clusterResourceMode
 			}
 			restore.SetRecoveryTargetDatetime(t)
 		}
-		wrapped := inmemorydbv3.RestoreClusterFromSnapshotAsClusterRestoreFromSnapshot(restore)
-		props.RestoreFromSnapshot = &wrapped
+		props.RestoreFromSnapshot = new(inmemorydbv3.RestoreClusterFromSnapshotAsClusterRestoreFromSnapshot(restore))
 	}
 
 	return props, diagnostics
@@ -702,8 +706,7 @@ func buildClusterUpdateProperties(ctx context.Context, plan *clusterResourceMode
 			return inmemorydbv3.Cluster{}, diagnostics
 		}
 		restore := inmemorydbv3.NewInPlaceRestoreClusterFromSnapshot(t)
-		wrapped := inmemorydbv3.InPlaceRestoreClusterFromSnapshotAsClusterRestoreFromSnapshot(restore)
-		props.RestoreFromSnapshot = &wrapped
+		props.RestoreFromSnapshot = new(inmemorydbv3.InPlaceRestoreClusterFromSnapshotAsClusterRestoreFromSnapshot(restore))
 	}
 
 	return props, diagnostics
