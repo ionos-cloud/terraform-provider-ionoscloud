@@ -31,8 +31,8 @@ type snapshotLocationsDataSource struct {
 }
 
 type snapshotLocationsDataSourceModel struct {
-	Location types.String                      `tfsdk:"location"`
 	Items    []snapshotLocationDataSourceModel `tfsdk:"items"`
+	Location types.String                      `tfsdk:"location"`
 }
 
 // NewSnapshotLocationsDataSource creates a data source for listing snapshot locations.
@@ -63,16 +63,16 @@ func (d *snapshotLocationsDataSource) Schema(_ context.Context, _ datasource.Sch
 	resp.Schema = schema.Schema{
 		Description: "Lists all InMemoryDB v2 snapshot locations for a given API endpoint location.",
 		Attributes: map[string]schema.Attribute{
-			"location": schema.StringAttribute{
-				Required:    true,
-				Description: "The InMemoryDB API endpoint location to query. Available locations: " + inmemorydbv2service.AvailableLocationsString() + ".",
-			},
 			"items": schema.ListNestedAttribute{
 				Computed:    true,
 				Description: "The list of snapshot locations.",
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: snapshotLocationDataSourceAttributes(),
 				},
+			},
+			"location": schema.StringAttribute{
+				Required:    true,
+				Description: "The InMemoryDB API endpoint location to query. Available locations: " + inmemorydbv2service.AvailableLocationsString() + ".",
 			},
 		},
 	}

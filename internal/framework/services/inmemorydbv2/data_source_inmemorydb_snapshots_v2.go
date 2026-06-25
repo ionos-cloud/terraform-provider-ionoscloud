@@ -16,17 +16,17 @@ import (
 var _ datasource.DataSourceWithConfigure = (*snapshotsDataSource)(nil)
 
 type snapshotDataSourceModel struct {
-	ID                         types.String  `tfsdk:"id"`
-	Location                   types.String  `tfsdk:"location"`
 	ClusterID                  types.String  `tfsdk:"cluster_id"`
 	ClusterName                types.String  `tfsdk:"cluster_name"`
+	ClusterVersion             types.String  `tfsdk:"cluster_version"`
 	DatacenterID               types.String  `tfsdk:"datacenter_id"`
 	EarliestRecoveryTargetTime types.String  `tfsdk:"earliest_recovery_target_time"`
+	ID                         types.String  `tfsdk:"id"`
 	LatestRecoveryTargetTime   types.String  `tfsdk:"latest_recovery_target_time"`
-	SnapshotLocation           types.String  `tfsdk:"snapshot_location"`
-	ClusterVersion             types.String  `tfsdk:"cluster_version"`
-	SnapshotSize               types.Float32 `tfsdk:"snapshot_size"`
+	Location                   types.String  `tfsdk:"location"`
 	RequiredSizeForRestore     types.Float32 `tfsdk:"required_size_for_restore"`
+	SnapshotLocation           types.String  `tfsdk:"snapshot_location"`
+	SnapshotSize               types.Float32 `tfsdk:"snapshot_size"`
 }
 
 func snapshotDataSourceAttributes() map[string]schema.Attribute {
@@ -50,9 +50,9 @@ type snapshotsDataSource struct {
 }
 
 type snapshotsDataSourceModel struct {
-	Location  types.String              `tfsdk:"location"`
 	ClusterID types.String              `tfsdk:"cluster_id"`
 	Items     []snapshotDataSourceModel `tfsdk:"items"`
+	Location  types.String              `tfsdk:"location"`
 }
 
 // NewSnapshotsDataSource creates a new data source for listing InMemoryDB v2 snapshots.
@@ -133,7 +133,7 @@ func (d *snapshotsDataSource) Read(ctx context.Context, req datasource.ReadReque
 		item.ClusterName = types.StringPointerValue(props.ClusterName)
 		item.DatacenterID = types.StringPointerValue(props.DatacenterId)
 		if props.EarliestRecoveryTargetTime != nil {
-			item.EarliestRecoveryTargetTime = types.StringValue(props.EarliestRecoveryTargetTime.Time.Format(time.RFC3339))
+			item.EarliestRecoveryTargetTime = types.StringValue(props.EarliestRecoveryTargetTime.Format(time.RFC3339))
 		}
 		if props.LatestRecoveryTargetTime != nil {
 			if t := props.LatestRecoveryTargetTime.Get(); t != nil {

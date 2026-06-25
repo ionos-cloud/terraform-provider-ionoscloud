@@ -19,9 +19,9 @@ type clustersDataSource struct {
 }
 
 type clustersDataSourceModel struct {
+	Items    []clusterDataSourceModel `tfsdk:"items"`
 	Location types.String             `tfsdk:"location"`
 	Name     types.String             `tfsdk:"name"`
-	Items    []clusterDataSourceModel `tfsdk:"items"`
 }
 
 // NewClustersDataSource creates a new data source for listing InMemoryDB v2 clusters.
@@ -52,6 +52,13 @@ func (d *clustersDataSource) Schema(_ context.Context, _ datasource.SchemaReques
 	resp.Schema = schema.Schema{
 		Description: "Lists all InMemoryDB v2 clusters in a given location, with optional name filter.",
 		Attributes: map[string]schema.Attribute{
+			"items": schema.ListNestedAttribute{
+				Computed:    true,
+				Description: "The list of clusters.",
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: clusterListItemAttributes(),
+				},
+			},
 			"location": schema.StringAttribute{
 				Required:    true,
 				Description: "The location to query. Available locations: " + inmemorydbv2service.AvailableLocationsString() + ".",
@@ -59,13 +66,6 @@ func (d *clustersDataSource) Schema(_ context.Context, _ datasource.SchemaReques
 			"name": schema.StringAttribute{
 				Optional:    true,
 				Description: "Filter clusters by name (partial match, case-insensitive).",
-			},
-			"items": schema.ListNestedAttribute{
-				Computed:    true,
-				Description: "The list of clusters.",
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: clusterListItemAttributes(),
-				},
 			},
 		},
 	}

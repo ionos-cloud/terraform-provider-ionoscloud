@@ -42,29 +42,28 @@ type clusterResource struct {
 }
 
 type clusterResourceModel struct {
-	ID              types.String   `tfsdk:"id"`
-	Location        types.String   `tfsdk:"location"`
-	Name            types.String   `tfsdk:"name"`
-	Description     types.String   `tfsdk:"description"`
-	Version         types.String   `tfsdk:"version"`
-	PersistenceMode types.String   `tfsdk:"persistence_mode"`
-	EvictionPolicy  types.String   `tfsdk:"eviction_policy"`
-	LogsEnabled     types.Bool     `tfsdk:"logs_enabled"`
-	MetricsEnabled  types.Bool     `tfsdk:"metrics_enabled"`
-	DNSName         types.String   `tfsdk:"dns_name"`
-	Timeouts        timeouts.Value `tfsdk:"timeouts"`
-
-	Instances           *instancesModel           `tfsdk:"instances"`
 	Connections         *connectionModel          `tfsdk:"connections"`
-	Snapshot            *snapshotConfigModel      `tfsdk:"snapshot"`
-	MaintenanceWindow   *maintenanceWindowModel   `tfsdk:"maintenance_window"`
 	Credentials         *credentialsModel         `tfsdk:"credentials"`
+	Description         types.String              `tfsdk:"description"`
+	DNSName             types.String              `tfsdk:"dns_name"`
+	EvictionPolicy      types.String              `tfsdk:"eviction_policy"`
+	ID                  types.String              `tfsdk:"id"`
+	Instances           *instancesModel           `tfsdk:"instances"`
+	Location            types.String              `tfsdk:"location"`
+	LogsEnabled         types.Bool                `tfsdk:"logs_enabled"`
+	MaintenanceWindow   *maintenanceWindowModel   `tfsdk:"maintenance_window"`
+	MetricsEnabled      types.Bool                `tfsdk:"metrics_enabled"`
+	Name                types.String              `tfsdk:"name"`
+	PersistenceMode     types.String              `tfsdk:"persistence_mode"`
 	RestoreFromSnapshot *restoreFromSnapshotModel `tfsdk:"restore_from_snapshot"`
+	Snapshot            *snapshotConfigModel      `tfsdk:"snapshot"`
+	Timeouts            timeouts.Value            `tfsdk:"timeouts"`
+	Version             types.String              `tfsdk:"version"`
 }
 
 type instancesModel struct {
-	Count types.Int32 `tfsdk:"count"`
 	Cores types.Int32 `tfsdk:"cores"`
+	Count types.Int32 `tfsdk:"count"`
 	RAM   types.Int32 `tfsdk:"ram"`
 }
 
@@ -81,13 +80,13 @@ type snapshotConfigModel struct {
 }
 
 type maintenanceWindowModel struct {
-	Time         types.String `tfsdk:"time"`
 	DayOfTheWeek types.String `tfsdk:"day_of_the_week"`
+	Time         types.String `tfsdk:"time"`
 }
 
 type credentialsModel struct {
-	Username types.String   `tfsdk:"username"`
 	Password *passwordModel `tfsdk:"password"`
+	Username types.String   `tfsdk:"username"`
 }
 
 type passwordModel struct {
@@ -96,8 +95,8 @@ type passwordModel struct {
 }
 
 type restoreFromSnapshotModel struct {
-	SourceSnapshotID       types.String `tfsdk:"source_snapshot_id"`
 	RecoveryTargetDatetime types.String `tfsdk:"recovery_target_datetime"`
+	SourceSnapshotID       types.String `tfsdk:"source_snapshot_id"`
 }
 
 // NewClusterResource creates a new resource for the InMemoryDB v2 cluster.
@@ -146,10 +145,6 @@ func (r *clusterResource) Schema(ctx context.Context, req resource.SchemaRequest
 				Required:    true,
 				Description: "Credentials for the user with access to the cluster.",
 				Attributes: map[string]schema.Attribute{
-					"username": schema.StringAttribute{
-						Required:    true,
-						Description: "The username for the In-Memory DB user.",
-					},
 					"password": schema.SingleNestedAttribute{
 						Required:    true,
 						Description: "A pre-hashed password for the user.",
@@ -164,6 +159,10 @@ func (r *clusterResource) Schema(ctx context.Context, req resource.SchemaRequest
 								Description: "The hex-encoded hash of the password.",
 							},
 						},
+					},
+					"username": schema.StringAttribute{
+						Required:    true,
+						Description: "The username for the In-Memory DB user.",
 					},
 				},
 			},
@@ -256,13 +255,13 @@ func (r *clusterResource) Schema(ctx context.Context, req resource.SchemaRequest
 				Optional:    true,
 				Description: "Restores the cluster data from a snapshot.",
 				Attributes: map[string]schema.Attribute{
-					"source_snapshot_id": schema.StringAttribute{
-						Optional:    true,
-						Description: "The UUID of the snapshot to restore from.",
-					},
 					"recovery_target_datetime": schema.StringAttribute{
 						Optional:    true,
 						Description: "ISO 8601 timestamp to restore from the most recent snapshot at or before that time.",
+					},
+					"source_snapshot_id": schema.StringAttribute{
+						Optional:    true,
+						Description: "The UUID of the snapshot to restore from.",
 					},
 				},
 			},

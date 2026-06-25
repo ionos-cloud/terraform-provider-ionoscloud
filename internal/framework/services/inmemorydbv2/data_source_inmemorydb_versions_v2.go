@@ -17,11 +17,11 @@ import (
 var _ datasource.DataSourceWithConfigure = (*versionsDataSource)(nil)
 
 type versionDataSourceModel struct {
-	ID           types.String `tfsdk:"id"`
-	Version      types.String `tfsdk:"version"`
-	Status       types.String `tfsdk:"status"`
-	Comment      types.String `tfsdk:"comment"`
 	CanUpgradeTo types.List   `tfsdk:"can_upgrade_to"`
+	Comment      types.String `tfsdk:"comment"`
+	ID           types.String `tfsdk:"id"`
+	Status       types.String `tfsdk:"status"`
+	Version      types.String `tfsdk:"version"`
 }
 
 func versionDataSourceAttributes() map[string]schema.Attribute {
@@ -39,8 +39,8 @@ type versionsDataSource struct {
 }
 
 type versionsDataSourceModel struct {
-	Location types.String             `tfsdk:"location"`
 	Items    []versionDataSourceModel `tfsdk:"items"`
+	Location types.String             `tfsdk:"location"`
 }
 
 // NewVersionsDataSource creates a new data source for listing InMemoryDB v2 versions.

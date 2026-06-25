@@ -26,21 +26,21 @@ type clusterDataSource struct {
 }
 
 type clusterDataSourceModel struct {
-	ID                types.String                    `tfsdk:"id"`
-	Location          types.String                    `tfsdk:"location"`
-	Name              types.String                    `tfsdk:"name"`
-	Description       types.String                    `tfsdk:"description"`
-	Version           types.String                    `tfsdk:"version"`
-	PersistenceMode   types.String                    `tfsdk:"persistence_mode"`
-	EvictionPolicy    types.String                    `tfsdk:"eviction_policy"`
-	LogsEnabled       types.Bool                      `tfsdk:"logs_enabled"`
-	MetricsEnabled    types.Bool                      `tfsdk:"metrics_enabled"`
-	DNSName           types.String                    `tfsdk:"dns_name"`
-	Instances         *instancesModel                 `tfsdk:"instances"`
-	Connections       *connectionModel                `tfsdk:"connections"`
-	Snapshot          *snapshotConfigModel            `tfsdk:"snapshot"`
-	MaintenanceWindow *maintenanceWindowModel         `tfsdk:"maintenance_window"`
-	Credentials       *credentialsDataSourceModel     `tfsdk:"credentials"`
+	Connections       *connectionModel            `tfsdk:"connections"`
+	Credentials       *credentialsDataSourceModel `tfsdk:"credentials"`
+	Description       types.String                `tfsdk:"description"`
+	DNSName           types.String                `tfsdk:"dns_name"`
+	EvictionPolicy    types.String                `tfsdk:"eviction_policy"`
+	ID                types.String                `tfsdk:"id"`
+	Instances         *instancesModel             `tfsdk:"instances"`
+	Location          types.String                `tfsdk:"location"`
+	LogsEnabled       types.Bool                  `tfsdk:"logs_enabled"`
+	MaintenanceWindow *maintenanceWindowModel     `tfsdk:"maintenance_window"`
+	MetricsEnabled    types.Bool                  `tfsdk:"metrics_enabled"`
+	Name              types.String                `tfsdk:"name"`
+	PersistenceMode   types.String                `tfsdk:"persistence_mode"`
+	Snapshot          *snapshotConfigModel        `tfsdk:"snapshot"`
+	Version           types.String                `tfsdk:"version"`
 }
 
 type credentialsDataSourceModel struct {
@@ -239,6 +239,13 @@ func clusterDataSourceAttributes() map[string]schema.Attribute {
 				"primary_instance_address": schema.StringAttribute{Computed: true, Description: "The IP address and subnet mask in CIDR notation."},
 			},
 		},
+		"credentials": schema.SingleNestedAttribute{
+			Computed:    true,
+			Description: "Credentials for the user with access to the cluster.",
+			Attributes: map[string]schema.Attribute{
+				"username": schema.StringAttribute{Computed: true, Description: "The username for the In-Memory DB user."},
+			},
+		},
 		"description": schema.StringAttribute{
 			Computed:    true,
 			Description: "Human-readable description for the cluster.",
@@ -306,13 +313,6 @@ func clusterDataSourceAttributes() map[string]schema.Attribute {
 		"version": schema.StringAttribute{
 			Computed:    true,
 			Description: "The In-Memory DB version.",
-		},
-		"credentials": schema.SingleNestedAttribute{
-			Computed:    true,
-			Description: "Credentials for the user with access to the cluster.",
-			Attributes: map[string]schema.Attribute{
-				"username": schema.StringAttribute{Computed: true, Description: "The username for the In-Memory DB user."},
-			},
 		},
 	}
 }
