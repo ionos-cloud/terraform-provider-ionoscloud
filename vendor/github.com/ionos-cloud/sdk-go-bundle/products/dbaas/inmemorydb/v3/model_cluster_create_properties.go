@@ -27,7 +27,7 @@ type ClusterCreateProperties struct {
 	Version             string                      `json:"version"`
 	Instances           InstanceConfiguration       `json:"instances"`
 	Connection          ClusterConnection           `json:"connection"`
-	PersistenceMode     PersistenceMode             `json:"persistenceMode"`
+	PersistenceMode     *PersistenceMode            `json:"persistenceMode,omitempty"`
 	EvictionPolicy      EvictionPolicy              `json:"evictionPolicy"`
 	Snapshot            SnapshotConfiguration       `json:"snapshot"`
 	MaintenanceWindow   MaintenanceWindow           `json:"maintenanceWindow"`
@@ -43,14 +43,15 @@ type ClusterCreateProperties struct {
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewClusterCreateProperties(name string, version string, instances InstanceConfiguration, connection ClusterConnection, persistenceMode PersistenceMode, evictionPolicy EvictionPolicy, snapshot SnapshotConfiguration, maintenanceWindow MaintenanceWindow, credentials ClusterCredentials) *ClusterCreateProperties {
+func NewClusterCreateProperties(name string, version string, instances InstanceConfiguration, connection ClusterConnection, evictionPolicy EvictionPolicy, snapshot SnapshotConfiguration, maintenanceWindow MaintenanceWindow, credentials ClusterCredentials) *ClusterCreateProperties {
 	this := ClusterCreateProperties{}
 
 	this.Name = name
 	this.Version = version
 	this.Instances = instances
 	this.Connection = connection
-	this.PersistenceMode = persistenceMode
+	var persistenceMode PersistenceMode = PERSISTENCEMODE_NONE
+	this.PersistenceMode = &persistenceMode
 	this.EvictionPolicy = evictionPolicy
 	this.Snapshot = snapshot
 	this.MaintenanceWindow = maintenanceWindow
@@ -69,7 +70,7 @@ func NewClusterCreateProperties(name string, version string, instances InstanceC
 func NewClusterCreatePropertiesWithDefaults() *ClusterCreateProperties {
 	this := ClusterCreateProperties{}
 	var persistenceMode PersistenceMode = PERSISTENCEMODE_NONE
-	this.PersistenceMode = persistenceMode
+	this.PersistenceMode = &persistenceMode
 	var evictionPolicy EvictionPolicy = EVICTIONPOLICY_ALLKEYS_LRU
 	this.EvictionPolicy = evictionPolicy
 	var logsEnabled bool = false
@@ -207,28 +208,36 @@ func (o *ClusterCreateProperties) SetConnection(v ClusterConnection) {
 	o.Connection = v
 }
 
-// GetPersistenceMode returns the PersistenceMode field value
+// GetPersistenceMode returns the PersistenceMode field value if set, zero value otherwise.
 func (o *ClusterCreateProperties) GetPersistenceMode() PersistenceMode {
-	if o == nil {
+	if o == nil || IsNil(o.PersistenceMode) {
 		var ret PersistenceMode
 		return ret
 	}
-
-	return o.PersistenceMode
+	return *o.PersistenceMode
 }
 
-// GetPersistenceModeOk returns a tuple with the PersistenceMode field value
+// GetPersistenceModeOk returns a tuple with the PersistenceMode field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *ClusterCreateProperties) GetPersistenceModeOk() (*PersistenceMode, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.PersistenceMode) {
 		return nil, false
 	}
-	return &o.PersistenceMode, true
+	return o.PersistenceMode, true
 }
 
-// SetPersistenceMode sets field value
+// HasPersistenceMode returns a boolean if a field has been set.
+func (o *ClusterCreateProperties) HasPersistenceMode() bool {
+	if o != nil && !IsNil(o.PersistenceMode) {
+		return true
+	}
+
+	return false
+}
+
+// SetPersistenceMode gets a reference to the given PersistenceMode and assigns it to the PersistenceMode field.
 func (o *ClusterCreateProperties) SetPersistenceMode(v PersistenceMode) {
-	o.PersistenceMode = v
+	o.PersistenceMode = &v
 }
 
 // GetEvictionPolicy returns the EvictionPolicy field value
@@ -440,7 +449,9 @@ func (o ClusterCreateProperties) ToMap() (map[string]interface{}, error) {
 	toSerialize["version"] = o.Version
 	toSerialize["instances"] = o.Instances
 	toSerialize["connection"] = o.Connection
-	toSerialize["persistenceMode"] = o.PersistenceMode
+	if !IsNil(o.PersistenceMode) {
+		toSerialize["persistenceMode"] = o.PersistenceMode
+	}
 	toSerialize["evictionPolicy"] = o.EvictionPolicy
 	toSerialize["snapshot"] = o.Snapshot
 	toSerialize["maintenanceWindow"] = o.MaintenanceWindow

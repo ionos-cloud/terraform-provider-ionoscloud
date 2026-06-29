@@ -248,8 +248,12 @@ func (r *clusterResource) Schema(ctx context.Context, req resource.SchemaRequest
 				Description: "The name of the In-Memory DB cluster.",
 			},
 			"persistence_mode": schema.StringAttribute{
-				Required:    true,
+				Optional:    true,
+				Computed:    true,
 				Description: "Specifies how and whether data is persisted to disk.",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"restore_from_snapshot": schema.SingleNestedAttribute{
 				Optional:    true,
@@ -597,10 +601,9 @@ func buildClusterCreateProperties(ctx context.Context, plan *clusterResourceMode
 	}
 
 	props := inmemorydbv3.ClusterCreateProperties{
-		Name:            plan.Name.ValueString(),
-		Version:         plan.Version.ValueString(),
-		PersistenceMode: inmemorydbv3.PersistenceMode(plan.PersistenceMode.ValueString()),
-		EvictionPolicy:  inmemorydbv3.EvictionPolicy(plan.EvictionPolicy.ValueString()),
+		Name:           plan.Name.ValueString(),
+		Version:        plan.Version.ValueString(),
+		EvictionPolicy: inmemorydbv3.EvictionPolicy(plan.EvictionPolicy.ValueString()),
 		Instances: inmemorydbv3.InstanceConfiguration{
 			Count: plan.Instances.Count.ValueInt32(),
 			Cores: plan.Instances.Cores.ValueInt32(),
@@ -627,6 +630,9 @@ func buildClusterCreateProperties(ctx context.Context, plan *clusterResourceMode
 
 	props.Description = plan.Description.ValueStringPointer()
 
+	if !plan.PersistenceMode.IsNull() && !plan.PersistenceMode.IsUnknown() {
+		props.PersistenceMode = new(inmemorydbv3.PersistenceMode(plan.PersistenceMode.ValueString()))
+	}
 	if !plan.LogsEnabled.IsUnknown() {
 		props.LogsEnabled = plan.LogsEnabled.ValueBoolPointer()
 	}
@@ -660,10 +666,9 @@ func buildClusterUpdateProperties(ctx context.Context, plan *clusterResourceMode
 	}
 
 	props := inmemorydbv3.Cluster{
-		Name:            plan.Name.ValueString(),
-		Version:         plan.Version.ValueString(),
-		PersistenceMode: inmemorydbv3.PersistenceMode(plan.PersistenceMode.ValueString()),
-		EvictionPolicy:  inmemorydbv3.EvictionPolicy(plan.EvictionPolicy.ValueString()),
+		Name:           plan.Name.ValueString(),
+		Version:        plan.Version.ValueString(),
+		EvictionPolicy: inmemorydbv3.EvictionPolicy(plan.EvictionPolicy.ValueString()),
 		Instances: inmemorydbv3.InstanceConfiguration{
 			Count: plan.Instances.Count.ValueInt32(),
 			Cores: plan.Instances.Cores.ValueInt32(),
@@ -683,6 +688,9 @@ func buildClusterUpdateProperties(ctx context.Context, plan *clusterResourceMode
 
 	props.Description = plan.Description.ValueStringPointer()
 
+	if !plan.PersistenceMode.IsNull() && !plan.PersistenceMode.IsUnknown() {
+		props.PersistenceMode = new(inmemorydbv3.PersistenceMode(plan.PersistenceMode.ValueString()))
+	}
 	if !plan.LogsEnabled.IsUnknown() {
 		props.LogsEnabled = plan.LogsEnabled.ValueBoolPointer()
 	}
@@ -742,7 +750,7 @@ func mapClusterResponseToModel(ctx context.Context, cluster *inmemorydbv3.Cluste
 	model.Name = types.StringValue(props.Name)
 	model.Description = types.StringPointerValue(props.Description)
 	model.Version = types.StringValue(props.Version)
-	model.PersistenceMode = types.StringValue(string(props.PersistenceMode))
+	model.PersistenceMode = types.StringValue(string(props.GetPersistenceMode()))
 	model.EvictionPolicy = types.StringValue(string(props.EvictionPolicy))
 	model.LogsEnabled = types.BoolPointerValue(props.LogsEnabled)
 	model.MetricsEnabled = types.BoolPointerValue(props.MetricsEnabled)

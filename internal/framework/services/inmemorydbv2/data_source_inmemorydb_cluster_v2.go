@@ -171,7 +171,7 @@ func mapClusterResponseToDataSourceModel(ctx context.Context, cluster *inmemoryd
 	model.Name = types.StringValue(props.Name)
 	model.Description = types.StringPointerValue(props.Description)
 	model.Version = types.StringValue(props.Version)
-	model.PersistenceMode = types.StringValue(string(props.PersistenceMode))
+	model.PersistenceMode = types.StringValue(string(props.GetPersistenceMode()))
 	model.EvictionPolicy = types.StringValue(string(props.EvictionPolicy))
 	model.LogsEnabled = types.BoolPointerValue(props.LogsEnabled)
 	model.MetricsEnabled = types.BoolPointerValue(props.MetricsEnabled)

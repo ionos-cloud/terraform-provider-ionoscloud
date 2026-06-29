@@ -8,10 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
-	"github.com/hashicorp/terraform-plugin-testing/querycheck"
-	"github.com/hashicorp/terraform-plugin-testing/querycheck/queryfilter"
 	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
-
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/acctest"
 )
 
@@ -151,8 +148,8 @@ func TestAccInMemoryDBV2Cluster(t *testing.T) {
 			{
 				Query: true,
 				Config: `list "ionoscloud_inmemorydb_cluster_v2" "test" {
-  provider = ionoscloud
-}`,
+			 provider = ionoscloud
+			}`,
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectIdentity(clusterResourceAddr, map[string]knownvalue.Check{
 						"id":       knownvalue.NotNull(),
@@ -164,14 +161,14 @@ func TestAccInMemoryDBV2Cluster(t *testing.T) {
 			{
 				Query: true,
 				Config: `list "ionoscloud_inmemorydb_cluster_v2" "test" {
-  provider = ionoscloud
-  config {
-    filters = [
-      { field_name = "name",     field_value = "tf-test-inmemorydbv2" },
-      { field_name = "location", field_value = "` + testLocation + `" },
-    ]
-  }
-}`,
+			 provider = ionoscloud
+			 config {
+			   filters = [
+			     { field_name = "name",     field_value = "tf-test-inmemorydbv2" },
+			     { field_name = "location", field_value = "` + testLocation + `" },
+			   ]
+			 }
+			}`,
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLength(clusterResourceAddr, 1),
 				},
@@ -180,14 +177,14 @@ func TestAccInMemoryDBV2Cluster(t *testing.T) {
 			{
 				Query: true,
 				Config: `list "ionoscloud_inmemorydb_cluster_v2" "test" {
-  provider = ionoscloud
-  config {
-    filters = [
-      { field_name = "name",     field_value = "tf-test-inmemorydbv2" },
-      { field_name = "location", field_value = "` + testLocationOther + `" },
-    ]
-  }
-}`,
+			 provider = ionoscloud
+			 config {
+			   filters = [
+			     { field_name = "name",     field_value = "tf-test-inmemorydbv2" },
+			     { field_name = "location", field_value = "` + testLocationOther + `" },
+			   ]
+			 }
+			}`,
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLength(clusterResourceAddr, 0),
 				},
@@ -196,15 +193,15 @@ func TestAccInMemoryDBV2Cluster(t *testing.T) {
 			{
 				Query: true,
 				Config: `list "ionoscloud_inmemorydb_cluster_v2" "test" {
-  provider         = ionoscloud
-  include_resource = true
-  config {
-    filters = [
-      { field_name = "name",     field_value = "tf-test-inmemorydbv2" },
-      { field_name = "location", field_value = "` + testLocation + `" },
-    ]
-  }
-}`,
+			 provider         = ionoscloud
+			 include_resource = true
+			 config {
+			   filters = [
+			     { field_name = "name",     field_value = "tf-test-inmemorydbv2" },
+			     { field_name = "location", field_value = "` + testLocation + `" },
+			   ]
+			 }
+			}`,
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectResourceKnownValues(clusterResourceAddr,
 						queryfilter.ByDisplayName(knownvalue.StringExact("tf-test-inmemorydbv2")),
