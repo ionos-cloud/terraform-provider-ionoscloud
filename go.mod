@@ -34,7 +34,7 @@ require (
 	github.com/ionos-cloud/sdk-go-bundle/products/userobjectstorage/v2 v2.0.5
 	github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2 v2.0.1
 	github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.2
-	github.com/ionos-cloud/sdk-go-bundle/shared v0.1.11-0.20260624104436-ba442401ba58
+	github.com/ionos-cloud/sdk-go-bundle/shared v0.1.11
 	github.com/ionos-cloud/sdk-go/v6 v6.3.8
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/stretchr/testify v1.10.0
@@ -106,6 +106,3 @@ require (
 	google.golang.org/grpc v1.79.3 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 )
-
-replace github.com/ionos-cloud/sdk-go-bundle/products/dbaas/inmemorydb/v3 => /home/adeatcu/work/claude-workspace/sdks/generated_from_swagger
-

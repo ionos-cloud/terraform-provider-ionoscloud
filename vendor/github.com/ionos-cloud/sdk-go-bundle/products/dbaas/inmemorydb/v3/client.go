@@ -52,7 +52,7 @@ const (
 	RequestStatusFailed  = "FAILED"
 	RequestStatusDone    = "DONE"
 
-	Version               = "1.0.0"
+	Version               = "products/dbaas/inmemorydb/v3.0.0"
 	DefaultIonosServerUrl = "https://in-memory-db.de-fra.ionos.com/v2"
 	DefaultIonosBasePath  = "/v2"
 )
@@ -117,7 +117,7 @@ func NewAPIClient(cfg *shared.Configuration) *APIClient {
 	}
 
 	if cfgCopy.UserAgent == "" {
-		cfgCopy.UserAgent = "sdk-go-bundle/1.0.0"
+		cfgCopy.UserAgent = "sdk-go-bundle/products/dbaas/inmemorydb/v3.0.0"
 	}
 
 	// Initialize default values in the copied configuration
@@ -164,7 +164,9 @@ func NewAPIClient(cfg *shared.Configuration) *APIClient {
 				Description: "France, Paris",
 			},
 		}
+		shared.LogDebug("[DEBUG] inmemorydb: using default endpoint: %s", cfgCopy.Servers[0].URL)
 	} else {
+		shared.LogDebug("[DEBUG] inmemorydb: server config provided with %d endpoint(s)", len(cfgCopy.Servers))
 		// If the user has provided a custom server configuration, we need to ensure that the basepath is set
 		for i := range cfgCopy.Servers {
 			if cfgCopy.Servers[i].URL != "" && !strings.HasSuffix(cfgCopy.Servers[i].URL, DefaultIonosBasePath) {
@@ -179,6 +181,11 @@ func NewAPIClient(cfg *shared.Configuration) *APIClient {
 		httpTransport := &http.Transport{}
 		AddPinnedCert(httpTransport, pkFingerprint)
 		cfgCopy.HTTPClient.Transport = httpTransport
+	}
+
+	// Log final resolved endpoints
+	for i, srv := range cfgCopy.Servers {
+		shared.LogDebug("[DEBUG] inmemorydb: final endpoint[%d]: url=%s description=%q", i, srv.URL, srv.Description)
 	}
 
 	// Create and initialize the API client
@@ -477,6 +484,7 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, time.Duratio
 		resp, err = c.cfg.HTTPClient.Do(clonedRequest)
 		httpRequestTime = time.Since(httpRequestStartTime)
 		if err != nil {
+			shared.LogDebug("[DEBUG] inmemorydb: request failed for %s %s: %v", clonedRequest.Method, clonedRequest.URL.Host, err)
 			return resp, httpRequestTime, err
 		}
 
@@ -496,8 +504,10 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, time.Duratio
 			http.StatusGatewayTimeout,
 			http.StatusBadGateway:
 			if request.Method == http.MethodPost {
+				shared.LogDebug("[DEBUG] inmemorydb: received %d for POST %s, not retrying (non-idempotent)", resp.StatusCode, request.URL.String())
 				return resp, httpRequestTime, err
 			}
+			shared.LogDebug("[DEBUG] inmemorydb: received %d for %s %s, will retry (attempt %d/%d)", resp.StatusCode, request.Method, request.URL.String(), retryCount, c.GetConfig().MaxRetries)
 			backoffTime = c.GetConfig().WaitTime
 
 		case http.StatusTooManyRequests:
@@ -507,8 +517,10 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, time.Duratio
 					return resp, httpRequestTime, err
 				}
 				backoffTime = waitTime
+				shared.LogDebug("[DEBUG] inmemorydb: rate limited (429) for %s %s, retry-after=%ss (attempt %d/%d)", request.Method, request.URL.String(), retryAfterSeconds, retryCount, c.GetConfig().MaxRetries)
 			} else {
 				backoffTime = c.GetConfig().WaitTime
+				shared.LogDebug("[DEBUG] inmemorydb: rate limited (429) for %s %s, using default backoff (attempt %d/%d)", request.Method, request.URL.String(), retryCount, c.GetConfig().MaxRetries)
 			}
 		default:
 			return resp, httpRequestTime, err
@@ -516,9 +528,7 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, time.Duratio
 		}
 
 		if retryCount >= c.GetConfig().MaxRetries {
-			if shared.SdkLogLevel.Satisfies(shared.Debug) {
-				shared.SdkLogger.Printf(" Number of maximum retries exceeded (%d retries)\n", c.cfg.MaxRetries)
-			}
+			shared.LogDebug("[DEBUG] inmemorydb: retry exhausted after %d attempts for %s %s, last status=%d", retryCount, request.Method, request.URL.String(), resp.StatusCode)
 			break
 		} else {
 			c.backOff(request.Context(), backoffTime)

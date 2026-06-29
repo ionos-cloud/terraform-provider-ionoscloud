@@ -1,9 +1,6 @@
 # Go API client for inmemorydb
 
-IONOS CLOUD Database as a Service (DBaaS) In-Memory DB v2 lets you provision and
-manage in-memory clusters through a REST API.
-For product information, see [IONOS CLOUD In-Memory DB Guide](https://docs.ionos.com/cloud/databases/in-memory-db).
-
+API description for the IONOS In-Memory DB
 
 ## Overview
 The IONOS Cloud SDK for GO provides you with access to the IONOS Cloud API. The client library supports both simple and complex requests.
@@ -50,17 +47,17 @@ Examples for creating resources using the Go SDK can be found [here](examples/)
 
 All available server URLs are:
 
-- *https://in-memory-db.de-fra.ionos.com/v2* - Germany, Frankfurt
-- *https://in-memory-db.de-txl.ionos.com/v2* - Germany, Berlin
-- *https://in-memory-db.es-vit.ionos.com/v2* - Spain, Logroño
-- *https://in-memory-db.gb-bhx.ionos.com/v2* - United Kingdom, Worcester
-- *https://in-memory-db.gb-lhr.ionos.com/v2* - United Kingdom, London
-- *https://in-memory-db.us-ewr.ionos.com/v2* - United States, Newark
-- *https://in-memory-db.us-las.ionos.com/v2* - United States, Las Vegas
-- *https://in-memory-db.us-mci.ionos.com/v2* - United States, Lenexa
-- *https://in-memory-db.fr-par.ionos.com/v2* - France, Paris
+- *https://in-memory-db.de-fra.ionos.com* - Production de-fra
+- *https://in-memory-db.de-txl.ionos.com* - Production de-txl
+- *https://in-memory-db.es-vit.ionos.com* - Production es-vit
+- *https://in-memory-db.gb-bhx.ionos.com* - Production gb-bhx
+- *https://in-memory-db.gb-lhr.ionos.com* - Production gb-lhr
+- *https://in-memory-db.us-ewr.ionos.com* - Production us-ewr
+- *https://in-memory-db.us-las.ionos.com* - Production us-las
+- *https://in-memory-db.us-mci.ionos.com* - Production us-mci
+- *https://in-memory-db.fr-par.ionos.com* - Production fr-par
 
-By default, *https://in-memory-db.de-fra.ionos.com/v2* is used, however this can be overriden at authentication, either
+By default, *https://in-memory-db.de-fra.ionos.com* is used, however this can be overriden at authentication, either
 by setting the `IONOS_API_URL` environment variable or by specifying the `hostUrl` parameter when
 initializing the sdk client.
 
@@ -213,73 +210,70 @@ func main() {
 
 ## Documentation for API Endpoints
 
-All URIs are relative to *https://in-memory-db.de-fra.ionos.com/v2*
+All URIs are relative to *https://in-memory-db.de-fra.ionos.com*
 <details >
 <summary title="Click to toggle">API Endpoints table</summary>
 
 
 Class | Method | HTTP request | Description
 ------------- | ------------- | ------------- | -------------
-ClustersApi | [**ClustersDelete**](docs/api/ClustersApi.md#clustersdelete) | **Delete** /clusters/{clusterId} | Delete Cluster
-ClustersApi | [**ClustersFindById**](docs/api/ClustersApi.md#clustersfindbyid) | **Get** /clusters/{clusterId} | Retrieve Cluster
-ClustersApi | [**ClustersGet**](docs/api/ClustersApi.md#clustersget) | **Get** /clusters | Retrieve all Clusters
-ClustersApi | [**ClustersPost**](docs/api/ClustersApi.md#clusterspost) | **Post** /clusters | Create Cluster
-ClustersApi | [**ClustersPut**](docs/api/ClustersApi.md#clustersput) | **Put** /clusters/{clusterId} | Ensure Cluster
-SnapshotLocationsApi | [**SnapshotlocationsFindById**](docs/api/SnapshotLocationsApi.md#snapshotlocationsfindbyid) | **Get** /snapshot-locations/{snapshotLocationId} | Retrieve SnapshotLocation
-SnapshotLocationsApi | [**SnapshotlocationsGet**](docs/api/SnapshotLocationsApi.md#snapshotlocationsget) | **Get** /snapshot-locations | Retrieve all SnapshotLocations
-SnapshotsApi | [**SnapshotsFindById**](docs/api/SnapshotsApi.md#snapshotsfindbyid) | **Get** /snapshots/{snapshotId} | Retrieve Snapshot
-SnapshotsApi | [**SnapshotsGet**](docs/api/SnapshotsApi.md#snapshotsget) | **Get** /snapshots | Retrieve all Snapshots
-VersionsApi | [**VersionsFindById**](docs/api/VersionsApi.md#versionsfindbyid) | **Get** /versions/{versionId} | Retrieve Version
-VersionsApi | [**VersionsGet**](docs/api/VersionsApi.md#versionsget) | **Get** /versions | Retrieve all Versions
+ReplicaSetApi | [**ReplicasetsDelete**](docs/api/ReplicaSetApi.md#replicasetsdelete) | **Delete** /replicasets/{replicasetId} | Delete ReplicaSet
+ReplicaSetApi | [**ReplicasetsFindById**](docs/api/ReplicaSetApi.md#replicasetsfindbyid) | **Get** /replicasets/{replicasetId} | Retrieve ReplicaSet
+ReplicaSetApi | [**ReplicasetsGet**](docs/api/ReplicaSetApi.md#replicasetsget) | **Get** /replicasets | Retrieve all ReplicaSet
+ReplicaSetApi | [**ReplicasetsPost**](docs/api/ReplicaSetApi.md#replicasetspost) | **Post** /replicasets | Create ReplicaSet
+ReplicaSetApi | [**ReplicasetsPut**](docs/api/ReplicaSetApi.md#replicasetsput) | **Put** /replicasets/{replicasetId} | Ensure ReplicaSet
+RestoreApi | [**SnapshotsRestoresFindById**](docs/api/RestoreApi.md#snapshotsrestoresfindbyid) | **Get** /snapshots/{snapshotId}/restores/{restoreId} | Retrieve Restore
+RestoreApi | [**SnapshotsRestoresGet**](docs/api/RestoreApi.md#snapshotsrestoresget) | **Get** /snapshots/{snapshotId}/restores | Retrieve all Restore
+RestoreApi | [**SnapshotsRestoresPost**](docs/api/RestoreApi.md#snapshotsrestorespost) | **Post** /snapshots/{snapshotId}/restores | Create Restore
+SnapshotApi | [**SnapshotsFindById**](docs/api/SnapshotApi.md#snapshotsfindbyid) | **Get** /snapshots/{snapshotId} | Retrieve Snapshot
+SnapshotApi | [**SnapshotsGet**](docs/api/SnapshotApi.md#snapshotsget) | **Get** /snapshots | Retrieve all Snapshot
 
 </details>
 
 ## Documentation For Models
 
-All URIs are relative to *https://in-memory-db.de-fra.ionos.com/v2*
+All URIs are relative to *https://in-memory-db.de-fra.ionos.com*
 <details >
 <summary title="Click to toggle">API models list</summary>
 
- - [Cluster](docs/models/Cluster)
- - [ClusterConnection](docs/models/ClusterConnection)
- - [ClusterCreate](docs/models/ClusterCreate)
- - [ClusterCreateProperties](docs/models/ClusterCreateProperties)
- - [ClusterCredentials](docs/models/ClusterCredentials)
- - [ClusterEnsure](docs/models/ClusterEnsure)
- - [ClusterMetadata](docs/models/ClusterMetadata)
- - [ClusterMetadataAllOf](docs/models/ClusterMetadataAllOf)
- - [ClusterRead](docs/models/ClusterRead)
- - [ClusterReadList](docs/models/ClusterReadList)
- - [ClusterReadListAllOf](docs/models/ClusterReadListAllOf)
- - [ClusterRestoreFromSnapshot](docs/models/ClusterRestoreFromSnapshot)
- - [ClusterState](docs/models/ClusterState)
+ - [BackupProperties](docs/models/BackupProperties)
+ - [Connection](docs/models/Connection)
  - [DayOfTheWeek](docs/models/DayOfTheWeek)
  - [Error](docs/models/Error)
  - [ErrorMessages](docs/models/ErrorMessages)
  - [EvictionPolicy](docs/models/EvictionPolicy)
  - [HashedPassword](docs/models/HashedPassword)
- - [InPlaceRestoreClusterFromSnapshot](docs/models/InPlaceRestoreClusterFromSnapshot)
- - [InstanceConfiguration](docs/models/InstanceConfiguration)
  - [Links](docs/models/Links)
  - [MaintenanceWindow](docs/models/MaintenanceWindow)
  - [Metadata](docs/models/Metadata)
  - [Pagination](docs/models/Pagination)
  - [PersistenceMode](docs/models/PersistenceMode)
- - [RestoreClusterFromSnapshot](docs/models/RestoreClusterFromSnapshot)
- - [Snapshot](docs/models/Snapshot)
- - [SnapshotConfiguration](docs/models/SnapshotConfiguration)
- - [SnapshotLocation](docs/models/SnapshotLocation)
- - [SnapshotLocationRead](docs/models/SnapshotLocationRead)
- - [SnapshotLocationReadList](docs/models/SnapshotLocationReadList)
- - [SnapshotLocationReadListAllOf](docs/models/SnapshotLocationReadListAllOf)
+ - [ReplicaSet](docs/models/ReplicaSet)
+ - [ReplicaSetCreate](docs/models/ReplicaSetCreate)
+ - [ReplicaSetEnsure](docs/models/ReplicaSetEnsure)
+ - [ReplicaSetMetadata](docs/models/ReplicaSetMetadata)
+ - [ReplicaSetMetadataAllOf](docs/models/ReplicaSetMetadataAllOf)
+ - [ReplicaSetRead](docs/models/ReplicaSetRead)
+ - [ReplicaSetReadList](docs/models/ReplicaSetReadList)
+ - [ReplicaSetReadListAllOf](docs/models/ReplicaSetReadListAllOf)
+ - [ResourceState](docs/models/ResourceState)
+ - [Resources](docs/models/Resources)
+ - [Restore](docs/models/Restore)
+ - [RestoreCreate](docs/models/RestoreCreate)
+ - [RestoreMetadata](docs/models/RestoreMetadata)
+ - [RestoreMetadataAllOf](docs/models/RestoreMetadataAllOf)
+ - [RestoreRead](docs/models/RestoreRead)
+ - [RestoreReadList](docs/models/RestoreReadList)
+ - [RestoreReadListAllOf](docs/models/RestoreReadListAllOf)
+ - [SnapshotCreate](docs/models/SnapshotCreate)
+ - [SnapshotEnsure](docs/models/SnapshotEnsure)
+ - [SnapshotMetadata](docs/models/SnapshotMetadata)
+ - [SnapshotMetadataAllOf](docs/models/SnapshotMetadataAllOf)
  - [SnapshotRead](docs/models/SnapshotRead)
  - [SnapshotReadList](docs/models/SnapshotReadList)
  - [SnapshotReadListAllOf](docs/models/SnapshotReadListAllOf)
- - [SupportedVersion](docs/models/SupportedVersion)
  - [User](docs/models/User)
- - [VersionRead](docs/models/VersionRead)
- - [VersionReadList](docs/models/VersionReadList)
- - [VersionReadListAllOf](docs/models/VersionReadListAllOf)
+ - [UserPassword](docs/models/UserPassword)
 
 
 [[Back to API list]](#documentation-for-api-endpoints) [[Back to Model list]](#documentation-for-models)

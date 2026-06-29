@@ -8,6 +8,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/querycheck"
+	"github.com/hashicorp/terraform-plugin-testing/querycheck/queryfilter"
 	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/acctest"
 )
