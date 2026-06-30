@@ -1,5 +1,5 @@
 ---
-subcategory: "Database as a Service - PostgreSQL V2"
+subcategory: "Database as a Service - PostgreSQL v2"
 layout: "ionoscloud"
 page_title: "IONOS CLOUD: pg_cluster_v2"
 description: |-
