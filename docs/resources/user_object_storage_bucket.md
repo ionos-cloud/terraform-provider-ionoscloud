@@ -1,7 +1,7 @@
 ---
 subcategory: "Object Storage"
 layout: "ionoscloud"
-page_title: "IonosCloud: user_object_storage_bucket"
+page_title: "IONOS CLOUD: user_object_storage_bucket"
 sidebar_current: "docs-resource-user_object_storage_bucket"
 description: |-
   Creates and manages IONOS User-Owned Object Storage Buckets.
@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_user_object_storage_bucket
 
-Manages user-owned IONOS Object Storage Buckets on IonosCloud.
+Manages user-owned IONOS Object Storage Buckets on IONOS CLOUD.
 
 > ⚠️ **Deprecation notice:** User-owned buckets are a legacy bucket type. IONOS recommends using **contract-owned buckets** ([`ionoscloud_s3_bucket`](s3_bucket.md)) for all new workloads. Contract-owned buckets offer broader regional availability, full Terraform sub-resource support (versioning, lifecycle, CORS, SSE, etc.), and are the actively developed offering. Migrate existing user-owned buckets to contract-owned buckets where possible.
 
