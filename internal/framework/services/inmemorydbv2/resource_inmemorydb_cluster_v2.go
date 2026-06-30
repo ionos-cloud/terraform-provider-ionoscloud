@@ -121,7 +121,7 @@ func (r *clusterResource) IdentitySchema(_ context.Context, _ resource.IdentityS
 // Schema returns the schema for the InMemoryDB v2 cluster resource.
 func (r *clusterResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "Manages an IONOS Cloud In-Memory DB v2 cluster.",
+		Description: "Manages an IONOS CLOUD In-Memory DB v2 cluster.",
 		Attributes: map[string]schema.Attribute{
 			"connections": schema.SingleNestedAttribute{
 				Required:    true,
@@ -362,8 +362,9 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 	clusterResponse, apiResponse, err := client.CreateCluster(ctx, inmemorydbv3.ClusterCreate{Properties: createProps})
 	if err != nil {
 		resp.Diagnostics.AddError("failed to create InMemoryDB v2 cluster", diagutil.WrapError(err, &diagutil.ErrorContext{
-			ResourceName: plan.Name.ValueString(),
-			StatusCode:   apiResponse.SafeStatusCode(),
+			ResourceName:   plan.Name.ValueString(),
+			StatusCode:     apiResponse.SafeStatusCode(),
+			AdditionalInfo: map[string]string{"Location": location},
 		}).Error())
 		return
 	}
@@ -374,16 +375,22 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 		return client.IsClusterReady(ctx, clusterID)
 	}, backoff.NewExponentialBackOff(backoff.WithMaxElapsedTime(createTimeout)))
 	if err != nil {
-		resp.Diagnostics.AddError("error waiting for InMemoryDB v2 cluster to become available", err.Error())
+		resp.Diagnostics.AddError("error waiting for InMemoryDB v2 cluster to become available", diagutil.WrapError(err, &diagutil.ErrorContext{
+			ResourceID:     clusterID,
+			ResourceName:   plan.Name.ValueString(),
+			StatusCode:     apiResponse.SafeStatusCode(),
+			AdditionalInfo: map[string]string{"Location": location},
+		}).Error())
 		return
 	}
 
 	cluster, apiResponseGet, err := client.GetCluster(ctx, clusterID)
 	if err != nil {
 		resp.Diagnostics.AddError("error reading InMemoryDB v2 cluster after creation", diagutil.WrapError(err, &diagutil.ErrorContext{
-			ResourceID:   clusterID,
-			ResourceName: plan.Name.ValueString(),
-			StatusCode:   apiResponseGet.SafeStatusCode(),
+			ResourceID:     clusterID,
+			ResourceName:   plan.Name.ValueString(),
+			StatusCode:     apiResponseGet.SafeStatusCode(),
+			AdditionalInfo: map[string]string{"Location": location},
 		}).Error())
 		return
 	}
@@ -421,9 +428,10 @@ func (r *clusterResource) Read(ctx context.Context, req resource.ReadRequest, re
 			return
 		}
 		resp.Diagnostics.AddError("error reading InMemoryDB v2 cluster", diagutil.WrapError(err, &diagutil.ErrorContext{
-			ResourceID:   clusterID,
-			ResourceName: state.Name.ValueString(),
-			StatusCode:   apiResponse.SafeStatusCode(),
+			ResourceID:     clusterID,
+			ResourceName:   state.Name.ValueString(),
+			StatusCode:     apiResponse.SafeStatusCode(),
+			AdditionalInfo: map[string]string{"Location": location},
 		}).Error())
 		return
 	}
@@ -489,9 +497,10 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 	_, apiResponseUpdate, err := client.UpdateCluster(ctx, updateReq, clusterID)
 	if err != nil {
 		resp.Diagnostics.AddError("error updating InMemoryDB v2 cluster", diagutil.WrapError(err, &diagutil.ErrorContext{
-			ResourceID:   clusterID,
-			ResourceName: state.Name.ValueString(),
-			StatusCode:   apiResponseUpdate.SafeStatusCode(),
+			ResourceID:     clusterID,
+			ResourceName:   state.Name.ValueString(),
+			StatusCode:     apiResponseUpdate.SafeStatusCode(),
+			AdditionalInfo: map[string]string{"Location": location},
 		}).Error())
 		return
 	}
@@ -500,16 +509,22 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 		return client.IsClusterReady(ctx, clusterID)
 	}, backoff.NewExponentialBackOff(backoff.WithMaxElapsedTime(updateTimeout)))
 	if err != nil {
-		resp.Diagnostics.AddError("error waiting for InMemoryDB v2 cluster to become available after update", fmt.Sprintf("cluster ID: %s, error: %v", clusterID, err))
+		resp.Diagnostics.AddError("error waiting for InMemoryDB v2 cluster to become available after update", diagutil.WrapError(err, &diagutil.ErrorContext{
+			ResourceID:     clusterID,
+			ResourceName:   state.Name.ValueString(),
+			StatusCode:     apiResponseUpdate.SafeStatusCode(),
+			AdditionalInfo: map[string]string{"Location": location},
+		}).Error())
 		return
 	}
 
 	cluster, apiResponseGetAfterUpdate, err := client.GetCluster(ctx, clusterID)
 	if err != nil {
 		resp.Diagnostics.AddError("error reading InMemoryDB v2 cluster after update", diagutil.WrapError(err, &diagutil.ErrorContext{
-			ResourceID:   clusterID,
-			ResourceName: state.Name.ValueString(),
-			StatusCode:   apiResponseGetAfterUpdate.SafeStatusCode(),
+			ResourceID:     clusterID,
+			ResourceName:   state.Name.ValueString(),
+			StatusCode:     apiResponseGetAfterUpdate.SafeStatusCode(),
+			AdditionalInfo: map[string]string{"Location": location},
 		}).Error())
 		return
 	}
@@ -549,9 +564,10 @@ func (r *clusterResource) Delete(ctx context.Context, req resource.DeleteRequest
 	apiResponseDelete, err := client.DeleteCluster(ctx, clusterID)
 	if err != nil {
 		resp.Diagnostics.AddError("error deleting InMemoryDB v2 cluster", diagutil.WrapError(err, &diagutil.ErrorContext{
-			ResourceID:   clusterID,
-			ResourceName: state.Name.ValueString(),
-			StatusCode:   apiResponseDelete.SafeStatusCode(),
+			ResourceID:     clusterID,
+			ResourceName:   state.Name.ValueString(),
+			StatusCode:     apiResponseDelete.SafeStatusCode(),
+			AdditionalInfo: map[string]string{"Location": location},
 		}).Error())
 		return
 	}
@@ -560,7 +576,12 @@ func (r *clusterResource) Delete(ctx context.Context, req resource.DeleteRequest
 		return client.IsClusterDeleted(ctx, clusterID)
 	}, backoff.NewExponentialBackOff(backoff.WithMaxElapsedTime(deleteTimeout)))
 	if err != nil {
-		resp.Diagnostics.AddError("error waiting for InMemoryDB v2 cluster to be deleted", fmt.Sprintf("cluster ID: %s, error: %v", clusterID, err))
+		resp.Diagnostics.AddError("error waiting for InMemoryDB v2 cluster to be deleted", diagutil.WrapError(err, &diagutil.ErrorContext{
+			ResourceID:     clusterID,
+			ResourceName:   state.Name.ValueString(),
+			StatusCode:     apiResponseDelete.SafeStatusCode(),
+			AdditionalInfo: map[string]string{"Location": location},
+		}).Error())
 		return
 	}
 }
