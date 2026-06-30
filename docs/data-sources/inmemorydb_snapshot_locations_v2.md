@@ -1,15 +1,15 @@
 ---
-subcategory: "Database as a Service - In-Memory DB v2"
+subcategory: "Database as a Service - InMemoryDB V2"
 layout: "ionoscloud"
-page_title: "IonosCloud: ionoscloud_inmemorydb_snapshot_locations_v2"
+page_title: "IONOS CLOUD: ionoscloud_inmemorydb_snapshot_locations_v2"
 sidebar_current: "docs-datasource-inmemorydb_snapshot_locations_v2"
 description: |-
-  Lists IONOS Cloud In-Memory DB v2 Snapshot Locations.
+  Lists IONOS CLOUD InMemoryDB V2 Snapshot Locations.
 ---
 
-# ionoscloud_inmemorydb_snapshot_locations_v2 (Data Source)
+# ionoscloud_inmemorydb_snapshot_locations_v2
 
-Lists all IONOS Cloud In-Memory DB v2 Snapshot Locations available for a given API endpoint.
+The `ionoscloud_inmemorydb_snapshot_locations_v2` data source can be used to retrieve available InMemoryDB V2 snapshot locations for a given API endpoint.
 
 ## Example Usage
 
@@ -17,20 +17,16 @@ Lists all IONOS Cloud In-Memory DB v2 Snapshot Locations available for a given A
 data "ionoscloud_inmemorydb_snapshot_locations_v2" "example" {
   location = "de/txl"
 }
-
-output "available_snapshot_locations" {
-  value = data.ionoscloud_inmemorydb_snapshot_locations_v2.example.items[*].snapshot_region
-}
 ```
 
 ## Argument Reference
 
-| Attribute | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `location` | String | Yes | The InMemoryDB API endpoint location to query. |
+* `location` - (Required)[string] The location to query. Requests are routed to the corresponding regional InMemoryDB endpoint.
 
 ## Attributes Reference
 
-| Attribute | Description |
-|-----------|-------------|
-| `items` | List of snapshot location objects, each with `id` and `snapshot_region`. |
+The following attributes are returned by the datasource:
+
+* `items` - List of snapshot location objects. Each item includes:
+  * `id` - The ID of the snapshot location.
+  * `snapshot_region` - The snapshot region identifier.

@@ -1,15 +1,15 @@
 ---
-subcategory: "Database as a Service - In-Memory DB v2"
+subcategory: "Database as a Service - InMemoryDB V2"
 layout: "ionoscloud"
-page_title: "IonosCloud: ionoscloud_inmemorydb_versions_v2"
+page_title: "IONOS CLOUD: ionoscloud_inmemorydb_versions_v2"
 sidebar_current: "docs-datasource-inmemorydb_versions_v2"
 description: |-
-  Lists supported IONOS Cloud In-Memory DB v2 Versions.
+  Lists supported IONOS CLOUD InMemoryDB V2 Versions.
 ---
 
-# ionoscloud_inmemorydb_versions_v2 (Data Source)
+# ionoscloud_inmemorydb_versions_v2
 
-Lists all supported IONOS Cloud In-Memory DB v2 versions in a given location.
+The `ionoscloud_inmemorydb_versions_v2` data source can be used to retrieve the supported InMemoryDB V2 versions in a given location.
 
 ## Example Usage
 
@@ -17,23 +17,19 @@ Lists all supported IONOS Cloud In-Memory DB v2 versions in a given location.
 data "ionoscloud_inmemorydb_versions_v2" "example" {
   location = "de/txl"
 }
-
-output "recommended_version" {
-  value = [
-    for v in data.ionoscloud_inmemorydb_versions_v2.example.items :
-    v.version if v.status == "RECOMMENDED"
-  ]
-}
 ```
 
 ## Argument Reference
 
-| Attribute | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `location` | String | Yes | The location to query. |
+* `location` - (Required)[string] The location to query.
 
 ## Attributes Reference
 
-| Attribute | Description |
-|-----------|-------------|
-| `items` | List of version objects, each with `version`, `status`, `comment`, and `can_upgrade_to`. |
+The following attributes are returned by the datasource:
+
+* `items` - List of versions. Each item includes:
+  * `id` - The UUID of the version.
+  * `version` - The version string (e.g. `9.0`).
+  * `status` - The support status of the version (e.g. `SUPPORTED`, `RECOMMENDED`).
+  * `comment` - Additional human-readable information about the version lifecycle.
+  * `can_upgrade_to` - List of versions that a cluster running this version can be upgraded to.

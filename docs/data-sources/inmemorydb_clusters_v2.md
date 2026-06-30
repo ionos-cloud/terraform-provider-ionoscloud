@@ -1,15 +1,15 @@
 ---
-subcategory: "Database as a Service - In-Memory DB v2"
+subcategory: "Database as a Service - InMemoryDB V2"
 layout: "ionoscloud"
-page_title: "IonosCloud: ionoscloud_inmemorydb_clusters_v2"
+page_title: "IONOS CLOUD: ionoscloud_inmemorydb_clusters_v2"
 sidebar_current: "docs-datasource-inmemorydb_clusters_v2"
 description: |-
-  Lists IONOS Cloud In-Memory DB v2 Clusters.
+  Lists IONOS CLOUD InMemoryDB V2 Clusters.
 ---
 
-# ionoscloud_inmemorydb_clusters_v2 (Data Source)
+# ionoscloud_inmemorydb_clusters_v2
 
-Lists IONOS Cloud In-Memory DB v2 Clusters in a given location, with optional name filter.
+The `ionoscloud_inmemorydb_clusters_v2` data source can be used to retrieve information about existing InMemoryDB V2 clusters in a given location, with an optional name filter.
 
 ## Example Usage
 
@@ -26,13 +26,11 @@ data "ionoscloud_inmemorydb_clusters_v2" "filtered" {
 
 ## Argument Reference
 
-| Attribute | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `location` | String | Yes | The location to query. |
-| `name` | String | No | Filter by name (case-insensitive contains match). |
+* `location` - (Required)[string] The location to query.
+* `name` - (Optional)[string] Filter by name (case-insensitive contains match).
 
 ## Attributes Reference
 
-| Attribute | Description |
-|-----------|-------------|
-| `items` | List of cluster objects. Each item contains all cluster attributes (see `ionoscloud_inmemorydb_cluster_v2` resource for the full schema). |
+The following attributes are returned by the datasource:
+
+* `items` - List of clusters. Each item exposes the same attributes as the [ionoscloud_inmemorydb_cluster_v2](inmemorydb_cluster_v2.md) data source. Note that `credentials.password` is not available — only `credentials.username` is returned by the API.

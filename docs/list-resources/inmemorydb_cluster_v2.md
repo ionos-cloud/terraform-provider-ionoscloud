@@ -1,20 +1,20 @@
 ---
-subcategory: "Database as a Service - In-Memory DB v2"
+subcategory: "Database as a Service - InMemoryDB V2"
 layout: "ionoscloud"
 page_title: "IONOS CLOUD: inmemorydb_cluster_v2"
 description: |-
-  Lists IONOS CLOUD In-Memory DB v2 Clusters.
+  Lists IONOS CLOUD InMemoryDB V2 Clusters.
 ---
 
 # List Resource: ionoscloud_inmemorydb_cluster_v2
 
 ⚠️ **Note:** List Resources require HashiCorp Terraform version 1.14 or later and are queried using `terraform query`.
 
-Lists [IONOS In-Memory DB v2 Clusters](https://docs.ionos.com/cloud/databases/in-memory-db) on IONOS CLOUD.
+Lists [InMemoryDB V2 Clusters](https://docs.ionos.com/cloud/databases/in-memory-db) on IONOS CLOUD.
 
 ## Example Usage
 
-⚠️ **Note:** `list` blocks must be placed in a dedicated `tfquery.hcl` file, separate from your main Terraform configuration.
+⚠️ **Note:** `list` blocks must be placed in a dedicated `.tfquery.hcl` file, separate from your main Terraform configuration.
 
 ### List all clusters
 
@@ -93,7 +93,7 @@ Each result exposes the following attributes when `include_resource = true`, mat
 - `id` - The UUID of the cluster.
 - `name` - The name of the cluster.
 - `description` - A human-readable description for the cluster.
-- `version` - The In-Memory DB version (e.g. `9.0`).
+- `version` - The InMemoryDB version (e.g. `9.0`).
 - `dns_name` - The DNS name used to connect to the cluster's primary instance.
 - `location` - The regional location of the cluster (e.g. `de/txl`).
 - `persistence_mode` - The data persistence mode (`None`, `AOF`, `RDB`, `RDB_AOF`).
@@ -116,7 +116,6 @@ Each result exposes the following attributes when `include_resource = true`, mat
   - `retention_days` - Number of days snapshots are retained.
   - `snapshot_hours` - UTC hours at which snapshots are taken.
 - `credentials` - Credentials block:
-  - `username` - The username for the In-Memory DB user.
-  - `password` - Always null (write-only, not returned by the API).
+  - `username` - The username for the InMemoryDB user.
 
-> **Note:** `credentials.password` is write-only and never returned by the API (it will be null).
+> **Note:** `credentials.password` is not available in the list resource — the API never returns the password hash. Only `credentials.username` is populated.

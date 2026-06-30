@@ -1,16 +1,16 @@
 ---
-subcategory: "Database as a Service - In-Memory DB v2"
+subcategory: "Database as a Service - InMemoryDB V2"
 layout: "ionoscloud"
 page_title: "Migrating from ionoscloud_dbaas_inmemorydb_replica_set to ionoscloud_inmemorydb_cluster_v2"
 sidebar_current: "docs-guide-migrating-inmemorydb-v1-to-v2"
 description: |-
-  How to migrate existing In-Memory DB replica sets from the legacy ionoscloud_dbaas_inmemorydb_replica_set resource to ionoscloud_inmemorydb_cluster_v2.
+  How to migrate existing InMemoryDB replica sets from the legacy ionoscloud_dbaas_inmemorydb_replica_set resource to ionoscloud_inmemorydb_cluster_v2.
 ---
 
-# Migrating In-Memory DB from `ionoscloud_dbaas_inmemorydb_replica_set` to `ionoscloud_inmemorydb_cluster_v2`
+# Migrating InMemoryDB from `ionoscloud_dbaas_inmemorydb_replica_set` to `ionoscloud_inmemorydb_cluster_v2`
 
-`ionoscloud_inmemorydb_cluster_v2` is a re-implementation of the In-Memory DB resource on the
-newer plugin framework, backed by the v2 DBaaS In-Memory DB API. It is a **different resource type**
+`ionoscloud_inmemorydb_cluster_v2` is a re-implementation of the InMemoryDB resource on the
+newer plugin framework, backed by the v2 DBaaS InMemoryDB API. It is a **different resource type**
 from the legacy `ionoscloud_dbaas_inmemorydb_replica_set`, with a different schema (single nested
 blocks instead of lists, a required `location`, explicit snapshot and maintenance window
 configuration, etc.).
@@ -61,8 +61,8 @@ terraform query -generate-config-out=generated_inmemorydb_v2.tf
 
 `generated_inmemorydb_v2.tf` will contain a fully-populated `ionoscloud_inmemorydb_cluster_v2`
 block for each cluster (name, version, instances, connections, snapshot, maintenance window,
-logs/metrics, …), together with the `import` wiring keyed by the v2 identity
-(`<location>:<cluster_id>`).
+logs/metrics, …), together with `import` blocks keyed by the v2 resource identity (the cluster
+`id` and `location`).
 
 ### 2. Drop the legacy resources from state
 
@@ -86,15 +86,14 @@ configuration.
 A few attributes are not part of the cluster's readable state and must be added by hand to the
 generated `ionoscloud_inmemorydb_cluster_v2` blocks:
 
-| Attribute                          | Why it's missing                      | What to do                                                               |
-|------------------------------------|---------------------------------------|--------------------------------------------------------------------------|
-| `credentials.password.algorithm`   | Write-only; the API never returns it. | Set the hashing algorithm used (e.g. `"SHA-256"`).                       |
-| `credentials.password.hash`        | Write-only; the API never returns it. | Set the hex-encoded hash of the password (reuse the same value).         |
-| `timeouts`                         | Optional; not generated.              | Add only if you previously customized timeouts.                          |
+| Attribute                          | Why it's missing                      | What to do                                                                                            |
+|------------------------------------|---------------------------------------|-------------------------------------------------------------------------------------------------------|
+| `credentials.password`             | Write-only; the API never returns it. | Add the entire `password` block (it is `Required`).  |
+| `timeouts`                         | Optional; not generated.              | Add only if you previously customized timeouts.                                                       |
 
-`restore_from_snapshot` is create-time-only and not part of a cluster's readable state, so config
-generation never emits it and you do not need it when adopting an existing cluster. Leave it out
-(it is only relevant when initializing a brand-new cluster from a snapshot).
+`restore_from_snapshot` is never returned by the API, so config generation never emits it. You do
+not need it when adopting an existing cluster — add it only if you want to trigger a restore from
+a snapshot.
 
 ### 4. Apply
 

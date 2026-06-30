@@ -1,26 +1,28 @@
 ---
-subcategory: "Database as a Service - In-Memory DB v2"
+subcategory: "Database as a Service - InMemoryDB V2"
 layout: "ionoscloud"
-page_title: "IonosCloud: ionoscloud_inmemorydb_cluster_v2"
+page_title: "IONOS CLOUD: ionoscloud_inmemorydb_cluster_v2"
 sidebar_current: "docs-datasource-inmemorydb_cluster_v2"
 description: |-
-  Reads an IONOS Cloud In-Memory DB v2 Cluster by ID or name.
+  Reads an IONOS CLOUD InMemoryDB V2 Cluster by ID or name.
 ---
 
-# ionoscloud_inmemorydb_cluster_v2 (Data Source)
+# ionoscloud_inmemorydb_cluster_v2
 
-Reads an IONOS Cloud In-Memory DB v2 Cluster.
+The `ionoscloud_inmemorydb_cluster_v2` data source can be used to retrieve information about an existing InMemoryDB V2 cluster.
 
 ## Example Usage
 
+### By id
 ```hcl
-# Look up by ID
 data "ionoscloud_inmemorydb_cluster_v2" "by_id" {
-  id       = "e69b22a5-8fee-56b1-b6fb-4a07e4205ead"
+  id       = "example-id"
   location = "de/txl"
 }
+```
 
-# Look up by name
+### By name
+```hcl
 data "ionoscloud_inmemorydb_cluster_v2" "by_name" {
   name     = "my-inmemorydb-cluster"
   location = "de/txl"
@@ -29,37 +31,40 @@ data "ionoscloud_inmemorydb_cluster_v2" "by_name" {
 
 ## Argument Reference
 
-Exactly one of `id` or `name` must be provided.
+* `id` - (Optional) The UUID of the cluster.
+* `name` - (Optional) The cluster name (exact match).
+* `location` - (Required)[string] The location of the cluster.
 
-| Attribute | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `id` | String | One of | The UUID of the cluster. |
-| `name` | String | One of | The cluster name (exact match). |
-| `location` | String | Yes | The location of the cluster. |
+> **Note:** Either `id` or `name` must be provided. If none, or both are provided, the datasource will return an error.
 
 ## Attributes Reference
 
-| Attribute | Description |
-|-----------|-------------|
-| `id` | The UUID of the cluster. |
-| `name` | The name of the cluster. |
-| `location` | The location of the cluster. |
-| `description` | Human-readable description for the cluster. |
-| `version` | The In-Memory DB version. |
-| `persistence_mode` | The data persistence mode. |
-| `eviction_policy` | The key eviction strategy. |
-| `logs_enabled` | Whether log collection is enabled. |
-| `metrics_enabled` | Whether metrics collection is enabled. |
-| `dns_name` | The DNS name for connecting to the cluster's primary instance. |
-| `instances.count` | Number of instances. |
-| `instances.cores` | CPU cores per instance. |
-| `instances.ram` | RAM per instance in GB. |
-| `connections.datacenter_id` | The Virtual Data Center ID. |
-| `connections.lan_id` | The numeric LAN ID. |
-| `connections.primary_instance_address` | The primary instance IP in CIDR notation. |
-| `snapshot.location` | Object Storage location for snapshots. |
-| `snapshot.retention_days` | Days snapshots are retained. |
-| `snapshot.snapshot_hours` | UTC hours at which snapshots are taken. |
-| `maintenance_window.time` | Maintenance window start time in UTC (HH:MM:SS). |
-| `maintenance_window.day_of_the_week` | Maintenance window day of the week. |
-| `credentials.username` | The username for the In-Memory DB user. |
+The following attributes are returned by the datasource:
+
+* `id` - The UUID of the cluster.
+* `name` - The name of the cluster.
+* `location` - The location of the cluster.
+* `description` - Human-readable description for the cluster.
+* `version` - The InMemoryDB version.
+* `persistence_mode` - The data persistence mode.
+* `eviction_policy` - The key eviction strategy.
+* `logs_enabled` - Whether log collection is enabled.
+* `metrics_enabled` - Whether metrics collection is enabled.
+* `dns_name` - The DNS name for connecting to the cluster's primary instance.
+* `instances` - Instance sizing configuration:
+  * `count` - Number of instances.
+  * `cores` - CPU cores per instance.
+  * `ram` - RAM per instance in GB.
+* `connections` - Network connection configuration:
+  * `datacenter_id` - The Virtual Data Center ID.
+  * `lan_id` - The numeric LAN ID.
+  * `primary_instance_address` - The primary instance IP in CIDR notation.
+* `snapshot` - Snapshot configuration:
+  * `location` - Object Storage location for snapshots.
+  * `retention_days` - Days snapshots are retained.
+  * `snapshot_hours` - UTC hours at which snapshots are taken.
+* `maintenance_window` - Maintenance window configuration:
+  * `time` - Maintenance window start time in UTC (HH:MM:SS).
+  * `day_of_the_week` - Maintenance window day of the week.
+* `credentials` - Credentials block:
+  * `username` - The username for the InMemoryDB user.
