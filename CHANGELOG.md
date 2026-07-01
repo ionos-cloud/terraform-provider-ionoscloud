@@ -1,3 +1,8 @@
+## 6.7.36
+
+### Documentation
+- `ionoscloud_volume`: document the volume performance classes (`ESSENTIAL`, `BALANCED`, `PERFORMANCE`) as `disk_type` values.
+
 ## 6.7.35
 
 ### Features
