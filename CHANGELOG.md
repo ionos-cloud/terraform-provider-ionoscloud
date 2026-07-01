@@ -29,6 +29,9 @@
 ### Documentation
 - Align brand references in docs and schema descriptions to `IONOS CLOUD`.
 
+### Fixes
+- Fix `ionoscloud_networkloadbalancer`: re-apply no longer fails with "you can not empty the ips field" when the optional `ips` attribute is omitted from the configuration
+
 ## 6.7.30
 
 ### Features
