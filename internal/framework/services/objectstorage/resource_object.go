@@ -37,6 +37,7 @@ func NewObjectResource() resource.Resource {
 
 type objectResource struct {
 	client *objectstorage.Client
+	diags  *diagutil.Enricher
 }
 
 // Metadata returns the metadata for the object resource.
@@ -202,6 +203,7 @@ func (r *objectResource) Configure(_ context.Context, req resource.ConfigureRequ
 	}
 
 	r.client = clientBundle.S3Client
+	r.diags = clientBundle.Diags
 }
 
 func (r *objectResource) ConfigValidators(_ context.Context) []resource.ConfigValidator {
@@ -228,12 +230,12 @@ func (r *objectResource) Create(ctx context.Context, req resource.CreateRequest,
 
 	result, err := r.client.UploadObject(ctx, data)
 	if err != nil {
-		resp.Diagnostics.AddError("failed to create object", diagutil.WrapError(formatXMLError(err), &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString() + "/" + data.Key.ValueString()}).Error())
+		resp.Diagnostics.AddError("failed to create object", r.diags.WrapError(formatXMLError(err), &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString() + "/" + data.Key.ValueString()}).Error())
 		return
 	}
 
 	if err = r.client.SetObjectComputedAttributes(ctx, data, result); err != nil {
-		resp.Diagnostics.AddError("failed to set computed attributes", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString() + "/" + data.Key.ValueString()}).Error())
+		resp.Diagnostics.AddError("failed to set computed attributes", r.diags.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString() + "/" + data.Key.ValueString()}).Error())
 		return
 	}
 
@@ -255,7 +257,7 @@ func (r *objectResource) Read(ctx context.Context, req resource.ReadRequest, res
 
 	result, found, err := r.client.GetObject(ctx, data)
 	if err != nil {
-		resp.Diagnostics.AddError("failed to read object", diagutil.WrapError(formatXMLError(err), &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString() + "/" + data.Key.ValueString()}).Error())
+		resp.Diagnostics.AddError("failed to read object", r.diags.WrapError(formatXMLError(err), &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString() + "/" + data.Key.ValueString()}).Error())
 		return
 	}
 
@@ -291,7 +293,7 @@ func (r *objectResource) Update(ctx context.Context, req resource.UpdateRequest,
 	}
 
 	if err := r.client.UpdateObject(ctx, plan, state); err != nil {
-		resp.Diagnostics.AddError("failed to update object", diagutil.WrapError(formatXMLError(err), &diagutil.ErrorContext{ResourceName: plan.Bucket.ValueString() + "/" + plan.Key.ValueString()}).Error())
+		resp.Diagnostics.AddError("failed to update object", r.diags.WrapError(formatXMLError(err), &diagutil.ErrorContext{ResourceName: plan.Bucket.ValueString() + "/" + plan.Key.ValueString()}).Error())
 		return
 	}
 
@@ -312,7 +314,7 @@ func (r *objectResource) Delete(ctx context.Context, req resource.DeleteRequest,
 	}
 
 	if err := r.client.DeleteObject(ctx, data); err != nil {
-		resp.Diagnostics.AddError("failed to delete object", diagutil.WrapError(formatXMLError(err), &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString() + "/" + data.Key.ValueString()}).Error())
+		resp.Diagnostics.AddError("failed to delete object", r.diags.WrapError(formatXMLError(err), &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString() + "/" + data.Key.ValueString()}).Error())
 		return
 	}
 }

@@ -76,15 +76,15 @@ func dataSourceReverseRecordRead(ctx context.Context, d *schema.ResourceData, me
 	}
 
 	if count > 1 {
-		return diagutil.ToDiags(d, fmt.Errorf("only one of [Id, name, ip] can be specified at the same time"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("only one of [Id, name, ip] can be specified at the same time"), nil)
 	}
 
 	if count == 0 {
-		return diagutil.ToDiags(d, fmt.Errorf("please provide either the DNS Record Id, name or IP"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("please provide either the DNS Record Id, name or IP"), nil)
 	}
 
 	if partialMatch && !nameOk {
-		return diagutil.ToDiags(d, fmt.Errorf("partial_match can only be used together with the name attribute"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("partial_match can only be used together with the name attribute"), nil)
 	}
 
 	var record dns.ReverseRecordRead
@@ -94,7 +94,7 @@ func dataSourceReverseRecordRead(ctx context.Context, d *schema.ResourceData, me
 	if idOk {
 		record, apiResponse, err = client.GetReverseRecordById(ctx, recordID)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the DNS Reverse Record with ID: %s, error: %w", recordID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching the DNS Reverse Record with ID: %s, error: %w", recordID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 	} else {
 
@@ -103,7 +103,7 @@ func dataSourceReverseRecordRead(ctx context.Context, d *schema.ResourceData, me
 			tflog.Info(ctx, "searching DNS reverse record by name", map[string]any{"name": recordName, "partial_match": partialMatch})
 			records, apiResponse, err := client.ListReverseRecords(ctx, nil)
 			if err != nil {
-				return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching DNS Reverse Records: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+				return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching DNS Reverse Records: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 			}
 			for _, recordItem := range records.Items {
 				if partialMatch {
@@ -119,7 +119,7 @@ func dataSourceReverseRecordRead(ctx context.Context, d *schema.ResourceData, me
 		} else {
 			records, apiResponse, err := client.ListReverseRecords(ctx, []string{recordIp})
 			if err != nil {
-				return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching DNS Reverse Records: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+				return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching DNS Reverse Records: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 			}
 			results = records.Items
 		}
@@ -133,16 +133,16 @@ func dataSourceReverseRecordRead(ctx context.Context, d *schema.ResourceData, me
 
 		switch {
 		case len(results) == 0:
-			return diagutil.ToDiags(d, fmt.Errorf("no DNS Reverse Record found with the specified filter = %s", usedFilter), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("no DNS Reverse Record found with the specified filter = %s", usedFilter), nil)
 		case len(results) > 1:
-			return diagutil.ToDiags(d, fmt.Errorf("more than one DNS Reverse Record found with the specified filter = %s", usedFilter), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("more than one DNS Reverse Record found with the specified filter = %s", usedFilter), nil)
 		default:
 			record = results[0]
 		}
 	}
 
 	if err := client.SetReverseRecordData(d, record); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 
 	return nil

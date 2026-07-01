@@ -234,7 +234,7 @@ func (c *Client) bucketExistsCheck(ctx context.Context, name string) error {
 				errCtx.RequestID = loc.String()
 			}
 		}
-		return backoff.Permanent(diagutil.WrapError(fmt.Errorf("failed to check if bucket exists: %w", err),
+		return backoff.Permanent(c.Diags.WrapError(fmt.Errorf("failed to check if bucket exists: %w", err),
 			errCtx))
 	}
 	return nil

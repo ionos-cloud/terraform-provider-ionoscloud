@@ -117,10 +117,10 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta an
 	}
 
 	if idOk && nameOk {
-		return diagutil.ToDiags(d, fmt.Errorf("id and name cannot be both specified in the same time"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("id and name cannot be both specified in the same time"), nil)
 	}
 	if !idOk && !nameOk {
-		return diagutil.ToDiags(d, fmt.Errorf("please provide either the snapshot id or name"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("please provide either the snapshot id or name"), nil)
 	}
 
 	var snapshot ionoscloud.Snapshot
@@ -131,7 +131,7 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta an
 		snapshot, apiResponse, err = client.SnapshotsApi.SnapshotsFindById(ctx, id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the snapshot with ID %s: %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching the snapshot with ID %s: %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 	} else {
 		var results []ionoscloud.Snapshot
@@ -140,7 +140,7 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta an
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching IONOS CLOUD snapshots: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching IONOS CLOUD snapshots: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 
 		if snapshots.Items != nil {
@@ -175,16 +175,16 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta an
 		}
 
 		if results == nil || len(results) == 0 {
-			return diagutil.ToDiags(d, fmt.Errorf("no snapshot found with the specified criteria: name = %s, location = %s, size = %v", name.(string), location.(string), size.(int)), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("no snapshot found with the specified criteria: name = %s, location = %s, size = %v", name.(string), location.(string), size.(int)), nil)
 		} else if len(results) > 1 {
-			return diagutil.ToDiags(d, fmt.Errorf("more than one snapshot found with the specified criteria: name = %s, location = %s, size = %v", name.(string), location.(string), size.(int)), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("more than one snapshot found with the specified criteria: name = %s, location = %s, size = %v", name.(string), location.(string), size.(int)), nil)
 		} else {
 			snapshot = results[0]
 		}
 	}
 
 	if err = setSnapshotData(d, &snapshot); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 
 	return nil

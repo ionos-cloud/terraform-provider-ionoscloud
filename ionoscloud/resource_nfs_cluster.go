@@ -107,16 +107,16 @@ func resourceNFSClusterCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 	response, apiResponse, err := client.CreateNFSCluster(ctx, d)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error creating NFS Cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error creating NFS Cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	clusterID := response.Id
 	d.SetId(clusterID)
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsClusterReady)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error checking status for NFS Cluster with ID %v: %w", clusterID, err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error checking status for NFS Cluster with ID %v: %w", clusterID, err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String()})
 	}
 	if err := client.SetNFSClusterData(d, response); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 	return nil
 }
@@ -126,14 +126,14 @@ func resourceNFSClusterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 	response, apiResponse, err := client.UpdateNFSCluster(ctx, d)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error updating NFS Cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error updating NFS Cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsClusterReady)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error checking status for NFS Cluster %w", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error checking status for NFS Cluster %w", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String()})
 	}
 	if err := client.SetNFSClusterData(d, response); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 	return nil
 }
@@ -143,11 +143,11 @@ func resourceNFSClusterDelete(ctx context.Context, d *schema.ResourceData, meta 
 	clusterID := d.Id()
 	apiResponse, err := client.DeleteNFSCluster(ctx, d)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error deleting NFS Cluster with ID: %v, error: %w", clusterID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error deleting NFS Cluster with ID: %v, error: %w", clusterID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsClusterDeleted)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("deletion check failed for NFS Cluster with ID: %v, error: %w", clusterID, err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("deletion check failed for NFS Cluster with ID: %v, error: %w", clusterID, err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String()})
 	}
 	return nil
 }
@@ -156,26 +156,26 @@ func resourceNFSClusterImport(ctx context.Context, d *schema.ResourceData, meta 
 	client := meta.(bundleclient.SdkBundle).NFSClient
 	parts := strings.Split(d.Id(), ":")
 	if len(parts) != 2 {
-		return nil, diagutil.ToError(d, fmt.Errorf("invalid import, expected ID in the format '<location>:<replica_set_id>'"), nil)
+		return nil, bundleclient.ToError(meta, d, fmt.Errorf("invalid import, expected ID in the format '<location>:<replica_set_id>'"), nil)
 	}
 	location := parts[0]
 	id := parts[1]
 
 	err := d.Set("location", location)
 	if err != nil {
-		return nil, diagutil.ToError(d, fmt.Errorf("failed setting location %s: %w", location, err), nil)
+		return nil, bundleclient.ToError(meta, d, fmt.Errorf("failed setting location %s: %w", location, err), nil)
 	}
 	err = d.Set("id", id)
 	if err != nil {
-		return nil, diagutil.ToError(d, fmt.Errorf("failed setting id %s: %w", id, err), nil)
+		return nil, bundleclient.ToError(meta, d, fmt.Errorf("failed setting id %s: %w", id, err), nil)
 	}
 
 	cluster, err := findCluster(ctx, d, id, location, client)
 	if err != nil {
-		return nil, diagutil.ToError(d, fmt.Errorf("error finding NFS Cluster: %w", err), nil)
+		return nil, bundleclient.ToError(meta, d, fmt.Errorf("error finding NFS Cluster: %w", err), nil)
 	}
 	if err := client.SetNFSClusterData(d, cluster); err != nil {
-		return nil, diagutil.ToError(d, err, nil)
+		return nil, bundleclient.ToError(meta, d, err, nil)
 	}
 	return []*schema.ResourceData{d}, nil
 }
@@ -184,10 +184,10 @@ func resourceNFSClusterRead(ctx context.Context, d *schema.ResourceData, meta an
 	client := meta.(bundleclient.SdkBundle).NFSClient
 	cluster, err := findCluster(ctx, d, d.Id(), d.Get("location").(string), client)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error finding NFS Cluster: %w", err), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error finding NFS Cluster: %w", err), nil)
 	}
 	if errSetData := client.SetNFSClusterData(d, cluster); errSetData != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("failed to set NFS Cluster data: %w", errSetData), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("failed to set NFS Cluster data: %w", errSetData), nil)
 	}
 	return nil
 }

@@ -49,30 +49,30 @@ func dataSourceResourceRead(ctx context.Context, d *schema.ResourceData, meta an
 		result, apiResponse, err := client.UserManagementApi.UmResourcesFindByTypeAndId(ctx, resourceType, resourceID).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching resource by type %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching resource by type %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 		results = append(results, result)
 
 		err = d.Set("resource_type", result.Type)
 		if err != nil {
-			return diagutil.ToDiags(d, err, nil)
+			return bundleclient.ToDiags(meta, d, err, nil)
 		}
 		err = d.Set("resource_id", result.Id)
 		if err != nil {
-			return diagutil.ToDiags(d, err, nil)
+			return bundleclient.ToDiags(meta, d, err, nil)
 		}
 	} else if resourceType != "" {
 		// items, err := client.ListResourcesByType(resource_type)
 		items, apiResponse, err := client.UserManagementApi.UmResourcesFindByType(ctx, resourceType).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching resources by type %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching resources by type %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 		results = *items.Items
 		if len(results) > 0 && results[0].Type != nil {
 			err = d.Set("resource_type", results[0].Type)
 			if err != nil {
-				return diagutil.ToDiags(d, err, nil)
+				return bundleclient.ToDiags(meta, d, err, nil)
 			}
 		}
 
@@ -81,13 +81,13 @@ func dataSourceResourceRead(ctx context.Context, d *schema.ResourceData, meta an
 		items, apiResponse, err := client.UserManagementApi.UmResourcesGet(ctx).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching resources %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching resources %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 		results = *items.Items
 	}
 
 	if len(results) == 0 {
-		return diagutil.ToDiags(d, fmt.Errorf("there are no resources that match the search criteria"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("there are no resources that match the search criteria"), nil)
 	}
 
 	d.SetId(*results[0].Id)

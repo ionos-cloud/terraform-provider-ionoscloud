@@ -87,13 +87,13 @@ func dataSourceK8sReadNodePoolNodes(ctx context.Context, d *schema.ResourceData,
 	nodesList, apiResponse, err := client.KubernetesApi.K8sNodepoolsNodesGet(ctx, clusterID.(string), nodePoolIDStr).Depth(1).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching k8s nodes: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching k8s nodes: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	if nodesList.Items == nil {
-		return diagutil.ToDiags(d, fmt.Errorf("no nodes found for nodepool with id %s", nodePoolIDStr), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("no nodes found for nodepool with id %s", nodePoolIDStr), nil)
 	}
 	if len(*nodesList.Items) == 0 {
-		return diagutil.ToDiags(d, fmt.Errorf("nodes list is empty for of nodepool with id %s", nodePoolIDStr), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("nodes list is empty for of nodepool with id %s", nodePoolIDStr), nil)
 	}
 	if len(*nodesList.Items) > 0 {
 		var nodes []any
@@ -103,7 +103,7 @@ func dataSourceK8sReadNodePoolNodes(ctx context.Context, d *schema.ResourceData,
 		}
 		err := d.Set("nodes", nodes)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("error while setting nodes: %w", err), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("error while setting nodes: %w", err), nil)
 		}
 	}
 	return nil

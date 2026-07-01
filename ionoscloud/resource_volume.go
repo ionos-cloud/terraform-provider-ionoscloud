@@ -231,7 +231,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta any)
 	// create volume object with data to be used for image
 	volumeProperties, err := getVolumeData(ctx, d, "", "")
 	if err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 
 	volume := ionoscloud.Volume{
@@ -239,7 +239,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta any)
 	}
 	image, imageAlias, err = getImage(ctx, client, d, *volume.Properties)
 	if err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 
 	if image != "" {
@@ -256,7 +256,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta any)
 
 	if userData, ok := d.GetOk("user_data"); ok {
 		if image == "" && imageAlias == "" {
-			return diagutil.ToDiags(d, fmt.Errorf("it is mandatory to provide either public image that has cloud-init compatibility in conjunction with user_data property "), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("it is mandatory to provide either public image that has cloud-init compatibility in conjunction with user_data property "), nil)
 		} else {
 			userData := userData.(string)
 			volume.Properties.UserData = &userData
@@ -266,13 +266,13 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta any)
 	if backupUnitID, ok := d.GetOk("backup_unit_id"); ok {
 		if utils.IsValidUUID(backupUnitID.(string)) {
 			if image == "" && imageAlias == "" {
-				return diagutil.ToDiags(d, fmt.Errorf("it is mandatory to provide either public image that has cloud-init compatibility in conjunction with backup_unit_id property "), nil)
+				return bundleclient.ToDiags(meta, d, fmt.Errorf("it is mandatory to provide either public image that has cloud-init compatibility in conjunction with backup_unit_id property "), nil)
 			} else {
 				backupUnitID := backupUnitID.(string)
 				volume.Properties.BackupunitId = &backupUnitID
 			}
 		} else {
-			return diagutil.ToDiags(d, fmt.Errorf("the backup_unit_id that you specified is not a valid UUID"), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("the backup_unit_id that you specified is not a valid UUID"), nil)
 		}
 	}
 
@@ -281,7 +281,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta any)
 
 	if err != nil {
 		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating a volume: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while creating a volume: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	d.SetId(*volume.Id)
@@ -291,7 +291,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta any)
 			d.SetId("")
 		}
 		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
+		return bundleclient.ToDiags(meta, d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	volumeToAttach := ionoscloud.Volume{Id: volume.Id}
@@ -300,23 +300,23 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta any)
 
 	if err != nil {
 		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while attaching a volume dcID: %s server_id: %s ID: %s Response: %w", dcID, serverID, *volumeToAttach.Id, err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while attaching a volume dcID: %s server_id: %s ID: %s Response: %w", dcID, serverID, *volumeToAttach.Id, err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	sErr := d.Set("server_id", serverID)
 
 	if sErr != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error while setting serverID %s: %w", serverID, sErr), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error while setting serverID %s: %w", serverID, sErr), nil)
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
 		if bundleclient.IsRequestFailed(errState) {
 			if sErr := d.Set("server_id", ""); sErr != nil {
-				return diagutil.ToDiags(d, fmt.Errorf("error while setting serverID: %w", sErr), nil)
+				return bundleclient.ToDiags(meta, d, fmt.Errorf("error while setting serverID: %w", sErr), nil)
 			}
 		}
 		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation)})
+		return bundleclient.ToDiags(meta, d, errState, &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	return resourceVolumeRead(ctx, d, meta)
@@ -341,7 +341,7 @@ func resourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta any) d
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error occurred while fetching volume: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error occurred while fetching volume: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	_, apiResponse, err = client.ServersApi.DatacentersServersVolumesFindById(ctx, dcID, serverID, volumeID).Execute()
@@ -349,12 +349,12 @@ func resourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta any) d
 	if err != nil {
 		if err2 := d.Set("server_id", ""); err2 != nil {
 			requestLocation, _ := apiResponse.SafeLocation()
-			return diagutil.ToDiags(d, err2, &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
+			return bundleclient.ToDiags(meta, d, err2, &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 		}
 	}
 
 	if err := setVolumeData(d, &volume); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 
 	return nil
@@ -404,19 +404,19 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta any)
 
 	if err != nil {
 		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating volume: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while updating volume: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 
 	}
 
 	// Wait, catching any errors
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
 		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
+		return bundleclient.ToDiags(meta, d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	if apiResponse.SafeStatusCode() > 299 {
 		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating a volume, status code: %d", apiResponse.SafeStatusCode()), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while updating a volume, status code: %d", apiResponse.SafeStatusCode()), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if d.HasChange("server_id") {
@@ -427,13 +427,13 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta any)
 		logApiRequestTime(apiResponse)
 		if err != nil {
 			requestLocation, _ := apiResponse.SafeLocation()
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while attaching a volume dcID: %s server_id: %s ID: %s Response: %w",
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while attaching a volume dcID: %s server_id: %s ID: %s Response: %w",
 				dcID, serverID, *volume.Id, err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 		}
 
 		if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
 			requestLocation, _ := apiResponse.SafeLocation()
-			return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
+			return bundleclient.ToDiags(meta, d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 		}
 	}
 
@@ -453,13 +453,13 @@ func resourceVolumeDelete(ctx context.Context, d *schema.ResourceData, meta any)
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while deleting a volume: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while deleting a volume: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
 		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
+		return bundleclient.ToDiags(meta, d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	d.SetId("")
@@ -471,14 +471,14 @@ func resourceVolumeImporter(ctx context.Context, d *schema.ResourceData, meta an
 
 	location, parts := splitImportID(importID, "/")
 	if len(parts) != 3 {
-		return nil, diagutil.ToError(d, fmt.Errorf(
+		return nil, bundleclient.ToError(meta, d, fmt.Errorf(
 			"invalid import identifier: expected one of <location>:<datacenter-id>/<server-id>/<volume-id> "+
 				"or <datacenter-id>/<server-id>/<volume-id>, got: %s", importID,
 		), nil)
 	}
 
 	if err := validateImportIDParts(parts); err != nil {
-		return nil, diagutil.ToError(d, fmt.Errorf("failed validating import identifier %q: %w", importID, err), nil)
+		return nil, bundleclient.ToError(meta, d, fmt.Errorf("failed validating import identifier %q: %w", importID, err), nil)
 	}
 
 	dcID := parts[0]
@@ -496,20 +496,20 @@ func resourceVolumeImporter(ctx context.Context, d *schema.ResourceData, meta an
 	if err != nil {
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("volume does not exist %q", volumeID), nil)
+			return nil, bundleclient.ToError(meta, d, fmt.Errorf("volume does not exist %q", volumeID), nil)
 		}
-		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to find the volume %q", volumeID), nil)
+		return nil, bundleclient.ToError(meta, d, fmt.Errorf("an error occurred while trying to find the volume %q", volumeID), nil)
 	}
 
 	tflog.Info(ctx, "volume found", map[string]any{"volume_id": *volume.Id, "datacenter_id": dcID})
 
 	d.SetId(*volume.Id)
 	if err := d.Set("datacenter_id", dcID); err != nil {
-		return nil, diagutil.ToError(d, err, nil)
+		return nil, bundleclient.ToError(meta, d, err, nil)
 	}
 
 	if err := d.Set("server_id", srvID); err != nil {
-		return nil, diagutil.ToError(d, err, nil)
+		return nil, bundleclient.ToError(meta, d, err, nil)
 	}
 
 	if err := d.Set("location", location); err != nil {
@@ -517,7 +517,7 @@ func resourceVolumeImporter(ctx context.Context, d *schema.ResourceData, meta an
 	}
 
 	if err := setVolumeData(d, &volume); err != nil {
-		return nil, diagutil.ToError(d, err, nil)
+		return nil, bundleclient.ToError(meta, d, err, nil)
 	}
 
 	return []*schema.ResourceData{d}, nil

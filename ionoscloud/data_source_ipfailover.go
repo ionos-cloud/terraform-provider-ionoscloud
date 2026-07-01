@@ -68,12 +68,12 @@ func dataSourceIpFailoverRead(ctx context.Context, d *schema.ResourceData, meta 
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return diagutil.ToDiags(d, fmt.Errorf("unable to find the LAN with ID: %s, datacenter ID: %s", lanID, dcID), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("unable to find the LAN with ID: %s, datacenter ID: %s", lanID, dcID), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while fetching LAN with ID: %s, datacenter ID: %s, err: %w", lanID, dcID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error while fetching LAN with ID: %s, datacenter ID: %s, err: %w", lanID, dcID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	if lan.Properties == nil || lan.Properties.IpFailover == nil {
-		return diagutil.ToDiags(d, fmt.Errorf("expected a LAN response containing IP failover groups but received 'nil' instead"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("expected a LAN response containing IP failover groups but received 'nil' instead"), nil)
 	}
 
 	ipFailoverGroups := lan.Properties.IpFailover
@@ -87,7 +87,7 @@ func dataSourceIpFailoverRead(ctx context.Context, d *schema.ResourceData, meta 
 				d.SetId(uuidgen.GenerateUuidFromName(ip))
 
 				if err := d.Set("nicuuid", *ipFailoverGroup.NicUuid); err != nil {
-					return diagutil.ToDiags(d, utils.GenerateSetError(constant.ResourceIpFailover, "nicuuid", err), nil)
+					return bundleclient.ToDiags(meta, d, utils.GenerateSetError(constant.ResourceIpFailover, "nicuuid", err), nil)
 				}
 				ipFailoverGroupFound = true
 				// After we find the IP Failover Group, we can stop searching since the IP is unique
@@ -97,7 +97,7 @@ func dataSourceIpFailoverRead(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	if !ipFailoverGroupFound {
-		return diagutil.ToDiags(d, fmt.Errorf("IP Failover Group with IP: %s does not exist in the LAN with ID: %s, datacenter ID: %s", ip, lanID, dcID), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("IP Failover Group with IP: %s does not exist in the LAN with ID: %s, datacenter ID: %s", ip, lanID, dcID), nil)
 	}
 	return nil
 }

@@ -331,9 +331,13 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, terraformVer
 
 	client := bundleclient.New(ctx, clientOptions, fileConfig)
 
-	diagutil.SetupContractNumberResolver(d.Get("contract_number").(string), token, func() string {
-		return contractservice.GetContractNumber(ctx, client)
-	})
+	contractNumber := d.Get("contract_number").(string)
+	contractFallback := func() string { return contractservice.GetContractNumber(ctx, client) }
+	// Per-configuration enricher: the contract number travels with this
+	// configuration's bundle instead of process-global state, so concurrent
+	// provider configurations cannot overwrite one another's contract number.
+	client.Diags = diagutil.NewEnricher(contractNumber, token, contractFallback)
+	client.UserS3Client.Diags = client.Diags
 
 	return *client, nil
 }

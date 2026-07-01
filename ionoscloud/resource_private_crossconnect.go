@@ -134,13 +134,13 @@ func resourcePrivateCrossConnectCreate(ctx context.Context, d *schema.ResourceDa
 
 	if err != nil {
 		d.SetId("")
-		return diagutil.ToDiags(d, fmt.Errorf("error creating cross connect: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error creating cross connect: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	d.SetId(*rsp.Id)
 	tflog.Info(ctx, "created PCC", map[string]any{"pcc_id": d.Id()})
 
-	if diags := waitForPCCToBeReady(ctx, d, client); diags != nil {
+	if diags := waitForPCCToBeReady(ctx, d, meta, client); diags != nil {
 		return diags
 	}
 	return resourcePrivateCrossConnectRead(ctx, d, meta)
@@ -161,13 +161,13 @@ func resourcePrivateCrossConnectRead(ctx context.Context, d *schema.ResourceData
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while fetching PCC: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error while fetching PCC: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	tflog.Info(ctx, "retrieved PCC", map[string]any{"pcc_id": d.Id()})
 
 	if err = setPccDataSource(d, &pcc); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 	return nil
 }
@@ -211,9 +211,9 @@ func resourcePrivateCrossConnectUpdate(ctx context.Context, d *schema.ResourceDa
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while updating PCC: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error while updating PCC: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
-	if diags := waitForPCCToBeReady(ctx, d, client); diags != nil {
+	if diags := waitForPCCToBeReady(ctx, d, meta, client); diags != nil {
 		return diags
 	}
 
@@ -235,7 +235,7 @@ func resourcePrivateCrossConnectDelete(ctx context.Context, d *schema.ResourceDa
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while deleting PCC: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error while deleting PCC: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	for {
@@ -244,7 +244,7 @@ func resourcePrivateCrossConnectDelete(ctx context.Context, d *schema.ResourceDa
 		pccDeleted, dsErr := privateCrossConnectDeleted(ctx, client, d)
 
 		if dsErr != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("error while deleting PCC: %w", dsErr), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("error while deleting PCC: %w", dsErr), nil)
 		}
 
 		if pccDeleted {
@@ -257,7 +257,7 @@ func resourcePrivateCrossConnectDelete(ctx context.Context, d *schema.ResourceDa
 			tflog.Info(ctx, "PCC not yet deleted, retrying")
 		case <-ctx.Done():
 			tflog.Info(ctx, "PCC delete timed out")
-			return diagutil.ToDiags(d, fmt.Errorf("pcc removal timed out! WARNING: your pcc will still probably be removed after some time but the terraform state won't reflect that; check the updates in your IONOS CLOUD account"), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("pcc removal timed out! WARNING: your pcc will still probably be removed after some time but the terraform state won't reflect that; check the updates in your IONOS CLOUD account"), nil)
 		}
 	}
 
@@ -288,26 +288,26 @@ func resourcePrivateCrossConnectImport(ctx context.Context, d *schema.ResourceDa
 	if err != nil {
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("unable to find PCC %q", pccID), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return nil, bundleclient.ToError(meta, d, fmt.Errorf("unable to find PCC %q", pccID), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
-		return nil, diagutil.ToError(d, fmt.Errorf("unable to retrieve PCC, error: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return nil, bundleclient.ToError(meta, d, fmt.Errorf("unable to retrieve PCC, error: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	tflog.Info(ctx, "PCC found", map[string]any{"pcc_id": *pcc.Id})
 
 	d.SetId(*pcc.Id)
 	if err := d.Set("name", *pcc.Properties.Name); err != nil {
-		return nil, diagutil.ToError(d, err, nil)
+		return nil, bundleclient.ToError(meta, d, err, nil)
 	}
 	if err := d.Set("description", *pcc.Properties.Description); err != nil {
-		return nil, diagutil.ToError(d, err, nil)
+		return nil, bundleclient.ToError(meta, d, err, nil)
 	}
 	if err := d.Set("location", location); err != nil {
 		return nil, err
 	}
 
 	if err = setPccDataSource(d, &pcc); err != nil {
-		return nil, diagutil.ToError(d, err, nil)
+		return nil, bundleclient.ToError(meta, d, err, nil)
 	}
 
 	tflog.Info(ctx, "importing PCC", map[string]any{"pcc_id": d.Id()})
@@ -338,14 +338,14 @@ func privateCrossConnectDeleted(ctx context.Context, client *ionoscloud.APIClien
 	return false, nil
 }
 
-func waitForPCCToBeReady(ctx context.Context, d *schema.ResourceData, client *ionoscloud.APIClient) diag.Diagnostics {
+func waitForPCCToBeReady(ctx context.Context, d *schema.ResourceData, meta any, client *ionoscloud.APIClient) diag.Diagnostics {
 	for {
 		tflog.Info(ctx, "waiting for PCC to be ready", map[string]any{"pcc_id": d.Id()})
 
 		pccReady, rsErr := privateCrossConnectReady(ctx, client, d)
 
 		if rsErr != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("error while checking readiness status of PCC: %w", rsErr), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("error while checking readiness status of PCC: %w", rsErr), nil)
 		}
 
 		if pccReady {
@@ -358,7 +358,7 @@ func waitForPCCToBeReady(ctx context.Context, d *schema.ResourceData, client *io
 			tflog.Info(ctx, "PCC not ready, retrying")
 		case <-ctx.Done():
 			tflog.Info(ctx, "PCC update timed out")
-			return diagutil.ToDiags(d, fmt.Errorf("pcc readiness check timed out! WARNING: your pcc will still probably be created/updated after some time "+
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("pcc readiness check timed out! WARNING: your pcc will still probably be created/updated after some time "+
 				"but the terraform state wont reflect that; check your IONOS CLOUD account to see the updates"), nil)
 		}
 	}

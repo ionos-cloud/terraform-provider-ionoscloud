@@ -157,17 +157,17 @@ func resourceCDNDistributionCreate(ctx context.Context, d *schema.ResourceData, 
 	if routingRules, err := cdnservice.GetRoutingRulesData(d); err == nil {
 		distribution.Properties.RoutingRules = *routingRules
 	} else {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 
 	createdDistribution, apiResponse, err := client.SdkClient.DistributionsApi.DistributionsPost(ctx).DistributionCreate(distribution).Execute()
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error creating CDN distribution: (%w)", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error creating CDN distribution: (%w)", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	d.SetId(createdDistribution.Id)
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsDistributionReady)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error occurred while checking the status for the CDN Distribution: %w", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error occurred while checking the status for the CDN Distribution: %w", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String()})
 	}
 
 	tflog.Info(ctx, "CDN distribution created", map[string]any{"distribution_id": d.Id()})
@@ -185,13 +185,13 @@ func resourceCDNDistributionRead(ctx context.Context, d *schema.ResourceData, me
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while fetching CDN distribution: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error while fetching CDN distribution: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	tflog.Info(ctx, "retrieved CDN distribution", map[string]any{"distribution_id": d.Id()})
 
 	if err := cdnservice.SetDistributionData(d, distribution); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 
 	return nil
@@ -217,18 +217,18 @@ func resourceCDNDistributionUpdate(ctx context.Context, d *schema.ResourceData, 
 	if routingRules, err := cdnservice.GetRoutingRulesData(d); err == nil {
 		request.Properties.RoutingRules = *routingRules
 	} else {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 
 	_, apiResponse, err := client.SdkClient.DistributionsApi.DistributionsPut(ctx, d.Id()).DistributionUpdate(request).Execute()
 
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating a CDN distribution ID %s %w",
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while updating a CDN distribution ID %s %w",
 			d.Id(), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsDistributionReady)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error occurred while checking the status for the CDN Distribution: %w", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error occurred while checking the status for the CDN Distribution: %w", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String()})
 	}
 
 	return resourceCDNDistributionRead(ctx, d, meta)
@@ -240,7 +240,7 @@ func resourceCDNDistributionDelete(ctx context.Context, d *schema.ResourceData, 
 	apiResponse, err := client.SdkClient.DistributionsApi.DistributionsDelete(ctx, d.Id()).Execute()
 
 	if err != nil {
-		return diagutil.ToDiags(d, err, &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, err, &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	d.SetId("")
@@ -257,15 +257,15 @@ func resourceCDNDistributionImport(ctx context.Context, d *schema.ResourceData, 
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("registry does not exist %q", distributionID), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return nil, bundleclient.ToError(meta, d, fmt.Errorf("registry does not exist %q", distributionID), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
-		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the import of CDN distribution %q, error:%w", distributionID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return nil, bundleclient.ToError(meta, d, fmt.Errorf("an error occurred while trying to fetch the import of CDN distribution %q, error:%w", distributionID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	tflog.Info(ctx, "CDN distribution imported", map[string]any{"distribution_id": distributionID})
 
 	if err := cdnservice.SetDistributionData(d, distribution); err != nil {
-		return nil, diagutil.ToError(d, err, nil)
+		return nil, bundleclient.ToError(meta, d, err, nil)
 	}
 
 	return []*schema.ResourceData{d}, nil

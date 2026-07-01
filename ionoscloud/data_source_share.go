@@ -55,19 +55,19 @@ func dataSourceShareRead(ctx context.Context, d *schema.ResourceData, meta any) 
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		if httpNotFound(apiResponse) {
-			return diagutil.ToDiags(d, fmt.Errorf("group_id %s resource_id %s not found", groupID, resourceID), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("group_id %s resource_id %s not found", groupID, resourceID), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching a share with group_id %s resource_id %s %w", groupID, resourceID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching a share with group_id %s resource_id %s %w", groupID, resourceID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	if rsp.Properties == nil {
-		return diagutil.ToDiags(d, fmt.Errorf("no properties found in the response"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("no properties found in the response"), nil)
 	}
 	d.SetId(*rsp.Id)
 	if err := d.Set("edit_privilege", *rsp.Properties.EditPrivilege); err != nil {
-		return diagutil.ToDiags(d, utils.GenerateSetError("share", "edit_privilege", err), nil)
+		return bundleclient.ToDiags(meta, d, utils.GenerateSetError("share", "edit_privilege", err), nil)
 	}
 	if err := d.Set("share_privilege", *rsp.Properties.SharePrivilege); err != nil {
-		return diagutil.ToDiags(d, utils.GenerateSetError("share", "share_privilege", err), nil)
+		return bundleclient.ToDiags(meta, d, utils.GenerateSetError("share", "share_privilege", err), nil)
 	}
 	return nil
 }

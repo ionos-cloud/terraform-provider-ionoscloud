@@ -111,7 +111,7 @@ func resourceKafkaClusterCreate(ctx context.Context, d *schema.ResourceData, met
 	createdCluster, apiResponse, err := client.CreateCluster(ctx, d)
 	if err != nil {
 		d.SetId("")
-		return diagutil.ToDiags(d, fmt.Errorf("error creating Kafka Cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error creating Kafka Cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	d.SetId(createdCluster.Id)
@@ -122,7 +122,7 @@ func resourceKafkaClusterCreate(ctx context.Context, d *schema.ResourceData, met
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsClusterAvailable)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while Kafka Cluster waiting to be ready: %w", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while Kafka Cluster waiting to be ready: %w", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String()})
 	}
 
 	return resourceKafkaClusterRead(ctx, d, meta)
@@ -137,13 +137,13 @@ func resourceKafkaClusterRead(ctx context.Context, d *schema.ResourceData, meta 
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while fetching Kafka Cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error while fetching Kafka Cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	tflog.Info(ctx, "retrieved Kafka cluster", map[string]any{"cluster_id": d.Id()})
 
 	if err := client.SetKafkaClusterData(d, &cluster); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 
 	return nil
@@ -158,12 +158,12 @@ func resourceKafkaClusterDelete(ctx context.Context, d *schema.ResourceData, met
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while deleting Kafka Cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error while deleting Kafka Cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsClusterDeleted)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("the check for Kafka Cluster deletion failed with the following error: %w", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("the check for Kafka Cluster deletion failed with the following error: %w", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String()})
 	}
 
 	d.SetId("")
@@ -174,18 +174,18 @@ func resourceKafkaClusterDelete(ctx context.Context, d *schema.ResourceData, met
 func resourceKafkaClusterImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), ":")
 	if len(parts) != 2 {
-		return nil, diagutil.ToError(d, fmt.Errorf("expected ID in the format location:cluster_id"), nil)
+		return nil, bundleclient.ToError(meta, d, fmt.Errorf("expected ID in the format location:cluster_id"), nil)
 	}
 
 	location := parts[0]
 	if err := d.Set("location", location); err != nil {
-		return nil, diagutil.ToError(d, fmt.Errorf("failed to set location Kafka Cluster for import: %w", err), nil)
+		return nil, bundleclient.ToError(meta, d, fmt.Errorf("failed to set location Kafka Cluster for import: %w", err), nil)
 	}
 	d.SetId(parts[1])
 
 	diags := resourceKafkaClusterRead(ctx, d, meta)
 	if diags != nil && diags.HasError() {
-		return nil, diagutil.ToError(d, errors.New(diags[0].Summary), nil)
+		return nil, bundleclient.ToError(meta, d, errors.New(diags[0].Summary), nil)
 	}
 
 	return []*schema.ResourceData{d}, nil

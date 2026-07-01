@@ -76,20 +76,20 @@ func dataSourceGpuRead(ctx context.Context, d *schema.ResourceData, meta any) di
 	name, nameOk := d.GetOk("name")
 
 	if idOk && nameOk {
-		return diagutil.ToDiags(d, fmt.Errorf("ID and name cannot be both specified at the same time"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("ID and name cannot be both specified at the same time"), nil)
 	}
 	if !idOk && !nameOk {
-		return diagutil.ToDiags(d, fmt.Errorf("please provide either the GPU ID or name"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("please provide either the GPU ID or name"), nil)
 	}
 
 	idStr, idIsString := id.(string)
 	if idOk && (!idIsString || idStr == "") {
-		return diagutil.ToDiags(d, fmt.Errorf("the provided ID is not valid"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("the provided ID is not valid"), nil)
 	}
 
 	nameStr, nameIsString := name.(string)
 	if nameOk && (!nameIsString || nameStr == "") {
-		return diagutil.ToDiags(d, fmt.Errorf("the provided name is not valid"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("the provided name is not valid"), nil)
 	}
 
 	var gpu ionoscloud.Gpu
@@ -101,7 +101,7 @@ func dataSourceGpuRead(ctx context.Context, d *schema.ResourceData, meta any) di
 			DatacentersServersGPUsFindById(ctx, datacenterID, serverID, idStr).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching GPU with ID %s: %w", idStr, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching GPU with ID %s: %w", idStr, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 	} else {
 		/* search by name */
@@ -110,7 +110,7 @@ func dataSourceGpuRead(ctx context.Context, d *schema.ResourceData, meta any) di
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching GPUs: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching GPUs: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 
 		var results []ionoscloud.Gpu
@@ -119,12 +119,12 @@ func dataSourceGpuRead(ctx context.Context, d *schema.ResourceData, meta any) di
 				if g.Properties != nil && g.Properties.Name != nil && *g.Properties.Name == nameStr {
 					/* GPU found */
 					if g.Id == nil {
-						return diagutil.ToDiags(d, fmt.Errorf("GPU found with name %s but returned without an ID", nameStr), nil)
+						return bundleclient.ToDiags(meta, d, fmt.Errorf("GPU found with name %s but returned without an ID", nameStr), nil)
 					}
 					gpu, apiResponse, err = client.GraphicsProcessingUnitCardsApi.DatacentersServersGPUsFindById(ctx, datacenterID, serverID, *g.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {
-						return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching GPU %s: %w", *g.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+						return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching GPU %s: %w", *g.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 					}
 					results = append(results, gpu)
 				}
@@ -133,46 +133,46 @@ func dataSourceGpuRead(ctx context.Context, d *schema.ResourceData, meta any) di
 
 		switch {
 		case len(results) == 0:
-			return diagutil.ToDiags(d, fmt.Errorf("no GPU found with the specified criteria: name = %s", nameStr), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("no GPU found with the specified criteria: name = %s", nameStr), nil)
 		case len(results) > 1:
-			return diagutil.ToDiags(d, fmt.Errorf("more than one GPU found with the specified criteria: name = %s", nameStr), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("more than one GPU found with the specified criteria: name = %s", nameStr), nil)
 		default:
 			gpu = results[0]
 		}
 	}
 
 	if gpu.Id == nil {
-		return diagutil.ToDiags(d, fmt.Errorf("GPU returned without an ID"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("GPU returned without an ID"), nil)
 	}
 
 	d.SetId(*gpu.Id)
 
 	if err := d.Set("datacenter_id", datacenterID); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 	if err := d.Set("server_id", serverID); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 
 	if gpu.Properties != nil {
 		if gpu.Properties.Name != nil {
 			if err := d.Set("name", *gpu.Properties.Name); err != nil {
-				return diagutil.ToDiags(d, err, nil)
+				return bundleclient.ToDiags(meta, d, err, nil)
 			}
 		}
 		if gpu.Properties.Vendor != nil {
 			if err := d.Set("vendor", *gpu.Properties.Vendor); err != nil {
-				return diagutil.ToDiags(d, err, nil)
+				return bundleclient.ToDiags(meta, d, err, nil)
 			}
 		}
 		if gpu.Properties.Type != nil {
 			if err := d.Set("type", *gpu.Properties.Type); err != nil {
-				return diagutil.ToDiags(d, err, nil)
+				return bundleclient.ToDiags(meta, d, err, nil)
 			}
 		}
 		if gpu.Properties.Model != nil {
 			if err := d.Set("model", *gpu.Properties.Model); err != nil {
-				return diagutil.ToDiags(d, err, nil)
+				return bundleclient.ToDiags(meta, d, err, nil)
 			}
 		}
 	}

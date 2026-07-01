@@ -26,6 +26,7 @@ var (
 
 type bucketWebsiteConfiguration struct {
 	client *objectstorage.Client
+	diags  *diagutil.Enricher
 }
 
 func (r *bucketWebsiteConfiguration) ConfigValidators(ctx context.Context) []resource.ConfigValidator {
@@ -174,6 +175,7 @@ func (r *bucketWebsiteConfiguration) Configure(_ context.Context, req resource.C
 	}
 
 	r.client = clientBundle.S3Client
+	r.diags = clientBundle.Diags
 }
 
 // Create creates the bucket website configuration.
@@ -190,7 +192,7 @@ func (r *bucketWebsiteConfiguration) Create(ctx context.Context, req resource.Cr
 	}
 
 	if err := r.client.CreateBucketWebsite(ctx, data); err != nil {
-		resp.Diagnostics.AddError("Failed to create resource", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
+		resp.Diagnostics.AddError("Failed to create resource", r.diags.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
 		return
 	}
 
@@ -212,7 +214,7 @@ func (r *bucketWebsiteConfiguration) Read(ctx context.Context, req resource.Read
 
 	result, found, err := r.client.GetBucketWebsite(ctx, data.Bucket)
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to read resource", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
+		resp.Diagnostics.AddError("Failed to read resource", r.diags.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
 		return
 	}
 
@@ -244,7 +246,7 @@ func (r *bucketWebsiteConfiguration) Update(ctx context.Context, req resource.Up
 	}
 
 	if err := r.client.UpdateBucketWebsite(ctx, data); err != nil {
-		resp.Diagnostics.AddError("Failed to update resource", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
+		resp.Diagnostics.AddError("Failed to update resource", r.diags.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
 		return
 	}
 
@@ -265,7 +267,7 @@ func (r *bucketWebsiteConfiguration) Delete(ctx context.Context, req resource.De
 	}
 
 	if err := r.client.DeleteBucketWebsite(ctx, data.Bucket); err != nil {
-		resp.Diagnostics.AddError("Failed to delete resource", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
+		resp.Diagnostics.AddError("Failed to delete resource", r.diags.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
 		return
 	}
 }

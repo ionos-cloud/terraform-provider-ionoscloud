@@ -26,6 +26,7 @@ func NewObjectDataSource() datasource.DataSource {
 
 type objectDataSource struct {
 	client *objectstorage.Client
+	diags  *diagutil.Enricher
 }
 
 // Metadata returns the metadata for the object data source.
@@ -52,6 +53,7 @@ func (d *objectDataSource) Configure(ctx context.Context, req datasource.Configu
 	}
 
 	d.client = clientBundle.S3Client
+	d.diags = clientBundle.Diags
 }
 
 // Schema returns the schema for the object data source.
@@ -161,7 +163,7 @@ func (d *objectDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 
 	result, found, err := d.client.GetObjectForDataSource(ctx, data)
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to read resource", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString() + "/" + data.Key.ValueString()}).Error())
+		resp.Diagnostics.AddError("Failed to read resource", d.diags.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString() + "/" + data.Key.ValueString()}).Error())
 		return
 	}
 

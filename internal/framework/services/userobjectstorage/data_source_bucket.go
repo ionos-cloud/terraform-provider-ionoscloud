@@ -23,6 +23,7 @@ func NewBucketDataSource() datasource.DataSource {
 
 type bucketDataSource struct {
 	client *userobjectstorage.Client
+	diags  *diagutil.Enricher
 }
 
 type bucketDataSourceModel struct {
@@ -76,6 +77,7 @@ func (d *bucketDataSource) Configure(_ context.Context, req datasource.Configure
 		return
 	}
 	d.client = clientBundle.UserS3Client
+	d.diags = clientBundle.Diags
 }
 
 // Read reads the data source.
@@ -93,7 +95,7 @@ func (d *bucketDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 
 	found, err := d.client.GetBucket(ctx, data.Name.ValueString(), data.Region.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("failed to get bucket", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Name.ValueString()}).Error())
+		resp.Diagnostics.AddError("failed to get bucket", d.diags.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Name.ValueString()}).Error())
 		return
 	}
 	if !found {
@@ -103,19 +105,19 @@ func (d *bucketDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 
 	objectLockEnabled, err := d.client.GetObjectLockEnabled(ctx, data.Name.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("failed to get object lock configuration", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Name.ValueString()}).Error())
+		resp.Diagnostics.AddError("failed to get object lock configuration", d.diags.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Name.ValueString()}).Error())
 		return
 	}
 
 	rawTags, err := d.client.GetBucketTags(ctx, data.Name.ValueString(), data.Region.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("failed to get bucket tags", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Name.ValueString()}).Error())
+		resp.Diagnostics.AddError("failed to get bucket tags", d.diags.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Name.ValueString()}).Error())
 		return
 	}
 
 	tagsMap, tagsErr := tags.KeyValueTags(rawTags).ToMap(ctx)
 	if tagsErr != nil {
-		resp.Diagnostics.AddError("failed to convert bucket tags", diagutil.WrapError(tagsErr, &diagutil.ErrorContext{ResourceName: data.Name.ValueString()}).Error())
+		resp.Diagnostics.AddError("failed to convert bucket tags", d.diags.WrapError(tagsErr, &diagutil.ErrorContext{ResourceName: data.Name.ValueString()}).Error())
 		return
 	}
 

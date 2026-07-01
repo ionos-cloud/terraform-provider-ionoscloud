@@ -77,15 +77,15 @@ func resourceNSGCreate(ctx context.Context, d *schema.ResourceData, meta any) di
 	apiResponse.LogInfo()
 	if err != nil {
 		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating a Network Security Group for datacenter dcID: %s, %w", datacenterID, err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while creating a Network Security Group for datacenter dcID: %s, %w", datacenterID, err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
 		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while waiting for Network Security Group to be created for datacenter dcID: %s,  %w", datacenterID, errState), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while waiting for Network Security Group to be created for datacenter dcID: %s,  %w", datacenterID, errState), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 	d.SetId(*securityGroup.Id)
 
-	return diagutil.ToDiags(d, setNSGData(d, &securityGroup), nil)
+	return bundleclient.ToDiags(meta, d, setNSGData(d, &securityGroup), nil)
 }
 
 func resourceNSGRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
@@ -100,11 +100,11 @@ func resourceNSGRead(ctx context.Context, d *schema.ResourceData, meta any) diag
 	securityGroup, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsFindById(ctx, datacenterID, d.Id()).Depth(2).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while retrieving a network security group: %w", err), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while retrieving a network security group: %w", err), nil)
 	}
 
 	if err := setNSGData(d, &securityGroup); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 	return nil
 }
@@ -131,12 +131,12 @@ func resourceNSGUpdate(ctx context.Context, d *schema.ResourceData, meta any) di
 	apiResponse.LogInfo()
 	if err != nil {
 		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating network security group: dcID: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while updating network security group: dcID: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
 		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while waiting for Network Security Group to be updated for datacenter dcID: %s,  %w", datacenterID, errState), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while waiting for Network Security Group to be updated for datacenter dcID: %s,  %w", datacenterID, errState), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	return resourceNSGRead(ctx, d, meta)
@@ -155,12 +155,12 @@ func resourceNSGDelete(ctx context.Context, d *schema.ResourceData, meta any) di
 	apiResponse.LogInfo()
 	if err != nil {
 		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while deleting a network security group: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while deleting a network security group: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
 		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while waiting for Network Security Group to be deleted for datacenter dcID: %s,  %w", datacenterID, errState), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while waiting for Network Security Group to be deleted for datacenter dcID: %s,  %w", datacenterID, errState), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	return nil
@@ -175,7 +175,7 @@ func resourceNSGImport(ctx context.Context, d *schema.ResourceData, meta any) ([
 	}
 
 	if err := validateImportIDParts(parts); err != nil {
-		return nil, diagutil.ToError(d, fmt.Errorf("failed validating import identifier %q: %w", importID, err), nil)
+		return nil, bundleclient.ToError(meta, d, fmt.Errorf("failed validating import identifier %q: %w", importID, err), nil)
 	}
 
 	datacenterID := parts[0]
@@ -192,20 +192,20 @@ func resourceNSGImport(ctx context.Context, d *schema.ResourceData, meta any) ([
 	if err != nil {
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("unable to find Network Security Group %q", nsgID), nil)
+			return nil, bundleclient.ToError(meta, d, fmt.Errorf("unable to find Network Security Group %q", nsgID), nil)
 		}
-		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while retrieving the Network Security Group, %w", err), nil)
+		return nil, bundleclient.ToError(meta, d, fmt.Errorf("an error occurred while retrieving the Network Security Group, %w", err), nil)
 	}
 
 	tflog.Info(ctx, "NSG imported", map[string]any{"nsg_id": nsgID, "datacenter_id": datacenterID})
 	if err = d.Set("datacenter_id", datacenterID); err != nil {
-		return nil, diagutil.ToError(d, err, nil)
+		return nil, bundleclient.ToError(meta, d, err, nil)
 	}
 	if err = d.Set("location", location); err != nil {
 		return nil, err
 	}
 	if err = setNSGData(d, &nsg); err != nil {
-		return nil, diagutil.ToError(d, err, nil)
+		return nil, bundleclient.ToError(meta, d, err, nil)
 	}
 
 	return []*schema.ResourceData{d}, nil

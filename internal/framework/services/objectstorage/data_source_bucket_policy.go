@@ -22,6 +22,7 @@ func NewBucketPolicyDataSource() datasource.DataSource {
 
 type bucketPolicyDataSource struct {
 	client *objectstorage.Client
+	diags  *diagutil.Enricher
 }
 
 // Metadata returns the metadata for the data source.
@@ -48,6 +49,7 @@ func (d *bucketPolicyDataSource) Configure(ctx context.Context, req datasource.C
 	}
 
 	d.client = clientBundle.S3Client
+	d.diags = clientBundle.Diags
 }
 
 // Schema returns the schema for the data source.
@@ -82,7 +84,7 @@ func (d *bucketPolicyDataSource) Read(ctx context.Context, req datasource.ReadRe
 
 	result, found, err := d.client.GetBucketPolicy(ctx, data.Bucket)
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to read resource", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
+		resp.Diagnostics.AddError("Failed to read resource", d.diags.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
 		return
 	}
 

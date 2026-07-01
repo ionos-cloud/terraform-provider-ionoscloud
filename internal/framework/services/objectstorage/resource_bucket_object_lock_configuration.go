@@ -28,6 +28,7 @@ var (
 
 type objectLockConfiguration struct {
 	client *objectstorage.Client
+	diags  *diagutil.Enricher
 }
 
 // NewObjectLockConfigurationResource creates a new resource for the bucket object lock configuration resource.
@@ -114,6 +115,7 @@ func (r *objectLockConfiguration) Configure(_ context.Context, req resource.Conf
 	}
 
 	r.client = clientBundle.S3Client
+	r.diags = clientBundle.Diags
 }
 
 // Create creates the bucket object lock configuration resource.
@@ -130,7 +132,7 @@ func (r *objectLockConfiguration) Create(ctx context.Context, req resource.Creat
 	}
 
 	if err := r.client.CreateObjectLock(ctx, data); err != nil {
-		resp.Diagnostics.AddError("Failed to create resource", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
+		resp.Diagnostics.AddError("Failed to create resource", r.diags.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
 		return
 	}
 
@@ -152,7 +154,7 @@ func (r *objectLockConfiguration) Read(ctx context.Context, req resource.ReadReq
 
 	result, found, err := r.client.GetObjectLock(ctx, data.Bucket)
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to read resource", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
+		resp.Diagnostics.AddError("Failed to read resource", r.diags.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
 		return
 	}
 
@@ -184,7 +186,7 @@ func (r *objectLockConfiguration) Update(ctx context.Context, req resource.Updat
 	}
 
 	if err := r.client.UpdateObjectLock(ctx, data); err != nil {
-		resp.Diagnostics.AddError("Failed to update resource", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
+		resp.Diagnostics.AddError("Failed to update resource", r.diags.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
 		return
 	}
 

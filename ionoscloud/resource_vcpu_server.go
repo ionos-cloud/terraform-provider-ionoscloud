@@ -8,9 +8,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/serverutil"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
-	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 func resourceVCPUServer() *schema.Resource {
@@ -290,7 +290,7 @@ func resourceVCPUServer() *schema.Resource {
 
 func resourceVCPUServerCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	if err := d.Set("type", constant.VCPUType); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 	return resourceServerCreate(ctx, d, meta)
 }

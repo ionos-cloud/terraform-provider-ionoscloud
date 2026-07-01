@@ -36,6 +36,7 @@ func NewBucketResource() resource.Resource {
 
 type bucketResource struct {
 	client *userobjectstorage.Client
+	diags  *diagutil.Enricher
 }
 
 type bucketResourceModel struct {
@@ -124,6 +125,7 @@ func (r *bucketResource) Configure(_ context.Context, req resource.ConfigureRequ
 		return
 	}
 	r.client = clientBundle.UserS3Client
+	r.diags = clientBundle.Diags
 }
 
 // Create provisions the bucket.
@@ -148,13 +150,13 @@ func (r *bucketResource) Create(ctx context.Context, req resource.CreateRequest,
 	defer cancel()
 
 	if err := r.client.CreateBucket(ctx, data.Name.ValueString(), data.Region.ValueString(), data.ObjectLockEnabled.ValueBool(), createTimeout); err != nil {
-		resp.Diagnostics.AddError("failed to create bucket", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Name.ValueString()}).Error())
+		resp.Diagnostics.AddError("failed to create bucket", r.diags.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Name.ValueString()}).Error())
 		return
 	}
 
 	if !data.Tags.IsNull() && len(data.Tags.Elements()) > 0 {
 		if err := r.client.PutBucketTags(ctx, data.Name.ValueString(), data.Region.ValueString(), tags.NewFromMap(data.Tags)); err != nil {
-			resp.Diagnostics.AddError("failed to set bucket tags", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Name.ValueString()}).Error())
+			resp.Diagnostics.AddError("failed to set bucket tags", r.diags.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Name.ValueString()}).Error())
 			return
 		}
 	}
@@ -186,7 +188,7 @@ func (r *bucketResource) Read(ctx context.Context, req resource.ReadRequest, res
 
 	found, err := r.client.GetBucket(ctx, data.Name.ValueString(), data.Region.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("Bucket API error", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Name.ValueString()}).Error())
+		resp.Diagnostics.AddError("Bucket API error", r.diags.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Name.ValueString()}).Error())
 		return
 	}
 	if !found {
@@ -196,19 +198,19 @@ func (r *bucketResource) Read(ctx context.Context, req resource.ReadRequest, res
 
 	objectLockEnabled, err := r.client.GetObjectLockEnabled(ctx, data.Name.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("failed to get object lock configuration", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Name.ValueString()}).Error())
+		resp.Diagnostics.AddError("failed to get object lock configuration", r.diags.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Name.ValueString()}).Error())
 		return
 	}
 
 	rawTags, err := r.client.GetBucketTags(ctx, data.Name.ValueString(), data.Region.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("failed to get bucket tags", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Name.ValueString()}).Error())
+		resp.Diagnostics.AddError("failed to get bucket tags", r.diags.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Name.ValueString()}).Error())
 		return
 	}
 
 	tagsMap, err := tags.KeyValueTags(rawTags).ToMap(ctx)
 	if err != nil {
-		resp.Diagnostics.AddError("failed to convert bucket tags", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Name.ValueString()}).Error())
+		resp.Diagnostics.AddError("failed to convert bucket tags", r.diags.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Name.ValueString()}).Error())
 		return
 	}
 
@@ -230,12 +232,12 @@ func (r *bucketResource) Update(ctx context.Context, req resource.UpdateRequest,
 	if !plan.Tags.Equal(state.Tags) {
 		if plan.Tags.IsNull() || len(plan.Tags.Elements()) == 0 {
 			if err := r.client.DeleteBucketTags(ctx, plan.Name.ValueString(), plan.Region.ValueString()); err != nil {
-				resp.Diagnostics.AddError("failed to delete bucket tags", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: plan.Name.ValueString()}).Error())
+				resp.Diagnostics.AddError("failed to delete bucket tags", r.diags.WrapError(err, &diagutil.ErrorContext{ResourceName: plan.Name.ValueString()}).Error())
 				return
 			}
 		} else {
 			if err := r.client.PutBucketTags(ctx, plan.Name.ValueString(), plan.Region.ValueString(), tags.NewFromMap(plan.Tags)); err != nil {
-				resp.Diagnostics.AddError("failed to update bucket tags", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: plan.Name.ValueString()}).Error())
+				resp.Diagnostics.AddError("failed to update bucket tags", r.diags.WrapError(err, &diagutil.ErrorContext{ResourceName: plan.Name.ValueString()}).Error())
 				return
 			}
 		}
@@ -267,7 +269,7 @@ func (r *bucketResource) Delete(ctx context.Context, req resource.DeleteRequest,
 	defer cancel()
 
 	if err := r.client.DeleteBucket(ctx, data.Name.ValueString(), data.Region.ValueString(), data.ForceDestroy.ValueBool(), deleteTimeout); err != nil {
-		resp.Diagnostics.AddError("failed to delete bucket", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Name.ValueString()}).Error())
+		resp.Diagnostics.AddError("failed to delete bucket", r.diags.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Name.ValueString()}).Error())
 	}
 }
 

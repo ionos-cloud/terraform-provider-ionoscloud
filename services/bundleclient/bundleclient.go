@@ -40,6 +40,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/vpn"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/configlog"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 // New creates a new SdkBundle client
@@ -81,6 +82,12 @@ type SdkBundle struct {
 	S3Client          *objectstorageservice.Client
 	UserS3Client      *userobjectstorageservice.Client
 	MonitoringClient  *monitoringservice.Client
+
+	// Diags carries per-configuration error-enrichment context (currently the
+	// contract number). Set once in the provider's Configure and propagated to
+	// the per-product clients created below, so each provider configuration has
+	// its own contract number instead of sharing package-level state.
+	Diags *diagutil.Enricher
 
 	clientOptions clientoptions.TerraformClientOptions
 	fileConfig    *fileconfiguration.FileConfig
@@ -411,7 +418,9 @@ func (c SdkBundle) NewObjectStorageManagementClient(ctx context.Context) (*objec
 	))
 
 	if !c.shouldApplyOverridesCustomEnv(ctx, fileconfiguration.ObjectStorageManagement, objectstoragemanagementservice.IonosAPIURLObjectStorageManagement) {
-		return objectstoragemanagementservice.NewClientFromConfig(config), nil
+		cl := objectstoragemanagementservice.NewClientFromConfig(config)
+		cl.Diags = c.Diags
+		return cl, nil
 	}
 
 	failoverOptions := c.fileConfig.GetFailoverOptions()
@@ -464,5 +473,7 @@ func (c SdkBundle) NewObjectStorageManagementClient(ctx context.Context) (*objec
 
 	config.Servers = servers
 
-	return objectstoragemanagementservice.NewClientFromConfig(config), nil
+	cl := objectstoragemanagementservice.NewClientFromConfig(config)
+	cl.Diags = c.Diags
+	return cl, nil
 }

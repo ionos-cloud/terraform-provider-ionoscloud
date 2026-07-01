@@ -21,6 +21,7 @@ func NewBucketDataSource() datasource.DataSource {
 
 type bucketDataSource struct {
 	client *objectstorage.Client
+	diags  *diagutil.Enricher
 }
 
 // Metadata returns the metadata for the data source.
@@ -47,6 +48,7 @@ func (d *bucketDataSource) Configure(ctx context.Context, req datasource.Configu
 	}
 
 	d.client = clientBundle.S3Client
+	d.diags = clientBundle.Diags
 }
 
 // Schema returns the schema for the data source.
@@ -80,7 +82,7 @@ func (d *bucketDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 
 	result, found, err := d.client.GetBucketForDataSource(ctx, data.Name)
 	if err != nil {
-		resp.Diagnostics.AddError("failed to get bucket", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Name.ValueString()}).Error())
+		resp.Diagnostics.AddError("failed to get bucket", d.diags.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Name.ValueString()}).Error())
 		return
 	}
 

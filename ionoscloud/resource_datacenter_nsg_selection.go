@@ -82,11 +82,11 @@ func resourceDatacenterNSGSelectionRead(ctx context.Context, d *schema.ResourceD
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, err, &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, err, &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if err = setDatacenterDefaultNSGSelectionData(d, &datacenter); err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error reading default NSG for datacenter, dcID: %s, sID: %s, (%w)", dcID, nsgID, err), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error reading default NSG for datacenter, dcID: %s, sID: %s, (%w)", dcID, nsgID, err), nil)
 	}
 	return nil
 }

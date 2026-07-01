@@ -130,27 +130,27 @@ func resourceNatGatewayRuleCreate(ctx context.Context, d *schema.ResourceData, m
 		name := name.(string)
 		natGatewayRule.Properties.Name = &name
 	} else {
-		return diagutil.ToDiags(d, fmt.Errorf("name must be provided for nat gateway rule"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("name must be provided for nat gateway rule"), nil)
 	}
 
 	if sourceSubnet, sourceSubnetOk := d.GetOk("source_subnet"); sourceSubnetOk {
 		sourceSubnet := sourceSubnet.(string)
 		natGatewayRule.Properties.SourceSubnet = &sourceSubnet
 	} else {
-		return diagutil.ToDiags(d, fmt.Errorf("source subnet must be provided for nat gateway rule"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("source subnet must be provided for nat gateway rule"), nil)
 	}
 
 	if publicIp, publicIpOk := d.GetOk("public_ip"); publicIpOk {
 		publicIp := publicIp.(string)
 		natGatewayRule.Properties.PublicIp = &publicIp
 	} else {
-		return diagutil.ToDiags(d, fmt.Errorf("public Ip must be provided for nat gateway rule"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("public Ip must be provided for nat gateway rule"), nil)
 	}
 
 	if ruleType, ruleTypeOk := d.GetOk("type"); ruleTypeOk {
 
 		if strings.ToUpper(ruleType.(string)) != "SNAT" {
-			return diagutil.ToDiags(d, fmt.Errorf("attribute value '%s' not allowed. Expected one of [SNAT]", ruleType.(string)), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("attribute value '%s' not allowed. Expected one of [SNAT]", ruleType.(string)), nil)
 		}
 		ruleType := ionoscloud.NatGatewayRuleType(strings.ToUpper(ruleType.(string)))
 		natGatewayRule.Properties.Type = &ruleType
@@ -159,7 +159,7 @@ func resourceNatGatewayRuleCreate(ctx context.Context, d *schema.ResourceData, m
 	if protocol, protocolOk := d.GetOk("protocol"); protocolOk {
 		if strings.ToUpper(protocol.(string)) != "TCP" && strings.ToUpper(protocol.(string)) != "UDP" &&
 			strings.ToUpper(protocol.(string)) != "ICMP" && strings.ToUpper(protocol.(string)) != "ALL" {
-			return diagutil.ToDiags(d, fmt.Errorf("attribute value '%s' not allowed. Expected one of [TCP, UDP, ICMP, ALL]", protocol.(string)), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("attribute value '%s' not allowed. Expected one of [TCP, UDP, ICMP, ALL]", protocol.(string)), nil)
 		}
 		protocol := ionoscloud.NatGatewayRuleProtocol(strings.ToUpper(protocol.(string)))
 		natGatewayRule.Properties.Protocol = &protocol
@@ -172,7 +172,7 @@ func resourceNatGatewayRuleCreate(ctx context.Context, d *schema.ResourceData, m
 
 	if _, targetPortRangeOk := d.GetOk("target_port_range.0"); targetPortRangeOk {
 		if *natGatewayRule.Properties.Protocol == "ICMP" || *natGatewayRule.Properties.Protocol == "ALL" {
-			return diagutil.ToDiags(d, fmt.Errorf("target_port_range start/end can not be set if protocol is ICMP or ALL or not provided"), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("target_port_range start/end can not be set if protocol is ICMP or ALL or not provided"), nil)
 		}
 		natGatewayRule.Properties.TargetPortRange = &ionoscloud.TargetPortRange{}
 	}
@@ -196,7 +196,7 @@ func resourceNatGatewayRuleCreate(ctx context.Context, d *schema.ResourceData, m
 	if err != nil {
 		d.SetId("")
 		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, fmt.Errorf("error creating nat gateway rule: %w \n ApiError %s", err, responseBody(apiResponse)), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error creating nat gateway rule: %w \n ApiError %s", err, responseBody(apiResponse)), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	d.SetId(*natGatewayRuleResp.Id)
@@ -206,7 +206,7 @@ func resourceNatGatewayRuleCreate(ctx context.Context, d *schema.ResourceData, m
 			d.SetId("")
 		}
 		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
+		return bundleclient.ToDiags(meta, d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	return resourceNatGatewayRuleRead(ctx, d, meta)
@@ -236,7 +236,7 @@ func resourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, met
 	tflog.Info(ctx, "retrieved nat gateway rule", map[string]any{"rule_id": d.Id()})
 
 	if err := setNatGatewayRuleData(d, &natGatewayRule); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 
 	return nil
@@ -332,12 +332,12 @@ func resourceNatGatewayRuleUpdate(ctx context.Context, d *schema.ResourceData, m
 
 	if err != nil {
 		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating a nat gateway rule: %w \n ApiError: %s", err, responseBody(apiResponse)), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while updating a nat gateway rule: %w \n ApiError: %s", err, responseBody(apiResponse)), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
 		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
+		return bundleclient.ToDiags(meta, d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	return resourceNatGatewayRuleRead(ctx, d, meta)
@@ -358,12 +358,12 @@ func resourceNatGatewayRuleDelete(ctx context.Context, d *schema.ResourceData, m
 
 	if err != nil {
 		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while deleting a nat gateway rule: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while deleting a nat gateway rule: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
 		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
+		return bundleclient.ToDiags(meta, d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	d.SetId("")
@@ -383,7 +383,7 @@ func resourceNatGatewayRuleImport(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	if err := validateImportIDParts(parts); err != nil {
-		return nil, diagutil.ToError(d, fmt.Errorf("failed validating import identifier %q: %w", importID, err), nil)
+		return nil, bundleclient.ToError(meta, d, fmt.Errorf("failed validating import identifier %q: %w", importID, err), nil)
 	}
 
 	dcID := parts[0]
@@ -402,23 +402,23 @@ func resourceNatGatewayRuleImport(ctx context.Context, d *schema.ResourceData, m
 		tflog.Info(ctx, "nat gateway rule not found on import", map[string]any{"rule_id": natGatewayRuleID, "error": err.Error()})
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("unable to find nat gateway rule %q", natGatewayRuleID), nil)
+			return nil, bundleclient.ToError(meta, d, fmt.Errorf("unable to find nat gateway rule %q", natGatewayRuleID), nil)
 		}
-		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while retrieving nat gateway rule  %q: %w ", natGatewayRuleID, err), nil)
+		return nil, bundleclient.ToError(meta, d, fmt.Errorf("an error occurred while retrieving nat gateway rule  %q: %w ", natGatewayRuleID, err), nil)
 	}
 
 	if err := d.Set("datacenter_id", dcID); err != nil {
-		return nil, diagutil.ToError(d, err, nil)
+		return nil, bundleclient.ToError(meta, d, err, nil)
 	}
 	if err := d.Set("natgateway_id", natGatewayID); err != nil {
-		return nil, diagutil.ToError(d, err, nil)
+		return nil, bundleclient.ToError(meta, d, err, nil)
 	}
 	if err := d.Set("location", location); err != nil {
 		return nil, err
 	}
 
 	if err := setNatGatewayRuleData(d, &natGatewayRule); err != nil {
-		return nil, diagutil.ToError(d, err, nil)
+		return nil, bundleclient.ToError(meta, d, err, nil)
 	}
 
 	return []*schema.ResourceData{d}, nil

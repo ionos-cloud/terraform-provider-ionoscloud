@@ -195,14 +195,14 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta any) di
 
 	nic, err := cloudapinic.GetNicFromSchemaCreate(d, "")
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error occurred while getting nic from schema: %w", err), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error occurred while getting nic from schema: %w", err), nil)
 	}
 
 	dcid := d.Get("datacenter_id").(string)
 	srvid := d.Get("server_id").(string)
 	createdNic, apiResponse, err := ns.Create(ctx, dcid, srvid, nic)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error occurred while creating a nic: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error occurred while creating a nic: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if createdNic.Id != nil {
@@ -238,11 +238,11 @@ func resourceNicCreate(ctx context.Context, d *schema.ResourceData, meta any) di
 	})
 
 	if err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 
 	if foundNic == nil || *foundNic.Id == "" {
-		return diagutil.ToDiags(d, fmt.Errorf("could not find nic with id %s after creation ", *nic.Id), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("could not find nic with id %s after creation ", *nic.Id), nil)
 	}
 
 	return resourceNicRead(ctx, d, meta)
@@ -266,11 +266,11 @@ func resourceNicRead(ctx context.Context, d *schema.ResourceData, meta any) diag
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error occurred while fetching a nic: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error occurred while fetching a nic: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if err := cloudapinic.NicSetData(ctx, d, nic); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 
 	return nil
@@ -309,7 +309,7 @@ func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta any) di
 						if firstFlowLogID == "" {
 							_ = d.Set("flowlog", nil)
 						}
-						return diagutil.ToDiags(d, err, nil)
+						return bundleclient.ToDiags(meta, d, err, nil)
 					}
 				}
 			}
@@ -318,12 +318,12 @@ func resourceNicUpdate(ctx context.Context, d *schema.ResourceData, meta any) di
 
 	nic, err := cloudapinic.GetNicFromSchema(d, "")
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("update error occurred while getting nic from schema: %w", err), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("update error occurred while getting nic from schema: %w", err), nil)
 	}
 
 	_, apiResponse, err := ns.Update(ctx, dcID, srvID, nicID, *nic.Properties)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error occurred while updating a nic: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error occurred while updating a nic: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	if d.HasChange("security_groups_ids") {
 		if v, ok := d.GetOk("security_groups_ids"); ok {
@@ -351,7 +351,7 @@ func resourceNicDelete(ctx context.Context, d *schema.ResourceData, meta any) di
 	nicid := d.Id()
 	apiResponse, err := ns.Delete(ctx, dcid, srvid, nicid)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while deleting a nic dcID %s %w", d.Get("datacenter_id").(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while deleting a nic dcID %s %w", d.Get("datacenter_id").(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	d.SetId("")
 	return nil
@@ -362,14 +362,14 @@ func resourceNicImport(ctx context.Context, d *schema.ResourceData, meta any) ([
 
 	location, parts := splitImportID(importID, "/")
 	if len(parts) != 3 {
-		return nil, diagutil.ToError(d, fmt.Errorf(
+		return nil, bundleclient.ToError(meta, d, fmt.Errorf(
 			"invalid import identifier: expected one of <location>:<datacenter>/<server>/<nic> or "+
 				"<datacenter>/<server>/<nic>, got: %s", importID,
 		), nil)
 	}
 
 	if err := validateImportIDParts(parts); err != nil {
-		return nil, diagutil.ToError(d, fmt.Errorf("failed validating import identifier %q: %w", importID, err), nil)
+		return nil, bundleclient.ToError(meta, d, fmt.Errorf("failed validating import identifier %q: %w", importID, err), nil)
 	}
 
 	dcID := parts[0]
@@ -387,27 +387,27 @@ func resourceNicImport(ctx context.Context, d *schema.ResourceData, meta any) ([
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("nic does not exist %q", nicID), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return nil, bundleclient.ToError(meta, d, fmt.Errorf("nic does not exist %q", nicID), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 
-		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the nic %q, error:%w", nicID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return nil, bundleclient.ToError(meta, d, fmt.Errorf("an error occurred while trying to fetch the nic %q, error:%w", nicID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 
 	}
 
 	err = d.Set("datacenter_id", dcID)
 	if err != nil {
-		return nil, diagutil.ToError(d, err, nil)
+		return nil, bundleclient.ToError(meta, d, err, nil)
 	}
 	err = d.Set("server_id", sID)
 	if err != nil {
-		return nil, diagutil.ToError(d, err, nil)
+		return nil, bundleclient.ToError(meta, d, err, nil)
 	}
 	if err = d.Set("location", location); err != nil {
 		return nil, err
 	}
 
 	if err := cloudapinic.NicSetData(ctx, d, &nic); err != nil {
-		return nil, diagutil.ToError(d, err, nil)
+		return nil, bundleclient.ToError(meta, d, err, nil)
 	}
 
 	tflog.Info(ctx, "nic found", map[string]any{"nic_id": nicID, "server_id": sID, "datacenter_id": dcID})

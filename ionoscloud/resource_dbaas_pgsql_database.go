@@ -69,9 +69,9 @@ func resourceDbaasPgSqlDatabaseCreate(ctx context.Context, d *schema.ResourceDat
 
 	database, apiResponse, err := client.CreateDatabase(ctx, clusterID, request)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating the PgSql database named: %s inside the cluster with ID: %s, error: %w", name, clusterID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while creating the PgSql database named: %s inside the cluster with ID: %s, error: %w", name, clusterID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
-	return diagutil.ToDiags(d, dbaas.SetDatabasePgSqlData(d, &database), nil)
+	return bundleclient.ToDiags(meta, d, dbaas.SetDatabasePgSqlData(d, &database), nil)
 }
 
 func resourceDbaasPgSqlDatabaseRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
@@ -88,10 +88,10 @@ func resourceDbaasPgSqlDatabaseRead(ctx context.Context, d *schema.ResourceData,
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the PgSql database: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching the PgSql database: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	if err := dbaas.SetDatabasePgSqlData(d, &database); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 	return nil
 }
@@ -106,7 +106,7 @@ func resourceDbaasPgSqlDatabaseDelete(ctx context.Context, d *schema.ResourceDat
 	name := d.Get("name").(string)
 	apiResponse, err := client.DeleteDatabase(ctx, clusterID, name)
 	if err != nil {
-		return diagutil.ToDiags(d, err, &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, err, &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	return nil
 }
@@ -115,11 +115,11 @@ func resourceDbaasPgSqlDatabaseImporter(ctx context.Context, d *schema.ResourceD
 	importID := d.Id()
 	location, parts := splitImportID(importID, "/")
 	if len(parts) != 2 {
-		return nil, diagutil.ToError(d, fmt.Errorf("invalid import identifier: expected one of <location>:<cluster-id>/<database-name> or <cluster-id>/<database-name>, got: %s", importID), nil)
+		return nil, bundleclient.ToError(meta, d, fmt.Errorf("invalid import identifier: expected one of <location>:<cluster-id>/<database-name> or <cluster-id>/<database-name>, got: %s", importID), nil)
 	}
 
 	if err := validateImportIDParts(parts); err != nil {
-		return nil, diagutil.ToError(d, fmt.Errorf("failed validating import identifier %q: %w", importID, err), nil)
+		return nil, bundleclient.ToError(meta, d, fmt.Errorf("failed validating import identifier %q: %w", importID, err), nil)
 	}
 
 	client, err := meta.(bundleclient.SdkBundle).NewPsqlClient(ctx, location)
@@ -134,12 +134,12 @@ func resourceDbaasPgSqlDatabaseImporter(ctx context.Context, d *schema.ResourceD
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("unable to find PgSql database: %s, cluster ID: %s", name, clusterID), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return nil, bundleclient.ToError(meta, d, fmt.Errorf("unable to find PgSql database: %s, cluster ID: %s", name, clusterID), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
-		return nil, diagutil.ToError(d, fmt.Errorf("error occurred while fetching PgSql database: %s, cluster ID: %s, error: %w", name, clusterID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return nil, bundleclient.ToError(meta, d, fmt.Errorf("error occurred while fetching PgSql database: %s, cluster ID: %s, error: %w", name, clusterID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	if err := dbaas.SetDatabasePgSqlData(d, &database); err != nil {
-		return nil, diagutil.ToError(d, err, nil)
+		return nil, bundleclient.ToError(meta, d, err, nil)
 	}
 	if err := d.Set("cluster_id", clusterID); err != nil {
 		return nil, utils.GenerateSetError("PgSQL database", "cluster_id", err)

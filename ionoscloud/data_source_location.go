@@ -80,7 +80,7 @@ func dataSourceLocationRead(ctx context.Context, d *schema.ResourceData, meta an
 	feature, featureOk := d.GetOk("feature")
 
 	if !nameOk && !featureOk {
-		return diagutil.ToDiags(d, fmt.Errorf("either 'name' or 'feature' must be provided"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("either 'name' or 'feature' must be provided"), nil)
 	}
 
 	request := client.LocationsApi.LocationsGet(ctx).Depth(1)
@@ -93,7 +93,7 @@ func dataSourceLocationRead(ctx context.Context, d *schema.ResourceData, meta an
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching locations: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching locations: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	var results []ionoscloud.Location
 
@@ -114,13 +114,13 @@ func dataSourceLocationRead(ctx context.Context, d *schema.ResourceData, meta an
 	var location ionoscloud.Location
 
 	if results == nil || len(results) == 0 {
-		return diagutil.ToDiags(d, fmt.Errorf("no location found with the specified criteria: name = %v, feature = %v", name, feature), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("no location found with the specified criteria: name = %v, feature = %v", name, feature), nil)
 	} else {
 		location = results[0]
 	}
 
 	if err := setLocationData(d, &location); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 
 	return nil

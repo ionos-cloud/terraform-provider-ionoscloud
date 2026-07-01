@@ -258,10 +258,10 @@ func dataSourceDbaasMongoReadCluster(ctx context.Context, d *schema.ResourceData
 	name, nameOk := d.GetOk("display_name")
 
 	if idOk && nameOk {
-		return diagutil.ToDiags(d, fmt.Errorf("id and display_name cannot be both specified in the same time"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("id and display_name cannot be both specified in the same time"), nil)
 	}
 	if !idOk && !nameOk {
-		return diagutil.ToDiags(d, fmt.Errorf("please provide either the dbaas cluster id or display_name"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("please provide either the dbaas cluster id or display_name"), nil)
 	}
 
 	var cluster mongo.ClusterResponse
@@ -271,13 +271,13 @@ func dataSourceDbaasMongoReadCluster(ctx context.Context, d *schema.ResourceData
 		/* search by ID */
 		cluster, apiResponse, err = client.GetCluster(ctx, id.(string))
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the dbaas mongo cluster with ID %s: %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching the dbaas mongo cluster with ID %s: %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 	} else {
 		clusters, apiResponse, err := client.ListClusters(ctx, "")
 
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching dbaas mongo clusters: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching dbaas mongo clusters: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 
 		var results []mongo.ClusterResponse
@@ -292,9 +292,9 @@ func dataSourceDbaasMongoReadCluster(ctx context.Context, d *schema.ResourceData
 
 		switch {
 		case len(results) == 0:
-			return diagutil.ToDiags(d, fmt.Errorf("no DBaaS mongo cluster found with the specified name = %s", name), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("no DBaaS mongo cluster found with the specified name = %s", name), nil)
 		case len(results) > 1:
-			return diagutil.ToDiags(d, fmt.Errorf("more than one DBaaS mongo cluster found with the specified criteria name = %s", name), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("more than one DBaaS mongo cluster found with the specified criteria name = %s", name), nil)
 		default:
 			cluster = results[0]
 		}
@@ -302,7 +302,7 @@ func dataSourceDbaasMongoReadCluster(ctx context.Context, d *schema.ResourceData
 	}
 
 	if err := dbaasservice.SetMongoDBClusterData(d, cluster); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 
 	return nil

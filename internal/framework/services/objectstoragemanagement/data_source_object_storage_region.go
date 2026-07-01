@@ -22,6 +22,7 @@ func NewRegionDataSource() datasource.DataSource {
 
 type regionDataSource struct {
 	client *objectstorageservice.Client
+	diags  *diagutil.Enricher
 }
 
 // Metadata returns the metadata for the data source.
@@ -52,6 +53,7 @@ func (d *regionDataSource) Configure(ctx context.Context, req datasource.Configu
 	if err != nil {
 		resp.Diagnostics.AddError("initialization error for Object Storage Management client", err.Error())
 	}
+	d.diags = clientBundle.Diags
 }
 
 // Schema returns the schema for the data source.
@@ -121,7 +123,7 @@ func (d *regionDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		return
 	}
 	if err != nil {
-		resp.Diagnostics.AddError("failed to get region", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceID: data.ID.ValueString()}).Error())
+		resp.Diagnostics.AddError("failed to get region", d.diags.WrapError(err, &diagutil.ErrorContext{ResourceID: data.ID.ValueString()}).Error())
 		return
 	}
 

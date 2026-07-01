@@ -22,6 +22,7 @@ var _ datasource.DataSourceWithConfigure = (*usersDataSource)(nil)
 
 type usersDataSource struct {
 	client *kafkaservice.Client
+	diags  *diagutil.Enricher
 }
 
 type usersDataSourceModel struct {
@@ -58,6 +59,7 @@ func (d *usersDataSource) Configure(ctx context.Context, req datasource.Configur
 			fmt.Sprintf("Expected *bundleclient.Sdkbundle, got: %T. Please report this issue to the provider developers.", req.ProviderData))
 	}
 	d.client = clientBundle.KafkaClient
+	d.diags = clientBundle.Diags
 }
 
 // Schema returns the schema for the data source.
@@ -120,7 +122,7 @@ func (d *usersDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 	location := data.Location.ValueString()
 	users, apiResponse, err := d.client.GetUsers(ctx, clusterID, location)
 	if err != nil {
-		resp.Diagnostics.AddError("API Error Reading Kafka Users", diagutil.WrapError(err, &diagutil.ErrorContext{
+		resp.Diagnostics.AddError("API Error Reading Kafka Users", d.diags.WrapError(err, &diagutil.ErrorContext{
 			StatusCode:     apiResponse.SafeStatusCode(),
 			AdditionalInfo: map[string]string{"Cluster ID": clusterID},
 		}).Error())

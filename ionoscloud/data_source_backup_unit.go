@@ -54,10 +54,10 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 	name, nameOk := d.GetOk("name")
 
 	if idOk && nameOk {
-		return diagutil.ToDiags(d, fmt.Errorf("id and name cannot be both specified in the same time"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("id and name cannot be both specified in the same time"), nil)
 	}
 	if !idOk && !nameOk {
-		return diagutil.ToDiags(d, fmt.Errorf("please provide either the backup unit id or name"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("please provide either the backup unit id or name"), nil)
 	}
 	var backupUnit ionoscloud.BackupUnit
 	var apiResponse *ionoscloud.APIResponse
@@ -67,7 +67,7 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 		backupUnit, apiResponse, err = BackupUnitFindByID(ctx, id.(string), client)
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the backup unit %s: %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching the backup unit %s: %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 		if backupUnit.Properties != nil {
 			tflog.Info(ctx, "got backup unit", map[string]any{"name": *backupUnit.Properties.Name, "id": *backupUnit.Id})
@@ -80,7 +80,7 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching backup unit: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching backup unit: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 
 		var results []ionoscloud.BackupUnit
@@ -90,7 +90,7 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 					tmpBackupUnit, apiResponse, err := BackupUnitFindByID(ctx, *bu.Id, client)
 					logApiRequestTime(apiResponse)
 					if err != nil {
-						return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching backup unit with ID %s: %w", *bu.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+						return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching backup unit with ID %s: %w", *bu.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 					}
 					results = append(results, tmpBackupUnit)
 				}
@@ -99,7 +99,7 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 		}
 
 		if results == nil || len(results) == 0 {
-			return diagutil.ToDiags(d, fmt.Errorf("no backup unit found with the specified name %s", name), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("no backup unit found with the specified name %s", name), nil)
 		} else {
 			backupUnit = results[0]
 		}
@@ -110,11 +110,11 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 	logApiRequestTime(apiResponse)
 
 	if cErr != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error while fetching contract resources for backup unit: %w", cErr), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error while fetching contract resources for backup unit: %w", cErr), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if err := setBackupUnitData(d, &backupUnit, &contractResources); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 
 	return nil
