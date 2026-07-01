@@ -58,6 +58,7 @@ const (
 	Kafka         = "kafka"
 	Logging       = "logging"
 	Mariadb       = "mariadb"
+	MariaDBV2     = "mariadbv2"
 	Monitoring    = "monitoring"
 	NFS           = "nfs"
 	ObjectStorage = "objectstorage"

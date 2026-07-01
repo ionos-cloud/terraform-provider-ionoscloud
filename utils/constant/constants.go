@@ -328,6 +328,14 @@ const (
 	InMemoryDBV2SnapshotsDataSource         = "ionoscloud_inmemorydb_snapshots_v2"
 	InMemoryDBV2SnapshotLocationsDataSource = "ionoscloud_inmemorydb_snapshot_locations_v2"
 	InMemoryDBV2VersionsDataSource          = "ionoscloud_inmemorydb_versions_v2"
+
+	// MariaDB V2 constants
+	MariaDBV2ClusterResource           = "ionoscloud_mariadb_cluster_v2"
+	MariaDBV2ClusterDataSource         = "ionoscloud_mariadb_cluster_v2"
+	MariaDBV2ClustersDataSource        = "ionoscloud_mariadb_clusters_v2"
+	MariaDBV2BackupsDataSource         = "ionoscloud_mariadb_backups_v2"
+	MariaDBV2BackupLocationsDataSource = "ionoscloud_mariadb_backup_locations_v2"
+	MariaDBV2VersionsDataSource        = "ionoscloud_mariadb_versions_v2"
 )
 
 // Locations slice represents the locations in which services are available.
