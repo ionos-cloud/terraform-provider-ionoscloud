@@ -117,7 +117,7 @@ resource "random_password" "volume_image_password" {
 
 * `datacenter_id` - (Required)[string] The ID of a Virtual Data Center.
 * `server_id` - (Required)[string] The ID of a server.
-* `disk_type` - (Required)[string] The volume type. Possible values: `HDD`, `SSD`, `SSD Standard`, `SSD Premium`, `ESSENTIAL`, `BALANCED`, `PERFORMANCE`. This property is immutable.
+* `disk_type` - (Required)[string] The volume type. Possible values: `HDD`, `SSD`, `SSD Standard`, `SSD Premium`, `DAS`, `ISO`, `ESSENTIAL`, `BALANCED`, `PERFORMANCE`. This property is immutable.
 * `bus` - (Optional)[Boolean] The bus type of the volume: VIRTIO or IDE.
 * `size` -  (Required)[integer] The size of the volume in GB.
 * `ssh_key_path` -  (Optional)[list] List of absolute paths to files containing a public SSH key that will be injected into IONOS CLOUD provided Linux images. Also accepts ssh keys directly. Required for IONOS CLOUD Linux images. Required if `image_password` is not provided. This property is immutable.
