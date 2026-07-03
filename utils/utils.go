@@ -8,6 +8,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"path/filepath"
 	"reflect"
 	"regexp"
 	"slices"
@@ -188,17 +189,17 @@ func CheckFileExists(filePath string) bool {
 
 // WriteToFile - creates the file and writes 'value' to it.
 func WriteToFile(ctx context.Context, name, value string) error {
-	file, err := os.Create(name)
-	defer func() {
-		err = file.Close()
-		if err != nil {
-			tflog.Debug(ctx, "could not close file", map[string]any{"error": err})
-		}
-	}()
-
+	cleanPath := filepath.Clean(name)
+	file, err := os.OpenFile(cleanPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
 		return err
 	}
+	defer func() {
+		if closeErr := file.Close(); closeErr != nil {
+			tflog.Debug(ctx, "could not close file", map[string]any{"error": closeErr})
+		}
+	}()
+
 	_, err = file.WriteString(value)
 	return err
 }

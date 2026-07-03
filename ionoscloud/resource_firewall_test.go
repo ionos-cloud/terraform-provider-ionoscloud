@@ -289,7 +289,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   image_name = "ubuntu:latest"
-  image_password = "test1234"
+  image_password = random_password.image_password.result
   volume {
     name = "system"
     size = 14
@@ -329,6 +329,10 @@ resource ` + constant.FirewallResource + ` ` + constant.FirewallTestResource + `
   icmp_code = 7
   type = "EGRESS"
 }
+resource "random_password" "image_password" {
+  length  = 16
+  special = false
+}
 `
 
 const testAccCheckFirewallConfigUDP = testAccCheckDatacenterConfigBasic + `
@@ -338,7 +342,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   image_name = "ubuntu:latest"
-  image_password = "test1234"
+  image_password = random_password.image_password.result
   volume {
     name = "system"
     size = 14
@@ -378,6 +382,10 @@ resource ` + constant.FirewallResource + ` ` + constant.FirewallTestResource + `
   target_ip = ionoscloud_ipblock.ipblock.ips[1]
   type = "INGRESS"
 }
+resource "random_password" "image_password" {
+  length  = 16
+  special = false
+}
 `
 
 const testAccCheckFirewallConfigUpdateUDP = testAccCheckDatacenterConfigBasic + `
@@ -387,7 +395,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   image_name = "ubuntu:latest"
-  image_password = "test1234"
+  image_password = random_password.image_password.result
   volume {
     name = "system"
     size = 14
@@ -427,6 +435,10 @@ resource ` + constant.FirewallResource + ` ` + constant.FirewallTestResource + `
   target_ip = ionoscloud_ipblock.ipblock_update.ips[1]
   type = "EGRESS"
 }
+resource "random_password" "image_password" {
+  length  = 16
+  special = false
+}
 `
 
 const testAccCheckFirewallSetICMPToZero = testAccCheckDatacenterConfigBasic + `
@@ -436,7 +448,7 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
   cores = 1
   ram = 1024
   image_name = "ubuntu:latest"
-  image_password = "test1234"
+  image_password = random_password.image_password.result
   volume {
     name = "system"
     size = 14
@@ -472,6 +484,10 @@ resource ` + constant.FirewallResource + ` ` + constant.FirewallTestResource + `
   target_ip = ionoscloud_ipblock.ipblock_update.ips[1]
   icmp_type = 0
   icmp_code = 0
+}
+resource "random_password" "image_password" {
+  length  = 16
+  special = false
 }
 `
 const testAccDataSourceFirewallMatchID = testAccCheckFirewallConfigBasic + `

@@ -124,7 +124,7 @@ resource ` + constant.UserResource + ` "example" {
   first_name 	 = "terraform"
   last_name 	 = "test"
   email 		 = "` + utils.GenerateEmail() + `"
-  password 		 = "abc123-321CBA"
+  password 		 = random_password.user_password.result
   administrator  = false
   force_sec_auth = false
   active		 = true
@@ -139,6 +139,11 @@ resource "ionoscloud_group" "s3group" {
 resource ` + constant.S3KeyResource + ` ` + constant.S3KeyTestResource + ` {
   user_id    = ` + constant.UserResource + `.example.id
   active     = true
+}
+
+resource "random_password" "user_password" {
+  length  = 16
+  special = true
 }`
 
 var testAccChecks3KeyConfigUpdate = `
@@ -146,7 +151,7 @@ resource ` + constant.UserResource + ` "example" {
   first_name 	 = "terraform"
   last_name 	 = "test"
   email 		 = "` + utils.GenerateEmail() + `"
-  password		 = "abc123-321CBA"
+  password		 = random_password.user_password.result
   administrator  = false
   force_sec_auth = false
   active         = true
@@ -161,6 +166,11 @@ resource "ionoscloud_group" "s3group" {
 resource ` + constant.S3KeyResource + ` ` + constant.S3KeyTestResource + ` {
   user_id = ` + constant.UserResource + `.example.id
   active  = false
+}
+
+resource "random_password" "user_password" {
+  length  = 16
+  special = true
 }`
 var testAccDataSourceS3KeyMatchID = testAccChecks3KeyConfigBasic + `
 data ` + constant.S3KeyResource + ` ` + constant.S3KeyDataSourceById + ` {

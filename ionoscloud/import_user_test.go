@@ -54,7 +54,7 @@ resource ` + constant.UserResource + ` ` + constant.UserTestResource + ` {
   first_name = "` + constant.UserTestResource + `"
   last_name = "` + constant.UserTestResource + `"
   email = "` + utils.GenerateEmail() + `"
-  password = "abc123-321CBA"
+  password = random_password.user_password.result
   force_sec_auth= true
   active  = true
   group_ids 		= [ ionoscloud_group.group1.id]
@@ -67,5 +67,10 @@ resource "ionoscloud_group" "group1" {
   reserve_ip = true
   access_activity_log = false
   create_k8s_cluster = true
+}
+
+resource "random_password" "user_password" {
+  length  = 16
+  special = true
 }
 `

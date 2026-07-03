@@ -2,7 +2,7 @@ package provider
 
 import (
 	"context"
-	"log"
+	"fmt"
 	"os"
 	"runtime/debug"
 	"strconv"
@@ -75,10 +75,12 @@ func (p *IonosCloudProvider) Schema(ctx context.Context, req provider.SchemaRequ
 			},
 			"password": schema.StringAttribute{
 				Optional:    true,
+				Sensitive:   true,
 				Description: "IONOS CLOUD password for API operations. If token is provided, token is preferred",
 			},
 			"token": schema.StringAttribute{
 				Optional:    true,
+				Sensitive:   true,
 				Description: "IONOS CLOUD bearer token for API operations.",
 			},
 			"endpoint": schema.StringAttribute{
@@ -95,10 +97,12 @@ func (p *IonosCloudProvider) Schema(ctx context.Context, req provider.SchemaRequ
 			},
 			"s3_secret_key": schema.StringAttribute{
 				Optional:    true,
+				Sensitive:   true,
 				Description: "Secret key for IONOS Object Storage operations.",
 			},
 			"s3_access_key": schema.StringAttribute{
 				Optional:    true,
+				Sensitive:   true,
 				Description: "Access key for IONOS Object Storage operations.",
 			},
 			"s3_region": schema.StringAttribute{
@@ -160,7 +164,8 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 	if insecureStr != "" {
 		boolValue, err := strconv.ParseBool(insecureStr)
 		if err != nil {
-			log.Fatal(err)
+			resp.Diagnostics.AddError("Invalid IONOS_ALLOW_INSECURE value", fmt.Sprintf("Could not parse IONOS_ALLOW_INSECURE as bool: %s", err))
+			return
 		}
 		insecureBool = boolValue
 	}
