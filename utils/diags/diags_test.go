@@ -196,7 +196,7 @@ func TestEnricher_LazyResolvedOnceConcurrent(t *testing.T) {
 	const n = 50
 	var wg sync.WaitGroup
 	wg.Add(n)
-	for i := 0; i < n; i++ {
+	for range n {
 		go func() {
 			defer wg.Done()
 			if got := e.ContractNumber(); got != "98765" {

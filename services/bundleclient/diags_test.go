@@ -94,7 +94,7 @@ func TestToDiags_ConcurrentNoContamination(t *testing.T) {
 	var wg sync.WaitGroup
 	failures := make(chan string, 2*n)
 
-	for i := 0; i < n; i++ {
+	for range n {
 		wg.Add(2)
 		go func() {
 			defer wg.Done()
