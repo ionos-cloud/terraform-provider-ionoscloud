@@ -18,6 +18,7 @@ import (
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/compute"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/inmemorydbv2"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/kafka"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/monitoring"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/objectstorage"
@@ -275,6 +276,7 @@ func (p *IonosCloudProvider) Resources(_ context.Context) []func() resource.Reso
 		monitoring.Resources(),
 		pgsqlv2.Resources(),
 		userobjectstorage.Resources(),
+		inmemorydbv2.Resources(),
 	}
 
 	for _, r := range resources {
@@ -295,6 +297,7 @@ func (p *IonosCloudProvider) DataSources(_ context.Context) []func() datasource.
 		kafka.DataSources(),
 		pgsqlv2.DataSources(),
 		userobjectstorage.DataSources(),
+		inmemorydbv2.DataSources(),
 	}
 
 	for _, r := range dataSources {
@@ -324,6 +327,7 @@ func (p *IonosCloudProvider) ListResources(_ context.Context) []func() list.List
 		objectstorage.ListResources(),
 		objectstoragemanagement.ListResources(),
 		pgsqlv2.ListResources(),
+		inmemorydbv2.ListResources(),
 	}
 
 	for _, r := range listResources {

@@ -54,6 +54,7 @@ const (
 // products that have a location and will override the endpoint that is for each location
 const (
 	InMemoryDB    = "inmemorydb"
+	InMemoryDBV2  = "inmemorydbv2"
 	Kafka         = "kafka"
 	Logging       = "logging"
 	Mariadb       = "mariadb"
@@ -61,7 +62,7 @@ const (
 	NFS           = "nfs"
 	ObjectStorage = "objectstorage"
 	VPN           = "vpn"
-	PSQLV2		  = "psqlv2"
+	PSQLV2        = "psqlv2"
 )
 
 // Endpoint is a struct that represents an endpoint

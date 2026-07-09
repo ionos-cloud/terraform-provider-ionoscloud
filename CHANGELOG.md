@@ -3,6 +3,15 @@
 ### Fixes
 - `ionoscloud_pg_cluster_v2`: fix query not working due to hasnext going over offset
 
+## 6.7.32
+
+### Features
+- Add DBaaS InMemoryDB V2 support:
+  - New resource: `ionoscloud_inmemorydb_cluster_v2`
+  - New data sources: `ionoscloud_inmemorydb_cluster_v2`, `ionoscloud_inmemorydb_clusters_v2`, `ionoscloud_inmemorydb_snapshots_v2`, `ionoscloud_inmemorydb_snapshot_locations_v2`, `ionoscloud_inmemorydb_versions_v2`
+  - New list resource: `ionoscloud_inmemorydb_cluster_v2`
+  - Deprecated: `ionoscloud_dbaas_inmemorydb_replica_set` resource and `ionoscloud_dbaas_inmemorydb_replicaset`, `ionoscloud_dbaas_inmemorydb_snapshot` data sources
+
 ## 6.7.33
 
 ### Fixes
