@@ -1,4 +1,9 @@
-## Upcoming release
+## 6.7.33 - upcoming release
+
+### Fixes
+- `ionoscloud_pg_cluster_v2`: fix query not working due to hasnext going over offset
+
+## 6.7.33
 
 ### Fixes
 - `ionoscloud_pg_cluster`: remove schema-level validation on `synchronization_mode` to preserve backward compatibility with existing clusters; validation is delegated to the API.
