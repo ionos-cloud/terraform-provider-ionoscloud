@@ -37,7 +37,8 @@ func (c *Client) ListClusters(ctx context.Context, filterName string) (pgsqlv2.C
 			return pgsqlv2.ClusterReadList{}, apiResponse, err
 		}
 		all = append(all, page.Items...)
-		// A short page (fewer items than requested) means this was the last page.
+		// We treat a short (or empty) page as the end of the result set; if the total
+		// count is an exact multiple of pageSize we may perform one extra request.
 		// Links.HasNext() is deliberately not used: it has been observed to stay
 		// populated past the last page, turning this into an infinite loop of
 		// ever-increasing offsets.
