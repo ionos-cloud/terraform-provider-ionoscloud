@@ -1,3 +1,8 @@
+## 6.7.33 -- upcoming release
+
+### Refactor
+- Remove invalid plan modifier for some InMemoryDB v2 cluster resource attributes.
+
 ## 6.7.32
 
 ### Features
