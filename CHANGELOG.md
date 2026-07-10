@@ -1,6 +1,10 @@
-## Upcoming release
+## 6.7.33 -- upcoming release
 
+### Fixes
 - `ionoscloud_pg_cluster_v2`: Fix query pagination loop where `Links.HasNext()` remained set past the last page, causing offsets to grow indefinitely.
+
+### Refactor
+- Remove invalid plan modifier for some InMemoryDB v2 cluster resource attributes.
 
 ## 6.7.32
 
