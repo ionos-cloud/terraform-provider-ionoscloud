@@ -42,7 +42,7 @@ func (c *Client) ListClusters(ctx context.Context, filterName string) (pgsqlv2.C
 		// Links.HasNext() is deliberately not used: it has been observed to stay
 		// populated past the last page, turning this into an infinite loop of
 		// ever-increasing offsets.
-		if int32(len(page.Items)) < pageSize {
+		if len(page.Items) < int(pageSize) {
 			page.Items = all
 			return page, apiResponse, nil
 		}
