@@ -81,17 +81,27 @@ Delete the corresponding `resource "ionoscloud_pg_cluster" "example" { … }` co
 ### 3. Fill in the values that cannot be generated
 
 A few attributes are not part of the cluster's readable state and must be added by hand to the
-generated `ionoscloud_pg_cluster_v2` blocks:
+generated `ionoscloud_pg_cluster_v2` blocks. Fill these in yourself before applying:
 
 | Attribute                      | Why it's missing                            | What to do                                                                 |
 |--------------------------------|---------------------------------------------|----------------------------------------------------------------------------|
 | `credentials.password`         | Write-only; the API never returns it.       | Set it (reuse the same value, e.g. via a variable or `random_password`).   |
 | `credentials.password_version` | Provider-side marker with no v1 equivalent. | Set an initial value such as `"v1"`.                                       |
+| `credentials.database`         | Write-only; the API never returns it.       | Set it to any existing database on the cluster (see below).               |
+| `credentials.username`         | Write-only; the API never returns it.       | Set it to an existing or new user name on the cluster (see below).        |
 | `timeouts`                     | Optional; not generated.                    | Add only if you previously customized timeouts.                            |
 
 `restore_from_backup` is create-time-only and not part of a cluster's readable state, so config
 generation never emits it and you do not need it when adopting an existing cluster. Leave it out
 (it is only relevant when initializing a brand-new cluster from a backup).
+
+You can set `credentials.database` to any database you are already using on the cluster, not just
+the one originally created with it. Applying the `credentials` block never destroys existing data;
+it only creates what's missing and, if needed, resets the password:
+
+- If the database doesn't exist yet: it gets created on the existing cluster.
+- If the user doesn't exist yet: the user gets created with the password you provided.
+- If the user already exists: the user's password gets set to the one you provided (and if it's already the same password, nothing changes).
 
 ### 4. Apply
 
