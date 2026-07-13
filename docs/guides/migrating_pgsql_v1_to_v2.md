@@ -99,10 +99,9 @@ You can set `credentials.database` to any database you are already using on the 
 the one originally created with it. Applying the `credentials` block never destroys existing data;
 it only creates what's missing and, if needed, resets the password:
 
-- The database doesn't exist yet: it gets created on the existing cluster.
-- The database exists but the user doesn't: the user gets created with the password you provided.
-- Both the database and the user already exist: the user's password gets set to the one you
-  provided. If that's the same password the user already has, nothing changes.
+- If the database doesn't exist yet: it gets created on the existing cluster.
+- If the user doesn't exist yet: the user gets created with the password you provided.
+- If the user already exists: the user's password gets set to the one you provided (and if it's already the same password, nothing changes).
 
 ### 4. Apply
 
