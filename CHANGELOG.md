@@ -1,4 +1,4 @@
-## 6.7.33 - upcoming release
+## 6.7.34 - upcoming release
 
 ### Fixes
 - update sdk-go to retry on 500 for GET requests. Add test to verify that the retry logic is working as expected.
