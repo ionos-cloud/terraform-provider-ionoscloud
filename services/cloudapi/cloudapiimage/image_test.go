@@ -3,7 +3,7 @@ package cloudapiimage
 import (
 	"testing"
 
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
 )
 
 // testImages: a child location (pc/txl/1) owns no images — everything usable from it

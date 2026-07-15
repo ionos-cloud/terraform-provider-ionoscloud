@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
@@ -123,26 +123,23 @@ func resourceNatGatewayRuleCreate(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	natGatewayRule := ionoscloud.NatGatewayRule{
-		Properties: &ionoscloud.NatGatewayRuleProperties{},
+		Properties: ionoscloud.NatGatewayRuleProperties{},
 	}
 
 	if name, nameOk := d.GetOk("name"); nameOk {
-		name := name.(string)
-		natGatewayRule.Properties.Name = &name
+		natGatewayRule.Properties.Name = name.(string)
 	} else {
 		return diagutil.ToDiags(d, fmt.Errorf("name must be provided for nat gateway rule"), nil)
 	}
 
 	if sourceSubnet, sourceSubnetOk := d.GetOk("source_subnet"); sourceSubnetOk {
-		sourceSubnet := sourceSubnet.(string)
-		natGatewayRule.Properties.SourceSubnet = &sourceSubnet
+		natGatewayRule.Properties.SourceSubnet = sourceSubnet.(string)
 	} else {
 		return diagutil.ToDiags(d, fmt.Errorf("source subnet must be provided for nat gateway rule"), nil)
 	}
 
 	if publicIp, publicIpOk := d.GetOk("public_ip"); publicIpOk {
-		publicIp := publicIp.(string)
-		natGatewayRule.Properties.PublicIp = &publicIp
+		natGatewayRule.Properties.PublicIp = publicIp.(string)
 	} else {
 		return diagutil.ToDiags(d, fmt.Errorf("public Ip must be provided for nat gateway rule"), nil)
 	}
@@ -195,7 +192,7 @@ func resourceNatGatewayRuleCreate(ctx context.Context, d *schema.ResourceData, m
 
 	if err != nil {
 		d.SetId("")
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, fmt.Errorf("error creating nat gateway rule: %w \n ApiError %s", err, responseBody(apiResponse)), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
@@ -205,7 +202,7 @@ func resourceNatGatewayRuleCreate(ctx context.Context, d *schema.ResourceData, m
 		if bundleclient.IsRequestFailed(errState) {
 			d.SetId("")
 		}
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
@@ -248,7 +245,7 @@ func resourceNatGatewayRuleUpdate(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 	request := ionoscloud.NatGatewayRule{
-		Properties: &ionoscloud.NatGatewayRuleProperties{},
+		Properties: ionoscloud.NatGatewayRuleProperties{},
 	}
 
 	dcID := d.Get("datacenter_id").(string)
@@ -256,8 +253,7 @@ func resourceNatGatewayRuleUpdate(ctx context.Context, d *schema.ResourceData, m
 
 	if d.HasChange("name") {
 		_, v := d.GetChange("name")
-		vStr := v.(string)
-		request.Properties.Name = &vStr
+		request.Properties.Name = v.(string)
 	}
 
 	if d.HasChange("type") {
@@ -274,14 +270,12 @@ func resourceNatGatewayRuleUpdate(ctx context.Context, d *schema.ResourceData, m
 
 	if d.HasChange("source_subnet") {
 		_, v := d.GetChange("source_subnet")
-		vStr := v.(string)
-		request.Properties.SourceSubnet = &vStr
+		request.Properties.SourceSubnet = v.(string)
 	}
 
 	if d.HasChange("public_ip") {
 		_, v := d.GetChange("public_ip")
-		vStr := v.(string)
-		request.Properties.PublicIp = &vStr
+		request.Properties.PublicIp = v.(string)
 	}
 
 	if d.HasChange("target_subnet") {
@@ -327,16 +321,16 @@ func resourceNatGatewayRuleUpdate(ctx context.Context, d *schema.ResourceData, m
 
 	_, apiResponse, err := client.NATGatewaysApi.
 		DatacentersNatgatewaysRulesPatch(ctx, dcID, ngID, d.Id()).
-		NatGatewayRuleProperties(*request.Properties).
+		NatGatewayRuleProperties(request.Properties).
 		Execute()
 
 	if err != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating a nat gateway rule: %w \n ApiError: %s", err, responseBody(apiResponse)), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
@@ -357,12 +351,12 @@ func resourceNatGatewayRuleDelete(ctx context.Context, d *schema.ResourceData, m
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while deleting a nat gateway rule: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
@@ -430,59 +424,49 @@ func setNatGatewayRuleData(d *schema.ResourceData, natGatewayRule *ionoscloud.Na
 		d.SetId(*natGatewayRule.Id)
 	}
 
-	if natGatewayRule.Properties != nil {
-		if natGatewayRule.Properties.Name != nil {
-			err := d.Set("name", *natGatewayRule.Properties.Name)
-			if err != nil {
-				return fmt.Errorf("error while setting name property for nat gateway %s: %w", d.Id(), err)
-			}
+	if natGatewayRule.Properties.Name != "" {
+		if err := d.Set("name", natGatewayRule.Properties.Name); err != nil {
+			return fmt.Errorf("error while setting name property for nat gateway %s: %w", d.Id(), err)
 		}
+	}
 
-		if natGatewayRule.Properties.Type != nil {
-			err := d.Set("type", *natGatewayRule.Properties.Type)
-			if err != nil {
-				return fmt.Errorf("error while setting type property for nat gateway %s: %w", d.Id(), err)
-			}
+	if natGatewayRule.Properties.Type != nil {
+		if err := d.Set("type", *natGatewayRule.Properties.Type); err != nil {
+			return fmt.Errorf("error while setting type property for nat gateway %s: %w", d.Id(), err)
 		}
+	}
 
-		if natGatewayRule.Properties.Protocol != nil {
-			err := d.Set("protocol", *natGatewayRule.Properties.Protocol)
-			if err != nil {
-				return fmt.Errorf("error while setting protocol property for nat gateway %s: %w", d.Id(), err)
-			}
+	if natGatewayRule.Properties.Protocol != nil {
+		if err := d.Set("protocol", *natGatewayRule.Properties.Protocol); err != nil {
+			return fmt.Errorf("error while setting protocol property for nat gateway %s: %w", d.Id(), err)
 		}
+	}
 
-		if natGatewayRule.Properties.SourceSubnet != nil {
-			err := d.Set("source_subnet", *natGatewayRule.Properties.SourceSubnet)
-			if err != nil {
-				return fmt.Errorf("error while setting source_subnet property for nat gateway %s: %w", d.Id(), err)
-			}
+	if natGatewayRule.Properties.SourceSubnet != "" {
+		if err := d.Set("source_subnet", natGatewayRule.Properties.SourceSubnet); err != nil {
+			return fmt.Errorf("error while setting source_subnet property for nat gateway %s: %w", d.Id(), err)
 		}
+	}
 
-		if natGatewayRule.Properties.PublicIp != nil {
-			err := d.Set("public_ip", *natGatewayRule.Properties.PublicIp)
-			if err != nil {
-				return fmt.Errorf("error while setting public_ip property for nat gateway %s: %w", d.Id(), err)
-			}
+	if natGatewayRule.Properties.PublicIp != "" {
+		if err := d.Set("public_ip", natGatewayRule.Properties.PublicIp); err != nil {
+			return fmt.Errorf("error while setting public_ip property for nat gateway %s: %w", d.Id(), err)
 		}
+	}
 
-		if natGatewayRule.Properties.TargetSubnet != nil {
-			err := d.Set("target_subnet", *natGatewayRule.Properties.TargetSubnet)
-			if err != nil {
-				return fmt.Errorf("error while setting target_subnet property for nat gateway %s: %w", d.Id(), err)
-			}
+	if natGatewayRule.Properties.TargetSubnet != nil {
+		if err := d.Set("target_subnet", *natGatewayRule.Properties.TargetSubnet); err != nil {
+			return fmt.Errorf("error while setting target_subnet property for nat gateway %s: %w", d.Id(), err)
 		}
+	}
 
-		if natGatewayRule.Properties.TargetPortRange != nil && natGatewayRule.Properties.TargetPortRange.Start != nil &&
-			natGatewayRule.Properties.TargetPortRange.End != nil {
-			err := d.Set("target_port_range", []map[string]int32{{
-				"start": *natGatewayRule.Properties.TargetPortRange.Start,
-				"end":   *natGatewayRule.Properties.TargetPortRange.End,
-			},
-			})
-			if err != nil {
-				return fmt.Errorf("error while setting target_port_range property for nat gateway %s: %w", d.Id(), err)
-			}
+	if natGatewayRule.Properties.TargetPortRange != nil && natGatewayRule.Properties.TargetPortRange.Start != nil &&
+		natGatewayRule.Properties.TargetPortRange.End != nil {
+		if err := d.Set("target_port_range", []map[string]int32{{
+			"start": *natGatewayRule.Properties.TargetPortRange.Start,
+			"end":   *natGatewayRule.Properties.TargetPortRange.End,
+		}}); err != nil {
+			return fmt.Errorf("error while setting target_port_range property for nat gateway %s: %w", d.Id(), err)
 		}
 	}
 	return nil

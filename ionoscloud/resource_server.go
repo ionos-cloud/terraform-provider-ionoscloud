@@ -20,7 +20,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -530,7 +530,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta any)
 		}
 		// add volume object to serverReq
 		serverReq.Entities.Volumes = &ionoscloud.AttachedVolumes{
-			Items: &[]ionoscloud.Volume{
+			Items: []ionoscloud.Volume{
 				{
 					Properties: volume,
 				},
@@ -540,7 +540,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta any)
 	// get nic data and add object to serverReq
 	if nics, ok := d.GetOk("nic"); ok {
 		serverReq.Entities.Nics = &ionoscloud.Nics{
-			Items: &[]ionoscloud.Nic{},
+			Items: []ionoscloud.Nic{},
 		}
 		if nics.([]any) != nil {
 			for nicIndex := range nics.([]any) {
@@ -549,13 +549,13 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta any)
 				if err != nil {
 					return diagutil.ToDiags(d, fmt.Errorf("create error occurred while getting nic from schema: %w", err), nil)
 				}
-				*serverReq.Entities.Nics.Items = append(*serverReq.Entities.Nics.Items, nic)
+				serverReq.Entities.Nics.Items = append(serverReq.Entities.Nics.Items, nic)
 				fwRulesPath := nicPath + "firewall"
 				if firewallRules, ok := d.GetOk(fwRulesPath); ok {
 					fwRules := []ionoscloud.FirewallRule{}
-					(*serverReq.Entities.Nics.Items)[nicIndex].Entities = &ionoscloud.NicEntities{
+					serverReq.Entities.Nics.Items[nicIndex].Entities = &ionoscloud.NicEntities{
 						Firewallrules: &ionoscloud.FirewallRules{
-							Items: &[]ionoscloud.FirewallRule{},
+							Items: []ionoscloud.FirewallRule{},
 						},
 					}
 
@@ -570,12 +570,12 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta any)
 						for idx := range fwRulesProperties {
 							cloudapifirewall.PropUnsetSetFieldIfNotSetInSchema(&fwRulesProperties[idx], fwRulesPath, d)
 							firewall := ionoscloud.FirewallRule{
-								Properties: &fwRulesProperties[idx],
+								Properties: fwRulesProperties[idx],
 							}
 							fwRules = append(fwRules, firewall)
 						}
 					}
-					*(*serverReq.Entities.Nics.Items)[nicIndex].Entities.Firewallrules.Items = fwRules
+					serverReq.Entities.Nics.Items[nicIndex].Entities.Firewallrules.Items = fwRules
 				}
 			}
 		}
@@ -584,7 +584,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta any)
 	postServer, apiResponse, err := client.ServersApi.DatacentersServersPost(ctx, datacenterID).Server(serverReq).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, fmt.Errorf("error creating server: (%w)", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
@@ -597,7 +597,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta any)
 			tflog.Debug(ctx, "failed to create server resource")
 			d.SetId("")
 		}
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, fmt.Errorf("error waiting for state change for server creation %w", errState), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 	if v, ok := d.GetOk("security_groups_ids"); ok {
@@ -619,24 +619,24 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta any)
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, fmt.Errorf("error fetching server: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
-	if foundServer.Entities.Nics.Items != nil {
-		if len(*foundServer.Entities.Nics.Items) > 0 {
+	if len(foundServer.Entities.Nics.Items) > 0 {
+		{
 			// what we get from backend
-			foundFirstNic := (*foundServer.Entities.Nics.Items)[0]
+			foundFirstNic := foundServer.Entities.Nics.Items[0]
 			var orderedRuleIDs []string
-			if foundFirstNic.Entities != nil && foundFirstNic.Entities.Firewallrules != nil && foundFirstNic.Entities.Firewallrules.Items != nil {
+			if foundFirstNic.Entities != nil && foundFirstNic.Entities.Firewallrules != nil {
 				// Finding a NIC does not guarantee that we have sent one. In some scenarios, the API automatically creates a NIC.
 				// This check fixes Github issue #872.
-				if serverReq.Entities.Nics != nil && serverReq.Entities.Nics.Items != nil && len(*serverReq.Entities.Nics.Items) > 0 {
+				if serverReq.Entities.Nics != nil && len(serverReq.Entities.Nics.Items) > 0 {
 					// what we get from schema and send to the API
-					sentFirstNic := (*serverReq.Entities.Nics.Items)[0]
+					sentFirstNic := serverReq.Entities.Nics.Items[0]
 
-					if sentFirstNic.Entities != nil && sentFirstNic.Entities.Firewallrules != nil && sentFirstNic.Entities.Firewallrules.Items != nil {
-						sentRules := *sentFirstNic.Entities.Firewallrules.Items
-						foundRules := *foundFirstNic.Entities.Firewallrules.Items
+					if sentFirstNic.Entities != nil && sentFirstNic.Entities.Firewallrules != nil {
+						sentRules := sentFirstNic.Entities.Firewallrules.Items
+						foundRules := foundFirstNic.Entities.Firewallrules.Items
 						orderedRuleIDs = cloudapifirewall.ExtractOrderedFirewallIDs(foundRules, sentRules)
 						if len(orderedRuleIDs) > 0 {
 							if err := d.Set("firewallrule_id", orderedRuleIDs[0]); err != nil {
@@ -667,47 +667,38 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta any)
 					}
 				}
 			}
-			foundNicProps := foundFirstNic.Properties
-			if foundNicProps != nil {
-				firstNicIps := foundNicProps.Ips
-				if firstNicIps != nil &&
-					len(*firstNicIps) > 0 {
-					tflog.Debug(ctx, "setting primary_ip", map[string]any{"primary_ip": (*firstNicIps)[0]})
-					if err := d.Set("primary_ip", (*firstNicIps)[0]); err != nil {
-						return diagutil.ToDiags(d, utils.GenerateSetError("ionoscloud_server", "primary_ip", err), nil)
-					}
+			firstNicIps := foundFirstNic.Properties.Ips
+			if len(firstNicIps) > 0 {
+				tflog.Debug(ctx, "setting primary_ip", map[string]any{"primary_ip": firstNicIps[0]})
+				if err := d.Set("primary_ip", firstNicIps[0]); err != nil {
+					return diagutil.ToDiags(d, utils.GenerateSetError("ionoscloud_server", "primary_ip", err), nil)
 				}
-				var volumeItems *[]ionoscloud.Volume
-				var firstVolumeItem ionoscloud.Volume
-				if serverReq.Entities.Volumes != nil {
-					volumeItems = serverReq.Entities.Volumes.Items
-					if volumeItems != nil && len(*volumeItems) > 0 {
-						firstVolumeItem = (*volumeItems)[0]
-					}
-				}
-				if foundNicProps.Ips != nil &&
-					firstNicIps != nil &&
-					len(*firstNicIps) > 0 &&
-					volumeItems != nil &&
-					len(*volumeItems) > 0 &&
-					firstVolumeItem.Properties != nil &&
-					firstVolumeItem.Properties.ImagePassword != nil {
+			}
+			var firstVolumeItem ionoscloud.Volume
+			hasVolumes := false
+			if serverReq.Entities.Volumes != nil && len(serverReq.Entities.Volumes.Items) > 0 {
+				firstVolumeItem = serverReq.Entities.Volumes.Items[0]
+				hasVolumes = true
+			}
+			if len(firstNicIps) > 0 &&
+				hasVolumes &&
+				firstVolumeItem.Properties != nil &&
+				firstVolumeItem.Properties.ImagePassword != nil {
 
-					d.SetConnInfo(map[string]string{
-						"type":     "ssh",
-						"host":     (*firstNicIps)[0],
-						"password": *firstVolumeItem.Properties.ImagePassword,
-					})
-				}
+				d.SetConnInfo(map[string]string{
+					"type":     "ssh",
+					"host":     firstNicIps[0],
+					"password": *firstVolumeItem.Properties.ImagePassword,
+				})
 			}
 		}
 
 	}
 
 	// Set inline volumes
-	if foundServer.Entities.Volumes != nil && foundServer.Entities.Volumes.Items != nil {
+	if foundServer.Entities.Volumes != nil {
 		var inlineVolumeIDs []string
-		for _, volume := range *foundServer.Entities.Volumes.Items {
+		for _, volume := range foundServer.Entities.Volumes.Items {
 			inlineVolumeIDs = append(inlineVolumeIDs, *volume.Id)
 		}
 
@@ -762,9 +753,9 @@ func SetVolumeProperties(volume ionoscloud.Volume) map[string]any {
 
 	volumeMap := map[string]any{}
 	if volume.Properties != nil {
-		if volume.Properties.SshKeys != nil && len(*volume.Properties.SshKeys) > 0 {
+		if len(volume.Properties.SshKeys) > 0 {
 			var sshKeys []any
-			for _, sshKey := range *volume.Properties.SshKeys {
+			for _, sshKey := range volume.Properties.SshKeys {
 				sshKeys = append(sshKeys, sshKey)
 			}
 			volumeMap["ssh_keys"] = sshKeys
@@ -873,12 +864,12 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta any)
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, fmt.Errorf("error occurred while updating server: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
@@ -904,7 +895,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta any)
 				_, apiResponse, err := client.ServersApi.DatacentersServersVolumesFindById(ctx, dcID, d.Id(), volumeIDStr).Execute()
 				logApiRequestTime(apiResponse)
 				if err != nil {
-					requestLocation, _ := apiResponse.SafeLocation()
+					requestLocation := safeLocation(apiResponse)
 					return diagutil.ToDiags(d, fmt.Errorf("an error occurred while getting a volume dcID: %s ID: %s Response: %w", dcID, volumeID, err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 				}
 				if v, ok := d.GetOk(volumePath + "name"); ok {
@@ -934,12 +925,12 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta any)
 				logApiRequestTime(apiResponse)
 
 				if err != nil {
-					requestLocation, _ := apiResponse.SafeLocation()
+					requestLocation := safeLocation(apiResponse)
 					return diagutil.ToDiags(d, fmt.Errorf("error patching volume: (%w)", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 				}
 
 				if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-					requestLocation, _ := apiResponse.SafeLocation()
+					requestLocation := safeLocation(apiResponse)
 					return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 				}
 			}
@@ -974,7 +965,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta any)
 		} else {
 			primaryNic := d.Get("primary_nic").(string)
 			nic := &ionoscloud.Nic{}
-			for _, n := range *server.Entities.Nics.Items {
+			for _, n := range server.Entities.Nics.Items {
 				if *n.Id == primaryNic {
 					nic = &n
 					break
@@ -983,7 +974,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta any)
 
 			lan := int32(d.Get("nic.0.lan").(int))
 			nicProperties := ionoscloud.NicProperties{
-				Lan: &lan,
+				Lan: lan,
 			}
 
 			if v, ok := d.GetOk("nic.0.name"); ok {
@@ -993,7 +984,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta any)
 
 			if v, ok := d.GetOk("nic.0.ipv6_cidr_block"); ok {
 				ipv6Block := v.(string)
-				nicProperties.Ipv6CidrBlock = &ipv6Block
+				nicProperties.SetIpv6CidrBlock(ipv6Block)
 			}
 
 			ips, err := cloudapinic.GetNicIPsFromSchema(d, "nic.0.ips")
@@ -1001,7 +992,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta any)
 				return diagutil.ToDiags(d, err, nil)
 			}
 			if ips != nil {
-				nicProperties.Ips = &ips
+				nicProperties.Ips = ips
 			}
 
 			ipv6IPs, err := cloudapinic.GetNicIPsFromSchema(d, "nic.0.ipv6_ips")
@@ -1009,7 +1000,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta any)
 				return diagutil.ToDiags(d, err, nil)
 			}
 			if ipv6IPs != nil {
-				nicProperties.Ipv6Ips = &ipv6IPs
+				nicProperties.Ipv6Ips = ipv6IPs
 			}
 
 			dhcp := d.Get("nic.0.dhcp").(bool)
@@ -1018,8 +1009,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta any)
 			nicProperties.FirewallActive = &fwRule
 			if d.HasChange("nic.0.dhcpv6") {
 				if dhcpv6, ok := d.GetOkExists("nic.0.dhcpv6"); ok {
-					dhcpv6 := dhcpv6.(bool)
-					nicProperties.Dhcpv6 = &dhcpv6
+					nicProperties.SetDhcpv6(dhcpv6.(bool))
 				} else {
 					nicProperties.SetDhcpv6Nil()
 				}
@@ -1042,7 +1032,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta any)
 			if len(firewallRules) > 0 {
 				nic.Entities = &ionoscloud.NicEntities{
 					Firewallrules: &ionoscloud.FirewallRules{
-						Items: &firewallRules,
+						Items: firewallRules,
 					},
 				}
 			}
@@ -1050,14 +1040,14 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta any)
 			tflog.Debug(ctx, "updating nic properties", map[string]any{"properties": string(mProp)})
 			var createdNic *ionoscloud.Nic
 			if createNic {
-				nic.Properties = &nicProperties
+				nic.Properties = nicProperties
 				createdNic, apiResponse, err = ns.Create(ctx, d.Get("datacenter_id").(string), *server.Id, *nic)
 			} else if nic.Id != nil {
 				_, apiResponse, err = ns.Update(ctx, d.Get("datacenter_id").(string), *server.Id, *nic.Id, nicProperties)
 			}
 			logApiRequestTime(apiResponse)
 			if err != nil {
-				requestLocation, _ := apiResponse.SafeLocation()
+				requestLocation := safeLocation(apiResponse)
 				return diagutil.ToDiags(d, fmt.Errorf("error nic (%w)", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 			}
 
@@ -1144,12 +1134,12 @@ func deleteInlineVolumes(ctx context.Context, d *schema.ResourceData, meta any, 
 				tflog.Info(ctx, "volume not found during deletion", map[string]any{"volume_id": volumeID.(string), "datacenter_id": dcID, "server_id": d.Id()})
 				continue
 			}
-			requestLocation, _ := apiResponse.SafeLocation()
+			requestLocation := safeLocation(apiResponse)
 			return diagutil.ToDiags(d, fmt.Errorf("error occurred while deleting volume with ID: %s %w", volumeID.(string), err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 		}
 
 		if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-			requestLocation, _ := apiResponse.SafeLocation()
+			requestLocation := safeLocation(apiResponse)
 			return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 		}
 
@@ -1169,7 +1159,7 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta any)
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, fmt.Errorf("error occurred while fetching a server: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
@@ -1183,13 +1173,13 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta any)
 	apiResponse, err = client.ServersApi.DatacentersServersDelete(ctx, dcID, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while deleting a server: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, fmt.Errorf("error getting state change for datacenter delete %w", errState), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
@@ -1241,18 +1231,18 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta any)
 			return nil, diagutil.ToError(d, fmt.Errorf("error setting primary_nic id %w", err), nil)
 		}
 	} else {
-		if server.Entities != nil && server.Entities.Nics != nil && len(*server.Entities.Nics.Items) > 0 {
-			primaryNic = (*server.Entities.Nics.Items)[0]
+		if server.Entities != nil && server.Entities.Nics != nil && len(server.Entities.Nics.Items) > 0 {
+			primaryNic = server.Entities.Nics.Items[0]
 		}
 	}
 	if primaryNicID != "" {
-		if server.Entities != nil && server.Entities.Nics != nil && server.Entities.Nics.Items != nil {
-			for _, nic := range *server.Entities.Nics.Items {
+		if server.Entities != nil && server.Entities.Nics != nil {
+			for _, nic := range server.Entities.Nics.Items {
 				if *nic.Id == primaryNicID {
 					primaryNic = nic
-					if primaryNic.Properties != nil && *nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
-						tflog.Debug(ctx, "setting primary_ip", map[string]any{"primary_ip": (*primaryNic.Properties.Ips)[0]})
-						if err := d.Set("primary_ip", (*primaryNic.Properties.Ips)[0]); err != nil {
+					if len(nic.Properties.Ips) > 0 {
+						tflog.Debug(ctx, "setting primary_ip", map[string]any{"primary_ip": primaryNic.Properties.Ips[0]})
+						if err := d.Set("primary_ip", primaryNic.Properties.Ips[0]); err != nil {
 							return nil, diagutil.ToError(d, fmt.Errorf("error while setting primary ip: %w", err), nil)
 						}
 					}
@@ -1288,25 +1278,25 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta any)
 func SetCdromProperties(image ionoscloud.Image) map[string]any {
 
 	cdrom := make(map[string]any)
-	if image.Properties != nil {
-		utils.SetPropWithNilCheck(cdrom, "name", image.Properties.Name)
-		utils.SetPropWithNilCheck(cdrom, "description", image.Properties.Description)
-		utils.SetPropWithNilCheck(cdrom, "location", image.Properties.Location)
-		utils.SetPropWithNilCheck(cdrom, "size", image.Properties.Size)
-		utils.SetPropWithNilCheck(cdrom, "cpu_hot_plug", image.Properties.CpuHotPlug)
-		utils.SetPropWithNilCheck(cdrom, "cpu_hot_unplug", image.Properties.CpuHotUnplug)
-		utils.SetPropWithNilCheck(cdrom, "ram_hot_plug", image.Properties.RamHotPlug)
-		utils.SetPropWithNilCheck(cdrom, "ram_hot_unplug", image.Properties.RamHotUnplug)
-		utils.SetPropWithNilCheck(cdrom, "nic_hot_plug", image.Properties.NicHotPlug)
-		utils.SetPropWithNilCheck(cdrom, "nic_hot_unplug", image.Properties.NicHotUnplug)
-		utils.SetPropWithNilCheck(cdrom, "disc_virtio_hot_plug", image.Properties.DiscVirtioHotPlug)
-		utils.SetPropWithNilCheck(cdrom, "disc_virtio_hot_unplug", image.Properties.DiscVirtioHotUnplug)
-		utils.SetPropWithNilCheck(cdrom, "disc_scsi_hot_plug", image.Properties.DiscScsiHotPlug)
-		utils.SetPropWithNilCheck(cdrom, "disc_scsi_hot_unplug", image.Properties.DiscScsiHotUnplug)
-		utils.SetPropWithNilCheck(cdrom, "licence_type", image.Properties.LicenceType)
-		utils.SetPropWithNilCheck(cdrom, "image_type", image.Properties.ImageType)
-		utils.SetPropWithNilCheck(cdrom, "public", image.Properties.Public)
+	utils.SetPropWithNilCheck(cdrom, "name", image.Properties.Name)
+	utils.SetPropWithNilCheck(cdrom, "description", image.Properties.Description)
+	utils.SetPropWithNilCheck(cdrom, "location", image.Properties.Location)
+	utils.SetPropWithNilCheck(cdrom, "size", image.Properties.Size)
+	utils.SetPropWithNilCheck(cdrom, "cpu_hot_plug", image.Properties.CpuHotPlug)
+	utils.SetPropWithNilCheck(cdrom, "cpu_hot_unplug", image.Properties.CpuHotUnplug)
+	utils.SetPropWithNilCheck(cdrom, "ram_hot_plug", image.Properties.RamHotPlug)
+	utils.SetPropWithNilCheck(cdrom, "ram_hot_unplug", image.Properties.RamHotUnplug)
+	utils.SetPropWithNilCheck(cdrom, "nic_hot_plug", image.Properties.NicHotPlug)
+	utils.SetPropWithNilCheck(cdrom, "nic_hot_unplug", image.Properties.NicHotUnplug)
+	utils.SetPropWithNilCheck(cdrom, "disc_virtio_hot_plug", image.Properties.DiscVirtioHotPlug)
+	utils.SetPropWithNilCheck(cdrom, "disc_virtio_hot_unplug", image.Properties.DiscVirtioHotUnplug)
+	utils.SetPropWithNilCheck(cdrom, "disc_scsi_hot_plug", image.Properties.DiscScsiHotPlug)
+	utils.SetPropWithNilCheck(cdrom, "disc_scsi_hot_unplug", image.Properties.DiscScsiHotUnplug)
+	if image.Properties.LicenceType != "" {
+		cdrom["licence_type"] = image.Properties.LicenceType
 	}
+	utils.SetPropWithNilCheck(cdrom, "image_type", image.Properties.ImageType)
+	utils.SetPropWithNilCheck(cdrom, "public", image.Properties.Public)
 
 	return cdrom
 }
@@ -1401,7 +1391,7 @@ func getServerData(d *schema.ResourceData) (*ionoscloud.Server, error) {
 		bootCdrom := d.Get("boot_cdrom").(string)
 		if utils.IsValidUUID(bootCdrom) {
 			server.Properties.BootCdrom = &ionoscloud.ResourceReference{
-				Id: &bootCdrom,
+				Id: bootCdrom,
 			}
 
 		} else {
@@ -1436,85 +1426,84 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 	}
 
 	datacenterID := d.Get("datacenter_id").(string)
-	if server.Properties != nil {
-		if server.Properties.Name != nil {
-			if err := d.Set("name", *server.Properties.Name); err != nil {
-				return fmt.Errorf("error setting name %w", err)
-			}
+	if server.Properties.Name != nil {
+		if err := d.Set("name", *server.Properties.Name); err != nil {
+			return fmt.Errorf("error setting name %w", err)
 		}
-		if server.Properties.Hostname != nil {
-			if err := d.Set("hostname", *server.Properties.Hostname); err != nil {
-				return fmt.Errorf("error setting hostname %w", err)
-			}
+	}
+	if server.Properties.Hostname != nil {
+		if err := d.Set("hostname", *server.Properties.Hostname); err != nil {
+			return fmt.Errorf("error setting hostname %w", err)
 		}
-		if server.Properties.Cores != nil {
-			if err := d.Set("cores", *server.Properties.Cores); err != nil {
-				return fmt.Errorf("error setting cores %w", err)
-			}
+	}
+	if server.Properties.Cores != nil {
+		if err := d.Set("cores", *server.Properties.Cores); err != nil {
+			return fmt.Errorf("error setting cores %w", err)
 		}
+	}
 
-		if server.Properties.Ram != nil {
-			if err := d.Set("ram", *server.Properties.Ram); err != nil {
-				return fmt.Errorf("error setting ram %w", err)
-			}
+	if server.Properties.Ram != nil {
+		if err := d.Set("ram", *server.Properties.Ram); err != nil {
+			return fmt.Errorf("error setting ram %w", err)
 		}
+	}
 
-		if server.Properties.AvailabilityZone != nil {
-			if err := d.Set("availability_zone", *server.Properties.AvailabilityZone); err != nil {
-				return fmt.Errorf("error setting availability_zone %w", err)
-			}
+	if server.Properties.AvailabilityZone != nil {
+		if err := d.Set("availability_zone", *server.Properties.AvailabilityZone); err != nil {
+			return fmt.Errorf("error setting availability_zone %w", err)
 		}
+	}
 
-		if server.Properties.CpuFamily != nil {
-			if err := d.Set("cpu_family", *server.Properties.CpuFamily); err != nil {
-				return fmt.Errorf("error setting cpu_family %w", err)
-			}
+	if server.Properties.CpuFamily != nil {
+		if err := d.Set("cpu_family", *server.Properties.CpuFamily); err != nil {
+			return fmt.Errorf("error setting cpu_family %w", err)
 		}
+	}
 
-		if server.Properties.Type != nil {
-			if err := d.Set("type", *server.Properties.Type); err != nil {
-				return fmt.Errorf("error setting type %w", err)
-			}
+	if server.Properties.Type != nil {
+		if err := d.Set("type", *server.Properties.Type); err != nil {
+			return fmt.Errorf("error setting type %w", err)
 		}
+	}
 
-		if server.Properties.VmState != nil {
-			if err := d.Set("vm_state", *server.Properties.VmState); err != nil {
-				return fmt.Errorf("error setting vm_state %w", err)
-			}
+	if server.Properties.VmState != nil {
+		if err := d.Set("vm_state", *server.Properties.VmState); err != nil {
+			return fmt.Errorf("error setting vm_state %w", err)
 		}
+	}
 
-		if server.Properties.BootCdrom != nil {
-			if err := d.Set("boot_cdrom", *server.Properties.BootCdrom.Id); err != nil {
-				return fmt.Errorf("error setting boot_cdrom %w", err)
-			}
-		} else {
-			d.Set("boot_cdrom", nil)
+	if server.Properties.BootCdrom != nil && server.Properties.BootCdrom.Id != "" {
+		if err := d.Set("boot_cdrom", server.Properties.BootCdrom.Id); err != nil {
+			return fmt.Errorf("error setting boot_cdrom %w", err)
 		}
+	} else {
+		d.Set("boot_cdrom", nil)
+	}
 
-		if server.Properties.BootVolume != nil {
-			if err := d.Set("boot_volume", *server.Properties.BootVolume.Id); err != nil {
-				return fmt.Errorf("error setting bootVolume %w", err)
-			}
-		} else {
-			d.Set("boot_volume", nil)
+	if server.Properties.BootVolume != nil && server.Properties.BootVolume.Id != "" {
+		if err := d.Set("boot_volume", server.Properties.BootVolume.Id); err != nil {
+			return fmt.Errorf("error setting bootVolume %w", err)
 		}
-		if server.Entities != nil {
-			if server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil && len(*server.Entities.Volumes.Items) > 0 &&
-				(*server.Entities.Volumes.Items)[0].Properties != nil && (*server.Entities.Volumes.Items)[0].Properties.Image != nil {
-				if err := d.Set("boot_image", *(*server.Entities.Volumes.Items)[0].Properties.Image); err != nil {
-					return fmt.Errorf("error setting boot_image %w", err)
-				}
-			}
-			if server.Entities.Securitygroups != nil && server.Entities.Securitygroups.Items != nil {
-				if err := nsg.SetNSGInResourceData(d, server.Entities.Securitygroups.Items); err != nil {
-					return err
-				}
+	} else {
+		d.Set("boot_volume", nil)
+	}
+	if server.Entities != nil {
+		if server.Entities.Volumes != nil && len(server.Entities.Volumes.Items) > 0 &&
+			server.Entities.Volumes.Items[0].Properties != nil && server.Entities.Volumes.Items[0].Properties.Image != nil {
+			if err := d.Set("boot_image", *server.Entities.Volumes.Items[0].Properties.Image); err != nil {
+				return fmt.Errorf("error setting boot_image %w", err)
 			}
 		}
-		if server.Properties.NicMultiQueue != nil {
-			if err := d.Set("nic_multi_queue", *server.Properties.NicMultiQueue); err != nil {
-				return fmt.Errorf("error setting nic_multi_queue: %w", err)
+		if server.Entities.Securitygroups != nil && len(server.Entities.Securitygroups.Items) > 0 {
+			if err := nsg.SetNSGInResourceData(d, server.Entities.Securitygroups.Items); err != nil {
+				return err
 			}
+		}
+	}
+
+	if server.Properties.NicMultiQueue != nil {
+		if err := d.Set("nic_multi_queue", *server.Properties.NicMultiQueue); err != nil {
+			return fmt.Errorf("error setting nic_multi_queue: %w", err)
 		}
 	}
 
@@ -1580,10 +1569,10 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 		var nicEntry map[string]any
 		var fwRulesEntries []map[string]any
 
-		if nic != nil && nic.Properties != nil {
+		if nic != nil {
 			// fixes #467
-			if nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
-				if err := d.Set("primary_ip", (*nic.Properties.Ips)[0]); err != nil {
+			if len(nic.Properties.Ips) > 0 {
+				if err := d.Set("primary_ip", nic.Properties.Ips[0]); err != nil {
 					return err
 				}
 			}
@@ -1601,9 +1590,9 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 				}
 			}
 		}
-		if nic != nil && nic.Entities != nil && nic.Entities.Securitygroups != nil && nic.Entities.Securitygroups.Items != nil {
+		if nic != nil && nic.Entities != nil && nic.Entities.Securitygroups != nil {
 			nsgIDs := make([]string, 0)
-			for _, group := range *nic.Entities.Securitygroups.Items {
+			for _, group := range nic.Entities.Securitygroups.Items {
 				if group.Id != nil {
 					id := *group.Id
 					nsgIDs = append(nsgIDs, id)

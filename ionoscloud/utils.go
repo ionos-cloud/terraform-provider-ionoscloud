@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"net/url"
 	"slices"
 	"strconv"
 	"strings"
@@ -12,10 +13,10 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 )
 
-func responseBody(resp *ionoscloud.APIResponse) string {
+func responseBody(resp *shared.APIResponse) string {
 	ret := "<nil>"
 	if resp != nil {
 		ret = string(resp.Payload)
@@ -95,7 +96,7 @@ func VerifyUnavailableIPs(val any, key string) (warns []string, errs []error) {
 	return
 }
 
-func logApiRequestTime(resp *ionoscloud.APIResponse) {
+func logApiRequestTime(resp *shared.APIResponse) {
 	if resp != nil {
 		log.Printf("[DEBUG] Request time : %s for operation : %s",
 			resp.RequestTime, resp.Operation)
@@ -103,8 +104,18 @@ func logApiRequestTime(resp *ionoscloud.APIResponse) {
 	}
 }
 
-func httpNotFound(resp *ionoscloud.APIResponse) bool {
+func httpNotFound(resp *shared.APIResponse) bool {
 	return resp.SafeStatusCode() == http.StatusNotFound
+}
+
+// safeLocation returns the Location header URL from the API response.
+// Returns nil if the response or the embedded http.Response is nil.
+func safeLocation(resp *shared.APIResponse) *url.URL {
+	if resp != nil && resp.Response != nil {
+		loc, _ := resp.Response.Location()
+		return loc
+	}
+	return nil
 }
 
 // splitImportID splits the import ID into location and a slice of resource identifiers. The import ID

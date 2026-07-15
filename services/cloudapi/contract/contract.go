@@ -21,11 +21,11 @@ func GetContractNumber(ctx context.Context, client *bundleclient.SdkBundle) stri
 	if err != nil {
 		return ""
 	}
-	if contracts.Items == nil || len(*contracts.Items) != 1 {
+	if len(contracts.Items) != 1 {
 		return ""
 	}
-	c := (*contracts.Items)[0]
-	if c.Properties != nil && c.Properties.ContractNumber != nil {
+	c := contracts.Items[0]
+	if c.Properties.ContractNumber != nil {
 		return fmt.Sprintf("%d", *c.Properties.ContractNumber)
 	}
 	return ""

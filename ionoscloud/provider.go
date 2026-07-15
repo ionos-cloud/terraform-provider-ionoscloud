@@ -10,7 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
@@ -30,25 +29,25 @@ func Provider() *schema.Provider {
 			"username": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc(ionoscloud.IonosUsernameEnvVar, nil),
+				DefaultFunc: schema.EnvDefaultFunc(shared.IonosUsernameEnvVar, nil),
 				Description: "IONOS CLOUD username for API operations. If token is provided, token is preferred",
 			},
 			"password": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc(ionoscloud.IonosPasswordEnvVar, nil),
+				DefaultFunc: schema.EnvDefaultFunc(shared.IonosPasswordEnvVar, nil),
 				Description: "IONOS CLOUD password for API operations. If token is provided, token is preferred",
 			},
 			"token": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc(ionoscloud.IonosTokenEnvVar, nil),
+				DefaultFunc: schema.EnvDefaultFunc(shared.IonosTokenEnvVar, nil),
 				Description: "IONOS CLOUD bearer token for API operations.",
 			},
 			"endpoint": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc(ionoscloud.IonosApiUrlEnvVar, ""),
+				DefaultFunc: schema.EnvDefaultFunc(shared.IonosApiUrlEnvVar, ""),
 				Description: "IONOS CLOUD REST API URL. Usually not necessary to be set, SDKs know internally how to route requests to the API.",
 			},
 			"retries": {
@@ -299,7 +298,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, terraformVer
 
 	if contractNumber, contractOk := d.GetOk("contract_number"); contractOk {
 		// will inject x-contract-number to sdks
-		if err := os.Setenv(ionoscloud.IonosContractNumber, contractNumber.(string)); err != nil {
+		if err := os.Setenv("IONOS_CONTRACT_NUMBER", contractNumber.(string)); err != nil {
 			return nil, diag.FromErr(err)
 		}
 	}

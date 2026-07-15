@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/serverutil"
 
@@ -265,7 +265,7 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta a
 	}
 
 	server := ionoscloud.Server{
-		Properties: &ionoscloud.ServerProperties{},
+		Properties: ionoscloud.ServerProperties{},
 	}
 
 	var image, imageAlias string
@@ -337,7 +337,7 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta a
 		}
 		server.Entities = &ionoscloud.ServerEntities{
 			Volumes: &ionoscloud.AttachedVolumes{
-				Items: &[]ionoscloud.Volume{
+				Items: []ionoscloud.Volume{
 					{
 						Properties: volume,
 					},
@@ -354,11 +354,11 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta a
 		}
 
 		server.Entities.Nics = &ionoscloud.Nics{
-			Items: &[]ionoscloud.Nic{
+			Items: []ionoscloud.Nic{
 				nic,
 			},
 		}
-		primaryNic = &(*server.Entities.Nics.Items)[0]
+		primaryNic = &server.Entities.Nics.Items[0]
 		tflog.Debug(ctx, "nic dhcp", map[string]any{"nic_dhcp": *nic.Properties.Dhcp, "primary_nic_dhcp": *primaryNic.Properties.Dhcp})
 
 		var firewall ionoscloud.FirewallRule
@@ -368,19 +368,17 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta a
 			if diags != nil {
 				return diags
 			}
-			(*server.Entities.Nics.Items)[0].Entities = &ionoscloud.NicEntities{
+			server.Entities.Nics.Items[0].Entities = &ionoscloud.NicEntities{
 				Firewallrules: &ionoscloud.FirewallRules{
-					Items: &[]ionoscloud.FirewallRule{
+					Items: []ionoscloud.FirewallRule{
 						firewall,
 					},
 				},
 			}
 		}
 
-		if primaryNic != nil && primaryNic.Properties != nil && primaryNic.Properties.Ips != nil {
-			if len(*primaryNic.Properties.Ips) == 0 {
-				*primaryNic.Properties.Ips = nil
-			}
+		if primaryNic != nil && len(primaryNic.Properties.Ips) == 0 {
+			primaryNic.Properties.Ips = nil
 		}
 	}
 
@@ -388,7 +386,7 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta a
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, fmt.Errorf("error creating server: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 	d.SetId(*createdServer.Id)
@@ -398,7 +396,7 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta a
 			tflog.Debug(ctx, "failed to create gpu server resource")
 			d.SetId("")
 		}
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, fmt.Errorf("error waiting for state change for server creation %w", errState), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
@@ -407,7 +405,7 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta a
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, fmt.Errorf("error fetching server: (%w)", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 	if v, ok := d.GetOk("security_groups_ids"); ok {
@@ -418,25 +416,23 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta a
 		}
 	}
 
-	if createdServer.Entities != nil && createdServer.Entities.Nics != nil && len(*createdServer.Entities.Nics.Items) > 0 {
+	if createdServer.Entities != nil && createdServer.Entities.Nics != nil && len(createdServer.Entities.Nics.Items) > 0 {
 		firewallRules, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, d.Get("datacenter_id").(string),
-			*createdServer.Id, *(*createdServer.Entities.Nics.Items)[0].Id).Execute()
+			*createdServer.Id, *createdServer.Entities.Nics.Items[0].Id).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			requestLocation, _ := apiResponse.SafeLocation()
+			requestLocation := safeLocation(apiResponse)
 			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching firewall rules: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 		}
 
-		if firewallRules.Items != nil {
-			if len(*firewallRules.Items) > 0 {
-				if err := d.Set("firewallrule_id", *(*firewallRules.Items)[0].Id); err != nil {
-					return diagutil.ToDiags(d, err, nil)
-				}
+		if len(firewallRules.Items) > 0 {
+			if err := d.Set("firewallrule_id", *firewallRules.Items[0].Id); err != nil {
+				return diagutil.ToDiags(d, err, nil)
 			}
 		}
 
-		if (*createdServer.Entities.Nics.Items)[0].Id != nil {
-			primaryNicID := *(*createdServer.Entities.Nics.Items)[0].Id
+		if createdServer.Entities.Nics.Items[0].Id != nil {
+			primaryNicID := *createdServer.Entities.Nics.Items[0].Id
 			err := d.Set("primary_nic", primaryNicID)
 			if err != nil {
 				return diagutil.ToDiags(d, fmt.Errorf("error while setting primary nic: %w", err), nil)
@@ -450,26 +446,24 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta a
 			}
 		}
 
-		if (*createdServer.Entities.Nics.Items)[0].Properties.Ips != nil &&
-			len(*(*createdServer.Entities.Nics.Items)[0].Properties.Ips) > 0 &&
+		if len(createdServer.Entities.Nics.Items[0].Properties.Ips) > 0 &&
 			createdServer.Entities.Volumes != nil &&
-			createdServer.Entities.Volumes.Items != nil &&
-			len(*createdServer.Entities.Volumes.Items) > 0 &&
-			(*createdServer.Entities.Volumes.Items)[0].Properties != nil &&
-			(*createdServer.Entities.Volumes.Items)[0].Properties.ImagePassword != nil {
+			len(createdServer.Entities.Volumes.Items) > 0 &&
+			createdServer.Entities.Volumes.Items[0].Properties != nil &&
+			createdServer.Entities.Volumes.Items[0].Properties.ImagePassword != nil {
 
 			d.SetConnInfo(map[string]string{
 				"type":     "ssh",
-				"host":     (*(*createdServer.Entities.Nics.Items)[0].Properties.Ips)[0],
-				"password": *(*createdServer.Entities.Volumes.Items)[0].Properties.ImagePassword,
+				"host":     createdServer.Entities.Nics.Items[0].Properties.Ips[0],
+				"password": *createdServer.Entities.Volumes.Items[0].Properties.ImagePassword,
 			})
 		}
 	}
 
 	// Set inline volumes
-	if createdServer.Entities != nil && createdServer.Entities.Volumes != nil && createdServer.Entities.Volumes.Items != nil {
+	if createdServer.Entities != nil && createdServer.Entities.Volumes != nil {
 		var inlineVolumeIDs []string
-		for _, volume := range *createdServer.Entities.Volumes.Items {
+		for _, volume := range createdServer.Entities.Volumes.Items {
 			inlineVolumeIDs = append(inlineVolumeIDs, *volume.Id)
 		}
 

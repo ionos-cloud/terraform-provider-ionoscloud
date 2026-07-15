@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 )
@@ -99,12 +99,9 @@ func (nsg *Service) SetDefaultDatacenterNSG(ctx context.Context, dcID, nsgID str
 }
 
 // SetNSGInResourceData sets the security groups in the schema
-func SetNSGInResourceData(d *schema.ResourceData, items *[]ionoscloud.SecurityGroup) error {
-	if items == nil {
-		return nil
-	}
+func SetNSGInResourceData(d *schema.ResourceData, items []ionoscloud.SecurityGroup) error {
 	nsgIDs := make([]string, 0)
-	for _, group := range *items {
+	for _, group := range items {
 		if group.Id != nil {
 			id := *group.Id
 			nsgIDs = append(nsgIDs, id)

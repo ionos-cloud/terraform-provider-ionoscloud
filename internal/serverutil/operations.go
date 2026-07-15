@@ -3,11 +3,12 @@ package serverutil
 import (
 	"context"
 	"fmt"
+	"net/url"
 
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
@@ -56,13 +57,19 @@ func ResourceCommonServerDelete(ctx context.Context, d *schema.ResourceData, met
 		})
 	}
 	if err != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		var requestLocation *url.URL
+		if apiResponse != nil && apiResponse.Response != nil {
+			requestLocation, _ = apiResponse.Response.Location()
+		}
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while deleting a server: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		var requestLocation *url.URL
+		if apiResponse != nil && apiResponse.Response != nil {
+			requestLocation, _ = apiResponse.Response.Location()
+		}
 		return diagutil.ToDiags(d, fmt.Errorf("error getting state change for server delete %w", errState), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 

@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 )
@@ -239,45 +239,41 @@ func (d *contractsDataSource) Read(ctx context.Context, req datasource.ReadReque
 		resp.Diagnostics.AddError("Error reading contracts", fmt.Sprintf("Could not read contracts, unexpected error: %s", err.Error()))
 		return
 	}
-	if contracts.Items == nil {
+	if len(contracts.Items) == 0 {
 		resp.Diagnostics.AddError("Error reading contracts", "No contracts found")
 		return
 	}
-	contractList := make([]attr.Value, len(*contracts.Items))
+	contractList := make([]attr.Value, len(contracts.Items))
 	var diags diag.Diagnostics
-	for i, contract := range *contracts.Items {
+	for i, contract := range contracts.Items {
 		resourceLimits := types.ObjectNull(resourceLimitsModel)
-		if contract.Properties == nil {
-			resp.Diagnostics.AddError("Error reading contracts", "Contract properties are nil")
-			return
-		}
 		if contract.Properties.ResourceLimits != nil {
 			resourceLimits, diags = types.ObjectValue(resourceLimitsModel, map[string]attr.Value{
-				"cores_per_server":             types.Int64Value(int64(*contract.Properties.ResourceLimits.CoresPerServer)),
-				"ram_per_server":               types.Int64Value(int64(*contract.Properties.ResourceLimits.RamPerServer)),
-				"ram_per_contract":             types.Int64Value(int64(*contract.Properties.ResourceLimits.RamPerContract)),
-				"cores_per_contract":           types.Int64Value(int64(*contract.Properties.ResourceLimits.CoresPerContract)),
-				"cores_provisioned":            types.Int64Value(int64(*contract.Properties.ResourceLimits.CoresProvisioned)),
-				"das_volume_provisioned":       types.Int64Value(*contract.Properties.ResourceLimits.DasVolumeProvisioned),
-				"hdd_limit_per_contract":       types.Int64Value(*contract.Properties.ResourceLimits.HddLimitPerContract),
-				"hdd_limit_per_volume":         types.Int64Value(*contract.Properties.ResourceLimits.HddLimitPerVolume),
-				"hdd_volume_provisioned":       types.Int64Value(*contract.Properties.ResourceLimits.HddVolumeProvisioned),
-				"k8s_cluster_limit_total":      types.Int64Value(int64(*contract.Properties.ResourceLimits.K8sClusterLimitTotal)),
-				"k8s_clusters_provisioned":     types.Int64Value(int64(*contract.Properties.ResourceLimits.K8sClustersProvisioned)),
-				"nat_gateway_limit_total":      types.Int64Value(int64(*contract.Properties.ResourceLimits.NatGatewayLimitTotal)),
-				"nat_gateway_provisioned":      types.Int64Value(int64(*contract.Properties.ResourceLimits.NatGatewayProvisioned)),
-				"nlb_limit_total":              types.Int64Value(int64(*contract.Properties.ResourceLimits.NlbLimitTotal)),
-				"nlb_provisioned":              types.Int64Value(int64(*contract.Properties.ResourceLimits.NlbProvisioned)),
-				"ram_provisioned":              types.Int64Value(int64(*contract.Properties.ResourceLimits.RamProvisioned)),
-				"reservable_ips":               types.Int64Value(int64(*contract.Properties.ResourceLimits.ReservableIps)),
-				"reserved_ips_in_use":          types.Int64Value(int64(*contract.Properties.ResourceLimits.ReservedIpsInUse)),
-				"reserved_ips_on_contract":     types.Int64Value(int64(*contract.Properties.ResourceLimits.ReservedIpsOnContract)),
-				"ssd_limit_per_contract":       types.Int64Value(*contract.Properties.ResourceLimits.SsdLimitPerContract),
-				"ssd_limit_per_volume":         types.Int64Value(*contract.Properties.ResourceLimits.SsdLimitPerVolume),
-				"ssd_volume_provisioned":       types.Int64Value(*contract.Properties.ResourceLimits.SsdVolumeProvisioned),
-				"security_groups_per_vdc":      types.Int64Value(int64(*contract.Properties.ResourceLimits.SecurityGroupsPerVdc)),
-				"security_groups_per_resource": types.Int64Value(int64(*contract.Properties.ResourceLimits.SecurityGroupsPerResource)),
-				"rules_per_security_group":     types.Int64Value(int64(*contract.Properties.ResourceLimits.RulesPerSecurityGroup)),
+				"cores_per_server":             types.Int64Value(int64(contract.Properties.ResourceLimits.CoresPerServer)),
+				"ram_per_server":               types.Int64Value(int64(contract.Properties.ResourceLimits.RamPerServer)),
+				"ram_per_contract":             types.Int64Value(int64(contract.Properties.ResourceLimits.RamPerContract)),
+				"cores_per_contract":           types.Int64Value(int64(contract.Properties.ResourceLimits.CoresPerContract)),
+				"cores_provisioned":            types.Int64Value(int64(contract.Properties.ResourceLimits.CoresProvisioned)),
+				"das_volume_provisioned":       types.Int64Value(contract.Properties.ResourceLimits.DasVolumeProvisioned),
+				"hdd_limit_per_contract":       types.Int64Value(contract.Properties.ResourceLimits.HddLimitPerContract),
+				"hdd_limit_per_volume":         types.Int64Value(contract.Properties.ResourceLimits.HddLimitPerVolume),
+				"hdd_volume_provisioned":       types.Int64Value(contract.Properties.ResourceLimits.HddVolumeProvisioned),
+				"k8s_cluster_limit_total":      types.Int64Value(int64(contract.Properties.ResourceLimits.K8sClusterLimitTotal)),
+				"k8s_clusters_provisioned":     types.Int64Value(int64(contract.Properties.ResourceLimits.K8sClustersProvisioned)),
+				"nat_gateway_limit_total":      types.Int64Value(int64(contract.Properties.ResourceLimits.NatGatewayLimitTotal)),
+				"nat_gateway_provisioned":      types.Int64Value(int64(contract.Properties.ResourceLimits.NatGatewayProvisioned)),
+				"nlb_limit_total":              types.Int64Value(int64(contract.Properties.ResourceLimits.NlbLimitTotal)),
+				"nlb_provisioned":              types.Int64Value(int64(contract.Properties.ResourceLimits.NlbProvisioned)),
+				"ram_provisioned":              types.Int64Value(int64(contract.Properties.ResourceLimits.RamProvisioned)),
+				"reservable_ips":               types.Int64Value(int64(contract.Properties.ResourceLimits.ReservableIps)),
+				"reserved_ips_in_use":          types.Int64Value(int64(contract.Properties.ResourceLimits.ReservedIpsInUse)),
+				"reserved_ips_on_contract":     types.Int64Value(int64(contract.Properties.ResourceLimits.ReservedIpsOnContract)),
+				"ssd_limit_per_contract":       types.Int64Value(contract.Properties.ResourceLimits.SsdLimitPerContract),
+				"ssd_limit_per_volume":         types.Int64Value(contract.Properties.ResourceLimits.SsdLimitPerVolume),
+				"ssd_volume_provisioned":       types.Int64Value(contract.Properties.ResourceLimits.SsdVolumeProvisioned),
+				"security_groups_per_vdc":      types.Int64Value(int64(contract.Properties.ResourceLimits.SecurityGroupsPerVdc)),
+				"security_groups_per_resource": types.Int64Value(int64(contract.Properties.ResourceLimits.SecurityGroupsPerResource)),
+				"rules_per_security_group":     types.Int64Value(int64(contract.Properties.ResourceLimits.RulesPerSecurityGroup)),
 			})
 			resp.Diagnostics.Append(diags...)
 			if resp.Diagnostics.HasError() {

@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/serverutil"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
@@ -35,67 +35,65 @@ func setCubeServerData(d *schema.ResourceData, server *ionoscloud.Server, token 
 		}
 	}
 
-	if server.Properties != nil {
-		if server.Properties.TemplateUuid != nil {
-			if err := d.Set("template_uuid", *server.Properties.TemplateUuid); err != nil {
-				return err
-			}
+	if server.Properties.TemplateUuid != nil {
+		if err := d.Set("template_uuid", *server.Properties.TemplateUuid); err != nil {
+			return err
 		}
+	}
 
-		if server.Properties.Name != nil {
-			if err := d.Set("name", *server.Properties.Name); err != nil {
-				return err
-			}
+	if server.Properties.Name != nil {
+		if err := d.Set("name", *server.Properties.Name); err != nil {
+			return err
 		}
-		if server.Properties.Hostname != nil {
-			if err := d.Set("hostname", *server.Properties.Hostname); err != nil {
-				return err
-			}
+	}
+	if server.Properties.Hostname != nil {
+		if err := d.Set("hostname", *server.Properties.Hostname); err != nil {
+			return err
 		}
-		if server.Properties.Cores != nil {
-			if err := d.Set("cores", *server.Properties.Cores); err != nil {
-				return err
-			}
+	}
+	if server.Properties.Cores != nil {
+		if err := d.Set("cores", *server.Properties.Cores); err != nil {
+			return err
 		}
-		if server.Properties.Ram != nil {
-			if err := d.Set("ram", *server.Properties.Ram); err != nil {
-				return err
-			}
+	}
+	if server.Properties.Ram != nil {
+		if err := d.Set("ram", *server.Properties.Ram); err != nil {
+			return err
 		}
+	}
 
-		if server.Properties.AvailabilityZone != nil {
-			if err := d.Set("availability_zone", *server.Properties.AvailabilityZone); err != nil {
-				return err
-			}
+	if server.Properties.AvailabilityZone != nil {
+		if err := d.Set("availability_zone", *server.Properties.AvailabilityZone); err != nil {
+			return err
 		}
+	}
 
-		if server.Properties.VmState != nil {
-			if err := d.Set("vm_state", *server.Properties.VmState); err != nil {
-				return err
-			}
+	if server.Properties.VmState != nil {
+		if err := d.Set("vm_state", *server.Properties.VmState); err != nil {
+			return err
 		}
+	}
 
-		if server.Properties.CpuFamily != nil {
-			if err := d.Set("cpu_family", *server.Properties.CpuFamily); err != nil {
-				return err
-			}
+	if server.Properties.CpuFamily != nil {
+		if err := d.Set("cpu_family", *server.Properties.CpuFamily); err != nil {
+			return err
 		}
-		if server.Properties.BootCdrom != nil && server.Properties.BootCdrom.Id != nil {
-			if err := d.Set("boot_cdrom", *server.Properties.BootCdrom.Id); err != nil {
-				return err
-			}
+	}
+	if server.Properties.BootCdrom != nil && server.Properties.BootCdrom.Id != "" {
+		if err := d.Set("boot_cdrom", server.Properties.BootCdrom.Id); err != nil {
+			return err
 		}
+	}
 
-		if server.Properties.BootVolume != nil && server.Properties.BootVolume.Id != nil {
-			if err := d.Set("boot_volume", *server.Properties.BootVolume.Id); err != nil {
-				return err
-			}
+	if server.Properties.BootVolume != nil && server.Properties.BootVolume.Id != "" {
+		if err := d.Set("boot_volume", server.Properties.BootVolume.Id); err != nil {
+			return err
 		}
-		if server.Entities != nil && server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil && len(*server.Entities.Volumes.Items) > 0 &&
-			(*server.Entities.Volumes.Items)[0].Properties.Image != nil {
-			if err := d.Set("boot_image", *(*server.Entities.Volumes.Items)[0].Properties.Image); err != nil {
-				return err
-			}
+	}
+	if server.Entities != nil && server.Entities.Volumes != nil && len(server.Entities.Volumes.Items) > 0 &&
+		server.Entities.Volumes.Items[0].Properties != nil && server.Entities.Volumes.Items[0].Properties.Image != nil {
+		if err := d.Set("boot_image", *server.Entities.Volumes.Items[0].Properties.Image); err != nil {
+			return err
 		}
 	}
 
@@ -103,7 +101,7 @@ func setCubeServerData(d *schema.ResourceData, server *ionoscloud.Server, token 
 		return nil
 	}
 
-	if server.Entities.Cdroms != nil && server.Entities.Cdroms.Items != nil && len(*server.Entities.Cdroms.Items) > 0 {
+	if server.Entities.Cdroms != nil && len(server.Entities.Cdroms.Items) > 0 {
 		cdroms := setServerCDRoms(server.Entities.Cdroms.Items)
 		if err := d.Set("cdroms", cdroms); err != nil {
 			return err
@@ -111,8 +109,8 @@ func setCubeServerData(d *schema.ResourceData, server *ionoscloud.Server, token 
 	}
 
 	var volumes []any
-	if server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil && len(*server.Entities.Volumes.Items) > 0 {
-		for _, volume := range *server.Entities.Volumes.Items {
+	if server.Entities.Volumes != nil && len(server.Entities.Volumes.Items) > 0 {
+		for _, volume := range server.Entities.Volumes.Items {
 			entry := make(map[string]any)
 
 			entry["id"] = shared.ToValueDefault(volume.Id)
@@ -122,9 +120,9 @@ func setCubeServerData(d *schema.ResourceData, server *ionoscloud.Server, token 
 			entry["image_name"] = shared.ToValueDefault(volume.Properties.Image)
 			entry["image_password"] = shared.ToValueDefault(volume.Properties.ImagePassword)
 
-			if volume.Properties.SshKeys != nil && len(*volume.Properties.SshKeys) > 0 {
+			if len(volume.Properties.SshKeys) > 0 {
 				var sshKeys []any
-				for _, sshKey := range *volume.Properties.SshKeys {
+				for _, sshKey := range volume.Properties.SshKeys {
 					sshKeys = append(sshKeys, sshKey)
 				}
 				entry["ssh_keys"] = sshKeys
@@ -156,23 +154,20 @@ func setCubeServerData(d *schema.ResourceData, server *ionoscloud.Server, token 
 
 	var nicsIntf []any
 	if server.Entities != nil {
-		if server.Entities.Nics != nil && server.Entities.Nics.Items != nil {
-			nicItems := server.Entities.Nics.Items
-			if nicItems != nil && len(*nicItems) > 0 {
-				var nics []any
-				for _, nic := range *server.Entities.Nics.Items {
-					nicMap := cloudapinic.SetNetworkProperties(nic)
-					fw := setFirewallRules(nic)
-					nicMap["firewall_rules"] = fw
-					utils.SetPropWithNilCheck(nicMap, "id", nic.Id)
-					nics = append(nics, nicMap)
-				}
-				nicsIntf = nics
+		if server.Entities.Nics != nil && len(server.Entities.Nics.Items) > 0 {
+			var nics []any
+			for _, nic := range server.Entities.Nics.Items {
+				nicMap := cloudapinic.SetNetworkProperties(nic)
+				fw := setFirewallRules(nic)
+				nicMap["firewall_rules"] = fw
+				utils.SetPropWithNilCheck(nicMap, "id", nic.Id)
+				nics = append(nics, nicMap)
 			}
+			nicsIntf = nics
 		}
 	}
 
-	if server.Entities != nil && server.Entities.Securitygroups != nil && server.Entities.Securitygroups.Items != nil {
+	if server.Entities != nil && server.Entities.Securitygroups != nil && len(server.Entities.Securitygroups.Items) > 0 {
 		if err := nsg.SetNSGInResourceData(d, server.Entities.Securitygroups.Items); err != nil {
 			return err
 		}
@@ -217,7 +212,7 @@ func dataSourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta 
 		return diagutil.ToDiags(d, fmt.Errorf("please provide either the server id or name"), nil)
 	}
 	var server ionoscloud.Server
-	var apiResponse *ionoscloud.APIResponse
+	var apiResponse *shared.APIResponse
 
 	if idOk {
 		/* search by ID */
@@ -236,17 +231,15 @@ func dataSourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta 
 
 		var results []ionoscloud.Server
 
-		if servers.Items != nil {
-			for _, s := range *servers.Items {
-				if s.Properties != nil && s.Properties.Name != nil && *s.Properties.Name == name.(string) {
-					/* server found */
-					server, apiResponse, err = client.ServersApi.DatacentersServersFindById(ctx, datacenterID.(string), *s.Id).Depth(4).Execute()
-					logApiRequestTime(apiResponse)
-					if err != nil {
-						return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the server with ID %s: %w", *s.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
-					}
-					results = append(results, server)
+		for _, s := range servers.Items {
+			if s.Properties.Name != nil && *s.Properties.Name == name.(string) {
+				/* server found */
+				server, apiResponse, err = client.ServersApi.DatacentersServersFindById(ctx, datacenterID.(string), *s.Id).Depth(4).Execute()
+				logApiRequestTime(apiResponse)
+				if err != nil {
+					return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the server with ID %s: %w", *s.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 				}
+				results = append(results, server)
 			}
 		}
 

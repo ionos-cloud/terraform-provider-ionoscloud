@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
@@ -56,7 +56,7 @@ func resourceShareCreate(ctx context.Context, d *schema.ResourceData, meta any) 
 	}
 
 	request := ionoscloud.GroupShare{
-		Properties: &ionoscloud.GroupShareProperties{},
+		Properties: ionoscloud.GroupShareProperties{},
 	}
 
 	tempSharePrivilege := d.Get("share_privilege").(bool)
@@ -67,7 +67,7 @@ func resourceShareCreate(ctx context.Context, d *schema.ResourceData, meta any) 
 	rsp, apiResponse, err := client.UserManagementApi.UmGroupsSharesPost(ctx, d.Get("group_id").(string), d.Get("resource_id").(string)).Resource(request).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating a share: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 	d.SetId(*rsp.Id)
@@ -76,7 +76,7 @@ func resourceShareCreate(ctx context.Context, d *schema.ResourceData, meta any) 
 		if bundleclient.IsRequestFailed(errState) {
 			d.SetId("")
 		}
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
@@ -118,7 +118,7 @@ func resourceShareUpdate(ctx context.Context, d *schema.ResourceData, meta any) 
 	tempEditPrivilege := d.Get("edit_privilege").(bool)
 
 	shareReq := ionoscloud.GroupShare{
-		Properties: &ionoscloud.GroupShareProperties{
+		Properties: ionoscloud.GroupShareProperties{
 			EditPrivilege:  &tempEditPrivilege,
 			SharePrivilege: &tempSharePrivilege,
 		},
@@ -128,12 +128,12 @@ func resourceShareUpdate(ctx context.Context, d *schema.ResourceData, meta any) 
 		d.Get("group_id").(string), d.Get("resource_id").(string)).Resource(shareReq).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while patching a share: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
@@ -157,7 +157,7 @@ func resourceShareDelete(ctx context.Context, d *schema.ResourceData, meta any) 
 		}
 	}
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 

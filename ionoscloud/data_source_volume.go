@@ -6,7 +6,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
@@ -142,7 +143,7 @@ func dataSourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta any)
 	}
 	var volume ionoscloud.Volume
 	var err error
-	var apiResponse *ionoscloud.APIResponse
+	var apiResponse *shared.APIResponse
 
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
@@ -169,17 +170,15 @@ func dataSourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta any)
 		}
 
 		var results []ionoscloud.Volume
-		if volumes.Items != nil {
-			for _, v := range *volumes.Items {
-				if v.Properties != nil && v.Properties.Name != nil && *v.Properties.Name == name.(string) {
-					/* volume found */
-					volume, apiResponse, err = client.VolumesApi.DatacentersVolumesFindById(ctx, datacenterID.(string), *v.Id).Execute()
-					logApiRequestTime(apiResponse)
-					if err != nil {
-						return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching volume %s: %w", *v.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
-					}
-					results = append(results, volume)
+		for _, v := range volumes.Items {
+			if v.Properties != nil && v.Properties.Name != nil && *v.Properties.Name == name.(string) {
+				/* volume found */
+				volume, apiResponse, err = client.VolumesApi.DatacentersVolumesFindById(ctx, datacenterID.(string), *v.Id).Execute()
+				logApiRequestTime(apiResponse)
+				if err != nil {
+					return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching volume %s: %w", *v.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 				}
+				results = append(results, volume)
 			}
 		}
 

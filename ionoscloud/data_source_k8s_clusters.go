@@ -14,7 +14,7 @@ import (
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/uuidgen"
 
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
 )
 
 func dataSourceK8sClusters() *schema.Resource {
@@ -75,10 +75,10 @@ func dataSourceK8sReadClusters(ctx context.Context, d *schema.ResourceData, meta
 	if err != nil {
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching k8s clusters: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
-	if clusters.Items != nil && len(*clusters.Items) == 0 {
+	if len(clusters.Items) == 0 {
 		return diagutil.ToDiags(d, fmt.Errorf("no clusters found"), nil)
 	}
-	if err := setDataSourceK8sSetClusters(ctx, d, *clusters.Items, client); err != nil {
+	if err := setDataSourceK8sSetClusters(ctx, d, clusters.Items, client); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
 	return nil
@@ -110,43 +110,38 @@ func setDataSourceK8sSetClusters(ctx context.Context, d *schema.ResourceData, cl
 
 // K8sClusterProperties returns a map equivalent of dataSourceK8sClusterSchema
 func K8sClusterProperties(ctx context.Context, cluster ionoscloud.KubernetesCluster, client *ionoscloud.APIClient) (map[string]any, error) {
-	if cluster.Properties == nil {
-		clusterID := "nil"
-		if cluster.Id != nil {
-			clusterID = *cluster.Id
-		}
-		return nil, fmt.Errorf("cannot set data, Properties was nil for cluster: %s", clusterID)
-	}
 	clusterProperties := make(map[string]any)
 
-	utils.SetPropWithNilCheck(clusterProperties, "name", cluster.Properties.Name)
+	clusterProperties["name"] = cluster.Properties.Name
 	utils.SetPropWithNilCheck(clusterProperties, "k8s_version", cluster.Properties.K8sVersion)
 	utils.SetPropWithNilCheck(clusterProperties, "public", cluster.Properties.Public)
 	utils.SetPropWithNilCheck(clusterProperties, "location", cluster.Properties.Location)
 	utils.SetPropWithNilCheck(clusterProperties, "nat_gateway_ip", cluster.Properties.NatGatewayIp)
 	utils.SetPropWithNilCheck(clusterProperties, "node_subnet", cluster.Properties.NodeSubnet)
-	utils.SetPropWithNilCheck(clusterProperties, "viable_node_pool_versions", cluster.Properties.ViableNodePoolVersions)
-
-	if cluster.Properties.MaintenanceWindow != nil && cluster.Properties.MaintenanceWindow.Time != nil && cluster.Properties.MaintenanceWindow.DayOfTheWeek != nil {
-		clusterProperties["maintenance_window"] = []map[string]any{{"time": *cluster.Properties.MaintenanceWindow.Time, "day_of_the_week": *cluster.Properties.MaintenanceWindow.DayOfTheWeek}}
+	if len(cluster.Properties.ViableNodePoolVersions) > 0 {
+		clusterProperties["viable_node_pool_versions"] = cluster.Properties.ViableNodePoolVersions
 	}
-	if cluster.Properties.S3Buckets != nil {
-		s3Buckets := make([]map[string]any, len(*cluster.Properties.S3Buckets))
-		for i, s3Bucket := range *cluster.Properties.S3Buckets {
+
+	if cluster.Properties.MaintenanceWindow != nil {
+		clusterProperties["maintenance_window"] = []map[string]any{{"time": cluster.Properties.MaintenanceWindow.Time, "day_of_the_week": cluster.Properties.MaintenanceWindow.DayOfTheWeek}}
+	}
+	if len(cluster.Properties.S3Buckets) > 0 {
+		s3Buckets := make([]map[string]any, len(cluster.Properties.S3Buckets))
+		for i, s3Bucket := range cluster.Properties.S3Buckets {
 			s3Buckets[i] = map[string]any{"name": s3Bucket.Name}
 		}
 		clusterProperties["s3_buckets"] = s3Buckets
 	}
-	if cluster.Properties.AvailableUpgradeVersions != nil {
-		availableUpgradeVersions := make([]any, len(*cluster.Properties.AvailableUpgradeVersions))
-		for i, availableUpgradeVersion := range *cluster.Properties.AvailableUpgradeVersions {
+	if len(cluster.Properties.AvailableUpgradeVersions) > 0 {
+		availableUpgradeVersions := make([]any, len(cluster.Properties.AvailableUpgradeVersions))
+		for i, availableUpgradeVersion := range cluster.Properties.AvailableUpgradeVersions {
 			availableUpgradeVersions[i] = availableUpgradeVersion
 		}
 		clusterProperties["available_upgrade_versions"] = availableUpgradeVersions
 	}
-	if cluster.Properties.ApiSubnetAllowList != nil {
-		apiSubnetAllowList := make([]any, len(*cluster.Properties.ApiSubnetAllowList))
-		for i, subnet := range *cluster.Properties.ApiSubnetAllowList {
+	if len(cluster.Properties.ApiSubnetAllowList) > 0 {
+		apiSubnetAllowList := make([]any, len(cluster.Properties.ApiSubnetAllowList))
+		for i, subnet := range cluster.Properties.ApiSubnetAllowList {
 			apiSubnetAllowList[i] = subnet
 		}
 		clusterProperties["api_subnet_allow_list"] = apiSubnetAllowList
@@ -174,9 +169,9 @@ func K8sClusterProperties(ctx context.Context, cluster ionoscloud.KubernetesClus
 		if err != nil {
 			return nil, fmt.Errorf("an error occurred while fetching the kubernetes cluster node pools for cluster with ID %s: %w", *cluster.Id, err)
 		}
-		if clusterNodePools.Items != nil && len(*clusterNodePools.Items) > 0 {
+		if len(clusterNodePools.Items) > 0 {
 			var nodePools []any
-			for _, nodePool := range *clusterNodePools.Items {
+			for _, nodePool := range clusterNodePools.Items {
 				nodePools = append(nodePools, *nodePool.Id)
 			}
 			clusterProperties["node_pools"] = nodePools

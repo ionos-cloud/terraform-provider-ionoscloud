@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
@@ -67,8 +67,8 @@ func resourceNSGCreate(ctx context.Context, d *schema.ResourceData, meta any) di
 	}
 
 	sg := ionoscloud.SecurityGroupRequest{
-		Properties: &ionoscloud.SecurityGroupProperties{
-			Name:        &sgName,
+		Properties: ionoscloud.SecurityGroupProperties{
+			Name:        sgName,
 			Description: &sgDescription,
 		},
 	}
@@ -76,11 +76,11 @@ func resourceNSGCreate(ctx context.Context, d *schema.ResourceData, meta any) di
 	securityGroup, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsPost(ctx, datacenterID).SecurityGroup(sg).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating a Network Security Group for datacenter dcID: %s, %w", datacenterID, err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while waiting for Network Security Group to be created for datacenter dcID: %s,  %w", datacenterID, errState), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 	d.SetId(*securityGroup.Id)
@@ -121,8 +121,8 @@ func resourceNSGUpdate(ctx context.Context, d *schema.ResourceData, meta any) di
 	}
 
 	sg := ionoscloud.SecurityGroupRequest{
-		Properties: &ionoscloud.SecurityGroupProperties{
-			Name:        &sgName,
+		Properties: ionoscloud.SecurityGroupProperties{
+			Name:        sgName,
 			Description: &sgDescription,
 		},
 	}
@@ -130,12 +130,12 @@ func resourceNSGUpdate(ctx context.Context, d *schema.ResourceData, meta any) di
 	_, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsPut(ctx, datacenterID, d.Id()).SecurityGroup(sg).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating network security group: dcID: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while waiting for Network Security Group to be updated for datacenter dcID: %s,  %w", datacenterID, errState), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
@@ -154,12 +154,12 @@ func resourceNSGDelete(ctx context.Context, d *schema.ResourceData, meta any) di
 	apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsDelete(ctx, datacenterID, d.Id()).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while deleting a network security group: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while waiting for Network Security Group to be deleted for datacenter dcID: %s,  %w", datacenterID, errState), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
@@ -217,27 +217,21 @@ func setNSGData(d *schema.ResourceData, securityGroup *ionoscloud.SecurityGroup)
 		d.SetId(*securityGroup.Id)
 	}
 
-	if securityGroup.Properties != nil {
-		if securityGroup.Properties.Name != nil {
-			err := d.Set("name", *securityGroup.Properties.Name)
-			if err != nil {
-				return fmt.Errorf("error while setting Network Security Group name  %s: %w", d.Id(), err)
-			}
+	if securityGroup.Properties.Name != "" {
+		if err := d.Set("name", securityGroup.Properties.Name); err != nil {
+			return fmt.Errorf("error while setting Network Security Group name  %s: %w", d.Id(), err)
 		}
-		if securityGroup.Properties.Description != nil {
-			err := d.Set("description", *securityGroup.Properties.Description)
-			if err != nil {
-				return fmt.Errorf("error while setting Network Security Group description  %s: %w", d.Id(), err)
-			}
+	}
+	if securityGroup.Properties.Description != nil {
+		if err := d.Set("description", *securityGroup.Properties.Description); err != nil {
+			return fmt.Errorf("error while setting Network Security Group description  %s: %w", d.Id(), err)
 		}
 	}
 	var ruleIDs []string
-	if securityGroup.Entities != nil {
-		if securityGroup.Entities.Rules != nil && securityGroup.Entities.Rules.Items != nil {
-			ruleIDs = make([]string, 0, len(*securityGroup.Entities.Rules.Items))
-			for _, rule := range *securityGroup.Entities.Rules.Items {
-				ruleIDs = append(ruleIDs, *rule.Id)
-			}
+	if securityGroup.Entities != nil && securityGroup.Entities.Rules != nil {
+		ruleIDs = make([]string, 0, len(securityGroup.Entities.Rules.Items))
+		for _, rule := range securityGroup.Entities.Rules.Items {
+			ruleIDs = append(ruleIDs, *rule.Id)
 		}
 	}
 	if err := d.Set("rule_ids", ruleIDs); err != nil {

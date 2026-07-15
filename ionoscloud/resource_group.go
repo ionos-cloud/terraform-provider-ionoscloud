@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/slice"
@@ -248,7 +248,7 @@ func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta any) 
 	}
 
 	request := ionoscloud.Group{
-		Properties: &ionoscloud.GroupProperties{},
+		Properties: ionoscloud.GroupProperties{},
 	}
 
 	groupName := d.Get("name").(string)
@@ -310,7 +310,7 @@ func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta any) 
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating a group: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
@@ -322,7 +322,7 @@ func resourceGroupCreate(ctx context.Context, d *schema.ResourceData, meta any) 
 		if bundleclient.IsRequestFailed(errState) {
 			d.SetId("")
 		}
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
@@ -408,7 +408,7 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta any) 
 	tempManageDBaaS := d.Get("manage_dbaas").(bool)
 
 	groupReq := ionoscloud.Group{
-		Properties: &ionoscloud.GroupProperties{
+		Properties: ionoscloud.GroupProperties{
 			CreateDataCenter:                  &tempCreateDataCenter,
 			CreateSnapshot:                    &tempCreateSnapshot,
 			ReserveIp:                         &tempReserveIp,
@@ -444,12 +444,12 @@ func resourceGroupUpdate(ctx context.Context, d *schema.ResourceData, meta any) 
 	_, apiResponse, err := client.UserManagementApi.UmGroupsPut(ctx, d.Id()).Group(groupReq).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while patching a group: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
@@ -513,12 +513,12 @@ func resourceGroupDelete(ctx context.Context, d *schema.ResourceData, meta any) 
 	apiResponse, err := client.UserManagementApi.UmGroupsDelete(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, err, &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
@@ -565,7 +565,7 @@ func setGroupData(ctx context.Context, client *ionoscloud.APIClient, d *schema.R
 		d.SetId(*group.Id)
 	}
 
-	if group.Properties != nil {
+	{
 		if group.Properties.Name != nil {
 			err := d.Set("name", *group.Properties.Name)
 			if err != nil {
@@ -753,35 +753,33 @@ func setGroupData(ctx context.Context, client *ionoscloud.APIClient, d *schema.R
 			if err != nil {
 				return fmt.Errorf("an error occurred while UmGroupsUsersGet %s %w", d.Id(), err)
 			}
-			if users.Items != nil && len(*users.Items) > 0 {
-				usersEntries = make([]any, len(*users.Items))
-				for userIndex, user := range *users.Items {
+			if len(users.Items) > 0 {
+				usersEntries = make([]any, len(users.Items))
+				for userIndex, user := range users.Items {
 					userEntry := make(map[string]any)
 
 					if user.Id != nil {
 						userEntry["id"] = *user.Id
 					}
 
-					if user.Properties != nil {
-						if user.Properties.Firstname != nil {
-							userEntry["first_name"] = *user.Properties.Firstname
-						}
+					if user.Properties.Firstname != nil {
+						userEntry["first_name"] = *user.Properties.Firstname
+					}
 
-						if user.Properties.Lastname != nil {
-							userEntry["last_name"] = *user.Properties.Lastname
-						}
+					if user.Properties.Lastname != nil {
+						userEntry["last_name"] = *user.Properties.Lastname
+					}
 
-						if user.Properties.Email != nil {
-							userEntry["email"] = *user.Properties.Email
-						}
+					if user.Properties.Email != nil {
+						userEntry["email"] = *user.Properties.Email
+					}
 
-						if user.Properties.Administrator != nil {
-							userEntry["administrator"] = *user.Properties.Administrator
-						}
+					if user.Properties.Administrator != nil {
+						userEntry["administrator"] = *user.Properties.Administrator
+					}
 
-						if user.Properties.ForceSecAuth != nil {
-							userEntry["force_sec_auth"] = *user.Properties.ForceSecAuth
-						}
+					if user.Properties.ForceSecAuth != nil {
+						userEntry["force_sec_auth"] = *user.Properties.ForceSecAuth
 					}
 					usersEntries[userIndex] = userEntry
 				}
@@ -801,7 +799,7 @@ func addUserToGroup(userID, groupID string, ctx context.Context, d *schema.Resou
 		return err
 	}
 	userToAdd := ionoscloud.UserGroupPost{
-		Id: &userID,
+		Id: userID,
 	}
 
 	_, apiResponse, err := client.UserManagementApi.UmGroupsUsersPost(ctx, groupID).User(userToAdd).Execute()

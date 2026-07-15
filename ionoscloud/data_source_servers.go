@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/iancoleman/strcase"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/serverutil"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
@@ -276,7 +276,7 @@ func dataSourceServersRead(ctx context.Context, d *schema.ResourceData, meta any
 			tflog.Info(ctx, "adding server filter", map[string]any{"name": name, "value": value})
 		}
 	}
-	var apiResponse *ionoscloud.APIResponse
+	var apiResponse *shared.APIResponse
 
 	/* search by whatever filter is set above */
 	servers, apiResponse, err := req.Execute()
@@ -290,39 +290,34 @@ func dataSourceServersRead(ctx context.Context, d *schema.ResourceData, meta any
 	if d.Id() == "" {
 		d.SetId(datacenterID.(string))
 	}
-	for _, server := range *servers.Items {
+	for _, server := range servers.Items {
 		serverEntry = SetServerProperties(server)
 		utils.SetPropWithNilCheck(serverEntry, "id", server.Id)
 		// todo: Add token?
 		if server.Entities != nil {
-			if server.Entities.Nics != nil && server.Entities.Nics.Items != nil {
-				nicItems := server.Entities.Nics.Items
-				if nicItems != nil && len(*nicItems) > 0 {
-					var nics []any
-					for _, nic := range *server.Entities.Nics.Items {
-						nicMap := cloudapinic.SetNetworkProperties(nic)
-						fw := setFirewallRules(nic)
-						nicMap["firewall_rules"] = fw
-						utils.SetPropWithNilCheck(nicMap, "id", nic.Id)
-						nics = append(nics, nicMap)
-					}
-					if len(nics) > 0 {
-						serverEntry["nics"] = nics
-					}
+			if server.Entities.Nics != nil && len(server.Entities.Nics.Items) > 0 {
+				var nics []any
+				for _, nic := range server.Entities.Nics.Items {
+					nicMap := cloudapinic.SetNetworkProperties(nic)
+					fw := setFirewallRules(nic)
+					nicMap["firewall_rules"] = fw
+					utils.SetPropWithNilCheck(nicMap, "id", nic.Id)
+					nics = append(nics, nicMap)
+				}
+				if len(nics) > 0 {
+					serverEntry["nics"] = nics
 				}
 			}
-			if server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil {
-				volumes := setVolumePropertiesToSlice(*server.Entities.Volumes.Items)
-				if volumes != nil && len(volumes) > 0 {
+			if server.Entities.Volumes != nil && len(server.Entities.Volumes.Items) > 0 {
+				volumes := setVolumePropertiesToSlice(server.Entities.Volumes.Items)
+				if len(volumes) > 0 {
 					serverEntry["volumes"] = volumes
 				}
 			}
-			if server.Entities.Cdroms != nil {
-				if server.Entities.Cdroms.Items != nil && len(*server.Entities.Cdroms.Items) > 0 {
-					cdroms := setServerCDRoms(server.Entities.Cdroms.Items)
-					if cdroms != nil && len(cdroms) > 0 {
-						serverEntry["cdroms"] = cdroms
-					}
+			if server.Entities.Cdroms != nil && len(server.Entities.Cdroms.Items) > 0 {
+				cdroms := setServerCDRoms(server.Entities.Cdroms.Items)
+				if len(cdroms) > 0 {
+					serverEntry["cdroms"] = cdroms
 				}
 			}
 
@@ -364,8 +359,8 @@ func setVolumePropertiesToSlice(volumesList []ionoscloud.Volume) []any {
 }
 func setFirewallRules(nic ionoscloud.Nic) []any {
 	var firewallRules []any
-	if nic.Entities != nil && nic.Entities.Firewallrules != nil && nic.Entities.Firewallrules.Items != nil {
-		for _, rule := range *nic.Entities.Firewallrules.Items {
+	if nic.Entities != nil && nic.Entities.Firewallrules != nil {
+		for _, rule := range nic.Entities.Firewallrules.Items {
 			ruleEntry := setFirewallRuleProperties(rule)
 			firewallRules = append(firewallRules, ruleEntry)
 		}
@@ -376,52 +371,47 @@ func setFirewallRules(nic ionoscloud.Nic) []any {
 func setFirewallRuleProperties(rule ionoscloud.FirewallRule) map[string]any {
 	ruleEntry := make(map[string]any)
 	ruleEntry["id"] = shared.ToValueDefault(rule.Id)
-	if rule.Properties != nil {
-		ruleEntry["name"] = shared.ToValueDefault(rule.Properties.Name)
-		ruleEntry["protocol"] = shared.ToValueDefault(rule.Properties.Protocol)
-		ruleEntry["source_mac"] = shared.ToValueDefault(rule.Properties.SourceMac)
-		ruleEntry["source_ip"] = shared.ToValueDefault(rule.Properties.SourceIp)
-		ruleEntry["target_ip"] = shared.ToValueDefault(rule.Properties.TargetIp)
-		ruleEntry["icmp_code"] = int32OrDefault(rule.Properties.IcmpCode, 0)
-		ruleEntry["icmp_type"] = int32OrDefault(rule.Properties.IcmpType, 0)
-		ruleEntry["port_range_start"] = int32OrDefault(rule.Properties.PortRangeStart, 0)
-		ruleEntry["port_range_end"] = int32OrDefault(rule.Properties.PortRangeEnd, 0)
-		ruleEntry["type"] = shared.ToValueDefault(rule.Properties.Type)
-	}
+	ruleEntry["name"] = shared.ToValueDefault(rule.Properties.Name)
+	ruleEntry["protocol"] = shared.ToValueDefault(rule.Properties.Protocol)
+	ruleEntry["source_mac"] = shared.ToValueDefault(rule.Properties.SourceMac.Get())
+	ruleEntry["source_ip"] = shared.ToValueDefault(rule.Properties.SourceIp.Get())
+	ruleEntry["target_ip"] = shared.ToValueDefault(rule.Properties.TargetIp.Get())
+	ruleEntry["icmp_code"] = int32OrDefault(rule.Properties.IcmpCode.Get(), 0)
+	ruleEntry["icmp_type"] = int32OrDefault(rule.Properties.IcmpType.Get(), 0)
+	ruleEntry["port_range_start"] = int32OrDefault(rule.Properties.PortRangeStart, 0)
+	ruleEntry["port_range_end"] = int32OrDefault(rule.Properties.PortRangeEnd, 0)
+	ruleEntry["type"] = shared.ToValueDefault(rule.Properties.Type)
 	return ruleEntry
 }
 
 func SetServerProperties(server ionoscloud.Server) map[string]any {
 	serverMap := map[string]any{}
-	if server.Properties != nil {
-		utils.SetPropWithNilCheck(serverMap, "template_uuid", server.Properties.TemplateUuid)
-		utils.SetPropWithNilCheck(serverMap, "name", server.Properties.Name)
-		utils.SetPropWithNilCheck(serverMap, "hostname", server.Properties.Hostname)
-		utils.SetPropWithNilCheck(serverMap, "cores", server.Properties.Cores)
-		utils.SetPropWithNilCheck(serverMap, "ram", server.Properties.Ram)
-		utils.SetPropWithNilCheck(serverMap, "availability_zone", server.Properties.AvailabilityZone)
-		utils.SetPropWithNilCheck(serverMap, "cpu_family", server.Properties.CpuFamily)
-		utils.SetPropWithNilCheck(serverMap, "type", server.Properties.Type)
-		utils.SetPropWithNilCheck(serverMap, "nic_multi_queue", server.Properties.NicMultiQueue)
-		if server.Properties.BootCdrom != nil && server.Properties.BootCdrom.Id != nil {
-			utils.SetPropWithNilCheck(serverMap, "boot_cdrom", *server.Properties.BootCdrom.Id)
-		}
+	utils.SetPropWithNilCheck(serverMap, "template_uuid", server.Properties.TemplateUuid)
+	utils.SetPropWithNilCheck(serverMap, "name", server.Properties.Name)
+	utils.SetPropWithNilCheck(serverMap, "hostname", server.Properties.Hostname)
+	utils.SetPropWithNilCheck(serverMap, "cores", server.Properties.Cores)
+	utils.SetPropWithNilCheck(serverMap, "ram", server.Properties.Ram)
+	utils.SetPropWithNilCheck(serverMap, "availability_zone", server.Properties.AvailabilityZone)
+	utils.SetPropWithNilCheck(serverMap, "cpu_family", server.Properties.CpuFamily)
+	utils.SetPropWithNilCheck(serverMap, "type", server.Properties.Type)
+	utils.SetPropWithNilCheck(serverMap, "nic_multi_queue", server.Properties.NicMultiQueue)
+	if server.Properties.BootCdrom != nil && server.Properties.BootCdrom.Id != "" {
+		utils.SetPropWithNilCheck(serverMap, "boot_cdrom", server.Properties.BootCdrom.Id)
+	}
 
-		if server.Properties.BootVolume != nil && server.Properties.BootVolume.Id != nil {
-			utils.SetPropWithNilCheck(serverMap, "boot_volume", *server.Properties.BootVolume.Id)
-
-		}
-		if server.Entities != nil && server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil && len(*server.Entities.Volumes.Items) > 0 &&
-			(*server.Entities.Volumes.Items)[0].Properties.Image != nil {
-			utils.SetPropWithNilCheck(serverMap, "boot_image", (*server.Entities.Volumes.Items)[0].Properties.Image)
-		}
+	if server.Properties.BootVolume != nil && server.Properties.BootVolume.Id != "" {
+		utils.SetPropWithNilCheck(serverMap, "boot_volume", server.Properties.BootVolume.Id)
+	}
+	if server.Entities != nil && server.Entities.Volumes != nil && len(server.Entities.Volumes.Items) > 0 &&
+		server.Entities.Volumes.Items[0].Properties != nil && server.Entities.Volumes.Items[0].Properties.Image != nil {
+		utils.SetPropWithNilCheck(serverMap, "boot_image", server.Entities.Volumes.Items[0].Properties.Image)
 	}
 	return serverMap
 }
 
-func setServerCDRoms(images *[]ionoscloud.Image) []any {
+func setServerCDRoms(images []ionoscloud.Image) []any {
 	var cdroms []any
-	for _, image := range *images {
+	for _, image := range images {
 		entry := make(map[string]any)
 
 		entry["id"] = shared.ToValueDefault(image.Id)
@@ -439,13 +429,13 @@ func setServerCDRoms(images *[]ionoscloud.Image) []any {
 		entry["disc_virtio_hot_unplug"] = boolOrDefault(image.Properties.DiscVirtioHotUnplug, true)
 		entry["disc_scsi_hot_plug"] = boolOrDefault(image.Properties.DiscScsiHotPlug, true)
 		entry["disc_scsi_hot_unplug"] = boolOrDefault(image.Properties.DiscScsiHotUnplug, true)
-		entry["licence_type"] = shared.ToValueDefault(image.Properties.LicenceType)
+		entry["licence_type"] = image.Properties.LicenceType
 		entry["image_type"] = shared.ToValueDefault(image.Properties.ImageType)
 		entry["public"] = boolOrDefault(image.Properties.Public, false)
 
-		if image.Properties.ImageAliases != nil {
+		if len(image.Properties.ImageAliases) > 0 {
 			var imageAliases []any
-			for _, imageAlias := range *image.Properties.ImageAliases {
+			for _, imageAlias := range image.Properties.ImageAliases {
 				imageAliases = append(imageAliases, imageAlias)
 			}
 			entry["image_aliases"] = imageAliases

@@ -7,7 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
@@ -60,7 +61,7 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 		return diagutil.ToDiags(d, fmt.Errorf("please provide either the backup unit id or name"), nil)
 	}
 	var backupUnit ionoscloud.BackupUnit
-	var apiResponse *ionoscloud.APIResponse
+	var apiResponse *shared.APIResponse
 
 	if idOk {
 		/* search by ID */
@@ -69,9 +70,7 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 		if err != nil {
 			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the backup unit %s: %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
-		if backupUnit.Properties != nil {
-			tflog.Info(ctx, "got backup unit", map[string]any{"name": *backupUnit.Properties.Name, "id": *backupUnit.Id})
-		}
+		tflog.Info(ctx, "got backup unit", map[string]any{"name": backupUnit.Properties.Name, "id": *backupUnit.Id})
 	} else {
 		/* search by name */
 		var backupUnits ionoscloud.BackupUnits
@@ -84,17 +83,14 @@ func dataSourceBackupUnitRead(ctx context.Context, d *schema.ResourceData, meta 
 		}
 
 		var results []ionoscloud.BackupUnit
-		if backupUnits.Items != nil {
-			for _, bu := range *backupUnits.Items {
-				if bu.Properties != nil && bu.Properties.Name != nil && *bu.Properties.Name == name.(string) {
-					tmpBackupUnit, apiResponse, err := BackupUnitFindByID(ctx, *bu.Id, client)
-					logApiRequestTime(apiResponse)
-					if err != nil {
-						return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching backup unit with ID %s: %w", *bu.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
-					}
-					results = append(results, tmpBackupUnit)
+		for _, bu := range backupUnits.Items {
+			if bu.Properties.Name == name.(string) {
+				tmpBackupUnit, apiResponse, err := BackupUnitFindByID(ctx, *bu.Id, client)
+				logApiRequestTime(apiResponse)
+				if err != nil {
+					return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching backup unit with ID %s: %w", *bu.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 				}
-
+				results = append(results, tmpBackupUnit)
 			}
 		}
 

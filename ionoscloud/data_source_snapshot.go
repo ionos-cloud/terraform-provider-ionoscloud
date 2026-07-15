@@ -6,7 +6,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapilocation"
@@ -124,7 +125,7 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta an
 	}
 
 	var snapshot ionoscloud.Snapshot
-	var apiResponse *ionoscloud.APIResponse
+	var apiResponse *shared.APIResponse
 
 	if idOk {
 		/* search by ID */
@@ -143,11 +144,9 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta an
 			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching IONOS CLOUD locations %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 
-		if snapshots.Items != nil {
-			for _, snp := range *snapshots.Items {
-				if snp.Properties != nil && snp.Properties.Name != nil && *snp.Properties.Name == name.(string) {
-					results = append(results, snp)
-				}
+		for _, snp := range snapshots.Items {
+			if snp.Properties.Name != nil && *snp.Properties.Name == name.(string) {
+				results = append(results, snp)
 			}
 		}
 
@@ -156,7 +155,7 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta an
 			locationIDs := cloudapilocation.ResolveParentLocation(ctx, client, location.(string))
 			var locationResults []ionoscloud.Snapshot
 			for _, snp := range results {
-				if snp.Properties != nil && snp.Properties.Location != nil && cloudapilocation.LocationInSet(locationIDs, *snp.Properties.Location) {
+				if snp.Properties.Location != nil && cloudapilocation.LocationInSet(locationIDs, *snp.Properties.Location) {
 					locationResults = append(locationResults, snp)
 				}
 			}
@@ -166,10 +165,9 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta an
 		if sizeOk {
 			var sizeResults []ionoscloud.Snapshot
 			for _, snp := range results {
-				if snp.Properties != nil && snp.Properties.Size != nil && *snp.Properties.Size == float32(size.(int)) {
+				if snp.Properties.Size != nil && *snp.Properties.Size == float32(size.(int)) {
 					sizeResults = append(sizeResults, snp)
 				}
-
 			}
 			results = sizeResults
 		}

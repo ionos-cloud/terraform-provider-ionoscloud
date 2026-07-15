@@ -9,7 +9,8 @@ import (
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	cloudapiflowlog "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/flowlog"
@@ -30,14 +31,14 @@ func (fs *Service) List(ctx context.Context, datacenterID, serverID string, dept
 	if err != nil {
 		return emptyNicList, err
 	}
-	if nics.Items == nil {
+	if len(nics.Items) == 0 {
 		tflog.Debug(ctx, "empty nic list", map[string]any{"datacenter_id": datacenterID, "server_id": serverID})
 		return emptyNicList, nil
 	}
-	return *nics.Items, nil
+	return nics.Items, nil
 }
 
-func (fs *Service) Get(ctx context.Context, datacenterID, serverID, ID string, depth int32) (*ionoscloud.Nic, *ionoscloud.APIResponse, error) {
+func (fs *Service) Get(ctx context.Context, datacenterID, serverID, ID string, depth int32) (*ionoscloud.Nic, *shared.APIResponse, error) {
 	nic, apiResponse, err := fs.Client.NetworkInterfacesApi.DatacentersServersNicsFindById(ctx, datacenterID, serverID, ID).Depth(depth).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
@@ -49,7 +50,7 @@ func (fs *Service) Get(ctx context.Context, datacenterID, serverID, ID string, d
 	return &nic, apiResponse, nil
 }
 
-func (fs *Service) Delete(ctx context.Context, datacenterID, serverID, ID string) (*ionoscloud.APIResponse, error) {
+func (fs *Service) Delete(ctx context.Context, datacenterID, serverID, ID string) (*shared.APIResponse, error) {
 	apiResponse, err := fs.Client.NetworkInterfacesApi.DatacentersServersNicsDelete(ctx, datacenterID, serverID, ID).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
@@ -62,7 +63,7 @@ func (fs *Service) Delete(ctx context.Context, datacenterID, serverID, ID string
 }
 
 // Create - creates the resource in the backend and waits until it is in an `AVAILABLE` state
-func (fs *Service) Create(ctx context.Context, datacenterID, serverID string, nic ionoscloud.Nic) (*ionoscloud.Nic, *ionoscloud.APIResponse, error) {
+func (fs *Service) Create(ctx context.Context, datacenterID, serverID string, nic ionoscloud.Nic) (*ionoscloud.Nic, *shared.APIResponse, error) {
 	val, apiResponse, err := fs.Client.NetworkInterfacesApi.DatacentersServersNicsPost(ctx, datacenterID, serverID).Nic(nic).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
@@ -77,7 +78,7 @@ func (fs *Service) Create(ctx context.Context, datacenterID, serverID string, ni
 	return &val, apiResponse, nil
 }
 
-func (fs *Service) Update(ctx context.Context, datacenterID, serverID, ID string, nicProperties ionoscloud.NicProperties) (*ionoscloud.Nic, *ionoscloud.APIResponse, error) {
+func (fs *Service) Update(ctx context.Context, datacenterID, serverID, ID string, nicProperties ionoscloud.NicProperties) (*ionoscloud.Nic, *shared.APIResponse, error) {
 	updatedNic, apiResponse, err := fs.Client.NetworkInterfacesApi.DatacentersServersNicsPatch(ctx, datacenterID, serverID, ID).Nic(nicProperties).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
@@ -106,24 +107,23 @@ func DecodeTo(ctx context.Context, oldValues, newValues []any) ([]ionoscloud.Nic
 
 func SetNetworkProperties(nic ionoscloud.Nic) map[string]any {
 	network := map[string]any{}
-	if nic.Properties != nil {
-		utils.SetPropWithNilCheck(network, "dhcp", nic.Properties.Dhcp)
-		utils.SetPropWithNilCheck(network, "dhcpv6", nic.Properties.Dhcpv6)
-		utils.SetPropWithNilCheck(network, "firewall_active", nic.Properties.FirewallActive)
-		utils.SetPropWithNilCheck(network, "firewall_type", nic.Properties.FirewallType)
-		utils.SetPropWithNilCheck(network, "lan", nic.Properties.Lan)
-		utils.SetPropWithNilCheck(network, "name", nic.Properties.Name)
-		utils.SetPropWithNilCheck(network, "ips", nic.Properties.Ips)
-		utils.SetPropWithNilCheck(network, "ipv6_ips", nic.Properties.Ipv6Ips)
-		utils.SetPropWithNilCheck(network, "ipv6_cidr_block", nic.Properties.Ipv6CidrBlock)
-		utils.SetPropWithNilCheck(network, "mac", nic.Properties.Mac)
-		if nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
-			network["ips"] = *nic.Properties.Ips
-		}
+	utils.SetPropWithNilCheck(network, "dhcp", nic.Properties.Dhcp)
+	utils.SetPropWithNilCheck(network, "dhcpv6", nic.Properties.Dhcpv6.Get())
+	utils.SetPropWithNilCheck(network, "firewall_active", nic.Properties.FirewallActive)
+	utils.SetPropWithNilCheck(network, "firewall_type", nic.Properties.FirewallType)
+	network["lan"] = nic.Properties.Lan
+	utils.SetPropWithNilCheck(network, "name", nic.Properties.Name)
+	utils.SetPropWithNilCheck(network, "ipv6_cidr_block", nic.Properties.Ipv6CidrBlock.Get())
+	utils.SetPropWithNilCheck(network, "mac", nic.Properties.Mac)
+	if len(nic.Properties.Ips) > 0 {
+		network["ips"] = nic.Properties.Ips
+	}
+	if len(nic.Properties.Ipv6Ips) > 0 {
+		network["ipv6_ips"] = nic.Properties.Ipv6Ips
 	}
 	nsgIDs := make([]string, 0)
 	if nic.Entities != nil && nic.Entities.Securitygroups != nil && nic.Entities.Securitygroups.Items != nil {
-		for _, group := range *nic.Entities.Securitygroups.Items {
+		for _, group := range nic.Entities.Securitygroups.Items {
 			if group.Id != nil {
 				id := *group.Id
 				nsgIDs = append(nsgIDs, id)
@@ -137,11 +137,11 @@ func SetNetworkProperties(nic ionoscloud.Nic) map[string]any {
 
 func GetNicFromSchema(d *schema.ResourceData, path string) (ionoscloud.Nic, error) {
 	nic := ionoscloud.Nic{
-		Properties: &ionoscloud.NicProperties{},
+		Properties: ionoscloud.NicProperties{},
 	}
 
 	lanInt := int32(d.Get(path + "lan").(int))
-	nic.Properties.Lan = &lanInt
+	nic.Properties.Lan = lanInt
 
 	if v, ok := d.GetOk(path + "name"); ok {
 		vStr := v.(string)
@@ -151,7 +151,7 @@ func GetNicFromSchema(d *schema.ResourceData, path string) (ionoscloud.Nic, erro
 	dhcp := d.Get(path + "dhcp").(bool)
 	if dhcpv6, ok := d.GetOkExists(path + "dhcpv6"); ok {
 		dhcpv6 := dhcpv6.(bool)
-		nic.Properties.Dhcpv6 = &dhcpv6
+		nic.Properties.Dhcpv6.Set(&dhcpv6)
 	} else {
 		nic.Properties.SetDhcpv6Nil()
 	}
@@ -170,7 +170,7 @@ func GetNicFromSchema(d *schema.ResourceData, path string) (ionoscloud.Nic, erro
 		return nic, err
 	}
 	if ips != nil {
-		nic.Properties.Ips = &ips
+		nic.Properties.Ips = ips
 	}
 
 	ipv6IPs, err := GetNicIPsFromSchema(d, path+"ipv6_ips")
@@ -178,23 +178,23 @@ func GetNicFromSchema(d *schema.ResourceData, path string) (ionoscloud.Nic, erro
 		return nic, err
 	}
 	if ipv6IPs != nil {
-		nic.Properties.Ipv6Ips = &ipv6IPs
+		nic.Properties.Ipv6Ips = ipv6IPs
 	}
 
 	if v, ok := d.GetOk(path + "ipv6_cidr_block"); ok {
 		ipv6Block := v.(string)
-		nic.Properties.Ipv6CidrBlock = &ipv6Block
+		nic.Properties.Ipv6CidrBlock.Set(&ipv6Block)
 	}
 	if flowLogs, ok := d.GetOk("flowlog"); ok {
 		nic.Entities = &ionoscloud.NicEntities{
 			Flowlogs: &ionoscloud.FlowLogs{
-				Items: &[]ionoscloud.FlowLog{},
+				Items: []ionoscloud.FlowLog{},
 			},
 		}
 		if flowLogList, ok := flowLogs.([]any); ok {
 			for _, flowLogData := range flowLogList {
 				if flowLog, ok := flowLogData.(map[string]any); ok {
-					*nic.Entities.Flowlogs.Items = append(*nic.Entities.Flowlogs.Items, cloudapiflowlog.GetFlowlogFromMap(flowLog))
+					nic.Entities.Flowlogs.Items = append(nic.Entities.Flowlogs.Items, cloudapiflowlog.GetFlowlogFromMap(flowLog))
 				}
 			}
 		}
@@ -226,81 +226,75 @@ func NicSetData(ctx context.Context, d *schema.ResourceData, nic *ionoscloud.Nic
 		d.SetId(*nic.Id)
 	}
 
-	if nic.Properties != nil {
-		tflog.Info(ctx, "LAN on NIC", map[string]any{"lan": nic.Properties.Lan})
-		if nic.Properties.Dhcp != nil {
-			if err := d.Set("dhcp", *nic.Properties.Dhcp); err != nil {
-				return fmt.Errorf("error setting dhcp %w", err)
-			}
-		}
-
-		if nic.Properties.Dhcpv6 != nil {
-			if err := d.Set("dhcpv6", *nic.Properties.Dhcpv6); err != nil {
-				return fmt.Errorf("error setting dhcpv6 %w", err)
-			}
-		}
-		if nic.Properties.Lan != nil {
-			if err := d.Set("lan", *nic.Properties.Lan); err != nil {
-				return fmt.Errorf("error setting lan %w", err)
-			}
-		}
-		if nic.Properties.Name != nil {
-			if err := d.Set("name", *nic.Properties.Name); err != nil {
-				return fmt.Errorf("error setting name %w", err)
-			}
-		}
-		if nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
-			if err := d.Set("ips", *nic.Properties.Ips); err != nil {
-				return fmt.Errorf("error setting ips %w", err)
-			}
-		}
-		// should not be checked for len, we want to set the empty slice anyway as the field is computed, and it will not be set by backend
-		// if ipv6_cidr_block is not set on the lan
-		if nic.Properties.Ipv6Ips != nil {
-			if err := d.Set("ipv6_ips", *nic.Properties.Ipv6Ips); err != nil {
-				return fmt.Errorf("error setting ipv6_ips %w", err)
-			}
-		}
-		if nic.Properties.Ipv6CidrBlock != nil {
-			if err := d.Set("ipv6_cidr_block", *nic.Properties.Ipv6CidrBlock); err != nil {
-				return fmt.Errorf("error setting ipv6_cidr_block %w", err)
-			}
-		}
-		if nic.Properties.FirewallActive != nil {
-			if err := d.Set("firewall_active", *nic.Properties.FirewallActive); err != nil {
-				return fmt.Errorf("error setting firewall_active %w", err)
-			}
-		}
-		if nic.Properties.FirewallType != nil {
-			if err := d.Set("firewall_type", *nic.Properties.FirewallType); err != nil {
-				return fmt.Errorf("error setting firewall_type %w", err)
-			}
-		}
-		if nic.Properties.Mac != nil {
-			if err := d.Set("mac", *nic.Properties.Mac); err != nil {
-				return fmt.Errorf("error setting mac %w", err)
-			}
-		}
-		if nic.Properties.DeviceNumber != nil {
-			if err := d.Set("device_number", *nic.Properties.DeviceNumber); err != nil {
-				return fmt.Errorf("error setting device_number %w", err)
-			}
-		}
-		if nic.Properties.PciSlot != nil {
-			if err := d.Set("pci_slot", *nic.Properties.PciSlot); err != nil {
-				return fmt.Errorf("error setting pci_slot %w", err)
-			}
-		}
-		if nic.Entities != nil && nic.Entities.Securitygroups != nil && nic.Entities.Securitygroups.Items != nil {
-			if err := nsg.SetNSGInResourceData(d, nic.Entities.Securitygroups.Items); err != nil {
-				return err
-			}
+	tflog.Info(ctx, "LAN on NIC", map[string]any{"lan": nic.Properties.Lan})
+	if nic.Properties.Dhcp != nil {
+		if err := d.Set("dhcp", *nic.Properties.Dhcp); err != nil {
+			return fmt.Errorf("error setting dhcp %w", err)
 		}
 	}
 
-	if nic.Entities != nil && nic.Entities.Flowlogs != nil && nic.Entities.Flowlogs.Items != nil && len(*nic.Entities.Flowlogs.Items) > 0 {
+	if nic.Properties.Dhcpv6.IsSet() {
+		if err := d.Set("dhcpv6", *nic.Properties.Dhcpv6.Get()); err != nil {
+			return fmt.Errorf("error setting dhcpv6 %w", err)
+		}
+	}
+	if err := d.Set("lan", nic.Properties.Lan); err != nil {
+		return fmt.Errorf("error setting lan %w", err)
+	}
+	if nic.Properties.Name != nil {
+		if err := d.Set("name", *nic.Properties.Name); err != nil {
+			return fmt.Errorf("error setting name %w", err)
+		}
+	}
+	if len(nic.Properties.Ips) > 0 {
+		if err := d.Set("ips", nic.Properties.Ips); err != nil {
+			return fmt.Errorf("error setting ips %w", err)
+		}
+	}
+	// should not be checked for len, we want to set the empty slice anyway as the field is computed, and it will not be set by backend
+	// if ipv6_cidr_block is not set on the lan
+	if err := d.Set("ipv6_ips", nic.Properties.Ipv6Ips); err != nil {
+		return fmt.Errorf("error setting ipv6_ips %w", err)
+	}
+	if nic.Properties.Ipv6CidrBlock.IsSet() {
+		if err := d.Set("ipv6_cidr_block", *nic.Properties.Ipv6CidrBlock.Get()); err != nil {
+			return fmt.Errorf("error setting ipv6_cidr_block %w", err)
+		}
+	}
+	if nic.Properties.FirewallActive != nil {
+		if err := d.Set("firewall_active", *nic.Properties.FirewallActive); err != nil {
+			return fmt.Errorf("error setting firewall_active %w", err)
+		}
+	}
+	if nic.Properties.FirewallType != nil {
+		if err := d.Set("firewall_type", *nic.Properties.FirewallType); err != nil {
+			return fmt.Errorf("error setting firewall_type %w", err)
+		}
+	}
+	if nic.Properties.Mac != nil {
+		if err := d.Set("mac", *nic.Properties.Mac); err != nil {
+			return fmt.Errorf("error setting mac %w", err)
+		}
+	}
+	if nic.Properties.DeviceNumber != nil {
+		if err := d.Set("device_number", *nic.Properties.DeviceNumber); err != nil {
+			return fmt.Errorf("error setting device_number %w", err)
+		}
+	}
+	if nic.Properties.PciSlot != nil {
+		if err := d.Set("pci_slot", *nic.Properties.PciSlot); err != nil {
+			return fmt.Errorf("error setting pci_slot %w", err)
+		}
+	}
+	if nic.Entities != nil && nic.Entities.Securitygroups != nil && nic.Entities.Securitygroups.Items != nil {
+		if err := nsg.SetNSGInResourceData(d, nic.Entities.Securitygroups.Items); err != nil {
+			return err
+		}
+	}
+
+	if nic.Entities != nil && nic.Entities.Flowlogs != nil && len(nic.Entities.Flowlogs.Items) > 0 {
 		var flowlogs []map[string]any
-		for _, flowLog := range *nic.Entities.Flowlogs.Items {
+		for _, flowLog := range nic.Entities.Flowlogs.Items {
 			result := map[string]any{}
 			result, err := utils.DecodeStructToMap(flowLog.Properties)
 			if err != nil {

@@ -19,7 +19,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 )
 
 func resourceS3Key() *schema.Resource {
@@ -72,7 +73,7 @@ func resourceS3KeyCreate(ctx context.Context, d *schema.ResourceData, meta any) 
 	keyID := *rsp.Id
 	d.SetId(keyID)
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
@@ -80,7 +81,7 @@ func resourceS3KeyCreate(ctx context.Context, d *schema.ResourceData, meta any) 
 
 	active := d.Get("active").(bool)
 	s3Key := ionoscloud.S3Key{
-		Properties: &ionoscloud.S3KeyProperties{
+		Properties: ionoscloud.S3KeyProperties{
 			Active: &active,
 		},
 	}
@@ -88,12 +89,12 @@ func resourceS3KeyCreate(ctx context.Context, d *schema.ResourceData, meta any) 
 	_, apiResponse, err = client.UserS3KeysApi.UmUsersS3keysPut(ctx, userID, keyID).S3Key(s3Key).Depth(1).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, fmt.Errorf("error saving key data %s: %w", keyID, err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
@@ -102,7 +103,7 @@ func resourceS3KeyCreate(ctx context.Context, d *schema.ResourceData, meta any) 
 
 // createS3KeyWithRetry uses retry.RetryContext to attempt to create an S3 key,
 // specifically retrying on privilege propagation errors.
-func createS3KeyWithRetry(ctx context.Context, d *schema.ResourceData, meta any) (ionoscloud.S3Key, *ionoscloud.APIResponse, error) {
+func createS3KeyWithRetry(ctx context.Context, d *schema.ResourceData, meta any) (ionoscloud.S3Key, *shared.APIResponse, error) {
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return ionoscloud.S3Key{}, nil, err
@@ -110,7 +111,7 @@ func createS3KeyWithRetry(ctx context.Context, d *schema.ResourceData, meta any)
 	userID := d.Get("user_id").(string)
 
 	var s3Key ionoscloud.S3Key
-	var apiResponse *ionoscloud.APIResponse
+	var apiResponse *shared.APIResponse
 
 	retryErr := retry.RetryContext(ctx, d.Timeout(schema.TimeoutCreate), func() *retry.RetryError {
 		s3Key, apiResponse, err = client.UserS3KeysApi.UmUsersS3keysPost(ctx, userID).Execute()
@@ -158,7 +159,7 @@ func resourceS3KeyRead(ctx context.Context, d *schema.ResourceData, meta any) di
 
 	tflog.Info(ctx, "retrieved Object Storage key", map[string]any{"key_id": *s3Key.Id})
 
-	if s3Key.HasProperties() && s3Key.Properties.HasActive() {
+	if s3Key.Properties.HasActive() {
 		tflog.Info(ctx, "Object Storage key status", map[string]any{"active": *s3Key.Properties.Active})
 	}
 
@@ -176,7 +177,7 @@ func resourceS3KeyUpdate(ctx context.Context, d *schema.ResourceData, meta any) 
 	}
 
 	request := ionoscloud.S3Key{}
-	request.Properties = &ionoscloud.S3KeyProperties{}
+	request.Properties = ionoscloud.S3KeyProperties{}
 
 	tflog.Info(ctx, "attempting to update Object Storage key", map[string]any{"key_id": d.Id()})
 
@@ -198,7 +199,7 @@ func resourceS3KeyUpdate(ctx context.Context, d *schema.ResourceData, meta any) 
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
@@ -268,7 +269,7 @@ func isS3KeyPrivilegeError(ctx context.Context, err error) bool {
 	if !retryEnabled {
 		return false
 	}
-	var genericOpenAPIError ionoscloud.GenericOpenAPIError
+	var genericOpenAPIError shared.GenericOpenAPIError
 	if !errors.As(err, &genericOpenAPIError) {
 		return false
 	}
@@ -278,7 +279,7 @@ func isS3KeyPrivilegeError(ctx context.Context, err error) bool {
 
 // isS3KeyNotFound needed because api returns 422 instead of 404 on key being not found. will be removed once API issue is fixed
 func isS3KeyNotFound(err error) bool {
-	var genericOpenAPIError ionoscloud.GenericOpenAPIError
+	var genericOpenAPIError shared.GenericOpenAPIError
 	if !errors.As(err, &genericOpenAPIError) {
 		return false
 	}

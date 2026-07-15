@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -58,7 +59,7 @@ func dataSourceObjectStorageKeyRead(ctx context.Context, d *schema.ResourceData,
 	}
 	var s3Keys ionoscloud.S3Keys
 	var s3Key ionoscloud.S3Key
-	var apiResponse *ionoscloud.APIResponse
+	var apiResponse *shared.APIResponse
 	if IDItf, idOk := d.GetOk("id"); idOk {
 		id := IDItf.(string)
 		s3Key, apiResponse, err = client.UserS3KeysApi.UmUsersS3keysFindByKeyId(ctx, userID, id).Execute()
@@ -78,13 +79,13 @@ func dataSourceObjectStorageKeyRead(ctx context.Context, d *schema.ResourceData,
 		if err != nil {
 			return diagutil.ToDiags(d, fmt.Errorf("error while reading Object Storage key: %w, %s", err, userID), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
-		if s3Keys.Items == nil || len(*s3Keys.Items) == 0 {
+		if len(s3Keys.Items) == 0 {
 			return diagutil.ToDiags(d, fmt.Errorf("no storage key found with the specified criteria: userID = %s", userID), nil)
-		} else if len(*s3Keys.Items) > 1 {
+		} else if len(s3Keys.Items) > 1 {
 			return diagutil.ToDiags(d, fmt.Errorf("more than one storage key found with the specified criteria: userID = %s", userID), nil)
 		}
 
-		s3Key = (*s3Keys.Items)[0]
+		s3Key = s3Keys.Items[0]
 	}
 
 	if err := setS3KeyIDAndProperties(ctx, &s3Key, d); err != nil {

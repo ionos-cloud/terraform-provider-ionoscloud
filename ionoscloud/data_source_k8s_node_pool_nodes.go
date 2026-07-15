@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
@@ -89,22 +89,16 @@ func dataSourceK8sReadNodePoolNodes(ctx context.Context, d *schema.ResourceData,
 	if err != nil {
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching k8s nodes: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
-	if nodesList.Items == nil {
+	if len(nodesList.Items) == 0 {
 		return diagutil.ToDiags(d, fmt.Errorf("no nodes found for nodepool with id %s", nodePoolIDStr), nil)
 	}
-	if len(*nodesList.Items) == 0 {
-		return diagutil.ToDiags(d, fmt.Errorf("nodes list is empty for of nodepool with id %s", nodePoolIDStr), nil)
+	var nodes []any
+	for _, node := range nodesList.Items {
+		nodeMap := setK8sNodesDataToMap(node)
+		nodes = append(nodes, nodeMap)
 	}
-	if len(*nodesList.Items) > 0 {
-		var nodes []any
-		for _, node := range *nodesList.Items {
-			nodeMap := setK8sNodesDataToMap(node)
-			nodes = append(nodes, nodeMap)
-		}
-		err := d.Set("nodes", nodes)
-		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("error while setting nodes: %w", err), nil)
-		}
+	if err := d.Set("nodes", nodes); err != nil {
+		return diagutil.ToDiags(d, fmt.Errorf("error while setting nodes: %w", err), nil)
 	}
 	return nil
 }
@@ -114,11 +108,9 @@ func setK8sNodesDataToMap(node ionoscloud.KubernetesNode) map[string]any {
 	if node.Id != nil {
 		nodeEntry["id"] = shared.ToValueDefault(node.Id)
 	}
-	if node.Properties != nil {
-		nodeEntry["name"] = shared.ToValueDefault(node.Properties.Name)
-		nodeEntry["public_ip"] = shared.ToValueDefault(node.Properties.PublicIP)
-		nodeEntry["private_ip"] = shared.ToValueDefault(node.Properties.PrivateIP)
-		nodeEntry["k8s_version"] = shared.ToValueDefault(node.Properties.K8sVersion)
-	}
+	nodeEntry["name"] = node.Properties.Name
+	nodeEntry["public_ip"] = shared.ToValueDefault(node.Properties.PublicIP)
+	nodeEntry["private_ip"] = shared.ToValueDefault(node.Properties.PrivateIP)
+	nodeEntry["k8s_version"] = node.Properties.K8sVersion
 	return nodeEntry
 }

@@ -9,7 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"gopkg.in/yaml.v3"
 
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
@@ -285,7 +286,7 @@ func dataSourceK8sReadCluster(ctx context.Context, d *schema.ResourceData, meta 
 		return diagutil.ToDiags(d, fmt.Errorf("please provide either the k8s cluster id or name"), nil)
 	}
 	var cluster ionoscloud.KubernetesCluster
-	var apiResponse *ionoscloud.APIResponse
+	var apiResponse *shared.APIResponse
 
 	if idOk {
 		/* search by ID */
@@ -304,11 +305,11 @@ func dataSourceK8sReadCluster(ctx context.Context, d *schema.ResourceData, meta 
 			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching k8s clusters: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 
-		if clusters.Items != nil {
+		{
 			var results []ionoscloud.KubernetesCluster
 
-			for _, c := range *clusters.Items {
-				if c.Properties != nil && c.Properties.Name != nil && *c.Properties.Name == name.(string) {
+			for _, c := range clusters.Items {
+				if c.Properties.Name == name.(string) {
 					tmpCluster, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, *c.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {
@@ -455,9 +456,9 @@ func setAdditionalK8sClusterData(ctx context.Context, d *schema.ResourceData, cl
 			return fmt.Errorf("an error occurred while fetching the kubernetes cluster node pools for cluster with ID %s: %w", *cluster.Id, err)
 		}
 
-		if clusterNodePools.Items != nil && len(*clusterNodePools.Items) > 0 {
+		if len(clusterNodePools.Items) > 0 {
 			var nodePools []any
-			for _, nodePool := range *clusterNodePools.Items {
+			for _, nodePool := range clusterNodePools.Items {
 				nodePools = append(nodePools, *nodePool.Id)
 			}
 			if err := d.Set("node_pools", nodePools); err != nil {
@@ -465,9 +466,9 @@ func setAdditionalK8sClusterData(ctx context.Context, d *schema.ResourceData, cl
 			}
 		}
 
-		if cluster.Properties != nil && cluster.Properties.AvailableUpgradeVersions != nil {
-			availableUpgradeVersions := make([]any, len(*cluster.Properties.AvailableUpgradeVersions), len(*cluster.Properties.AvailableUpgradeVersions))
-			for i, availableUpgradeVersion := range *cluster.Properties.AvailableUpgradeVersions {
+		if len(cluster.Properties.AvailableUpgradeVersions) > 0 {
+			availableUpgradeVersions := make([]any, len(cluster.Properties.AvailableUpgradeVersions))
+			for i, availableUpgradeVersion := range cluster.Properties.AvailableUpgradeVersions {
 				availableUpgradeVersions[i] = availableUpgradeVersion
 			}
 			if err := d.Set("available_upgrade_versions", availableUpgradeVersions); err != nil {

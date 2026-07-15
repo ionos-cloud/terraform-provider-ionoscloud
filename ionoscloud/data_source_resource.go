@@ -6,7 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
@@ -68,7 +68,7 @@ func dataSourceResourceRead(ctx context.Context, d *schema.ResourceData, meta an
 		if err != nil {
 			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching resources by type %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
-		results = *items.Items
+		results = items.Items
 		if len(results) > 0 && results[0].Type != nil {
 			err = d.Set("resource_type", results[0].Type)
 			if err != nil {
@@ -83,7 +83,7 @@ func dataSourceResourceRead(ctx context.Context, d *schema.ResourceData, meta an
 		if err != nil {
 			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching resources %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
-		results = *items.Items
+		results = items.Items
 	}
 
 	if len(results) == 0 {

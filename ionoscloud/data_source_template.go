@@ -7,7 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
@@ -97,66 +97,58 @@ func dataSourceTemplateRead(ctx context.Context, d *schema.ResourceData, meta an
 
 	var results []ionoscloud.Template
 
-	if nameOk && templates.Items != nil {
-		for _, tmp := range *templates.Items {
-			if strings.Contains(strings.ToLower(*tmp.Properties.Name), strings.ToLower(name.(string))) {
+	if nameOk {
+		for _, tmp := range templates.Items {
+			if strings.Contains(strings.ToLower(tmp.Properties.Name), strings.ToLower(name.(string))) {
 				results = append(results, tmp)
 			}
 		}
-	} else if templates.Items != nil {
-		results = *templates.Items
+	} else {
+		results = templates.Items
 	}
 
 	if coresOk {
 		cores := float32(cores.(float64))
-		if results != nil {
-			var coresResults []ionoscloud.Template
-			for _, tmp := range results {
-				if tmp.Properties.Cores != nil && *tmp.Properties.Cores == cores {
-					coresResults = append(coresResults, tmp)
-				}
+		var coresResults []ionoscloud.Template
+		for _, tmp := range results {
+			if tmp.Properties.Cores == cores {
+				coresResults = append(coresResults, tmp)
 			}
-			results = coresResults
 		}
+		results = coresResults
 	}
 
 	if ramOk {
 		ram := float32(ram.(float64))
-		if results != nil {
-			var ramResults []ionoscloud.Template
-			for _, tmp := range results {
-				if tmp.Properties.Ram != nil && *tmp.Properties.Ram == ram {
-					ramResults = append(ramResults, tmp)
-				}
+		var ramResults []ionoscloud.Template
+		for _, tmp := range results {
+			if tmp.Properties.Ram == ram {
+				ramResults = append(ramResults, tmp)
 			}
-			results = ramResults
 		}
+		results = ramResults
 	}
 
 	if storageSizeOk {
 		storageSize := float32(storageSize.(float64))
-		if results != nil {
-			var storageSizeResults []ionoscloud.Template
-			for _, tmp := range results {
-				if tmp.Properties != nil && tmp.Properties.StorageSize != nil && *tmp.Properties.StorageSize == storageSize {
-					storageSizeResults = append(storageSizeResults, tmp)
-				}
+		var storageSizeResults []ionoscloud.Template
+		for _, tmp := range results {
+			if tmp.Properties.StorageSize == storageSize {
+				storageSizeResults = append(storageSizeResults, tmp)
 			}
-			results = storageSizeResults
 		}
+		results = storageSizeResults
 	}
 
 	if categoryOk {
 		categoryStr := category.(string)
-		if results != nil {
-			var categoryResults []ionoscloud.Template
-			for _, tmp := range results {
-				if tmp.Properties != nil && tmp.Properties.Category != nil && *tmp.Properties.Category == categoryStr {
-					categoryResults = append(categoryResults, tmp)
-				}
+		var categoryResults []ionoscloud.Template
+		for _, tmp := range results {
+			if tmp.Properties.Category == categoryStr {
+				categoryResults = append(categoryResults, tmp)
 			}
-			results = categoryResults
 		}
+		results = categoryResults
 	}
 
 	var template ionoscloud.Template
@@ -179,50 +171,41 @@ func dataSourceTemplateRead(ctx context.Context, d *schema.ResourceData, meta an
 func setTemplateData(d *schema.ResourceData, template *ionoscloud.Template) error {
 	d.SetId(*template.Id)
 
-	if template.Properties != nil {
-		if template.Properties.Name != nil {
-			err := d.Set("name", *template.Properties.Name)
-			if err != nil {
-				return fmt.Errorf("error while setting name property for image %s: %w", d.Id(), err)
-			}
+	if template.Properties.Name != "" {
+		if err := d.Set("name", template.Properties.Name); err != nil {
+			return fmt.Errorf("error while setting name property for image %s: %w", d.Id(), err)
 		}
+	}
 
-		if template.Properties.Cores != nil {
-			if err := d.Set("cores", *template.Properties.Cores); err != nil {
-				return err
-			}
-		}
-		if template.Properties.Ram != nil {
-			if err := d.Set("ram", *template.Properties.Ram); err != nil {
-				return err
-			}
-		}
-		if template.Properties.StorageSize != nil {
-			if err := d.Set("storage_size", *template.Properties.StorageSize); err != nil {
-				return err
-			}
-		}
+	if err := d.Set("cores", template.Properties.Cores); err != nil {
+		return err
+	}
+	if err := d.Set("ram", template.Properties.Ram); err != nil {
+		return err
+	}
+	if err := d.Set("storage_size", template.Properties.StorageSize); err != nil {
+		return err
+	}
 
-		if template.Properties.Category != nil {
-			if err := d.Set("category", *template.Properties.Category); err != nil {
-				return err
-			}
+	if template.Properties.Category != "" {
+		if err := d.Set("category", template.Properties.Category); err != nil {
+			return err
 		}
+	}
 
-		if template.Properties.Gpus != nil {
-			var gpus []map[string]any
-			for _, gpu := range *template.Properties.Gpus {
-				gpuMap := map[string]any{
-					"count":  gpu.Count,
-					"model":  gpu.Model,
-					"type":   gpu.Type,
-					"vendor": gpu.Vendor,
-				}
-				gpus = append(gpus, gpuMap)
+	if len(template.Properties.Gpus) > 0 {
+		var gpus []map[string]any
+		for _, gpu := range template.Properties.Gpus {
+			gpuMap := map[string]any{
+				"count":  gpu.Count,
+				"model":  gpu.Model,
+				"type":   gpu.Type,
+				"vendor": gpu.Vendor,
 			}
-			if err := d.Set("gpus", gpus); err != nil {
-				return err
-			}
+			gpus = append(gpus, gpuMap)
+		}
+		if err := d.Set("gpus", gpus); err != nil {
+			return err
 		}
 	}
 

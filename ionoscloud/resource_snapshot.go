@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
@@ -157,7 +157,7 @@ func resourceSnapshotCreate(ctx context.Context, d *schema.ResourceData, meta an
 	rsp, apiResponse, err := client.VolumesApi.DatacentersVolumesCreateSnapshotPost(ctx, dcID, volumeID).Snapshot(*snapshot).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating a snapshot: %w ", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
@@ -166,7 +166,7 @@ func resourceSnapshotCreate(ctx context.Context, d *schema.ResourceData, meta an
 		if bundleclient.IsRequestFailed(errState) {
 			d.SetId("")
 		}
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
@@ -245,12 +245,12 @@ func resourceSnapshotUpdate(ctx context.Context, d *schema.ResourceData, meta an
 	_, apiResponse, err := client.SnapshotsApi.SnapshotsPatch(ctx, d.Id()).Snapshot(input).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while restoring a snapshot: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
@@ -267,12 +267,12 @@ func resourceSnapshotDelete(ctx context.Context, d *schema.ResourceData, meta an
 	apiResponse, err := client.SnapshotsApi.SnapshotsDelete(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while deleting a snapshot: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
@@ -321,107 +321,89 @@ func resourceSnapshotImport(ctx context.Context, d *schema.ResourceData, meta an
 func setSnapshotData(d *schema.ResourceData, snapshot *ionoscloud.Snapshot) error {
 	d.SetId(*snapshot.Id)
 
-	if snapshot.Properties != nil {
-		if snapshot.Properties.Name != nil {
-			if err := d.Set("name", *snapshot.Properties.Name); err != nil {
-				return err
-			}
+	if snapshot.Properties.Name != nil {
+		if err := d.Set("name", *snapshot.Properties.Name); err != nil {
+			return err
 		}
-
-		if snapshot.Properties.Location != nil {
-			if err := d.Set("location", *snapshot.Properties.Location); err != nil {
-				return err
-			}
+	}
+	if snapshot.Properties.Location != nil {
+		if err := d.Set("location", *snapshot.Properties.Location); err != nil {
+			return err
 		}
-
-		if snapshot.Properties.Size != nil {
-			if err := d.Set("size", *snapshot.Properties.Size); err != nil {
-				return err
-			}
+	}
+	if snapshot.Properties.Size != nil {
+		if err := d.Set("size", *snapshot.Properties.Size); err != nil {
+			return err
 		}
-
-		if snapshot.Properties.Description != nil {
-			if err := d.Set("description", *snapshot.Properties.Description); err != nil {
-				return err
-			}
+	}
+	if snapshot.Properties.Description != nil {
+		if err := d.Set("description", *snapshot.Properties.Description); err != nil {
+			return err
 		}
-
-		if snapshot.Properties.LicenceType != nil {
-			if err := d.Set("licence_type", *snapshot.Properties.LicenceType); err != nil {
-				return err
-			}
+	}
+	if snapshot.Properties.LicenceType != nil {
+		if err := d.Set("licence_type", *snapshot.Properties.LicenceType); err != nil {
+			return err
 		}
-
-		if snapshot.Properties.SecAuthProtection != nil {
-			if err := d.Set("sec_auth_protection", *snapshot.Properties.SecAuthProtection); err != nil {
-				return err
-			}
+	}
+	if snapshot.Properties.SecAuthProtection != nil {
+		if err := d.Set("sec_auth_protection", *snapshot.Properties.SecAuthProtection); err != nil {
+			return err
 		}
-
-		if snapshot.Properties.CpuHotPlug != nil {
-			if err := d.Set("cpu_hot_plug", *snapshot.Properties.CpuHotPlug); err != nil {
-				return err
-			}
+	}
+	if snapshot.Properties.CpuHotPlug != nil {
+		if err := d.Set("cpu_hot_plug", *snapshot.Properties.CpuHotPlug); err != nil {
+			return err
 		}
-
-		if snapshot.Properties.CpuHotUnplug != nil {
-			if err := d.Set("cpu_hot_unplug", *snapshot.Properties.CpuHotUnplug); err != nil {
-				return err
-			}
+	}
+	if snapshot.Properties.CpuHotUnplug != nil {
+		if err := d.Set("cpu_hot_unplug", *snapshot.Properties.CpuHotUnplug); err != nil {
+			return err
 		}
-
-		if snapshot.Properties.RamHotPlug != nil {
-			if err := d.Set("ram_hot_plug", *snapshot.Properties.RamHotPlug); err != nil {
-				return err
-			}
+	}
+	if snapshot.Properties.RamHotPlug != nil {
+		if err := d.Set("ram_hot_plug", *snapshot.Properties.RamHotPlug); err != nil {
+			return err
 		}
-
-		if snapshot.Properties.RamHotUnplug != nil {
-			if err := d.Set("ram_hot_unplug", *snapshot.Properties.RamHotUnplug); err != nil {
-				return err
-			}
+	}
+	if snapshot.Properties.RamHotUnplug != nil {
+		if err := d.Set("ram_hot_unplug", *snapshot.Properties.RamHotUnplug); err != nil {
+			return err
 		}
-
-		if snapshot.Properties.NicHotPlug != nil {
-			if err := d.Set("nic_hot_plug", *snapshot.Properties.NicHotPlug); err != nil {
-				return err
-			}
+	}
+	if snapshot.Properties.NicHotPlug != nil {
+		if err := d.Set("nic_hot_plug", *snapshot.Properties.NicHotPlug); err != nil {
+			return err
 		}
-
-		if snapshot.Properties.NicHotUnplug != nil {
-			if err := d.Set("nic_hot_unplug", *snapshot.Properties.NicHotUnplug); err != nil {
-				return err
-			}
+	}
+	if snapshot.Properties.NicHotUnplug != nil {
+		if err := d.Set("nic_hot_unplug", *snapshot.Properties.NicHotUnplug); err != nil {
+			return err
 		}
-
-		if snapshot.Properties.DiscVirtioHotPlug != nil {
-			if err := d.Set("disc_virtio_hot_plug", *snapshot.Properties.DiscVirtioHotPlug); err != nil {
-				return err
-			}
+	}
+	if snapshot.Properties.DiscVirtioHotPlug != nil {
+		if err := d.Set("disc_virtio_hot_plug", *snapshot.Properties.DiscVirtioHotPlug); err != nil {
+			return err
 		}
-
-		if snapshot.Properties.DiscVirtioHotUnplug != nil {
-			if err := d.Set("disc_virtio_hot_unplug", *snapshot.Properties.DiscVirtioHotUnplug); err != nil {
-				return err
-			}
+	}
+	if snapshot.Properties.DiscVirtioHotUnplug != nil {
+		if err := d.Set("disc_virtio_hot_unplug", *snapshot.Properties.DiscVirtioHotUnplug); err != nil {
+			return err
 		}
-
-		if snapshot.Properties.DiscScsiHotPlug != nil {
-			if err := d.Set("disc_scsi_hot_plug", *snapshot.Properties.DiscVirtioHotUnplug); err != nil {
-				return err
-			}
+	}
+	if snapshot.Properties.DiscScsiHotPlug != nil {
+		if err := d.Set("disc_scsi_hot_plug", *snapshot.Properties.DiscScsiHotPlug); err != nil {
+			return err
 		}
-
-		if snapshot.Properties.DiscScsiHotUnplug != nil {
-			if err := d.Set("disc_scsi_hot_unplug", *snapshot.Properties.DiscVirtioHotUnplug); err != nil {
-				return err
-			}
+	}
+	if snapshot.Properties.DiscScsiHotUnplug != nil {
+		if err := d.Set("disc_scsi_hot_unplug", *snapshot.Properties.DiscScsiHotUnplug); err != nil {
+			return err
 		}
-
-		if snapshot.Properties.RequireLegacyBios != nil {
-			if err := d.Set("require_legacy_bios", *snapshot.Properties.RequireLegacyBios); err != nil {
-				return err
-			}
+	}
+	if snapshot.Properties.RequireLegacyBios != nil {
+		if err := d.Set("require_legacy_bios", *snapshot.Properties.RequireLegacyBios); err != nil {
+			return err
 		}
 	}
 	return nil

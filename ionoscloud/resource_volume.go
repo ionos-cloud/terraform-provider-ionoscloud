@@ -14,7 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 
@@ -280,7 +280,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta any)
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating a volume: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
@@ -290,7 +290,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta any)
 		if bundleclient.IsRequestFailed(errState) {
 			d.SetId("")
 		}
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
@@ -299,7 +299,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta any)
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while attaching a volume dcID: %s server_id: %s ID: %s Response: %w", dcID, serverID, *volumeToAttach.Id, err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
@@ -315,7 +315,7 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta any)
 				return diagutil.ToDiags(d, fmt.Errorf("error while setting serverID: %w", sErr), nil)
 			}
 		}
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
@@ -348,7 +348,7 @@ func resourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta any) d
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		if err2 := d.Set("server_id", ""); err2 != nil {
-			requestLocation, _ := apiResponse.SafeLocation()
+			requestLocation := safeLocation(apiResponse)
 			return diagutil.ToDiags(d, err2, &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 		}
 	}
@@ -403,19 +403,19 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta any)
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating volume: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 
 	}
 
 	// Wait, catching any errors
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	if apiResponse.SafeStatusCode() > 299 {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating a volume, status code: %d", apiResponse.SafeStatusCode()), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
@@ -426,13 +426,13 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta any)
 		_, apiResponse, err := client.ServersApi.DatacentersServersVolumesPost(ctx, dcID, serverID).Volume(volumeToAttach).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			requestLocation, _ := apiResponse.SafeLocation()
+			requestLocation := safeLocation(apiResponse)
 			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while attaching a volume dcID: %s server_id: %s ID: %s Response: %w",
 				dcID, serverID, *volume.Id, err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 		}
 
 		if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
-			requestLocation, _ := apiResponse.SafeLocation()
+			requestLocation := safeLocation(apiResponse)
 			return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 		}
 	}
@@ -452,13 +452,13 @@ func resourceVolumeDelete(ctx context.Context, d *schema.ResourceData, meta any)
 	apiResponse, err := client.VolumesApi.DatacentersVolumesDelete(ctx, dcID, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while deleting a volume: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
@@ -743,7 +743,7 @@ func getVolumeData(ctx context.Context, d *schema.ResourceData, path, serverType
 			publicKeys = append(publicKeys, publicKey)
 		}
 		if len(publicKeys) > 0 {
-			volume.SshKeys = &publicKeys
+			volume.SshKeys = publicKeys
 		}
 	}
 
@@ -788,7 +788,7 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 				return image, imageAlias, fmt.Errorf("error fetching datacenter %s: (%w)", dcID, err)
 			}
 
-			locationIDs := cloudapilocation.ResolveParentLocation(ctx, client, *dc.Properties.Location)
+			locationIDs := cloudapilocation.ResolveParentLocation(ctx, client, dc.Properties.Location)
 
 			img, rejectedImg := resolveVolumeImageName(imageName, images, locationIDs)
 			if img != nil {
@@ -808,14 +808,14 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 								"image '%s' was found (name: '%s') with type '%s' in location '%s'; "+
 									"volume requires an image of type '%s' in location '%s'",
 								imageName, *rejectedImg.Properties.Name, *rejectedImg.Properties.ImageType,
-								*rejectedImg.Properties.Location, HDDImage, *dc.Properties.Location)
+								*rejectedImg.Properties.Location, HDDImage, dc.Properties.Location)
 						}
 						return image, imageAlias, fmt.Errorf("could not find an image/imagealias/snapshot that matches %s", imageName)
 					}
 				}
 			}
 
-			if volume.ImagePassword == nil && (volume.SshKeys == nil || len(*volume.SshKeys) == 0) && isSnapshot == false &&
+			if volume.ImagePassword == nil && len(volume.SshKeys) == 0 && isSnapshot == false &&
 				(img == nil || (img.Properties.Public != nil && *img.Properties.Public)) {
 				return image, imageAlias, fmt.Errorf("volume, either 'image_password' or 'ssh_key_path'/'ssh_keys' must be provided")
 			}
@@ -841,7 +841,7 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 
 			if isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public == true {
 
-				if volume.ImagePassword == nil && (volume.SshKeys == nil || len(*volume.SshKeys) == 0) {
+				if volume.ImagePassword == nil && len(volume.SshKeys) == 0 {
 					return image, imageAlias, fmt.Errorf("public image, either 'image_password' or 'ssh_key_path'/'ssh_keys' must be provided")
 				}
 
@@ -851,7 +851,7 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 					return image, imageAlias, fmt.Errorf("error fetching datacenter %s: (%w)", dcID, err)
 				}
 
-				locationIDs := cloudapilocation.ResolveParentLocation(ctx, client, *dc.Properties.Location)
+				locationIDs := cloudapilocation.ResolveParentLocation(ctx, client, dc.Properties.Location)
 
 				images, err := cloudapiimage.GetAllImages(ctx, client)
 				if err != nil {
@@ -889,7 +889,7 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 
 				} else {
 					if isSnapshot == false && img.Properties.Public != nil && *img.Properties.Public == true {
-						if volume.ImagePassword == nil && (volume.SshKeys == nil || len(*volume.SshKeys) == 0) {
+						if volume.ImagePassword == nil && len(volume.SshKeys) == 0 {
 							return image, imageAlias, fmt.Errorf("either 'image_password' or 'ssh_key_path'/'ssh_keys' must be provided for imageName %s ", imageName)
 						}
 						image = imageName
@@ -905,7 +905,7 @@ func getImage(ctx context.Context, client *ionoscloud.APIClient, d *schema.Resou
 		return image, imageAlias, fmt.Errorf("either 'image_name', 'licence_type', or 'image_alias' must be set")
 	}
 
-	if isSnapshot == true && (volume.ImagePassword != nil || volume.SshKeys != nil && len(*volume.SshKeys) > 0) {
+	if isSnapshot == true && (volume.ImagePassword != nil || len(volume.SshKeys) > 0) {
 		return image, imageAlias, fmt.Errorf("passwords/SSH keys are not supported for snapshots")
 	}
 
@@ -925,16 +925,14 @@ func getSnapshotID(ctx context.Context, client *ionoscloud.APIClient, snapshotNa
 		tflog.Error(ctx, "error while fetching the list of snapshots", map[string]any{"error": err.Error()})
 	}
 
-	if len(*snapshots.Items) > 0 {
-		for _, i := range *snapshots.Items {
-			imgName := ""
-			if i.Properties != nil && i.Properties.Name != nil && *i.Properties.Name != "" {
-				imgName = *i.Properties.Name
-			}
+	for _, i := range snapshots.Items {
+		imgName := ""
+		if i.Properties.Name != nil && *i.Properties.Name != "" {
+			imgName = *i.Properties.Name
+		}
 
-			if imgName != "" && strings.Contains(strings.ToLower(imgName), strings.ToLower(snapshotName)) {
-				return *i.Id
-			}
+		if imgName != "" && strings.Contains(strings.ToLower(imgName), strings.ToLower(snapshotName)) {
+			return *i.Id
 		}
 	}
 	return ""
@@ -952,7 +950,7 @@ func resolveVolumeImageName(imageName string, images []ionoscloud.Image, locatio
 	var partialMatch *ionoscloud.Image
 	var nameMatchWrongTypeOrLocation *ionoscloud.Image
 	for _, imageEntry := range images {
-		if imageEntry.Properties != nil && imageEntry.Properties.Name != nil && *imageEntry.Properties.Name != "" {
+		if imageEntry.Properties.Name != nil && *imageEntry.Properties.Name != "" {
 
 			nameMatches := (imageEntry.Id != nil && strings.EqualFold(imageName, *imageEntry.Id)) ||
 				strings.EqualFold(*imageEntry.Properties.Name, imageName) ||

@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapinic"
@@ -145,7 +145,7 @@ func dataSourceNicRead(ctx context.Context, d *schema.ResourceData, meta any) di
 			return diagutil.ToDiags(d, fmt.Errorf("error getting nic with id %s %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 		if nameOk {
-			if foundNic.Properties != nil && *foundNic.Properties.Name != name {
+			if foundNic.Properties.Name != nil && *foundNic.Properties.Name != name {
 				return diagutil.ToDiags(d, fmt.Errorf("name of nic (UUID=%s, name=%s) does not match expected name: %s",
 					*foundNic.Id, *foundNic.Properties.Name, name), nil)
 			}
@@ -159,9 +159,9 @@ func dataSourceNicRead(ctx context.Context, d *schema.ResourceData, meta any) di
 
 		var results []ionoscloud.Nic
 
-		if nameOk && nics != nil {
+		if nameOk {
 			for _, tempNic := range nics {
-				if tempNic.Properties != nil && tempNic.Properties.Name != nil && *tempNic.Properties.Name == name {
+				if tempNic.Properties.Name != nil && *tempNic.Properties.Name == name {
 					results = append(results, tempNic)
 				}
 			}

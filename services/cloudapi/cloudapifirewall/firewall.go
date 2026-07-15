@@ -9,7 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/slice"
@@ -29,14 +30,14 @@ func (fs *Service) Get(ctx context.Context, datacenterID, serverID, nicID string
 	if err != nil {
 		return nil, err
 	}
-	if apiResponse.HttpNotFound() || firewallRules.Items == nil || len(*firewallRules.Items) == 0 {
+	if apiResponse.HttpNotFound() || len(firewallRules.Items) == 0 {
 		tflog.Debug(ctx, "no firewalls found", map[string]any{"datacenter_id": datacenterID, "server_id": serverID, "nic_id": nicID})
 		return nil, nil
 	}
-	return *firewallRules.Items, nil
+	return firewallRules.Items, nil
 }
 
-func (fs *Service) FindById(ctx context.Context, datacenterID, serverID, nicID, firewallID string) (*ionoscloud.FirewallRule, *ionoscloud.APIResponse, error) {
+func (fs *Service) FindById(ctx context.Context, datacenterID, serverID, nicID, firewallID string) (*ionoscloud.FirewallRule, *shared.APIResponse, error) {
 	firewallRule, apiResponse, err := fs.Client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterID, serverID, nicID, firewallID).Depth(1).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
@@ -49,7 +50,7 @@ func (fs *Service) FindById(ctx context.Context, datacenterID, serverID, nicID, 
 	return &firewallRule, apiResponse, nil
 }
 
-func (fs *Service) Delete(ctx context.Context, datacenterID, serverID, nicID, firewallID string) (*ionoscloud.APIResponse, error) {
+func (fs *Service) Delete(ctx context.Context, datacenterID, serverID, nicID, firewallID string) (*shared.APIResponse, error) {
 	apiResponse, err := fs.Client.FirewallRulesApi.DatacentersServersNicsFirewallrulesDelete(ctx, datacenterID, serverID, nicID, firewallID).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
@@ -61,7 +62,7 @@ func (fs *Service) Delete(ctx context.Context, datacenterID, serverID, nicID, fi
 	return apiResponse, nil
 }
 
-func (fs *Service) Create(ctx context.Context, datacenterID, serverID, nicID string, firewallrule ionoscloud.FirewallRule) (*ionoscloud.FirewallRule, *ionoscloud.APIResponse, error) {
+func (fs *Service) Create(ctx context.Context, datacenterID, serverID, nicID string, firewallrule ionoscloud.FirewallRule) (*ionoscloud.FirewallRule, *shared.APIResponse, error) {
 	firewall, apiResponse, err := fs.Client.FirewallRulesApi.DatacentersServersNicsFirewallrulesPost(ctx, datacenterID, serverID, nicID).Firewallrule(firewallrule).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
@@ -73,7 +74,7 @@ func (fs *Service) Create(ctx context.Context, datacenterID, serverID, nicID str
 	return &firewall, apiResponse, nil
 }
 
-func (fs *Service) Update(ctx context.Context, datacenterID, serverID, nicID, id string, firewallrule ionoscloud.FirewallRule) (*ionoscloud.FirewallRule, *ionoscloud.APIResponse, error) {
+func (fs *Service) Update(ctx context.Context, datacenterID, serverID, nicID, id string, firewallrule ionoscloud.FirewallRule) (*ionoscloud.FirewallRule, *shared.APIResponse, error) {
 	firewall, apiResponse, err := fs.Client.FirewallRulesApi.DatacentersServersNicsFirewallrulesPut(ctx, datacenterID, serverID, nicID, id).Firewallrule(firewallrule).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
@@ -88,21 +89,19 @@ func (fs *Service) Update(ctx context.Context, datacenterID, serverID, nicID, id
 func SetProperties(firewall ionoscloud.FirewallRule) map[string]any {
 
 	fw := map[string]any{}
-	if firewall.Properties != nil {
-		utils.SetPropWithNilCheck(fw, "protocol", firewall.Properties.Protocol)
-		utils.SetPropWithNilCheck(fw, "name", firewall.Properties.Name)
-		utils.SetPropWithNilCheck(fw, "source_mac", firewall.Properties.SourceMac)
-		utils.SetPropWithNilCheck(fw, "source_ip", firewall.Properties.SourceIp)
-		utils.SetPropWithNilCheck(fw, "target_ip", firewall.Properties.TargetIp)
-		utils.SetPropWithNilCheck(fw, "port_range_start", firewall.Properties.PortRangeStart)
-		utils.SetPropWithNilCheck(fw, "port_range_end", firewall.Properties.PortRangeEnd)
-		utils.SetPropWithNilCheck(fw, "type", firewall.Properties.Type)
-		if firewall.Properties.IcmpType != nil {
-			fw["icmp_type"] = strconv.Itoa(int(*firewall.Properties.IcmpType))
-		}
-		if firewall.Properties.IcmpCode != nil {
-			fw["icmp_code"] = strconv.Itoa(int(*firewall.Properties.IcmpCode))
-		}
+	utils.SetPropWithNilCheck(fw, "protocol", firewall.Properties.Protocol)
+	utils.SetPropWithNilCheck(fw, "name", firewall.Properties.Name)
+	utils.SetPropWithNilCheck(fw, "source_mac", firewall.Properties.SourceMac.Get())
+	utils.SetPropWithNilCheck(fw, "source_ip", firewall.Properties.SourceIp.Get())
+	utils.SetPropWithNilCheck(fw, "target_ip", firewall.Properties.TargetIp.Get())
+	utils.SetPropWithNilCheck(fw, "port_range_start", firewall.Properties.PortRangeStart)
+	utils.SetPropWithNilCheck(fw, "port_range_end", firewall.Properties.PortRangeEnd)
+	utils.SetPropWithNilCheck(fw, "type", firewall.Properties.Type)
+	if firewall.Properties.IcmpType.IsSet() {
+		fw["icmp_type"] = strconv.Itoa(int(*firewall.Properties.IcmpType.Get()))
+	}
+	if firewall.Properties.IcmpCode.IsSet() {
+		fw["icmp_code"] = strconv.Itoa(int(*firewall.Properties.IcmpCode.Get()))
 	}
 	return fw
 }
@@ -180,13 +179,13 @@ func (fs *Service) GetAndUpdateFirewalls(ctx context.Context, dcID, serverID, ni
 			PropUnsetSetFieldIfNotSetInSchema(&newFirewalls[idx], path, fs.D)
 			prop := newFirewalls[idx]
 			fwRule := ionoscloud.FirewallRule{
-				Properties: &prop,
+				Properties: prop,
 			}
 			var firewall *ionoscloud.FirewallRule
 			if nicID != "" {
 				if id, ok := onlyNew[idx].(map[string]any)["id"]; ok && id != "" {
 					// do not send protocol, it's an update
-					*fwRule.Properties = SetNullableFields(*fwRule.Properties)
+					fwRule.Properties = SetNullableFields(fwRule.Properties)
 					fwRule.Properties.Protocol = nil
 					firewall, _, err = fs.Update(ctx, dcID, serverID, nicID, id.(string), fwRule)
 					if err != nil {
@@ -207,22 +206,22 @@ func (fs *Service) GetAndUpdateFirewalls(ctx context.Context, dcID, serverID, ni
 }
 
 func SetNullableFields(prop ionoscloud.FirewallruleProperties) ionoscloud.FirewallruleProperties {
-	if prop.SourceIp == nil {
+	if !prop.SourceIp.IsSet() {
 		prop.SetSourceIpNil()
 	}
-	if prop.SourceMac == nil {
+	if !prop.SourceMac.IsSet() {
 		prop.SetSourceMacNil()
 	}
-	if prop.IpVersion == nil {
+	if !prop.IpVersion.IsSet() {
 		prop.SetIpVersionNil()
 	}
-	if prop.TargetIp == nil {
+	if !prop.TargetIp.IsSet() {
 		prop.SetTargetIpNil()
 	}
-	if prop.IcmpCode == nil {
+	if !prop.IcmpCode.IsSet() {
 		prop.SetIcmpCodeNil()
 	}
-	if prop.IcmpType == nil {
+	if !prop.IcmpType.IsSet() {
 		prop.SetIcmpTypeNil()
 	}
 	return prop
@@ -244,7 +243,7 @@ func (fs *Service) AddToMapIfRuleExists(ctx context.Context, datacenterID, serve
 	if firewall == nil {
 		return firewallEntry, nil
 	}
-	if firewall.Properties != nil && firewall.Properties.Name != nil {
+	if firewall.Properties.Name != nil {
 		tflog.Debug(ctx, "found firewall rule", map[string]any{"name": *firewall.Properties.Name})
 	}
 	firewallEntry = SetProperties(*firewall)
@@ -277,8 +276,7 @@ func ExtractOrderedFirewallIDs(foundRules, sentRules []ionoscloud.FirewallRule) 
 	for _, rule := range sentRules {
 		for _, foundRule := range foundRules {
 			// computed, make equal for comparison
-			if rule.Properties != nil &&
-				foundRule.Properties != nil && foundRule.Properties.IpVersion != nil {
+			if foundRule.Properties.IpVersion.IsSet() {
 				rule.Properties.IpVersion = foundRule.Properties.IpVersion
 			}
 			// we need deepEqual here, because the structures contain pointers and cannot be compared using the stricter `==`

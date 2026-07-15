@@ -8,7 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
@@ -109,7 +110,7 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	var datacenter ionoscloud.Datacenter
-	var apiResponse *ionoscloud.APIResponse
+	var apiResponse *shared.APIResponse
 
 	if !idOk && !nameOk && !locationOk {
 		return diagutil.ToDiags(d, fmt.Errorf("either id, location or name must be set"), nil)
@@ -128,14 +129,12 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 			}
 		}
 		if locationOk {
-			if *datacenter.Properties.Location != location {
+			if datacenter.Properties.Location != location {
 				return diagutil.ToDiags(d, fmt.Errorf("location of dc (UUID=%s, location=%s) does not match expected location: %s",
-					*datacenter.Id, *datacenter.Properties.Location, location), nil)
+					*datacenter.Id, datacenter.Properties.Location, location), nil)
 			}
 		}
-		if datacenter.Properties != nil {
-			tflog.Info(ctx, "got datacenter", map[string]any{"name": *datacenter.Properties.Name, "location": *datacenter.Properties.Location})
-		}
+		tflog.Info(ctx, "got datacenter", map[string]any{"name": shared.ToValueDefault(datacenter.Properties.Name), "location": datacenter.Properties.Location})
 
 	} else {
 		datacenters, apiResponse, err := client.DataCentersApi.DatacentersGet(ctx).Depth(1).Execute()
@@ -147,10 +146,10 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 
 		var results []ionoscloud.Datacenter
 
-		if nameOk && datacenters.Items != nil {
+		if nameOk {
 			var resultsByDatacenter []ionoscloud.Datacenter
-			for _, dc := range *datacenters.Items {
-				if dc.Properties != nil && dc.Properties.Name != nil && *dc.Properties.Name == name {
+			for _, dc := range datacenters.Items {
+				if dc.Properties.Name != nil && *dc.Properties.Name == name {
 					resultsByDatacenter = append(resultsByDatacenter, dc)
 				}
 			}
@@ -166,14 +165,14 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 			var resultsByLocation []ionoscloud.Datacenter
 			if results != nil {
 				for _, dc := range results {
-					if dc.Properties.Location != nil && *dc.Properties.Location == location {
+					if dc.Properties.Location == location {
 						resultsByLocation = append(resultsByLocation, dc)
 					}
 				}
-			} else if datacenters.Items != nil {
+			} else {
 				/* find the first datacenter matching the location */
-				for _, dc := range *datacenters.Items {
-					if dc.Properties.Location != nil && *dc.Properties.Location == location {
+				for _, dc := range datacenters.Items {
+					if dc.Properties.Location == location {
 						resultsByLocation = append(resultsByLocation, dc)
 					}
 				}
