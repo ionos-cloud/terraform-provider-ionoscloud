@@ -45,6 +45,8 @@ type KubernetesNodePoolPropertiesForPost struct {
 	Labels *map[string]string `json:"labels,omitempty"`
 	// The annotations attached to the node pool.
 	Annotations *map[string]string `json:"annotations,omitempty"`
+	// Taints applied to nodes in this pool. A taint repels pods that do not have a matching toleration. Maximum 50 taints per node pool.
+	Taints *[]KubernetesNodePoolTaint `json:"taints,omitempty"`
 	// Optional array of reserved public IP addresses to be used by the nodes. The IPs must be from the exact location of the node pool's data center. If autoscaling is used, the array must contain one more IP than the maximum possible number of nodes (nodeCount+1 for a fixed number of nodes or maxNodeCount+1). The extra IP is used when the nodes are rebuilt.
 	PublicIps *[]string `json:"publicIps,omitempty"`
 }
@@ -688,6 +690,44 @@ func (o *KubernetesNodePoolPropertiesForPost) HasAnnotations() bool {
 	return false
 }
 
+// GetTaints returns the Taints field value
+// If the value is explicit nil, nil is returned
+func (o *KubernetesNodePoolPropertiesForPost) GetTaints() *[]KubernetesNodePoolTaint {
+	if o == nil {
+		return nil
+	}
+
+	return o.Taints
+
+}
+
+// GetTaintsOk returns a tuple with the Taints field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *KubernetesNodePoolPropertiesForPost) GetTaintsOk() (*[]KubernetesNodePoolTaint, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.Taints, true
+}
+
+// SetTaints sets field value
+func (o *KubernetesNodePoolPropertiesForPost) SetTaints(v []KubernetesNodePoolTaint) {
+
+	o.Taints = &v
+
+}
+
+// HasTaints returns a boolean if a field has been set.
+func (o *KubernetesNodePoolPropertiesForPost) HasTaints() bool {
+	if o != nil && o.Taints != nil {
+		return true
+	}
+
+	return false
+}
+
 // GetPublicIps returns the PublicIps field value
 // If the value is explicit nil, nil is returned
 func (o *KubernetesNodePoolPropertiesForPost) GetPublicIps() *[]string {
@@ -790,6 +830,10 @@ func (o KubernetesNodePoolPropertiesForPost) MarshalJSON() ([]byte, error) {
 
 	if o.Annotations != nil {
 		toSerialize["annotations"] = o.Annotations
+	}
+
+	if o.Taints != nil {
+		toSerialize["taints"] = o.Taints
 	}
 
 	if o.PublicIps != nil {

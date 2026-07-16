@@ -35,7 +35,7 @@ require (
 	github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2 v2.0.1
 	github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.2
 	github.com/ionos-cloud/sdk-go-bundle/shared v0.1.11
-	github.com/ionos-cloud/sdk-go/v6 v6.3.8
+	github.com/ionos-cloud/sdk-go/v6 v6.3.10
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/crypto v0.51.0

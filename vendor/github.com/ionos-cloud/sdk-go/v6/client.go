@@ -52,7 +52,7 @@ const (
 	RequestStatusFailed  = "FAILED"
 	RequestStatusDone    = "DONE"
 
-	Version = "6.3.8"
+	Version = "6.3.10"
 )
 
 // Constants for APIs
@@ -382,17 +382,27 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, time.Duratio
 		var backoffTime time.Duration
 
 		switch resp.StatusCode {
+		case http.StatusInternalServerError:
+			// Only retry 500s on GET to avoid retrying potentially
+			// non-idempotent requests.
+			if request.Method != http.MethodGet {
+				return resp, httpRequestTime, err
+			}
+			if c.cfg.Debug || c.cfg.LogLevel.Satisfies(Debug) {
+				c.cfg.Logger.Printf("[DEBUG] ionoscloud: received %d for %s %s, will retry (attempt %d/%d)\n", resp.StatusCode, request.Method, request.URL.String(), retryCount, c.GetConfig().MaxRetries)
+			}
+			backoffTime = c.GetConfig().WaitTime
 		case http.StatusServiceUnavailable,
 			http.StatusGatewayTimeout,
 			http.StatusBadGateway:
 			if request.Method == http.MethodPost {
 				if c.cfg.Debug || c.cfg.LogLevel.Satisfies(Debug) {
-					c.cfg.Logger.Printf("[DEBUG] cloudapi: received %d for POST %s, not retrying (non-idempotent)\n", resp.StatusCode, request.URL.String())
+					c.cfg.Logger.Printf("[DEBUG] ionoscloud: received %d for POST %s, not retrying (non-idempotent)\n", resp.StatusCode, request.URL.String())
 				}
 				return resp, httpRequestTime, err
 			}
 			if c.cfg.Debug || c.cfg.LogLevel.Satisfies(Debug) {
-				c.cfg.Logger.Printf("[DEBUG] cloudapi: received %d for %s %s, will retry (attempt %d/%d)\n", resp.StatusCode, request.Method, request.URL.String(), retryCount, c.GetConfig().MaxRetries)
+				c.cfg.Logger.Printf("[DEBUG] ionoscloud: received %d for %s %s, will retry (attempt %d/%d)\n", resp.StatusCode, request.Method, request.URL.String(), retryCount, c.GetConfig().MaxRetries)
 			}
 			backoffTime = c.GetConfig().WaitTime
 
@@ -404,12 +414,12 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, time.Duratio
 				}
 				backoffTime = waitTime
 				if c.cfg.Debug || c.cfg.LogLevel.Satisfies(Debug) {
-					c.cfg.Logger.Printf("[DEBUG] cloudapi: rate limited (429) for %s %s, retry-after=%ss (attempt %d/%d)\n", request.Method, request.URL.String(), retryAfterSeconds, retryCount, c.GetConfig().MaxRetries)
+					c.cfg.Logger.Printf("[DEBUG] ionoscloud: rate limited (429) for %s %s, retry-after=%ss (attempt %d/%d)\n", request.Method, request.URL.String(), retryAfterSeconds, retryCount, c.GetConfig().MaxRetries)
 				}
 			} else {
 				backoffTime = c.GetConfig().WaitTime
 				if c.cfg.Debug || c.cfg.LogLevel.Satisfies(Debug) {
-					c.cfg.Logger.Printf("[DEBUG] cloudapi: rate limited (429) for %s %s, using default backoff (attempt %d/%d)\n", request.Method, request.URL.String(), retryCount, c.GetConfig().MaxRetries)
+					c.cfg.Logger.Printf("[DEBUG] ionoscloud: rate limited (429) for %s %s, using default backoff (attempt %d/%d)\n", request.Method, request.URL.String(), retryCount, c.GetConfig().MaxRetries)
 				}
 			}
 		default:
@@ -419,10 +429,12 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, time.Duratio
 
 		if retryCount >= c.GetConfig().MaxRetries {
 			if c.cfg.Debug || c.cfg.LogLevel.Satisfies(Debug) {
-				c.cfg.Logger.Printf("[DEBUG] cloudapi: retry exhausted after %d attempts for %s %s, last status=%d\n", retryCount, request.Method, request.URL.String(), resp.StatusCode)
+				c.cfg.Logger.Printf("[DEBUG] ionoscloud: retry exhausted after %d attempts for %s %s, last status=%d\n", retryCount, request.Method, request.URL.String(), resp.StatusCode)
 			}
 			break
 		} else {
+			_, _ = io.Copy(io.Discard, resp.Body)
+			_ = resp.Body.Close()
 			c.backOff(request.Context(), backoffTime)
 		}
 	}
