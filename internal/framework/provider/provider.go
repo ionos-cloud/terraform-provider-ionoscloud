@@ -2,7 +2,6 @@ package provider
 
 import (
 	"context"
-	"log"
 	"os"
 	"runtime/debug"
 	"strconv"
@@ -160,7 +159,8 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 	if insecureStr != "" {
 		boolValue, err := strconv.ParseBool(insecureStr)
 		if err != nil {
-			log.Fatal(err)
+			resp.Diagnostics.AddError("invalid IONOS_ALLOW_INSECURE value", err.Error())
+			return
 		}
 		insecureBool = boolValue
 	}

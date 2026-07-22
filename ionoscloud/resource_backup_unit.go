@@ -143,7 +143,7 @@ func resourceBackupUnitUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	oldEmail, newEmail := d.GetChange("email")
 	emailStr := oldEmail.(string)
 	if d.HasChange("email") {
-		tflog.Info(ctx, "backup unit email changed", map[string]any{"old": oldEmail, "new": newEmail})
+		tflog.Info(ctx, "backup unit email changed")
 		emailStr = newEmail.(string)
 	}
 	request.Properties.Email = &emailStr

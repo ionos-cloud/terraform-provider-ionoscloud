@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"runtime/debug"
+	"strconv"
 
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
@@ -261,8 +262,12 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, terraformVer
 		token = tokenItf.(string)
 	}
 	// for some reason, ENVDEFAULTFUNC does not work for this(boolean?) field
-	if insecure := os.Getenv("IONOS_ALLOW_INSECURE"); insecure != "" {
-		_ = d.Set("insecure", true)
+	if insecureStr := os.Getenv("IONOS_ALLOW_INSECURE"); insecureStr != "" {
+		insecureVal, insecureDiags := parseInsecureEnv(insecureStr)
+		if insecureDiags.HasError() {
+			return nil, insecureDiags
+		}
+		_ = d.Set("insecure", insecureVal)
 	}
 	insecure, insecureSet := d.GetOk("insecure")
 	insecureBool := false
@@ -309,6 +314,15 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, terraformVer
 	}
 	configlog.LogTLSConfig(ctx, insecureBool)
 
+	var diags diag.Diagnostics
+	if insecureBool {
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Warning,
+			Summary:  "insecure mode enabled",
+			Detail:   "TLS verification is disabled. This is not recommended for production environments.",
+		})
+	}
+
 	clientOptions := clientoptions.TerraformClientOptions{
 		ClientOptions: shared.ClientOptions{
 			Endpoint:      endpoint,
@@ -335,7 +349,17 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, terraformVer
 		return contractservice.GetContractNumber(ctx, client)
 	})
 
-	return *client, nil
+	return *client, diags
+}
+
+// parseInsecureEnv parses the IONOS_ALLOW_INSECURE env var value as a boolean.
+// Returns an error diagnostic if the value is not a valid boolean string.
+func parseInsecureEnv(val string) (bool, diag.Diagnostics) {
+	b, err := strconv.ParseBool(val)
+	if err != nil {
+		return false, diag.Errorf("invalid IONOS_ALLOW_INSECURE value %q: must be a boolean (true/false/1/0)", val)
+	}
+	return b, nil
 }
 
 // resourceDefaultTimeouts sets default value for each Timeout type
