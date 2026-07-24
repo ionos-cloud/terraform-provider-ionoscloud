@@ -1,13 +1,16 @@
-## 6.7.34 - upcoming release
+## 6.7.34
+
+### Refactor
+- `ionoscloud_mariadb_cluster`: align input validation with API specification — enforce `username` length (1-16 chars), add `username` pattern validation, enforce `password` length (10-63 chars), add `display_name` length and pattern validation, enforce `maintenance_window.time` format (HH:MM:SS), and correct minimum `RAM` requirement (4 GB).
 
 ### Fixes
-- update sdk-go to retry on 500 for GET requests. Add test to verify that the retry logic is working as expected.
+- Update sdk-go to retry on 500 for GET requests. Add test to verify that the retry logic is working as expected.
+- `ionoscloud_server`: Fix `type` changes with `allow_replace = true` silently doing nothing instead of destroying and re-creating the server.
 
 ## 6.7.33
 
 ### Fixes
 - `ionoscloud_pg_cluster_v2`: Fix query pagination loop where `Links.HasNext()` remained set past the last page, causing offsets to grow indefinitely.
-- `ionoscloud_server`: Fix `type` changes with `allow_replace = true` silently doing nothing instead of destroying and re-creating the server.
 
 ### Refactor
 - Remove invalid plan modifier for some InMemoryDB v2 cluster resource attributes.
