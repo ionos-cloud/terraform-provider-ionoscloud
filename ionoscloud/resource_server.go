@@ -94,6 +94,7 @@ func resourceServer() *schema.Resource {
 				Type:             schema.TypeString,
 				Optional:         true,
 				Computed:         true,
+				ForceNew:         true,
 				Description:      "server usages: ENTERPRISE, VCPU or CUBE",
 				DiffSuppressFunc: utils.DiffToLower,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"CUBE", "VCPU", "ENTERPRISE"}, true)),
