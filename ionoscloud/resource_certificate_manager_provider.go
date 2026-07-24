@@ -83,17 +83,17 @@ func providerCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.
 	providerCreateData := cert.GetProviderDataCreate(d)
 	response, apiResponse, err := client.CreateProvider(ctx, *providerCreateData, location)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating an auto-certificate provider: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while creating an auto-certificate provider: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	providerID := response.Id
 	d.SetId(providerID)
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsProviderReady)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while checking the creation status for the auto-certificate provider with ID: %v, error: %w", providerID, err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while checking the creation status for the auto-certificate provider with ID: %v, error: %w", providerID, err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String()})
 	}
 	if err := cert.SetProviderData(d, response); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 	return nil
 }
@@ -108,11 +108,11 @@ func providerRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Di
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while fetching auto-certificate provider with ID: %v, error: %w", providerID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error while fetching auto-certificate provider with ID: %v, error: %w", providerID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	tflog.Info(ctx, "retrieved auto-certificate provider", map[string]any{"provider_id": providerID})
 	if err := cert.SetProviderData(d, provider); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 	return nil
 }
@@ -125,13 +125,13 @@ func providerUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.
 	providerUpdateData := cert.GetProviderDataUpdate(d)
 	provider, apiResponse, err := client.UpdateProvider(ctx, providerID, location, *providerUpdateData)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating auto-certificate provider with ID: %v, error: %w", providerID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while updating auto-certificate provider with ID: %v, error: %w", providerID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	if err = utils.WaitForResourceToBeReady(ctx, d, client.IsProviderReady); err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while checking the update status for the auto-certificate provider with ID: %v, error: %w", providerID, err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while checking the update status for the auto-certificate provider with ID: %v, error: %w", providerID, err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String()})
 	}
 	if err := cert.SetProviderData(d, provider); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 	return nil
 }
@@ -146,11 +146,11 @@ func providerDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while deleting auto-certificate provider with ID: %v, error: %w", providerID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error while deleting auto-certificate provider with ID: %v, error: %w", providerID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsProviderDeleted)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("deletion check failed for auto-certificate provider with ID: %v, error: %w", providerID, err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("deletion check failed for auto-certificate provider with ID: %v, error: %w", providerID, err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String()})
 	}
 	return nil
 }
@@ -159,7 +159,7 @@ func providerImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*s
 	client := meta.(bundleclient.SdkBundle).CertManagerClient
 	parts := strings.Split(d.Id(), ":")
 	if len(parts) != 2 {
-		return nil, diagutil.ToError(d, fmt.Errorf("invalid import, expected ID in the format: '<location>:<provider_id>'"), nil)
+		return nil, bundleclient.ToError(meta, d, fmt.Errorf("invalid import, expected ID in the format: '<location>:<provider_id>'"), nil)
 	}
 	location := parts[0]
 	providerID := parts[1]
@@ -167,16 +167,16 @@ func providerImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*s
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("auto-certificate provider with ID: %v does not exist", providerID), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return nil, bundleclient.ToError(meta, d, fmt.Errorf("auto-certificate provider with ID: %v does not exist", providerID), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
-		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to import auto-certificate provider with ID: %v, error: %w", providerID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return nil, bundleclient.ToError(meta, d, fmt.Errorf("an error occurred while trying to import auto-certificate provider with ID: %v, error: %w", providerID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	tflog.Info(ctx, "auto-certificate provider imported", map[string]any{"provider_id": providerID})
 	if err := d.Set("location", location); err != nil {
 		return nil, utils.GenerateSetError("Auto-certificate provider", "location", err)
 	}
 	if err := cert.SetProviderData(d, provider); err != nil {
-		return nil, diagutil.ToError(d, err, nil)
+		return nil, bundleclient.ToError(meta, d, err, nil)
 	}
 
 	return []*schema.ResourceData{d}, nil

@@ -128,17 +128,17 @@ func dataSourceVolume() *schema.Resource {
 func dataSourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	datacenterID, dcIDOk := d.GetOk("datacenter_id")
 	if !dcIDOk {
-		return diagutil.ToDiags(d, fmt.Errorf("no datacenter_id was specified"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("no datacenter_id was specified"), nil)
 	}
 
 	id, idOk := d.GetOk("id")
 	name, nameOk := d.GetOk("name")
 
 	if idOk && nameOk {
-		return diagutil.ToDiags(d, fmt.Errorf("ID and name cannot be both specified in the same time"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("ID and name cannot be both specified in the same time"), nil)
 	}
 	if !idOk && !nameOk {
-		return diagutil.ToDiags(d, fmt.Errorf("please provide either the volume ID or name"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("please provide either the volume ID or name"), nil)
 	}
 	var volume ionoscloud.Volume
 	var err error
@@ -156,7 +156,7 @@ func dataSourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta any)
 		volume, apiResponse, err = client.VolumesApi.DatacentersVolumesFindById(ctx, datacenterID.(string), id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching volume with ID %s: %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching volume with ID %s: %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 	} else {
 		/* search by name */
@@ -165,7 +165,7 @@ func dataSourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta any)
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching volumes: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching volumes: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 
 		var results []ionoscloud.Volume
@@ -176,7 +176,7 @@ func dataSourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta any)
 					volume, apiResponse, err = client.VolumesApi.DatacentersVolumesFindById(ctx, datacenterID.(string), *v.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {
-						return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching volume %s: %w", *v.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+						return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching volume %s: %w", *v.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 					}
 					results = append(results, volume)
 				}
@@ -184,16 +184,16 @@ func dataSourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta any)
 		}
 
 		if results == nil || len(results) == 0 {
-			return diagutil.ToDiags(d, fmt.Errorf("no volume found with the specified criteria: name = %s", name.(string)), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("no volume found with the specified criteria: name = %s", name.(string)), nil)
 		} else if len(results) > 1 {
-			return diagutil.ToDiags(d, fmt.Errorf("more than one volume found with the specified criteria: name = %s", name.(string)), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("more than one volume found with the specified criteria: name = %s", name.(string)), nil)
 		} else {
 			volume = results[0]
 		}
 	}
 
 	if err = setVolumeData(d, &volume); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 
 	return nil

@@ -168,10 +168,10 @@ func dataSourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta
 	name := nameValue.(string)
 
 	if idOk && nameOk {
-		return diagutil.ToDiags(d, fmt.Errorf("id and name cannot be both specified in the same time"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("id and name cannot be both specified in the same time"), nil)
 	}
 	if !idOk && !nameOk {
-		return diagutil.ToDiags(d, fmt.Errorf("please provide either the target group id or name"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("please provide either the target group id or name"), nil)
 	}
 	var targetGroup ionoscloud.TargetGroup
 	var apiResponse *ionoscloud.APIResponse
@@ -183,7 +183,7 @@ func dataSourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the target group %s: %w", id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching the target group %s: %w", id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 	} else {
 		/* search by name */
@@ -198,7 +198,7 @@ func dataSourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta
 			logApiRequestTime(apiResponse)
 
 			if err != nil {
-				return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching target groups: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+				return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching target groups: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 			}
 
 			results = *targetGroups.Items
@@ -207,7 +207,7 @@ func dataSourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta
 			logApiRequestTime(apiResponse)
 
 			if err != nil {
-				return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching target groups: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+				return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching target groups: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 			}
 
 			if targetGroups.Items != nil {
@@ -216,7 +216,7 @@ func dataSourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta
 						tmpTargetGroup, apiResponse, err := client.TargetGroupsApi.TargetgroupsFindByTargetGroupId(ctx, *t.Id).Execute()
 						logApiRequestTime(apiResponse)
 						if err != nil {
-							return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching target group with ID %s: %w", *t.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+							return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching target group with ID %s: %w", *t.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 						}
 						results = append(results, tmpTargetGroup)
 
@@ -226,9 +226,9 @@ func dataSourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta
 		}
 
 		if results == nil || len(results) == 0 {
-			return diagutil.ToDiags(d, fmt.Errorf("no target group found with the specified criteria: name = %s", name), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("no target group found with the specified criteria: name = %s", name), nil)
 		} else if len(results) > 1 {
-			return diagutil.ToDiags(d, fmt.Errorf("more than one target group found with the specified criteria: name = %s", name), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("more than one target group found with the specified criteria: name = %s", name), nil)
 		}
 
 		targetGroup = results[0]
@@ -236,7 +236,7 @@ func dataSourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	if err = setTargetGroupData(d, &targetGroup); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 
 	return nil

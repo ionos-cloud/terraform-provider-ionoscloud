@@ -112,24 +112,24 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 	var apiResponse *ionoscloud.APIResponse
 
 	if !idOk && !nameOk && !locationOk {
-		return diagutil.ToDiags(d, fmt.Errorf("either id, location or name must be set"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("either id, location or name must be set"), nil)
 	}
 
 	if idOk {
 		datacenter, apiResponse, err = client.DataCentersApi.DatacentersFindById(ctx, id).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("error getting datacenter with id %s %w", id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("error getting datacenter with id %s %w", id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 		if nameOk {
 			if *datacenter.Properties.Name != name {
-				return diagutil.ToDiags(d, fmt.Errorf("name of dc (UUID=%s, name=%s) does not match expected name: %s",
+				return bundleclient.ToDiags(meta, d, fmt.Errorf("name of dc (UUID=%s, name=%s) does not match expected name: %s",
 					*datacenter.Id, *datacenter.Properties.Name, name), nil)
 			}
 		}
 		if locationOk {
 			if *datacenter.Properties.Location != location {
-				return diagutil.ToDiags(d, fmt.Errorf("location of dc (UUID=%s, location=%s) does not match expected location: %s",
+				return bundleclient.ToDiags(meta, d, fmt.Errorf("location of dc (UUID=%s, location=%s) does not match expected location: %s",
 					*datacenter.Id, *datacenter.Properties.Location, location), nil)
 			}
 		}
@@ -142,7 +142,7 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching datacenters: %w ", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching datacenters: %w ", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 
 		var results []ionoscloud.Datacenter
@@ -156,7 +156,7 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 			}
 
 			if resultsByDatacenter == nil {
-				return diagutil.ToDiags(d, fmt.Errorf("no datacenter found with the specified criteria: name = %s", name), nil)
+				return bundleclient.ToDiags(meta, d, fmt.Errorf("no datacenter found with the specified criteria: name = %s", name), nil)
 			} else {
 				results = resultsByDatacenter
 			}
@@ -179,16 +179,16 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 				}
 			}
 			if resultsByLocation == nil {
-				return diagutil.ToDiags(d, fmt.Errorf("no datacenter found with the specified criteria: location = %s", location), nil)
+				return bundleclient.ToDiags(meta, d, fmt.Errorf("no datacenter found with the specified criteria: location = %s", location), nil)
 			} else {
 				results = resultsByLocation
 			}
 		}
 
 		if results == nil || len(results) == 0 {
-			return diagutil.ToDiags(d, fmt.Errorf("no datacenter found with the specified criteria: name = %s location = %s", name, location), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("no datacenter found with the specified criteria: name = %s location = %s", name, location), nil)
 		} else if len(results) > 1 {
-			return diagutil.ToDiags(d, fmt.Errorf("more than one datacenter found with the specified criteria: name = %s location = %s", name, location), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("more than one datacenter found with the specified criteria: name = %s location = %s", name, location), nil)
 		} else {
 			datacenter = results[0]
 		}
@@ -196,7 +196,7 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	if err := setDatacenterData(d, &datacenter); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 
 	return nil

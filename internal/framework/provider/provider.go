@@ -257,14 +257,19 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 	}
 
 	client := bundleclient.New(ctx, clientOptions, fileConfig)
+
+	contractNumber := clientOpts.ContractNumber.ValueString()
+	contractFallback := func() string { return contractservice.GetContractNumber(ctx, client) }
+	// Per-configuration enricher: the contract number travels with this
+	// configuration's bundle instead of process-global state, so concurrent
+	// provider configurations cannot overwrite one another's contract number.
+	client.Diags = diagutil.NewEnricher(contractNumber, token, contractFallback)
+	client.UserS3Client.Diags = client.Diags
+
 	resp.DataSourceData = client
 	resp.EphemeralResourceData = client
 	resp.ResourceData = client
 	resp.ListResourceData = client
-
-	diagutil.SetupContractNumberResolver(clientOpts.ContractNumber.ValueString(), token, func() string { //nolint:contextcheck
-		return contractservice.GetContractNumber(ctx, client)
-	})
 }
 
 // Resources returns the resources for the provider.

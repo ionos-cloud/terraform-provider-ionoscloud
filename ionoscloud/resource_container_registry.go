@@ -118,7 +118,7 @@ func resourceContainerRegistryCreate(ctx context.Context, d *schema.ResourceData
 
 	containerRegistry, err := crservice.GetRegistryDataCreate(ctx, d)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error occurred while getting container registry from schema: %w", err), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error occurred while getting container registry from schema: %w", err), nil)
 	}
 
 	containerRegistryFeatures, warnings := crservice.GetRegistryFeatures(d)
@@ -126,12 +126,12 @@ func resourceContainerRegistryCreate(ctx context.Context, d *schema.ResourceData
 
 	containerRegistryResponse, apiResponse, err := client.CreateRegistry(ctx, *containerRegistry)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating the registry: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while creating the registry: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	d.SetId(*containerRegistryResponse.Id)
 
 	if err := utils.WaitForResourceToBeReady(ctx, d, client.IsRegistryReady); err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error waiting for registry to be ready: %w", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error waiting for registry to be ready: %w", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String()})
 	}
 	return append(warnings, resourceContainerRegistryRead(ctx, d, meta)...)
 }
@@ -149,13 +149,13 @@ func resourceContainerRegistryRead(ctx context.Context, d *schema.ResourceData, 
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while fetching registry: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error while fetching registry: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	tflog.Info(ctx, "retrieved container registry", map[string]any{"registry_id": d.Id()})
 
 	if err := crservice.SetRegistryData(d, registry); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 
 	return nil
@@ -170,7 +170,7 @@ func resourceContainerRegistryUpdate(ctx context.Context, d *schema.ResourceData
 
 	containerRegistry, err := crservice.GetRegistryDataUpdate(ctx, d)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error occurred while getting container registry from schema: %w", err), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error occurred while getting container registry from schema: %w", err), nil)
 	}
 	containerRegistryFeatures, warnings := crservice.GetRegistryFeatures(d)
 	containerRegistry.Features = containerRegistryFeatures
@@ -183,11 +183,11 @@ func resourceContainerRegistryUpdate(ctx context.Context, d *schema.ResourceData
 
 	_, apiResponse, err := client.PatchRegistry(ctx, registryID, *containerRegistry)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating a registry: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while updating a registry: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if err := utils.WaitForResourceToBeReady(ctx, d, client.IsRegistryReady); err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error waiting for registry to be ready: %w", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error waiting for registry to be ready: %w", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String()})
 	}
 
 	return append(warnings, resourceContainerRegistryRead(ctx, d, meta)...)
@@ -209,10 +209,10 @@ func resourceContainerRegistryDelete(ctx context.Context, d *schema.ResourceData
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while deleting registry %s: %w", registryID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error while deleting registry %s: %w", registryID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	return diagutil.ToDiags(d, utils.WaitForResourceToBeDeleted(ctx, d, client.IsRegistryDeleted), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String()})
+	return bundleclient.ToDiags(meta, d, utils.WaitForResourceToBeDeleted(ctx, d, client.IsRegistryDeleted), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String()})
 }
 
 func resourceContainerRegistryImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
@@ -237,15 +237,15 @@ func resourceContainerRegistryImport(ctx context.Context, d *schema.ResourceData
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("registry does not exist %q", registryID), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return nil, bundleclient.ToError(meta, d, fmt.Errorf("registry does not exist %q", registryID), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
-		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the import of registry %q, error:%w", registryID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return nil, bundleclient.ToError(meta, d, fmt.Errorf("an error occurred while trying to fetch the import of registry %q, error:%w", registryID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	tflog.Info(ctx, "container registry imported", map[string]any{"registry_id": registryID})
 
 	if err := crservice.SetRegistryData(d, containerRegistry); err != nil {
-		return nil, diagutil.ToError(d, err, nil)
+		return nil, bundleclient.ToError(meta, d, err, nil)
 	}
 
 	return []*schema.ResourceData{d}, nil

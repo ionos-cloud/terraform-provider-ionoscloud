@@ -433,19 +433,19 @@ func resourceAutoscalingGroupCreate(ctx context.Context, d *schema.ResourceData,
 	var group autoscaling.GroupPost
 	properties, err := expandProperties(ctx, d)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while expanding properties: %w", err), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while expanding properties: %w", err), nil)
 	}
 	group.Properties = *properties
 	autoscalingGroup, apiResponse, err := client.CreateGroup(ctx, group)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error creating Autoscaling Group: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error creating Autoscaling Group: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	d.SetId(autoscalingGroup.Id)
 	tflog.Info(ctx, "autoscaling group created", map[string]any{"group_id": autoscalingGroup.Id})
 
 	if err := checkAction(ctx, client, d); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 
 	return resourceAutoscalingGroupRead(ctx, d, meta)
@@ -460,12 +460,12 @@ func resourceAutoscalingGroupRead(ctx context.Context, d *schema.ResourceData, m
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while retrieving Autoscaling Group: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error while retrieving Autoscaling Group: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	tflog.Info(ctx, "retrieved autoscaling group", map[string]any{"group_id": d.Id()})
 	if err := setAutoscalingGroupData(d, &group.Properties); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 
 	tflog.Info(ctx, "autoscaling group data set", map[string]any{"group_id": d.Id()})
@@ -477,12 +477,12 @@ func resourceAutoscalingGroupUpdate(ctx context.Context, d *schema.ResourceData,
 	client := meta.(bundleclient.SdkBundle).AutoscalingClient
 
 	if d.HasChange("datacenter_id") {
-		return diagutil.ToDiags(d, fmt.Errorf("datacenter_id property is immutable and can be used only in create requests"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("datacenter_id property is immutable and can be used only in create requests"), nil)
 	}
 
 	replicaConfiguration, err := expandReplicaConfiguration(ctx, d.Get("replica_configuration").([]any))
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while expanding replica configuration: %w", err), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while expanding replica configuration: %w", err), nil)
 	}
 
 	group := autoscaling.GroupPut{
@@ -499,13 +499,13 @@ func resourceAutoscalingGroupUpdate(ctx context.Context, d *schema.ResourceData,
 	}
 
 	if _, apiResponse, err := client.UpdateGroup(ctx, d.Id(), group); err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating Autoscaling Group: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while updating Autoscaling Group: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	tflog.Info(ctx, "autoscaling group updated", map[string]any{"group_id": d.Id()})
 
 	if err := checkAction(ctx, client, d); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 
 	return resourceAutoscalingGroupRead(ctx, d, meta)
@@ -514,7 +514,7 @@ func resourceAutoscalingGroupUpdate(ctx context.Context, d *schema.ResourceData,
 func resourceAutoscalingGroupDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).AutoscalingClient
 	if apiResponse, err := client.DeleteGroup(ctx, d.Id()); err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while deleting an Autoscaling Group: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while deleting an Autoscaling Group: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	tflog.Info(ctx, "autoscaling group deleted", map[string]any{"group_id": d.Id()})
@@ -533,15 +533,15 @@ func resourceAutoscalingGroupImport(ctx context.Context, d *schema.ResourceData,
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("unable to find Autoscaling Group %q", groupID), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return nil, bundleclient.ToError(meta, d, fmt.Errorf("unable to find Autoscaling Group %q", groupID), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
-		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while retrieving Autoscaling Group %q, %w", groupID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return nil, bundleclient.ToError(meta, d, fmt.Errorf("an error occurred while retrieving Autoscaling Group %q, %w", groupID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	tflog.Info(ctx, "autoscaling group imported", map[string]any{"group_id": groupID})
 
 	if err := setAutoscalingGroupData(d, &group.Properties); err != nil {
-		return nil, diagutil.ToError(d, err, nil)
+		return nil, bundleclient.ToError(meta, d, err, nil)
 	}
 
 	return []*schema.ResourceData{d}, nil

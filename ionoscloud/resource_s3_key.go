@@ -63,17 +63,17 @@ func resourceS3KeyCreate(ctx context.Context, d *schema.ResourceData, meta any) 
 	rsp, apiResponse, err := createS3KeyWithRetry(ctx, d, meta)
 	if err != nil {
 		d.SetId("")
-		return diagutil.ToDiags(d, fmt.Errorf("error creating Object Storage key: %w", err), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error creating Object Storage key: %w", err), nil)
 	}
 
 	if rsp.Id == nil {
-		return diagutil.ToDiags(d, fmt.Errorf("the API didn't return an Object Storage key ID"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("the API didn't return an Object Storage key ID"), nil)
 	}
 	keyID := *rsp.Id
 	d.SetId(keyID)
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
 		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
+		return bundleclient.ToDiags(meta, d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	tflog.Info(ctx, "created Object Storage key", map[string]any{"key_id": d.Id()})
@@ -89,12 +89,12 @@ func resourceS3KeyCreate(ctx context.Context, d *schema.ResourceData, meta any) 
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, fmt.Errorf("error saving key data %s: %w", keyID, err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error saving key data %s: %w", keyID, err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
 		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
+		return bundleclient.ToDiags(meta, d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	return resourceS3KeyRead(ctx, d, meta)
@@ -153,7 +153,7 @@ func resourceS3KeyRead(ctx context.Context, d *schema.ResourceData, meta any) di
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while reading Object Storage key: %w, %+v", err, s3Key), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error while reading Object Storage key: %w, %+v", err, s3Key), nil)
 	}
 
 	tflog.Info(ctx, "retrieved Object Storage key", map[string]any{"key_id": *s3Key.Id})
@@ -163,7 +163,7 @@ func resourceS3KeyRead(ctx context.Context, d *schema.ResourceData, meta any) di
 	}
 
 	if err := setS3KeyIDAndProperties(ctx, &s3Key, d); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 
 	return nil
@@ -194,12 +194,12 @@ func resourceS3KeyUpdate(ctx context.Context, d *schema.ResourceData, meta any) 
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while updating Object Storage key: %w", err), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error while updating Object Storage key: %w", err), nil)
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
 		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
+		return bundleclient.ToDiags(meta, d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	return resourceS3KeyRead(ctx, d, meta)
@@ -220,7 +220,7 @@ func resourceS3KeyDelete(ctx context.Context, d *schema.ResourceData, meta any) 
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while deleting Object Storage key: %w", err), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error while deleting Object Storage key: %w", err), nil)
 	}
 
 	for {
@@ -233,7 +233,7 @@ func resourceS3KeyDelete(ctx context.Context, d *schema.ResourceData, meta any) 
 				tflog.Info(ctx, "successfully deleted Object Storage key", map[string]any{"key_id": d.Id()})
 				return nil
 			}
-			return diagutil.ToDiags(d, fmt.Errorf("error while checking deletion status of Object Storage key: %w", dsErr), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("error while checking deletion status of Object Storage key: %w", dsErr), nil)
 		}
 
 		if s3KeyDeleted {
@@ -246,7 +246,7 @@ func resourceS3KeyDelete(ctx context.Context, d *schema.ResourceData, meta any) 
 			tflog.Info(ctx, "S3 key not yet deleted, retrying")
 		case <-ctx.Done():
 			tflog.Info(ctx, "S3 key delete timed out")
-			return diagutil.ToDiags(d, fmt.Errorf("object storage key delete timed out, your key will still probably be deleted after some time but the terraform state won't reflect that; check your IONOS CLOUD account for updates"), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("object storage key delete timed out, your key will still probably be deleted after some time but the terraform state won't reflect that; check your IONOS CLOUD account for updates"), nil)
 		}
 	}
 
@@ -315,7 +315,7 @@ func resourceS3KeyImport(ctx context.Context, d *schema.ResourceData, meta any) 
 	parts := strings.Split(d.Id(), "/")
 
 	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
-		return nil, diagutil.ToError(d, fmt.Errorf("invalid import. Expecting {userID}/{s3KeyID}"), nil)
+		return nil, bundleclient.ToError(meta, d, fmt.Errorf("invalid import. Expecting {userID}/{s3KeyID}"), nil)
 	}
 
 	userID := parts[0]
@@ -332,17 +332,17 @@ func resourceS3KeyImport(ctx context.Context, d *schema.ResourceData, meta any) 
 	if err != nil {
 		if httpNotFound(apiResponse) || isS3KeyNotFound(err) {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("unable to find Object Storage key %q", keyID), nil)
+			return nil, bundleclient.ToError(meta, d, fmt.Errorf("unable to find Object Storage key %q", keyID), nil)
 		}
-		return nil, diagutil.ToError(d, fmt.Errorf("unable to retrieve Object Storage key %q, error:%w", keyID, err), nil)
+		return nil, bundleclient.ToError(meta, d, fmt.Errorf("unable to retrieve Object Storage key %q, error:%w", keyID, err), nil)
 	}
 
 	if err := setS3KeyIDAndProperties(ctx, &s3Key, d); err != nil {
-		return nil, diagutil.ToError(d, err, nil)
+		return nil, bundleclient.ToError(meta, d, err, nil)
 	}
 
 	if err := d.Set("user_id", userID); err != nil {
-		return nil, diagutil.ToError(d, err, nil)
+		return nil, bundleclient.ToError(meta, d, err, nil)
 	}
 
 	return []*schema.ResourceData{d}, nil

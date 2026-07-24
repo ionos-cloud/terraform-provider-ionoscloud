@@ -44,6 +44,7 @@ func NewAccesskeyResource() resource.Resource {
 
 type accesskeyResource struct {
 	client *objstorageservice.Client
+	diags  *diagutil.Enricher
 }
 
 // Metadata returns the metadata for the accesskey resource.
@@ -112,6 +113,7 @@ func (r *accesskeyResource) Configure(ctx context.Context, req resource.Configur
 	if err != nil {
 		resp.Diagnostics.AddError("initialization error for Object Storage Management client", err.Error())
 	}
+	r.diags = clientBundle.Diags
 }
 
 // Create creates the accesskey.
@@ -139,7 +141,7 @@ func (r *accesskeyResource) Create(ctx context.Context, req resource.CreateReque
 	}
 	accessKeyResponse, apiResponse, err := r.client.CreateAccessKey(ctx, accessKey, createTimeout)
 	if err != nil {
-		resp.Diagnostics.AddError("failed to create accessKey", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Description.ValueString(), StatusCode: apiResponse.SafeStatusCode()}).Error())
+		resp.Diagnostics.AddError("failed to create accessKey", r.diags.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Description.ValueString(), StatusCode: apiResponse.SafeStatusCode()}).Error())
 		return
 	}
 	// we need this because secretkey is only available on create response
@@ -147,7 +149,7 @@ func (r *accesskeyResource) Create(ctx context.Context, req resource.CreateReque
 
 	accessKeyRead, apiResponse, err := r.client.GetAccessKey(ctx, data.ID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("access Key API error", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceID: data.ID.ValueString(), StatusCode: apiResponse.SafeStatusCode()}).Error())
+		resp.Diagnostics.AddError("access Key API error", r.diags.WrapError(err, &diagutil.ErrorContext{ResourceID: data.ID.ValueString(), StatusCode: apiResponse.SafeStatusCode()}).Error())
 		return
 	}
 
@@ -172,7 +174,7 @@ func (r *accesskeyResource) Read(ctx context.Context, req resource.ReadRequest, 
 
 	accessKey, apiResponse, err := r.client.GetAccessKey(ctx, data.ID.ValueString())
 	if err != nil {
-		resp.Diagnostics.AddError("read Access Key API error", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceID: data.ID.ValueString()}).Error())
+		resp.Diagnostics.AddError("read Access Key API error", r.diags.WrapError(err, &diagutil.ErrorContext{ResourceID: data.ID.ValueString()}).Error())
 		return
 	}
 	if apiResponse.HttpNotFound() {
@@ -214,7 +216,7 @@ func (r *accesskeyResource) Update(ctx context.Context, req resource.UpdateReque
 
 	accessKeyResponse, apiResponse, err := r.client.UpdateAccessKey(ctx, state.ID.ValueString(), accessKey, updateTimeout)
 	if err != nil {
-		resp.Diagnostics.AddError("failed to update accessKey", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceID: state.ID.ValueString(), StatusCode: apiResponse.SafeStatusCode()}).Error())
+		resp.Diagnostics.AddError("failed to update accessKey", r.diags.WrapError(err, &diagutil.ErrorContext{ResourceID: state.ID.ValueString(), StatusCode: apiResponse.SafeStatusCode()}).Error())
 		return
 	}
 
@@ -222,7 +224,7 @@ func (r *accesskeyResource) Update(ctx context.Context, req resource.UpdateReque
 
 	accessKeyRead, apiResponse, err := r.client.GetAccessKey(ctx, accessKeyResponse.Id)
 	if err != nil {
-		resp.Diagnostics.AddError("on update, read access Key API error", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceID: accessKeyResponse.Id, StatusCode: apiResponse.SafeStatusCode()}).Error())
+		resp.Diagnostics.AddError("on update, read access Key API error", r.diags.WrapError(err, &diagutil.ErrorContext{ResourceID: accessKeyResponse.Id, StatusCode: apiResponse.SafeStatusCode()}).Error())
 		return
 	}
 
@@ -253,7 +255,7 @@ func (r *accesskeyResource) Delete(ctx context.Context, req resource.DeleteReque
 	defer cancel()
 
 	if _, err := r.client.DeleteAccessKey(ctx, data.ID.ValueString(), deleteTimeout); err != nil {
-		resp.Diagnostics.AddError("failed to delete accesskey", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceID: data.ID.ValueString()}).Error())
+		resp.Diagnostics.AddError("failed to delete accesskey", r.diags.WrapError(err, &diagutil.ErrorContext{ResourceID: data.ID.ValueString()}).Error())
 		return
 	}
 }

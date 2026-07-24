@@ -128,13 +128,13 @@ func resourceVpnIPSecGatewayCreate(ctx context.Context, d *schema.ResourceData, 
 
 	gateway, apiResponse, err := client.CreateIPSecGateway(ctx, d)
 	if err != nil {
-		return diagutil.ToDiags(d, err, &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, err, &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	d.SetId(gateway.Id)
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsIPSecGatewayReady)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("creating %w ", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("creating %w ", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String()})
 	}
 
 	return resourceVpnIPSecGatewayRead(ctx, d, meta)
@@ -152,25 +152,25 @@ func resourceVpnIPSecGatewayRead(ctx context.Context, d *schema.ResourceData, me
 			return nil
 		}
 
-		return diagutil.ToDiags(d, fmt.Errorf("error while fetching IPSec Gateway: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error while fetching IPSec Gateway: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	return diagutil.ToDiags(d, vpn.SetIPSecGatewayData(d, gateway), nil)
+	return bundleclient.ToDiags(meta, d, vpn.SetIPSecGatewayData(d, gateway), nil)
 }
 func resourceVpnIPSecGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).VPNClient
 
 	gateway, apiResponse, err := client.UpdateIPSecGateway(ctx, d)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error updating IPSec Gateway: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error updating IPSec Gateway: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsIPSecGatewayReady)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("while waiting for IPSec Gateway to be ready: %w", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("while waiting for IPSec Gateway to be ready: %w", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String()})
 	}
 
-	return diagutil.ToDiags(d, vpn.SetIPSecGatewayData(d, gateway), nil)
+	return bundleclient.ToDiags(meta, d, vpn.SetIPSecGatewayData(d, gateway), nil)
 }
 
 func resourceVpnIPSecGatewayDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
@@ -185,13 +185,13 @@ func resourceVpnIPSecGatewayDelete(ctx context.Context, d *schema.ResourceData, 
 			return nil
 		}
 
-		return diagutil.ToDiags(d, fmt.Errorf("error while deleting IPSec Gateway: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error while deleting IPSec Gateway: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	time.Sleep(5 * time.Second)
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsIPSecGatewayDeleted)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("while deleting IPSec Gateway: %w", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("while deleting IPSec Gateway: %w", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String()})
 	}
 
 	return nil
@@ -203,13 +203,13 @@ func resourceVpnIPSecGatewayImport(ctx context.Context, d *schema.ResourceData, 
 	id := parts[1]
 
 	if err := d.Set("location", location); err != nil {
-		return nil, diagutil.ToError(d, err, nil)
+		return nil, bundleclient.ToError(meta, d, err, nil)
 	}
 	d.SetId(id)
 
 	diags := resourceVpnIPSecGatewayRead(ctx, d, meta)
 	if diags != nil && diags.HasError() {
-		return nil, diagutil.ToError(d, errors.New(diags[0].Summary), nil)
+		return nil, bundleclient.ToError(meta, d, errors.New(diags[0].Summary), nil)
 	}
 	return []*schema.ResourceData{d}, nil
 }

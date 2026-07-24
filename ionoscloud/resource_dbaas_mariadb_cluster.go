@@ -203,22 +203,22 @@ func mariaDBClusterCreate(ctx context.Context, d *schema.ResourceData, meta any)
 
 	cluster, err := mariadb.GetMariaDBClusterDataCreate(d)
 	if err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 
 	response, apiResponse, err := client.CreateCluster(ctx, *cluster, d.Get("location").(string))
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating a DBaaS MariaDB cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while creating a DBaaS MariaDB cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	clusterID := *response.Id
 	d.SetId(clusterID)
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsClusterReady)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error occurred while checking the status for MariaDB cluster with ID: %v, error: %w", clusterID, err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error occurred while checking the status for MariaDB cluster with ID: %v, error: %w", clusterID, err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String()})
 	}
 	if err := client.SetMariaDBClusterData(d, response); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 	return nil
 }
@@ -232,11 +232,11 @@ func mariaDBClusterDelete(ctx context.Context, d *schema.ResourceData, meta any)
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while deleting MariaDB cluster with ID: %v, error: %w", clusterID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error while deleting MariaDB cluster with ID: %v, error: %w", clusterID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsClusterDeleted)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("deletion check failed for MariaDB cluster with ID: %v, error: %w", clusterID, err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("deletion check failed for MariaDB cluster with ID: %v, error: %w", clusterID, err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String()})
 	}
 
 	// wait after the deletion of the cluster, for the lan to be freed
@@ -249,7 +249,7 @@ func mariaDBClusterImport(ctx context.Context, d *schema.ResourceData, meta any)
 	client := meta.(bundleclient.SdkBundle).MariaDBClient
 	parts := strings.Split(d.Id(), ":")
 	if len(parts) != 2 {
-		return nil, diagutil.ToError(d, fmt.Errorf("invalid import, expected ID in the format '<location>:<cluster_id>'"), nil)
+		return nil, bundleclient.ToError(meta, d, fmt.Errorf("invalid import, expected ID in the format '<location>:<cluster_id>'"), nil)
 	}
 	location := parts[0]
 	clusterID := parts[1]
@@ -258,9 +258,9 @@ func mariaDBClusterImport(ctx context.Context, d *schema.ResourceData, meta any)
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("MariaDB cluster with ID: %v does not exist", clusterID), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return nil, bundleclient.ToError(meta, d, fmt.Errorf("MariaDB cluster with ID: %v does not exist", clusterID), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
-		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to import MariaDB cluster with ID: %v, error: %w", clusterID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return nil, bundleclient.ToError(meta, d, fmt.Errorf("an error occurred while trying to import MariaDB cluster with ID: %v, error: %w", clusterID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	tflog.Info(ctx, "MariaDB cluster imported", map[string]any{"cluster_id": clusterID})
@@ -269,7 +269,7 @@ func mariaDBClusterImport(ctx context.Context, d *schema.ResourceData, meta any)
 		return nil, utils.GenerateSetError("MariaDB cluster", "location", err)
 	}
 	if err := client.SetMariaDBClusterData(d, cluster); err != nil {
-		return nil, diagutil.ToError(d, err, nil)
+		return nil, bundleclient.ToError(meta, d, err, nil)
 	}
 
 	return []*schema.ResourceData{d}, nil
@@ -284,12 +284,12 @@ func mariaDBClusterRead(ctx context.Context, d *schema.ResourceData, meta any) d
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while fetching MariaDB cluster with ID: %v, error: %w", clusterID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error while fetching MariaDB cluster with ID: %v, error: %w", clusterID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	tflog.Info(ctx, "retrieved MariaDB cluster", map[string]any{"cluster_id": clusterID})
 
 	if err := client.SetMariaDBClusterData(d, cluster); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 
 	return nil
@@ -301,20 +301,20 @@ func mariaDBClusterUpdate(ctx context.Context, d *schema.ResourceData, meta any)
 	clusterID := d.Id()
 	cluster, err := mariadb.GetMariaDBClusterDataUpdate(d)
 	if err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 	location := d.Get("location").(string)
 	response, apiResponse, err := client.UpdateCluster(ctx, *cluster, clusterID, location)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating DBaaS MariaDB cluster with ID: %v in location %s, error: %w", clusterID, location, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while updating DBaaS MariaDB cluster with ID: %v in location %s, error: %w", clusterID, location, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsClusterReady)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error occurred while checking the status for MariaDB cluster with ID: %v in location %s, error: %w", clusterID, location, err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error occurred while checking the status for MariaDB cluster with ID: %v in location %s, error: %w", clusterID, location, err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String()})
 	}
 	if err := client.SetMariaDBClusterData(d, response); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 	return nil
 }

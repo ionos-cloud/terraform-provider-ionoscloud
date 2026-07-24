@@ -109,10 +109,10 @@ func dataSourceContainerRegistryTokenRead(ctx context.Context, d *schema.Resourc
 	name := nameValue.(string)
 
 	if idOk && nameOk {
-		return diagutil.ToDiags(d, fmt.Errorf("id and name cannot be both specified in the same time"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("id and name cannot be both specified in the same time"), nil)
 	}
 	if !idOk && !nameOk {
-		return diagutil.ToDiags(d, fmt.Errorf("please provide either the token id or name"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("please provide either the token id or name"), nil)
 	}
 
 	var token crsdk.TokenResponse
@@ -122,14 +122,14 @@ func dataSourceContainerRegistryTokenRead(ctx context.Context, d *schema.Resourc
 		/* search by ID */
 		token, apiResponse, err = client.GetToken(ctx, registryID, id)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the token with ID %s: %w", id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching the token with ID %s: %w", id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 	} else {
 		var results []crsdk.TokenResponse
 
 		tokens, apiResponse, err := client.ListTokens(ctx, registryID)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching registry tokens: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching registry tokens: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 
 		partialMatch := d.Get("partial_match").(bool)
@@ -146,9 +146,9 @@ func dataSourceContainerRegistryTokenRead(ctx context.Context, d *schema.Resourc
 		}
 
 		if len(results) == 0 {
-			return diagutil.ToDiags(d, fmt.Errorf("no token found with the specified name = %s", name), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("no token found with the specified name = %s", name), nil)
 		} else if len(results) > 1 {
-			return diagutil.ToDiags(d, fmt.Errorf("more than one token found with the specified criteria: name = %s", name), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("more than one token found with the specified criteria: name = %s", name), nil)
 		}
 
 		token = results[0]
@@ -159,14 +159,14 @@ func dataSourceContainerRegistryTokenRead(ctx context.Context, d *schema.Resourc
 	}
 
 	if err := crservice.SetTokenData(d, token.Properties); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 
 	var credentials []any
 	credentialsEntry := crservice.SetCredentials(token.Properties.Credentials)
 	credentials = append(credentials, credentialsEntry)
 	if err := d.Set("credentials", credentials); err != nil {
-		return diagutil.ToDiags(d, utils.GenerateSetError("token", "credentials", err), nil)
+		return bundleclient.ToDiags(meta, d, utils.GenerateSetError("token", "credentials", err), nil)
 	}
 	return nil
 

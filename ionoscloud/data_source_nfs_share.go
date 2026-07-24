@@ -137,10 +137,10 @@ func dataSourceNFSShareRead(ctx context.Context, d *schema.ResourceData, meta an
 	clusterID := d.Get("cluster_id").(string)
 
 	if idOk && nameOk {
-		return diagutil.ToDiags(d, fmt.Errorf("ID and name cannot be both specified at the same time"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("ID and name cannot be both specified at the same time"), nil)
 	}
 	if !idOk && !nameOk {
-		return diagutil.ToDiags(d, fmt.Errorf("please provide either the NFS Share ID or name"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("please provide either the NFS Share ID or name"), nil)
 	}
 
 	var share nfs.ShareRead
@@ -149,12 +149,12 @@ func dataSourceNFSShareRead(ctx context.Context, d *schema.ResourceData, meta an
 	if idOk {
 		share, apiResponse, err = client.GetNFSShareByID(ctx, clusterID, id, location)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the NFS Share with ID: %s, error: %w", idValue, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching the NFS Share with ID: %s, error: %w", idValue, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 	} else {
 		shares, apiResponse, err := client.ListNFSShares(ctx, d)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching NFS Shares: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching NFS Shares: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 
 		var results []nfs.ShareRead
@@ -166,16 +166,16 @@ func dataSourceNFSShareRead(ctx context.Context, d *schema.ResourceData, meta an
 
 		switch {
 		case len(results) == 0:
-			return diagutil.ToDiags(d, fmt.Errorf("no NFS Share found with the specified name: %s", name), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("no NFS Share found with the specified name: %s", name), nil)
 		case len(results) > 1:
-			return diagutil.ToDiags(d, fmt.Errorf("more than one NFS Share found with the specified name: %s", name), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("more than one NFS Share found with the specified name: %s", name), nil)
 		default:
 			share = results[0]
 		}
 	}
 
 	if err = client.SetNFSShareData(d, share); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 
 	return nil

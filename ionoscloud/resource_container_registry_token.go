@@ -120,30 +120,30 @@ func resourceContainerRegistryTokenCreate(ctx context.Context, d *schema.Resourc
 	registryToken, err := crservice.GetTokenDataCreate(d)
 
 	if err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 	registryTokenResponse, apiResponse, err := client.CreateToken(ctx, registryID, *registryToken)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating the registry token: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while creating the registry token: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	d.SetId(*registryTokenResponse.Id)
 
 	if fileStr != "" {
 		if err := utils.WriteToFile(ctx, fileStr, registryTokenResponse.Properties.Credentials.Password); err != nil {
-			return diagutil.ToDiags(d, err, nil)
+			return bundleclient.ToDiags(meta, d, err, nil)
 		}
 	}
 
 	if err = crservice.SetTokenData(d, registryTokenResponse.Properties); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 
 	var credentials []any
 	credentialsEntry := crservice.SetCredentials(registryTokenResponse.Properties.Credentials)
 	credentials = append(credentials, credentialsEntry)
 	if err := d.Set("credentials", credentials); err != nil {
-		return diagutil.ToDiags(d, utils.GenerateSetError("token", "credentials", err), nil)
+		return bundleclient.ToDiags(meta, d, utils.GenerateSetError("token", "credentials", err), nil)
 	}
 	return nil
 }
@@ -164,13 +164,13 @@ func resourceContainerRegistryTokenRead(ctx context.Context, d *schema.ResourceD
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while fetching registry token: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error while fetching registry token: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	tflog.Info(ctx, "retrieved container registry token", map[string]any{"token_id": d.Id()})
 
 	if err := crservice.SetTokenData(d, registryToken.Properties); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 
 	return nil
@@ -187,12 +187,12 @@ func resourceContainerRegistryTokenUpdate(ctx context.Context, d *schema.Resourc
 	registryTokenID := d.Id()
 	registryToken, err := crservice.GetTokenDataUpdate(d)
 	if err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 
 	_, apiResponse, err := client.PatchToken(ctx, registryID, registryTokenID, *registryToken)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating a registry token: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while updating a registry token: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	return resourceContainerRegistryTokenRead(ctx, d, meta)
@@ -215,7 +215,7 @@ func resourceContainerRegistryTokenDelete(ctx context.Context, d *schema.Resourc
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while deleting registry token %s: %w", registryTokenID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error while deleting registry token %s: %w", registryTokenID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	return nil
@@ -245,9 +245,9 @@ func resourceContainerRegistryTokenImport(ctx context.Context, d *schema.Resourc
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("registry does not exist %q", registryTokenID), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return nil, bundleclient.ToError(meta, d, fmt.Errorf("registry does not exist %q", registryTokenID), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
-		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the import of registry token %q, error:%w", registryTokenID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return nil, bundleclient.ToError(meta, d, fmt.Errorf("an error occurred while trying to fetch the import of registry token %q, error:%w", registryTokenID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	tflog.Info(ctx, "container registry token imported", map[string]any{"token_id": registryTokenID})
@@ -267,7 +267,7 @@ func resourceContainerRegistryTokenImport(ctx context.Context, d *schema.Resourc
 	}
 
 	if err := crservice.SetTokenData(d, registryToken.Properties); err != nil {
-		return nil, diagutil.ToError(d, err, nil)
+		return nil, bundleclient.ToError(meta, d, err, nil)
 	}
 
 	return []*schema.ResourceData{d}, nil

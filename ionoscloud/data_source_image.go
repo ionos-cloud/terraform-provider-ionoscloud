@@ -12,7 +12,6 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapilocation"
-	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 func dataSourceImage() *schema.Resource {
@@ -167,7 +166,7 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta any) 
 			}
 		}
 		if results == nil {
-			return diagutil.ToDiags(d, fmt.Errorf("no image found with the specified criteria: name %s and version %s (%s)", name, version, nameVer), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("no image found with the specified criteria: name %s and version %s (%s)", name, version, nameVer), nil)
 		}
 	} else if nameOk && name != "" {
 		var exactMatches []ionoscloud.Image
@@ -187,7 +186,7 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta any) 
 			}
 		}
 		if results == nil {
-			return diagutil.ToDiags(d, fmt.Errorf("no image found with the specified criteria: name %s", name), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("no image found with the specified criteria: name %s", name), nil)
 		}
 	} else {
 		results = *images.Items
@@ -242,20 +241,20 @@ func dataSourceImageRead(ctx context.Context, d *schema.ResourceData, meta any) 
 	var image ionoscloud.Image
 
 	if results == nil || len(results) == 0 {
-		return diagutil.ToDiags(d, fmt.Errorf("no image found with the specified criteria: name = %s, type = %s, location = %s, version = %s, cloudInit = %s, imageAlias = %s", name, imageType, location, version, cloudInit, imgAlias), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("no image found with the specified criteria: name = %s, type = %s, location = %s, version = %s, cloudInit = %s, imageAlias = %s", name, imageType, location, version, cloudInit, imgAlias), nil)
 	} else if len(results) > 1 {
 		for _, result := range results {
 			if result.Properties != nil {
 				tflog.Debug(ctx, "found candidate image", map[string]any{"name": *result.Properties.Name, "location": *result.Properties.Location})
 			}
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("more than one image found, enable debug to learn more. Criteria used name = %s, type = %s, location = %s, version = %s, cloudInit = %s, imageAlias = %s", name, imageType, location, version, cloudInit, imgAlias), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("more than one image found, enable debug to learn more. Criteria used name = %s, type = %s, location = %s, version = %s, cloudInit = %s, imageAlias = %s", name, imageType, location, version, cloudInit, imgAlias), nil)
 	} else {
 		image = results[0]
 	}
 
 	if err := ImageSetData(d, &image); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 
 	return nil
