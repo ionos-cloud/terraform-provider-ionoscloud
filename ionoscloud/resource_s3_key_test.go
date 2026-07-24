@@ -32,6 +32,7 @@ func TestAccKeyBasic(t *testing.T) {
 					testAccCheckKeyExists(constant.S3KeyResource+"."+constant.S3KeyTestResource, &s3Key),
 					resource.TestCheckResourceAttrSet(constant.S3KeyResource+"."+constant.S3KeyTestResource, "secret_key"),
 					resource.TestCheckResourceAttr(constant.S3KeyResource+"."+constant.S3KeyTestResource, "active", "true"),
+					testAccCheckS3KeySecretKeyIsSensitive(constant.S3KeyResource+"."+constant.S3KeyTestResource),
 				),
 			},
 			{
@@ -53,6 +54,19 @@ func TestAccKeyBasic(t *testing.T) {
 			},
 		},
 	})
+}
+
+func testAccCheckS3KeySecretKeyIsSensitive(resourceName string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("resource not found: %s", resourceName)
+		}
+		if !rs.Primary.Sensitive["secret_key"] {
+			return fmt.Errorf("expected secret_key to be marked sensitive in state for %s", resourceName)
+		}
+		return nil
+	}
 }
 
 func testAccChecksKeyDestroyCheck(s *terraform.State) error {

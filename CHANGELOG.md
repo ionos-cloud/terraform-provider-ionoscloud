@@ -1,5 +1,8 @@
 ## 6.7.34 - upcoming release
 
+### Security
+- `ionoscloud_s3_key`: `secret_key` is now marked `Sensitive: true` — Terraform masks the value in plan/apply output and `terraform output` (use `terraform output -json` to retrieve it). Raw struct dump removed from read error logs to prevent accidental secret exposure.
+
 ### Fixes
 - update sdk-go to retry on 500 for GET requests. Add test to verify that the retry logic is working as expected.
 

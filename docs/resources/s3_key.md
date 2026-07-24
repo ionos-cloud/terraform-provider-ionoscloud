@@ -41,7 +41,7 @@ The following arguments are supported:
 
 - `user_id` - (Required)[string] The UUID of the user owning the IONOS Object Storage Key.
 - `active` - (Optional)[boolean] Whether the IONOS Object Storage is active / enabled or not - Please keep in mind this is only required on create. Default value in true
-- `secret_key` - (Computed)  The IONOS Object Storage Secret key.
+- `secret_key` - (Computed)[string] The IONOS Object Storage Secret key. This value is marked **sensitive**: Terraform masks it in plan/apply output and `terraform output` prints `(sensitive value)`. To retrieve it use `terraform output -json | jq '.secret_key.value'` or reference it in other resources directly.
 
 ## Import
 

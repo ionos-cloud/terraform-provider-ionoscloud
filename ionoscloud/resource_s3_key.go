@@ -42,6 +42,7 @@ func resourceS3Key() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "The Object Storage Secret key.",
 				Computed:    true,
+				Sensitive:   true,
 			},
 			"active": {
 				Type:        schema.TypeBool,
@@ -153,7 +154,7 @@ func resourceS3KeyRead(ctx context.Context, d *schema.ResourceData, meta any) di
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while reading Object Storage key: %w, %+v", err, s3Key), nil)
+		return diagutil.ToDiags(d, fmt.Errorf("error while reading Object Storage key %s: %w", d.Id(), err), nil)
 	}
 
 	tflog.Info(ctx, "retrieved Object Storage key", map[string]any{"key_id": *s3Key.Id})
