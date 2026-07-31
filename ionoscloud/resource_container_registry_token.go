@@ -3,7 +3,9 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"path/filepath"
 	"regexp"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -92,10 +94,21 @@ func resourceContainerRegistryToken() *schema.Resource {
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringMatch(regexp.MustCompile("^[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$"), "must be a valid UUID")),
 			},
 			"save_password_to_file": {
-				Type:             schema.TypeString,
-				Optional:         true,
-				Description:      "Saves password to file. Only works on create. Takes as argument a file name, or a file path",
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Saves password to file. Only works on create. Takes as argument a file name, or a file path",
+				ValidateDiagFunc: validation.ToDiagFunc(func(v any, k string) (warnings []string, errors []error) {
+					path, ok := v.(string)
+					if !ok || strings.TrimSpace(path) == "" {
+						errors = append(errors, fmt.Errorf("%q must be a non-empty string", k))
+						return
+					}
+					cleaned := filepath.Clean(path)
+					if strings.Contains(cleaned, "..") {
+						errors = append(errors, fmt.Errorf("%q must not contain path traversal sequences: %s", k, path))
+					}
+					return
+				}),
 			},
 			"location": {
 				Type:        schema.TypeString,

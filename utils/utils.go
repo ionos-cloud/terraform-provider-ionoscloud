@@ -12,6 +12,7 @@ import (
 	"regexp"
 	"slices"
 	"strconv"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -188,7 +189,11 @@ func CheckFileExists(filePath string) bool {
 
 // WriteToFile - creates the file and writes 'value' to it.
 func WriteToFile(ctx context.Context, name, value string) error {
-	file, err := os.Create(name)
+	cleanPath := filepath.Clean(name)
+	if strings.Contains(cleanPath, "..") {
+		return fmt.Errorf("invalid file path: path traversal not allowed: %s", name)
+	}
+	file, err := os.Create(cleanPath)
 	defer func() {
 		err = file.Close()
 		if err != nil {
