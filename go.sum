@@ -133,6 +133,8 @@ github.com/ionos-cloud/sdk-go-bundle/products/dbaas/inmemorydb/v3 v3.0.0 h1:QnBK
 github.com/ionos-cloud/sdk-go-bundle/products/dbaas/inmemorydb/v3 v3.0.0/go.mod h1:yeLOkJA7GMd3A0DQTUqTRfHy/+Ogw/cFuFVPmWXrB8Y=
 github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb/v2 v2.1.0 h1:KRyWPSov7KjCsnhCrnSoqgQR732PZ6LiXj2bZLXS+Hs=
 github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb/v2 v2.1.0/go.mod h1:viTYczukRYE3C94NUyKrSc2yEZvOq6mCbFwzVnjJnM4=
+github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb/v3 v3.0.0 h1:cBBJh4Zo9+hZqln19WhLHWS0EPIvU9MF+jJ9LMgOSBk=
+github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb/v3 v3.0.0/go.mod h1:SKlkrccbtQSZZLyjOQnYe9ipzDS7IgRFaWrLfer9TxI=
 github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2 v2.1.1 h1:eH4AZ7YCXKNwuwvUNtlBnrzt/BnU19AkENrWNHmKcsM=
 github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2 v2.1.1/go.mod h1:wSlye7CEzwnHow17pvGiwBvlfihh9QhowFXJBFhSFXQ=
 github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2 v2.1.0 h1:Upb8i8V7jN+cLDOGq+Jj4azEGoEgRzjWJHcSmnpElK0=
@@ -159,8 +161,8 @@ github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2 v2.0.1 h1:FOwVFj5
 github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2 v2.0.1/go.mod h1:InNuTTzgLZker3i9JpyTho9mHr5DDIFnEPwykbSIfyw=
 github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.2 h1:qR/ul88v/3ZF+ZLFFv6LE9TrjZS1qM4R10UlXCaQzcs=
 github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.2/go.mod h1:V6WHbWsQDlZsLtHqgsXO81Z9eJBsczE3Q6VY8J+rutc=
-github.com/ionos-cloud/sdk-go-bundle/shared v0.1.11 h1:6At4YirXUu5h9D0i0txzFEzy4qK/DmvH+Hao4oUdv10=
-github.com/ionos-cloud/sdk-go-bundle/shared v0.1.11/go.mod h1:R/vPCwxsYxk4pcfA2Ew7Pf1fCkzmPaROxYKgnhh0wpg=
+github.com/ionos-cloud/sdk-go-bundle/shared v0.1.12 h1:fhhG7TmvQoSyPb1GCTN77IvXZ/2cPxYNDk2yLfpWZo4=
+github.com/ionos-cloud/sdk-go-bundle/shared v0.1.12/go.mod h1:R/vPCwxsYxk4pcfA2Ew7Pf1fCkzmPaROxYKgnhh0wpg=
 github.com/ionos-cloud/sdk-go/v6 v6.3.10 h1:WLoWsesQo70UqrnG0EeEf8T2mjPSaeWT+t77lUZrJkE=
 github.com/ionos-cloud/sdk-go/v6 v6.3.10/go.mod h1:nUGHP4kZHAZngCVr4v6C8nuargFrtvt7GrzH/hqn7c4=
 github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 h1:BQSFePA1RWJOlocH6Fxy8MmwDt+yVQYULKfN0RoTN8A=

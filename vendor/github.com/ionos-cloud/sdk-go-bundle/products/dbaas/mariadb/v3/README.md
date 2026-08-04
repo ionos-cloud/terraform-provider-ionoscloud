@@ -1,6 +1,13 @@
 # Go API client for mariadb
 
-DBaaS MariaDB v2 is the version 2 of the MariaDB API at IONOS CLOUD.
+An enterprise-grade Database is provided as a Service (DBaaS) solution that
+can be managed through a browser-based \"Data Center Designer\" (DCD) tool or
+via an easy to use API.
+
+The API allows you to create additional MariaDB database clusters or modify existing
+ones. It is designed to allow users to leverage the same power and
+flexibility found within the DCD visual tool. Both tools are consistent with
+their concepts and lend well to making the experience smooth and intuitive.
 
 
 ## Overview
@@ -48,15 +55,14 @@ Examples for creating resources using the Go SDK can be found [here](examples/)
 
 All available server URLs are:
 
-- *https://mariadb.de-txl.ionos.com* - Germany, Berlin
-- *https://mariadb.de-fra.ionos.com* - Germany, Frankfurt (de/fra, de/fra/2)
-- *https://mariadb.fr-par.ionos.com* - France, Paris
-- *https://mariadb.es-vit.ionos.com* - Spain, Logroño
-- *https://mariadb.gb-lhr.ionos.com* - United Kingdom, London
-- *https://mariadb.gb-bhx.ionos.com* - United Kingdom, Worcester
-- *https://mariadb.us-las.ionos.com* - United States, Las Vegas
-- *https://mariadb.us-mci.ionos.com* - United States, Lenexa
-- *https://mariadb.us-ewr.ionos.com* - United States, Newark
+- *https://mariadb.de-txl.ionos.com* - Berlin, Germany
+- *https://mariadb.de-fra.ionos.com* - Frankfurt, Germany
+- *https://mariadb.es-vit.ionos.com* - Logroño, Spain
+- *https://mariadb.fr-par.ionos.com* - Paris, France
+- *https://mariadb.gb-lhr.ionos.com* - London, Great Britain
+- *https://mariadb.us-ewr.ionos.com* - Newark, USA
+- *https://mariadb.us-las.ionos.com* - Las Vegas, USA
+- *https://mariadb.us-mci.ionos.com* - Lenexa, USA
 
 By default, *https://mariadb.de-txl.ionos.com* is used, however this can be overriden at authentication, either
 by setting the `IONOS_API_URL` environment variable or by specifying the `hostUrl` parameter when
@@ -218,17 +224,15 @@ All URIs are relative to *https://mariadb.de-txl.ionos.com*
 
 Class | Method | HTTP request | Description
 ------------- | ------------- | ------------- | -------------
-BackupLocationsApi | [**BackuplocationsFindById**](docs/api/BackupLocationsApi.md#backuplocationsfindbyid) | **Get** /backup-locations/{backupLocationId} | Retrieve BackupLocation
-BackupLocationsApi | [**BackuplocationsGet**](docs/api/BackupLocationsApi.md#backuplocationsget) | **Get** /backup-locations | Retrieve all BackupLocations
-BackupsApi | [**BackupsFindById**](docs/api/BackupsApi.md#backupsfindbyid) | **Get** /backups/{backupId} | Retrieve Backup
-BackupsApi | [**BackupsGet**](docs/api/BackupsApi.md#backupsget) | **Get** /backups | Retrieve all Backups
-ClustersApi | [**ClustersDelete**](docs/api/ClustersApi.md#clustersdelete) | **Delete** /clusters/{clusterId} | Delete Cluster
-ClustersApi | [**ClustersFindById**](docs/api/ClustersApi.md#clustersfindbyid) | **Get** /clusters/{clusterId} | Retrieve Cluster
-ClustersApi | [**ClustersGet**](docs/api/ClustersApi.md#clustersget) | **Get** /clusters | Retrieve all Clusters
-ClustersApi | [**ClustersPost**](docs/api/ClustersApi.md#clusterspost) | **Post** /clusters | Create Cluster
-ClustersApi | [**ClustersPut**](docs/api/ClustersApi.md#clustersput) | **Put** /clusters/{clusterId} | Ensure Cluster
-VersionsApi | [**VersionsFindById**](docs/api/VersionsApi.md#versionsfindbyid) | **Get** /versions/{versionId} | Retrieve MariadbVersion
-VersionsApi | [**VersionsGet**](docs/api/VersionsApi.md#versionsget) | **Get** /versions | Retrieve all Versions
+BackupsApi | [**BackupsFindById**](docs/api/BackupsApi.md#backupsfindbyid) | **Get** /backups/{backupId} | Fetch backups
+BackupsApi | [**BackupsGet**](docs/api/BackupsApi.md#backupsget) | **Get** /backups | List of backups.
+BackupsApi | [**ClusterBackupsGet**](docs/api/BackupsApi.md#clusterbackupsget) | **Get** /clusters/{clusterId}/backups | List backups of cluster
+ClustersApi | [**ClustersDelete**](docs/api/ClustersApi.md#clustersdelete) | **Delete** /clusters/{clusterId} | Delete a cluster
+ClustersApi | [**ClustersFindById**](docs/api/ClustersApi.md#clustersfindbyid) | **Get** /clusters/{clusterId} | Fetch a cluster
+ClustersApi | [**ClustersGet**](docs/api/ClustersApi.md#clustersget) | **Get** /clusters | List clusters
+ClustersApi | [**ClustersPatch**](docs/api/ClustersApi.md#clusterspatch) | **Patch** /clusters/{clusterId} | Update a cluster
+ClustersApi | [**ClustersPost**](docs/api/ClustersApi.md#clusterspost) | **Post** /clusters | Create a cluster
+RestoreApi | [**ClustersRestore**](docs/api/RestoreApi.md#clustersrestore) | **Post** /clusters/{clusterId}/restore | In-place restore of a cluster.
 
 </details>
 
@@ -239,42 +243,40 @@ All URIs are relative to *https://mariadb.de-txl.ionos.com*
 <summary title="Click to toggle">API models list</summary>
 
  - [Backup](docs/models/Backup)
- - [BackupCreate](docs/models/BackupCreate)
- - [BackupEnsure](docs/models/BackupEnsure)
- - [BackupLocation](docs/models/BackupLocation)
- - [BackupLocationRead](docs/models/BackupLocationRead)
- - [BackupLocationReadList](docs/models/BackupLocationReadList)
- - [BackupLocationReadListAllOf](docs/models/BackupLocationReadListAllOf)
- - [BackupRead](docs/models/BackupRead)
- - [BackupReadList](docs/models/BackupReadList)
- - [BackupReadListAllOf](docs/models/BackupReadListAllOf)
- - [Cluster](docs/models/Cluster)
- - [ClusterBackup](docs/models/ClusterBackup)
- - [ClusterCreate](docs/models/ClusterCreate)
- - [ClusterCreateProperties](docs/models/ClusterCreateProperties)
- - [ClusterEnsure](docs/models/ClusterEnsure)
+ - [BackupList](docs/models/BackupList)
+ - [BackupListAllOf](docs/models/BackupListAllOf)
+ - [BackupProperties](docs/models/BackupProperties)
+ - [BackupResponse](docs/models/BackupResponse)
+ - [BaseBackup](docs/models/BaseBackup)
+ - [ClusterList](docs/models/ClusterList)
+ - [ClusterListAllOf](docs/models/ClusterListAllOf)
  - [ClusterMetadata](docs/models/ClusterMetadata)
- - [ClusterMetadataAllOf](docs/models/ClusterMetadataAllOf)
- - [ClusterMetadataAllOf1](docs/models/ClusterMetadataAllOf1)
- - [ClusterRead](docs/models/ClusterRead)
- - [ClusterReadList](docs/models/ClusterReadList)
- - [ClusterReadListAllOf](docs/models/ClusterReadListAllOf)
+ - [ClusterProperties](docs/models/ClusterProperties)
+ - [ClusterResponse](docs/models/ClusterResponse)
+ - [ClustersGet400Response](docs/models/ClustersGet400Response)
+ - [ClustersGet401Response](docs/models/ClustersGet401Response)
+ - [ClustersGet403Response](docs/models/ClustersGet403Response)
+ - [ClustersGet404Response](docs/models/ClustersGet404Response)
+ - [ClustersGet405Response](docs/models/ClustersGet405Response)
+ - [ClustersGet415Response](docs/models/ClustersGet415Response)
+ - [ClustersGet422Response](docs/models/ClustersGet422Response)
+ - [ClustersGet429Response](docs/models/ClustersGet429Response)
+ - [ClustersGet500Response](docs/models/ClustersGet500Response)
+ - [ClustersGet503Response](docs/models/ClustersGet503Response)
+ - [Connection](docs/models/Connection)
+ - [CreateClusterProperties](docs/models/CreateClusterProperties)
+ - [CreateClusterRequest](docs/models/CreateClusterRequest)
+ - [DBUser](docs/models/DBUser)
  - [DayOfTheWeek](docs/models/DayOfTheWeek)
- - [Error](docs/models/Error)
- - [ErrorMessages](docs/models/ErrorMessages)
- - [InstanceConfiguration](docs/models/InstanceConfiguration)
- - [Links](docs/models/Links)
+ - [ErrorMessage](docs/models/ErrorMessage)
  - [MaintenanceWindow](docs/models/MaintenanceWindow)
- - [MariadbClusterConnection](docs/models/MariadbClusterConnection)
- - [MariadbClusterStates](docs/models/MariadbClusterStates)
- - [MariadbRestoreClusterFromBackup](docs/models/MariadbRestoreClusterFromBackup)
- - [MariadbUser](docs/models/MariadbUser)
  - [MariadbVersion](docs/models/MariadbVersion)
- - [MariadbVersionRead](docs/models/MariadbVersionRead)
- - [MariadbVersionReadList](docs/models/MariadbVersionReadList)
- - [MariadbVersionReadListAllOf](docs/models/MariadbVersionReadListAllOf)
- - [Metadata](docs/models/Metadata)
  - [Pagination](docs/models/Pagination)
+ - [PaginationLinks](docs/models/PaginationLinks)
+ - [PatchClusterProperties](docs/models/PatchClusterProperties)
+ - [PatchClusterRequest](docs/models/PatchClusterRequest)
+ - [RestoreRequest](docs/models/RestoreRequest)
+ - [State](docs/models/State)
 
 
 [[Back to API list]](#documentation-for-api-endpoints) [[Back to Model list]](#documentation-for-models)
