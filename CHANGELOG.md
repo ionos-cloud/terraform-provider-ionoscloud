@@ -1,3 +1,11 @@
+## 6.7.35
+
+### Features
+- Add DBaaS MariaDB v2 support:
+  - New resource: `ionoscloud_mariadb_cluster_v2`
+  - New data sources: `ionoscloud_mariadb_cluster_v2`, `ionoscloud_mariadb_clusters_v2`, `ionoscloud_mariadb_backups_v2`, `ionoscloud_mariadb_backup_locations_v2`, `ionoscloud_mariadb_versions_v2`
+  - New list resource: `ionoscloud_mariadb_cluster_v2`
+
 ## 6.7.34
 
 ### Refactor
