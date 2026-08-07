@@ -29,7 +29,8 @@ func resourceVpnWireguardPeer() *schema.Resource {
 			"gateway_id": {
 				Type:             schema.TypeString,
 				Required:         true,
-				Description:      "The ID of the WireGuard Peer that the peer will connect to.",
+				ForceNew:         true,
+				Description:      "The ID of the WireGuard Gateway that the peer will connect to.",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
 			"location": {

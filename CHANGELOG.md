@@ -1,3 +1,7 @@
+## 6.7.36 -- upcoming release
+### Fixes
+- `ionoscloud_vpn_wireguard_peer`: Fix `gateway_id` changes attempting an in-place update against the API and failing with an error, instead of destroying and re-creating the peer.
+
 ## 6.7.35
 
 ### Features
