@@ -1,3 +1,10 @@
+## 6.7.40 -- upcoming release
+### Features
+- `ionoscloud_volume`, `ionoscloud_server`, `ionoscloud_cube_server`, `ionoscloud_gpu_server`, `ionoscloud_vcpu_server`: Allow setting `cpu_hot_plug`, `ram_hot_plug`, `nic_hot_plug`, `nic_hot_unplug`, `disc_virtio_hot_plug` and `disc_virtio_hot_unplug` on the volume/inline volume, instead of only exposing them as computed attributes.
+
+### Fixes
+- `ionoscloud_volume`, `ionoscloud_server`, `ionoscloud_cube_server`, `ionoscloud_gpu_server`, `ionoscloud_vcpu_server`: Fix `require_legacy_bios = false` being ignored on creation (and defaulting to `true`) because the SDK helper used `GetOk`, which cannot distinguish an explicit `false` from an unset value; a second `apply` was required to correct it.
+
 ## 6.7.39
 ### Features
 - `ionoscloud_ipblock`: New list resource, queryable with `terraform query` (requires Terraform 1.14+).
