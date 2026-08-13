@@ -35,7 +35,7 @@ func TestSetDatacenterDataCPUArchEnabledFeatures(t *testing.T) {
 		Properties: &ionoscloud.DatacenterProperties{
 			CpuArchitecture: &[]ionoscloud.CpuArchitectureProperties{
 				{
-					CpuFamily:       strPtr("AMD_TURIN"),
+					CpuFamily:       new("AMD_TURIN"),
 					EnabledFeatures: &[]string{"SEV-SNP"},
 				},
 			},
@@ -56,5 +56,3 @@ func TestSetDatacenterDataCPUArchEnabledFeatures(t *testing.T) {
 		t.Errorf("enabled_features = %v, want [SEV-SNP]", feats)
 	}
 }
-
-func strPtr(s string) *string { return &s }

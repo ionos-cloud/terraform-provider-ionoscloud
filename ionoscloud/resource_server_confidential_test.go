@@ -43,7 +43,7 @@ func TestInitializeCreateRequestsConfidential(t *testing.T) {
 		{
 			name:      "non-confidential enterprise sets cores",
 			config:    map[string]any{"name": "srv", "type": "ENTERPRISE", "ram": 4096, "cores": 4},
-			wantCores: int32Ptr(4),
+			wantCores: new(int32(4)),
 		},
 	}
 
@@ -74,8 +74,6 @@ func TestInitializeCreateRequestsConfidential(t *testing.T) {
 		})
 	}
 }
-
-func int32Ptr(v int32) *int32 { return &v }
 
 func int32PtrEqual(a, b *int32) bool {
 	if a == nil || b == nil {
