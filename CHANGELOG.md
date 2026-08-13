@@ -1,3 +1,8 @@
+## Upcoming release
+
+### Features
+- New list resource: `ionoscloud_datacenter` — list IONOS CLOUD Virtual Data Centers via `terraform query`, with optional filtering using `name` or `location` (requires Terraform 1.14+).
+
 ## 6.7.35
 
 ### Features
