@@ -34,15 +34,13 @@ require (
 	github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2 v2.0.1
 	github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.2
 	github.com/ionos-cloud/sdk-go-bundle/shared v0.1.10
-	github.com/ionos-cloud/sdk-go/v6 v6.3.8
+	github.com/ionos-cloud/sdk-go/v6 v6.3.11
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/crypto v0.51.0
 	gopkg.in/yaml.v3 v3.0.1
 )
-replace (
-	github.com/ionos-cloud/sdk-go/v6 => /tmp/sdk-go
-)
+
 require (
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
