@@ -11,9 +11,19 @@ import (
 
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/compute"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
+
+func init() {
+	// Registers ResourceDatacenter/SetDatacenterData with the compute package's
+	// list resource bridge. This is a one-way registration (rather than compute
+	// importing ionoscloud directly) to avoid an import cycle: ionoscloud's own
+	// test files import internal/framework/provider (to build the muxed
+	// acceptance-test provider server), which in turn imports compute.
+	compute.RegisterDatacenterBridge(ResourceDatacenter, SetDatacenterData)
+}
 
 func ResourceDatacenter() *schema.Resource {
 	return &schema.Resource{
