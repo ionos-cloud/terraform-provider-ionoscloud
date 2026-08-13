@@ -58,6 +58,8 @@ type ImageProperties struct {
 	Public *bool `json:"public,omitempty"`
 	// List of image aliases mapped for this image
 	ImageAliases *[]string `json:"imageAliases,omitempty"`
+	// The list of features required by this image. If `SEV-SNP` is part of this list, then the image supports Confidential Computing.
+	RequiredFeatures *[]string `json:"requiredFeatures,omitempty"`
 	// Cloud init compatibility.
 	CloudInit *string `json:"cloudInit,omitempty"`
 }
@@ -888,6 +890,44 @@ func (o *ImageProperties) HasImageAliases() bool {
 	return false
 }
 
+// GetRequiredFeatures returns the RequiredFeatures field value
+// If the value is explicit nil, nil is returned
+func (o *ImageProperties) GetRequiredFeatures() *[]string {
+	if o == nil {
+		return nil
+	}
+
+	return o.RequiredFeatures
+
+}
+
+// GetRequiredFeaturesOk returns a tuple with the RequiredFeatures field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *ImageProperties) GetRequiredFeaturesOk() (*[]string, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.RequiredFeatures, true
+}
+
+// SetRequiredFeatures sets field value
+func (o *ImageProperties) SetRequiredFeatures(v []string) {
+
+	o.RequiredFeatures = &v
+
+}
+
+// HasRequiredFeatures returns a boolean if a field has been set.
+func (o *ImageProperties) HasRequiredFeatures() bool {
+	if o != nil && o.RequiredFeatures != nil {
+		return true
+	}
+
+	return false
+}
+
 // GetCloudInit returns the CloudInit field value
 // If the value is explicit nil, nil is returned
 func (o *ImageProperties) GetCloudInit() *string {
@@ -1010,6 +1050,10 @@ func (o ImageProperties) MarshalJSON() ([]byte, error) {
 
 	if o.ImageAliases != nil {
 		toSerialize["imageAliases"] = o.ImageAliases
+	}
+
+	if o.RequiredFeatures != nil {
+		toSerialize["requiredFeatures"] = o.RequiredFeatures
 	}
 
 	if o.CloudInit != nil {
