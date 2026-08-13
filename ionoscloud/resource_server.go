@@ -1180,7 +1180,12 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta any)
 		return diagutil.ToDiags(d, fmt.Errorf("error occurred while fetching a server: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	if !strings.EqualFold(*server.Properties.Type, "cube") {
+	// A confidential boot volume cannot be detached while attached, so it must be deleted after
+	// the server is gone rather than before it.
+	//   Normal server: volume, then server.
+	//   Confidential:  server, then volume.
+	confidential := d.Get("confidential").(bool)
+	if !strings.EqualFold(*server.Properties.Type, "cube") && !confidential {
 		diags := deleteInlineVolumes(ctx, d, meta, client)
 		if diags != nil {
 			return diags
@@ -1198,6 +1203,13 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta any)
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
 		requestLocation, _ := apiResponse.SafeLocation()
 		return diagutil.ToDiags(d, fmt.Errorf("error getting state change for datacenter delete %w", errState), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
+	}
+
+	if confidential {
+		diags := deleteInlineVolumes(ctx, d, meta, client)
+		if diags != nil {
+			return diags
+		}
 	}
 
 	d.SetId("")
