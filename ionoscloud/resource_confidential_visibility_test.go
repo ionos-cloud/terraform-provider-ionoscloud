@@ -56,3 +56,43 @@ func TestSetDatacenterDataCPUArchEnabledFeatures(t *testing.T) {
 		t.Errorf("enabled_features = %v, want [SEV-SNP]", feats)
 	}
 }
+
+// serverIsConfidential drives the destroy volume-ordering, derived from the API-reported features
+// so it stays correct for imported/drifted servers.
+func TestServerIsConfidential(t *testing.T) {
+	tests := []struct {
+		name   string
+		server ionoscloud.Server
+		want   bool
+	}{
+		{name: "nil properties", server: ionoscloud.Server{}, want: false},
+		{
+			name:   "no features",
+			server: ionoscloud.Server{Properties: &ionoscloud.ServerProperties{}},
+			want:   false,
+		},
+		{
+			name:   "other feature only",
+			server: ionoscloud.Server{Properties: &ionoscloud.ServerProperties{EnabledFeatures: &[]string{"SOMETHING"}}},
+			want:   false,
+		},
+		{
+			name:   "sev-snp present",
+			server: ionoscloud.Server{Properties: &ionoscloud.ServerProperties{EnabledFeatures: &[]string{"SEV-SNP"}}},
+			want:   true,
+		},
+		{
+			name:   "case-insensitive match",
+			server: ionoscloud.Server{Properties: &ionoscloud.ServerProperties{EnabledFeatures: &[]string{"sev-snp"}}},
+			want:   true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := serverIsConfidential(&tt.server); got != tt.want {
+				t.Errorf("serverIsConfidential = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

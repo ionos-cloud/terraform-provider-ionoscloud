@@ -1170,6 +1170,21 @@ func deleteInlineVolumes(ctx context.Context, d *schema.ResourceData, meta any, 
 	return nil
 }
 
+// serverIsConfidential reports whether the server the API returned is a Confidential Computing
+// (SEV-SNP) VM, based on its enabled features. Derived from the API rather than the user-supplied
+// confidential flag so it stays correct for imported servers and config drift.
+func serverIsConfidential(server *ionoscloud.Server) bool {
+	if server == nil || server.Properties == nil || server.Properties.EnabledFeatures == nil {
+		return false
+	}
+	for _, f := range *server.Properties.EnabledFeatures {
+		if strings.EqualFold(f, "SEV-SNP") {
+			return true
+		}
+	}
+	return false
+}
+
 func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
@@ -1190,8 +1205,14 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta any)
 	// the server is gone rather than before it.
 	//   Normal server: volume, then server.
 	//   Confidential:  server, then volume.
-	confidential := d.Get("confidential").(bool)
-	if !strings.EqualFold(*server.Properties.Type, "cube") && !confidential {
+	// Confidentiality is derived from the server the API returned (not the user flag) so this stays
+	// correct for imported servers and config drift.
+	confidential := serverIsConfidential(&server)
+	serverType := ""
+	if server.Properties != nil && server.Properties.Type != nil {
+		serverType = *server.Properties.Type
+	}
+	if !strings.EqualFold(serverType, "cube") && !confidential {
 		diags := deleteInlineVolumes(ctx, d, meta, client)
 		if diags != nil {
 			return diags
@@ -1350,6 +1371,14 @@ func initializeCreateRequests(d *schema.ResourceData) (ionoscloud.Server, error)
 	if serverType != "" {
 		server.Properties.Type = &serverType
 	}
+
+	// Confidential Computing is only available for ENTERPRISE servers (an empty type defaults to
+	// ENTERPRISE). Reject any other explicit type up front so the failure is clear instead of a
+	// downstream API error, and so CUBE does not silently ignore the flag.
+	if d.Get("confidential").(bool) && serverType != "" && !strings.EqualFold(serverType, "ENTERPRISE") {
+		return *server, fmt.Errorf("confidential is only supported for ENTERPRISE servers, got type %q", serverType)
+	}
+
 	switch strings.ToLower(serverType) {
 	case "cube":
 		if v, ok := d.GetOk("template_uuid"); ok {
@@ -1522,6 +1551,9 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 			if err := d.Set("enabled_features", *server.Properties.EnabledFeatures); err != nil {
 				return fmt.Errorf("error setting enabled_features %w", err)
 			}
+		} else {
+			// Clear any stale value if the API no longer reports features.
+			d.Set("enabled_features", nil)
 		}
 
 		if server.Properties.BootCdrom != nil {

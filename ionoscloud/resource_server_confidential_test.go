@@ -45,6 +45,11 @@ func TestInitializeCreateRequestsConfidential(t *testing.T) {
 			config:    map[string]any{"name": "srv", "type": "ENTERPRISE", "ram": 4096, "cores": 4},
 			wantCores: new(int32(4)),
 		},
+		{
+			name:    "confidential rejected for non-enterprise type",
+			config:  map[string]any{"name": "coco", "type": "VCPU", "confidential": true, "ram": 4096},
+			wantErr: "only supported for ENTERPRISE",
+		},
 	}
 
 	for _, tt := range tests {

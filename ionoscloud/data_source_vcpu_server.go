@@ -60,7 +60,8 @@ func dataSourceVCPUServer() *schema.Resource {
 				Computed: true,
 			},
 			// Always empty for VCPU (only ENTERPRISE can be confidential), but kept because the
-			// shared setServerData reader sets it unconditionally.
+			// shared setServerData reader (used by both this and the server data source) sets it
+			// whenever the API returns features, and would error if the field were absent here.
 			"enabled_features": {
 				Type:        schema.TypeList,
 				Computed:    true,
