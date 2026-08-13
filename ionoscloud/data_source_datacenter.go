@@ -195,7 +195,7 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 
 	}
 
-	if err := setDatacenterData(d, &datacenter); err != nil {
+	if err := SetDatacenterData(d, &datacenter); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
 

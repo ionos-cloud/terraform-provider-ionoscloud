@@ -257,3 +257,19 @@ data ` + constant.DatacenterResource + ` ` + constant.DatacenterDataSourceMatchi
     id       = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
     location = "wrong_location"
 }`
+
+func TestResourceDatacenterHasIdentitySchema(t *testing.T) {
+	res := ResourceDatacenter()
+	if res.Identity == nil {
+		t.Fatal("expected ResourceDatacenter() to have a non-nil Identity")
+	}
+
+	identitySchema := res.Identity.SchemaMap()
+	idAttr, ok := identitySchema["id"]
+	if !ok {
+		t.Fatal("expected identity schema to contain an \"id\" attribute")
+	}
+	if !idAttr.RequiredForImport {
+		t.Error("expected identity \"id\" attribute to be RequiredForImport")
+	}
+}

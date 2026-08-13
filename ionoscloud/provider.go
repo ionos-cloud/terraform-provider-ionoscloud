@@ -91,7 +91,7 @@ func Provider() *schema.Provider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			constant.DatacenterResource:                        resourceDatacenter(),
+			constant.DatacenterResource:                        ResourceDatacenter(),
 			constant.IpBlockResource:                           resourceIPBlock(),
 			constant.FirewallResource:                          resourceFirewall(),
 			constant.LanResource:                               resourceLan(),

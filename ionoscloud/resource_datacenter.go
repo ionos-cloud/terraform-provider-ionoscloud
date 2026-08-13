@@ -15,7 +15,7 @@ import (
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
-func resourceDatacenter() *schema.Resource {
+func ResourceDatacenter() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceDatacenterCreate,
 		ReadContext:   resourceDatacenterRead,
@@ -23,6 +23,16 @@ func resourceDatacenter() *schema.Resource {
 		DeleteContext: resourceDatacenterDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceDatacenterImport,
+		},
+		Identity: &schema.ResourceIdentity{
+			SchemaFunc: func() map[string]*schema.Schema {
+				return map[string]*schema.Schema{
+					"id": {
+						Type:              schema.TypeString,
+						RequiredForImport: true,
+					},
+				}
+			},
 		},
 		Schema: map[string]*schema.Schema{
 
@@ -156,7 +166,7 @@ func resourceDatacenterRead(ctx context.Context, d *schema.ResourceData, meta an
 		return diagutil.ToDiags(d, err, nil)
 	}
 
-	if err := setDatacenterData(d, &datacenter); err != nil {
+	if err := SetDatacenterData(d, &datacenter); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
 
@@ -269,14 +279,14 @@ func resourceDatacenterImport(ctx context.Context, d *schema.ResourceData, meta 
 
 	tflog.Info(ctx, "datacenter imported", map[string]any{"resource_id": d.Id()})
 
-	if err := setDatacenterData(d, &datacenter); err != nil {
+	if err := SetDatacenterData(d, &datacenter); err != nil {
 		return nil, diagutil.ToError(d, err, nil)
 	}
 
 	return []*schema.ResourceData{d}, nil
 }
 
-func setDatacenterData(d *schema.ResourceData, datacenter *ionoscloud.Datacenter) error {
+func SetDatacenterData(d *schema.ResourceData, datacenter *ionoscloud.Datacenter) error {
 
 	if datacenter.Id != nil {
 		d.SetId(*datacenter.Id)
