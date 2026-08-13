@@ -14,6 +14,8 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/querycheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
@@ -36,6 +38,48 @@ func TestAccDataCenterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.DatacenterResource+"."+constant.DatacenterTestResource, "description", "Test Datacenter Description"),
 					resource.TestCheckResourceAttr(constant.DatacenterResource+"."+constant.DatacenterTestResource, "sec_auth_protection", "false"),
 				),
+			},
+			{
+				Query: true,
+				Config: `list "ionoscloud_datacenter" "test" {
+  provider = ionoscloud
+}`,
+				QueryResultChecks: []querycheck.QueryResultCheck{
+					querycheck.ExpectIdentity(
+						constant.DatacenterResource+"."+constant.DatacenterTestResource,
+						map[string]knownvalue.Check{
+							"id": knownvalue.NotNull(),
+						},
+					),
+				},
+			},
+			{
+				Query: true,
+				Config: `list "ionoscloud_datacenter" "test" {
+  provider = ionoscloud
+  config {
+    filters = [
+      { field_name = "name", field_value = "` + constant.DatacenterTestResource + `" },
+    ]
+  }
+}`,
+				QueryResultChecks: []querycheck.QueryResultCheck{
+					querycheck.ExpectLength(constant.DatacenterResource+"."+constant.DatacenterTestResource, 1),
+				},
+			},
+			{
+				Query: true,
+				Config: `list "ionoscloud_datacenter" "test" {
+  provider = ionoscloud
+  config {
+    filters = [
+      { field_name = "name", field_value = "definitely-does-not-exist-tf-test" },
+    ]
+  }
+}`,
+				QueryResultChecks: []querycheck.QueryResultCheck{
+					querycheck.ExpectLength(constant.DatacenterResource+"."+constant.DatacenterTestResource, 0),
+				},
 			},
 			{
 				Config: testAccDataSourceDatacenterMatchID,
