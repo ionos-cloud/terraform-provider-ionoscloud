@@ -100,28 +100,40 @@ func resourceVolume() *schema.Resource {
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"AUTO", "ZONE_1", "ZONE_2", "ZONE_3"}, true)),
 			},
 			"cpu_hot_plug": {
-				Type:     schema.TypeBool,
-				Computed: true,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Computed:    true,
+				Description: "Is capable of CPU hot plug (no reboot required)",
 			},
 			"ram_hot_plug": {
-				Type:     schema.TypeBool,
-				Computed: true,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Computed:    true,
+				Description: "Is capable of memory hot plug (no reboot required)",
 			},
 			"nic_hot_plug": {
-				Type:     schema.TypeBool,
-				Computed: true,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Computed:    true,
+				Description: "Is capable of nic hot plug (no reboot required)",
 			},
 			"nic_hot_unplug": {
-				Type:     schema.TypeBool,
-				Computed: true,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Computed:    true,
+				Description: "Is capable of nic hot unplug (no reboot required)",
 			},
 			"disc_virtio_hot_plug": {
-				Type:     schema.TypeBool,
-				Computed: true,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Computed:    true,
+				Description: "Is capable of Virt-IO drive hot plug (no reboot required)",
 			},
 			"disc_virtio_hot_unplug": {
-				Type:     schema.TypeBool,
-				Computed: true,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Computed:    true,
+				Description: "Is capable of Virt-IO drive hot unplug (no reboot required). This works only for non-Windows virtual Machines.",
 			},
 			"backup_unit_id": {
 				Type:     schema.TypeString,
@@ -397,6 +409,42 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta any)
 		_, newValue := d.GetChange("require_legacy_bios")
 		requireLegacyBios := newValue.(bool)
 		properties.RequireLegacyBios = &requireLegacyBios
+	}
+
+	if d.HasChange("cpu_hot_plug") {
+		_, newValue := d.GetChange("cpu_hot_plug")
+		cpuHotPlug := newValue.(bool)
+		properties.CpuHotPlug = &cpuHotPlug
+	}
+
+	if d.HasChange("ram_hot_plug") {
+		_, newValue := d.GetChange("ram_hot_plug")
+		ramHotPlug := newValue.(bool)
+		properties.RamHotPlug = &ramHotPlug
+	}
+
+	if d.HasChange("nic_hot_plug") {
+		_, newValue := d.GetChange("nic_hot_plug")
+		nicHotPlug := newValue.(bool)
+		properties.NicHotPlug = &nicHotPlug
+	}
+
+	if d.HasChange("nic_hot_unplug") {
+		_, newValue := d.GetChange("nic_hot_unplug")
+		nicHotUnplug := newValue.(bool)
+		properties.NicHotUnplug = &nicHotUnplug
+	}
+
+	if d.HasChange("disc_virtio_hot_plug") {
+		_, newValue := d.GetChange("disc_virtio_hot_plug")
+		discVirtioHotPlug := newValue.(bool)
+		properties.DiscVirtioHotPlug = &discVirtioHotPlug
+	}
+
+	if d.HasChange("disc_virtio_hot_unplug") {
+		_, newValue := d.GetChange("disc_virtio_hot_unplug")
+		discVirtioHotUnplug := newValue.(bool)
+		properties.DiscVirtioHotUnplug = &discVirtioHotUnplug
 	}
 
 	volume, apiResponse, err := client.VolumesApi.DatacentersVolumesPatch(ctx, dcID, d.Id()).Volume(properties).Execute()
@@ -752,9 +800,42 @@ func getVolumeData(ctx context.Context, d *schema.ResourceData, path, serverType
 		volume.ExposeSerial = &val
 	}
 
-	if v, ok := d.GetOk(path + "require_legacy_bios"); ok {
+	// GetOkExists is needed to distinguish unset from explicit false on these *bool fields;
+	// GetOk treats the zero value (false) as "not set" and would skip sending it, causing the
+	// API to silently apply its own default (e.g. requireLegacyBios defaults to true) on create.
+	if v, ok := d.GetOkExists(path + "require_legacy_bios"); ok { //nolint:staticcheck // SA1019: GetOkExists has no SDKv2 replacement for tri-state bools
 		requireLegacyBios := v.(bool)
 		volume.RequireLegacyBios = &requireLegacyBios
+	}
+
+	if v, ok := d.GetOkExists(path + "cpu_hot_plug"); ok { //nolint:staticcheck // SA1019: GetOkExists has no SDKv2 replacement for tri-state bools
+		cpuHotPlug := v.(bool)
+		volume.CpuHotPlug = &cpuHotPlug
+	}
+
+	if v, ok := d.GetOkExists(path + "ram_hot_plug"); ok { //nolint:staticcheck // SA1019: GetOkExists has no SDKv2 replacement for tri-state bools
+		ramHotPlug := v.(bool)
+		volume.RamHotPlug = &ramHotPlug
+	}
+
+	if v, ok := d.GetOkExists(path + "nic_hot_plug"); ok { //nolint:staticcheck // SA1019: GetOkExists has no SDKv2 replacement for tri-state bools
+		nicHotPlug := v.(bool)
+		volume.NicHotPlug = &nicHotPlug
+	}
+
+	if v, ok := d.GetOkExists(path + "nic_hot_unplug"); ok { //nolint:staticcheck // SA1019: GetOkExists has no SDKv2 replacement for tri-state bools
+		nicHotUnplug := v.(bool)
+		volume.NicHotUnplug = &nicHotUnplug
+	}
+
+	if v, ok := d.GetOkExists(path + "disc_virtio_hot_plug"); ok { //nolint:staticcheck // SA1019: GetOkExists has no SDKv2 replacement for tri-state bools
+		discVirtioHotPlug := v.(bool)
+		volume.DiscVirtioHotPlug = &discVirtioHotPlug
+	}
+
+	if v, ok := d.GetOkExists(path + "disc_virtio_hot_unplug"); ok { //nolint:staticcheck // SA1019: GetOkExists has no SDKv2 replacement for tri-state bools
+		discVirtioHotUnplug := v.(bool)
+		volume.DiscVirtioHotUnplug = &discVirtioHotUnplug
 	}
 
 	return &volume, nil
