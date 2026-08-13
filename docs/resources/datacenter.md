@@ -59,6 +59,7 @@ The following arguments are supported:
   * `max_cores` - The maximum number of cores available
   * `max_ram` - The maximum number of RAM in MB
   * `vendor` - A valid CPU vendor name
+  * `enabled_features` - Features enabled for this CPU architecture, e.g. `SEV-SNP` for Confidential Computing
 
 ## Import
 

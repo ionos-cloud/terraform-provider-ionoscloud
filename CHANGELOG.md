@@ -2,6 +2,7 @@
 
 ### Features
 - `ionoscloud_server`: Add `confidential` flag to create Confidential Computing (SEV-SNP) VMs; `cores` and `cpu_family` are derived from the boot image and must not be set.
+- Expose Confidential Computing visibility: `required_features` on the `ionoscloud_image` data source, `enabled_features` on `ionoscloud_server`/`ionoscloud_servers`, and `cpu_architecture.enabled_features` on the `ionoscloud_datacenter` and `ionoscloud_location` data sources (and the datacenter resource).
 
 ### Fixes
 - `ionoscloud_server`: Delete the confidential boot volume after the server on destroy, since it cannot be detached while attached.

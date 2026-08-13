@@ -110,6 +110,12 @@ func resourceServer() *schema.Resource {
 				Computed: true,
 				Optional: true,
 			},
+			"enabled_features": {
+				Type:        schema.TypeList,
+				Computed:    true,
+				Description: "Features enabled on the server, e.g. SEV-SNP for a Confidential Computing VM.",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
 			"primary_nic": {
 				Type:        schema.TypeString,
 				Computed:    true,
@@ -1509,6 +1515,12 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 		if server.Properties.VmState != nil {
 			if err := d.Set("vm_state", *server.Properties.VmState); err != nil {
 				return fmt.Errorf("error setting vm_state %w", err)
+			}
+		}
+
+		if server.Properties.EnabledFeatures != nil {
+			if err := d.Set("enabled_features", *server.Properties.EnabledFeatures); err != nil {
+				return fmt.Errorf("error setting enabled_features %w", err)
 			}
 		}
 

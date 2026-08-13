@@ -59,6 +59,14 @@ func dataSourceVCPUServer() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			// Always empty for VCPU (only ENTERPRISE can be confidential), but kept because the
+			// shared setServerData reader sets it unconditionally.
+			"enabled_features": {
+				Type:        schema.TypeList,
+				Computed:    true,
+				Description: "Features enabled on the server, e.g. SEV-SNP for a Confidential Computing VM. Always empty for VCPU servers, which cannot be confidential.",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
 			"boot_cdrom": {
 				Type:     schema.TypeString,
 				Computed: true,

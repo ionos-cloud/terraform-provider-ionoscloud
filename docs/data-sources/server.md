@@ -52,6 +52,7 @@ The following attributes are returned by the datasource:
 * `datacenter_id` - The id of the datacenter
 * `cores` - The total number of cores for the server
 * `cpu_family` - CPU architecture on which server gets provisioned; not all CPU architectures are available in all datacenter regions; available CPU architectures can be retrieved from the datacenter resource.
+* `enabled_features` - Features enabled on the server, e.g. `SEV-SNP` for a Confidential Computing VM.
 * `ram` - The amount of memory for the server in MB
 * `availability_zone` - The availability zone in which the server should exist
 * `vm_state` - Status of the virtual Machine

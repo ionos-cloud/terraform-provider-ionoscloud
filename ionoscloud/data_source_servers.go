@@ -83,6 +83,12 @@ func dataSourceServers() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"enabled_features": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "Features enabled on the server, e.g. SEV-SNP for a Confidential Computing VM.",
+							Elem:        &schema.Schema{Type: schema.TypeString},
+						},
 						"boot_cdrom": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -401,6 +407,7 @@ func SetServerProperties(server ionoscloud.Server) map[string]any {
 		utils.SetPropWithNilCheck(serverMap, "ram", server.Properties.Ram)
 		utils.SetPropWithNilCheck(serverMap, "availability_zone", server.Properties.AvailabilityZone)
 		utils.SetPropWithNilCheck(serverMap, "cpu_family", server.Properties.CpuFamily)
+		utils.SetPropWithNilCheck(serverMap, "enabled_features", server.Properties.EnabledFeatures)
 		utils.SetPropWithNilCheck(serverMap, "type", server.Properties.Type)
 		utils.SetPropWithNilCheck(serverMap, "nic_multi_queue", server.Properties.NicMultiQueue)
 		if server.Properties.BootCdrom != nil && server.Properties.BootCdrom.Id != nil {
