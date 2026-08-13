@@ -1,11 +1,20 @@
 package compute
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/list"
+	listschema "github.com/hashicorp/terraform-plugin-framework/list/schema"
+	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/identity"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 )
 
 // datacenterResourceFactory and datacenterDataSetter are populated by the
@@ -66,4 +75,131 @@ func datacenterToTfValues(dc ionoscloud.Datacenter) (identity *tftypes.Value, re
 	}
 
 	return identityVal, resourceVal, nil
+}
+
+var (
+	_ list.ListResource                 = (*datacenterListResource)(nil)
+	_ list.ListResourceWithConfigure    = (*datacenterListResource)(nil)
+	_ list.ListResourceWithRawV5Schemas = (*datacenterListResource)(nil)
+)
+
+type datacenterListResource struct {
+	bundle *bundleclient.SdkBundle
+}
+
+// NewDatacenterListResource creates a new list resource for ionoscloud_datacenter.
+func NewDatacenterListResource() list.ListResource {
+	return &datacenterListResource{}
+}
+
+// Metadata returns the full name of the list resource. This must match the
+// ionoscloud_datacenter managed resource's full name exactly.
+func (r *datacenterListResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_datacenter"
+}
+
+// Configure receives the shared SDK bundle. list.ListResourceWithConfigure's
+// Configure method is declared using resource.ConfigureRequest/resource.ConfigureResponse
+// (from the "resource" package, not "list"), matching resource.ResourceWithConfigure's
+// signature so a single implementation can satisfy both interfaces if needed.
+func (r *datacenterListResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+	if req.ProviderData == nil {
+		return
+	}
+
+	bundle, ok := req.ProviderData.(*bundleclient.SdkBundle)
+	if !ok {
+		resp.Diagnostics.AddError(
+			"Unexpected Provider Data Type",
+			fmt.Sprintf("Expected *bundleclient.SdkBundle, got: %T", req.ProviderData),
+		)
+		return
+	}
+
+	r.bundle = bundle
+}
+
+// ListResourceConfigSchema returns the schema for the list block's config.
+func (r *datacenterListResource) ListResourceConfigSchema(_ context.Context, _ list.ListResourceSchemaRequest, resp *list.ListResourceSchemaResponse) {
+	resp.Schema = listschema.Schema{
+		Attributes: map[string]listschema.Attribute{
+			identity.FiltersKey: identity.FilterAttribute("name", "location"),
+		},
+	}
+}
+
+// RawV5Schemas provides the ProtoV5 representations of the ionoscloud_datacenter
+// resource and identity schemas, since it is an SDKv2-defined resource rather
+// than a framework-native one.
+func (r *datacenterListResource) RawV5Schemas(ctx context.Context, _ list.RawV5SchemaRequest, resp *list.RawV5SchemaResponse) {
+	dcResource := datacenterResourceFactory()
+	resp.ProtoV5Schema = dcResource.ProtoSchema(ctx)()
+	resp.ProtoV5IdentitySchema = dcResource.ProtoIdentitySchema(ctx)()
+}
+
+// List streams datacenters matching the given filters.
+func (r *datacenterListResource) List(ctx context.Context, req list.ListRequest, stream *list.ListResultsStream) {
+	var filters []identity.Filter
+	diags := req.Config.GetAttribute(ctx, path.Root(identity.FiltersKey), &filters)
+	if diags.HasError() {
+		stream.Results = list.ListResultsStreamDiagnostics(diags)
+		return
+	}
+
+	nameFilter := identity.FilterValue(filters, "name")
+	locationFilter := identity.FilterValue(filters, "location")
+
+	client, err := r.bundle.NewCloudAPIClientWithFailover(ctx)
+	if err != nil {
+		var d diag.Diagnostics
+		d.AddError("Failed to create Cloud API client", err.Error())
+		stream.Results = list.ListResultsStreamDiagnostics(d)
+		return
+	}
+
+	request := client.DataCentersApi.DatacentersGet(ctx).Depth(1)
+	if nameFilter != "" {
+		request = request.Filter("name", nameFilter)
+	}
+	if locationFilter != "" {
+		request = request.Filter("location", locationFilter)
+	}
+
+	datacenters, _, err := request.Execute()
+	if err != nil {
+		var d diag.Diagnostics
+		d.AddError("Failed to list datacenters", err.Error())
+		stream.Results = list.ListResultsStreamDiagnostics(d)
+		return
+	}
+
+	items := datacenters.Items
+	stream.Results = func(push func(list.ListResult) bool) {
+		if items == nil {
+			return
+		}
+		for _, dc := range *items {
+			result := req.NewListResult(ctx)
+
+			if dc.Properties != nil && dc.Properties.Name != nil {
+				result.DisplayName = *dc.Properties.Name
+			}
+
+			identityVal, resourceVal, err := datacenterToTfValues(dc)
+			if err != nil {
+				result.Diagnostics.AddError("Failed to convert datacenter", err.Error())
+				push(result)
+				return
+			}
+
+			result.Identity.Raw = *identityVal
+			if req.IncludeResource {
+				result.Resource.Raw = *resourceVal
+			}
+
+			if !push(result) {
+				return
+			}
+		}
+	}
 }
