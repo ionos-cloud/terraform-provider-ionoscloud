@@ -90,6 +90,12 @@ func resourceServer() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"confidential": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "If set, creates a Confidential Computing (SEV-SNP) VM from a confidential boot image. Requires ENTERPRISE type. cores and cpu_family must not be set - both are derived from the image.",
+			},
 			"type": {
 				Type:             schema.TypeString,
 				Optional:         true,
@@ -1355,7 +1361,17 @@ func initializeCreateRequests(d *schema.ResourceData) (ionoscloud.Server, error)
 			return *server, errors.New("template_uuid argument can be set only for CUBE type servers")
 		}
 
-		if v, ok := d.GetOk("cores"); ok {
+		// Confidential Computing (SEV-SNP) VMs derive cores and cpu_family from the boot image's
+		// launch-config; the API rejects the request if either is set, so leave both unset.
+		confidential := d.Get("confidential").(bool)
+		if confidential {
+			if _, ok := d.GetOk("cores"); ok {
+				return *server, errors.New("cores argument must not be set for confidential servers - it is derived from the image")
+			}
+			if server.Properties.CpuFamily != nil {
+				return *server, errors.New("cpu_family argument must not be set for confidential servers - it is derived from the image")
+			}
+		} else if v, ok := d.GetOk("cores"); ok {
 			vInt := int32(v.(int))
 			server.Properties.Cores = &vInt
 		} else {
