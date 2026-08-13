@@ -327,6 +327,7 @@ func (p *IonosCloudProvider) EphemeralResources(_ context.Context) []func() ephe
 func (p *IonosCloudProvider) ListResources(_ context.Context) []func() list.ListResource {
 	var finalResult []func() list.ListResource //nolint:prealloc
 	listResources := [][]func() list.ListResource{
+		compute.ListResources(),
 		objectstorage.ListResources(),
 		objectstoragemanagement.ListResources(),
 		pgsqlv2.ListResources(),
