@@ -42,6 +42,17 @@ func TestAccDataSourceLocationBasic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(locationTestName, "name"),
 				),
 			},
+			{
+				Config:      testAccDataSourceLocationNoFilterError,
+				ExpectError: regexp.MustCompile(`either 'name' or 'feature' must be provided`),
+			},
+			{
+				Config: testAccDataSourceLocationByName,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(locationTestName, "id", "de/fra"),
+					resource.TestCheckResourceAttr(locationTestName, "name", "frankfurt"),
+				),
+			},
 		},
 	})
 
@@ -69,5 +80,16 @@ data ` + constant.LocationResource + ` ` + constant.LocationTestResource + ` {
 const testAccDataSourceLocationByFeature = `
 data ` + constant.LocationResource + ` ` + constant.LocationTestResource + ` {
 	  feature = "SSD"
+}
+`
+
+const testAccDataSourceLocationNoFilterError = `
+data ` + constant.LocationResource + ` ` + constant.LocationTestResource + ` {
+}
+`
+
+const testAccDataSourceLocationByName = `
+data ` + constant.LocationResource + ` ` + constant.LocationTestResource + ` {
+	  name = "frankfurt"
 }
 `

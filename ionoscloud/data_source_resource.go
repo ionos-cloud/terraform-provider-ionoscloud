@@ -38,15 +38,15 @@ func dataSourceResourceRead(ctx context.Context, d *schema.ResourceData, meta an
 	var results []ionoscloud.Resource
 
 	resourceType := d.Get("resource_type").(string)
-	resourceId := d.Get("resource_id").(string)
+	resourceID := d.Get("resource_id").(string)
 
 	ctx, cancel := context.WithTimeout(ctx, *resourceDefaultTimeouts.Default)
 	if cancel != nil {
 		defer cancel()
 	}
 
-	if resourceType != "" && resourceId != "" {
-		result, apiResponse, err := client.UserManagementApi.UmResourcesFindByTypeAndId(ctx, resourceType, resourceId).Execute()
+	if resourceType != "" && resourceID != "" {
+		result, apiResponse, err := client.UserManagementApi.UmResourcesFindByTypeAndId(ctx, resourceType, resourceID).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
 			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching resource by type %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})

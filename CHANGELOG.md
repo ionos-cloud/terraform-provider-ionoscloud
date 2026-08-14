@@ -1,7 +1,58 @@
-## Upcoming Release
+## 6.7.35
+
+### Features
+- Add DBaaS MariaDB v2 support:
+  - New resource: `ionoscloud_mariadb_cluster_v2`
+  - New data sources: `ionoscloud_mariadb_cluster_v2`, `ionoscloud_mariadb_clusters_v2`, `ionoscloud_mariadb_backups_v2`, `ionoscloud_mariadb_backup_locations_v2`, `ionoscloud_mariadb_versions_v2`
+  - New list resource: `ionoscloud_mariadb_cluster_v2`
+
+## 6.7.34
+
+### Refactor
+- `ionoscloud_mariadb_cluster`: align input validation with API specification — enforce `username` length (1-16 chars), add `username` pattern validation, enforce `password` length (10-63 chars), add `display_name` length and pattern validation, enforce `maintenance_window.time` format (HH:MM:SS), and correct minimum `RAM` requirement (4 GB).
+
+### Fixes
+- Update sdk-go to retry on 500 for GET requests. Add test to verify that the retry logic is working as expected.
+- `ionoscloud_server`: Fix `type` changes with `allow_replace = true` silently doing nothing instead of destroying and re-creating the server.
+
+## 6.7.33
+
+### Fixes
+- `ionoscloud_pg_cluster_v2`: Fix query pagination loop where `Links.HasNext()` remained set past the last page, causing offsets to grow indefinitely.
+
+### Refactor
+- Remove invalid plan modifier for some InMemoryDB v2 cluster resource attributes.
+
+## 6.7.32
+
+### Features
+- Add DBaaS InMemoryDB V2 support:
+  - New resource: `ionoscloud_inmemorydb_cluster_v2`
+  - New data sources: `ionoscloud_inmemorydb_cluster_v2`, `ionoscloud_inmemorydb_clusters_v2`, `ionoscloud_inmemorydb_snapshots_v2`, `ionoscloud_inmemorydb_snapshot_locations_v2`, `ionoscloud_inmemorydb_versions_v2`
+  - New list resource: `ionoscloud_inmemorydb_cluster_v2`
+  - Deprecated: `ionoscloud_dbaas_inmemorydb_replica_set` resource and `ionoscloud_dbaas_inmemorydb_replicaset`, `ionoscloud_dbaas_inmemorydb_snapshot` data sources
+
+### Fixes
+- `ionoscloud_pg_cluster`: remove schema-level validation on `synchronization_mode` to preserve backward compatibility with existing clusters; validation is delegated to the API.
+
+### Testing
+- Add more test cases for `compute` data sources.
+- Add more test cases for `ionoscloud_pg_cluster` resource with `STRICTLY_SYNCHRONOUS` synchronization mode.
+
+### Refactor
+- Refactor getImage, split into smaller functions and add unit tests
+
+### Documentation
+- Add migration guide for `ionoscloud_pg_cluster` to `ionoscloud_pg_cluster_v2` resource.
+
+## 6.7.31
 
 ### Features
 - New list resource: `ionoscloud_pg_cluster_v2` — list PostgreSQL v2 clusters via `terraform query`, with optional filtering using `name` or `location` (requires Terraform 1.14+).
+- Support child locations (e.g. `de/fra/2`): image and image alias resolution for `ionoscloud_server`, `ionoscloud_cube_server`, `ionoscloud_gpu_server` and `ionoscloud_volume` also considers the parent location the child inherits images from; the `ionoscloud_image` and `ionoscloud_snapshot` data sources accept results from the parent location; new `metro_region` attribute on the `ionoscloud_location` data source.
+
+### Documentation
+- Align brand references in docs and schema descriptions to `IONOS CLOUD`.
 
 ### Fixes
 - Fix `ionoscloud_networkloadbalancer`: re-apply no longer fails with "you can not empty the ips field" when the optional `ips` attribute is omitted from the configuration
@@ -95,17 +146,17 @@
 ## 6.7.24
 ### Features
 - Added `location` field to several resources and data sources to support regional endpoints via file configuration. The field should only be used if a file configuration is provided (e.g. at `IONOS_CONFIG_FILE`).
-    - Updated Resources: `application_loadbalancer_forwardingrule`, `container_registry_token`, `cube_server`, `datacenter_nsg_selection`, `dbaas_mongodb_user`, `dbaas_pgsql_database`, `dbaas_pgsql_user`, `firewall`, `gpu_server`, `k8s_node_pool`, `lan`, `loadbalancer`, `natgateway`, `natgateway_rule`, `networkloadbalancer`, `networkloadbalancer_forwardingrule`, `nic`, `nsg`, `nsg_firewallrule`, `private_crossconnect`, `server`, `server_boot_device_selection`, `snapshot`, `vcpu_server`, `volume`.
-    - Updated Data Sources: `application_loadbalancer`, `application_loadbalancer_forwardingrule`, `container_registry_token`, `dbaas_mongo_user`, `dbaas_pgsql_backups`, `dbaas_pgsql_database`, `dbaas_pgsql_databases`, `dbaas_pgsql_user`, `firewall`, `gpu`, `gpus`, `ipfailover`, `k8s_clusters`, `k8s_node_pool`, `k8s_node_pool_nodes`, `lan`, `natgateway`, `natgateway_rule`, `networkloadbalancer`, `networkloadbalancer_forwardingrule`, `nic`, `nsg`, `private_crossconnect`, `server`, `servers`, `vcpu_server`, `volume`.
+  - Updated Resources: `application_loadbalancer_forwardingrule`, `container_registry_token`, `cube_server`, `datacenter_nsg_selection`, `dbaas_mongodb_user`, `dbaas_pgsql_database`, `dbaas_pgsql_user`, `firewall`, `gpu_server`, `k8s_node_pool`, `lan`, `loadbalancer`, `natgateway`, `natgateway_rule`, `networkloadbalancer`, `networkloadbalancer_forwardingrule`, `nic`, `nsg`, `nsg_firewallrule`, `private_crossconnect`, `server`, `server_boot_device_selection`, `snapshot`, `vcpu_server`, `volume`.
+  - Updated Data Sources: `application_loadbalancer`, `application_loadbalancer_forwardingrule`, `container_registry_token`, `dbaas_mongo_user`, `dbaas_pgsql_backups`, `dbaas_pgsql_database`, `dbaas_pgsql_databases`, `dbaas_pgsql_user`, `firewall`, `gpu`, `gpus`, `ipfailover`, `k8s_clusters`, `k8s_node_pool`, `k8s_node_pool_nodes`, `lan`, `natgateway`, `natgateway_rule`, `networkloadbalancer`, `networkloadbalancer_forwardingrule`, `nic`, `nsg`, `private_crossconnect`, `server`, `servers`, `vcpu_server`, `volume`.
 - Added `ForceNew: true` for the following attributes:
-    - `location` inside `datacenter` resource;
-    - `datacenter_id` inside `datacenter_nsg_selection` resource;
-    - `datacenter_id` inside `k8s_node_pool` resource;
-    - `k8s_cluster_id` inside `k8s_node_pool` resource;
-    - `location` inside `snapshot` resource;
+  - `location` inside `datacenter` resource;
+  - `datacenter_id` inside `datacenter_nsg_selection` resource;
+  - `datacenter_id` inside `k8s_node_pool` resource;
+  - `k8s_cluster_id` inside `k8s_node_pool` resource;
+  - `location` inside `snapshot` resource;
 - Added `Optional: true` for the following attributes:
-    - `location` inside `snapshot` resource;
-    - `location` inside `k8s_cluster` resource;
+  - `location` inside `snapshot` resource;
+  - `location` inside `k8s_cluster` resource;
 
 ## 6.7.23
 ### Features
@@ -210,7 +261,7 @@
 - Add `key` to `ionoscloud_logging_pipeline` resource
 - Add `tcp_address` and`http_address` to `ionoscloud_logging_pipeline` resource and data source
 - Add `expose_serial` attribute to `ionoscloud_volume`, `ionoscloud_server`, `ionoscloud_cube_server` resources. If set to `true` will expose the serial id of the disk attached to the server.
-Some operating systems or software solutions require the serial id to be exposed to work properly. Exposing the serial can influence licensed software (e.g. Windows) behavior
+  Some operating systems or software solutions require the serial id to be exposed to work properly. Exposing the serial can influence licensed software (e.g. Windows) behavior
 
 ## 6.7.9
 ### Features
@@ -428,23 +479,23 @@ Some operating systems or software solutions require the serial id to be exposed
 
 ## 6.5.9
 ### Features
-  - Add new, required `sni_mode` attribute for `ionoscloud_cdn_distribution` resource and data source
+- Add new, required `sni_mode` attribute for `ionoscloud_cdn_distribution` resource and data source
 ### Documentation
-  - Add `FAQ` section in `README.md`, add information about IP retrieval for `NIC`s
+- Add `FAQ` section in `README.md`, add information about IP retrieval for `NIC`s
 
 ## 6.5.8
 ### Refactor
-  - Remove `image_alias` sets from `ionoscloud_volume` data source and resource
+- Remove `image_alias` sets from `ionoscloud_volume` data source and resource
 ### Documentation
-  - Remove `image_alias` from `ionocloud_volume` data source and resource docs
+- Remove `image_alias` from `ionocloud_volume` data source and resource docs
 ### Fixes
-  - Allow empty `prefix` for bucket lifecycle configuration rules
+- Allow empty `prefix` for bucket lifecycle configuration rules
 
 ## 6.5.7
 ### Fixes
-  - Fix documentation rendering of `autoscaling_group` resource and data source, `dbaas_mongo_template` data source and `server_boot_device_selection` resource in Terraform registry
-  - Fix `application_loadbalancer_forwardingrule` docs typo
-  - Fix for [#687](https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/687) by setting `user_data` and `backupunit_id` in `ionoscloud_cube_server`
+- Fix documentation rendering of `autoscaling_group` resource and data source, `dbaas_mongo_template` data source and `server_boot_device_selection` resource in Terraform registry
+- Fix `application_loadbalancer_forwardingrule` docs typo
+- Fix for [#687](https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/687) by setting `user_data` and `backupunit_id` in `ionoscloud_cube_server`
 
 ## 6.5.6
 ### Fixes
@@ -576,7 +627,7 @@ Some operating systems or software solutions require the serial id to be exposed
 
 ### Enhancements
 - Add configurable fields to `ionoscloud_share` resource. Fields that can be set on creation: `description`, `sec_auth_protection`, `licence_type`.
-Updatable fields: `description`, `licence_type`, `nic_hot_plug`, `cpu_hot_plug`, `nic_hot_unplug`, `disc_virtio_hot_plug`, `disc_virtio_hot_unplug`, `ram_hot_plug`.
+  Updatable fields: `description`, `licence_type`, `nic_hot_plug`, `cpu_hot_plug`, `nic_hot_unplug`, `disc_virtio_hot_plug`, `disc_virtio_hot_unplug`, `ram_hot_plug`.
 - Allow MariaDB cluster creation in other zones than `de/txl` by adding `location` parameter to resources and data sources
 
 
@@ -650,11 +701,11 @@ Updatable fields: `description`, `licence_type`, `nic_hot_plug`, `cpu_hot_plug`,
 - #494 add `proxy-protocol` to `ionoscloud_networkloadbalancer_forwarding_rule` resource
 
 ### New Product - **Autoscaling**:
-  - `Resources`:
-    - [ionoscloud_autoscaling_group](docs/resources/autoscaling_group.md)
-  - `Data Sources`:
-    - [ionoscloud_autoscaling_group](docs/data-sources/autoscaling_group.md)
-    - [ionoscloud_autoscaling_group_servers](docs/data-sources/autoscaling_group_servers.md)
+- `Resources`:
+  - [ionoscloud_autoscaling_group](docs/resources/autoscaling_group.md)
+- `Data Sources`:
+  - [ionoscloud_autoscaling_group](docs/data-sources/autoscaling_group.md)
+  - [ionoscloud_autoscaling_group_servers](docs/data-sources/autoscaling_group_servers.md)
 
 ### Fixes
 - #487. Crash on server import without inline `nic`
@@ -674,7 +725,7 @@ Updatable fields: `description`, `licence_type`, `nic_hot_plug`, `cpu_hot_plug`,
 ### Fixes
 - #467 removing an inline `nic` of the `server` resource from dcd should not throw 404 when running plan or apply after
 - #432 Now it is possible to create and delete multiple `ionoscloud_ipfailover` resources at the same time. The UUID is generated based on the IP of the
-failover group. The resources that are created using Terraform cannot be modified/deleted outside Terraform.
+  failover group. The resources that are created using Terraform cannot be modified/deleted outside Terraform.
 - Fix `nil` deref error on list for nic datasource
 - #470 fix image name searching in `ionoscloud_image` and `ionoscloud_volume`. Exact matches are returned correctly now if they exist.
 
@@ -744,7 +795,7 @@ failover group. The resources that are created using Terraform cannot be modifie
 ## 6.4.2
 ### Fixes
 - Fix `ssh_keys` field upgrade `ionoscloud_server` from `6.3.3` to higher versions should not replace server. `ssh_keys` and `ssh_key_path` fields no longer forceNew.
-`ssh_keys` is no longer computed.
+  `ssh_keys` is no longer computed.
 - Fix `ssh_keys` suppress diff on upgrade for `ionoscloud_server` when having `volume.0.ssh_keys`
 - Add validation to `label` `key` and `value` fields for `ionoscloud_server` resource
 - Fix gitbook references
@@ -820,12 +871,12 @@ Please contact your sales representative or support for more information.
 
 ## 6.3.4
 ### Feature:
- - Add update for mongo database resources
- - Add update for mongo cluster and user
- - Add labels for servers
- - Add data source for DBaaS Mongo Templates
- - Update mongo sdk to v1.2.0
- - Added server ssh_keys tests
+- Add update for mongo database resources
+- Add update for mongo cluster and user
+- Add labels for servers
+- Add data source for DBaaS Mongo Templates
+- Update mongo sdk to v1.2.0
+- Added server ssh_keys tests
 
 ### Refactor:
 - Refactor services, add generic `WaitForResourceToBeReady` and `WaitForResourceToBeDeleted` methods
@@ -833,19 +884,19 @@ Please contact your sales representative or support for more information.
 - Remove useless checks from services
 
 ## Fixes
- - Fix mongo user tests to check for cluster state instead of user state which was removed
- - Defining a separate firewall rule for server should not set firewall_id inside server resource, as it moves the firewall resource inside the server on re-apply
- - Fixes creating share resource edit and share privileges mix up
- - `viable_node_pool_versions`  in k8s cluster is no longer optional, is only computed
- - Allow server import with nic and firewallId : `terraform import ionoscloud_server.myserver datacenter uuid/server uuid/primary nic id/firewall rule id`
- - Mongo tests update mongo version
- - Change the way in which we set the NIC data
- - Allow server import with nic and firewall ids
- - Typo in group resource
- - Readme fix link to test suite, dbaas test use correct checking function
- - Make viable_node_pool_versions only computed
- - K8s nodepool test
- - Mix up share and edit privileges on create
+- Fix mongo user tests to check for cluster state instead of user state which was removed
+- Defining a separate firewall rule for server should not set firewall_id inside server resource, as it moves the firewall resource inside the server on re-apply
+- Fixes creating share resource edit and share privileges mix up
+- `viable_node_pool_versions`  in k8s cluster is no longer optional, is only computed
+- Allow server import with nic and firewallId : `terraform import ionoscloud_server.myserver datacenter uuid/server uuid/primary nic id/firewall rule id`
+- Mongo tests update mongo version
+- Change the way in which we set the NIC data
+- Allow server import with nic and firewall ids
+- Typo in group resource
+- Readme fix link to test suite, dbaas test use correct checking function
+- Make viable_node_pool_versions only computed
+- K8s nodepool test
+- Mix up share and edit privileges on create
 
 ## 6.3.3
 ### Feature
@@ -893,6 +944,6 @@ Please contact your sales representative or support for more information.
 
 ### Fixes
 - Reproduces rarely: sometimes the `nic` resource is not found after creation. As a fix we added a retry for 5 minutes to be able to get the NIC. The retry will keep trying if the response
-is `not found`(404)
+  is `not found`(404)
 - Fix cube server creation. Some attributes were not populated - name, boot_cdrom, availability_zone
 - Crash on update of k8s version when we have a value without `.`

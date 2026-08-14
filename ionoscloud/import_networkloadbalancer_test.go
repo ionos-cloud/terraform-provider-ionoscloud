@@ -25,7 +25,7 @@ func TestAccNetworkLoadBalancerImportBasic(t *testing.T) {
 
 			{
 				ResourceName:            networkLoadBalancerResource,
-				ImportStateIdFunc:       testAccNetworkLoadBalancerImportStateId,
+				ImportStateIdFunc:       testAccNetworkLoadBalancerImportStateID,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location"},
@@ -34,7 +34,7 @@ func TestAccNetworkLoadBalancerImportBasic(t *testing.T) {
 	})
 }
 
-func testAccNetworkLoadBalancerImportStateId(s *terraform.State) (string, error) {
+func testAccNetworkLoadBalancerImportStateID(s *terraform.State) (string, error) {
 	var importID = ""
 
 	for _, rs := range s.RootModule().Resources {

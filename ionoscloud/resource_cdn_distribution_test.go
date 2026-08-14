@@ -59,7 +59,7 @@ func TestAccDistributionBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDataSourceCDNDistributionMatchId,
+				Config: testAccDataSourceCDNDistributionMatchID,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(constant.CDNDistributionResource+"."+constant.CDNDistributionTestResource, "domain", "unique.test.example.com"),
 
@@ -189,7 +189,7 @@ func testAccCheckCDNDistributionExists(n string, distribution *ionoscloud_cdn.Di
 	}
 }
 
-const testAccDataSourceCDNDistributionMatchId = testAccCheckCDNDistributionConfigBasic + `
+const testAccDataSourceCDNDistributionMatchID = testAccCheckCDNDistributionConfigBasic + `
 data ` + constant.CDNDistributionResource + ` ` + constant.CDNDistributionDataSourceByID + ` {
   id			= ` + constant.CDNDistributionResource + `.` + constant.CDNDistributionTestResource + `.id
 }`

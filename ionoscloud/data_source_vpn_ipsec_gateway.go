@@ -7,7 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	vpnSdk "github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2"
+	vpnsdk "github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
@@ -122,7 +122,7 @@ func dataSourceVpnIPSecGatewayRead(ctx context.Context, d *schema.ResourceData, 
 		return diagutil.ToDiags(d, fmt.Errorf("please provide either the IPSec Gateway ID or name"), nil)
 	}
 
-	var gateway vpnSdk.IPSecGatewayRead
+	var gateway vpnsdk.IPSecGatewayRead
 	var apiResponse *shared.APIResponse
 	var err error
 	if idOk {
@@ -131,7 +131,7 @@ func dataSourceVpnIPSecGatewayRead(ctx context.Context, d *schema.ResourceData, 
 			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the IPSec Gateway with ID: %s, error: %w", id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 	} else {
-		var results []vpnSdk.IPSecGatewayRead
+		var results []vpnsdk.IPSecGatewayRead
 		gateways, apiResponse, err := client.ListIPSecGateway(ctx, location)
 		if err != nil {
 			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching IPSec Gateways: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})

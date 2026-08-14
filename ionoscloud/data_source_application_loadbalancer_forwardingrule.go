@@ -174,8 +174,8 @@ func dataSourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d 
 		return diag.FromErr(err)
 	}
 
-	datacenterId := d.Get("datacenter_id").(string)
-	albId := d.Get("application_loadbalancer_id").(string)
+	datacenterID := d.Get("datacenter_id").(string)
+	albID := d.Get("application_loadbalancer_id").(string)
 
 	idValue, idOk := d.GetOk("id")
 	nameValue, nameOk := d.GetOk("name")
@@ -196,7 +196,7 @@ func dataSourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d 
 	if idOk {
 		/* search by ID */
 		tflog.Info(ctx, "searching application load balancer forwarding rule by id", map[string]any{"id": id})
-		applicationLoadBalancerForwardingRule, apiResponse, err = client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterId, albId, id).Execute()
+		applicationLoadBalancerForwardingRule, apiResponse, err = client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterID, albID, id).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
 			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the application load balancer forwarding rule while searching by ID %s: %w", id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
@@ -210,7 +210,7 @@ func dataSourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d 
 		tflog.Info(ctx, "searching application load balancer forwarding rule by name", map[string]any{"partial_match": partialMatch, "name": name})
 
 		if partialMatch {
-			applicationLoadBalancersForwardingRules, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesGet(ctx, datacenterId, albId).Depth(1).Filter("name", name).Execute()
+			applicationLoadBalancersForwardingRules, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesGet(ctx, datacenterID, albID).Depth(1).Filter("name", name).Execute()
 			logApiRequestTime(apiResponse)
 
 			if err != nil {
@@ -219,7 +219,7 @@ func dataSourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d 
 
 			results = *applicationLoadBalancersForwardingRules.Items
 		} else {
-			applicationLoadBalancersForwardingRules, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesGet(ctx, datacenterId, albId).Depth(1).Execute()
+			applicationLoadBalancersForwardingRules, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesGet(ctx, datacenterID, albID).Depth(1).Execute()
 			logApiRequestTime(apiResponse)
 
 			if err != nil {
@@ -229,7 +229,7 @@ func dataSourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d 
 			if applicationLoadBalancersForwardingRules.Items != nil {
 				for _, albFr := range *applicationLoadBalancersForwardingRules.Items {
 					if albFr.Properties != nil && albFr.Properties.Name != nil && strings.EqualFold(*albFr.Properties.Name, name) {
-						tmpAlbFr, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterId, albId, *albFr.Id).Execute()
+						tmpAlbFr, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterID, albID, *albFr.Id).Execute()
 						logApiRequestTime(apiResponse)
 						if err != nil {
 							return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching application load balancer forwarding rule with ID %s: %w", *albFr.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})

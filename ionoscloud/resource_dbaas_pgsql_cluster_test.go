@@ -14,7 +14,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	psql "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
@@ -54,12 +54,12 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "maintenance_window.0.day_of_the_week", "Sunday"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "credentials.0.username", "username"),
 					resource.TestCheckResourceAttrPair(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "credentials.0.password", constant.RandomPassword+".cluster_password", "result"),
-					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "synchronization_mode", "ASYNCHRONOUS"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "synchronization_mode", string(psql.SYNCHRONIZATIONMODE_ASYNCHRONOUS)),
 					resource.TestCheckResourceAttrSet(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "dns_name"),
 				),
 			},
 			{
-				Config: testAccDataSourceDBaaSPgSqlClusterMatchId,
+				Config: testAccDataSourceDBaaSPgSqlClusterMatchID,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceById, "display_name", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "display_name"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PsqlClusterResource+"."+constant.DBaaSClusterTestDataSourceById, "instances", constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "instances"),
@@ -123,7 +123,7 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDataSourceDbaasPgSqlVersionsByClusterId,
+				Config: testAccDataSourceDbaasPgSqlVersionsByClusterID,
 				Check: resource.ComposeTestCheckFunc(
 					utils.TestNotEmptySlice(constant.PsqlVersionsResource, "postgres_versions.#"),
 				),
@@ -139,7 +139,7 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDbaasPgSqlClusterExists(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, &dbaasCluster),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "postgres_version", PgSQLVersion),
-					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "instances", "2"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "instances", "3"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "cores", "2"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "ram", "5120"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "storage_size", "11264"),
@@ -156,7 +156,7 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "maintenance_window.0.day_of_the_week", "Saturday"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "credentials.0.username", "username"),
 					resource.TestCheckResourceAttrPair(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "credentials.0.password", constant.RandomPassword+".cluster_password", "result"),
-					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "synchronization_mode", "ASYNCHRONOUS"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "synchronization_mode", string(psql.SYNCHRONIZATIONMODE_STRICTLY_SYNCHRONOUS)),
 				),
 			},
 			{
@@ -164,7 +164,7 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDbaasPgSqlClusterExists(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, &dbaasCluster),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "postgres_version", PgSQLVersion),
-					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "instances", "2"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "instances", "3"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "cores", "2"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "ram", "5120"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "storage_size", "11264"),
@@ -179,7 +179,7 @@ func TestAccDBaaSPgSqlClusterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "maintenance_window.0.day_of_the_week", "Saturday"),
 					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "credentials.0.username", "username"),
 					resource.TestCheckResourceAttrPair(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "credentials.0.password", constant.RandomPassword+".cluster_password", "result"),
-					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "synchronization_mode", "ASYNCHRONOUS"),
+					resource.TestCheckResourceAttr(constant.PsqlClusterResource+"."+constant.DBaaSClusterTestResource, "synchronization_mode", string(psql.SYNCHRONIZATIONMODE_STRICTLY_SYNCHRONOUS)),
 				),
 			},
 			{
@@ -374,7 +374,7 @@ resource ` + constant.LanResource + ` "lan_example_update" {
 
 resource ` + constant.PsqlClusterResource + ` ` + constant.DBaaSClusterTestResource + ` {
   postgres_version   = ` + PgSQLVersion + `
-  instances          = 2
+  instances          = 3
   cores              = 2
   ram                = 5120
   storage_size       = 11264
@@ -399,7 +399,7 @@ resource ` + constant.PsqlClusterResource + ` ` + constant.DBaaSClusterTestResou
   	username = "username"
 	password = ` + constant.RandomPassword + `.cluster_password.result
   }
-  synchronization_mode = "ASYNCHRONOUS"
+  synchronization_mode = "STRICTLY_SYNCHRONOUS"
 }
 
 resource ` + constant.RandomPassword + ` "cluster_password" {
@@ -437,7 +437,7 @@ resource ` + constant.LanResource + ` "lan_example_update" {
 
 resource ` + constant.PsqlClusterResource + ` ` + constant.DBaaSClusterTestResource + ` {
   postgres_version   = ` + PgSQLVersion + `
-  instances          = 2
+  instances          = 3
   cores              = 2
   ram                = 5120
   storage_size       = 11264
@@ -457,7 +457,7 @@ resource ` + constant.PsqlClusterResource + ` ` + constant.DBaaSClusterTestResou
   	username = "username"
 	password = ` + constant.RandomPassword + `.cluster_password.result
   }
-  synchronization_mode = "ASYNCHRONOUS"
+  synchronization_mode = "STRICTLY_SYNCHRONOUS"
 }
 
 resource ` + constant.RandomPassword + ` "cluster_password" {
@@ -540,7 +540,7 @@ resource ` + constant.RandomPassword + ` "cluster_password" {
 }
 `
 
-const testAccDataSourceDBaaSPgSqlClusterMatchId = testAccCheckDbaasPgSqlClusterConfigBasic + `
+const testAccDataSourceDBaaSPgSqlClusterMatchID = testAccCheckDbaasPgSqlClusterConfigBasic + `
 data ` + constant.PsqlClusterResource + ` ` + constant.DBaaSClusterTestDataSourceById + ` {
   id	= ` + constant.PsqlClusterResource + `.` + constant.DBaaSClusterTestResource + `.id
 }
@@ -569,7 +569,7 @@ data ` + constant.PsqlVersionsResource + ` ` + constant.PsqlVersionsTest + ` {
 }
 `
 
-const testAccDataSourceDbaasPgSqlVersionsByClusterId = testAccCheckDbaasPgSqlClusterConfigBasic + `
+const testAccDataSourceDbaasPgSqlVersionsByClusterID = testAccCheckDbaasPgSqlClusterConfigBasic + `
 data ` + constant.PsqlVersionsResource + ` ` + constant.PsqlVersionsTest + ` {
 	cluster_id = ` + constant.PsqlClusterResource + `.` + constant.DBaaSClusterTestResource + `.id
 }

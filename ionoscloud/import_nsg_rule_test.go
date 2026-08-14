@@ -23,14 +23,14 @@ func TestAccNSGRuleImportBasic(t *testing.T) {
 			},
 			{
 				ResourceName:            constant.NSGFirewallRuleResource + "." + constant.NSGFirewallRuleTestResource + "_1",
-				ImportStateIdFunc:       testAccNSGRuleImportStateId,
+				ImportStateIdFunc:       testAccNSGRuleImportStateID,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location"},
 			},
 			{
 				ResourceName:            constant.NSGFirewallRuleResource + "." + constant.NSGFirewallRuleTestResource + "_2",
-				ImportStateIdFunc:       testAccNSGRuleImportStateId,
+				ImportStateIdFunc:       testAccNSGRuleImportStateID,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location"},
@@ -39,7 +39,7 @@ func TestAccNSGRuleImportBasic(t *testing.T) {
 	})
 }
 
-func testAccNSGRuleImportStateId(s *terraform.State) (string, error) {
+func testAccNSGRuleImportStateID(s *terraform.State) (string, error) {
 	importID := ""
 
 	for _, rs := range s.RootModule().Resources {

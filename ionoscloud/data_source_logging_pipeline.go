@@ -12,7 +12,7 @@ import (
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
-	loggingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/logging"
+	loggingservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/logging"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
@@ -22,7 +22,7 @@ func dataSourceLoggingPipeline() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"location": {
 				Type:        schema.TypeString,
-				Description: fmt.Sprintf("The location of your logging pipeline. Default: de/txl. Supported locations: %s", strings.Join(loggingService.AvailableLocations, ", ")),
+				Description: fmt.Sprintf("The location of your logging pipeline. Default: de/txl. Supported locations: %s", strings.Join(loggingservice.AvailableLocations, ", ")),
 				Optional:    true,
 				Default:     "de/txl",
 				// no diff in case it moves from "" to de/txl since it's an upgrade from when we had no location

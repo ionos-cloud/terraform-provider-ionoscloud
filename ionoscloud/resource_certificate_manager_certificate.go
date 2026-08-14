@@ -178,14 +178,14 @@ func resourceCertificateManagerDelete(ctx context.Context, d *schema.ResourceDat
 func resourceCertificateManagerImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	client := meta.(bundleclient.SdkBundle).CertManagerClient
 
-	certId := d.Id()
+	certID := d.Id()
 	certDto, apiResponse, err := client.GetCertificate(ctx, d.Id())
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("unable to find cert %q", certId), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return nil, diagutil.ToError(d, fmt.Errorf("unable to find cert %q", certID), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
-		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while retrieving the cert %q, %w", certId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while retrieving the cert %q, %w", certID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if err := cert.SetCertificateData(d, &certDto); err != nil {

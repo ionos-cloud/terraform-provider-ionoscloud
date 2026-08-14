@@ -62,17 +62,17 @@ func resourceServerBootDeviceSelection() *schema.Resource {
 }
 
 func resourceServerBootDeviceSelectionCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	dcId := d.Get("datacenter_id").(string)
-	serverId := d.Get("server_id").(string)
+	dcID := d.Get("datacenter_id").(string)
+	serverID := d.Get("server_id").(string)
 	location := d.Get("location").(string)
 
-	ss, err := cloudapiserver.NewUnboundService(ctx, serverId, location, meta)
+	ss, err := cloudapiserver.NewUnboundService(ctx, serverID, location, meta)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	// The bootable device to which the server will revert if this resource is destroyed.
-	defaultBootVolume, err := ss.GetDefaultBootVolume(ctx, dcId, serverId)
+	defaultBootVolume, err := ss.GetDefaultBootVolume(ctx, dcID, serverID)
 	if err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
@@ -83,12 +83,12 @@ func resourceServerBootDeviceSelectionCreate(ctx context.Context, d *schema.Reso
 
 	bootDeviceIDValue, bootDeviceIDOk := d.GetOk("boot_device_id")
 	if !bootDeviceIDOk {
-		if err = ss.PxeBoot(ctx, dcId, serverId); err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("error while performing pxe boot for server, serverId: %s, dcId: %s (%w)", serverId, dcId, err), nil)
+		if err = ss.PxeBoot(ctx, dcID, serverID); err != nil {
+			return diagutil.ToDiags(d, fmt.Errorf("error while performing pxe boot for server, serverID: %s, dcID: %s (%w)", serverID, dcID, err), nil)
 		}
 	} else {
 		bootDeviceID := bootDeviceIDValue.(string)
-		if err = ss.UpdateBootDevice(ctx, dcId, serverId, bootDeviceID); err != nil {
+		if err = ss.UpdateBootDevice(ctx, dcID, serverID, bootDeviceID); err != nil {
 			return diagutil.ToDiags(d, err, nil)
 		}
 	}
@@ -105,10 +105,10 @@ func resourceServerBootDeviceSelectionRead(ctx context.Context, d *schema.Resour
 	}
 	ss := cloudapiserver.Service{Client: client, Meta: meta, D: d}
 
-	dcId := d.Get("datacenter_id").(string)
-	serverId := d.Get("server_id").(string)
+	dcID := d.Get("datacenter_id").(string)
+	serverID := d.Get("server_id").(string)
 
-	server, err := ss.FindById(ctx, dcId, serverId, 3)
+	server, err := ss.FindById(ctx, dcID, serverID, 3)
 	if err != nil {
 		if errors.Is(err, cloudapiserver.ErrServerNotFound) {
 			d.SetId("")
@@ -118,18 +118,18 @@ func resourceServerBootDeviceSelectionRead(ctx context.Context, d *schema.Resour
 	}
 
 	if err = setServerBootDeviceSelectionData(d, server); err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error reading boot devices for server, dcId: %s, sId: %s, (%w)", dcId, serverId, err), nil)
+		return diagutil.ToDiags(d, fmt.Errorf("error reading boot devices for server, dcID: %s, sID: %s, (%w)", dcID, serverID, err), nil)
 	}
 
 	return nil
 }
 
 func resourceServerBootDeviceSelectionUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	dcId := d.Get("datacenter_id").(string)
-	serverId := d.Get("server_id").(string)
+	dcID := d.Get("datacenter_id").(string)
+	serverID := d.Get("server_id").(string)
 	location := d.Get("location").(string)
 
-	ss, err := cloudapiserver.NewUnboundService(ctx, serverId, location, meta)
+	ss, err := cloudapiserver.NewUnboundService(ctx, serverID, location, meta)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -137,12 +137,12 @@ func resourceServerBootDeviceSelectionUpdate(ctx context.Context, d *schema.Reso
 	if d.HasChange("boot_device_id") {
 		bootDeviceIDValue, bootDeviceIDOk := d.GetOk("boot_device_id")
 		if !bootDeviceIDOk {
-			if err := ss.PxeBoot(ctx, dcId, serverId); err != nil {
-				return diagutil.ToDiags(d, fmt.Errorf("error while performing pxe boot: %w, serverId: %s, dcId: %s", err, serverId, dcId), nil)
+			if err := ss.PxeBoot(ctx, dcID, serverID); err != nil {
+				return diagutil.ToDiags(d, fmt.Errorf("error while performing pxe boot: %w, serverID: %s, dcID: %s", err, serverID, dcID), nil)
 			}
 		} else {
 			bootDeviceID := bootDeviceIDValue.(string)
-			if err := ss.UpdateBootDevice(ctx, dcId, serverId, bootDeviceID); err != nil {
+			if err := ss.UpdateBootDevice(ctx, dcID, serverID, bootDeviceID); err != nil {
 				return diagutil.ToDiags(d, err, nil)
 			}
 		}
@@ -158,11 +158,11 @@ func resourceServerBootDeviceSelectionDelete(ctx context.Context, d *schema.Reso
 	}
 	ss := cloudapiserver.Service{Client: client, Meta: meta, D: d}
 
-	dcId := d.Get("datacenter_id").(string)
-	serverId := d.Get("server_id").(string)
-	defaultBootVolumeId := d.Get("default_boot_volume_id").(string)
+	dcID := d.Get("datacenter_id").(string)
+	serverID := d.Get("server_id").(string)
+	defaultBootVolumeID := d.Get("default_boot_volume_id").(string)
 
-	if err := ss.UpdateBootDevice(ctx, dcId, serverId, defaultBootVolumeId); err != nil {
+	if err := ss.UpdateBootDevice(ctx, dcID, serverID, defaultBootVolumeID); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
 	d.SetId("")

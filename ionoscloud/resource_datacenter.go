@@ -249,20 +249,20 @@ func resourceDatacenterImport(ctx context.Context, d *schema.ResourceData, meta 
 		return nil, fmt.Errorf("failed validating import identifier %q: %w", importID, err)
 	}
 
-	dcId := parts[0]
+	dcID := parts[0]
 
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return nil, err
 	}
 
-	datacenter, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, dcId).Execute()
+	datacenter, apiResponse, err := client.DataCentersApi.DatacentersFindById(ctx, dcID).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("unable to find datacenter %q", dcId), nil)
+			return nil, diagutil.ToError(d, fmt.Errorf("unable to find datacenter %q", dcID), nil)
 		}
 		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while retrieving the datacenter: %w", err), nil)
 	}

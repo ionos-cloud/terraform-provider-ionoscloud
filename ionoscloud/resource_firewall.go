@@ -132,7 +132,7 @@ func resourceFirewallCreate(ctx context.Context, d *schema.ResourceData, meta an
 			d.SetId("")
 		}
 		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating a firewall rule dcId: %s server_id: %s  "+
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating a firewall rule dcID: %s server_id: %s  "+
 			"nic_id: %s %s", d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string), errState), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
@@ -156,7 +156,7 @@ func resourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta any)
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching a firewall rule dcId: %s server_id: %s  nic_id: %s ID: %s %w",
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching a firewall rule dcID: %s server_id: %s  nic_id: %s ID: %s %w",
 			d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string), d.Id(), err), nil)
 	}
 
@@ -237,35 +237,35 @@ func resourceFirewallImport(ctx context.Context, d *schema.ResourceData, meta an
 		return nil, diagutil.ToError(d, fmt.Errorf("failed validating import identifier %q: %w", importID, err), nil)
 	}
 
-	dcId := parts[0]
-	serverId := parts[1]
-	nicId := parts[2]
-	firewallId := parts[3]
+	dcID := parts[0]
+	serverID := parts[1]
+	nicID := parts[2]
+	firewallID := parts[3]
 
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return nil, err
 	}
 
-	fw, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, dcId,
-		serverId, nicId, firewallId).Execute()
+	fw, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, dcID,
+		serverID, nicID, firewallID).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("unable to find firewall rule %q", firewallId), nil)
+			return nil, diagutil.ToError(d, fmt.Errorf("unable to find firewall rule %q", firewallID), nil)
 		}
-		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while retrieving firewall rule %q: %w ", firewallId, err), nil)
+		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while retrieving firewall rule %q: %w ", firewallID, err), nil)
 	}
 
-	if err := d.Set("datacenter_id", dcId); err != nil {
+	if err := d.Set("datacenter_id", dcID); err != nil {
 		return nil, diagutil.ToError(d, err, nil)
 	}
-	if err := d.Set("server_id", serverId); err != nil {
+	if err := d.Set("server_id", serverID); err != nil {
 		return nil, diagutil.ToError(d, err, nil)
 	}
-	if err := d.Set("nic_id", nicId); err != nil {
+	if err := d.Set("nic_id", nicID); err != nil {
 		return nil, diagutil.ToError(d, err, nil)
 	}
 	if err := d.Set("location", location); err != nil {

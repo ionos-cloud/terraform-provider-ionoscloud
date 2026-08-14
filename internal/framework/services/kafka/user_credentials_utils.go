@@ -5,10 +5,10 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	kafkaSDK "github.com/ionos-cloud/sdk-go-bundle/products/kafka/v2"
+	kafkasdk "github.com/ionos-cloud/sdk-go-bundle/products/kafka/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
-	kafkaService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/kafka"
+	kafkaservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/kafka"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
@@ -23,13 +23,13 @@ type userCredentialsModel struct {
 }
 
 // hasMissingData verifies if the API response contains nil values.
-func hasMissingData(userCredentials kafkaSDK.UserReadAccess) bool {
+func hasMissingData(userCredentials kafkasdk.UserReadAccess) bool {
 	return userCredentials.Metadata.CertificateAuthority == nil || userCredentials.Metadata.PrivateKey == nil || userCredentials.Metadata.Certificate == nil
 }
 
 // getUserCredentials gets the user credentials by making the proper API request depending on the provided parameters (GetByID or GetByName).
-func getUserCredentials(ctx context.Context, client kafkaService.Client, data userCredentialsModel) (kafkaSDK.UserReadAccess, diag.Diagnostics) {
-	var userCredentials kafkaSDK.UserReadAccess
+func getUserCredentials(ctx context.Context, client kafkaservice.Client, data userCredentialsModel) (kafkasdk.UserReadAccess, diag.Diagnostics) {
+	var userCredentials kafkasdk.UserReadAccess
 	var err error
 	var diags diag.Diagnostics
 	var apiResponse *shared.APIResponse
@@ -66,7 +66,7 @@ func getUserCredentials(ctx context.Context, client kafkaService.Client, data us
 }
 
 // populateUserCredentialsModel populates the user credentials model with information retrieved from the API.
-func populateUserCredentialsModel(data *userCredentialsModel, userCredentials kafkaSDK.UserReadAccess) {
+func populateUserCredentialsModel(data *userCredentialsModel, userCredentials kafkasdk.UserReadAccess) {
 	data.CertificateAuthority = types.StringValue(*userCredentials.Metadata.CertificateAuthority)
 	data.PrivateKey = types.StringValue(*userCredentials.Metadata.PrivateKey)
 	data.Certificate = types.StringValue(*userCredentials.Metadata.Certificate)

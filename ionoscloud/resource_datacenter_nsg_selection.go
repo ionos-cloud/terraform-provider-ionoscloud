@@ -86,7 +86,7 @@ func resourceDatacenterNSGSelectionRead(ctx context.Context, d *schema.ResourceD
 	}
 
 	if err = setDatacenterDefaultNSGSelectionData(d, &datacenter); err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error reading default NSG for datacenter, dcId: %s, sId: %s, (%w)", dcID, nsgID, err), nil)
+		return diagutil.ToDiags(d, fmt.Errorf("error reading default NSG for datacenter, dcID: %s, sID: %s, (%w)", dcID, nsgID, err), nil)
 	}
 	return nil
 }

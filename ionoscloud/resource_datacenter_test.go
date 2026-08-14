@@ -38,7 +38,7 @@ func TestAccDataCenterBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDataSourceDatacenterMatchId,
+				Config: testAccDataSourceDatacenterMatchID,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DatacenterResource+"."+constant.DatacenterDataSourceById, "name", constant.DatacenterResource+"."+constant.DatacenterTestResource, "name"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DatacenterResource+"."+constant.DatacenterDataSourceById, "location", constant.DatacenterResource+"."+constant.DatacenterTestResource, "location"),
@@ -89,6 +89,22 @@ func TestAccDataCenterBasic(t *testing.T) {
 			{
 				Config:      testAccDataSourceDatacenterWrongNameAndLocationError,
 				ExpectError: regexp.MustCompile("no datacenter found with the specified criteria"),
+			},
+			{
+				Config:      testAccDataSourceDatacenterNoFilterError,
+				ExpectError: regexp.MustCompile(`either id, location or name must be set`),
+			},
+			{
+				Config:      testAccDataSourceDatacenterWrongIdError,
+				ExpectError: regexp.MustCompile(`error getting datacenter with id`),
+			},
+			{
+				Config:      testAccDataSourceDatacenterIdNameMismatchError,
+				ExpectError: regexp.MustCompile(`name of dc \(UUID=.+, name=.+\) does not match expected name`),
+			},
+			{
+				Config:      testAccDataSourceDatacenterIdLocationMismatchError,
+				ExpectError: regexp.MustCompile(`location of dc \(UUID=.+, location=.+\) does not match expected location`),
 			},
 			{
 				Config: testAccCheckDatacenterConfigUpdate,
@@ -180,7 +196,7 @@ resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource
 	sec_auth_protection = false
 }`
 
-const testAccDataSourceDatacenterMatchId = testAccCheckDatacenterConfigBasic + `
+const testAccDataSourceDatacenterMatchID = testAccCheckDatacenterConfigBasic + `
 data ` + constant.DatacenterResource + ` ` + constant.DatacenterDataSourceById + ` {
   id			= ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
 }`
@@ -219,4 +235,25 @@ const testAccDataSourceDatacenterWrongNameAndLocationError = testAccCheckDatacen
 data ` + constant.DatacenterResource + ` ` + constant.DatacenterDataSourceMatching + ` {
     name =  "wrong_name"
     location =  "wrong_location"
+}`
+
+const testAccDataSourceDatacenterNoFilterError = testAccCheckDatacenterConfigBasic + `
+data ` + constant.DatacenterResource + ` ` + constant.DatacenterDataSourceMatching + ` {
+}`
+
+const testAccDataSourceDatacenterWrongIdError = testAccCheckDatacenterConfigBasic + `
+data ` + constant.DatacenterResource + ` ` + constant.DatacenterDataSourceById + ` {
+    id = "00000000-0000-0000-0000-000000000000"
+}`
+
+const testAccDataSourceDatacenterIdNameMismatchError = testAccCheckDatacenterConfigBasic + `
+data ` + constant.DatacenterResource + ` ` + constant.DatacenterDataSourceMatching + ` {
+    id   = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+    name = "wrong_name"
+}`
+
+const testAccDataSourceDatacenterIdLocationMismatchError = testAccCheckDatacenterConfigBasic + `
+data ` + constant.DatacenterResource + ` ` + constant.DatacenterDataSourceMatching + ` {
+    id       = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+    location = "wrong_location"
 }`

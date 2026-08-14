@@ -13,10 +13,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	monitoringSDK "github.com/ionos-cloud/sdk-go-bundle/products/monitoring/v2"
+	monitoringsdk "github.com/ionos-cloud/sdk-go-bundle/products/monitoring/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
-	monitoringService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/monitoring"
+	monitoringservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/monitoring"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
@@ -27,7 +27,7 @@ var (
 )
 
 type pipelineResource struct {
-	client *monitoringService.Client
+	client *monitoringservice.Client
 }
 
 type pipelineResourceModel struct {
@@ -121,8 +121,8 @@ func (r *pipelineResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
-	createReq := monitoringSDK.PipelineCreate{
-		Properties: monitoringSDK.Pipeline{
+	createReq := monitoringsdk.PipelineCreate{
+		Properties: monitoringsdk.Pipeline{
 			Name: data.Name.ValueString(),
 		},
 	}
@@ -239,8 +239,8 @@ func (r *pipelineResource) Update(ctx context.Context, req resource.UpdateReques
 
 	pipelineID := state.ID.ValueString()
 	location := plan.Location.ValueString()
-	updateReq := monitoringSDK.PipelineEnsure{
-		Properties: monitoringSDK.Pipeline{
+	updateReq := monitoringsdk.PipelineEnsure{
+		Properties: monitoringsdk.Pipeline{
 			Name: plan.Name.ValueString(),
 		},
 	}

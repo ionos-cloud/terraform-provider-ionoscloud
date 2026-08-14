@@ -18,7 +18,9 @@ import (
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/compute"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/inmemorydbv2"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/kafka"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/mariadbv2"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/monitoring"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/objectstorage"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/objectstoragemanagement"
@@ -26,7 +28,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/userobjectstorage"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
-	contractService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/contract"
+	contractservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/contract"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/configlog"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
@@ -262,7 +264,7 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 	resp.ListResourceData = client
 
 	diagutil.SetupContractNumberResolver(clientOpts.ContractNumber.ValueString(), token, func() string { //nolint:contextcheck
-		return contractService.GetContractNumber(ctx, client)
+		return contractservice.GetContractNumber(ctx, client)
 	})
 }
 
@@ -275,6 +277,8 @@ func (p *IonosCloudProvider) Resources(_ context.Context) []func() resource.Reso
 		monitoring.Resources(),
 		pgsqlv2.Resources(),
 		userobjectstorage.Resources(),
+		inmemorydbv2.Resources(),
+		mariadbv2.Resources(),
 	}
 
 	for _, r := range resources {
@@ -295,6 +299,8 @@ func (p *IonosCloudProvider) DataSources(_ context.Context) []func() datasource.
 		kafka.DataSources(),
 		pgsqlv2.DataSources(),
 		userobjectstorage.DataSources(),
+		inmemorydbv2.DataSources(),
+		mariadbv2.DataSources(),
 	}
 
 	for _, r := range dataSources {
@@ -324,6 +330,8 @@ func (p *IonosCloudProvider) ListResources(_ context.Context) []func() list.List
 		objectstorage.ListResources(),
 		objectstoragemanagement.ListResources(),
 		pgsqlv2.ListResources(),
+		inmemorydbv2.ListResources(),
+		mariadbv2.ListResources(),
 	}
 
 	for _, r := range listResources {

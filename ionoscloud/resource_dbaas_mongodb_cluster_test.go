@@ -63,7 +63,7 @@ func TestAccDBaaSMongoClusterBasic(t *testing.T) {
 				ExpectError: regexp.MustCompile(fmt.Sprintf("downgrade is not supported from %s to %s", mongoVersion, mongoVersionOld)),
 			},
 			{
-				Config: testAccDataSourceDBaaSMongoClusterMatchId,
+				Config: testAccDataSourceDBaaSMongoClusterMatchID,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestDataSourceById, "maintenance_window.day_of_the_week", constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "maintenance_window.day_of_the_week"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestDataSourceById, "maintenance_window.time", constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "maintenance_window.time"),
@@ -190,7 +190,7 @@ func TestAccMongoClusterEnterpriseEditionBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDataSourceDBaaSMongoClusterEnterpriseMatchId,
+				Config: testAccDataSourceDBaaSMongoClusterEnterpriseMatchID,
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestDataSourceById, "maintenance_window.day_of_the_week",
 						constant.DBaasMongoClusterResource+"."+constant.DBaaSClusterTestResource, "maintenance_window.day_of_the_week"),
@@ -401,7 +401,7 @@ resource ` + constant.DBaasMongoClusterResource + ` ` + constant.DBaaSClusterTes
 }
 `
 
-const testAccDataSourceDBaaSMongoClusterMatchId = testAccCheckDbaasMongoClusterConfigBasic + `
+const testAccDataSourceDBaaSMongoClusterMatchID = testAccCheckDbaasMongoClusterConfigBasic + `
 data ` + constant.DBaasMongoClusterResource + ` ` + constant.DBaaSClusterTestDataSourceById + ` {
   id = ` + constant.DBaasMongoClusterResource + `.` + constant.DBaaSClusterTestResource + `.id
 }
@@ -564,7 +564,7 @@ resource ` + constant.DBaasMongoClusterResource + ` ` + constant.DBaaSClusterTes
 
 `
 
-const testAccDataSourceDBaaSMongoClusterEnterpriseMatchId = testAccCheckDbaasMongoClusterEnterpriseUpdated + `
+const testAccDataSourceDBaaSMongoClusterEnterpriseMatchID = testAccCheckDbaasMongoClusterEnterpriseUpdated + `
 data ` + constant.DBaasMongoClusterResource + ` ` + constant.DBaaSClusterTestDataSourceById + ` {
   id	= ` + constant.DBaasMongoClusterResource + `.` + constant.DBaaSClusterTestResource + `.id
 }

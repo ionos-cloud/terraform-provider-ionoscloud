@@ -468,12 +468,12 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta a
 
 	// Set inline volumes
 	if createdServer.Entities != nil && createdServer.Entities.Volumes != nil && createdServer.Entities.Volumes.Items != nil {
-		var inlineVolumeIds []string
+		var inlineVolumeIDs []string
 		for _, volume := range *createdServer.Entities.Volumes.Items {
-			inlineVolumeIds = append(inlineVolumeIds, *volume.Id)
+			inlineVolumeIDs = append(inlineVolumeIDs, *volume.Id)
 		}
 
-		if err := d.Set("inline_volume_ids", inlineVolumeIds); err != nil {
+		if err := d.Set("inline_volume_ids", inlineVolumeIDs); err != nil {
 			return diagutil.ToDiags(d, utils.GenerateSetError("server", "inline_volume_ids", err), nil)
 		}
 	}

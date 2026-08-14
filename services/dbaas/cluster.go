@@ -17,8 +17,8 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
-func (c *PsqlClient) GetCluster(ctx context.Context, clusterId string) (psql.ClusterResponse, *shared.APIResponse, error) {
-	cluster, apiResponse, err := c.sdkClient.ClustersApi.ClustersFindById(ctx, clusterId).Execute()
+func (c *PsqlClient) GetCluster(ctx context.Context, clusterID string) (psql.ClusterResponse, *shared.APIResponse, error) {
+	cluster, apiResponse, err := c.sdkClient.ClustersApi.ClustersFindById(ctx, clusterID).Execute()
 	apiResponse.LogInfo()
 	return cluster, apiResponse, err
 }
@@ -78,14 +78,14 @@ func (c *MongoClient) UpdateCluster(ctx context.Context, clusterID string, clust
 	return clusterResponse, apiResponse, err
 }
 
-func (c *PsqlClient) UpdateCluster(ctx context.Context, clusterId string, cluster psql.PatchClusterRequest) (psql.ClusterResponse, *shared.APIResponse, error) {
-	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersPatch(ctx, clusterId).PatchClusterRequest(cluster).Execute()
+func (c *PsqlClient) UpdateCluster(ctx context.Context, clusterID string, cluster psql.PatchClusterRequest) (psql.ClusterResponse, *shared.APIResponse, error) {
+	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersPatch(ctx, clusterID).PatchClusterRequest(cluster).Execute()
 	apiResponse.LogInfo()
 	return clusterResponse, apiResponse, err
 }
 
-func (c *PsqlClient) DeleteCluster(ctx context.Context, clusterId string) (psql.ClusterResponse, *shared.APIResponse, error) {
-	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersDelete(ctx, clusterId).Execute()
+func (c *PsqlClient) DeleteCluster(ctx context.Context, clusterID string) (psql.ClusterResponse, *shared.APIResponse, error) {
+	clusterResponse, apiResponse, err := c.sdkClient.ClustersApi.ClustersDelete(ctx, clusterID).Execute()
 	apiResponse.LogInfo()
 	return clusterResponse, apiResponse, err
 }
@@ -98,24 +98,24 @@ func (c *MongoClient) DeleteCluster(ctx context.Context, clusterID string) (mong
 }
 
 func (c *PsqlClient) IsClusterReady(ctx context.Context, d *schema.ResourceData) (bool, error) {
-	var clusterId string
+	var clusterID string
 	// This can be called from the users service, in which case the cluster_id is defined inside
 	// the user resource, hence this if since the ID can be obtained in different ways depending on
 	// the caller.
-	if clusterIdIntf, ok := d.GetOk("cluster_id"); ok {
-		clusterId = clusterIdIntf.(string)
+	if clusterIDIntf, ok := d.GetOk("cluster_id"); ok {
+		clusterID = clusterIDIntf.(string)
 	} else {
-		clusterId = d.Id()
+		clusterID = d.Id()
 	}
-	cluster, _, err := c.GetCluster(ctx, clusterId)
+	cluster, _, err := c.GetCluster(ctx, clusterID)
 	if err != nil {
 		return true, fmt.Errorf("check failed for cluster status: %w", err)
 	}
 
 	if cluster.Metadata == nil || cluster.Metadata.State == nil {
-		return false, fmt.Errorf("cluster metadata or state is empty for id %s", clusterId)
+		return false, fmt.Errorf("cluster metadata or state is empty for id %s", clusterID)
 	}
-	tflog.Info(ctx, "psql cluster state", map[string]any{"cluster_id": clusterId, "state": string(*cluster.Metadata.State)})
+	tflog.Info(ctx, "psql cluster state", map[string]any{"cluster_id": clusterID, "state": string(*cluster.Metadata.State)})
 	// todo - add back after DB-4696 is fixed
 	// if utils.IsStateFailed(string(*cluster.Metadata.State)) {
 	// 	return false, fmt.Errorf("cluster %s is in a failed state", d.Id())
@@ -254,8 +254,8 @@ func SetMongoClusterCreateProperties(d *schema.ResourceData) (*mongo.CreateClust
 		Properties: &mongo.CreateClusterProperties{},
 	}
 
-	if templateId, ok := d.GetOk("template_id"); ok {
-		mongoCluster.Properties.TemplateID = new(templateId.(string))
+	if templateID, ok := d.GetOk("template_id"); ok {
+		mongoCluster.Properties.TemplateID = new(templateID.(string))
 	}
 
 	if mongoVersion, ok := d.GetOk("mongodb_version"); ok {
@@ -490,14 +490,14 @@ func GetPsqlClusterConnectionsData(d *schema.ResourceData) []psql.Connection {
 
 				connection := psql.Connection{}
 
-				if datacenterId, ok := d.GetOk(fmt.Sprintf("connections.%d.datacenter_id", vdcIndex)); ok {
-					datacenterId := datacenterId.(string)
-					connection.DatacenterId = datacenterId
+				if datacenterID, ok := d.GetOk(fmt.Sprintf("connections.%d.datacenter_id", vdcIndex)); ok {
+					datacenterID := datacenterID.(string)
+					connection.DatacenterId = datacenterID
 				}
 
-				if lanId, ok := d.GetOk(fmt.Sprintf("connections.%d.lan_id", vdcIndex)); ok {
-					lanId := lanId.(string)
-					connection.LanId = lanId
+				if lanID, ok := d.GetOk(fmt.Sprintf("connections.%d.lan_id", vdcIndex)); ok {
+					lanID := lanID.(string)
+					connection.LanId = lanID
 				}
 
 				if cidr, ok := d.GetOk(fmt.Sprintf("connections.%d.cidr", vdcIndex)); ok {
@@ -524,14 +524,14 @@ func GetMongoClusterConnectionsData(d *schema.ResourceData) ([]mongo.Connection,
 			for vdcIndex := range vdcValue {
 
 				connection := mongo.Connection{}
-				if datacenterId, ok := d.GetOk(fmt.Sprintf("connections.%d.datacenter_id", vdcIndex)); ok {
-					datacenterId := datacenterId.(string)
-					connection.DatacenterId = datacenterId
+				if datacenterID, ok := d.GetOk(fmt.Sprintf("connections.%d.datacenter_id", vdcIndex)); ok {
+					datacenterID := datacenterID.(string)
+					connection.DatacenterId = datacenterID
 				}
 
-				if lanId, ok := d.GetOk(fmt.Sprintf("connections.%d.lan_id", vdcIndex)); ok {
-					lanId := lanId.(string)
-					connection.LanId = lanId
+				if lanID, ok := d.GetOk(fmt.Sprintf("connections.%d.lan_id", vdcIndex)); ok {
+					lanID := lanID.(string)
+					connection.LanId = lanID
 				}
 
 				if cidrList, ok := d.GetOk(fmt.Sprintf("connections.%d.cidr_list", vdcIndex)); ok {
@@ -634,9 +634,9 @@ func GetPsqlClusterCredentialsData(d *schema.ResourceData) psql.DBUser {
 func GetPsqlClusterFromBackupData(d *schema.ResourceData) (*psql.CreateRestoreRequest, error) {
 	var restore psql.CreateRestoreRequest
 
-	if backupId, ok := d.GetOk("from_backup.0.backup_id"); ok {
-		backupId := backupId.(string)
-		restore.BackupId = backupId
+	if backupID, ok := d.GetOk("from_backup.0.backup_id"); ok {
+		backupID := backupID.(string)
+		restore.BackupId = backupID
 	}
 
 	if targetTime, ok := d.GetOk("from_backup.0.recovery_target_time"); ok {

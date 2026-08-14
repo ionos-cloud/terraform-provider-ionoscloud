@@ -25,7 +25,7 @@ func TestAccNatGatewayRuleImportBasic(t *testing.T) {
 
 			{
 				ResourceName:            resourceNatGatewayRuleResource,
-				ImportStateIdFunc:       testAccNatGatewayRuleImportStateId,
+				ImportStateIdFunc:       testAccNatGatewayRuleImportStateID,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location"},
@@ -34,7 +34,7 @@ func TestAccNatGatewayRuleImportBasic(t *testing.T) {
 	})
 }
 
-func testAccNatGatewayRuleImportStateId(s *terraform.State) (string, error) {
+func testAccNatGatewayRuleImportStateID(s *terraform.State) (string, error) {
 	var importID = ""
 
 	for _, rs := range s.RootModule().Resources {

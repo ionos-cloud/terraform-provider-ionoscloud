@@ -24,7 +24,7 @@ func TestAccDataCenterImportBasic(t *testing.T) {
 
 			{
 				ResourceName:      constant.DatacenterResource + "." + constant.DatacenterTestResource,
-				ImportStateIdFunc: testAccDatacenterImportStateId,
+				ImportStateIdFunc: testAccDatacenterImportStateID,
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -32,7 +32,7 @@ func TestAccDataCenterImportBasic(t *testing.T) {
 	})
 }
 
-func testAccDatacenterImportStateId(s *terraform.State) (string, error) {
+func testAccDatacenterImportStateID(s *terraform.State) (string, error) {
 	importID := ""
 
 	for _, rs := range s.RootModule().Resources {

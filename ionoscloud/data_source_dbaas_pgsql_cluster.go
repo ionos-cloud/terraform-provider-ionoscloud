@@ -12,7 +12,7 @@ import (
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
-	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
+	dbaasservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
@@ -217,7 +217,7 @@ func dataSourceDbaasPgSqlReadCluster(ctx context.Context, d *schema.ResourceData
 
 	}
 
-	if err := dbaasService.SetPgSqlClusterData(d, cluster, true); err != nil {
+	if err := dbaasservice.SetPgSqlClusterData(d, cluster, true); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
 

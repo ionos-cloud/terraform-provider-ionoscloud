@@ -59,7 +59,7 @@ func resourceS3KeyCreate(ctx context.Context, d *schema.ResourceData, meta any) 
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	userId := d.Get("user_id").(string)
+	userID := d.Get("user_id").(string)
 	rsp, apiResponse, err := createS3KeyWithRetry(ctx, d, meta)
 	if err != nil {
 		d.SetId("")
@@ -69,8 +69,8 @@ func resourceS3KeyCreate(ctx context.Context, d *schema.ResourceData, meta any) 
 	if rsp.Id == nil {
 		return diagutil.ToDiags(d, fmt.Errorf("the API didn't return an Object Storage key ID"), nil)
 	}
-	keyId := *rsp.Id
-	d.SetId(keyId)
+	keyID := *rsp.Id
+	d.SetId(keyID)
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
 		requestLocation, _ := apiResponse.SafeLocation()
 		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
@@ -85,11 +85,11 @@ func resourceS3KeyCreate(ctx context.Context, d *schema.ResourceData, meta any) 
 		},
 	}
 	tflog.Info(ctx, "setting S3 key active status", map[string]any{"active": active})
-	_, apiResponse, err = client.UserS3KeysApi.UmUsersS3keysPut(ctx, userId, keyId).S3Key(s3Key).Depth(1).Execute()
+	_, apiResponse, err = client.UserS3KeysApi.UmUsersS3keysPut(ctx, userID, keyID).S3Key(s3Key).Depth(1).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, fmt.Errorf("error saving key data %s: %w", keyId, err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
+		return diagutil.ToDiags(d, fmt.Errorf("error saving key data %s: %w", keyID, err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
@@ -107,13 +107,13 @@ func createS3KeyWithRetry(ctx context.Context, d *schema.ResourceData, meta any)
 	if err != nil {
 		return ionoscloud.S3Key{}, nil, err
 	}
-	userId := d.Get("user_id").(string)
+	userID := d.Get("user_id").(string)
 
 	var s3Key ionoscloud.S3Key
 	var apiResponse *ionoscloud.APIResponse
 
 	retryErr := retry.RetryContext(ctx, d.Timeout(schema.TimeoutCreate), func() *retry.RetryError {
-		s3Key, apiResponse, err = client.UserS3KeysApi.UmUsersS3keysPost(ctx, userId).Execute()
+		s3Key, apiResponse, err = client.UserS3KeysApi.UmUsersS3keysPost(ctx, userID).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err == nil {
@@ -143,9 +143,9 @@ func resourceS3KeyRead(ctx context.Context, d *schema.ResourceData, meta any) di
 		return diag.FromErr(err)
 	}
 
-	userId := d.Get("user_id").(string)
+	userID := d.Get("user_id").(string)
 
-	s3Key, apiResponse, err := client.UserS3KeysApi.UmUsersS3keysFindByKeyId(ctx, userId, d.Id()).Execute()
+	s3Key, apiResponse, err := client.UserS3KeysApi.UmUsersS3keysFindByKeyId(ctx, userID, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -162,7 +162,7 @@ func resourceS3KeyRead(ctx context.Context, d *schema.ResourceData, meta any) di
 		tflog.Info(ctx, "Object Storage key status", map[string]any{"active": *s3Key.Properties.Active})
 	}
 
-	if err := setS3KeyIdAndProperties(ctx, &s3Key, d); err != nil {
+	if err := setS3KeyIDAndProperties(ctx, &s3Key, d); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
 
@@ -185,8 +185,8 @@ func resourceS3KeyUpdate(ctx context.Context, d *schema.ResourceData, meta any) 
 	active := newActiveSetting.(bool)
 	request.Properties.Active = &active
 
-	userId := d.Get("user_id").(string)
-	_, apiResponse, err := client.UserS3KeysApi.UmUsersS3keysPut(ctx, userId, d.Id()).S3Key(request).Execute()
+	userID := d.Get("user_id").(string)
+	_, apiResponse, err := client.UserS3KeysApi.UmUsersS3keysPut(ctx, userID, d.Id()).S3Key(request).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -211,8 +211,8 @@ func resourceS3KeyDelete(ctx context.Context, d *schema.ResourceData, meta any) 
 		return diag.FromErr(err)
 	}
 
-	userId := d.Get("user_id").(string)
-	apiResponse, err := client.UserS3KeysApi.UmUsersS3keysDelete(ctx, userId, d.Id()).Execute()
+	userID := d.Get("user_id").(string)
+	apiResponse, err := client.UserS3KeysApi.UmUsersS3keysDelete(ctx, userID, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -286,8 +286,8 @@ func isS3KeyNotFound(err error) bool {
 }
 
 func s3KeyDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
-	userId := d.Get("user_id").(string)
-	_, apiResponse, err := client.UserS3KeysApi.UmUsersS3keysFindByKeyId(ctx, userId, d.Id()).Execute()
+	userID := d.Get("user_id").(string)
+	_, apiResponse, err := client.UserS3KeysApi.UmUsersS3keysFindByKeyId(ctx, userID, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -300,8 +300,8 @@ func s3KeyDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.R
 }
 
 func s3Ready(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
-	userId := d.Get("user_id").(string)
-	rsp, apiResponse, err := client.UserS3KeysApi.UmUsersS3keysFindByKeyId(ctx, userId, d.Id()).Execute()
+	userID := d.Get("user_id").(string)
+	rsp, apiResponse, err := client.UserS3KeysApi.UmUsersS3keysFindByKeyId(ctx, userID, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -315,40 +315,40 @@ func resourceS3KeyImport(ctx context.Context, d *schema.ResourceData, meta any) 
 	parts := strings.Split(d.Id(), "/")
 
 	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
-		return nil, diagutil.ToError(d, fmt.Errorf("invalid import. Expecting {userId}/{s3KeyId}"), nil)
+		return nil, diagutil.ToError(d, fmt.Errorf("invalid import. Expecting {userID}/{s3KeyID}"), nil)
 	}
 
-	userId := parts[0]
-	keyId := parts[1]
+	userID := parts[0]
+	keyID := parts[1]
 
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	s3Key, apiResponse, err := client.UserS3KeysApi.UmUsersS3keysFindByKeyId(ctx, userId, keyId).Execute()
+	s3Key, apiResponse, err := client.UserS3KeysApi.UmUsersS3keysFindByKeyId(ctx, userID, keyID).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if httpNotFound(apiResponse) || isS3KeyNotFound(err) {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("unable to find Object Storage key %q", keyId), nil)
+			return nil, diagutil.ToError(d, fmt.Errorf("unable to find Object Storage key %q", keyID), nil)
 		}
-		return nil, diagutil.ToError(d, fmt.Errorf("unable to retrieve Object Storage key %q, error:%w", keyId, err), nil)
+		return nil, diagutil.ToError(d, fmt.Errorf("unable to retrieve Object Storage key %q, error:%w", keyID, err), nil)
 	}
 
-	if err := setS3KeyIdAndProperties(ctx, &s3Key, d); err != nil {
+	if err := setS3KeyIDAndProperties(ctx, &s3Key, d); err != nil {
 		return nil, diagutil.ToError(d, err, nil)
 	}
 
-	if err := d.Set("user_id", userId); err != nil {
+	if err := d.Set("user_id", userID); err != nil {
 		return nil, diagutil.ToError(d, err, nil)
 	}
 
 	return []*schema.ResourceData{d}, nil
 }
 
-func setS3KeyIdAndProperties(ctx context.Context, s3Key *ionoscloud.S3Key, data *schema.ResourceData) error {
+func setS3KeyIDAndProperties(ctx context.Context, s3Key *ionoscloud.S3Key, data *schema.ResourceData) error {
 
 	if s3Key == nil {
 		return fmt.Errorf("s3key not found")

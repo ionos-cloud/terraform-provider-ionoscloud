@@ -50,7 +50,7 @@ func TestAccUserBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDataSourceUserMatchId,
+				Config: testAccDataSourceUserMatchID,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.UserResource+"."+constant.UserDataSourceById, "first_name", constant.UserResource+"."+constant.UserTestResource, "first_name"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.UserResource+"."+constant.UserDataSourceById, "last_name", constant.UserResource+"."+constant.UserTestResource, "last_name"),
@@ -472,7 +472,7 @@ data ` + constant.UserResource + ` ` + constant.UserDataSourceById + ` {
 }
 `
 
-var testAccCheckUserWrongGroupId = `
+var testAccCheckUserWrongGroupID = `
 resource ` + constant.RandomPassword + ` "user_password_updated" {
   length           = 16
   special          = true
@@ -487,7 +487,7 @@ resource ` + constant.UserResource + ` ` + constant.UserTestResource + ` {
  administrator  = false
  force_sec_auth = false
  active  		= false
- group_ids = ["notAnId"]
+ group_ids = ["notAnID"]
 }
 
 resource "ionoscloud_group" "group1" {
@@ -554,7 +554,7 @@ data ` + constant.UserResource + ` ` + constant.UserDataSourceById + ` {
 }
 `
 
-var testAccDataSourceUserMatchId = testAccCheckUserConfigBasic + `
+var testAccDataSourceUserMatchID = testAccCheckUserConfigBasic + `
 data ` + constant.UserResource + ` ` + constant.UserDataSourceById + ` {
   id			= ` + constant.UserResource + `.` + constant.UserTestResource + `.id
 }

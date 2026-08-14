@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
-	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
+	crservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
@@ -40,7 +40,7 @@ func dataSourceContainerRegistryLocationsRead(ctx context.Context, d *schema.Res
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching container registry locations: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	crService.SetCRLocationsData(d, locations)
+	crservice.SetCRLocationsData(d, locations)
 
 	return nil
 

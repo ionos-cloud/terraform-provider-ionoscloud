@@ -19,7 +19,7 @@ import (
 )
 
 var resourceNameAlb = constant.ALBResource + "." + constant.ALBTestResource
-var dataSourceNameAlbById = constant.DataSource + "." + constant.ALBResource + "." + constant.ALBDataSourceById
+var dataSourceNameAlbByID = constant.DataSource + "." + constant.ALBResource + "." + constant.ALBDataSourceById
 var dataSourceNameAlbByName = constant.DataSource + "." + constant.ALBResource + "." + constant.ALBDataSourceByName
 
 func TestAccApplicationLoadBalancerBasic(t *testing.T) {
@@ -50,19 +50,19 @@ func TestAccApplicationLoadBalancerBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDataSourceApplicationLoadBalancerMatchId,
+				Config: testAccDataSourceApplicationLoadBalancerMatchID,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(resourceNameAlb, "name", dataSourceNameAlbById, "name"),
+					resource.TestCheckResourceAttrPair(resourceNameAlb, "name", dataSourceNameAlbByID, "name"),
 					resource.TestCheckResourceAttrPair(resourceNameAlb, "central_logging", "false", "central_logging"),
 					resource.TestCheckResourceAttrPair(resourceNameAlb, "logging_format", `%{+Q}o %{-Q}ci - - [%trg] %r %ST %B "" "" %cp %ms %ft %b %s %TR %Tw %Tc %Tr %Ta %tsc %ac %fc %bc %sc %rc %sq %bq %CC %CS %hrl %hsl`, "logging_format"),
-					resource.TestCheckResourceAttrPair(resourceNameAlb, "listener_lan", dataSourceNameAlbById, "listener_lan"),
-					resource.TestCheckResourceAttrPair(resourceNameAlb, "target_lan", dataSourceNameAlbById, "target_lan"),
-					resource.TestCheckResourceAttrPair(resourceNameAlb, "ips.0", dataSourceNameAlbById, "ips.0"),
-					resource.TestCheckResourceAttrPair(resourceNameAlb, "lb_private_ips.0", dataSourceNameAlbById, "lb_private_ips.0"),
-					resource.TestCheckResourceAttrPair(resourceNameAlb, "flowlog.0.name", dataSourceNameAlbById, "flowlog.0.name"),
-					resource.TestCheckResourceAttrPair(resourceNameAlb, "flowlog.0.action", dataSourceNameAlbById, "flowlog.0.action"),
-					resource.TestCheckResourceAttrPair(resourceNameAlb, "flowlog.0.direction", dataSourceNameAlbById, "flowlog.0.direction"),
-					resource.TestCheckResourceAttrPair(resourceNameAlb, "flowlog.0.direction", dataSourceNameAlbById, "flowlog.0.direction"),
+					resource.TestCheckResourceAttrPair(resourceNameAlb, "listener_lan", dataSourceNameAlbByID, "listener_lan"),
+					resource.TestCheckResourceAttrPair(resourceNameAlb, "target_lan", dataSourceNameAlbByID, "target_lan"),
+					resource.TestCheckResourceAttrPair(resourceNameAlb, "ips.0", dataSourceNameAlbByID, "ips.0"),
+					resource.TestCheckResourceAttrPair(resourceNameAlb, "lb_private_ips.0", dataSourceNameAlbByID, "lb_private_ips.0"),
+					resource.TestCheckResourceAttrPair(resourceNameAlb, "flowlog.0.name", dataSourceNameAlbByID, "flowlog.0.name"),
+					resource.TestCheckResourceAttrPair(resourceNameAlb, "flowlog.0.action", dataSourceNameAlbByID, "flowlog.0.action"),
+					resource.TestCheckResourceAttrPair(resourceNameAlb, "flowlog.0.direction", dataSourceNameAlbByID, "flowlog.0.direction"),
+					resource.TestCheckResourceAttrPair(resourceNameAlb, "flowlog.0.direction", dataSourceNameAlbByID, "flowlog.0.direction"),
 				),
 			},
 			{
@@ -127,8 +127,8 @@ func testAccCheckApplicationLoadBalancerDestroyCheck(s *terraform.State) error {
 			continue
 		}
 
-		dcId := rs.Primary.Attributes["datacenter_id"]
-		albId := rs.Primary.ID
+		dcID := rs.Primary.Attributes["datacenter_id"]
+		albID := rs.Primary.ID
 		location := rs.Primary.Attributes["location"]
 
 		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
@@ -136,7 +136,7 @@ func testAccCheckApplicationLoadBalancerDestroyCheck(s *terraform.State) error {
 			return err
 		}
 
-		_, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFindByApplicationLoadBalancerId(ctx, dcId, albId).Execute()
+		_, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFindByApplicationLoadBalancerId(ctx, dcID, albID).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
@@ -169,8 +169,8 @@ func testAccCheckApplicationLoadBalancerExists(n string, alb *ionoscloud.Applica
 			defer cancel()
 		}
 
-		dcId := rs.Primary.Attributes["datacenter_id"]
-		albId := rs.Primary.ID
+		dcID := rs.Primary.Attributes["datacenter_id"]
+		albID := rs.Primary.ID
 		location := rs.Primary.Attributes["location"]
 
 		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
@@ -178,7 +178,7 @@ func testAccCheckApplicationLoadBalancerExists(n string, alb *ionoscloud.Applica
 			return err
 		}
 
-		foundNatGateway, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFindByApplicationLoadBalancerId(ctx, dcId, albId).Execute()
+		foundNatGateway, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFindByApplicationLoadBalancerId(ctx, dcID, albID).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
@@ -278,7 +278,7 @@ resource ` + constant.ALBResource + ` ` + constant.ALBTestResource + ` {
   logging_format	= "%%{+Q}o %%{-Q}ci - - [%trg] %r %ST %B \"\" \"\" %cp %ms %ft %b %s %TR %Tw %Tc %Tr %Ta %tsc %ac %fc %bc %sc %rc %sq %bq %CC %CS %hrl %hsl"
 }`
 
-const testAccDataSourceApplicationLoadBalancerMatchId = testAccCheckApplicationLoadBalancerConfigBasic + `
+const testAccDataSourceApplicationLoadBalancerMatchID = testAccCheckApplicationLoadBalancerConfigBasic + `
 data ` + constant.ALBResource + ` ` + constant.ALBDataSourceById + ` {
   datacenter_id = ` + constant.DatacenterResource + `.alb_datacenter.id
   id			= ` + constant.ALBResource + `.` + constant.ALBTestResource + `.id

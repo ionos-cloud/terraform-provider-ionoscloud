@@ -10,7 +10,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
-	inMemoryDB "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/inmemorydb/v2"
+	inmemorydbsdk "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/inmemorydb/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
 
@@ -22,7 +22,7 @@ import (
 
 // Client is a wrapper for the in-memory db client that has file configuration
 type Client struct {
-	sdkClient  *inMemoryDB.APIClient
+	sdkClient  *inmemorydbsdk.APIClient
 	fileConfig *fileconfiguration.FileConfig
 }
 
@@ -47,12 +47,12 @@ func NewClient(clientOptions clientoptions.TerraformClientOptions, fileConfig *f
 	newConfigDbaas.HTTPClient = &http.Client{Transport: shared.CreateTransport(clientOptions.SkipTLSVerify, clientOptions.Certificate)}
 	newConfigDbaas.UserAgent = fmt.Sprintf(
 		"terraform-provider/%s_ionos-cloud-sdk-go-dbaas-in-memory-db/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
-		clientOptions.Version, inMemoryDB.Version, clientOptions.TerraformVersion,
+		clientOptions.Version, inmemorydbsdk.Version, clientOptions.TerraformVersion,
 		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
 	)
 
 	return &Client{
-		sdkClient:  inMemoryDB.NewAPIClient(newConfigDbaas),
+		sdkClient:  inmemorydbsdk.NewAPIClient(newConfigDbaas),
 		fileConfig: fileConfig,
 	}
 }

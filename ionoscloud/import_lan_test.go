@@ -24,7 +24,7 @@ func TestAccLanImportBasic(t *testing.T) {
 
 			{
 				ResourceName:            constant.LanResource + "." + constant.LanTestResource,
-				ImportStateIdFunc:       testAccLanImportStateId,
+				ImportStateIdFunc:       testAccLanImportStateID,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location"},
@@ -33,7 +33,7 @@ func TestAccLanImportBasic(t *testing.T) {
 	})
 }
 
-func testAccLanImportStateId(s *terraform.State) (string, error) {
+func testAccLanImportStateID(s *terraform.State) (string, error) {
 	var importID = ""
 
 	for _, rs := range s.RootModule().Resources {

@@ -202,8 +202,8 @@ func dataSourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta 
 		return diag.FromErr(err)
 	}
 
-	datacenterId, dcIdOk := d.GetOk("datacenter_id")
-	if !dcIdOk {
+	datacenterID, dcIDOk := d.GetOk("datacenter_id")
+	if !dcIDOk {
 		return diagutil.ToDiags(d, fmt.Errorf("no datacenter_id was specified"), nil)
 	}
 
@@ -221,14 +221,14 @@ func dataSourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta 
 
 	if idOk {
 		/* search by ID */
-		server, apiResponse, err = client.ServersApi.DatacentersServersFindById(ctx, datacenterId.(string), id.(string)).Depth(5).Execute()
+		server, apiResponse, err = client.ServersApi.DatacentersServersFindById(ctx, datacenterID.(string), id.(string)).Depth(5).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
 			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the server with ID %s: %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 	} else {
 		/* search by name */
-		servers, apiResponse, err := client.ServersApi.DatacentersServersGet(ctx, datacenterId.(string)).Depth(5).Execute()
+		servers, apiResponse, err := client.ServersApi.DatacentersServersGet(ctx, datacenterID.(string)).Depth(5).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
 			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching servers: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
@@ -240,7 +240,7 @@ func dataSourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta 
 			for _, s := range *servers.Items {
 				if s.Properties != nil && s.Properties.Name != nil && *s.Properties.Name == name.(string) {
 					/* server found */
-					server, apiResponse, err = client.ServersApi.DatacentersServersFindById(ctx, datacenterId.(string), *s.Id).Depth(4).Execute()
+					server, apiResponse, err = client.ServersApi.DatacentersServersFindById(ctx, datacenterID.(string), *s.Id).Depth(4).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {
 						return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the server with ID %s: %w", *s.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
@@ -263,7 +263,7 @@ func dataSourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta 
 	var token = ionoscloud.Token{}
 
 	if &server != nil && server.Id != nil {
-		token, apiResponse, err = client.ServersApi.DatacentersServersTokenGet(ctx, datacenterId.(string), *server.Id).Execute()
+		token, apiResponse, err = client.ServersApi.DatacentersServersTokenGet(ctx, datacenterID.(string), *server.Id).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {

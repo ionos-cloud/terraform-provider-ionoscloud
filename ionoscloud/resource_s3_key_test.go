@@ -35,7 +35,7 @@ func TestAccKeyBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDataSourceS3KeyMatchId,
+				Config: testAccDataSourceS3KeyMatchID,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(constant.S3KeyResource+"."+constant.S3KeyTestResource, "id"),
 					resource.TestCheckResourceAttrPair(constant.S3KeyResource+"."+constant.S3KeyTestResource, "id", constant.DataSource+"."+constant.S3KeyResource+"."+constant.S3KeyDataSourceById, "id"),
@@ -67,8 +67,8 @@ func testAccChecksKeyDestroyCheck(s *terraform.State) error {
 			continue
 		}
 
-		userId := rs.Primary.Attributes["user_id"]
-		_, apiResponse, err := client.UserS3KeysApi.UmUsersS3keysFindByKeyId(context.TODO(), userId, rs.Primary.ID).Execute()
+		userID := rs.Primary.Attributes["user_id"]
+		_, apiResponse, err := client.UserS3KeysApi.UmUsersS3keysFindByKeyId(context.TODO(), userID, rs.Primary.ID).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
@@ -101,8 +101,8 @@ func testAccCheckKeyExists(n string, s3Key *ionoscloud.S3Key) resource.TestCheck
 			return fmt.Errorf("no Record ID is set")
 		}
 
-		userId := rs.Primary.Attributes["user_id"]
-		foundS3Key, apiResponse, err := client.UserS3KeysApi.UmUsersS3keysFindByKeyId(context.TODO(), userId, rs.Primary.ID).Execute()
+		userID := rs.Primary.Attributes["user_id"]
+		foundS3Key, apiResponse, err := client.UserS3KeysApi.UmUsersS3keysFindByKeyId(context.TODO(), userID, rs.Primary.ID).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
@@ -162,7 +162,7 @@ resource ` + constant.S3KeyResource + ` ` + constant.S3KeyTestResource + ` {
   user_id = ` + constant.UserResource + `.example.id
   active  = false
 }`
-var testAccDataSourceS3KeyMatchId = testAccChecks3KeyConfigBasic + `
+var testAccDataSourceS3KeyMatchID = testAccChecks3KeyConfigBasic + `
 data ` + constant.S3KeyResource + ` ` + constant.S3KeyDataSourceById + ` {
   user_id = ` + constant.UserResource + `.example.id
   id      = ` + constant.S3KeyResource + `.` + constant.S3KeyTestResource + `.id

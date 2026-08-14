@@ -59,18 +59,18 @@ func dataSourceIpFailoverRead(ctx context.Context, d *schema.ResourceData, meta 
 		return diag.FromErr(err)
 	}
 
-	dcId := d.Get("datacenter_id").(string)
-	lanId := d.Get("lan_id").(string)
+	dcID := d.Get("datacenter_id").(string)
+	lanID := d.Get("lan_id").(string)
 	ip := d.Get("ip").(string)
 
-	lan, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, dcId, lanId).Execute()
+	lan, apiResponse, err := client.LANsApi.DatacentersLansFindById(ctx, dcID, lanID).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return diagutil.ToDiags(d, fmt.Errorf("unable to find the LAN with ID: %s, datacenter ID: %s", lanId, dcId), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return diagutil.ToDiags(d, fmt.Errorf("unable to find the LAN with ID: %s, datacenter ID: %s", lanID, dcID), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while fetching LAN with ID: %s, datacenter ID: %s, err: %w", lanId, dcId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return diagutil.ToDiags(d, fmt.Errorf("error while fetching LAN with ID: %s, datacenter ID: %s, err: %w", lanID, dcID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	if lan.Properties == nil || lan.Properties.IpFailover == nil {
 		return diagutil.ToDiags(d, fmt.Errorf("expected a LAN response containing IP failover groups but received 'nil' instead"), nil)
@@ -97,7 +97,7 @@ func dataSourceIpFailoverRead(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	if !ipFailoverGroupFound {
-		return diagutil.ToDiags(d, fmt.Errorf("IP Failover Group with IP: %s does not exist in the LAN with ID: %s, datacenter ID: %s", ip, lanId, dcId), nil)
+		return diagutil.ToDiags(d, fmt.Errorf("IP Failover Group with IP: %s does not exist in the LAN with ID: %s, datacenter ID: %s", ip, lanID, dcID), nil)
 	}
 	return nil
 }

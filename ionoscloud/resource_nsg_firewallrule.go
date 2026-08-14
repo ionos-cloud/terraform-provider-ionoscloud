@@ -118,7 +118,7 @@ func resourceNSGFirewallCreate(ctx context.Context, d *schema.ResourceData, meta
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
 		d.SetId("")
 		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating a nsg firewall rule dcId: %s nsg_id: %s %w", d.Get("datacenter_id").(string), d.Get("nsg_id").(string), errState), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating a nsg firewall rule dcID: %s nsg_id: %s %w", d.Get("datacenter_id").(string), d.Get("nsg_id").(string), errState), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	return resourceNSGFirewallRead(ctx, d, meta)
@@ -141,7 +141,7 @@ func resourceNSGFirewallRead(ctx context.Context, d *schema.ResourceData, meta a
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching a nsg firewall rule dcId: %s nsg_id: %s ID: %s %w",
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching a nsg firewall rule dcID: %s nsg_id: %s ID: %s %w",
 			d.Get("datacenter_id").(string), d.Get("nsg_id").(string), d.Id(), err), nil)
 	}
 

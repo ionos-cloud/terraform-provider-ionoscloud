@@ -18,7 +18,7 @@ import (
 )
 
 const resourceNameTargetGroup = constant.TargetGroupResource + "." + constant.TargetGroupTestResource
-const resourceNameTargetGroupById = constant.DataSource + "." + constant.TargetGroupResource + "." + constant.TargetGroupDataSourceById
+const resourceNameTargetGroupByID = constant.DataSource + "." + constant.TargetGroupResource + "." + constant.TargetGroupDataSourceById
 const resourceNameTargetGroupByName = constant.DataSource + "." + constant.TargetGroupResource + "." + constant.TargetGroupDataSourceByName
 
 func TestAccTargetGroupBasic(t *testing.T) {
@@ -75,32 +75,32 @@ func TestAccTargetGroupBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDataSourceTargetGroupMatchId,
+				Config: testAccDataSourceTargetGroupMatchID,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(resourceNameTargetGroupById, "name", resourceNameTargetGroup, "name"),
-					resource.TestCheckResourceAttrPair(resourceNameTargetGroupById, "protocol_version", resourceNameTargetGroup, "protocol_version"),
-					resource.TestCheckResourceAttrPair(resourceNameTargetGroupById, "algorithm", resourceNameTargetGroup, "algorithm"),
-					resource.TestCheckResourceAttrPair(resourceNameTargetGroupById, "targets.0.ip", resourceNameTargetGroup, "targets.0.ip"),
-					resource.TestCheckResourceAttrPair(resourceNameTargetGroupById, "targets.0.port", resourceNameTargetGroup, "targets.0.port"),
-					resource.TestCheckResourceAttrPair(resourceNameTargetGroupById, "targets.0.weight", resourceNameTargetGroup, "targets.0.weight"),
-					resource.TestCheckResourceAttrPair(resourceNameTargetGroupById, "targets.0.proxy_protocol", resourceNameTargetGroup, "targets.0.proxy_protocol"),
-					resource.TestCheckResourceAttrPair(resourceNameTargetGroupById, "targets.0.health_check_enabled", resourceNameTargetGroup, "targets.0.health_check_enabled"),
-					resource.TestCheckResourceAttrPair(resourceNameTargetGroupById, "targets.0.maintenance_enabled", resourceNameTargetGroup, "targets.0.maintenance_enabled"),
-					resource.TestCheckResourceAttrPair(resourceNameTargetGroupById, "targets.1.ip", resourceNameTargetGroup, "targets.1.ip"),
-					resource.TestCheckResourceAttrPair(resourceNameTargetGroupById, "targets.1.port", resourceNameTargetGroup, "targets.1.port"),
-					resource.TestCheckResourceAttrPair(resourceNameTargetGroupById, "targets.1.weight", resourceNameTargetGroup, "targets.1.weight"),
-					resource.TestCheckResourceAttrPair(resourceNameTargetGroupById, "targets.1.proxy_protocol", resourceNameTargetGroup, "targets.1.proxy_protocol"),
-					resource.TestCheckResourceAttrPair(resourceNameTargetGroupById, "targets.1.health_check_enabled", resourceNameTargetGroup, "targets.1.health_check_enabled"),
-					resource.TestCheckResourceAttrPair(resourceNameTargetGroupById, "targets.1.maintenance_enabled", resourceNameTargetGroup, "targets.1.maintenance_enabled"),
-					resource.TestCheckResourceAttrPair(resourceNameTargetGroupById, "health_check.0.check_timeout", resourceNameTargetGroup, "health_check.0.check_timeout"),
-					resource.TestCheckResourceAttrPair(resourceNameTargetGroupById, "health_check.0.check_interval", resourceNameTargetGroup, "health_check.0.check_interval"),
-					resource.TestCheckResourceAttrPair(resourceNameTargetGroupById, "health_check.0.retries", resourceNameTargetGroup, "health_check.0.retries"),
-					resource.TestCheckResourceAttrPair(resourceNameTargetGroupById, "http_health_check.0.path", resourceNameTargetGroup, "http_health_check.0.path"),
-					resource.TestCheckResourceAttrPair(resourceNameTargetGroupById, "http_health_check.0.method", resourceNameTargetGroup, "http_health_check.0.method"),
-					resource.TestCheckResourceAttrPair(resourceNameTargetGroupById, "http_health_check.0.match_type", resourceNameTargetGroup, "http_health_check.0.match_type"),
-					resource.TestCheckResourceAttrPair(resourceNameTargetGroupById, "http_health_check.0.response", resourceNameTargetGroup, "http_health_check.0.response"),
-					resource.TestCheckResourceAttrPair(resourceNameTargetGroupById, "http_health_check.0.regex", resourceNameTargetGroup, "http_health_check.0.regex"),
-					resource.TestCheckResourceAttrPair(resourceNameTargetGroupById, "http_health_check.0.negate", resourceNameTargetGroup, "http_health_check.0.negate"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByID, "name", resourceNameTargetGroup, "name"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByID, "protocol_version", resourceNameTargetGroup, "protocol_version"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByID, "algorithm", resourceNameTargetGroup, "algorithm"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByID, "targets.0.ip", resourceNameTargetGroup, "targets.0.ip"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByID, "targets.0.port", resourceNameTargetGroup, "targets.0.port"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByID, "targets.0.weight", resourceNameTargetGroup, "targets.0.weight"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByID, "targets.0.proxy_protocol", resourceNameTargetGroup, "targets.0.proxy_protocol"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByID, "targets.0.health_check_enabled", resourceNameTargetGroup, "targets.0.health_check_enabled"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByID, "targets.0.maintenance_enabled", resourceNameTargetGroup, "targets.0.maintenance_enabled"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByID, "targets.1.ip", resourceNameTargetGroup, "targets.1.ip"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByID, "targets.1.port", resourceNameTargetGroup, "targets.1.port"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByID, "targets.1.weight", resourceNameTargetGroup, "targets.1.weight"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByID, "targets.1.proxy_protocol", resourceNameTargetGroup, "targets.1.proxy_protocol"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByID, "targets.1.health_check_enabled", resourceNameTargetGroup, "targets.1.health_check_enabled"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByID, "targets.1.maintenance_enabled", resourceNameTargetGroup, "targets.1.maintenance_enabled"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByID, "health_check.0.check_timeout", resourceNameTargetGroup, "health_check.0.check_timeout"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByID, "health_check.0.check_interval", resourceNameTargetGroup, "health_check.0.check_interval"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByID, "health_check.0.retries", resourceNameTargetGroup, "health_check.0.retries"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByID, "http_health_check.0.path", resourceNameTargetGroup, "http_health_check.0.path"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByID, "http_health_check.0.method", resourceNameTargetGroup, "http_health_check.0.method"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByID, "http_health_check.0.match_type", resourceNameTargetGroup, "http_health_check.0.match_type"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByID, "http_health_check.0.response", resourceNameTargetGroup, "http_health_check.0.response"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByID, "http_health_check.0.regex", resourceNameTargetGroup, "http_health_check.0.regex"),
+					resource.TestCheckResourceAttrPair(resourceNameTargetGroupByID, "http_health_check.0.negate", resourceNameTargetGroup, "http_health_check.0.negate"),
 				),
 			},
 			{
@@ -347,7 +347,7 @@ resource ` + constant.TargetGroupResource + ` ` + constant.TargetGroupTestResour
    }
 }`
 
-const testAccDataSourceTargetGroupMatchId = testAccCheckTargetGroupConfigUpdateWithAllParameters + `
+const testAccDataSourceTargetGroupMatchID = testAccCheckTargetGroupConfigUpdateWithAllParameters + `
 data ` + constant.TargetGroupResource + ` ` + constant.TargetGroupDataSourceById + ` {
   id			= ` + resourceNameTargetGroup + `.id
 }

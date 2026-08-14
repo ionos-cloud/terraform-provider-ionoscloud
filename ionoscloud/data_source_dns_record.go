@@ -78,10 +78,10 @@ func dataSourceDNSRecord() *schema.Resource {
 func dataSourceRecordRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).DNSClient
 	partialMatch := d.Get("partial_match").(bool)
-	zoneId := d.Get("zone_id").(string)
+	zoneID := d.Get("zone_id").(string)
 	idValue, idOk := d.GetOk("id")
 	nameValue, nameOk := d.GetOk("name")
-	recordId := idValue.(string)
+	recordID := idValue.(string)
 	recordName := nameValue.(string)
 
 	if idOk && nameOk {
@@ -99,9 +99,9 @@ func dataSourceRecordRead(ctx context.Context, d *schema.ResourceData, meta any)
 	var err error
 
 	if idOk {
-		record, apiResponse, err = client.GetRecordById(ctx, zoneId, recordId)
+		record, apiResponse, err = client.GetRecordById(ctx, zoneID, recordID)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the DNS Record with ID: %s, DNS Zone ID: %s, error: %w", recordId, zoneId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the DNS Record with ID: %s, DNS Zone ID: %s, error: %w", recordID, zoneID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 	} else {
 		var results []dns.RecordRead

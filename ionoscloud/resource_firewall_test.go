@@ -43,7 +43,7 @@ func TestAccFirewallBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDataSourceFirewallMatchId,
+				Config: testAccDataSourceFirewallMatchID,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.FirewallResource+"."+constant.FirewallDataSourceById, "name", constant.FirewallResource+"."+constant.FirewallTestResource, "name"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.FirewallResource+"."+constant.FirewallDataSourceById, "protocol", constant.FirewallResource+"."+constant.FirewallTestResource, "protocol"),
@@ -75,6 +75,18 @@ func TestAccFirewallBasic(t *testing.T) {
 			{
 				Config:      testAccDataSourceFirewallWrongNameError,
 				ExpectError: regexp.MustCompile("no firewall rule found with the specified name"),
+			},
+			{
+				Config:      testAccDataSourceFirewallBothIdAndNameError,
+				ExpectError: regexp.MustCompile(`id and name cannot be both specified in the same time`),
+			},
+			{
+				Config:      testAccDataSourceFirewallNoIdNoNameError,
+				ExpectError: regexp.MustCompile(`please provide either the firewall rule id or name`),
+			},
+			{
+				Config:      testAccDataSourceFirewallWrongIdError,
+				ExpectError: regexp.MustCompile(`an error occurred while fetching the firewall rule`),
 			},
 			{
 				Config: testAccCheckFirewallConfigUpdate,
@@ -462,7 +474,7 @@ resource ` + constant.FirewallResource + ` ` + constant.FirewallTestResource + `
   icmp_code = 0
 }
 `
-const testAccDataSourceFirewallMatchId = testAccCheckFirewallConfigBasic + `
+const testAccDataSourceFirewallMatchID = testAccCheckFirewallConfigBasic + `
 data ` + constant.FirewallResource + ` ` + constant.FirewallDataSourceById + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
@@ -509,5 +521,32 @@ data ` + constant.FirewallResource + ` ` + constant.FirewallDataSourceByName + `
   server_id = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
   nic_id = ionoscloud_nic.database_nic.id
   name	= "wrong_name"
+}
+`
+
+const testAccDataSourceFirewallBothIdAndNameError = testAccCheckFirewallConfigBasic + `
+data ` + constant.FirewallResource + ` ` + constant.FirewallDataSourceByName + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  server_id     = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
+  nic_id        = ionoscloud_nic.database_nic.id
+  id            = ` + constant.FirewallResource + `.` + constant.FirewallTestResource + `.id
+  name          = "` + constant.FirewallTestResource + `"
+}
+`
+
+const testAccDataSourceFirewallNoIdNoNameError = testAccCheckFirewallConfigBasic + `
+data ` + constant.FirewallResource + ` ` + constant.FirewallDataSourceByName + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  server_id     = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
+  nic_id        = ionoscloud_nic.database_nic.id
+}
+`
+
+const testAccDataSourceFirewallWrongIdError = testAccCheckFirewallConfigBasic + `
+data ` + constant.FirewallResource + ` ` + constant.FirewallDataSourceById + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  server_id     = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.id
+  nic_id        = ionoscloud_nic.database_nic.id
+  id            = "00000000-0000-0000-0000-000000000000"
 }
 `

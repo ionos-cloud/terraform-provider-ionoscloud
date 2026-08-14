@@ -78,9 +78,9 @@ func resourceDbaasMongoUserCreate(ctx context.Context, d *schema.ResourceData, m
 		Properties: &mongo.UserProperties{},
 	}
 
-	var clusterId string
+	var clusterID string
 	if d.Get("cluster_id") != nil {
-		clusterId = d.Get("cluster_id").(string)
+		clusterID = d.Get("cluster_id").(string)
 	}
 	username := ""
 	if d.Get("username") != nil {
@@ -109,18 +109,18 @@ func resourceDbaasMongoUserCreate(ctx context.Context, d *schema.ResourceData, m
 		request.Properties.Roles = roles
 	}
 
-	user, apiResponse, err := client.CreateUser(ctx, clusterId, request)
+	user, apiResponse, err := client.CreateUser(ctx, clusterID, request)
 	if err != nil {
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while adding a user to mongoDB: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if user.Properties != nil {
-		d.SetId(clusterId + user.Properties.Username)
+		d.SetId(clusterID + user.Properties.Username)
 	}
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsUserReady)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while waiting for the Mongo user to become available, user ID: %v, error: %w", clusterId+user.Properties.Username, err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String()})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while waiting for the Mongo user to become available, user ID: %v, error: %w", clusterID+user.Properties.Username, err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String()})
 	}
 
 	return diagutil.ToDiags(d, dbaas.SetUserMongoData(d, &user), nil)
@@ -135,7 +135,7 @@ func resourceDbaasMongoUserUpdate(ctx context.Context, d *schema.ResourceData, m
 		Properties: mongo.NewPatchUserProperties(),
 	}
 
-	clusterId := d.Get("cluster_id").(string)
+	clusterID := d.Get("cluster_id").(string)
 	username := d.Get("username").(string)
 
 	if d.HasChange("password") {
@@ -163,14 +163,14 @@ func resourceDbaasMongoUserUpdate(ctx context.Context, d *schema.ResourceData, m
 		request.Properties.Roles = roles
 	}
 
-	user, apiResponse, err := client.UpdateUser(ctx, clusterId, username, request)
+	user, apiResponse, err := client.UpdateUser(ctx, clusterID, username, request)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating a Mongo user, username: %v, cluster ID: %v, error: %w", username, clusterId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating a Mongo user, username: %v, cluster ID: %v, error: %w", username, clusterID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsUserReady)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while waiting for a Mongo user to become available after an update, username: %v, cluster ID: %v, error: %w", username, clusterId, err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String()})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while waiting for a Mongo user to become available after an update, username: %v, cluster ID: %v, error: %w", username, clusterID, err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String()})
 	}
 
 	return diagutil.ToDiags(d, dbaas.SetUserMongoData(d, &user), nil)
@@ -182,10 +182,10 @@ func resourceDbaasMongoUserRead(ctx context.Context, d *schema.ResourceData, met
 		return diag.FromErr(err)
 	}
 
-	clusterId := d.Get("cluster_id").(string)
+	clusterID := d.Get("cluster_id").(string)
 	username := d.Get("username").(string)
 
-	user, apiResponse, err := client.FindUserByUsername(ctx, clusterId, username)
+	user, apiResponse, err := client.FindUserByUsername(ctx, clusterID, username)
 
 	if err != nil {
 		if apiResponse.HttpNotFound() {
@@ -208,9 +208,9 @@ func resourceDbaasMongoUserDelete(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	clusterId := d.Get("cluster_id").(string)
+	clusterID := d.Get("cluster_id").(string)
 	username := d.Get("username").(string)
-	apiResponse, err := client.DeleteUser(ctx, clusterId, username)
+	apiResponse, err := client.DeleteUser(ctx, clusterID, username)
 	if err != nil {
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while deleting the Mongo user: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}

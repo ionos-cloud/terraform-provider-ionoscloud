@@ -28,10 +28,10 @@ resource "ionoscloud_lan"  "example" {
 }
 
 resource "ionoscloud_pg_cluster" "example" {
-  postgres_version        = "12"
+  postgres_version        = "16"
   instances               = 1
   cores                   = 4
-  ram                     = 2048
+  ram                     = 4096
   storage_size            = 10240
   storage_type            = "HDD"
   connection_pooler {
@@ -160,7 +160,7 @@ resource "random_password" "cluster_password" {
 * `credentials` - (Required)[string] Credentials for the database user to be created. This attribute is immutable(disallowed in update requests).
     * `username` - (Required)[string] The username for the initial postgres user. Some system usernames are restricted (e.g. "postgres", "admin", "standby")
     * `password` - (Required)[string]
-* `synchronization_mode` - (Required) [string] Represents different modes of replication. Can have one of the following values: ASYNCHRONOUS, STRICTLY_SYNCHRONOUS. The SYNCHRONOUS value has been deprecated for create requests.
+* `synchronization_mode` - (Required) [string] Represents different modes of replication. Can have one of the following values: `ASYNCHRONOUS`, `STRICTLY_SYNCHRONOUS`.
 * `from_backup` - (Optional)[string] The unique ID of the backup you want to restore. This attribute is immutable(disallowed in update requests).
   * `backup_id` - (Required)[string] The unique ID of the backup you want to restore.
   * `recovery_target_time` - (Optional)[string] If this value is supplied as ISO 8601 timestamp, the backup will be replayed up until the given timestamp. If empty, the backup will be applied completely.

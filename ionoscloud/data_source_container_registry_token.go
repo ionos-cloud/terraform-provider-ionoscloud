@@ -8,11 +8,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	cr "github.com/ionos-cloud/sdk-go-bundle/products/containerregistry/v2"
+	crsdk "github.com/ionos-cloud/sdk-go-bundle/products/containerregistry/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
-	crService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
+	crservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/containerregistry"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
@@ -101,7 +101,7 @@ func dataSourceContainerRegistryTokenRead(ctx context.Context, d *schema.Resourc
 		return diag.FromErr(err)
 	}
 
-	registryId := d.Get("registry_id").(string)
+	registryID := d.Get("registry_id").(string)
 	idValue, idOk := d.GetOk("id")
 	nameValue, nameOk := d.GetOk("name")
 
@@ -115,19 +115,19 @@ func dataSourceContainerRegistryTokenRead(ctx context.Context, d *schema.Resourc
 		return diagutil.ToDiags(d, fmt.Errorf("please provide either the token id or name"), nil)
 	}
 
-	var token cr.TokenResponse
+	var token crsdk.TokenResponse
 	var apiResponse *shared.APIResponse
 
 	if idOk {
 		/* search by ID */
-		token, apiResponse, err = client.GetToken(ctx, registryId, id)
+		token, apiResponse, err = client.GetToken(ctx, registryID, id)
 		if err != nil {
 			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the token with ID %s: %w", id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 	} else {
-		var results []cr.TokenResponse
+		var results []crsdk.TokenResponse
 
-		tokens, apiResponse, err := client.ListTokens(ctx, registryId)
+		tokens, apiResponse, err := client.ListTokens(ctx, registryID)
 		if err != nil {
 			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching registry tokens: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
@@ -158,12 +158,12 @@ func dataSourceContainerRegistryTokenRead(ctx context.Context, d *schema.Resourc
 		d.SetId(*token.Id)
 	}
 
-	if err := crService.SetTokenData(d, token.Properties); err != nil {
+	if err := crservice.SetTokenData(d, token.Properties); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
 
 	var credentials []any
-	credentialsEntry := crService.SetCredentials(token.Properties.Credentials)
+	credentialsEntry := crservice.SetCredentials(token.Properties.Credentials)
 	credentials = append(credentials, credentialsEntry)
 	if err := d.Set("credentials", credentials); err != nil {
 		return diagutil.ToDiags(d, utils.GenerateSetError("token", "credentials", err), nil)

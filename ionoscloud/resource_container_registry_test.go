@@ -40,7 +40,7 @@ func TestAccContainerRegistryBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDataSourceContainerRegistryMatchId,
+				Config: testAccDataSourceContainerRegistryMatchID,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestDataSourceById, "garbage_collection_schedule.0.time", constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestResource, "garbage_collection_schedule.0.time"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestDataSourceById, "garbage_collection_schedule.0.days.0", constant.ContainerRegistryResource+"."+constant.ContainerRegistryTestResource, "garbage_collection_schedule.0.days.0"),
@@ -219,7 +219,7 @@ resource ` + constant.ContainerRegistryResource + ` ` + constant.ContainerRegist
 }
 `
 
-const testAccDataSourceContainerRegistryMatchId = testAccCheckContainerRegistryConfigBasic + `
+const testAccDataSourceContainerRegistryMatchID = testAccCheckContainerRegistryConfigBasic + `
 data ` + constant.ContainerRegistryResource + ` ` + constant.ContainerRegistryTestDataSourceById + ` {
   id = ` + constant.ContainerRegistryResource + `.` + constant.ContainerRegistryTestResource + `.id
 }
@@ -237,7 +237,7 @@ data ` + constant.ContainerRegistryResource + ` ` + constant.ContainerRegistryTe
   location = "de/fra" 
 }
 `
-const testAccDataSourceContainerRegistryWrongIdError = testAccCheckContainerRegistryConfigBasic + `
+const testAccDataSourceContainerRegistryWrongIDError = testAccCheckContainerRegistryConfigBasic + `
 data ` + constant.ContainerRegistryResource + ` ` + constant.ContainerRegistryTestDataSourceByName + ` {
   id = "wrong_id"
 }

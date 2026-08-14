@@ -25,7 +25,7 @@ func TestAccBackupUnitImportBasic(t *testing.T) {
 			},
 			{
 				ResourceName:            constant.BackupUnitResource + "." + constant.BackupUnitTestResource,
-				ImportStateIdFunc:       testAccBackupUnitImportStateId,
+				ImportStateIdFunc:       testAccBackupUnitImportStateID,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"password"},
@@ -34,7 +34,7 @@ func TestAccBackupUnitImportBasic(t *testing.T) {
 	})
 }
 
-func testAccBackupUnitImportStateId(s *terraform.State) (string, error) {
+func testAccBackupUnitImportStateID(s *terraform.State) (string, error) {
 	importID := ""
 
 	for _, rs := range s.RootModule().Resources {

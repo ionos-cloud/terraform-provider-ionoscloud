@@ -275,20 +275,20 @@ func resourcePrivateCrossConnectImport(ctx context.Context, d *schema.ResourceDa
 		return nil, fmt.Errorf("failed validating import identifier %q: %w", importID, err)
 	}
 
-	pccId := parts[0]
+	pccID := parts[0]
 
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return nil, err
 	}
 
-	pcc, apiResponse, err := client.PrivateCrossConnectsApi.PccsFindById(ctx, pccId).Execute()
+	pcc, apiResponse, err := client.PrivateCrossConnectsApi.PccsFindById(ctx, pccID).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("unable to find PCC %q", pccId), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return nil, diagutil.ToError(d, fmt.Errorf("unable to find PCC %q", pccID), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 		return nil, diagutil.ToError(d, fmt.Errorf("unable to retrieve PCC, error: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}

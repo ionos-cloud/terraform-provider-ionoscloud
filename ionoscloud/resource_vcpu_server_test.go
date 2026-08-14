@@ -118,7 +118,7 @@ func TestAccServerVCPUBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDataSourceServerVCPUMatchId,
+				Config: testAccDataSourceServerVCPUMatchID,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerVCPUResource+"."+constant.ServerDataSourceById, "name", constant.ServerVCPUResource+"."+constant.ServerTestResource, "name"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerVCPUResource+"."+constant.ServerDataSourceById, "hostname", constant.ServerVCPUResource+"."+constant.ServerTestResource, "hostname"),
@@ -186,6 +186,26 @@ func TestAccServerVCPUBasic(t *testing.T) {
 			{
 				Config:      testAccDataSourceServerVCPUWrongNameError,
 				ExpectError: regexp.MustCompile(`no server found with the specified criteria: name`),
+			},
+			{
+				Config:      testAccDataSourceServerVCPUBothIdAndNameError,
+				ExpectError: regexp.MustCompile(`ID and name cannot be both specified in the same time`),
+			},
+			{
+				Config:      testAccDataSourceServerVCPUNoIdNoNameError,
+				ExpectError: regexp.MustCompile(`please provide either the server id or name`),
+			},
+			{
+				Config:      testAccDataSourceServerVCPUWrongIdError,
+				ExpectError: regexp.MustCompile(`an error occurred while fetching the server with ID`),
+			},
+			{
+				Config:      testAccDataSourceServerVCPUMultipleResultsError,
+				ExpectError: regexp.MustCompile(`more than one server found with the specified criteria: name`),
+			},
+			{
+				Config:      testAccDataSourceServerVCPUInvalidDatacenterIdError,
+				ExpectError: regexp.MustCompile(`expected .+ to be a valid UUID`),
 			},
 			{
 				Config: testAccCheckServerVCPUConfigUpdate,
@@ -757,14 +777,14 @@ func testAccCheckServerVCPUDestroyCheck(s *terraform.State) error {
 			continue
 		}
 
-		dcId := rs.Primary.Attributes["datacenter_id"]
+		dcID := rs.Primary.Attributes["datacenter_id"]
 		location := rs.Primary.Attributes["location"]
 		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 		if err != nil {
 			return err
 		}
 
-		_, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, dcId, rs.Primary.ID).Execute()
+		_, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, dcID, rs.Primary.ID).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
@@ -790,7 +810,7 @@ func testAccCheckServerVCPUAndVolumesDestroyed(dcName string) resource.TestCheck
 			return fmt.Errorf("can not get data center resource named: %s", dcName)
 		}
 
-		dcId := datacenterResourceState.Primary.ID
+		dcID := datacenterResourceState.Primary.ID
 		location := datacenterResourceState.Primary.Attributes["location"]
 		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 		if err != nil {
@@ -799,24 +819,24 @@ func testAccCheckServerVCPUAndVolumesDestroyed(dcName string) resource.TestCheck
 
 		// Since we are creating only ONE server in the data center, we can use
 		// DatacentersServersGet to check if the server was deleted properly.
-		servers, apiResponse, err := client.ServersApi.DatacentersServersGet(ctx, dcId).Execute()
+		servers, apiResponse, err := client.ServersApi.DatacentersServersGet(ctx, dcID).Execute()
 		logApiRequestTime(apiResponse)
 		if err == nil {
 			if serverItems, ok := servers.GetItemsOk(); ok {
 				if len(*serverItems) > 0 {
-					return fmt.Errorf("server still exists for data center with ID: %s", dcId)
+					return fmt.Errorf("server still exists for data center with ID: %s", dcID)
 				}
 			}
 		} else {
 			return err
 		}
 
-		volumes, apiResponse, err := client.VolumesApi.DatacentersVolumesGet(ctx, dcId).Execute()
+		volumes, apiResponse, err := client.VolumesApi.DatacentersVolumesGet(ctx, dcID).Execute()
 		logApiRequestTime(apiResponse)
 		if err == nil {
 			if volItems, ok := volumes.GetItemsOk(); ok {
 				if len(*volItems) > 0 {
-					return fmt.Errorf("volumes still exists for data center with ID: %s", dcId)
+					return fmt.Errorf("volumes still exists for data center with ID: %s", dcID)
 				}
 			}
 		} else {
@@ -866,7 +886,7 @@ func testAccCheckServerVCPUExists(serverName string, server *ionoscloud.Server) 
 	}
 }
 
-const bootCdromImageIdForVCPUServer = "0e4d57f9-cd78-11e9-b88c-525400f64d8d"
+const bootCdromImageIDForVCPUServer = "0e4d57f9-cd78-11e9-b88c-525400f64d8d"
 
 const testAccCheckServerVCPUConfigUpdate = `
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
@@ -926,7 +946,7 @@ resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + `
 }
 ` + ServerImagePasswordUpdated + testSecurityGroups
 
-const testAccDataSourceServerVCPUMatchId = testAccCheckServerVCPUConfigBasic + `
+const testAccDataSourceServerVCPUMatchID = testAccCheckServerVCPUConfigBasic + `
 data ` + constant.ServerVCPUResource + ` ` + constant.ServerDataSourceById + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   id			= ` + constant.ServerVCPUResource + `.` + constant.ServerTestResource + `.id
@@ -943,6 +963,62 @@ const testAccDataSourceServerVCPUWrongNameError = testAccCheckServerVCPUConfigBa
 data ` + constant.ServerVCPUResource + ` ` + constant.ServerDataSourceByName + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   name			= "wrong_name"
+}
+`
+
+const testAccDataSourceServerVCPUBothIdAndNameError = testAccCheckServerVCPUConfigBasic + `
+data ` + constant.ServerVCPUResource + ` ` + constant.ServerDataSourceByName + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  id            = ` + constant.ServerVCPUResource + `.` + constant.ServerTestResource + `.id
+  name          = "` + constant.ServerTestResource + `"
+}
+`
+
+const testAccDataSourceServerVCPUNoIdNoNameError = testAccCheckServerVCPUConfigBasic + `
+data ` + constant.ServerVCPUResource + ` ` + constant.ServerDataSourceByName + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+}
+`
+
+const testAccDataSourceServerVCPUWrongIdError = testAccCheckServerVCPUConfigBasic + `
+data ` + constant.ServerVCPUResource + ` ` + constant.ServerDataSourceById + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  id            = "00000000-0000-0000-0000-000000000000"
+}
+`
+
+const testAccDataSourceServerVCPUMultipleResultsError = testAccCheckServerVCPUConfigBasic + `
+resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + `_same_name {
+  name              = "` + constant.ServerTestResource + `"
+  datacenter_id     = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  cores             = 1
+  ram               = 1024
+  availability_zone = "AUTO"
+  image_name        = "ubuntu:latest"
+  image_password    = ` + constant.RandomPassword + `.server_image_password.result
+  volume {
+    name      = "system"
+    size      = 5
+    disk_type = "SSD Standard"
+  }
+  nic {
+    lan             = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
+    dhcp            = true
+    firewall_active = false
+  }
+}
+
+data ` + constant.ServerVCPUResource + ` ` + constant.ServerDataSourceByName + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  name          = "` + constant.ServerTestResource + `"
+  depends_on    = [` + constant.ServerVCPUResource + `.` + constant.ServerTestResource + `_same_name]
+}
+`
+
+const testAccDataSourceServerVCPUInvalidDatacenterIdError = testAccCheckServerVCPUConfigBasic + `
+data ` + constant.ServerVCPUResource + ` ` + constant.ServerDataSourceByName + ` {
+  datacenter_id = "not-a-uuid"
+  name          = "anything"
 }
 `
 
@@ -972,7 +1048,7 @@ resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + `
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
-  boot_cdrom = "` + bootCdromImageIdForVCPUServer + `" 
+  boot_cdrom = "` + bootCdromImageIDForVCPUServer + `" 
   volume {
     name = "` + constant.ServerTestResource + `"
     size = 5
@@ -1025,7 +1101,7 @@ resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + `
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
-  boot_cdrom = "` + bootCdromImageIdForVCPUServer + `" 
+  boot_cdrom = "` + bootCdromImageIDForVCPUServer + `" 
   volume {
     name = "` + constant.ServerTestResource + `"
     size = 5
@@ -1070,7 +1146,7 @@ resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + `
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
-  boot_cdrom = "` + bootCdromImageIdForVCPUServer + `" 
+  boot_cdrom = "` + bootCdromImageIDForVCPUServer + `" 
   volume {
     name = "` + constant.ServerTestResource + `"
     size = 5
@@ -1118,7 +1194,7 @@ resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + `
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
-  boot_cdrom = "` + bootCdromImageIdForVCPUServer + `" 
+  boot_cdrom = "` + bootCdromImageIDForVCPUServer + `" 
   volume {
     name = "` + constant.ServerTestResource + `"
     size = 5
@@ -1153,7 +1229,7 @@ resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + `
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   cores = 1
   ram = 1024
-  boot_cdrom = "` + bootCdromImageIdForVCPUServer + `" 
+  boot_cdrom = "` + bootCdromImageIDForVCPUServer + `" 
   volume {
     name = "` + constant.ServerTestResource + `"
     size = 5

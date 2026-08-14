@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	autoscalingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/autoscaling"
+	autoscalingservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/autoscaling"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
@@ -53,5 +53,5 @@ func dataSourceAutoscalingServersRead(ctx context.Context, d *schema.ResourceDat
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the servers for the group with ID %s: %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	return autoscalingService.SetAutoscalingServersData(d, groupServers)
+	return autoscalingservice.SetAutoscalingServersData(d, groupServers)
 }

@@ -24,7 +24,7 @@ func TestAccCubeServerImportBasic(t *testing.T) {
 			},
 			{
 				ResourceName:            constant.ServerCubeResource + "." + constant.ServerTestResource,
-				ImportStateIdFunc:       testAccCubeServerImportStateId,
+				ImportStateIdFunc:       testAccCubeServerImportStateID,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"image_password", "ssh_key_path.#", "image_name", "volume.0.user_data", "volume.0.backup_unit_id", "firewallrule_id", "primary_nic", "inline_volume_ids", "allow_replace", "location", "boot_volume"},
@@ -45,7 +45,7 @@ func TestAccCubeServerImportWithIPv6(t *testing.T) {
 			},
 			{
 				ResourceName:            constant.ServerCubeResource + "." + constant.ServerTestResource,
-				ImportStateIdFunc:       testAccCubeServerImportStateId,
+				ImportStateIdFunc:       testAccCubeServerImportStateID,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"image_password", "ssh_key_path.#", "image_name", "volume.0.user_data", "volume.0.backup_unit_id", "firewallrule_id", "primary_nic", "inline_volume_ids", "allow_replace", "location", "boot_volume"},
@@ -54,7 +54,7 @@ func TestAccCubeServerImportWithIPv6(t *testing.T) {
 	})
 }
 
-func testAccCubeServerImportStateId(s *terraform.State) (string, error) {
+func testAccCubeServerImportStateID(s *terraform.State) (string, error) {
 	var importID string
 
 	for _, rs := range s.RootModule().Resources {

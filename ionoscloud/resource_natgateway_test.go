@@ -18,7 +18,7 @@ import (
 )
 
 const resourceNatGatewayResource = constant.NatGatewayResource + "." + constant.NatGatewayTestResource
-const dataSourceIdNatGatewayResource = constant.DataSource + "." + constant.NatGatewayResource + "." + constant.NatGatewayDataSourceById
+const dataSourceIDNatGatewayResource = constant.DataSource + "." + constant.NatGatewayResource + "." + constant.NatGatewayDataSourceById
 const dataSourceNameNatGatewayResource = constant.DataSource + "." + constant.NatGatewayResource + "." + constant.NatGatewayDataSourceByName
 
 func TestAccNatGatewayBasic(t *testing.T) {
@@ -42,12 +42,12 @@ func TestAccNatGatewayBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: fmt.Sprintf(testAccDataSourceNatGatewayMatchId, constant.NatGatewayTestResource),
+				Config: fmt.Sprintf(testAccDataSourceNatGatewayMatchID, constant.NatGatewayTestResource),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(dataSourceIdNatGatewayResource, "name", resourceNatGatewayResource, "name"),
-					resource.TestCheckResourceAttrPair(dataSourceIdNatGatewayResource, "public_ips.0", resourceNatGatewayResource, "public_ips.0"),
-					resource.TestCheckResourceAttrPair(dataSourceIdNatGatewayResource, "lans.0.id", resourceNatGatewayResource, "lans.0.id"),
-					resource.TestCheckResourceAttrPair(dataSourceIdNatGatewayResource, "lans.0.gateway_ips", resourceNatGatewayResource, "lans.0.gateway_ips"),
+					resource.TestCheckResourceAttrPair(dataSourceIDNatGatewayResource, "name", resourceNatGatewayResource, "name"),
+					resource.TestCheckResourceAttrPair(dataSourceIDNatGatewayResource, "public_ips.0", resourceNatGatewayResource, "public_ips.0"),
+					resource.TestCheckResourceAttrPair(dataSourceIDNatGatewayResource, "lans.0.id", resourceNatGatewayResource, "lans.0.id"),
+					resource.TestCheckResourceAttrPair(dataSourceIDNatGatewayResource, "lans.0.gateway_ips", resourceNatGatewayResource, "lans.0.gateway_ips"),
 				),
 			},
 			{
@@ -215,7 +215,7 @@ resource ` + constant.NatGatewayResource + ` ` + constant.NatGatewayTestResource
   }
 }`
 
-const testAccDataSourceNatGatewayMatchId = testAccCheckNatGatewayConfigBasic + `
+const testAccDataSourceNatGatewayMatchID = testAccCheckNatGatewayConfigBasic + `
 data ` + constant.NatGatewayResource + ` ` + constant.NatGatewayDataSourceById + ` {
   datacenter_id = ` + constant.DatacenterResource + `.natgateway_datacenter.id
   id			= ` + constant.NatGatewayResource + `.` + constant.NatGatewayTestResource + `.id

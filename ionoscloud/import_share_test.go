@@ -26,7 +26,7 @@ func TestAccShareImportBasic(t *testing.T) {
 
 			{
 				ResourceName:      fmt.Sprintf("%s.%s", constant.ShareResource, resourceName),
-				ImportStateIdFunc: testAccShareImportStateId,
+				ImportStateIdFunc: testAccShareImportStateID,
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -34,7 +34,7 @@ func TestAccShareImportBasic(t *testing.T) {
 	})
 }
 
-func testAccShareImportStateId(s *terraform.State) (string, error) {
+func testAccShareImportStateID(s *terraform.State) (string, error) {
 	importID := ""
 
 	for _, rs := range s.RootModule().Resources {

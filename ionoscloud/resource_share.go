@@ -146,10 +146,10 @@ func resourceShareDelete(ctx context.Context, d *schema.ResourceData, meta any) 
 		return diag.FromErr(err)
 	}
 
-	groupId := d.Get("group_id").(string)
-	resourceId := d.Get("resource_id").(string)
+	groupID := d.Get("group_id").(string)
+	resourceID := d.Get("resource_id").(string)
 
-	apiResponse, err := client.UserManagementApi.UmGroupsSharesDelete(ctx, groupId, resourceId).Execute()
+	apiResponse, err := client.UserManagementApi.UmGroupsSharesDelete(ctx, groupID, resourceID).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		if !httpNotFound(apiResponse) {
@@ -171,33 +171,33 @@ func resourceShareImporter(ctx context.Context, d *schema.ResourceData, meta any
 		return nil, diagutil.ToError(d, fmt.Errorf("invalid import. Expecting {group}/{resource}"), nil)
 	}
 
-	grpId := parts[0]
-	rscId := parts[1]
+	grpID := parts[0]
+	rscID := parts[1]
 
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	share, apiResponse, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(ctx, grpId, rscId).Execute()
+	share, apiResponse, err := client.UserManagementApi.UmGroupsSharesFindByResourceId(ctx, grpID, rscID).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the share of resource %q for group %q", rscId, grpId), nil)
+			return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the share of resource %q for group %q", rscID, grpID), nil)
 		}
-		return nil, diagutil.ToError(d, fmt.Errorf("share does not exist of resource %q for group %q", rscId, grpId), nil)
+		return nil, diagutil.ToError(d, fmt.Errorf("share does not exist of resource %q for group %q", rscID, grpID), nil)
 	}
 
-	tflog.Info(ctx, "share found", map[string]any{"share_id": *share.Id, "group_id": grpId, "resource_id": rscId})
+	tflog.Info(ctx, "share found", map[string]any{"share_id": *share.Id, "group_id": grpID, "resource_id": rscID})
 
 	d.SetId(*share.Id)
 
-	if err := d.Set("group_id", grpId); err != nil {
+	if err := d.Set("group_id", grpID); err != nil {
 		return nil, diagutil.ToError(d, err, nil)
 	}
 
-	if err := d.Set("resource_id", rscId); err != nil {
+	if err := d.Set("resource_id", rscID); err != nil {
 		return nil, diagutil.ToError(d, err, nil)
 	}
 

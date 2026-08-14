@@ -24,7 +24,7 @@ func TestAccServerImportBasic(t *testing.T) {
 			},
 			{
 				ResourceName:            constant.ServerResource + "." + constant.ServerTestResource,
-				ImportStateIdFunc:       testAccServerImportStateIdWithNicAndFw,
+				ImportStateIdFunc:       testAccServerImportStateIDWithNicAndFw,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"image_password", "ssh_key_path.#", "image_name", "volume.0.user_data", "volume.0.backup_unit_id", "firewallrule_id", "primary_nic", "inline_volume_ids", "allow_replace", "location"},
@@ -46,7 +46,7 @@ func TestAccServerWithLabelsImport(t *testing.T) {
 			},
 			{
 				ResourceName:            constant.ServerResource + "." + constant.ServerTestResource,
-				ImportStateIdFunc:       testAccServerImportStateId,
+				ImportStateIdFunc:       testAccServerImportStateID,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"image_password", "ssh_key_path.#", "image_name", "volume.0.user_data", "volume.0.backup_unit_id", "firewallrule_id", "primary_nic", "inline_volume_ids", "primary_ip", "allow_replace", "location"},
@@ -54,7 +54,7 @@ func TestAccServerWithLabelsImport(t *testing.T) {
 		},
 	})
 }
-func testAccServerImportStateId(s *terraform.State) (string, error) {
+func testAccServerImportStateID(s *terraform.State) (string, error) {
 	var importID = ""
 
 	for _, rs := range s.RootModule().Resources {
@@ -70,7 +70,7 @@ func testAccServerImportStateId(s *terraform.State) (string, error) {
 
 	return importID, nil
 }
-func testAccServerImportStateIdWithNicAndFw(s *terraform.State) (string, error) {
+func testAccServerImportStateIDWithNicAndFw(s *terraform.State) (string, error) {
 	var importID = ""
 
 	for _, rs := range s.RootModule().Resources {

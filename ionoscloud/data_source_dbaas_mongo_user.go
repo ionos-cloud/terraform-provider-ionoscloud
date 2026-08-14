@@ -80,7 +80,7 @@ func dataSourceDbaasMongoReadUser(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	clusterIdIf, idOk := d.GetOk("cluster_id")
+	clusterIDIf, idOk := d.GetOk("cluster_id")
 	usernameIf, nameOk := d.GetOk("username")
 
 	if !idOk || !nameOk {
@@ -88,10 +88,10 @@ func dataSourceDbaasMongoReadUser(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	username := usernameIf.(string)
-	clusterId := clusterIdIf.(string)
+	clusterID := clusterIDIf.(string)
 	var user mongo.User
 
-	users, apiResponse, err := client.GetUsers(ctx, clusterId)
+	users, apiResponse, err := client.GetUsers(ctx, clusterID)
 
 	if err != nil {
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching dbaas mongo users: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
@@ -109,9 +109,9 @@ func dataSourceDbaasMongoReadUser(ctx context.Context, d *schema.ResourceData, m
 
 	switch {
 	case len(results) == 0:
-		return diagutil.ToDiags(d, fmt.Errorf("no DBaaS mongo user found with the specified username = %s and cluster_id = %s", username, clusterId), nil)
+		return diagutil.ToDiags(d, fmt.Errorf("no DBaaS mongo user found with the specified username = %s and cluster_id = %s", username, clusterID), nil)
 	case len(results) > 1:
-		return diagutil.ToDiags(d, fmt.Errorf("more than one DBaaS mongo user found with the specified criteria username = %s and cluster_id = %s", username, clusterId), nil)
+		return diagutil.ToDiags(d, fmt.Errorf("more than one DBaaS mongo user found with the specified criteria username = %s and cluster_id = %s", username, clusterID), nil)
 	default:
 		user = results[0]
 	}
@@ -120,7 +120,7 @@ func dataSourceDbaasMongoReadUser(ctx context.Context, d *schema.ResourceData, m
 		return diagutil.ToDiags(d, err, nil)
 	}
 	if user.Properties != nil {
-		d.SetId(clusterId + user.Properties.Username)
+		d.SetId(clusterID + user.Properties.Username)
 	}
 
 	return nil

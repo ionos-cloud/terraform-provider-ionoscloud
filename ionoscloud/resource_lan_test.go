@@ -37,7 +37,7 @@ func TestAccLanBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDataSourceLanMatchId,
+				Config: testAccDataSourceLanMatchID,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.LanResource+"."+constant.LanDataSourceByID, "name", constant.LanResource+"."+constant.LanTestResource, "name"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.LanResource+"."+constant.LanDataSourceByID, "ip_failover.nic_uuid", constant.LanResource+"."+constant.LanTestResource, "ip_failover.nic_uuid"),
@@ -65,6 +65,18 @@ func TestAccLanBasic(t *testing.T) {
 			{
 				Config:      testAccDataSourceLanWrongNameError,
 				ExpectError: regexp.MustCompile(`no lan found with the specified name`),
+			},
+			{
+				Config:      testAccDataSourceLanBothIdAndNameError,
+				ExpectError: regexp.MustCompile(`id and name cannot be both specified in the same time`),
+			},
+			{
+				Config:      testAccDataSourceLanNoIdNoNameError,
+				ExpectError: regexp.MustCompile(`please provide either the lan id or name`),
+			},
+			{
+				Config:      testAccDataSourceLanWrongIdError,
+				ExpectError: regexp.MustCompile(`an error occurred while fetching lan with ID`),
 			},
 			{
 				Config: testAccCheckLanConfigUpdate,
@@ -183,7 +195,7 @@ data ` + constant.LanResource + ` ` + constant.LanDataSourceByID + ` {
 }
 `
 
-const testAccDataSourceLanMatchId = testAccCheckLanConfigBasic + `
+const testAccDataSourceLanMatchID = testAccCheckLanConfigBasic + `
 data ` + constant.LanResource + ` ` + constant.LanDataSourceByID + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   id			= ` + constant.LanResource + `.` + constant.LanTestResource + `.id
@@ -221,5 +233,26 @@ const testAccDataSourceLanWrongNameError = testAccCheckLanConfigBasic + `
 data ` + constant.LanResource + ` ` + constant.LanDataSourceByName + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   name			= "wrong_name"
+}
+`
+
+const testAccDataSourceLanBothIdAndNameError = testAccCheckLanConfigBasic + `
+data ` + constant.LanResource + ` ` + constant.LanDataSourceByName + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  id            = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
+  name          = "` + constant.LanTestResource + `"
+}
+`
+
+const testAccDataSourceLanNoIdNoNameError = testAccCheckLanConfigBasic + `
+data ` + constant.LanResource + ` ` + constant.LanDataSourceByName + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+}
+`
+
+const testAccDataSourceLanWrongIdError = testAccCheckLanConfigBasic + `
+data ` + constant.LanResource + ` ` + constant.LanDataSourceByID + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  id            = "00000000-0000-0000-0000-000000000000"
 }
 `

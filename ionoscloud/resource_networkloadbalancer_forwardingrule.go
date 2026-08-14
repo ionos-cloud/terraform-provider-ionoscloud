@@ -257,10 +257,10 @@ func resourceNetworkLoadBalancerForwardingRuleCreate(ctx context.Context, d *sch
 		}
 	}
 
-	dcId := d.Get("datacenter_id").(string)
-	nlbId := d.Get("networkloadbalancer_id").(string)
+	dcID := d.Get("datacenter_id").(string)
+	nlbID := d.Get("networkloadbalancer_id").(string)
 
-	networkLoadBalancerForwardingRuleResp, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesPost(ctx, dcId, nlbId).NetworkLoadBalancerForwardingRule(networkLoadBalancerForwardingRule).Execute()
+	networkLoadBalancerForwardingRuleResp, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesPost(ctx, dcID, nlbID).NetworkLoadBalancerForwardingRule(networkLoadBalancerForwardingRule).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -358,11 +358,11 @@ func resourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *schem
 		return diag.FromErr(err)
 	}
 
-	dcId := d.Get("datacenter_id").(string)
+	dcID := d.Get("datacenter_id").(string)
 
 	nlbID := d.Get("networkloadbalancer_id").(string)
 
-	networkLoadBalancerForwardingRule, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesFindByForwardingRuleId(ctx, dcId, nlbID, d.Id()).Execute()
+	networkLoadBalancerForwardingRule, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesFindByForwardingRuleId(ctx, dcID, nlbID, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -393,7 +393,7 @@ func resourceNetworkLoadBalancerForwardingRuleUpdate(ctx context.Context, d *sch
 		Properties: &ionoscloud.NetworkLoadBalancerForwardingRuleProperties{},
 	}
 
-	dcId := d.Get("datacenter_id").(string)
+	dcID := d.Get("datacenter_id").(string)
 	nlbID := d.Get("networkloadbalancer_id").(string)
 
 	if d.HasChange("name") {
@@ -477,7 +477,7 @@ func resourceNetworkLoadBalancerForwardingRuleUpdate(ctx context.Context, d *sch
 		tflog.Info(ctx, "nlb forwarding rule targets changed", map[string]any{"old": oldTargets, "new": newTargets})
 		request.Properties.Targets = &targets
 	}
-	_, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesPatch(ctx, dcId, nlbID, d.Id()).NetworkLoadBalancerForwardingRuleProperties(*request.Properties).Execute()
+	_, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesPatch(ctx, dcID, nlbID, d.Id()).NetworkLoadBalancerForwardingRuleProperties(*request.Properties).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -501,10 +501,10 @@ func resourceNetworkLoadBalancerForwardingRuleDelete(ctx context.Context, d *sch
 		return diag.FromErr(err)
 	}
 
-	dcId := d.Get("datacenter_id").(string)
+	dcID := d.Get("datacenter_id").(string)
 	nlbID := d.Get("networkloadbalancer_id").(string)
 
-	apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesDelete(ctx, dcId, nlbID, d.Id()).Execute()
+	apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesDelete(ctx, dcID, nlbID, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -537,31 +537,31 @@ func resourceNetworLoadBalancerForwardingRuleImport(ctx context.Context, d *sche
 		return nil, diagutil.ToError(d, fmt.Errorf("failed validating import identifier %q: %w", importID, err), nil)
 	}
 
-	dcId := parts[0]
-	networkLoadBalancerId := parts[1]
-	networkLoadBalancerRuleId := parts[2]
+	dcID := parts[0]
+	networkLoadBalancerID := parts[1]
+	networkLoadBalancerRuleID := parts[2]
 
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return nil, err
 	}
 
-	networkLoadBalancerForwardingRule, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesFindByForwardingRuleId(ctx, dcId, networkLoadBalancerId, networkLoadBalancerRuleId).Execute()
+	networkLoadBalancerForwardingRule, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesFindByForwardingRuleId(ctx, dcID, networkLoadBalancerID, networkLoadBalancerRuleID).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		tflog.Info(ctx, "nlb forwarding rule not found on import", map[string]any{"rule_id": networkLoadBalancerRuleId, "error": err.Error()})
+		tflog.Info(ctx, "nlb forwarding rule not found on import", map[string]any{"rule_id": networkLoadBalancerRuleID, "error": err.Error()})
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("unable to find network load balancer rule %q", networkLoadBalancerRuleId), nil)
+			return nil, diagutil.ToError(d, fmt.Errorf("unable to find network load balancer rule %q", networkLoadBalancerRuleID), nil)
 		}
-		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while retrieving network load balancer rule  %q: %w ", networkLoadBalancerRuleId, err), nil)
+		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while retrieving network load balancer rule  %q: %w ", networkLoadBalancerRuleID, err), nil)
 	}
 
-	if err := d.Set("datacenter_id", dcId); err != nil {
+	if err := d.Set("datacenter_id", dcID); err != nil {
 		return nil, diagutil.ToError(d, err, nil)
 	}
-	if err := d.Set("networkloadbalancer_id", networkLoadBalancerId); err != nil {
+	if err := d.Set("networkloadbalancer_id", networkLoadBalancerID); err != nil {
 		return nil, diagutil.ToError(d, err, nil)
 	}
 	if err := d.Set("location", location); err != nil {

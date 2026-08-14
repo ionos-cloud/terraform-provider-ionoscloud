@@ -26,7 +26,7 @@ func TestAccLoadbalancerImportBasic(t *testing.T) {
 
 			{
 				ResourceName:            fmt.Sprintf("ionoscloud_loadbalancer.%s", resourceName),
-				ImportStateIdFunc:       testAccLoadbalancerImportStateId,
+				ImportStateIdFunc:       testAccLoadbalancerImportStateID,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location"},
@@ -35,7 +35,7 @@ func TestAccLoadbalancerImportBasic(t *testing.T) {
 	})
 }
 
-func testAccLoadbalancerImportStateId(s *terraform.State) (string, error) {
+func testAccLoadbalancerImportStateID(s *terraform.State) (string, error) {
 	importID := ""
 
 	for _, rs := range s.RootModule().Resources {

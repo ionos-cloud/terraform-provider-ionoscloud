@@ -25,7 +25,7 @@ func TestAccNetworkLoadBalancerForwardingRuleImportBasic(t *testing.T) {
 
 			{
 				ResourceName:            networkLoadBalancerForwardingRuleResource,
-				ImportStateIdFunc:       testAccNetworkLoadBalancerForwardingRuleImportStateId,
+				ImportStateIdFunc:       testAccNetworkLoadBalancerForwardingRuleImportStateID,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location"},
@@ -34,7 +34,7 @@ func TestAccNetworkLoadBalancerForwardingRuleImportBasic(t *testing.T) {
 	})
 }
 
-func testAccNetworkLoadBalancerForwardingRuleImportStateId(s *terraform.State) (string, error) {
+func testAccNetworkLoadBalancerForwardingRuleImportStateID(s *terraform.State) (string, error) {
 	var importID = ""
 
 	for _, rs := range s.RootModule().Resources {

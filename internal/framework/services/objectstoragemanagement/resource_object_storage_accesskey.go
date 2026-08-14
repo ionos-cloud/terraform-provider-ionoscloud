@@ -11,12 +11,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 
+	objstoragesdk "github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2"
+
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/identity"
-
-	objectStorageManagement "github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2"
-
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
-	objectStorageManagementService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstoragemanagement"
+	objstorageservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/objectstoragemanagement"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
@@ -44,7 +43,7 @@ func NewAccesskeyResource() resource.Resource {
 }
 
 type accesskeyResource struct {
-	client *objectStorageManagementService.Client
+	client *objstorageservice.Client
 }
 
 // Metadata returns the metadata for the accesskey resource.
@@ -122,7 +121,7 @@ func (r *accesskeyResource) Create(ctx context.Context, req resource.CreateReque
 		return
 	}
 
-	var data *objectStorageManagementService.AccesskeyResourceModel
+	var data *objstorageservice.AccesskeyResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -133,8 +132,8 @@ func (r *accesskeyResource) Create(ctx context.Context, req resource.CreateReque
 	ctx, cancel := context.WithTimeout(ctx, createTimeout)
 	defer cancel()
 
-	var accessKey = objectStorageManagement.AccessKeyCreate{
-		Properties: objectStorageManagement.AccessKey{
+	var accessKey = objstoragesdk.AccessKeyCreate{
+		Properties: objstoragesdk.AccessKey{
 			Description: data.Description.ValueString(),
 		},
 	}
@@ -144,7 +143,7 @@ func (r *accesskeyResource) Create(ctx context.Context, req resource.CreateReque
 		return
 	}
 	// we need this because secretkey is only available on create response
-	objectStorageManagementService.SetAccessKeyPropertiesToPlan(data, accessKeyResponse)
+	objstorageservice.SetAccessKeyPropertiesToPlan(data, accessKeyResponse)
 
 	accessKeyRead, apiResponse, err := r.client.GetAccessKey(ctx, data.ID.ValueString())
 	if err != nil {
@@ -153,7 +152,7 @@ func (r *accesskeyResource) Create(ctx context.Context, req resource.CreateReque
 	}
 
 	// we need this because canonical_user_id not available on create response
-	objectStorageManagementService.SetAccessKeyPropertiesToPlan(data, accessKeyRead)
+	objstorageservice.SetAccessKeyPropertiesToPlan(data, accessKeyRead)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 	resp.Diagnostics.Append(resp.Identity.Set(ctx, &identity.Model{ID: data.ID})...)
 }
@@ -165,7 +164,7 @@ func (r *accesskeyResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	var data objectStorageManagementService.AccesskeyResourceModel
+	var data objstorageservice.AccesskeyResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -181,7 +180,7 @@ func (r *accesskeyResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	objectStorageManagementService.SetAccessKeyPropertiesToPlan(&data, accessKey)
+	objstorageservice.SetAccessKeyPropertiesToPlan(&data, accessKey)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 	resp.Diagnostics.Append(resp.Identity.Set(ctx, &identity.Model{ID: data.ID})...)
 }
@@ -193,7 +192,7 @@ func (r *accesskeyResource) ImportState(ctx context.Context, req resource.Import
 
 // Update updates the accesskey.
 func (r *accesskeyResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var plan, state *objectStorageManagementService.AccesskeyResourceModel
+	var plan, state *objstorageservice.AccesskeyResourceModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
@@ -207,8 +206,8 @@ func (r *accesskeyResource) Update(ctx context.Context, req resource.UpdateReque
 	ctx, cancel := context.WithTimeout(ctx, updateTimeout)
 	defer cancel()
 
-	var accessKey = objectStorageManagement.AccessKeyEnsure{
-		Properties: objectStorageManagement.AccessKey{
+	var accessKey = objstoragesdk.AccessKeyEnsure{
+		Properties: objstoragesdk.AccessKey{
 			Description: plan.Description.ValueString(),
 		},
 	}
@@ -227,7 +226,7 @@ func (r *accesskeyResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
-	objectStorageManagementService.SetAccessKeyPropertiesToPlan(state, accessKeyRead)
+	objstorageservice.SetAccessKeyPropertiesToPlan(state, accessKeyRead)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 	resp.Diagnostics.Append(resp.Identity.Set(ctx, &identity.Model{ID: state.ID})...)
 }
@@ -239,7 +238,7 @@ func (r *accesskeyResource) Delete(ctx context.Context, req resource.DeleteReque
 		return
 	}
 
-	var data *objectStorageManagementService.AccesskeyResourceModel
+	var data *objstorageservice.AccesskeyResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return

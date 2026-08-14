@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
-	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
+	dbaasservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
@@ -118,7 +118,7 @@ func dataSourceDbaasPgSqlReadBackups(ctx context.Context, d *schema.ResourceData
 		return diagutil.ToDiags(d, fmt.Errorf("could not find backups for cluster with ID %s", idStr), nil)
 	}
 
-	if diags := dbaasService.SetPgSqlClusterBackupData(d, &clusterBackups); diags != nil {
+	if diags := dbaasservice.SetPgSqlClusterBackupData(d, &clusterBackups); diags != nil {
 		return diags
 	}
 

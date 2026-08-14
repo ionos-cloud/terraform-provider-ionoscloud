@@ -12,8 +12,8 @@ import (
 	dbaas "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2"
 )
 
-func (c *PsqlClient) GetClusterVersions(ctx context.Context, clusterId string) (dbaas.PostgresVersionList, *shared.APIResponse, error) {
-	versions, apiResponse, err := c.sdkClient.ClustersApi.ClustersVersionsGet(ctx, clusterId).Execute()
+func (c *PsqlClient) GetClusterVersions(ctx context.Context, clusterID string) (dbaas.PostgresVersionList, *shared.APIResponse, error) {
+	versions, apiResponse, err := c.sdkClient.ClustersApi.ClustersVersionsGet(ctx, clusterID).Execute()
 	return versions, apiResponse, err
 }
 
@@ -37,8 +37,8 @@ func SetPgSqlVersionsData(d *schema.ResourceData, postgresVersions dbaas.Postgre
 		}
 	}
 
-	resourceId := uuid.New()
-	d.SetId(resourceId.String())
+	resourceID := uuid.New()
+	d.SetId(resourceID.String())
 
 	return nil
 }

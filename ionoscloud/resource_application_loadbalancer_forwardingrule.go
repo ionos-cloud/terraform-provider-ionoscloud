@@ -239,10 +239,10 @@ func resourceApplicationLoadBalancerForwardingRuleCreate(ctx context.Context, d 
 		}
 	}
 
-	dcId := d.Get("datacenter_id").(string)
-	albId := d.Get("application_loadbalancer_id").(string)
+	dcID := d.Get("datacenter_id").(string)
+	albID := d.Get("application_loadbalancer_id").(string)
 
-	albForwardingRuleResp, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesPost(ctx, dcId, albId).ApplicationLoadBalancerForwardingRule(applicationLoadBalancerForwardingRule).Execute()
+	albForwardingRuleResp, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesPost(ctx, dcID, albID).ApplicationLoadBalancerForwardingRule(applicationLoadBalancerForwardingRule).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -272,11 +272,11 @@ func resourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d *s
 		return diag.FromErr(err)
 	}
 
-	dcId := d.Get("datacenter_id").(string)
+	dcID := d.Get("datacenter_id").(string)
 
-	albId := d.Get("application_loadbalancer_id").(string)
+	albID := d.Get("application_loadbalancer_id").(string)
 
-	applicationLoadBalancerForwardingRule, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesFindByForwardingRuleId(ctx, dcId, albId, d.Id()).Execute()
+	applicationLoadBalancerForwardingRule, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesFindByForwardingRuleId(ctx, dcID, albID, d.Id()).Execute()
 
 	if err != nil {
 		tflog.Info(ctx, "alb forwarding rule not found", map[string]any{"rule_id": d.Id(), "error": err.Error()})
@@ -305,8 +305,8 @@ func resourceApplicationLoadBalancerForwardingRuleUpdate(ctx context.Context, d 
 		Properties: &ionoscloud.ApplicationLoadBalancerForwardingRuleProperties{},
 	}
 
-	dcId := d.Get("datacenter_id").(string)
-	albId := d.Get("application_loadbalancer_id").(string)
+	dcID := d.Get("datacenter_id").(string)
+	albID := d.Get("application_loadbalancer_id").(string)
 
 	if d.HasChange("name") {
 		_, v := d.GetChange("name")
@@ -358,7 +358,7 @@ func resourceApplicationLoadBalancerForwardingRuleUpdate(ctx context.Context, d 
 		}
 	}
 
-	_, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesPatch(ctx, dcId, albId, d.Id()).ApplicationLoadBalancerForwardingRuleProperties(*request.Properties).Execute()
+	_, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesPatch(ctx, dcID, albID, d.Id()).ApplicationLoadBalancerForwardingRuleProperties(*request.Properties).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -382,10 +382,10 @@ func resourceApplicationLoadBalancerForwardingRuleDelete(ctx context.Context, d 
 		return diag.FromErr(err)
 	}
 
-	dcId := d.Get("datacenter_id").(string)
+	dcID := d.Get("datacenter_id").(string)
 	albID := d.Get("application_loadbalancer_id").(string)
 
-	apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesDelete(ctx, dcId, albID, d.Id()).Execute()
+	apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesDelete(ctx, dcID, albID, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -419,34 +419,34 @@ func resourceApplicationLoadBalancerForwardingRuleImport(ctx context.Context, d 
 		return nil, diagutil.ToError(d, fmt.Errorf("failed validating import identifier %q: %w", importID, err), nil)
 	}
 
-	datacenterId := parts[0]
-	albId := parts[1]
-	ruleId := parts[2]
+	datacenterID := parts[0]
+	albID := parts[1]
+	ruleID := parts[2]
 
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return nil, err
 	}
 
-	albForwardingRule, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterId, albId, ruleId).Execute()
+	albForwardingRule, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterID, albID, ruleID).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("unable to find alb forwarding rule %q", ruleId), nil)
+			return nil, diagutil.ToError(d, fmt.Errorf("unable to find alb forwarding rule %q", ruleID), nil)
 		}
-		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while retrieving the alb forwarding rule %q, %w", ruleId, err), nil)
+		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while retrieving the alb forwarding rule %q, %w", ruleID, err), nil)
 	}
 
-	if err := d.Set("datacenter_id", datacenterId); err != nil {
-		return nil, diagutil.ToError(d, fmt.Errorf("error while setting datacenter_id property for  alb forwarding rule %q: %w", ruleId, err), nil)
+	if err := d.Set("datacenter_id", datacenterID); err != nil {
+		return nil, diagutil.ToError(d, fmt.Errorf("error while setting datacenter_id property for  alb forwarding rule %q: %w", ruleID, err), nil)
 	}
-	if err := d.Set("application_loadbalancer_id", albId); err != nil {
-		return nil, diagutil.ToError(d, fmt.Errorf("error while setting application_loadbalancer_id property for  alb forwarding rule %q: %w", ruleId, err), nil)
+	if err := d.Set("application_loadbalancer_id", albID); err != nil {
+		return nil, diagutil.ToError(d, fmt.Errorf("error while setting application_loadbalancer_id property for  alb forwarding rule %q: %w", ruleID, err), nil)
 	}
 	if err := d.Set("location", location); err != nil {
-		return nil, fmt.Errorf("error while setting location property for imported alb forwarding rule %q: %w", ruleId, err)
+		return nil, fmt.Errorf("error while setting location property for imported alb forwarding rule %q: %w", ruleID, err)
 	}
 
 	if err := setApplicationLoadBalancerForwardingRuleData(d, &albForwardingRule); err != nil {

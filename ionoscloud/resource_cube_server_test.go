@@ -18,7 +18,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
-const bootCdromImageIdCube = "83f21679-3321-11eb-a681-1e659523cb7b"
+const bootCdromImageIDCube = "83f21679-3321-11eb-a681-1e659523cb7b"
 
 func TestAccCubeServerBasic(t *testing.T) {
 	var server ionoscloud.Server
@@ -66,7 +66,7 @@ func TestAccCubeServerBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDataSourceCubeServerMatchId,
+				Config: testAccDataSourceCubeServerMatchID,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceById, "name", constant.ServerCubeResource+"."+constant.ServerTestResource, "name"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceById, "hostname", constant.ServerCubeResource+"."+constant.ServerTestResource, "hostname"),
@@ -128,6 +128,22 @@ func TestAccCubeServerBasic(t *testing.T) {
 			{
 				Config:      testAccDataSourceCubeServerWrongNameError,
 				ExpectError: regexp.MustCompile(`no server found with the specified criteria: name`),
+			},
+			{
+				Config:      testAccDataSourceCubeServerBothIdAndNameError,
+				ExpectError: regexp.MustCompile(`ID and name cannot be both specified in the same time`),
+			},
+			{
+				Config:      testAccDataSourceCubeServerNoIdNoNameError,
+				ExpectError: regexp.MustCompile(`please provide either the server id or name`),
+			},
+			{
+				Config:      testAccDataSourceCubeServerWrongIdError,
+				ExpectError: regexp.MustCompile(`an error occurred while fetching the server with ID`),
+			},
+			{
+				Config:      testAccDataSourceCubeServerMultipleResultsError,
+				ExpectError: regexp.MustCompile(`more than one server found with the specified criteria: name`),
 			},
 			{
 				Config: testAccCheckCubeServerConfigUpdate,
@@ -359,7 +375,7 @@ func testAccCheckCubeServerDestroyCheck(s *terraform.State) error {
 			continue
 		}
 
-		dcId := rs.Primary.Attributes["datacenter_id"]
+		dcID := rs.Primary.Attributes["datacenter_id"]
 		location := rs.Primary.Attributes["location"]
 
 		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
@@ -367,7 +383,7 @@ func testAccCheckCubeServerDestroyCheck(s *terraform.State) error {
 			return err
 		}
 
-		_, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, dcId, rs.Primary.ID).Execute()
+		_, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, dcID, rs.Primary.ID).Execute()
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
@@ -483,7 +499,7 @@ resource ` + constant.ServerCubeResource + ` ` + constant.ServerTestResource + `
 }
 ` + ServerImagePasswordUpdated
 
-const testAccDataSourceCubeServerMatchId = testAccCheckCubeServerConfigBasic + `
+const testAccDataSourceCubeServerMatchID = testAccCheckCubeServerConfigBasic + `
 data ` + constant.ServerCubeResource + ` ` + constant.ServerDataSourceById + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   id			= ` + constant.ServerCubeResource + `.` + constant.ServerTestResource + `.id
@@ -500,6 +516,55 @@ const testAccDataSourceCubeServerWrongNameError = testAccCheckCubeServerConfigBa
 data ` + constant.ServerCubeResource + ` ` + constant.ServerDataSourceByName + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   name			= "wrong_name"
+}
+`
+
+const testAccDataSourceCubeServerBothIdAndNameError = testAccCheckCubeServerConfigBasic + `
+data ` + constant.ServerCubeResource + ` ` + constant.ServerDataSourceByName + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  id            = ` + constant.ServerCubeResource + `.` + constant.ServerTestResource + `.id
+  name          = "` + constant.ServerTestResource + `"
+}
+`
+
+const testAccDataSourceCubeServerNoIdNoNameError = testAccCheckCubeServerConfigBasic + `
+data ` + constant.ServerCubeResource + ` ` + constant.ServerDataSourceByName + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+}
+`
+
+const testAccDataSourceCubeServerWrongIdError = testAccCheckCubeServerConfigBasic + `
+data ` + constant.ServerCubeResource + ` ` + constant.ServerDataSourceById + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  id            = "00000000-0000-0000-0000-000000000000"
+}
+`
+
+const testAccDataSourceCubeServerMultipleResultsError = testAccCheckCubeServerConfigBasic + `
+resource ` + constant.ServerCubeResource + ` ` + constant.ServerTestResource + `_same_name {
+  template_uuid     = data.ionoscloud_template.` + constant.ServerTestResource + `.id
+  name = "` + constant.ServerTestResource + `"
+  hostname = "` + constant.ServerTestHostname + `"
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  image_name = "ubuntu:latest"
+  image_password = ` + constant.RandomPassword + `.server_image_password.result
+  volume {
+    name = "system"
+    licence_type = "LINUX"
+    disk_type = "DAS"
+  }
+  nic {
+    lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
+    name = "system"
+    dhcp = true
+    firewall_active = false
+  }
+}
+
+data ` + constant.ServerCubeResource + ` ` + constant.ServerDataSourceByName + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  name          = "` + constant.ServerTestResource + `"
+  depends_on    = [` + constant.ServerCubeResource + `.` + constant.ServerTestResource + `_same_name]
 }
 `
 
@@ -525,7 +590,7 @@ resource ` + constant.ServerCubeResource + ` ` + constant.ServerTestResource + `
   name = "` + constant.ServerTestResource + `"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   availability_zone = "AUTO"
-  boot_cdrom = "` + bootCdromImageIdCube + `" 
+  boot_cdrom = "` + bootCdromImageIDCube + `" 
   volume {
     name = "` + constant.ServerTestResource + `"
     disk_type = "DAS"

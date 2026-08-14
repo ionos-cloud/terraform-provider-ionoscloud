@@ -17,7 +17,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	autoscaling "github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2"
 
-	autoscalingService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/autoscaling"
+	autoscalingservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/autoscaling"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
@@ -894,7 +894,7 @@ func setAutoscalingGroupData(d *schema.ResourceData, groupProperties *autoscalin
 		//	if err := d.Set("target_replica_count", *groupProperties.TargetReplicaCount); err != nil {
 		//		return utils.GenerateSetError(resourceName, "target_replica_count", err)
 		//	}
-		//}
+		// }
 
 		if groupProperties.Name != nil {
 			if err := d.Set("name", *groupProperties.Name); err != nil {
@@ -1098,7 +1098,7 @@ func flattenVolume(d *schema.ResourceData, replicaVolumes []autoscaling.ReplicaV
 	}
 	return volumes
 }
-func actionReady(ctx context.Context, client *autoscalingService.Client, d *schema.ResourceData, actionID string) (bool, error) {
+func actionReady(ctx context.Context, client *autoscalingservice.Client, d *schema.ResourceData, actionID string) (bool, error) {
 
 	action, _, err := client.GetAction(ctx, d.Id(), actionID)
 	if err != nil {
@@ -1116,7 +1116,7 @@ func actionReady(ctx context.Context, client *autoscalingService.Client, d *sche
 }
 
 // checkAction gets the triggered action and waits for it to be ready
-func checkAction(ctx context.Context, client *autoscalingService.Client, d *schema.ResourceData) error {
+func checkAction(ctx context.Context, client *autoscalingservice.Client, d *schema.ResourceData) error {
 	actions, _, err := client.GetAllActions(ctx, d.Id())
 	if err != nil {
 		return fmt.Errorf("error fetching group actions: %w", err)

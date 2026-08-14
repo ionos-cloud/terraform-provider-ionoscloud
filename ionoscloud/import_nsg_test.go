@@ -24,7 +24,7 @@ func TestAccNSGImportBasic(t *testing.T) {
 
 			{
 				ResourceName:            constant.NSGResource + "." + constant.NSGTestResource,
-				ImportStateIdFunc:       testAccNSGImportStateId,
+				ImportStateIdFunc:       testAccNSGImportStateID,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"rule_ids", "location"},
@@ -33,7 +33,7 @@ func TestAccNSGImportBasic(t *testing.T) {
 	})
 }
 
-func testAccNSGImportStateId(s *terraform.State) (string, error) {
+func testAccNSGImportStateID(s *terraform.State) (string, error) {
 	importID := ""
 
 	for _, rs := range s.RootModule().Resources {

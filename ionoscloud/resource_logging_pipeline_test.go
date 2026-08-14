@@ -125,14 +125,14 @@ func testAccLoggingPipelineDestroyCheck(s *terraform.State) error {
 		if rs.Type != constant.LoggingPipelineResource {
 			continue
 		}
-		pipelineId := rs.Primary.ID
-		_, apiResponse, err := client.GetPipelineByID(ctx, rs.Primary.Attributes["location"], pipelineId)
+		pipelineID := rs.Primary.ID
+		_, apiResponse, err := client.GetPipelineByID(ctx, rs.Primary.Attributes["location"], pipelineID)
 		if err != nil {
 			if !apiResponse.HttpNotFound() {
-				return fmt.Errorf("an error occurred while checking the destruction of Logging pipeline with ID: %s, error: %w", pipelineId, err)
+				return fmt.Errorf("an error occurred while checking the destruction of Logging pipeline with ID: %s, error: %w", pipelineID, err)
 			}
 		} else {
-			return fmt.Errorf("Logging pipeline with ID: %s still exists", pipelineId)
+			return fmt.Errorf("Logging pipeline with ID: %s still exists", pipelineID)
 		}
 	}
 	return nil
@@ -151,10 +151,10 @@ func testAccLoggingPipelineExistenceCheck(path string, pipeline *logging.Pipelin
 		}
 		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
 		defer cancel()
-		pipelineId := rs.Primary.ID
-		pipelineResponse, _, err := client.GetPipelineByID(ctx, rs.Primary.Attributes["location"], pipelineId)
+		pipelineID := rs.Primary.ID
+		pipelineResponse, _, err := client.GetPipelineByID(ctx, rs.Primary.Attributes["location"], pipelineID)
 		if err != nil {
-			return fmt.Errorf("an error occurred while fetching Logging pipeline with ID: %s location %s, error: %w", pipelineId, rs.Primary.Attributes["location"], err)
+			return fmt.Errorf("an error occurred while fetching Logging pipeline with ID: %s location %s, error: %w", pipelineID, rs.Primary.Attributes["location"], err)
 		}
 		pipeline = &pipelineResponse
 		return nil

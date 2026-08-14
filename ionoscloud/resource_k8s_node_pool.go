@@ -317,14 +317,14 @@ func resourceK8sNodePoolUpgradeV0(_ context.Context, state map[string]any, _ any
 
 	var lans []any
 
-	for _, lanId := range oldData {
+	for _, lanID := range oldData {
 		// this condition is for handling the migration from a v5.X.X to v6.X.X  release, when the content of lans property
 		// is a list of floats. The content is mapped to the new v6.X.X lans structure
-		if reflect.TypeOf(lanId) == reflect.TypeFor[float64]() {
+		if reflect.TypeOf(lanID) == reflect.TypeFor[float64]() {
 
 			lanEntry := make(map[string]any)
 
-			lanEntry["id"] = lanId
+			lanEntry["id"] = lanID
 
 			// default value for dhcp
 			lanEntry["dhcp"] = true
@@ -352,7 +352,7 @@ func getLanResourceData(ctx context.Context, lansList *schema.Set) []ionoscloud.
 			lanContent := lanItem.(map[string]any)
 			lan := ionoscloud.KubernetesNodePoolLan{}
 
-			if lanID, lanIdOk := lanContent["id"].(int); lanIdOk {
+			if lanID, lanIDOk := lanContent["id"].(int); lanIDOk {
 				tflog.Info(ctx, "adding LAN to node pool", map[string]any{"lan_id": lanID})
 				lanID := int32(lanID)
 				lan.Id = &lanID
@@ -428,7 +428,7 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	name := d.Get("name").(string)
-	datacenterId := d.Get("datacenter_id").(string)
+	datacenterID := d.Get("datacenter_id").(string)
 	k8sVersion := d.Get("k8s_version").(string)
 	availabilityZone := d.Get("availability_zone").(string)
 	storageType := d.Get("storage_type").(string)
@@ -441,7 +441,7 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 		Properties: &ionoscloud.KubernetesNodePoolPropertiesForPost{
 			AvailabilityZone: &availabilityZone,
 			CoresCount:       &coresCount,
-			DatacenterId:     &datacenterId,
+			DatacenterId:     &datacenterID,
 			K8sVersion:       &k8sVersion,
 			Name:             &name,
 			NodeCount:        &nodeCount,
@@ -855,33 +855,33 @@ func resourceK8sNodepoolImport(ctx context.Context, d *schema.ResourceData, meta
 		return nil, diagutil.ToError(d, fmt.Errorf("failed validating import identifier %q: %w", importID, err), nil)
 	}
 
-	clusterId := parts[0]
-	npId := parts[1]
+	clusterID := parts[0]
+	npID := parts[1]
 
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return nil, err
 	}
-	k8sNodepool, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, clusterId, npId).Execute()
+	k8sNodepool, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, clusterID, npID).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
 		if _, ok := err.(ionoscloud.GenericOpenAPIError); ok {
 			if httpNotFound(apiResponse) {
 				d.SetId("")
-				return nil, diagutil.ToError(d, fmt.Errorf("unable to find k8s node pool %q", npId), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+				return nil, diagutil.ToError(d, fmt.Errorf("unable to find k8s node pool %q", npID), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 			}
 		}
-		return nil, diagutil.ToError(d, fmt.Errorf("unable to retrieve k8s node pool %q, error:%w", npId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return nil, diagutil.ToError(d, fmt.Errorf("unable to retrieve k8s node pool %q, error:%w", npID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	tflog.Info(ctx, "k8s node pool imported", map[string]any{"node_pool_id": npId, "cluster_id": clusterId})
+	tflog.Info(ctx, "k8s node pool imported", map[string]any{"node_pool_id": npID, "cluster_id": clusterID})
 
-	if err := d.Set("k8s_cluster_id", clusterId); err != nil {
-		return nil, diagutil.ToError(d, fmt.Errorf("error while setting k8s_cluster_id property for k8s node pool %q: %w", npId, err), nil)
+	if err := d.Set("k8s_cluster_id", clusterID); err != nil {
+		return nil, diagutil.ToError(d, fmt.Errorf("error while setting k8s_cluster_id property for k8s node pool %q: %w", npID, err), nil)
 	}
 	if err := d.Set("location", location); err != nil {
-		return nil, diagutil.ToError(d, fmt.Errorf("error while setting location property for k8s node pool %q: %w", npId, err), nil)
+		return nil, diagutil.ToError(d, fmt.Errorf("error while setting location property for k8s node pool %q: %w", npID, err), nil)
 	}
 
 	if err := setK8sNodePoolData(d, &k8sNodepool); err != nil {

@@ -40,7 +40,7 @@ func TestAccK8sClusterBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDataSourceK8sClusterMatchId,
+				Config: testAccDataSourceK8sClusterMatchID,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClusterResource+"."+constant.K8sClusterDataSourceByID, "name", constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "name"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.K8sClusterResource+"."+constant.K8sClusterDataSourceByID, "k8s_version", constant.K8sClusterResource+"."+constant.K8sClusterTestResource, "k8s_version"),
@@ -123,7 +123,7 @@ func TestAccK8sClusterPrivate(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDataSourcePrivateK8sClusterMatchId,
+				Config: testAccDataSourcePrivateK8sClusterMatchID,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckK8sClusterExists(constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, &k8sCluster),
 					resource.TestCheckResourceAttr(constant.DataSource+"."+constant.K8sClusterResource+"."+constant.PrivateK8sClusterTestResource, "name", constant.PrivateK8sClusterTestResource),
@@ -342,13 +342,13 @@ resource ` + constant.K8sClusterResource + ` ` + constant.PrivateK8sClusterTestR
   node_subnet = "` + K8sPrivateClusterNodeSubnet + `"
 }`
 
-const testAccDataSourceK8sClusterMatchId = testAccCheckK8sClusterConfigBasic + `
+const testAccDataSourceK8sClusterMatchID = testAccCheckK8sClusterConfigBasic + `
 data ` + constant.K8sClusterResource + ` ` + constant.K8sClusterDataSourceByID + `{
   id	= ` + constant.K8sClusterResource + `.` + constant.K8sClusterTestResource + `.id
 }
 `
 
-const testAccDataSourcePrivateK8sClusterMatchId = testAccCheckK8sClusterConfigPrivateCluster + `
+const testAccDataSourcePrivateK8sClusterMatchID = testAccCheckK8sClusterConfigPrivateCluster + `
 data ` + constant.K8sClusterResource + ` ` + constant.PrivateK8sClusterTestResource + `{
   id	= ` + constant.K8sClusterResource + `.` + constant.PrivateK8sClusterTestResource + `.id
 }

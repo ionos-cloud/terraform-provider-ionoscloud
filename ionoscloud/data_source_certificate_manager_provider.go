@@ -8,11 +8,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	certSDK "github.com/ionos-cloud/sdk-go-bundle/products/cert/v2"
+	certsdk "github.com/ionos-cloud/sdk-go-bundle/products/cert/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
-	certService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
+	certservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cert"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
@@ -80,7 +80,7 @@ func dataSourceProviderRead(ctx context.Context, d *schema.ResourceData, meta an
 		return diagutil.ToDiags(d, fmt.Errorf("please provide either the auto-certificate provider ID or name"), nil)
 	}
 
-	var provider certSDK.ProviderRead
+	var provider certsdk.ProviderRead
 	var apiResponse *shared.APIResponse
 	var err error
 
@@ -95,7 +95,7 @@ func dataSourceProviderRead(ctx context.Context, d *schema.ResourceData, meta an
 		if err != nil {
 			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching auto-certificate providers: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
-		var results []certSDK.ProviderRead
+		var results []certsdk.ProviderRead
 		if providers.Items != nil {
 			for _, providerItem := range providers.Items {
 				if strings.EqualFold(providerItem.Properties.Name, name.(string)) {
@@ -113,7 +113,7 @@ func dataSourceProviderRead(ctx context.Context, d *schema.ResourceData, meta an
 		provider = results[0]
 	}
 
-	if err := certService.SetProviderData(d, provider); err != nil {
+	if err := certservice.SetProviderData(d, provider); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
 

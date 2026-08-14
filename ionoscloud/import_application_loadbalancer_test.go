@@ -26,7 +26,7 @@ func TestAccApplicationLoadBalancerImportBasic(t *testing.T) {
 
 			{
 				ResourceName:            resourceNameAlb,
-				ImportStateIdFunc:       testAccApplicationLoadBalancerImportStateId,
+				ImportStateIdFunc:       testAccApplicationLoadBalancerImportStateID,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location"},
@@ -35,7 +35,7 @@ func TestAccApplicationLoadBalancerImportBasic(t *testing.T) {
 	})
 }
 
-func testAccApplicationLoadBalancerImportStateId(s *terraform.State) (string, error) {
+func testAccApplicationLoadBalancerImportStateID(s *terraform.State) (string, error) {
 	importID := ""
 
 	for _, rs := range s.RootModule().Resources {

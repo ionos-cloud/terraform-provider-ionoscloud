@@ -25,7 +25,7 @@ func TestAccIpFailoverImportBasic(t *testing.T) {
 			},
 			{
 				ResourceName:            fmt.Sprintf("ionoscloud_ipfailover.%s", constant.IpfailoverName),
-				ImportStateIdFunc:       testAccIpFailoverImportStateId,
+				ImportStateIdFunc:       testAccIpFailoverImportStateID,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location"},
@@ -34,7 +34,7 @@ func TestAccIpFailoverImportBasic(t *testing.T) {
 	})
 }
 
-func testAccIpFailoverImportStateId(s *terraform.State) (string, error) {
+func testAccIpFailoverImportStateID(s *terraform.State) (string, error) {
 	importID := ""
 
 	for _, rs := range s.RootModule().Resources {

@@ -13,8 +13,8 @@ import (
 )
 
 // GetCertificate gets a certificate
-func (c *Client) GetCertificate(ctx context.Context, certId string) (certmanager.CertificateRead, *shared.APIResponse, error) {
-	cert, apiResponse, err := c.sdkClient.CertificateApi.CertificatesFindById(ctx, certId).Execute()
+func (c *Client) GetCertificate(ctx context.Context, certID string) (certmanager.CertificateRead, *shared.APIResponse, error) {
+	cert, apiResponse, err := c.sdkClient.CertificateApi.CertificatesFindById(ctx, certID).Execute()
 	apiResponse.LogInfo()
 	return cert, apiResponse, err
 }
@@ -34,15 +34,15 @@ func (c *Client) CreateCertificate(ctx context.Context, certPostDto certmanager.
 }
 
 // UpdateCertificate updates a certificate
-func (c *Client) UpdateCertificate(ctx context.Context, certId string, certPatch certmanager.CertificatePatch) (certmanager.CertificateRead, *shared.APIResponse, error) {
-	certResponse, apiResponse, err := c.sdkClient.CertificateApi.CertificatesPatch(ctx, certId).CertificatePatch(certPatch).Execute()
+func (c *Client) UpdateCertificate(ctx context.Context, certID string, certPatch certmanager.CertificatePatch) (certmanager.CertificateRead, *shared.APIResponse, error) {
+	certResponse, apiResponse, err := c.sdkClient.CertificateApi.CertificatesPatch(ctx, certID).CertificatePatch(certPatch).Execute()
 	apiResponse.LogInfo()
 	return certResponse, apiResponse, err
 }
 
 // DeleteCertificate deletes a certificate
-func (c *Client) DeleteCertificate(ctx context.Context, certId string) (*shared.APIResponse, error) {
-	apiResponse, err := c.sdkClient.CertificateApi.CertificatesDelete(ctx, certId).Execute()
+func (c *Client) DeleteCertificate(ctx context.Context, certID string) (*shared.APIResponse, error) {
+	apiResponse, err := c.sdkClient.CertificateApi.CertificatesDelete(ctx, certID).Execute()
 	apiResponse.LogInfo()
 	return apiResponse, err
 }

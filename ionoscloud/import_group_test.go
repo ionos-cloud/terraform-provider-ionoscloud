@@ -26,7 +26,7 @@ func TestAccGroupImportBasic(t *testing.T) {
 
 			{
 				ResourceName:            constant.GroupResource + "." + constant.GroupTestResource,
-				ImportStateIdFunc:       testAccGroupImportStateId,
+				ImportStateIdFunc:       testAccGroupImportStateID,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"user_id", "group_ids"},
@@ -35,7 +35,7 @@ func TestAccGroupImportBasic(t *testing.T) {
 	})
 }
 
-func testAccGroupImportStateId(s *terraform.State) (string, error) {
+func testAccGroupImportStateID(s *terraform.State) (string, error) {
 	importID := ""
 
 	for _, rs := range s.RootModule().Resources {

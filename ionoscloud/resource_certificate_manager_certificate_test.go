@@ -47,7 +47,7 @@ func TestAccCertificateResAndDataSource(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.CertificateResource+"."+constant.TestCertName, "certificate", constant.DataSource+"."+constant.CertificateResource+"."+constant.TestCertName, "certificate")),
 			},
 			{
-				Config: testAccCheckDataSourceById,
+				Config: testAccCheckDataSourceByID,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(constant.CertificateResource+"."+constant.TestCertName, "certificate", constant.DataSource+"."+constant.CertificateResource+"."+constant.TestCertName, "certificate")),
 			},
@@ -134,7 +134,7 @@ EOT
 name ="` + constant.TestCertName + `1"
 }
 `
-	testAccCheckDataSourceById = `
+	testAccCheckDataSourceByID = `
 resource ` + constant.CertificateResource + ` ` + constant.TestCertName + ` {
 	name        	  = "` + constant.TestCertName + `1"
 	certificate 	  = <<EOT

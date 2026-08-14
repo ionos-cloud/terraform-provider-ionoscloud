@@ -27,7 +27,7 @@ func TestAccFirewallImportBasic(t *testing.T) {
 
 			{
 				ResourceName:            constant.FirewallResource + "." + constant.FirewallTestResource,
-				ImportStateIdFunc:       testAccFirewallImportStateId,
+				ImportStateIdFunc:       testAccFirewallImportStateID,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location"},
@@ -36,7 +36,7 @@ func TestAccFirewallImportBasic(t *testing.T) {
 	})
 }
 
-func testAccFirewallImportStateId(s *terraform.State) (string, error) {
+func testAccFirewallImportStateID(s *terraform.State) (string, error) {
 	var importID = ""
 
 	for _, rs := range s.RootModule().Resources {

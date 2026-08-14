@@ -9,6 +9,7 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapilocation"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
@@ -119,7 +120,7 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta an
 		return diagutil.ToDiags(d, fmt.Errorf("id and name cannot be both specified in the same time"), nil)
 	}
 	if !idOk && !nameOk {
-		return diagutil.ToDiags(d, fmt.Errorf("please provide either the server id or name"), nil)
+		return diagutil.ToDiags(d, fmt.Errorf("please provide either the snapshot id or name"), nil)
 	}
 
 	var snapshot ionoscloud.Snapshot
@@ -139,7 +140,7 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta an
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching IONOS CLOUD locations %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching IONOS CLOUD snapshots: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 
 		if snapshots.Items != nil {
@@ -151,12 +152,13 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta an
 		}
 
 		if locationOk {
+			// Accept snapshots from the requested location or its parent location.
+			locationIDs := cloudapilocation.ResolveParentLocation(ctx, client, location.(string))
 			var locationResults []ionoscloud.Snapshot
 			for _, snp := range results {
-				if *snp.Properties.Location == location.(string) {
+				if snp.Properties != nil && snp.Properties.Location != nil && cloudapilocation.LocationInSet(locationIDs, *snp.Properties.Location) {
 					locationResults = append(locationResults, snp)
 				}
-
 			}
 			results = locationResults
 		}

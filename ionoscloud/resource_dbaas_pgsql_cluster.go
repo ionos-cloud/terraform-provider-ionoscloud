@@ -14,7 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
+	dbaasservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
@@ -192,10 +192,9 @@ func resourceDbaasPgSqlCluster() *schema.Resource {
 				},
 			},
 			"synchronization_mode": {
-				Type:             schema.TypeString,
-				Description:      "Represents different modes of replication.",
-				Required:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"ASYNCHRONOUS", "SYNCHRONOUS", "STRICTLY_SYNCHRONOUS"}, false)),
+				Type:        schema.TypeString,
+				Description: "Represents different modes of replication.",
+				Required:    true,
 			},
 			"from_backup": {
 				Type:        schema.TypeList,
@@ -272,7 +271,7 @@ func resourceDbaasPgSqlClusterCreate(ctx context.Context, d *schema.ResourceData
 		return diag.FromErr(err)
 	}
 
-	dbaasCluster, err := dbaasService.GetPgSqlClusterDataCreate(d)
+	dbaasCluster, err := dbaasservice.GetPgSqlClusterDataCreate(d)
 
 	if err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -311,7 +310,7 @@ func resourceDbaasPgSqlClusterRead(ctx context.Context, d *schema.ResourceData, 
 
 	tflog.Info(ctx, "retrieved PgSQL cluster", map[string]any{"cluster_id": d.Id()})
 
-	if err := dbaasService.SetPgSqlClusterData(d, cluster, false); err != nil {
+	if err := dbaasservice.SetPgSqlClusterData(d, cluster, false); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
 
@@ -324,7 +323,7 @@ func resourceDbaasPgSqlClusterUpdate(ctx context.Context, d *schema.ResourceData
 		return diag.FromErr(err)
 	}
 
-	cluster, diags := dbaasService.GetPgSqlClusterDataUpdate(d)
+	cluster, diags := dbaasservice.GetPgSqlClusterDataUpdate(d)
 	if diags != nil {
 		return diags
 	}
@@ -389,21 +388,21 @@ func resourceDbaasPgSqlClusterImport(ctx context.Context, d *schema.ResourceData
 		return nil, err
 	}
 
-	clusterId := parts[0]
+	clusterID := parts[0]
 
-	dbaasCluster, apiResponse, err := client.GetCluster(ctx, clusterId)
+	dbaasCluster, apiResponse, err := client.GetCluster(ctx, clusterID)
 
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("dbaas cluster does not exist %q", clusterId), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return nil, diagutil.ToError(d, fmt.Errorf("dbaas cluster does not exist %q", clusterID), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
-		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the import of dbaas cluster %q, error:%w", clusterId, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the import of dbaas cluster %q, error:%w", clusterID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	tflog.Info(ctx, "PgSQL cluster imported", map[string]any{"cluster_id": clusterId})
+	tflog.Info(ctx, "PgSQL cluster imported", map[string]any{"cluster_id": clusterID})
 
-	if err := dbaasService.SetPgSqlClusterData(d, dbaasCluster, false); err != nil {
+	if err := dbaasservice.SetPgSqlClusterData(d, dbaasCluster, false); err != nil {
 		return nil, diagutil.ToError(d, err, nil)
 	}
 

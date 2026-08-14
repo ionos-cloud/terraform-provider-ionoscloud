@@ -8,6 +8,7 @@ linters:
     - contextcheck
     - durationcheck
     - errchkjson
+    - errname
     - errorlint
     - exhaustive
     - gocheckcompilerdirectives
@@ -17,24 +18,33 @@ linters:
     - gocyclo
     - gosec
     - gosmopolitan
+    - intrange
     - loggercheck
     - makezero
     - misspell
+    - modernize
     - musttag
     - nakedret
     - nilerr
     - nilnesserr
     - noctx
+    - nolintlint
+    - nosprintfhostport
     - prealloc
+    - predeclared
     - protogetter
     - reassign
     - recvcheck
+    - revive
     - rowserrcheck
     - spancheck
     - sqlclosecheck
+    - tagalign
     - testifylint
     - unconvert
     - unparam
+    - usestdlibvars
+    - wastedassign
     - zerologlint
   settings:
     dupl:
@@ -42,6 +52,8 @@ linters:
     errcheck:
       check-type-assertions: false
       check-blank: false
+      exclude-functions:
+        - (*github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema.ResourceData).Set
     goconst:
       min-len: 3
       min-occurrences: 5
@@ -67,6 +79,20 @@ linters:
       for-loops: false
     unparam:
       check-exported: false
+    nolintlint:
+      require-explanation: true
+      require-specific: true
+    tagalign:
+      sort: true
+      order:
+        - json
+        - tfsdk
+        - mapstructure
+    revive:
+      rules:
+        - name: import-alias-naming
+          arguments:
+            - allowRegex: "^[a-z][a-z0-9]*$"
   exclusions:
     generated: lax
     rules:

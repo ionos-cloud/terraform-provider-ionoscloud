@@ -66,12 +66,12 @@ func pgSqlUserExistsCheck(path string, user *pgsql.UserResource) resource.TestCh
 		if err != nil {
 			return err
 		}
-		clusterId := rs.Primary.Attributes["cluster_id"]
+		clusterID := rs.Primary.Attributes["cluster_id"]
 		username := rs.Primary.Attributes["username"]
-		foundUser, apiResponse, err := client.FindUserByUsername(ctx, clusterId, username)
+		foundUser, apiResponse, err := client.FindUserByUsername(ctx, clusterID, username)
 		apiResponse.LogInfo()
 		if err != nil {
-			return fmt.Errorf("error occurred while fetching the PgSql user: %s, cluster ID: %s, error: %w", username, clusterId, err)
+			return fmt.Errorf("error occurred while fetching the PgSql user: %s, cluster ID: %s, error: %w", username, clusterID, err)
 		}
 		user = &foundUser
 		return nil
@@ -90,16 +90,16 @@ func pgSqlUserDestroyCheck(s *terraform.State) error {
 		if err != nil {
 			return err
 		}
-		clusterId := rs.Primary.Attributes["cluster_id"]
+		clusterID := rs.Primary.Attributes["cluster_id"]
 		username := rs.Primary.Attributes["username"]
-		_, apiResponse, err := client.FindUserByUsername(ctx, clusterId, username)
+		_, apiResponse, err := client.FindUserByUsername(ctx, clusterID, username)
 		apiResponse.LogInfo()
 		if err != nil {
 			if !apiResponse.HttpNotFound() {
-				return fmt.Errorf("an error occurred while checking the deletion of PgSql username: %s, cluster ID: %s, error: %w", username, clusterId, err)
+				return fmt.Errorf("an error occurred while checking the deletion of PgSql username: %s, cluster ID: %s, error: %w", username, clusterID, err)
 			}
 		} else {
-			return fmt.Errorf("PgSql user %s still exists in the cluster with ID: %s", username, clusterId)
+			return fmt.Errorf("PgSql user %s still exists in the cluster with ID: %s", username, clusterID)
 		}
 	}
 	return nil
@@ -155,7 +155,7 @@ resource ` + constant.PsqlClusterResource + ` ` + constant.DBaaSClusterTestResou
 }
 
 resource ` + constant.PsqlUserResource + ` ` + constant.UserTestResource + ` {
-  ` + clusterIdAttribute + ` = ` + constant.PsqlClusterResource + `.` + constant.DBaaSClusterTestResource + `.id 
+  ` + clusterIDAttribute + ` = ` + constant.PsqlClusterResource + `.` + constant.DBaaSClusterTestResource + `.id 
   ` + usernameAttribute + ` = "` + usernameValue + `"
   ` + passwordAttribute + ` = ` + constant.RandomPassword + `.user_password.result
 }
@@ -175,14 +175,14 @@ resource ` + constant.RandomPassword + ` "user_password" {
 
 const PgSqlUserDataSource = PgSqlUserConfig + `
 data ` + constant.PsqlUserResource + ` ` + constant.UserDataSourceByName + ` {
-  ` + clusterIdAttribute + ` = ` + constant.PsqlClusterResource + `.` + constant.DBaaSClusterTestResource + `.id  
+  ` + clusterIDAttribute + ` = ` + constant.PsqlClusterResource + `.` + constant.DBaaSClusterTestResource + `.id  
   username = ` + constant.PsqlUserResource + `.` + constant.UserTestResource + `.username
 }
 `
 
 const PgSqlUserDataSourceWrongUsername = PgSqlUserConfig + `
 data ` + constant.PsqlUserResource + ` ` + constant.UserDataSourceByName + ` {
-  ` + clusterIdAttribute + ` = ` + constant.PsqlClusterResource + `.` + constant.DBaaSClusterTestResource + `.id  
+  ` + clusterIDAttribute + ` = ` + constant.PsqlClusterResource + `.` + constant.DBaaSClusterTestResource + `.id  
   username = "nonexistent"
 }
 `

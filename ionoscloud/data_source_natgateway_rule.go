@@ -106,13 +106,13 @@ func dataSourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	datacenterId, dcIdOk := d.GetOk("datacenter_id")
-	if !dcIdOk {
+	datacenterID, dcIDOk := d.GetOk("datacenter_id")
+	if !dcIDOk {
 		return diagutil.ToDiags(d, fmt.Errorf("no datacenter_id was specified"), nil)
 	}
 
-	natgatewayId, ngIdOk := d.GetOk("natgateway_id")
-	if !ngIdOk {
+	natgatewayID, ngIDOk := d.GetOk("natgateway_id")
+	if !ngIDOk {
 		return diagutil.ToDiags(d, fmt.Errorf("no natgateway_id was specified"), nil)
 	}
 
@@ -131,7 +131,7 @@ func dataSourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, m
 
 	if idOk {
 		/* search by ID */
-		natGatewayRule, apiResponse, err = client.NATGatewaysApi.DatacentersNatgatewaysRulesFindByNatGatewayRuleId(ctx, datacenterId.(string), natgatewayId.(string), id.(string)).Execute()
+		natGatewayRule, apiResponse, err = client.NATGatewaysApi.DatacentersNatgatewaysRulesFindByNatGatewayRuleId(ctx, datacenterID.(string), natgatewayID.(string), id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
 			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the nat gateway rule %s: %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
@@ -140,7 +140,7 @@ func dataSourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, m
 		/* search by name */
 		var natGatewayRules ionoscloud.NatGatewayRules
 
-		natGatewayRules, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesGet(ctx, datacenterId.(string), natgatewayId.(string)).Depth(1).Execute()
+		natGatewayRules, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesGet(ctx, datacenterID.(string), natgatewayID.(string)).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
 			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching nat gateway rules: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
@@ -150,7 +150,7 @@ func dataSourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, m
 		if natGatewayRules.Items != nil {
 			for _, ngr := range *natGatewayRules.Items {
 				if ngr.Properties != nil && ngr.Properties.Name != nil && strings.EqualFold(*ngr.Properties.Name, name.(string)) {
-					tmpNatGatewayRule, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesFindByNatGatewayRuleId(ctx, datacenterId.(string), natgatewayId.(string), *ngr.Id).Execute()
+					tmpNatGatewayRule, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesFindByNatGatewayRuleId(ctx, datacenterID.(string), natgatewayID.(string), *ngr.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {
 						return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching nat gateway rule with ID %s: %w", *ngr.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})

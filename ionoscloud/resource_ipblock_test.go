@@ -19,7 +19,7 @@ import (
 
 const fullIpBlockResourceName = constant.IpBlockResource + "." + constant.IpBlockTestResource
 
-var dataSourceIpBlockNameById = fmt.Sprintf("%s.%s.%s", constant.DataSource, constant.IpBlockResource, constant.IpBlockDataSourceById)
+var dataSourceIpBlockNameByID = fmt.Sprintf("%s.%s.%s", constant.DataSource, constant.IpBlockResource, constant.IpBlockDataSourceById)
 var dataSourceIpBlockNameMatching = fmt.Sprintf("%s.%s.%s", constant.DataSource, constant.IpBlockResource, constant.IpBlockDataSourceMatching)
 var dataSourceIpBlockNameMatchName = fmt.Sprintf("%s.%s.%s", constant.DataSource, constant.IpBlockResource, constant.IpBlockDataSourceByName)
 
@@ -44,13 +44,13 @@ func TestAccIPBlockBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(fullIpBlockResourceName, "size", "1"),
 				),
 			}, {
-				Config: testAccDataSourceIpBlockMatchId,
+				Config: testAccDataSourceIpBlockMatchID,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(dataSourceIpBlockNameById, "name", fullIpBlockResourceName, "name"),
-					resource.TestCheckResourceAttrPair(dataSourceIpBlockNameById, "location", fullIpBlockResourceName, "location"),
-					resource.TestCheckResourceAttrPair(dataSourceIpBlockNameById, "size", fullIpBlockResourceName, "size"),
-					resource.TestCheckResourceAttrPair(dataSourceIpBlockNameById, "ips", fullIpBlockResourceName, "ips"),
-					resource.TestCheckResourceAttrPair(dataSourceIpBlockNameById, "ip_consumers", fullIpBlockResourceName, "ip_consumers"),
+					resource.TestCheckResourceAttrPair(dataSourceIpBlockNameByID, "name", fullIpBlockResourceName, "name"),
+					resource.TestCheckResourceAttrPair(dataSourceIpBlockNameByID, "location", fullIpBlockResourceName, "location"),
+					resource.TestCheckResourceAttrPair(dataSourceIpBlockNameByID, "size", fullIpBlockResourceName, "size"),
+					resource.TestCheckResourceAttrPair(dataSourceIpBlockNameByID, "ips", fullIpBlockResourceName, "ips"),
+					resource.TestCheckResourceAttrPair(dataSourceIpBlockNameByID, "ip_consumers", fullIpBlockResourceName, "ip_consumers"),
 				),
 			},
 			{
@@ -90,8 +90,20 @@ func TestAccIPBlockBasic(t *testing.T) {
 				ExpectError: regexp.MustCompile(`no ip block found with the specified criteria`),
 			},
 			{
-				Config:      testIpBlockGoodIdLocationError,
+				Config:      testIpBlockGoodIDLocationError,
 				ExpectError: regexp.MustCompile(`location of ip block`),
+			},
+			{
+				Config:      testAccDataSourceIpBlockNoFilterError,
+				ExpectError: regexp.MustCompile(`either id, location or name must be set`),
+			},
+			{
+				Config:      testAccDataSourceIpBlockWrongIdError,
+				ExpectError: regexp.MustCompile(`error getting ip block with id`),
+			},
+			{
+				Config:      testAccDataSourceIpBlockGoodIdNameError,
+				ExpectError: regexp.MustCompile(`name of ip block \(UUID=.+, name=.+\) does not match expected name`),
 			},
 			{
 				Config: testAccCheckIPBlockConfigUpdate,
@@ -199,7 +211,7 @@ resource ` + constant.IpBlockResource + ` ` + constant.IpBlockTestResource + `{
   name = "` + constant.UpdatedResources + `"
 }`
 
-const testAccDataSourceIpBlockMatchId = testAccCheckIPBlockConfigBasic + `
+const testAccDataSourceIpBlockMatchID = testAccCheckIPBlockConfigBasic + `
 data ` + constant.IpBlockResource + `  ` + constant.IpBlockDataSourceById + ` {
 	id = ` + fullIpBlockResourceName + `.id 
 }
@@ -241,8 +253,23 @@ data ` + constant.IpBlockResource + ` ` + constant.IpBlockDataSourceByName + ` {
 	location = "none"
 }`
 
-const testIpBlockGoodIdLocationError = testAccCheckIPBlockConfigBasic + `
+const testIpBlockGoodIDLocationError = testAccCheckIPBlockConfigBasic + `
 data ` + constant.IpBlockResource + ` ` + constant.IpBlockDataSourceByName + ` {
     id = ` + fullIpBlockResourceName + `.id
 	location = "none"
+}`
+
+const testAccDataSourceIpBlockNoFilterError = testAccCheckIPBlockConfigBasic + `
+data ` + constant.IpBlockResource + ` ` + constant.IpBlockDataSourceByName + ` {
+}`
+
+const testAccDataSourceIpBlockWrongIdError = testAccCheckIPBlockConfigBasic + `
+data ` + constant.IpBlockResource + ` ` + constant.IpBlockDataSourceById + ` {
+    id = "00000000-0000-0000-0000-000000000000"
+}`
+
+const testAccDataSourceIpBlockGoodIdNameError = testAccCheckIPBlockConfigBasic + `
+data ` + constant.IpBlockResource + ` ` + constant.IpBlockDataSourceByName + ` {
+    id   = ` + fullIpBlockResourceName + `.id
+    name = "wrong_name"
 }`

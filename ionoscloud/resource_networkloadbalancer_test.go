@@ -19,7 +19,7 @@ import (
 
 const networkLoadBalancerResource = constant.NetworkLoadBalancerResource + "." + constant.NetworkLoadBalancerTestResource
 
-const dataSourceNetworkLoadBalancerId = constant.DataSource + "." + constant.NetworkLoadBalancerResource + "." + constant.NetworkLoadBalancerDataSourceById
+const dataSourceNetworkLoadBalancerID = constant.DataSource + "." + constant.NetworkLoadBalancerResource + "." + constant.NetworkLoadBalancerDataSourceById
 const dataSourceNetworkLoadBalancerName = constant.DataSource + "." + constant.NetworkLoadBalancerResource + "." + constant.NetworkLoadBalancerDataSourceByName
 
 func TestAccNetworkLoadBalancerBasic(t *testing.T) {
@@ -65,19 +65,19 @@ func TestAccNetworkLoadBalancerBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDataSourceNetworkLoadBalancerMatchId,
+				Config: testAccDataSourceNetworkLoadBalancerMatchID,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "name", dataSourceNetworkLoadBalancerId, "name"),
-					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "listener_lan", dataSourceNetworkLoadBalancerId, "listener_lan"),
-					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "ips", dataSourceNetworkLoadBalancerId, "ips"),
-					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "target_lan", dataSourceNetworkLoadBalancerId, "target_lan"),
-					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "lb_private_ips", dataSourceNetworkLoadBalancerId, "lb_private_ips"),
+					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "name", dataSourceNetworkLoadBalancerID, "name"),
+					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "listener_lan", dataSourceNetworkLoadBalancerID, "listener_lan"),
+					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "ips", dataSourceNetworkLoadBalancerID, "ips"),
+					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "target_lan", dataSourceNetworkLoadBalancerID, "target_lan"),
+					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "lb_private_ips", dataSourceNetworkLoadBalancerID, "lb_private_ips"),
 					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "central_logging", "true", "central_logging"),
 					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "logging_format", `%{+Q}o %{-Q}ci - - [%trg] %r %ST %B "" "" %cp %ms %ft %b %s %TR %Tw %Tc %Tr %Ta %tsc %ac %fc %bc %sc %rc %sq %bq %CC %CS %hrl %hsl`, "logging_format"),
-					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerId, "flowlog.0.name", networkLoadBalancerResource, "flowlog.0.name"),
-					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerId, "flowlog.0.action", networkLoadBalancerResource, "flowlog.0.action"),
-					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerId, "flowlog.0.direction", networkLoadBalancerResource, "flowlog.0.direction"),
-					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerId, "flowlog.0.direction", networkLoadBalancerResource, "flowlog.0.direction"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerID, "flowlog.0.name", networkLoadBalancerResource, "flowlog.0.name"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerID, "flowlog.0.action", networkLoadBalancerResource, "flowlog.0.action"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerID, "flowlog.0.direction", networkLoadBalancerResource, "flowlog.0.direction"),
+					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerID, "flowlog.0.direction", networkLoadBalancerResource, "flowlog.0.direction"),
 				),
 			},
 			{
@@ -311,7 +311,7 @@ resource ` + constant.NetworkLoadBalancerResource + ` ` + constant.NetworkLoadBa
 }
 `
 
-const testAccDataSourceNetworkLoadBalancerMatchId = testAccCheckNetworkLoadBalancerConfigBasic + `
+const testAccDataSourceNetworkLoadBalancerMatchID = testAccCheckNetworkLoadBalancerConfigBasic + `
 data ` + constant.NetworkLoadBalancerResource + ` ` + constant.NetworkLoadBalancerDataSourceById + ` {
   datacenter_id = ` + constant.NetworkLoadBalancerResource + `.` + constant.NetworkLoadBalancerTestResource + `.datacenter_id
   id            = ` + constant.NetworkLoadBalancerResource + `.` + constant.NetworkLoadBalancerTestResource + `.id

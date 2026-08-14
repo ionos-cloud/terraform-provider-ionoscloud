@@ -6,11 +6,11 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	psql "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
-	dbaasService "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
+	dbaasservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
@@ -59,7 +59,7 @@ func dataSourceDbaasPgSqlReadVersions(ctx context.Context, d *schema.ResourceDat
 		}
 	}
 
-	dbaasService.SetPgSqlVersionsData(d, postgresVersions)
+	dbaasservice.SetPgSqlVersionsData(d, postgresVersions)
 
 	return nil
 

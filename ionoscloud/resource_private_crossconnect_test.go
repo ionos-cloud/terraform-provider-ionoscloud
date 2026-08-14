@@ -36,7 +36,7 @@ func TestAccPrivateCrossConnectBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccDataSourcePccMatchId,
+				Config: testAccDataSourcePccMatchID,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PCCResource+"."+constant.PCCDataSourceById, "name", constant.PCCResource+"."+constant.PCCTestResource, "name"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.PCCResource+"."+constant.PCCDataSourceById, "description", constant.PCCResource+"."+constant.PCCTestResource, "description"),
@@ -60,6 +60,18 @@ func TestAccPrivateCrossConnectBasic(t *testing.T) {
 			{
 				Config:      testAccDataSourcePccWrongNameError,
 				ExpectError: regexp.MustCompile(`no pcc found with the specified criteria: name`),
+			},
+			{
+				Config:      testAccDataSourcePccBothIdAndNameError,
+				ExpectError: regexp.MustCompile(`id and name cannot be both specified in the same time`),
+			},
+			{
+				Config:      testAccDataSourcePccNoIdNoNameError,
+				ExpectError: regexp.MustCompile(`please provide either the pcc id or name`),
+			},
+			{
+				Config:      testAccDataSourcePccWrongIdError,
+				ExpectError: regexp.MustCompile(`an error occurred while fetching the pcc with ID`),
 			},
 			{
 				Config: testAccCheckPrivateCrossConnectConfigUpdate,
@@ -148,7 +160,7 @@ resource ` + constant.PCCResource + ` ` + constant.PCCTestResource + ` {
   description = "` + constant.UpdatedResources + `"
 }`
 
-const testAccDataSourcePccMatchId = testAccCheckPrivateCrossConnectConfigBasic + `
+const testAccDataSourcePccMatchID = testAccCheckPrivateCrossConnectConfigBasic + `
 data ` + constant.PCCResource + ` ` + constant.PCCDataSourceById + ` {
   id			= ` + constant.PCCResource + `.` + constant.PCCTestResource + `.id
 }
@@ -174,5 +186,23 @@ resource ` + constant.PCCResource + ` ` + constant.PCCTestResource + `_multiple_
 
 data ` + constant.PCCResource + ` ` + constant.PCCDataSourceByName + ` {
   name			= "` + constant.PCCTestResource + `"
+}
+`
+
+const testAccDataSourcePccBothIdAndNameError = testAccCheckPrivateCrossConnectConfigBasic + `
+data ` + constant.PCCResource + ` ` + constant.PCCDataSourceByName + ` {
+  id   = ` + constant.PCCResource + `.` + constant.PCCTestResource + `.id
+  name = "` + constant.PCCTestResource + `"
+}
+`
+
+const testAccDataSourcePccNoIdNoNameError = testAccCheckPrivateCrossConnectConfigBasic + `
+data ` + constant.PCCResource + ` ` + constant.PCCDataSourceByName + ` {
+}
+`
+
+const testAccDataSourcePccWrongIdError = testAccCheckPrivateCrossConnectConfigBasic + `
+data ` + constant.PCCResource + ` ` + constant.PCCDataSourceById + ` {
+  id = "00000000-0000-0000-0000-000000000000"
 }
 `
