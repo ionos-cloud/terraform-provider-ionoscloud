@@ -20,10 +20,30 @@ func TestInitializeCreateRequestsConfidential(t *testing.T) {
 		wantCPUNil bool
 	}{
 		{
-			name:       "confidential omits cores and cpu_family",
-			config:     map[string]any{"name": "coco", "type": "ENTERPRISE", "confidential": true, "ram": 4096},
+			name: "confidential omits cores and cpu_family",
+			config: map[string]any{
+				"name": "coco", "type": "ENTERPRISE", "confidential": true, "ram": 4096,
+				"image_name": "some-sev-snp-image",
+				"volume":     []any{map[string]any{"disk_type": "HDD"}},
+			},
 			wantCores:  nil,
 			wantCPUNil: true,
+		},
+		{
+			name: "confidential requires a volume block",
+			config: map[string]any{
+				"name": "coco", "type": "ENTERPRISE", "confidential": true, "ram": 4096,
+				"image_name": "some-sev-snp-image",
+			},
+			wantErr: "confidential requires a volume block",
+		},
+		{
+			name: "confidential requires a boot image",
+			config: map[string]any{
+				"name": "coco", "type": "ENTERPRISE", "confidential": true, "ram": 4096,
+				"volume": []any{map[string]any{"disk_type": "HDD"}},
+			},
+			wantErr: "confidential requires a boot image",
 		},
 		{
 			name:    "confidential rejects cores",
@@ -77,6 +97,22 @@ func TestInitializeCreateRequestsConfidential(t *testing.T) {
 				t.Errorf("cpu_family = %v, want nil", *server.Properties.CpuFamily)
 			}
 		})
+	}
+}
+
+// confidential must be Computed + ForceNew: Computed lets Read derive it from the API so an
+// imported/drifted server does not trigger a spurious destroy+recreate; ForceNew makes an actual
+// change replace the server.
+func TestConfidentialSchemaComputedForceNew(t *testing.T) {
+	s := resourceServer().Schema["confidential"]
+	if s == nil {
+		t.Fatal("confidential attribute missing from schema")
+	}
+	if !s.Computed {
+		t.Error("confidential must be Computed so read-back avoids a spurious ForceNew replace on import/drift")
+	}
+	if !s.ForceNew {
+		t.Error("confidential must be ForceNew")
 	}
 }
 

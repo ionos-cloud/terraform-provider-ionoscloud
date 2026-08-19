@@ -93,8 +93,9 @@ func resourceServer() *schema.Resource {
 			"confidential": {
 				Type:        schema.TypeBool,
 				Optional:    true,
+				Computed:    true,
 				ForceNew:    true,
-				Description: "If set, creates a Confidential Computing (SEV-SNP) VM from a confidential boot image. Requires ENTERPRISE type. cores and cpu_family must not be set - both are derived from the image.",
+				Description: "If set, creates a Confidential Computing (SEV-SNP) VM from a confidential boot image. Requires ENTERPRISE type. cores and cpu_family must not be set - both are derived from the image. Computed on read from the server's enabled features, so imported servers reflect their real state.",
 			},
 			"type": {
 				Type:             schema.TypeString,
@@ -1418,6 +1419,17 @@ func initializeCreateRequests(d *schema.ResourceData) (ionoscloud.Server, error)
 			if server.Properties.CpuFamily != nil {
 				return *server, errors.New("cpu_family argument must not be set for confidential servers - it is derived from the image")
 			}
+			// A confidential VM boots from, and derives cores/cpu_family from, a SEV-SNP image, so a
+			// boot volume built from an image is mandatory. Fail early with a clear message instead
+			// of letting the API reject a volume-less request.
+			if _, ok := d.GetOk("volume.0.disk_type"); !ok {
+				return *server, errors.New("confidential requires a volume block that boots from a SEV-SNP image")
+			}
+			_, hasImage := d.GetOk("image_name")
+			_, hasVolImage := d.GetOk("volume.0.image_name")
+			if !hasImage && !hasVolImage {
+				return *server, errors.New("confidential requires a boot image: set image_name to a private SEV-SNP image")
+			}
 		} else if v, ok := d.GetOk("cores"); ok {
 			vInt := int32(v.(int))
 			server.Properties.Cores = &vInt
@@ -1554,6 +1566,12 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 		} else {
 			// Clear any stale value if the API no longer reports features.
 			d.Set("enabled_features", nil)
+		}
+
+		// Derive `confidential` from the API so imported/refreshed servers reflect their real state
+		// and don't trigger a spurious ForceNew replace.
+		if err := d.Set("confidential", serverIsConfidential(server)); err != nil {
+			return fmt.Errorf("error setting confidential %w", err)
 		}
 
 		if server.Properties.BootCdrom != nil {
