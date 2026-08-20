@@ -2,6 +2,8 @@
 ### Fixes
 - `ionoscloud_vpn_wireguard_peer`: Fix `gateway_id` changes attempting an in-place update against the API and failing with an error, instead of destroying and re-creating the peer.
 - `ionoscloud_k8s_cluster`: Fix `s3_buckets` set incorrectly in the state when `s3_buckets` was an empty list in the API response.
+### Testing
+- Update K8s tests with new versions. 
 
 ## 6.7.35
 
