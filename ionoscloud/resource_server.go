@@ -1424,8 +1424,10 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 	}
 
 	// takes care of an upgrade from a version that does not have inline_volume_ids(pre 6.4.0)
-	// to one that has it(>6.4.0)
-	if _, ok := d.GetOk("inline_volume_ids"); !ok {
+	// to one that has it(>6.4.0). GetOk cannot be used here since it also returns false when
+	// inline_volume_ids is present in the state as an empty list; checking the raw state directly
+	// ensures this only fires when the attribute is completely absent.
+	if rawState := d.GetRawState(); !rawState.IsNull() && rawState.GetAttr("inline_volume_ids").IsNull() {
 		if bootVolumeItf, ok := d.GetOk("boot_volume"); ok {
 			bootVolume := bootVolumeItf.(string)
 			var inlineVolumeIDs []string
