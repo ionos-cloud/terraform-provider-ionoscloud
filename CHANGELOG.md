@@ -8,6 +8,12 @@
 - `ionoscloud_server`: Delete the confidential boot volume after the server on destroy, since it cannot be detached while attached.
 - `ionoscloud_server`: `confidential` is now computed on read from the server's enabled features, so importing or refreshing a confidential server no longer plans a spurious destroy+recreate.
 - `ionoscloud_server`: Reject `confidential = true` without a `volume` block and boot image up front, instead of failing with an opaque API error.
+- `ionoscloud_vpn_wireguard_peer`: Fix `gateway_id` changes attempting an in-place update against the API and failing with an error, instead of destroying and re-creating the peer.
+- `ionoscloud_k8s_cluster`: Fix `s3_buckets` set incorrectly in the state when `s3_buckets` was an empty list in the API response.
+- `ionoscloud_server`, `ionoscloud_cube_server`: Fix behavior for the `inline_volume_ids` attribute (fixes [#1021](https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/1021))
+
+### Testing
+- Update K8s tests with new versions. 
 
 ## 6.7.35
 
