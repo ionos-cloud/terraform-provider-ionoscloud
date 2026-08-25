@@ -13,28 +13,22 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
+	dcschema "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/compute/datacenter"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/identity"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 )
 
-// datacenterResourceFactory and datacenterDataSetter are populated by the
-// ionoscloud package's init() (see RegisterDatacenterBridge), which owns the
-// ionoscloud_datacenter SDKv2 resource. This indirection exists to avoid an
-// import cycle: internal/framework/provider depends on this package (to
-// register the list resource), and ionoscloud's own test files depend on
-// internal/framework/provider (to build the muxed acceptance-test provider
-// server) — so this package cannot import the ionoscloud package directly.
-var (
-	datacenterResourceFactory func() *schema.Resource
-	datacenterDataSetter      func(*schema.ResourceData, *ionoscloud.Datacenter) error
-)
-
-// RegisterDatacenterBridge wires the ionoscloud_datacenter SDKv2 resource
-// constructor and field-mapping function into this package, for use by the
-// datacenter list resource. Called once from the ionoscloud package's init().
-func RegisterDatacenterBridge(resourceFactory func() *schema.Resource, dataSetter func(*schema.ResourceData, *ionoscloud.Datacenter) error) {
-	datacenterResourceFactory = resourceFactory
-	datacenterDataSetter = dataSetter
+// datacenterSchemaResource returns a schema-only *schema.Resource (no CRUD,
+// built from the same schema/identity schema the ionoscloud_datacenter SDKv2
+// resource uses) for use in building raw V5 values and schemas for the list
+// resource.
+func datacenterSchemaResource() *schema.Resource {
+	return &schema.Resource{
+		Identity: &schema.ResourceIdentity{
+			SchemaFunc: dcschema.IdentitySchema,
+		},
+		Schema: dcschema.Schema(),
+	}
 }
 
 // datacenterToTfValues converts a Cloud API Datacenter into the identity and
@@ -42,13 +36,9 @@ func RegisterDatacenterBridge(resourceFactory func() *schema.Resource, dataSette
 // it through an SDKv2 ResourceData instance (the same field-mapping code the
 // ionoscloud_datacenter resource and data source use).
 func datacenterToTfValues(dc ionoscloud.Datacenter) (identity *tftypes.Value, resource *tftypes.Value, err error) {
-	if datacenterResourceFactory == nil || datacenterDataSetter == nil {
-		return nil, nil, fmt.Errorf("datacenter bridge not registered: the ionoscloud package must be imported (for its init() to call RegisterDatacenterBridge)")
-	}
+	rd := datacenterSchemaResource().Data(nil)
 
-	rd := datacenterResourceFactory().Data(nil)
-
-	if err := datacenterDataSetter(rd, &dc); err != nil {
+	if err := dcschema.PopulateResourceData(rd, &dc); err != nil {
 		return nil, nil, fmt.Errorf("failed to populate datacenter resource data: %w", err)
 	}
 
@@ -132,7 +122,7 @@ func (r *datacenterListResource) ListResourceConfigSchema(_ context.Context, _ l
 // resource and identity schemas, since it is an SDKv2-defined resource rather
 // than a framework-native one.
 func (r *datacenterListResource) RawV5Schemas(ctx context.Context, _ list.RawV5SchemaRequest, resp *list.RawV5SchemaResponse) {
-	dcResource := datacenterResourceFactory()
+	dcResource := datacenterSchemaResource()
 	resp.ProtoV5Schema = dcResource.ProtoSchema(ctx)()
 	resp.ProtoV5IdentitySchema = dcResource.ProtoIdentitySchema(ctx)()
 }

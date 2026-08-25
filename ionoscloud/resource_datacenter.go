@@ -7,23 +7,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/compute"
+	dcschema "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/compute/datacenter"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
-
-func init() {
-	// Registers ResourceDatacenter/SetDatacenterData with the compute package's
-	// list resource bridge. This is a one-way registration (rather than compute
-	// importing ionoscloud directly) to avoid an import cycle: ionoscloud's own
-	// test files import internal/framework/provider (to build the muxed
-	// acceptance-test provider server), which in turn imports compute.
-	compute.RegisterDatacenterBridge(ResourceDatacenter, SetDatacenterData)
-}
 
 func ResourceDatacenter() *schema.Resource {
 	return &schema.Resource{
@@ -35,79 +25,9 @@ func ResourceDatacenter() *schema.Resource {
 			StateContext: resourceDatacenterImport,
 		},
 		Identity: &schema.ResourceIdentity{
-			SchemaFunc: func() map[string]*schema.Schema {
-				return map[string]*schema.Schema{
-					"id": {
-						Type:              schema.TypeString,
-						RequiredForImport: true,
-					},
-				}
-			},
+			SchemaFunc: dcschema.IdentitySchema,
 		},
-		Schema: map[string]*schema.Schema{
-
-			// Datacenter parameters
-			"name": {
-				Type:             schema.TypeString,
-				Required:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
-			},
-			"location": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
-			},
-			"description": {
-				Type:        schema.TypeString,
-				Description: "A description for the datacenter, e.g. staging, production",
-				Optional:    true,
-				Computed:    true,
-			},
-			"sec_auth_protection": {
-				Type:     schema.TypeBool,
-				Optional: true,
-			},
-			"version": {
-				Type:     schema.TypeInt,
-				Computed: true,
-			},
-			"features": {
-				Type:     schema.TypeSet,
-				Computed: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-			},
-			"cpu_architecture": {
-				Type:     schema.TypeList,
-				Computed: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"cpu_family": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"max_cores": {
-							Type:     schema.TypeInt,
-							Computed: true,
-						},
-						"max_ram": {
-							Type:     schema.TypeInt,
-							Computed: true,
-						},
-						"vendor": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-					},
-				},
-			},
-			"ipv6_cidr_block": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "Auto-assigned /56 IPv6 CIDR block, if IPv6 is enabled for the datacenter. Read-only",
-			},
-		},
+		Schema:   dcschema.Schema(),
 		Timeouts: &resourceDefaultTimeouts,
 	}
 }
@@ -176,7 +96,7 @@ func resourceDatacenterRead(ctx context.Context, d *schema.ResourceData, meta an
 		return diagutil.ToDiags(d, err, nil)
 	}
 
-	if err := SetDatacenterData(d, &datacenter); err != nil {
+	if err := dcschema.PopulateResourceData(d, &datacenter); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
 
@@ -289,101 +209,9 @@ func resourceDatacenterImport(ctx context.Context, d *schema.ResourceData, meta 
 
 	tflog.Info(ctx, "datacenter imported", map[string]any{"resource_id": d.Id()})
 
-	if err := SetDatacenterData(d, &datacenter); err != nil {
+	if err := dcschema.PopulateResourceData(d, &datacenter); err != nil {
 		return nil, diagutil.ToError(d, err, nil)
 	}
 
 	return []*schema.ResourceData{d}, nil
-}
-
-func SetDatacenterData(d *schema.ResourceData, datacenter *ionoscloud.Datacenter) error {
-
-	if datacenter.Id != nil {
-		d.SetId(*datacenter.Id)
-	}
-
-	if datacenter.Properties != nil {
-		if datacenter.Properties.Location != nil {
-			err := d.Set("location", *datacenter.Properties.Location)
-			if err != nil {
-				return fmt.Errorf("error while setting location property for datacenter %s: %w", d.Id(), err)
-			}
-		}
-
-		if datacenter.Properties.Description != nil {
-			err := d.Set("description", *datacenter.Properties.Description)
-			if err != nil {
-				return fmt.Errorf("error while setting description property for datacenter %s: %w", d.Id(), err)
-			}
-		}
-
-		if datacenter.Properties.Name != nil {
-			err := d.Set("name", *datacenter.Properties.Name)
-			if err != nil {
-				return fmt.Errorf("error while setting name property for datacenter %s: %w", d.Id(), err)
-			}
-		}
-
-		if datacenter.Properties.Version != nil {
-			err := d.Set("version", *datacenter.Properties.Version)
-			if err != nil {
-				return fmt.Errorf("error while setting version property for datacenter %s: %w", d.Id(), err)
-			}
-		}
-
-		if datacenter.Properties.Features != nil && len(*datacenter.Properties.Features) > 0 {
-			err := d.Set("features", *datacenter.Properties.Features)
-			if err != nil {
-				return fmt.Errorf("error while setting features property for datacenter %s: %w", d.Id(), err)
-			}
-		}
-
-		if datacenter.Properties.SecAuthProtection != nil {
-			err := d.Set("sec_auth_protection", *datacenter.Properties.SecAuthProtection)
-			if err != nil {
-				return fmt.Errorf("error while setting sec_auth_protection property for datacenter %s: %w", d.Id(), err)
-			}
-		}
-
-		if datacenter.Properties.CpuArchitecture != nil && len(*datacenter.Properties.CpuArchitecture) > 0 {
-			var cpuArchitectures []any
-			for _, cpuArchitecture := range *datacenter.Properties.CpuArchitecture {
-				architectureEntry := make(map[string]any)
-
-				if cpuArchitecture.CpuFamily != nil {
-					architectureEntry["cpu_family"] = *cpuArchitecture.CpuFamily
-				}
-
-				if cpuArchitecture.MaxCores != nil {
-					architectureEntry["max_cores"] = *cpuArchitecture.MaxCores
-				}
-
-				if cpuArchitecture.MaxRam != nil {
-					architectureEntry["max_ram"] = *cpuArchitecture.MaxRam
-				}
-
-				if cpuArchitecture.Vendor != nil {
-					architectureEntry["vendor"] = *cpuArchitecture.Vendor
-				}
-
-				cpuArchitectures = append(cpuArchitectures, architectureEntry)
-
-				if len(cpuArchitectures) > 0 {
-					if err := d.Set("cpu_architecture", cpuArchitectures); err != nil {
-						return fmt.Errorf("error while setting cpu_architecture property for datacenter %s: %w", d.Id(), err)
-					}
-				}
-			}
-		}
-
-		if datacenter.Properties.Ipv6CidrBlock != nil {
-			err := d.Set("ipv6_cidr_block", *datacenter.Properties.Ipv6CidrBlock)
-			if err != nil {
-				return fmt.Errorf("error while setting ipv6_cidr_block property for datacenter %s: %w", d.Id(), err)
-			}
-		}
-
-	}
-
-	return nil
 }

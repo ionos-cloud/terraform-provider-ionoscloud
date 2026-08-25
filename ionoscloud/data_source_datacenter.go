@@ -10,6 +10,7 @@ import (
 
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
+	dcschema "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/compute/datacenter"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
@@ -195,7 +196,7 @@ func dataSourceDataCenterRead(ctx context.Context, d *schema.ResourceData, meta 
 
 	}
 
-	if err := SetDatacenterData(d, &datacenter); err != nil {
+	if err := dcschema.PopulateResourceData(d, &datacenter); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
 
