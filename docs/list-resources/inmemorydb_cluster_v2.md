@@ -73,7 +73,7 @@ The `config` block supports the following arguments:
   - `field_name` - (Required) The field to filter on. Supported values: `name`, `location`.
   - `field_value` - (Required) The exact value to match against.
 
-Supported `location` values: `de/fra`, `de/txl`, `es/vit`, `fr/par`, `gb/bhx`, `gb/lhr`, `us/ewr`, `us/las`, `us/mci`.
+Supported `location` values: `de/fra`, `de/fra/1`, `de/fra/2`, `de/txl`, `es/vit`, `fr/par`, `gb/bhx`, `gb/lhr`, `us/ewr`, `us/las`, `us/mci`.
 
 > **Performance note:** When no `location` filter is set, the provider queries every regional endpoint in sequence. Adding a `location` filter reduces the query to a single endpoint call.
 

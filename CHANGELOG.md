@@ -1,4 +1,7 @@
 ## 6.7.36
+### Features
+- Add support for the `de/fra/1` location (Frankfurt West). Like `de/fra/2`, it is a child of the `de/fra` metro region and uses the same regional endpoints.
+
 ### Fixes
 - `ionoscloud_vpn_wireguard_peer`: Fix `gateway_id` changes attempting an in-place update against the API and failing with an error, instead of destroying and re-creating the peer.
 - `ionoscloud_k8s_cluster`: Fix `s3_buckets` set incorrectly in the state when `s3_buckets` was an empty list in the API response.

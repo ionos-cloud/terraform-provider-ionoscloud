@@ -38,7 +38,7 @@ resource "ionoscloud_auto_certificate" "example" {
 ## Argument reference
 
 * `provider_id` - (Required)[string] The certificate provider used to issue the certificates.
-* `location` - (Required)[string] The location of the auto-certificate. Available locations: `de/fra`, `de/fra/2`.
+* `location` - (Required)[string] The location of the auto-certificate. Available locations: `de/fra`, `de/fra/1`, `de/fra/2`.
 * `common_name` - (Required)[string] The common name (DNS) of the certificate to issue. The common name needs to be part of a zone in IONOS CLOUD DNS.
 * `key_algorithm` - (Required)[string] The key algorithm used to generate the certificate.
 * `name` - (Required)[string] A certificate name used for management purposes.

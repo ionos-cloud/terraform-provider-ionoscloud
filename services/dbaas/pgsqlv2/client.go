@@ -24,6 +24,7 @@ func NewClientFromConfig(config *shared.Configuration) *Client {
 var LocationToURL = map[string]string{
 	"de/txl":   "https://postgresql.de-txl.ionos.com",
 	"de/fra":   "https://postgresql.de-fra.ionos.com",
+	"de/fra/1": "https://postgresql.de-fra.ionos.com",
 	"de/fra/2": "https://postgresql.de-fra.ionos.com",
 	"fr/par":   "https://postgresql.fr-par.ionos.com",
 	"es/vit":   "https://postgresql.es-vit.ionos.com",

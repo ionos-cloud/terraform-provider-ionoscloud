@@ -70,7 +70,7 @@ resource "ionoscloud_inmemorydb_cluster_v2" "example" {
 
 ## Argument Reference
 
-* `location` - (Required)[string] The location of the cluster. Changing this forces a new resource. Available: `de/fra`, `de/txl`, `es/vit`, `fr/par`, `gb/bhx`, `gb/lhr`, `us/ewr`, `us/las`, `us/mci`.
+* `location` - (Required)[string] The location of the cluster. Changing this forces a new resource. Available: `de/fra`, `de/fra/1`, `de/fra/2`, `de/txl`, `es/vit`, `fr/par`, `gb/bhx`, `gb/lhr`, `us/ewr`, `us/las`, `us/mci`.
 * `name` - (Required)[string] Cluster name (2–63 alphanumeric chars with dashes, underscores, dots).
 * `version` - (Required)[string] The InMemoryDB version. Upgrades only (see `/versions` endpoint).
 * `eviction_policy` - (Required)[string] Key eviction strategy: `noeviction`, `allkeys-lru`, `allkeys-lfu`, `allkeys-random`, `volatile-lru`, `volatile-lfu`, `volatile-random`, `volatile-ttl`.

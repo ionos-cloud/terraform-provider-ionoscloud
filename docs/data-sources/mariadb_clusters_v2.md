@@ -26,7 +26,7 @@ data "ionoscloud_mariadb_clusters_v2" "filtered" {
 
 ## Argument Reference
 
-* `location` - (Required)[string] The location to query. Available locations: `de/fra`, `de/txl`, `es/vit`, `fr/par`, `gb/bhx`, `gb/lhr`, `us/ewr`, `us/las`, `us/mci`.
+* `location` - (Required)[string] The location to query. Available locations: `de/fra`, `de/fra/1`, `de/fra/2`, `de/txl`, `es/vit`, `fr/par`, `gb/bhx`, `gb/lhr`, `us/ewr`, `us/las`, `us/mci`.
 * `name` - (Optional)[string] Filter clusters by name (**partial match** — the value is passed directly to the API's name filter, so it matches any cluster name containing the given string, not only an exact match).
 
 ## Attributes Reference
