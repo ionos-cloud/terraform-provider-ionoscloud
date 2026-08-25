@@ -1,7 +1,8 @@
-## 6.7.36 -- upcoming release
+## 6.7.36
 ### Fixes
 - `ionoscloud_vpn_wireguard_peer`: Fix `gateway_id` changes attempting an in-place update against the API and failing with an error, instead of destroying and re-creating the peer.
 - `ionoscloud_k8s_cluster`: Fix `s3_buckets` set incorrectly in the state when `s3_buckets` was an empty list in the API response.
+- `ionoscloud_server`, `ionoscloud_cube_server`: Fix behavior for the `inline_volume_ids` attribute (fixes [#1021](https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/1021))
 ### Testing
 - Update K8s tests with new versions. 
 
