@@ -338,9 +338,6 @@ const (
 	MariaDBV2VersionsDataSource        = "ionoscloud_mariadb_versions_v2"
 )
 
-// Locations slice represents the locations in which services are available.
-var Locations = []string{"de/fra", "de/txl", "es/vit", "fr/par", "gb/lhr", "us/ewr", "us/las", "us/mci"}
-
 // Container Registry Constants
 const (
 	// ContainerRegistryTestResource needs to be with -, do not change

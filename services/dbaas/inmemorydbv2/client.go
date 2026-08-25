@@ -22,15 +22,17 @@ func NewClientFromConfig(config *shared.Configuration) *Client {
 }
 
 var LocationToURL = map[string]string{
-	"de/fra": "https://in-memory-db.de-fra.ionos.com/v2",
-	"de/txl": "https://in-memory-db.de-txl.ionos.com/v2",
-	"es/vit": "https://in-memory-db.es-vit.ionos.com/v2",
-	"gb/bhx": "https://in-memory-db.gb-bhx.ionos.com/v2",
-	"gb/lhr": "https://in-memory-db.gb-lhr.ionos.com/v2",
-	"us/ewr": "https://in-memory-db.us-ewr.ionos.com/v2",
-	"us/las": "https://in-memory-db.us-las.ionos.com/v2",
-	"us/mci": "https://in-memory-db.us-mci.ionos.com/v2",
-	"fr/par": "https://in-memory-db.fr-par.ionos.com/v2",
+	"de/fra":   "https://in-memory-db.de-fra.ionos.com/v2",
+	"de/fra/1": "https://in-memory-db.de-fra.ionos.com/v2",
+	"de/fra/2": "https://in-memory-db.de-fra.ionos.com/v2",
+	"de/txl":   "https://in-memory-db.de-txl.ionos.com/v2",
+	"es/vit":   "https://in-memory-db.es-vit.ionos.com/v2",
+	"gb/bhx":   "https://in-memory-db.gb-bhx.ionos.com/v2",
+	"gb/lhr":   "https://in-memory-db.gb-lhr.ionos.com/v2",
+	"us/ewr":   "https://in-memory-db.us-ewr.ionos.com/v2",
+	"us/las":   "https://in-memory-db.us-las.ionos.com/v2",
+	"us/mci":   "https://in-memory-db.us-mci.ionos.com/v2",
+	"fr/par":   "https://in-memory-db.fr-par.ionos.com/v2",
 }
 
 // AvailableLocations returns a sorted list of available InMemoryDB v2 locations.

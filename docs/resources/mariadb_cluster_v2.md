@@ -67,7 +67,7 @@ resource "ionoscloud_mariadb_cluster_v2" "example" {
 
 ## Argument Reference
 
-* `location` - (Required)[string] The location of the cluster. Changing this forces a new resource. Available: `de/fra`, `de/txl`, `es/vit`, `fr/par`, `gb/bhx`, `gb/lhr`, `us/ewr`, `us/las`, `us/mci`.
+* `location` - (Required)[string] The location of the cluster. Changing this forces a new resource. Available: `de/fra`, `de/fra/1`, `de/fra/2`, `de/txl`, `es/vit`, `fr/par`, `gb/bhx`, `gb/lhr`, `us/ewr`, `us/las`, `us/mci`.
 * `name` - (Required)[string] The name of the MariaDB cluster.
 * `version` - (Required)[string] The MariaDB version for the cluster. See the [`ionoscloud_mariadb_versions_v2`](../data-sources/mariadb_versions_v2.md) data source for the list of supported versions and their available upgrade paths.
 * `description` - (Optional)[string] Human-readable description for the cluster.

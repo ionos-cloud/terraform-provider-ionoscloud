@@ -33,7 +33,7 @@ data "ionoscloud_mariadb_cluster_v2" "by_name" {
 
 * `id` - (Optional) The UUID of the cluster.
 * `name` - (Optional) The cluster name (exact match).
-* `location` - (Required)[string] The location to query. Available locations: `de/fra`, `de/txl`, `es/vit`, `fr/par`, `gb/bhx`, `gb/lhr`, `us/ewr`, `us/las`, `us/mci`.
+* `location` - (Required)[string] The location to query. Available locations: `de/fra`, `de/fra/1`, `de/fra/2`, `de/txl`, `es/vit`, `fr/par`, `gb/bhx`, `gb/lhr`, `us/ewr`, `us/las`, `us/mci`.
 
 > **Note:** Either `id` or `name` must be provided. If none, or both are provided, the datasource will return an error.
 
