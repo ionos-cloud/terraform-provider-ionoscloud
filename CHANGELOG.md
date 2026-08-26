@@ -11,6 +11,9 @@
 - `ionoscloud_k8s_cluster`: Fix `s3_buckets` set incorrectly in the state when `s3_buckets` was an empty list in the API response.
 - `ionoscloud_server`, `ionoscloud_cube_server`: Fix behavior for the `inline_volume_ids` attribute (fixes [#1021](https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/1021))
 
+### Enhancements
+- Added `Sensitive: true` for multiple credential/secret attributes across the provider, several resources, and data sources.
+
 ### Testing
 - Update K8s tests with new versions. 
 
