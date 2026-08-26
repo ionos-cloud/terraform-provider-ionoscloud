@@ -41,7 +41,7 @@ ephemeral "ionoscloud_kafka_user_credentials" "kafka_user_credentials_ephemeral"
 * `cluster_id` - (Required)[string] the ID of the Kafka cluster;
 * `id` - (Optional)[string] the ID of the Kafka user, can be retrieved using [`ionoscloud_kafka_users` data source](kafka_users.md);
 * `username` - (Optional)[string] the name of the Kafka user, can be retrieved using [`ionoscloud_kafka_users` data source](kafka_users.md);
-* `location` - (Optional)[string] the location of the Kafka cluster, can be one of: `de/fra`, `de/fra/2`, `de/txl`, `fr/par`, `es/vit`, `gb/lhr`, `gb/bhx`, `us/las`, `us/mci`, `us/ewr`. If omitted, the default location will be used: `de/fra`;
+* `location` - (Optional)[string] the location of the Kafka cluster, can be one of: `de/fra`, `de/fra/1`, `de/fra/2`, `de/txl`, `fr/par`, `es/vit`, `gb/lhr`, `gb/bhx`, `us/las`, `us/mci`, `us/ewr`. If omitted, the default location will be used: `de/fra`;
 
 ## Attributes reference
 

@@ -3,11 +3,10 @@
 ### Features
 - `ionoscloud_server`: Add `confidential` flag to create Confidential Computing (SEV-SNP) VMs; `cores` and `cpu_family` are derived from the boot image and must not be set.
 - Expose Confidential Computing visibility: `required_features` on the `ionoscloud_image` data source, `enabled_features` on `ionoscloud_server`/`ionoscloud_servers`, and `cpu_architecture.enabled_features` on the `ionoscloud_datacenter` and `ionoscloud_location` data sources (and the datacenter resource).
+- Add support for the `de/fra/1` location (Frankfurt West). Like `de/fra/2`, it is a child of the `de/fra` metro region and uses the same regional endpoints.
 
 ### Fixes
 - `ionoscloud_server`: Delete the confidential boot volume after the server on destroy, since it cannot be detached while attached.
-- `ionoscloud_server`: `confidential` is now computed on read from the server's enabled features, so importing or refreshing a confidential server no longer plans a spurious destroy+recreate.
-- `ionoscloud_server`: Reject `confidential = true` without a `volume` block and boot image up front, instead of failing with an opaque API error.
 - `ionoscloud_vpn_wireguard_peer`: Fix `gateway_id` changes attempting an in-place update against the API and failing with an error, instead of destroying and re-creating the peer.
 - `ionoscloud_k8s_cluster`: Fix `s3_buckets` set incorrectly in the state when `s3_buckets` was an empty list in the API response.
 - `ionoscloud_server`, `ionoscloud_cube_server`: Fix behavior for the `inline_volume_ids` attribute (fixes [#1021](https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/1021))
