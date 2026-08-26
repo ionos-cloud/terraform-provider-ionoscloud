@@ -209,8 +209,9 @@ var SchemaTemplatedDatasource = map[string]*schema.Schema{
 		Computed: true,
 	},
 	"token": {
-		Type:     schema.TypeString,
-		Computed: true,
+		Type:      schema.TypeString,
+		Computed:  true,
+		Sensitive: true,
 	},
 	"cdroms": {
 		Type:     schema.TypeList,
@@ -243,8 +244,9 @@ var SchemaTemplatedDatasource = map[string]*schema.Schema{
 					Computed: true,
 				},
 				"image_password": {
-					Type:     schema.TypeString,
-					Computed: true,
+					Type:      schema.TypeString,
+					Computed:  true,
+					Sensitive: true,
 				},
 				"ssh_keys": {
 					Type:     schema.TypeList,

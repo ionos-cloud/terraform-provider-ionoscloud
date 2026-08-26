@@ -102,8 +102,9 @@ func dataSourceServers() *schema.Resource {
 							Computed: true,
 						},
 						"token": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:      schema.TypeString,
+							Computed:  true,
+							Sensitive: true,
 						},
 						"cdroms": {
 							Type:     schema.TypeList,
@@ -140,8 +141,9 @@ func dataSourceServers() *schema.Resource {
 										Computed: true,
 									},
 									"image_password": {
-										Type:     schema.TypeString,
-										Computed: true,
+										Type:      schema.TypeString,
+										Computed:  true,
+										Sensitive: true,
 									},
 									"ssh_keys": {
 										Type:     schema.TypeList,

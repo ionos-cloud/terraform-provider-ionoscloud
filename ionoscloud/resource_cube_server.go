@@ -143,6 +143,7 @@ func resourceCubeServer() *schema.Resource {
 						"image_password": {
 							Type:          schema.TypeString,
 							Optional:      true,
+							Sensitive:     true,
 							Deprecated:    "Please use image_password under server level",
 							ConflictsWith: []string{"image_password"},
 							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {

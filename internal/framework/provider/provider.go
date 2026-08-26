@@ -76,10 +76,12 @@ func (p *IonosCloudProvider) Schema(ctx context.Context, req provider.SchemaRequ
 			},
 			"password": schema.StringAttribute{
 				Optional:    true,
+				Sensitive:   true,
 				Description: "IONOS CLOUD password for API operations. If token is provided, token is preferred",
 			},
 			"token": schema.StringAttribute{
 				Optional:    true,
+				Sensitive:   true,
 				Description: "IONOS CLOUD bearer token for API operations.",
 			},
 			"endpoint": schema.StringAttribute{
@@ -96,6 +98,7 @@ func (p *IonosCloudProvider) Schema(ctx context.Context, req provider.SchemaRequ
 			},
 			"s3_secret_key": schema.StringAttribute{
 				Optional:    true,
+				Sensitive:   true,
 				Description: "Secret key for IONOS Object Storage operations.",
 			},
 			"s3_access_key": schema.StringAttribute{
