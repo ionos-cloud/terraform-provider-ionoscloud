@@ -90,6 +90,13 @@ func resourceServer() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"confidential": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Computed:    true,
+				ForceNew:    true,
+				Description: "If set, creates a Confidential Computing (SEV-SNP) VM from a confidential boot image. Requires ENTERPRISE type. cores and cpu_family must not be set - both are derived from the image. Computed on read from the server's enabled features, so imported servers reflect their real state.",
+			},
 			"type": {
 				Type:             schema.TypeString,
 				Optional:         true,
@@ -103,6 +110,12 @@ func resourceServer() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 				Optional: true,
+			},
+			"enabled_features": {
+				Type:        schema.TypeList,
+				Computed:    true,
+				Description: "Features enabled on the server, e.g. SEV-SNP for a Confidential Computing VM.",
+				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"primary_nic": {
 				Type:        schema.TypeString,
@@ -1158,6 +1171,21 @@ func deleteInlineVolumes(ctx context.Context, d *schema.ResourceData, meta any, 
 	return nil
 }
 
+// serverIsConfidential reports whether the server the API returned is a Confidential Computing
+// (SEV-SNP) VM, based on its enabled features. Derived from the API rather than the user-supplied
+// confidential flag so it stays correct for imported servers and config drift.
+func serverIsConfidential(server *ionoscloud.Server) bool {
+	if server == nil || server.Properties == nil || server.Properties.EnabledFeatures == nil {
+		return false
+	}
+	for _, f := range *server.Properties.EnabledFeatures {
+		if strings.EqualFold(f, "SEV-SNP") {
+			return true
+		}
+	}
+	return false
+}
+
 func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
@@ -1174,7 +1202,18 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta any)
 		return diagutil.ToDiags(d, fmt.Errorf("error occurred while fetching a server: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	if !strings.EqualFold(*server.Properties.Type, "cube") {
+	// A confidential boot volume cannot be detached while attached, so it must be deleted after
+	// the server is gone rather than before it.
+	//   Normal server: volume, then server.
+	//   Confidential:  server, then volume.
+	// Confidentiality is derived from the server the API returned (not the user flag) so this stays
+	// correct for imported servers and config drift.
+	confidential := serverIsConfidential(&server)
+	serverType := ""
+	if server.Properties != nil && server.Properties.Type != nil {
+		serverType = *server.Properties.Type
+	}
+	if !strings.EqualFold(serverType, "cube") && !confidential {
 		diags := deleteInlineVolumes(ctx, d, meta, client)
 		if diags != nil {
 			return diags
@@ -1192,6 +1231,13 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta any)
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
 		requestLocation, _ := apiResponse.SafeLocation()
 		return diagutil.ToDiags(d, fmt.Errorf("error getting state change for datacenter delete %w", errState), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
+	}
+
+	if confidential {
+		diags := deleteInlineVolumes(ctx, d, meta, client)
+		if diags != nil {
+			return diags
+		}
 	}
 
 	d.SetId("")
@@ -1326,6 +1372,14 @@ func initializeCreateRequests(d *schema.ResourceData) (ionoscloud.Server, error)
 	if serverType != "" {
 		server.Properties.Type = &serverType
 	}
+
+	// Confidential Computing is only available for ENTERPRISE servers (an empty type defaults to
+	// ENTERPRISE). Reject any other explicit type up front so the failure is clear instead of a
+	// downstream API error, and so CUBE does not silently ignore the flag.
+	if d.Get("confidential").(bool) && serverType != "" && !strings.EqualFold(serverType, "ENTERPRISE") {
+		return *server, fmt.Errorf("confidential is only supported for ENTERPRISE servers, got type %q", serverType)
+	}
+
 	switch strings.ToLower(serverType) {
 	case "cube":
 		if v, ok := d.GetOk("template_uuid"); ok {
@@ -1355,7 +1409,28 @@ func initializeCreateRequests(d *schema.ResourceData) (ionoscloud.Server, error)
 			return *server, errors.New("template_uuid argument can be set only for CUBE type servers")
 		}
 
-		if v, ok := d.GetOk("cores"); ok {
+		// Confidential Computing (SEV-SNP) VMs derive cores and cpu_family from the boot image's
+		// launch-config; the API rejects the request if either is set, so leave both unset.
+		confidential := d.Get("confidential").(bool)
+		if confidential {
+			if _, ok := d.GetOk("cores"); ok {
+				return *server, errors.New("cores argument must not be set for confidential servers - it is derived from the image")
+			}
+			if server.Properties.CpuFamily != nil {
+				return *server, errors.New("cpu_family argument must not be set for confidential servers - it is derived from the image")
+			}
+			// A confidential VM boots from, and derives cores/cpu_family from, a SEV-SNP image, so a
+			// boot volume built from an image is mandatory. Fail early with a clear message instead
+			// of letting the API reject a volume-less request.
+			if _, ok := d.GetOk("volume.0.disk_type"); !ok {
+				return *server, errors.New("confidential requires a volume block that boots from a SEV-SNP image")
+			}
+			_, hasImage := d.GetOk("image_name")
+			_, hasVolImage := d.GetOk("volume.0.image_name")
+			if !hasImage && !hasVolImage {
+				return *server, errors.New("confidential requires a boot image: set image_name to a private SEV-SNP image")
+			}
+		} else if v, ok := d.GetOk("cores"); ok {
 			vInt := int32(v.(int))
 			server.Properties.Cores = &vInt
 		} else {
@@ -1484,6 +1559,21 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 			if err := d.Set("vm_state", *server.Properties.VmState); err != nil {
 				return fmt.Errorf("error setting vm_state %w", err)
 			}
+		}
+
+		if server.Properties.EnabledFeatures != nil {
+			if err := d.Set("enabled_features", *server.Properties.EnabledFeatures); err != nil {
+				return fmt.Errorf("error setting enabled_features %w", err)
+			}
+		} else {
+			// Clear any stale value if the API no longer reports features.
+			d.Set("enabled_features", nil)
+		}
+
+		// Derive `confidential` from the API so imported/refreshed servers reflect their real state
+		// and don't trigger a spurious ForceNew replace.
+		if err := d.Set("confidential", serverIsConfidential(server)); err != nil {
+			return fmt.Errorf("error setting confidential %w", err)
 		}
 
 		if server.Properties.BootCdrom != nil {

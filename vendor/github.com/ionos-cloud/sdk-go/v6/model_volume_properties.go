@@ -24,11 +24,11 @@ type VolumeProperties struct {
 	Size *float32 `json:"size,omitempty"`
 	// The availability zone in which the volume should be provisioned. The storage volume will be provisioned on as few physical storage devices as possible, but this cannot be guaranteed upfront. This is uavailable for DAS (Direct Attached Storage), and subject to availability for SSD.
 	AvailabilityZone *string `json:"availabilityZone,omitempty"`
-	// Image or snapshot ID to be used as template for this volume. MSSQL Enterprise Images can be used only if the feature toggle for MSSQL Enterprise is enabled on the contract.
+	// Image or snapshot ID to be used as template for this volume. MSSQL Enterprise Images can be used only if the feature toggle for MSSQL Enterprise is enabled on the contract. If the referenced image supports Confidential Computing, additional rules apply: the volume can only be created inline as part of a server creation request (not via standalone volume creation, nor by attaching to an existing server), and exactly one volume on that server may use such an image. The resulting volume is permanently bound to the server as its boot device and cannot be detached or moved to another server.
 	Image *string `json:"image,omitempty"`
 	// Initial password to be set for installed OS. Works with public images only. Not modifiable, forbidden in update requests. Password rules allows all characters from a-z, A-Z, 0-9.
 	ImagePassword *string `json:"imagePassword,omitempty"`
-	// Image alias of an image to be used as template for this volume. MSSQL Enterprise Images can be used only if the feature toggle for MSSQL Enterprise is enabled on the contract.
+	// Image alias of an image to be used as template for this volume. MSSQL Enterprise Images can be used only if the feature toggle for MSSQL Enterprise is enabled on the contract. If the referenced image supports Confidential Computing, additional rules apply: the volume can only be created inline as part of a server creation request (not via standalone volume creation, nor by attaching to an existing server), and exactly one volume on that server may use such an image. The resulting volume is permanently bound to the server as its boot device and cannot be detached or moved to another server.
 	ImageAlias *string `json:"imageAlias,omitempty"`
 	// Public SSH keys are set on the image as authorized keys for appropriate SSH login to the instance using the corresponding private key. This field may only be set in creation requests. When reading, it always returns null. SSH keys are only supported if a public Linux image is used for the volume creation.
 	SshKeys *[]string `json:"sshKeys,omitempty"`
