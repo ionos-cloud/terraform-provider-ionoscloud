@@ -18,6 +18,7 @@ import (
 )
 
 func TestAccDataCenterBasic(t *testing.T) {
+	t.Parallel()
 	var datacenter ionoscloud.Datacenter
 
 	resource.Test(t, resource.TestCase{
