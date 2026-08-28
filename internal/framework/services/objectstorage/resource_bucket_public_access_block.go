@@ -34,6 +34,7 @@ func NewBucketPublicAccessBlockResource() resource.Resource {
 
 type bucketPublicAccessBlockResource struct {
 	client *objectstorage.Client
+	diags  *diagutil.Enricher
 }
 
 // Metadata returns the metadata for the bucket resource.
@@ -93,6 +94,7 @@ func (r *bucketPublicAccessBlockResource) Configure(_ context.Context, req resou
 	}
 
 	r.client = clientBundle.S3Client
+	r.diags = clientBundle.Diags
 }
 
 // Create creates the bucket.
@@ -109,7 +111,7 @@ func (r *bucketPublicAccessBlockResource) Create(ctx context.Context, req resour
 	}
 
 	if err := r.client.CreateBucketPublicAccessBlock(ctx, data); err != nil {
-		resp.Diagnostics.AddError("failed to create bucket public access block", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
+		resp.Diagnostics.AddError("failed to create bucket public access block", r.diags.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
 		return
 	}
 
@@ -131,7 +133,7 @@ func (r *bucketPublicAccessBlockResource) Read(ctx context.Context, req resource
 
 	result, found, err := r.client.GetBucketPublicAccessBlock(ctx, data.Bucket)
 	if err != nil {
-		resp.Diagnostics.AddError("failed to read bucket public access block", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
+		resp.Diagnostics.AddError("failed to read bucket public access block", r.diags.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
 		return
 	}
 
@@ -163,7 +165,7 @@ func (r *bucketPublicAccessBlockResource) Update(ctx context.Context, req resour
 	}
 
 	if err := r.client.UpdateBucketPublicAccessBlock(ctx, data); err != nil {
-		resp.Diagnostics.AddError("failed to update bucket public access block", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
+		resp.Diagnostics.AddError("failed to update bucket public access block", r.diags.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
 		return
 	}
 
@@ -184,7 +186,7 @@ func (r *bucketPublicAccessBlockResource) Delete(ctx context.Context, req resour
 	}
 
 	if err := r.client.DeleteBucketPublicAccessBlock(ctx, data.Bucket); err != nil {
-		resp.Diagnostics.AddError("failed to delete bucket public access block", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
+		resp.Diagnostics.AddError("failed to delete bucket public access block", r.diags.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
 		return
 	}
 }

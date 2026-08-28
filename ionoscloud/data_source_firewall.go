@@ -103,10 +103,10 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta an
 	name, nameOk := d.GetOk("name")
 
 	if idOk && nameOk {
-		return diagutil.ToDiags(d, fmt.Errorf("id and name cannot be both specified in the same time"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("id and name cannot be both specified in the same time"), nil)
 	}
 	if !idOk && !nameOk {
-		return diagutil.ToDiags(d, fmt.Errorf("please provide either the firewall rule id or name"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("please provide either the firewall rule id or name"), nil)
 	}
 	var firewall ionoscloud.FirewallRule
 	var apiResponse *ionoscloud.APIResponse
@@ -116,7 +116,7 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta an
 		firewall, apiResponse, err = client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterID, serverID, nicID, id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the firewall rule %s: %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching the firewall rule %s: %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 	} else {
 		/* search by name */
@@ -126,7 +126,7 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta an
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching firewall rules: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching firewall rules: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 
 		var results []ionoscloud.FirewallRule
@@ -137,7 +137,7 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta an
 					tmpFirewall, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterID, serverID, nicID, *fr.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {
-						return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching firewall rule with ID %s: %w", *fr.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+						return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching firewall rule with ID %s: %w", *fr.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 					}
 					results = append(results, tmpFirewall)
 				}
@@ -145,9 +145,9 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta an
 		}
 
 		if results == nil || len(results) == 0 {
-			return diagutil.ToDiags(d, fmt.Errorf("no firewall rule found with the specified name = %s", name), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("no firewall rule found with the specified name = %s", name), nil)
 		} else if len(results) > 1 {
-			return diagutil.ToDiags(d, fmt.Errorf("more than one firewall rule found with the specified criteria name = %s", name), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("more than one firewall rule found with the specified criteria name = %s", name), nil)
 		} else {
 			firewall = results[0]
 		}
@@ -155,7 +155,7 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta an
 	}
 
 	if err := setFirewallData(d, &firewall); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 
 	return nil

@@ -84,7 +84,7 @@ func dataSourceDbaasMongoReadUser(ctx context.Context, d *schema.ResourceData, m
 	usernameIf, nameOk := d.GetOk("username")
 
 	if !idOk || !nameOk {
-		return diagutil.ToDiags(d, fmt.Errorf("please provide cluster_id and username"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("please provide cluster_id and username"), nil)
 	}
 
 	username := usernameIf.(string)
@@ -94,7 +94,7 @@ func dataSourceDbaasMongoReadUser(ctx context.Context, d *schema.ResourceData, m
 	users, apiResponse, err := client.GetUsers(ctx, clusterID)
 
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching dbaas mongo users: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching dbaas mongo users: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	var results []mongo.User
@@ -109,15 +109,15 @@ func dataSourceDbaasMongoReadUser(ctx context.Context, d *schema.ResourceData, m
 
 	switch {
 	case len(results) == 0:
-		return diagutil.ToDiags(d, fmt.Errorf("no DBaaS mongo user found with the specified username = %s and cluster_id = %s", username, clusterID), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("no DBaaS mongo user found with the specified username = %s and cluster_id = %s", username, clusterID), nil)
 	case len(results) > 1:
-		return diagutil.ToDiags(d, fmt.Errorf("more than one DBaaS mongo user found with the specified criteria username = %s and cluster_id = %s", username, clusterID), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("more than one DBaaS mongo user found with the specified criteria username = %s and cluster_id = %s", username, clusterID), nil)
 	default:
 		user = results[0]
 	}
 
 	if err := dbaas.SetUserMongoData(d, &user); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 	if user.Properties != nil {
 		d.SetId(clusterID + user.Properties.Username)

@@ -18,6 +18,7 @@ import (
 
 type objectsDataSource struct {
 	client *objectstorage.Client
+	diags  *diagutil.Enricher
 }
 
 // NewObjectsDataSource creates a new data source for fetching objects from a bucket.
@@ -88,6 +89,7 @@ func (d *objectsDataSource) Configure(ctx context.Context, req datasource.Config
 	}
 
 	d.client = clientBundle.S3Client
+	d.diags = clientBundle.Diags
 }
 
 func (d *objectsDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -99,7 +101,7 @@ func (d *objectsDataSource) Read(ctx context.Context, req datasource.ReadRequest
 	}
 
 	if err := d.client.ListObjects(ctx, data); err != nil {
-		resp.Diagnostics.AddError("error fetching objects", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
+		resp.Diagnostics.AddError("error fetching objects", d.diags.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
 		return
 	}
 

@@ -25,6 +25,7 @@ var (
 
 type bucketVersioningResource struct {
 	client *objectstorage.Client
+	diags  *diagutil.Enricher
 }
 
 // NewBucketVersioningResource creates a new resource for the bucket versioning resource.
@@ -88,6 +89,7 @@ func (r *bucketVersioningResource) Configure(_ context.Context, req resource.Con
 	}
 
 	r.client = clientBundle.S3Client
+	r.diags = clientBundle.Diags
 }
 
 // Create creates the bucket versioning resource.
@@ -104,7 +106,7 @@ func (r *bucketVersioningResource) Create(ctx context.Context, req resource.Crea
 	}
 
 	if err := r.client.CreateBucketVersioning(ctx, data); err != nil {
-		resp.Diagnostics.AddError("Failed to create bucket versioning", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
+		resp.Diagnostics.AddError("Failed to create bucket versioning", r.diags.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
 		return
 	}
 
@@ -126,7 +128,7 @@ func (r *bucketVersioningResource) Read(ctx context.Context, req resource.ReadRe
 
 	result, found, err := r.client.GetBucketVersioning(ctx, data.Bucket)
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to read bucket versioning", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
+		resp.Diagnostics.AddError("Failed to read bucket versioning", r.diags.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
 		return
 	}
 
@@ -158,7 +160,7 @@ func (r *bucketVersioningResource) Update(ctx context.Context, req resource.Upda
 	}
 
 	if err := r.client.UpdateBucketVersioning(ctx, data); err != nil {
-		resp.Diagnostics.AddError("Failed to update bucket versioning", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
+		resp.Diagnostics.AddError("Failed to update bucket versioning", r.diags.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
 		return
 	}
 
@@ -179,7 +181,7 @@ func (r *bucketVersioningResource) Delete(ctx context.Context, req resource.Dele
 	}
 
 	if err := r.client.DeleteBucketVersioning(ctx, data); err != nil {
-		resp.Diagnostics.AddError("Failed to create bucket versioning", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
+		resp.Diagnostics.AddError("Failed to create bucket versioning", r.diags.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
 		return
 	}
 }

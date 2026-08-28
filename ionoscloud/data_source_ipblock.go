@@ -120,23 +120,23 @@ func datasourceIpBlockRead(ctx context.Context, d *schema.ResourceData, meta any
 	}
 
 	if !idOk && !nameOk && !locationOk {
-		return diagutil.ToDiags(d, fmt.Errorf("either id, location or name must be set"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("either id, location or name must be set"), nil)
 	}
 	if idOk {
 		ipBlock, apiResponse, err = client.IPBlocksApi.IpblocksFindById(ctx, id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("error getting ip block with id %s %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("error getting ip block with id %s %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 		if nameOk {
 			if ipBlock.Properties != nil && *ipBlock.Properties.Name != name {
-				return diagutil.ToDiags(d, fmt.Errorf("name of ip block (UUID=%s, name=%s) does not match expected name: %s",
+				return bundleclient.ToDiags(meta, d, fmt.Errorf("name of ip block (UUID=%s, name=%s) does not match expected name: %s",
 					*ipBlock.Id, *ipBlock.Properties.Name, name), nil)
 			}
 		}
 		if locationOk {
 			if ipBlock.Properties != nil && *ipBlock.Properties.Location != location {
-				return diagutil.ToDiags(d, fmt.Errorf("location of ip block (UUID=%s, location=%s) does not match expected location: %s",
+				return bundleclient.ToDiags(meta, d, fmt.Errorf("location of ip block (UUID=%s, location=%s) does not match expected location: %s",
 					*ipBlock.Id, *ipBlock.Properties.Location, location), nil)
 			}
 		}
@@ -147,7 +147,7 @@ func datasourceIpBlockRead(ctx context.Context, d *schema.ResourceData, meta any
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching ipBlocks: %w ", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching ipBlocks: %w ", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 
 		var results []ionoscloud.IpBlock
@@ -160,7 +160,7 @@ func datasourceIpBlockRead(ctx context.Context, d *schema.ResourceData, meta any
 			}
 
 			if results == nil {
-				return diagutil.ToDiags(d, fmt.Errorf("no ip block found with the specified criteria name %s", name), nil)
+				return bundleclient.ToDiags(meta, d, fmt.Errorf("no ip block found with the specified criteria name %s", name), nil)
 			}
 		}
 
@@ -184,9 +184,9 @@ func datasourceIpBlockRead(ctx context.Context, d *schema.ResourceData, meta any
 		}
 
 		if results == nil || len(results) == 0 {
-			return diagutil.ToDiags(d, fmt.Errorf("no ip block found with the specified criteria name = %s, location = %s", name, location), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("no ip block found with the specified criteria name = %s, location = %s", name, location), nil)
 		} else if len(results) > 1 {
-			return diagutil.ToDiags(d, fmt.Errorf("more than one ip block found with the specified criteria name = %s, location = %s", name, location), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("more than one ip block found with the specified criteria name = %s, location = %s", name, location), nil)
 		} else {
 			ipBlock = results[0]
 		}
@@ -194,7 +194,7 @@ func datasourceIpBlockRead(ctx context.Context, d *schema.ResourceData, meta any
 	}
 
 	if err := IpBlockSetData(d, &ipBlock); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 
 	return nil

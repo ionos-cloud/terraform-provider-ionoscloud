@@ -109,10 +109,10 @@ func dataSourceNFSClusterRead(ctx context.Context, d *schema.ResourceData, meta 
 	location := d.Get("location").(string)
 
 	if idOk && nameOk {
-		return diagutil.ToDiags(d, fmt.Errorf("ID and name cannot be both specified at the same time"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("ID and name cannot be both specified at the same time"), nil)
 	}
 	if !idOk && !nameOk {
-		return diagutil.ToDiags(d, fmt.Errorf("please provide either the NFS Cluster ID or name"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("please provide either the NFS Cluster ID or name"), nil)
 	}
 
 	var cluster nfs.ClusterRead
@@ -121,12 +121,12 @@ func dataSourceNFSClusterRead(ctx context.Context, d *schema.ResourceData, meta 
 	if idOk {
 		cluster, apiResponse, err = client.GetNFSClusterByID(ctx, id, location)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the NFS Cluster with ID: %s, error: %w", idValue, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching the NFS Cluster with ID: %s, error: %w", idValue, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 	} else {
 		clusters, apiResponse, err := client.ListNFSClusters(ctx, d)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching NFS Clusters: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching NFS Clusters: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 
 		var results []nfs.ClusterRead
@@ -138,16 +138,16 @@ func dataSourceNFSClusterRead(ctx context.Context, d *schema.ResourceData, meta 
 
 		switch {
 		case len(results) == 0:
-			return diagutil.ToDiags(d, fmt.Errorf("no NFS Cluster found with the specified name: %s", name), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("no NFS Cluster found with the specified name: %s", name), nil)
 		case len(results) > 1:
-			return diagutil.ToDiags(d, fmt.Errorf("more than one NFS Cluster found with the specified name: %s", name), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("more than one NFS Cluster found with the specified name: %s", name), nil)
 		default:
 			cluster = results[0]
 		}
 	}
 
 	if err = client.SetNFSClusterData(d, cluster); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 
 	return nil

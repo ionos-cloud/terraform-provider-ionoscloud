@@ -216,10 +216,10 @@ func dataSourceK8sReadNodePool(ctx context.Context, d *schema.ResourceData, meta
 	name, nameOk := d.GetOk("name")
 
 	if idOk && nameOk {
-		return diagutil.ToDiags(d, fmt.Errorf("id and name cannot be both specified in the same time"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("id and name cannot be both specified in the same time"), nil)
 	}
 	if !idOk && !nameOk {
-		return diagutil.ToDiags(d, fmt.Errorf("please provide either the lan id or name"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("please provide either the lan id or name"), nil)
 	}
 	var nodePool ionoscloud.KubernetesNodePool
 	var apiResponse *ionoscloud.APIResponse
@@ -228,7 +228,7 @@ func dataSourceK8sReadNodePool(ctx context.Context, d *schema.ResourceData, meta
 		nodePool, apiResponse, err = client.KubernetesApi.K8sNodepoolsFindById(ctx, clusterID.(string), id.(string)).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the k8s nodePool with ID %s: %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching the k8s nodePool with ID %s: %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 	} else {
 		/* search by name */
@@ -237,7 +237,7 @@ func dataSourceK8sReadNodePool(ctx context.Context, d *schema.ResourceData, meta
 		nodePools, apiResponse, err := client.KubernetesApi.K8sNodepoolsGet(ctx, clusterID.(string)).Depth(1).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching k8s nodepools: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching k8s nodepools: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 
 		if nodePools.Items != nil {
@@ -248,7 +248,7 @@ func dataSourceK8sReadNodePool(ctx context.Context, d *schema.ResourceData, meta
 					tmpNodePool, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, clusterID.(string), *c.Id).Execute()
 					logApiRequestTime(apiResponse)
 					if err != nil {
-						return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching k8s nodePool with ID %s: %w", *c.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+						return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching k8s nodePool with ID %s: %w", *c.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 					}
 					/* lan found */
 					results = append(results, tmpNodePool)
@@ -257,9 +257,9 @@ func dataSourceK8sReadNodePool(ctx context.Context, d *schema.ResourceData, meta
 			}
 
 			if results == nil || len(results) == 0 {
-				return diagutil.ToDiags(d, fmt.Errorf("no nodepool found with the specified name %s", name.(string)), nil)
+				return bundleclient.ToDiags(meta, d, fmt.Errorf("no nodepool found with the specified name %s", name.(string)), nil)
 			} else if len(results) > 1 {
-				return diagutil.ToDiags(d, fmt.Errorf("more than one nodepool found with the specified name %s", name.(string)), nil)
+				return bundleclient.ToDiags(meta, d, fmt.Errorf("more than one nodepool found with the specified name %s", name.(string)), nil)
 			} else {
 				nodePool = results[0]
 			}
@@ -267,18 +267,18 @@ func dataSourceK8sReadNodePool(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	if err = setK8sNodePoolData(d, &nodePool); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 
 	if nodePool.Metadata != nil && nodePool.Metadata.State != nil {
 		if err := d.Set("state", *nodePool.Metadata.State); err != nil {
-			return diagutil.ToDiags(d, err, nil)
+			return bundleclient.ToDiags(meta, d, err, nil)
 		}
 	}
 
 	if nodePool.Properties.AvailableUpgradeVersions != nil && len(*nodePool.Properties.AvailableUpgradeVersions) > 0 {
 		if err := d.Set("available_upgrade_versions", *nodePool.Properties.AvailableUpgradeVersions); err != nil {
-			return diagutil.ToDiags(d, err, nil)
+			return bundleclient.ToDiags(meta, d, err, nil)
 		}
 	}
 

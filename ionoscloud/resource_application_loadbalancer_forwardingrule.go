@@ -235,7 +235,7 @@ func resourceApplicationLoadBalancerForwardingRuleCreate(ctx context.Context, d 
 		if httpRules, err := getAlbHttpRulesData(d); err == nil {
 			applicationLoadBalancerForwardingRule.Properties.HttpRules = httpRules
 		} else {
-			return diagutil.ToDiags(d, err, nil)
+			return bundleclient.ToDiags(meta, d, err, nil)
 		}
 	}
 
@@ -248,7 +248,7 @@ func resourceApplicationLoadBalancerForwardingRuleCreate(ctx context.Context, d 
 	if err != nil {
 		d.SetId("")
 		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, fmt.Errorf("error creating application loadbalancer forwarding rule: %w \n ApiError: %s", err, responseBody(apiResponse)), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error creating application loadbalancer forwarding rule: %w \n ApiError: %s", err, responseBody(apiResponse)), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	d.SetId(*albForwardingRuleResp.Id)
@@ -258,7 +258,7 @@ func resourceApplicationLoadBalancerForwardingRuleCreate(ctx context.Context, d 
 			d.SetId("")
 		}
 		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
+		return bundleclient.ToDiags(meta, d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	return resourceApplicationLoadBalancerForwardingRuleRead(ctx, d, meta)
@@ -289,7 +289,7 @@ func resourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d *s
 	tflog.Info(ctx, "retrieved alb forwarding rule", map[string]any{"rule_id": d.Id()})
 
 	if err := setApplicationLoadBalancerForwardingRuleData(d, &applicationLoadBalancerForwardingRule); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 	return nil
 }
@@ -354,7 +354,7 @@ func resourceApplicationLoadBalancerForwardingRuleUpdate(ctx context.Context, d 
 		if httpRules, err := getAlbHttpRulesData(d); err == nil {
 			request.Properties.HttpRules = httpRules
 		} else {
-			return diagutil.ToDiags(d, err, nil)
+			return bundleclient.ToDiags(meta, d, err, nil)
 		}
 	}
 
@@ -363,13 +363,13 @@ func resourceApplicationLoadBalancerForwardingRuleUpdate(ctx context.Context, d 
 
 	if err != nil {
 		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating a application loadbalancer forwarding rule ID %s %w",
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while updating a application loadbalancer forwarding rule ID %s %w",
 			d.Id(), err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
 		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
+		return bundleclient.ToDiags(meta, d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	return resourceApplicationLoadBalancerForwardingRuleRead(ctx, d, meta)
@@ -390,12 +390,12 @@ func resourceApplicationLoadBalancerForwardingRuleDelete(ctx context.Context, d 
 
 	if err != nil {
 		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while deleting a application loadbalancer forwarding rule: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while deleting a application loadbalancer forwarding rule: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
 		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
+		return bundleclient.ToDiags(meta, d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	d.SetId("")
@@ -409,14 +409,14 @@ func resourceApplicationLoadBalancerForwardingRuleImport(ctx context.Context, d 
 	location, parts := splitImportID(importID, "/")
 
 	if len(parts) != 3 {
-		return nil, diagutil.ToError(d, fmt.Errorf(
+		return nil, bundleclient.ToError(meta, d, fmt.Errorf(
 			"invalid import identifier: expected one of <location>:<datacenter-id>/<alb-id>/<alb-forwarding-rule-id> or "+
 				"<datacenter-id>/<alb-id>/<alb-forwarding-rule-id>, got: %s", importID,
 		), nil)
 	}
 
 	if err := validateImportIDParts(parts); err != nil {
-		return nil, diagutil.ToError(d, fmt.Errorf("failed validating import identifier %q: %w", importID, err), nil)
+		return nil, bundleclient.ToError(meta, d, fmt.Errorf("failed validating import identifier %q: %w", importID, err), nil)
 	}
 
 	datacenterID := parts[0]
@@ -434,23 +434,23 @@ func resourceApplicationLoadBalancerForwardingRuleImport(ctx context.Context, d 
 	if err != nil {
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("unable to find alb forwarding rule %q", ruleID), nil)
+			return nil, bundleclient.ToError(meta, d, fmt.Errorf("unable to find alb forwarding rule %q", ruleID), nil)
 		}
-		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while retrieving the alb forwarding rule %q, %w", ruleID, err), nil)
+		return nil, bundleclient.ToError(meta, d, fmt.Errorf("an error occurred while retrieving the alb forwarding rule %q, %w", ruleID, err), nil)
 	}
 
 	if err := d.Set("datacenter_id", datacenterID); err != nil {
-		return nil, diagutil.ToError(d, fmt.Errorf("error while setting datacenter_id property for  alb forwarding rule %q: %w", ruleID, err), nil)
+		return nil, bundleclient.ToError(meta, d, fmt.Errorf("error while setting datacenter_id property for  alb forwarding rule %q: %w", ruleID, err), nil)
 	}
 	if err := d.Set("application_loadbalancer_id", albID); err != nil {
-		return nil, diagutil.ToError(d, fmt.Errorf("error while setting application_loadbalancer_id property for  alb forwarding rule %q: %w", ruleID, err), nil)
+		return nil, bundleclient.ToError(meta, d, fmt.Errorf("error while setting application_loadbalancer_id property for  alb forwarding rule %q: %w", ruleID, err), nil)
 	}
 	if err := d.Set("location", location); err != nil {
 		return nil, fmt.Errorf("error while setting location property for imported alb forwarding rule %q: %w", ruleID, err)
 	}
 
 	if err := setApplicationLoadBalancerForwardingRuleData(d, &albForwardingRule); err != nil {
-		return nil, diagutil.ToError(d, err, nil)
+		return nil, bundleclient.ToError(meta, d, err, nil)
 	}
 	return []*schema.ResourceData{d}, nil
 }
@@ -651,7 +651,7 @@ func getAlbHttpRulesData(d *schema.ResourceData) (*[]ionoscloud.ApplicationLoadB
 						conditionVal := conditionVal.(string)
 						condition.Condition = &conditionVal
 					} else if !strings.EqualFold(typeVal, "SOURCE_IP") {
-						return nil, diagutil.ToError(d, fmt.Errorf("condition must be provided for application loadbalancer forwarding rule http rule condition"), nil)
+						return nil, bundleclient.ToError(nil, d, fmt.Errorf("condition must be provided for application loadbalancer forwarding rule http rule condition"), nil)
 					}
 
 					if negate, negateOk := d.GetOk(fmt.Sprintf("http_rules.%d.conditions.%d.negate", httpRuleIndex, conditionIndex)); negateOk {

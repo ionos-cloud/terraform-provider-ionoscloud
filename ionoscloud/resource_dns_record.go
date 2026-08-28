@@ -74,12 +74,12 @@ func recordCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Di
 
 	recordResponse, apiResponse, err := client.CreateRecord(ctx, zoneID, d)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating a record for the DNS zone with ID: %s, error: %w", zoneID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while creating a record for the DNS zone with ID: %s, error: %w", zoneID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if recordResponse.Metadata.State == dns.PROVISIONINGSTATE_FAILED {
 		// This is a temporary error message since right now the API is not returning errors that we can work with.
-		return diagutil.ToDiags(d, fmt.Errorf("record creation has failed, this can happen if the data in the request is not correct, "+
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("record creation has failed, this can happen if the data in the request is not correct, "+
 			"please check again the values defined in the plan"), nil)
 	}
 	d.SetId(recordResponse.Id)
@@ -97,11 +97,11 @@ func recordRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diag
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while fetching the DNS Record, zone ID: %s, error: %w", zoneID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error while fetching the DNS Record, zone ID: %s, error: %w", zoneID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	tflog.Info(ctx, "retrieved DNS record", map[string]any{"record_id": recordID, "zone_id": zoneID})
 	if err := client.SetRecordData(d, record); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 	return nil
 }
@@ -113,11 +113,11 @@ func recordUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Di
 
 	recordResponse, apiResponse, err := client.UpdateRecord(ctx, zoneID, recordID, d)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating the DNS Record, zone ID: %s, error: %w", zoneID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while updating the DNS Record, zone ID: %s, error: %w", zoneID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	if recordResponse.Metadata.State == dns.PROVISIONINGSTATE_FAILED {
 		// This is a temporary error message since right now the API is not returning errors that we can work with.
-		return diagutil.ToDiags(d, fmt.Errorf("record update has failed, this can happen if the data in the request is not correct, "+
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("record update has failed, this can happen if the data in the request is not correct, "+
 			"please check again the values defined in the plan"), nil)
 	}
 	return recordRead(ctx, d, meta)
@@ -134,11 +134,11 @@ func recordDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Di
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("error while deleting DNS Record, zone ID: %s, error: %w", zoneID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error while deleting DNS Record, zone ID: %s, error: %w", zoneID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	err = utils.WaitForResourceToBeDeleted(ctx, d, client.IsRecordDeleted)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while waiting for the DNS Record to be deleted, error: %w", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while waiting for the DNS Record to be deleted, error: %w", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String()})
 	}
 	return nil
 }
@@ -149,7 +149,7 @@ func recordImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*sch
 	// Split the string provided in order to get the IDs for both zone and record.
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
-		return nil, diagutil.ToError(d, fmt.Errorf("invalid import, expected {zone UUID}/{record UUID}"), nil)
+		return nil, bundleclient.ToError(meta, d, fmt.Errorf("invalid import, expected {zone UUID}/{record UUID}"), nil)
 	}
 	zoneID := parts[0]
 	recordID := parts[1]
@@ -158,16 +158,16 @@ func recordImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*sch
 	if err != nil {
 		if apiResponse.HttpNotFound() {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("DNS Record with ID: %s does not exist, zone ID: %s", recordID, zoneID), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return nil, bundleclient.ToError(meta, d, fmt.Errorf("DNS Record with ID: %s does not exist, zone ID: %s", recordID, zoneID), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
-		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to import the DNS Record with ID: %s, zone ID: %s, error: %w", recordID, zoneID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return nil, bundleclient.ToError(meta, d, fmt.Errorf("an error occurred while trying to import the DNS Record with ID: %s, zone ID: %s, error: %w", recordID, zoneID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	tflog.Info(ctx, "DNS record imported", map[string]any{"record_id": recordID, "zone_id": zoneID})
 	if err := client.SetRecordData(d, record); err != nil {
-		return nil, diagutil.ToError(d, err, nil)
+		return nil, bundleclient.ToError(meta, d, err, nil)
 	}
 	if err := d.Set("zone_id", zoneID); err != nil {
-		return nil, diagutil.ToError(d, err, nil)
+		return nil, bundleclient.ToError(meta, d, err, nil)
 	}
 	return []*schema.ResourceData{d}, nil
 }

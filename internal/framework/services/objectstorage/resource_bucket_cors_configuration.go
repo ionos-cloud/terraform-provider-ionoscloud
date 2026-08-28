@@ -26,6 +26,7 @@ var (
 
 type bucketCorsConfiguration struct {
 	client *objectstorage.Client
+	diags  *diagutil.Enricher
 }
 
 // NewBucketCorsConfigurationResource creates a new resource for the bucket CORS configuration resource.
@@ -115,6 +116,7 @@ func (r *bucketCorsConfiguration) Configure(_ context.Context, req resource.Conf
 	}
 
 	r.client = clientBundle.S3Client
+	r.diags = clientBundle.Diags
 }
 
 // Create creates the bucket CORS configuration.
@@ -131,7 +133,7 @@ func (r *bucketCorsConfiguration) Create(ctx context.Context, req resource.Creat
 	}
 
 	if err := r.client.CreateBucketCors(ctx, data); err != nil {
-		resp.Diagnostics.AddError("Failed to create resource", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
+		resp.Diagnostics.AddError("Failed to create resource", r.diags.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
 		return
 	}
 
@@ -153,7 +155,7 @@ func (r *bucketCorsConfiguration) Read(ctx context.Context, req resource.ReadReq
 
 	result, found, err := r.client.GetBucketCors(ctx, data.Bucket)
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to read resource", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
+		resp.Diagnostics.AddError("Failed to read resource", r.diags.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
 		return
 	}
 
@@ -185,7 +187,7 @@ func (r *bucketCorsConfiguration) Update(ctx context.Context, req resource.Updat
 	}
 
 	if err := r.client.UpdateBucketCors(ctx, data); err != nil {
-		resp.Diagnostics.AddError("Failed to read resource", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
+		resp.Diagnostics.AddError("Failed to read resource", r.diags.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
 		return
 	}
 
@@ -206,7 +208,7 @@ func (r *bucketCorsConfiguration) Delete(ctx context.Context, req resource.Delet
 	}
 
 	if err := r.client.DeleteBucketCors(ctx, data.Bucket); err != nil {
-		resp.Diagnostics.AddError("Failed to delete resource", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
+		resp.Diagnostics.AddError("Failed to delete resource", r.diags.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
 		return
 	}
 }

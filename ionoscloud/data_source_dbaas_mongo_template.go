@@ -74,14 +74,14 @@ func dataSourceDbassMongoTemplateRead(ctx context.Context, d *schema.ResourceDat
 
 	// Initial checks.
 	if idOk && nameOk {
-		return diagutil.ToDiags(d, fmt.Errorf("name and ID cannot be both specified at the same time"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("name and ID cannot be both specified at the same time"), nil)
 	}
 	if !idOk && !nameOk {
-		return diagutil.ToDiags(d, fmt.Errorf("please provide a template ID or name"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("please provide a template ID or name"), nil)
 	}
 	retrievedTemplates, apiResponse, err := client.GetTemplates(ctx)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching dbaas mongo templates: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching dbaas mongo templates: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	var templates []mongo.TemplateResponse
@@ -96,16 +96,16 @@ func dataSourceDbassMongoTemplateRead(ctx context.Context, d *schema.ResourceDat
 		}
 	}
 	if templates == nil {
-		return diagutil.ToDiags(d, fmt.Errorf("no DBaaS Mongo Template found with the specified criteria"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("no DBaaS Mongo Template found with the specified criteria"), nil)
 	} else if len(templates) > 1 {
-		return diagutil.ToDiags(d, fmt.Errorf("more than one DBaaS Mongo Template found for the specified search criteria"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("more than one DBaaS Mongo Template found for the specified search criteria"), nil)
 	}
 
 	if err := d.Set("id", *templates[0].Id); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 	if err := dbaasservice.SetMongoDBTemplateData(d, templates[0]); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 	return nil
 }

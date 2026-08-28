@@ -45,12 +45,12 @@ func dataSourceAutoscalingServersRead(ctx context.Context, d *schema.ResourceDat
 	id, idOk := d.GetOk("group_id")
 
 	if !idOk {
-		return diagutil.ToDiags(d, fmt.Errorf("autoscaling group_id has to be provided in order to search for its servers"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("autoscaling group_id has to be provided in order to search for its servers"), nil)
 	}
 
 	groupServers, apiResponse, err := client.GetAllGroupServers(ctx, id.(string))
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the servers for the group with ID %s: %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching the servers for the group with ID %s: %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	return autoscalingservice.SetAutoscalingServersData(d, groupServers)

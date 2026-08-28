@@ -18,6 +18,7 @@ import (
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
+	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
 // Client holds the configuration needed to create per-region API clients.
@@ -29,6 +30,9 @@ type Client struct {
 	httpClient    *http.Client
 	signer        *awsv4.Signer
 	userAgent     string
+	// Diags carries per-configuration error enrichment (contract number),
+	// populated by the provider's Configure. Replaces package-level state.
+	Diags *diagutil.Enricher
 }
 
 var regionToURL = map[string]string{

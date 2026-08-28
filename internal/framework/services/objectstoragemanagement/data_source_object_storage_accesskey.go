@@ -23,6 +23,7 @@ func NewAccesskeyDataSource() datasource.DataSource {
 
 type accessKeyDataSource struct {
 	client *objectstorageservice.Client
+	diags  *diagutil.Enricher
 }
 
 // Metadata returns the metadata for the data source.
@@ -53,6 +54,7 @@ func (d *accessKeyDataSource) Configure(ctx context.Context, req datasource.Conf
 	if err != nil {
 		resp.Diagnostics.AddError("initialization error for Object Storage Management client", err.Error())
 	}
+	d.diags = clientBundle.Diags
 }
 
 // Schema returns the schema for the data source.
@@ -116,7 +118,7 @@ func (d *accessKeyDataSource) Read(ctx context.Context, req datasource.ReadReque
 			return
 		}
 		if err != nil {
-			resp.Diagnostics.AddError("an error occurred while fetching the accesskey", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceID: id, StatusCode: apiResponse.SafeStatusCode()}).Error())
+			resp.Diagnostics.AddError("an error occurred while fetching the accesskey", d.diags.WrapError(err, &diagutil.ErrorContext{ResourceID: id, StatusCode: apiResponse.SafeStatusCode()}).Error())
 			return
 		}
 		if !data.AccessKey.IsNull() && accessKey.Properties.AccessKey != accessKeyID {
@@ -142,7 +144,7 @@ func (d *accessKeyDataSource) Read(ctx context.Context, req datasource.ReadReque
 	case !data.AccessKey.IsNull():
 		accessKeys, apiResponse, err := d.client.ListAccessKeysFilter(ctx, accessKeyID)
 		if err != nil {
-			resp.Diagnostics.AddError("an error occurred while fetching the accesskeys", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: accessKeyID, StatusCode: apiResponse.SafeStatusCode()}).Error())
+			resp.Diagnostics.AddError("an error occurred while fetching the accesskeys", d.diags.WrapError(err, &diagutil.ErrorContext{ResourceName: accessKeyID, StatusCode: apiResponse.SafeStatusCode()}).Error())
 			return
 		}
 		if len(accessKeys.Items) != 0 {
@@ -164,7 +166,7 @@ func (d *accessKeyDataSource) Read(ctx context.Context, req datasource.ReadReque
 	case !data.Description.IsNull():
 		accessKeys, apiResponse, err = d.client.ListAccessKeys(ctx)
 		if err != nil {
-			resp.Diagnostics.AddError("an error occurred while fetching the accesskeys", diagutil.WrapError(err, &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()}).Error())
+			resp.Diagnostics.AddError("an error occurred while fetching the accesskeys", d.diags.WrapError(err, &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()}).Error())
 			return
 		}
 		found := false

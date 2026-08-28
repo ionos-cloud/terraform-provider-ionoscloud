@@ -23,6 +23,7 @@ var _ datasource.DataSourceWithConfigValidators = (*pipelineDataSource)(nil)
 
 type pipelineDataSource struct {
 	client *monitoringservice.Client
+	diags  *diagutil.Enricher
 }
 
 type pipelineDataSourceModel struct {
@@ -61,6 +62,7 @@ func (d *pipelineDataSource) Configure(ctx context.Context, req datasource.Confi
 	}
 
 	d.client = clientBundle.MonitoringClient
+	d.diags = clientBundle.Diags
 }
 
 func (d *pipelineDataSource) ConfigValidators(ctx context.Context) []datasource.ConfigValidator {
@@ -128,7 +130,7 @@ func (d *pipelineDataSource) Read(ctx context.Context, req datasource.ReadReques
 		pipeline, apiResponse, err = d.client.GetPipelineByID(ctx, pipelineID, location)
 
 		if err != nil {
-			resp.Diagnostics.AddError("failed to get Monitoring pipeline", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceID: pipelineID, StatusCode: apiResponse.SafeStatusCode()}).Error())
+			resp.Diagnostics.AddError("failed to get Monitoring pipeline", d.diags.WrapError(err, &diagutil.ErrorContext{ResourceID: pipelineID, StatusCode: apiResponse.SafeStatusCode()}).Error())
 			return
 		}
 	}
@@ -138,7 +140,7 @@ func (d *pipelineDataSource) Read(ctx context.Context, req datasource.ReadReques
 		// Retrieve ALL pipelines.
 		retrievedPipelines, apiResponse, err := d.client.GetPipelines(ctx, location)
 		if err != nil {
-			resp.Diagnostics.AddError(fmt.Sprintf("failed to get Monitoring pipelines from location: %s", location), diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: pipelineName, StatusCode: apiResponse.SafeStatusCode()}).Error())
+			resp.Diagnostics.AddError(fmt.Sprintf("failed to get Monitoring pipelines from location: %s", location), d.diags.WrapError(err, &diagutil.ErrorContext{ResourceName: pipelineName, StatusCode: apiResponse.SafeStatusCode()}).Error())
 			return
 		}
 

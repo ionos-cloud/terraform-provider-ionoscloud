@@ -121,10 +121,10 @@ func dataSourcePipelineRead(ctx context.Context, d *schema.ResourceData, meta an
 	name := nameValue.(string)
 
 	if idOk && nameOk {
-		return diagutil.ToDiags(d, fmt.Errorf("ID and name cannot be both specified at the same time"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("ID and name cannot be both specified at the same time"), nil)
 	}
 	if !idOk && !nameOk {
-		return diagutil.ToDiags(d, fmt.Errorf("please provide either the Logging pipeline ID or name"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("please provide either the Logging pipeline ID or name"), nil)
 	}
 
 	var pipeline logging.PipelineRead
@@ -133,13 +133,13 @@ func dataSourcePipelineRead(ctx context.Context, d *schema.ResourceData, meta an
 	if idOk {
 		pipeline, apiResponse, err = client.GetPipelineByID(ctx, location, id)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the Logging pipeline with ID: %s, error: %w", id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching the Logging pipeline with ID: %s, error: %w", id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 	} else {
 		var results []logging.PipelineRead
 		pipelines, apiResponse, err := client.ListPipelines(ctx, location)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching Logging pipelines: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching Logging pipelines: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 		for _, pipelineItem := range pipelines.Items {
 			if strings.EqualFold(pipelineItem.Properties.Name, name) {
@@ -147,15 +147,15 @@ func dataSourcePipelineRead(ctx context.Context, d *schema.ResourceData, meta an
 			}
 		}
 		if results == nil || len(results) == 0 {
-			return diagutil.ToDiags(d, fmt.Errorf("no Logging pipelines found with the specified name: %s", name), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("no Logging pipelines found with the specified name: %s", name), nil)
 		} else if len(results) > 1 {
-			return diagutil.ToDiags(d, fmt.Errorf("more than one Logging pipeline found with the specified name: %s", name), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("more than one Logging pipeline found with the specified name: %s", name), nil)
 		} else {
 			pipeline = results[0]
 		}
 	}
 	if err := client.SetPipelineData(d, pipeline); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 	return nil
 }

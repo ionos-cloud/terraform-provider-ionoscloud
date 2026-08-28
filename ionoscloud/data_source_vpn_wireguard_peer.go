@@ -84,10 +84,10 @@ func dataSourceVpnWireguardPeerRead(ctx context.Context, d *schema.ResourceData,
 	location := d.Get("location").(string)
 
 	if idOk && nameOk {
-		return diagutil.ToDiags(d, fmt.Errorf("ID and name cannot be both specified at the same time"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("ID and name cannot be both specified at the same time"), nil)
 	}
 	if !idOk && !nameOk {
-		return diagutil.ToDiags(d, fmt.Errorf("please provide either the WireGuard Peer ID or name"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("please provide either the WireGuard Peer ID or name"), nil)
 	}
 
 	var peer vpnsdk.WireguardPeerRead
@@ -97,14 +97,14 @@ func dataSourceVpnWireguardPeerRead(ctx context.Context, d *schema.ResourceData,
 		id := idValue.(string)
 		peer, apiResponse, err = client.GetWireguardPeerByID(ctx, gatewayID, id, location)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the WireGuard Peer with ID: %s, error: %w", id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching the WireGuard Peer with ID: %s, error: %w", id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 	} else {
 		name := nameValue.(string)
 		var results []vpnsdk.WireguardPeerRead
 		peers, apiResponse, err := client.ListWireguardPeers(ctx, gatewayID, location)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching WireGuard Peers: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching WireGuard Peers: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 		for _, recordItem := range peers.Items {
 			if len(results) == 1 {
@@ -116,19 +116,19 @@ func dataSourceVpnWireguardPeerRead(ctx context.Context, d *schema.ResourceData,
 		}
 		switch {
 		case len(results) == 0:
-			return diagutil.ToDiags(d, fmt.Errorf("no VPN WireGuard Peer found with the specified name = %s", name), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("no VPN WireGuard Peer found with the specified name = %s", name), nil)
 		case len(results) > 1:
-			return diagutil.ToDiags(d, fmt.Errorf("more than one VPN WireGuard Peer found with the specified name = %s", name), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("more than one VPN WireGuard Peer found with the specified name = %s", name), nil)
 		default:
 			peer = results[0]
 		}
 	}
 	if err := d.Set("id", peer.Id); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 
 	if err := vpn.SetWireguardPeerData(d, peer); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 
 	return nil

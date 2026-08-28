@@ -120,7 +120,7 @@ func resourceIPBlockCreate(ctx context.Context, d *schema.ResourceData, meta any
 
 	if err != nil {
 		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while reserving an ip block: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while reserving an ip block: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 	d.SetId(*ipblock.Id)
 
@@ -129,7 +129,7 @@ func resourceIPBlockCreate(ctx context.Context, d *schema.ResourceData, meta any
 			d.SetId("")
 		}
 		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
+		return bundleclient.ToDiags(meta, d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	return resourceIPBlockRead(ctx, d, meta)
@@ -151,13 +151,13 @@ func resourceIPBlockRead(ctx context.Context, d *schema.ResourceData, meta any) 
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching an ip block: %w", err), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching an ip block: %w", err), nil)
 	}
 
 	tflog.Info(ctx, "ip block fetched", map[string]any{"ips": strings.Join(*ipBlock.Properties.Ips, ",")})
 
 	if err := IpBlockSetData(d, &ipBlock); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 
 	return nil
@@ -183,7 +183,7 @@ func resourceIPBlockUpdate(ctx context.Context, d *schema.ResourceData, meta any
 
 	if err != nil {
 		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating an ip block: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while updating an ip block: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	return nil
@@ -202,12 +202,12 @@ func resourceIPBlockDelete(ctx context.Context, d *schema.ResourceData, meta any
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while releasing an ipblock: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while releasing an ipblock: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
 		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
+		return bundleclient.ToDiags(meta, d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	d.SetId("")
@@ -239,9 +239,9 @@ func resourceIpBlockImporter(ctx context.Context, d *schema.ResourceData, meta a
 	if err != nil {
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("ipBlock does not exist %q", ipBlockID), nil)
+			return nil, bundleclient.ToError(meta, d, fmt.Errorf("ipBlock does not exist %q", ipBlockID), nil)
 		}
-		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while trying to fetch the ipBlock %q, error:%w", ipBlockID, err), nil)
+		return nil, bundleclient.ToError(meta, d, fmt.Errorf("an error occurred while trying to fetch the ipBlock %q, error:%w", ipBlockID, err), nil)
 
 	}
 
@@ -250,7 +250,7 @@ func resourceIpBlockImporter(ctx context.Context, d *schema.ResourceData, meta a
 	d.SetId(*ipBlock.Id)
 
 	if err := IpBlockSetData(d, &ipBlock); err != nil {
-		return nil, diagutil.ToError(d, err, nil)
+		return nil, bundleclient.ToError(meta, d, err, nil)
 	}
 
 	return []*schema.ResourceData{d}, nil

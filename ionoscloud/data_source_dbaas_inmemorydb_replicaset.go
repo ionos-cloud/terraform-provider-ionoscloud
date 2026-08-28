@@ -154,10 +154,10 @@ func dataSourceReplicaSetRead(ctx context.Context, d *schema.ResourceData, meta 
 	location := d.Get("location").(string)
 
 	if idOk && displayNameOk {
-		return diagutil.ToDiags(d, fmt.Errorf("ID and display_name cannot be both specified at the same time"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("ID and display_name cannot be both specified at the same time"), nil)
 	}
 	if !idOk && !displayNameOk {
-		return diagutil.ToDiags(d, fmt.Errorf("please provide either the InMemoryDB replicaset ID or display_name"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("please provide either the InMemoryDB replicaset ID or display_name"), nil)
 	}
 
 	var replica inmemorydb.ReplicaSetRead
@@ -168,13 +168,13 @@ func dataSourceReplicaSetRead(ctx context.Context, d *schema.ResourceData, meta 
 		// search by ID
 		replica, apiResponse, err = client.GetReplicaSet(ctx, id.(string), location)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the InMemoryDB replica set with ID %v: %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching the InMemoryDB replica set with ID %v: %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 	} else {
 		// list, then filter by name
 		clusters, apiResponse, err := client.ListReplicaSets(ctx, displayName.(string), location)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching InMemoryDB replica sets: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching InMemoryDB replica sets: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 
 		var results []inmemorydb.ReplicaSetRead
@@ -188,20 +188,20 @@ func dataSourceReplicaSetRead(ctx context.Context, d *schema.ResourceData, meta 
 		}
 
 		if len(results) == 0 {
-			return diagutil.ToDiags(d, fmt.Errorf("no InMemoryDB replica set found with the specified display name: %v", displayName), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("no InMemoryDB replica set found with the specified display name: %v", displayName), nil)
 		}
 		if len(results) > 1 {
 			var ids []string
 			for _, r := range results {
 				ids = append(ids, r.Id)
 			}
-			return diagutil.ToDiags(d, fmt.Errorf("more than one InMemoryDB replica set found with the specified criteria name '%v': (%v)", displayName, strings.Join(ids, ", ")), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("more than one InMemoryDB replica set found with the specified criteria name '%v': (%v)", displayName, strings.Join(ids, ", ")), nil)
 		}
 		replica = results[0]
 	}
 
 	if err := client.SetReplicaSetData(d, replica); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 	return nil
 }

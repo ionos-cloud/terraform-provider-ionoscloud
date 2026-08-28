@@ -135,7 +135,7 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta any) di
 	if err != nil {
 		d.SetId("")
 		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating LAN: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while creating LAN: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	d.SetId(*rsp.Id)
@@ -149,7 +149,7 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta any) di
 			}
 		}
 		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
+		return bundleclient.ToDiags(meta, d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	for {
@@ -158,7 +158,7 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta any) di
 		lanReady, rsErr := lanAvailable(ctx, client, d)
 
 		if rsErr != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("error while checking readiness status of LAN %s: %w", *rsp.Id, rsErr), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("error while checking readiness status of LAN %s: %w", *rsp.Id, rsErr), nil)
 		}
 
 		if lanReady {
@@ -171,7 +171,7 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta any) di
 			tflog.Info(ctx, "LAN not yet ready, retrying")
 		case <-ctx.Done():
 			tflog.Info(ctx, "LAN creation timed out")
-			return diagutil.ToDiags(d, fmt.Errorf("lan creation timed out! WARNING: your lan will still probably be created after some time but the terraform state won't reflect that; check your IONOS CLOUD account for updates"), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("lan creation timed out! WARNING: your lan will still probably be created after some time but the terraform state won't reflect that; check your IONOS CLOUD account for updates"), nil)
 		}
 	}
 
@@ -197,13 +197,13 @@ func resourceLanRead(ctx context.Context, d *schema.ResourceData, meta any) diag
 			return nil
 		}
 
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching a LAN: %w", err), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching a LAN: %w", err), nil)
 	}
 
 	tflog.Info(ctx, "LAN found", map[string]any{"lan_id": d.Id()})
 
 	if err := setLanData(d, &lan); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 
 	return nil
@@ -255,12 +255,12 @@ func resourceLanUpdate(ctx context.Context, d *schema.ResourceData, meta any) di
 
 	if err != nil {
 		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while patching a lan: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while patching a lan: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
 		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
+		return bundleclient.ToDiags(meta, d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	return resourceLanRead(ctx, d, meta)
@@ -275,7 +275,7 @@ func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta any) di
 	}
 
 	if err := waitForLanNicsDeletion(ctx, client, d); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 
 	err = retry.RetryContext(ctx, d.Timeout(schema.TimeoutDelete), func() *retry.RetryError {
@@ -295,11 +295,11 @@ func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta any) di
 		return nil
 	})
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while deleting lan dcID %s %w", dcID, err), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while deleting lan dcID %s %w", dcID, err), nil)
 	}
 
 	if err := waitForLanDeletion(ctx, client, d); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 
 	d.SetId("")
@@ -326,7 +326,7 @@ func resourceLanImport(ctx context.Context, d *schema.ResourceData, meta any) ([
 	}
 
 	if err := validateImportIDParts(parts); err != nil {
-		return nil, diagutil.ToError(d, fmt.Errorf("failed validating import identifier %q: %w", importID, err), nil)
+		return nil, bundleclient.ToError(meta, d, fmt.Errorf("failed validating import identifier %q: %w", importID, err), nil)
 	}
 
 	datacenterID := parts[0]
@@ -343,22 +343,22 @@ func resourceLanImport(ctx context.Context, d *schema.ResourceData, meta any) ([
 	if err != nil {
 		if httpNotFound(apiResponse) {
 			d.SetId("")
-			return nil, diagutil.ToError(d, fmt.Errorf("unable to find lan %q", lanID), nil)
+			return nil, bundleclient.ToError(meta, d, fmt.Errorf("unable to find lan %q", lanID), nil)
 		}
-		return nil, diagutil.ToError(d, fmt.Errorf("an error occurred while retrieving the lan %q, %w", lanID, err), nil)
+		return nil, bundleclient.ToError(meta, d, fmt.Errorf("an error occurred while retrieving the lan %q, %w", lanID, err), nil)
 	}
 
 	tflog.Info(ctx, "LAN imported", map[string]any{"lan_id": d.Id(), "datacenter_id": datacenterID})
 
 	if err := d.Set("datacenter_id", datacenterID); err != nil {
-		return nil, diagutil.ToError(d, fmt.Errorf("error while setting datacenter_id property for lan %q: %w", lanID, err), nil)
+		return nil, bundleclient.ToError(meta, d, fmt.Errorf("error while setting datacenter_id property for lan %q: %w", lanID, err), nil)
 	}
 	if err := d.Set("location", location); err != nil {
 		return nil, err
 	}
 
 	if err := setLanData(d, &lan); err != nil {
-		return nil, diagutil.ToError(d, err, nil)
+		return nil, bundleclient.ToError(meta, d, err, nil)
 	}
 	return []*schema.ResourceData{d}, nil
 }

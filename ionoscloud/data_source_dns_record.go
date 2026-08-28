@@ -85,13 +85,13 @@ func dataSourceRecordRead(ctx context.Context, d *schema.ResourceData, meta any)
 	recordName := nameValue.(string)
 
 	if idOk && nameOk {
-		return diagutil.ToDiags(d, fmt.Errorf("ID and name cannot be both specified at the same time"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("ID and name cannot be both specified at the same time"), nil)
 	}
 	if !idOk && !nameOk {
-		return diagutil.ToDiags(d, fmt.Errorf("please provide either the DNS Record ID or name"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("please provide either the DNS Record ID or name"), nil)
 	}
 	if partialMatch && !nameOk {
-		return diagutil.ToDiags(d, fmt.Errorf("partial_match can only be used together with the name attribute"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("partial_match can only be used together with the name attribute"), nil)
 	}
 
 	var record dns.RecordRead
@@ -101,7 +101,7 @@ func dataSourceRecordRead(ctx context.Context, d *schema.ResourceData, meta any)
 	if idOk {
 		record, apiResponse, err = client.GetRecordById(ctx, zoneID, recordID)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the DNS Record with ID: %s, DNS Zone ID: %s, error: %w", recordID, zoneID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching the DNS Record with ID: %s, DNS Zone ID: %s, error: %w", recordID, zoneID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 	} else {
 		var results []dns.RecordRead
@@ -111,7 +111,7 @@ func dataSourceRecordRead(ctx context.Context, d *schema.ResourceData, meta any)
 			// is true.
 			records, apiResponse, err := client.ListRecords(ctx, recordName)
 			if err != nil {
-				return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching DNS Records: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+				return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching DNS Records: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 			}
 			results = records.Items
 		} else {
@@ -120,7 +120,7 @@ func dataSourceRecordRead(ctx context.Context, d *schema.ResourceData, meta any)
 			// filter.name only does a partial match.
 			records, apiResponse, err := client.ListRecords(ctx, "")
 			if err != nil {
-				return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching DNS Records: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+				return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching DNS Records: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 			}
 			for _, recordItem := range records.Items {
 				// Since each record has a unique name, there is no need to keep on searching if
@@ -134,16 +134,16 @@ func dataSourceRecordRead(ctx context.Context, d *schema.ResourceData, meta any)
 			}
 		}
 		if results == nil || len(results) == 0 {
-			return diagutil.ToDiags(d, fmt.Errorf("no DNS Record found with the specified name = %s", recordName), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("no DNS Record found with the specified name = %s", recordName), nil)
 		} else if len(results) > 1 {
-			return diagutil.ToDiags(d, fmt.Errorf("more than one DNS Record found with the specified name = %s", recordName), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("more than one DNS Record found with the specified name = %s", recordName), nil)
 		} else {
 			record = results[0]
 		}
 	}
 
 	if err := client.SetRecordData(d, record); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 
 	return nil

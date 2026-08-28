@@ -104,10 +104,10 @@ func dataSourceKafkaClusterRead(ctx context.Context, d *schema.ResourceData, met
 	location := d.Get("location").(string)
 
 	if idOk && nameOk {
-		return diagutil.ToDiags(d, fmt.Errorf("ID and name cannot be both specified at the same time"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("ID and name cannot be both specified at the same time"), nil)
 	}
 	if !idOk && !nameOk {
-		return diagutil.ToDiags(d, fmt.Errorf("please provide either the Kafka Cluster ID or name"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("please provide either the Kafka Cluster ID or name"), nil)
 	}
 
 	partialMatch := d.Get("partial_match").(bool)
@@ -117,14 +117,14 @@ func dataSourceKafkaClusterRead(ctx context.Context, d *schema.ResourceData, met
 	if idOk {
 		cluster, apiResponse, err = client.GetClusterByID(ctx, id, location)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the Kafka Cluster with ID: %s, error: %w", id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching the Kafka Cluster with ID: %s, error: %w", id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 	} else {
 		var results []kafkasdk.ClusterRead
 
 		clusters, apiResponse, err := client.ListClusters(ctx, location)
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching Kafka Cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("an error occurred while fetching Kafka Cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 
 		for _, cluster := range clusters.Items {
@@ -135,16 +135,16 @@ func dataSourceKafkaClusterRead(ctx context.Context, d *schema.ResourceData, met
 
 		switch {
 		case len(results) == 0:
-			return diagutil.ToDiags(d, fmt.Errorf("no Kafka Clusters found with the specified name: %s", name), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("no Kafka Clusters found with the specified name: %s", name), nil)
 		case len(results) > 1:
-			return diagutil.ToDiags(d, fmt.Errorf("more than one Kafka Cluster found with the specified name: %s", name), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("more than one Kafka Cluster found with the specified name: %s", name), nil)
 		default:
 			cluster = results[0]
 		}
 	}
 
 	if err := client.SetKafkaClusterData(d, &cluster); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 
 	return nil

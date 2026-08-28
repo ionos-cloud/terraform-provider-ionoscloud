@@ -50,7 +50,7 @@ func (r *bucketResource) Map(ctx context.Context, includeResource bool, filters 
 
 	region, err := r.client.GetBucketLocation(ctx, types.StringValue(*b.Name))
 	if err != nil {
-		diags.AddError("failed to get bucket location", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: *b.Name}).Error())
+		diags.AddError("failed to get bucket location", r.diags.WrapError(err, &diagutil.ErrorContext{ResourceName: *b.Name}).Error())
 		return nil, diags
 	}
 
@@ -72,7 +72,7 @@ func (r *bucketResource) Map(ctx context.Context, includeResource bool, filters 
 
 	bucketModel, found, err := r.client.GetBucket(ctx, types.StringValue(*b.Name), region)
 	if err != nil {
-		diags.AddError("failed to get bucket details", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: *b.Name}).Error())
+		diags.AddError("failed to get bucket details", r.diags.WrapError(err, &diagutil.ErrorContext{ResourceName: *b.Name}).Error())
 		return mapped, diags
 	}
 	if !found {

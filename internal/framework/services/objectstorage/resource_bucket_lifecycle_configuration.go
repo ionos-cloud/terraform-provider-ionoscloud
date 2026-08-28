@@ -24,6 +24,7 @@ var (
 
 type bucketLifecycleConfiguration struct {
 	client *objectstorage.Client
+	diags  *diagutil.Enricher
 }
 
 // NewBucketLifecycleConfigurationResource creates a new resource for the bucket lifecycle configuration resource.
@@ -162,6 +163,7 @@ func (r *bucketLifecycleConfiguration) Configure(_ context.Context, req resource
 	}
 
 	r.client = clientBundle.S3Client
+	r.diags = clientBundle.Diags
 }
 
 // Create creates the bucket lifecycle configuration resource.
@@ -179,7 +181,7 @@ func (r *bucketLifecycleConfiguration) Create(ctx context.Context, req resource.
 
 	err := r.client.CreateBucketLifecycle(ctx, data)
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to create resource", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
+		resp.Diagnostics.AddError("Failed to create resource", r.diags.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
 		return
 	}
 
@@ -201,7 +203,7 @@ func (r *bucketLifecycleConfiguration) Read(ctx context.Context, req resource.Re
 
 	result, found, err := r.client.GetBucketLifecycle(ctx, data.Bucket)
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to read resource", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
+		resp.Diagnostics.AddError("Failed to read resource", r.diags.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
 		return
 	}
 
@@ -233,7 +235,7 @@ func (r *bucketLifecycleConfiguration) Update(ctx context.Context, req resource.
 	}
 
 	if err := r.client.UpdateBucketLifecycle(ctx, data); err != nil {
-		resp.Diagnostics.AddError("Failed to update resource", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
+		resp.Diagnostics.AddError("Failed to update resource", r.diags.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
 		return
 	}
 
@@ -254,7 +256,7 @@ func (r *bucketLifecycleConfiguration) Delete(ctx context.Context, req resource.
 	}
 
 	if err := r.client.DeleteBucketLifecycle(ctx, data.Bucket); err != nil {
-		resp.Diagnostics.AddError("Failed to delete resource", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
+		resp.Diagnostics.AddError("Failed to delete resource", r.diags.WrapError(err, &diagutil.ErrorContext{ResourceName: data.Bucket.ValueString()}).Error())
 		return
 	}
 }

@@ -12,7 +12,6 @@ import (
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapiserver"
-	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/uuidgen"
 )
 
@@ -74,22 +73,22 @@ func resourceServerBootDeviceSelectionCreate(ctx context.Context, d *schema.Reso
 	// The bootable device to which the server will revert if this resource is destroyed.
 	defaultBootVolume, err := ss.GetDefaultBootVolume(ctx, dcID, serverID)
 	if err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 
 	if err = d.Set("default_boot_volume_id", defaultBootVolume.Id); err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error setting a default boot volume for boot selection resource"), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error setting a default boot volume for boot selection resource"), nil)
 	}
 
 	bootDeviceIDValue, bootDeviceIDOk := d.GetOk("boot_device_id")
 	if !bootDeviceIDOk {
 		if err = ss.PxeBoot(ctx, dcID, serverID); err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("error while performing pxe boot for server, serverID: %s, dcID: %s (%w)", serverID, dcID, err), nil)
+			return bundleclient.ToDiags(meta, d, fmt.Errorf("error while performing pxe boot for server, serverID: %s, dcID: %s (%w)", serverID, dcID, err), nil)
 		}
 	} else {
 		bootDeviceID := bootDeviceIDValue.(string)
 		if err = ss.UpdateBootDevice(ctx, dcID, serverID, bootDeviceID); err != nil {
-			return diagutil.ToDiags(d, err, nil)
+			return bundleclient.ToDiags(meta, d, err, nil)
 		}
 	}
 
@@ -114,11 +113,11 @@ func resourceServerBootDeviceSelectionRead(ctx context.Context, d *schema.Resour
 			d.SetId("")
 			return nil
 		}
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 
 	if err = setServerBootDeviceSelectionData(d, server); err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error reading boot devices for server, dcID: %s, sID: %s, (%w)", dcID, serverID, err), nil)
+		return bundleclient.ToDiags(meta, d, fmt.Errorf("error reading boot devices for server, dcID: %s, sID: %s, (%w)", dcID, serverID, err), nil)
 	}
 
 	return nil
@@ -138,12 +137,12 @@ func resourceServerBootDeviceSelectionUpdate(ctx context.Context, d *schema.Reso
 		bootDeviceIDValue, bootDeviceIDOk := d.GetOk("boot_device_id")
 		if !bootDeviceIDOk {
 			if err := ss.PxeBoot(ctx, dcID, serverID); err != nil {
-				return diagutil.ToDiags(d, fmt.Errorf("error while performing pxe boot: %w, serverID: %s, dcID: %s", err, serverID, dcID), nil)
+				return bundleclient.ToDiags(meta, d, fmt.Errorf("error while performing pxe boot: %w, serverID: %s, dcID: %s", err, serverID, dcID), nil)
 			}
 		} else {
 			bootDeviceID := bootDeviceIDValue.(string)
 			if err := ss.UpdateBootDevice(ctx, dcID, serverID, bootDeviceID); err != nil {
-				return diagutil.ToDiags(d, err, nil)
+				return bundleclient.ToDiags(meta, d, err, nil)
 			}
 		}
 	}
@@ -163,7 +162,7 @@ func resourceServerBootDeviceSelectionDelete(ctx context.Context, d *schema.Reso
 	defaultBootVolumeID := d.Get("default_boot_volume_id").(string)
 
 	if err := ss.UpdateBootDevice(ctx, dcID, serverID, defaultBootVolumeID); err != nil {
-		return diagutil.ToDiags(d, err, nil)
+		return bundleclient.ToDiags(meta, d, err, nil)
 	}
 	d.SetId("")
 	return nil
