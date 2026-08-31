@@ -1,6 +1,8 @@
 ## 6.7.36
 ### Features
 - Add support for the `de/fra/1` location (Frankfurt West). Like `de/fra/2`, it is a child of the `de/fra` metro region and uses the same regional endpoints.
+- `ionoscloud_datacenter`: New list resource, queryable with `terraform query` (requires Terraform 1.14+). This is the first list resource for an SDKv2-based resource and serves as the reference example for adding more.
+- `ionoscloud_datacenter`: Add a resource identity (`id`, `location`), which also enables `import` blocks with an `identity` attribute.
 
 ### Fixes
 - `ionoscloud_vpn_wireguard_peer`: Fix `gateway_id` changes attempting an in-place update against the API and failing with an error, instead of destroying and re-creating the peer.

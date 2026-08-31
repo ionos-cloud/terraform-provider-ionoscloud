@@ -66,7 +66,7 @@ func ProtoV5ProviderServerFactory(ctx context.Context) (func() tfprotov5.Provide
 	primary := Provider()
 	servers := []func() tfprotov5.ProviderServer{
 		primary.GRPCProvider,
-		providerserver.NewProtocol5(provider.New()),
+		providerserver.NewProtocol5(provider.New(primary)),
 	}
 
 	muxServer, err := tf5muxserver.NewMuxServer(ctx, servers...)
@@ -88,7 +88,7 @@ func ProtoV6ProviderServerFactory(ctx context.Context) (func() tfprotov6.Provide
 		return nil, nil, err
 	}
 	servers := []func() tfprotov6.ProviderServer{
-		providerserver.NewProtocol6(provider.New()),
+		providerserver.NewProtocol6(provider.New(primary)),
 		func() tfprotov6.ProviderServer {
 			return upgradedSdkServer
 		},

@@ -24,6 +24,27 @@ func resourceDatacenter() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceDatacenterImport,
 		},
+		// The identity is what a `list "ionoscloud_datacenter"` block streams back for
+		// each datacenter it finds, and what an import block can be written against.
+		// Terraform requires every read of a resource that declares an identity to
+		// return one, see setDatacenterIdentity.
+		Identity: &schema.ResourceIdentity{
+			Version: 0,
+			SchemaFunc: func() map[string]*schema.Schema {
+				return map[string]*schema.Schema{
+					"id": {
+						Type:              schema.TypeString,
+						RequiredForImport: true,
+						Description:       "The UUID of the datacenter.",
+					},
+					"location": {
+						Type:              schema.TypeString,
+						OptionalForImport: true,
+						Description:       "The location the datacenter lives in. Only needed when the Cloud API endpoint is overridden per location.",
+					},
+				}
+			},
+		},
 		Schema: map[string]*schema.Schema{
 
 			// Datacenter parameters
@@ -160,6 +181,10 @@ func resourceDatacenterRead(ctx context.Context, d *schema.ResourceData, meta an
 		return diagutil.ToDiags(d, err, nil)
 	}
 
+	if err := setDatacenterIdentity(d); err != nil {
+		return diagutil.ToDiags(d, err, nil)
+	}
+
 	return nil
 }
 
@@ -239,17 +264,10 @@ func resourceDatacenterDelete(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourceDatacenterImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
-	importID := d.Id()
-	location, parts := splitImportID(importID, ":")
-	if len(parts) != 1 {
-		return nil, fmt.Errorf("invalid import identifier: expected one of <location>:<datacenter-id> or <datacenter-id>, got: %s", importID)
+	dcID, location, err := datacenterImportParts(d)
+	if err != nil {
+		return nil, err
 	}
-
-	if err := validateImportIDParts(parts); err != nil {
-		return nil, fmt.Errorf("failed validating import identifier %q: %w", importID, err)
-	}
-
-	dcID := parts[0]
 
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
@@ -273,7 +291,57 @@ func resourceDatacenterImport(ctx context.Context, d *schema.ResourceData, meta 
 		return nil, diagutil.ToError(d, err, nil)
 	}
 
+	if err := setDatacenterIdentity(d); err != nil {
+		return nil, diagutil.ToError(d, err, nil)
+	}
+
 	return []*schema.ResourceData{d}, nil
+}
+
+// datacenterImportParts resolves the datacenter to import, either from the resource
+// identity - which is how an import block with an `identity` argument, and the
+// import config that `terraform query` generates, address a datacenter - or from the
+// "<location>:<datacenter-id>" import string.
+func datacenterImportParts(d *schema.ResourceData) (dcID, location string, err error) {
+	if identity, identityErr := d.Identity(); identityErr == nil {
+		if id, ok := identity.GetOk("id"); ok {
+			loc, _ := identity.Get("location").(string)
+			dcID, _ = id.(string)
+			return dcID, loc, nil
+		}
+	}
+
+	importID := d.Id()
+	location, parts := splitImportID(importID, ":")
+	if len(parts) != 1 {
+		return "", "", fmt.Errorf("invalid import identifier: expected one of <location>:<datacenter-id> or <datacenter-id>, got: %s", importID)
+	}
+
+	if err := validateImportIDParts(parts); err != nil {
+		return "", "", fmt.Errorf("failed validating import identifier %q: %w", importID, err)
+	}
+
+	return parts[0], location, nil
+}
+
+// setDatacenterIdentity writes the resource identity from the datacenter already in
+// state. Terraform errors out with "Missing Resource Identity After Read" if a
+// resource that declares an identity finishes a read without returning one.
+func setDatacenterIdentity(d *schema.ResourceData) error {
+	identity, err := d.Identity()
+	if err != nil {
+		return err
+	}
+
+	if err := identity.Set("id", d.Id()); err != nil {
+		return fmt.Errorf("error while setting id identity attribute for datacenter %s: %w", d.Id(), err)
+	}
+
+	if err := identity.Set("location", d.Get("location")); err != nil {
+		return fmt.Errorf("error while setting location identity attribute for datacenter %s: %w", d.Id(), err)
+	}
+
+	return nil
 }
 
 func setDatacenterData(d *schema.ResourceData, datacenter *ionoscloud.Datacenter) error {

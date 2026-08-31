@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	sdkv2 "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/compute"
@@ -54,11 +55,18 @@ var (
 
 // IonosCloudProvider is the provider implementation.
 type IonosCloudProvider struct {
+	// sdkv2Provider is the SDKv2 half of the muxed provider. The framework side needs
+	// it to serve list resources for resources that are still implemented with SDKv2,
+	// because it is the only source of their protocol schemas. See
+	// internal/framework/sdkv2schema.
+	sdkv2Provider *sdkv2.Provider
 }
 
-// New creates a new provider.
-func New() provider.Provider {
-	return &IonosCloudProvider{}
+// New creates a new provider. sdkv2Provider is the SDKv2 provider this one is muxed
+// with; passing nil is allowed, but then list resources for SDKv2 resources such as
+// ionoscloud_datacenter cannot be served.
+func New(sdkv2Provider *sdkv2.Provider) provider.Provider {
+	return &IonosCloudProvider{sdkv2Provider: sdkv2Provider}
 }
 
 // Metadata returns the metadata for the provider.
@@ -332,6 +340,7 @@ func (p *IonosCloudProvider) ListResources(_ context.Context) []func() list.List
 		pgsqlv2.ListResources(),
 		inmemorydbv2.ListResources(),
 		mariadbv2.ListResources(),
+		compute.ListResources(p.sdkv2Provider),
 	}
 
 	for _, r := range listResources {
