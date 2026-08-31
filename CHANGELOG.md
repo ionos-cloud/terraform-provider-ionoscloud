@@ -1,3 +1,8 @@
+## 6.7.37
+
+### Fixes
+- `ionoscloud_vcpu_server`: Fix `error setting enabled_features` on every plan/apply/refresh by adding the missing `enabled_features` (Computed) attribute to the resource schema, introduced in 6.7.36 by the Confidential Computing change.
+
 ## 6.7.36
 
 ### Features

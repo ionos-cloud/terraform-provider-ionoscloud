@@ -109,6 +109,7 @@ resource "random_password" "server_image_password" {
 - `boot_volume` - (Computed) The associated boot volume.
 - `boot_cdrom` - ***DEPRECATED*** Please refer to [ionoscloud_server_boot_device_selection](server_boot_device_selection.md) (Optional)[string] The associated boot drive, if any. Must be the UUID of a bootable CDROM image that can be retrieved using the [ionoscloud_image](./../data-sources/image.md) data source.
 - `boot_image` - (Optional)[string] The image or snapshot UUID / name. May also be an image alias. It is required if `licence_type` is not provided.
+- `enabled_features` - (Computed)[list] Features enabled on the server, e.g. `SEV-SNP` for a Confidential Computing VM.
 - `primary_nic` - (Computed) The associated NIC.
 - `primary_ip` - (Computed) The associated IP address.
 - `firewallrule_id` - (Computed) The associated firewall rule.

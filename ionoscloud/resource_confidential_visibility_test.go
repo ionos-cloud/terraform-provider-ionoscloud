@@ -57,6 +57,20 @@ func TestSetDatacenterDataCPUArchEnabledFeatures(t *testing.T) {
 	}
 }
 
+// Regression for the 6.7.36 crash (https://github.com/ionos-cloud/terraform-provider-ionoscloud):
+// ionoscloud_vcpu_server reads through the shared server state-writer (resourceServerRead ->
+// setResourceServerData), which unconditionally calls d.Set for enabled_features and confidential.
+// Both keys must exist in the VCPU resource schema or every plan/apply/refresh fails with
+// "error setting enabled_features Invalid address to set".
+func TestVCPUServerSchemaHasConfidentialVisibilityKeys(t *testing.T) {
+	s := resourceVCPUServer().Schema
+	for _, key := range []string{"enabled_features", "confidential"} {
+		if _, ok := s[key]; !ok {
+			t.Errorf("VCPU server schema missing %q; shared server state-writer sets it and will fail", key)
+		}
+	}
+}
+
 // serverIsConfidential drives the destroy volume-ordering, derived from the API-reported features
 // so it stays correct for imported/drifted servers.
 func TestServerIsConfidential(t *testing.T) {

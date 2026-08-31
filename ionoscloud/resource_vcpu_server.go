@@ -76,6 +76,17 @@ func resourceVCPUServer() *schema.Resource {
 				Computed: true,
 				Optional: true,
 			},
+			"enabled_features": {
+				Type:        schema.TypeList,
+				Computed:    true,
+				Description: "Features enabled on the server, e.g. SEV-SNP for a Confidential Computing VM.",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"confidential": {
+				Type:        schema.TypeBool,
+				Computed:    true,
+				Description: "Computed on read from the server's enabled features. Always false for VCPU servers, which cannot be Confidential Computing VMs.",
+			},
 			"primary_nic": {
 				Type:        schema.TypeString,
 				Computed:    true,
