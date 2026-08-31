@@ -57,16 +57,59 @@ func TestSetDatacenterDataCPUArchEnabledFeatures(t *testing.T) {
 	}
 }
 
+// sharedServerReadWriterKeys are the keys that setResourceServerData (the state-writer behind the
+// shared resourceServerRead) calls d.Set on unconditionally, i.e. not gated on the key existing in
+// the caller's schema. Every resource wired to resourceServerRead MUST declare all of them, or that
+// resource crashes at plan/apply/refresh with "Invalid address to set". Keep this list in sync with
+// the unconditional d.Set calls in setResourceServerData (resource_server.go).
+var sharedServerReadWriterKeys = []string{"enabled_features", "confidential"}
+
+// sharedServerReadResources are the resources that reuse resourceServerRead / setResourceServerData
+// as their read path. ionoscloud_cube_server is deliberately excluded: it has its own reader
+// (resourceCubeServerRead) that does not set these keys.
+var sharedServerReadResources = map[string]func() *schema.Resource{
+	"ionoscloud_server":      resourceServer,
+	"ionoscloud_vcpu_server": resourceVCPUServer,
+}
+
 // Regression for the 6.7.36 crash (https://github.com/ionos-cloud/terraform-provider-ionoscloud):
 // ionoscloud_vcpu_server reads through the shared server state-writer (resourceServerRead ->
 // setResourceServerData), which unconditionally calls d.Set for enabled_features and confidential.
-// Both keys must exist in the VCPU resource schema or every plan/apply/refresh fails with
-// "error setting enabled_features Invalid address to set".
-func TestVCPUServerSchemaHasConfidentialVisibilityKeys(t *testing.T) {
-	s := resourceVCPUServer().Schema
-	for _, key := range []string{"enabled_features", "confidential"} {
-		if _, ok := s[key]; !ok {
-			t.Errorf("VCPU server schema missing %q; shared server state-writer sets it and will fail", key)
+// Both keys must exist in every schema wired to that reader or plan/apply/refresh fails with
+// "error setting enabled_features Invalid address to set". This guards the whole class, not just
+// the one attribute/one resource that broke in 6.7.36.
+func TestSharedServerReadWriterKeysPresentInSchemas(t *testing.T) {
+	for name, ctor := range sharedServerReadResources {
+		s := ctor().Schema
+		for _, key := range sharedServerReadWriterKeys {
+			if _, ok := s[key]; !ok {
+				t.Errorf("%s schema missing %q; shared server state-writer sets it unconditionally and will crash at read", name, key)
+			}
+		}
+	}
+}
+
+// Reproduces the exact failing calls from setResourceServerData (resource_server.go:1566, 1576)
+// against every shared-reader schema: enabled_features as a []string and confidential as a bool.
+// Stronger than the presence check — it also catches a type mismatch (e.g. someone re-declaring
+// enabled_features as TypeString), which would still fail d.Set at runtime.
+func TestSharedServerReadWriterSetRoundTrip(t *testing.T) {
+	for name, ctor := range sharedServerReadResources {
+		d := schema.TestResourceDataRaw(t, ctor().Schema, nil)
+
+		if err := d.Set("enabled_features", []string{"SEV-SNP"}); err != nil {
+			t.Errorf("%s: d.Set(enabled_features) = %v, want nil", name, err)
+		}
+		if err := d.Set("confidential", true); err != nil {
+			t.Errorf("%s: d.Set(confidential) = %v, want nil", name, err)
+		}
+
+		feats := d.Get("enabled_features").([]any)
+		if len(feats) != 1 || feats[0].(string) != "SEV-SNP" {
+			t.Errorf("%s: enabled_features = %v, want [SEV-SNP]", name, feats)
+		}
+		if d.Get("confidential").(bool) != true {
+			t.Errorf("%s: confidential = false, want true", name)
 		}
 	}
 }
