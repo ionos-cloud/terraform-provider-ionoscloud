@@ -92,12 +92,12 @@ func TestDatacenterListResource(t *testing.T) {
 		assert.Equal(t, "the production datacenter", resource["description"])
 		assert.Equal(t, "2001:db8::/56", resource["ipv6_cidr_block"])
 		assert.Equal(t, false, resource["sec_auth_protection"])
-		assert.Equal(t, float64(7), resource["version"])
+		assert.Equal(t, int64(7), resource["version"])
 		assert.ElementsMatch(t, []any{"SSD", "MULTIPLE_CPU"}, resource["features"])
 		assert.Equal(t, []any{map[string]any{
 			"cpu_family": "INTEL_SKYLAKE",
-			"max_cores":  float64(32),
-			"max_ram":    float64(245760),
+			"max_cores":  int64(32),
+			"max_ram":    int64(245760),
 			"vendor":     "GenuineIntel",
 		}}, resource["cpu_architecture"])
 		assert.Nil(t, resource["timeouts"], "a listed datacenter has no timeouts")
@@ -115,7 +115,7 @@ func TestDatacenterListResource(t *testing.T) {
 		assert.Equal(t, "d3b07384-d9a0-4d1e-8f2a-000000000002", staging["id"])
 		assert.Equal(t, "staging", staging["name"])
 		assert.Equal(t, "de/fra", staging["location"])
-		assert.Equal(t, float64(1), staging["version"])
+		assert.Equal(t, int64(1), staging["version"])
 		assert.Nil(t, staging["description"])
 		assert.Nil(t, staging["ipv6_cidr_block"])
 		assert.Nil(t, staging["sec_auth_protection"])
@@ -334,7 +334,7 @@ func decode(t *testing.T, value *tfprotov6.DynamicValue, valueType tftypes.Type)
 }
 
 // goValue converts a tftypes.Value into the plain Go value it holds: an object becomes
-// a map[string]any, a list or set becomes a []any, a number becomes a float64, and a
+// a map[string]any, a list or set becomes a []any, a number becomes an int64, and a
 // null or unknown value becomes nil.
 func goValue(t *testing.T, value tftypes.Value) any {
 	t.Helper()
@@ -357,8 +357,14 @@ func goValue(t *testing.T, value tftypes.Value) any {
 	case valueType.Is(tftypes.Number):
 		var number big.Float
 		readValue(t, value, &number)
-		f, _ := number.Float64()
-		return f
+		// Every number in the datacenter schema is a TypeInt, so this keeps a single
+		// integer representation and fails loudly rather than silently switching to a
+		// float if that ever stops being true.
+		if !number.IsInt() {
+			t.Fatalf("expected a whole number, got %s", number.String())
+		}
+		n, _ := number.Int64()
+		return n
 
 	case valueType.Is(tftypes.List{}), valueType.Is(tftypes.Set{}):
 		var elements []tftypes.Value
