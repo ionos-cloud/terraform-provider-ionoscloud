@@ -269,6 +269,10 @@ func resourceDatacenterImport(ctx context.Context, d *schema.ResourceData, meta 
 		return nil, err
 	}
 
+	// Terraform sends an empty ID for an identity-based import, so the ID has to be
+	// set here for the error diagnostics and the log line below to name the resource.
+	d.SetId(dcID)
+
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
 		return nil, err

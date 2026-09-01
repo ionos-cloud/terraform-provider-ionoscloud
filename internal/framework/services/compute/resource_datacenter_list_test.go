@@ -3,6 +3,7 @@ package compute_test
 import (
 	"context"
 	"encoding/json"
+	"math/big"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -82,12 +83,44 @@ func TestDatacenterListResource(t *testing.T) {
 		assert.Equal(t, "d3b07384-d9a0-4d1e-8f2a-000000000001", identity["id"])
 		assert.Equal(t, "de/txl", identity["location"])
 
+		// Every attribute the mapper fills is asserted here, so that mapping a value
+		// to the wrong attribute fails the test.
 		resource := decode(t, results[0].Resource, resourceType)
 		assert.Equal(t, "d3b07384-d9a0-4d1e-8f2a-000000000001", resource["id"])
 		assert.Equal(t, "prod", resource["name"])
 		assert.Equal(t, "de/txl", resource["location"])
 		assert.Equal(t, "the production datacenter", resource["description"])
 		assert.Equal(t, "2001:db8::/56", resource["ipv6_cidr_block"])
+		assert.Equal(t, false, resource["sec_auth_protection"])
+		assert.Equal(t, float64(7), resource["version"])
+		assert.ElementsMatch(t, []any{"SSD", "MULTIPLE_CPU"}, resource["features"])
+		assert.Equal(t, []any{map[string]any{
+			"cpu_family": "INTEL_SKYLAKE",
+			"max_cores":  float64(32),
+			"max_ram":    float64(245760),
+			"vendor":     "GenuineIntel",
+		}}, resource["cpu_architecture"])
+		assert.Nil(t, resource["timeouts"], "a listed datacenter has no timeouts")
+
+		// The second datacenter reports only the properties the API always sets, which
+		// pins that the pairing holds past the first result and that the properties the
+		// API left out stay null instead of turning into zero values.
+		assert.Equal(t, "staging", results[1].DisplayName)
+
+		stagingIdentity := decode(t, results[1].Identity.IdentityData, identityType(identitySchema))
+		assert.Equal(t, "d3b07384-d9a0-4d1e-8f2a-000000000002", stagingIdentity["id"])
+		assert.Equal(t, "de/fra", stagingIdentity["location"])
+
+		staging := decode(t, results[1].Resource, resourceType)
+		assert.Equal(t, "d3b07384-d9a0-4d1e-8f2a-000000000002", staging["id"])
+		assert.Equal(t, "staging", staging["name"])
+		assert.Equal(t, "de/fra", staging["location"])
+		assert.Equal(t, float64(1), staging["version"])
+		assert.Nil(t, staging["description"])
+		assert.Nil(t, staging["ipv6_cidr_block"])
+		assert.Nil(t, staging["sec_auth_protection"])
+		assert.Nil(t, staging["features"])
+		assert.Nil(t, staging["cpu_architecture"])
 	})
 
 	t.Run("applies filters", func(t *testing.T) {
@@ -280,9 +313,10 @@ func listConfig(t *testing.T, configType tftypes.Type, filters map[string]string
 	return tftypes.NewValue(configType, map[string]tftypes.Value{"filters": filtersValue})
 }
 
-// decode unmarshals a dynamic value and flattens its string attributes into a map,
-// which is enough to assert on the attributes this test cares about.
-func decode(t *testing.T, value *tfprotov6.DynamicValue, valueType tftypes.Type) map[string]string {
+// decode unmarshals a dynamic value into the plain Go values its attributes hold, so
+// that the assertions can reach the collection and number attributes as well as the
+// string ones.
+func decode(t *testing.T, value *tfprotov6.DynamicValue, valueType tftypes.Type) map[string]any {
 	t.Helper()
 
 	decoded, err := value.Unmarshal(valueType)
@@ -290,24 +324,73 @@ func decode(t *testing.T, value *tfprotov6.DynamicValue, valueType tftypes.Type)
 		t.Fatalf("failed to unmarshal a list result: %v", err)
 	}
 
-	var attributes map[string]tftypes.Value
-	if err := decoded.As(&attributes); err != nil {
-		t.Fatalf("failed to read the attributes of a list result: %v", err)
+	converted := goValue(t, decoded)
+	attributes, ok := converted.(map[string]any)
+	if !ok {
+		t.Fatalf("expected a list result to decode into an object, got %T", converted)
 	}
 
-	result := make(map[string]string, len(attributes))
-	for name, attribute := range attributes {
-		if !attribute.Type().Is(tftypes.String) || attribute.IsNull() {
-			continue
-		}
+	return attributes
+}
+
+// goValue converts a tftypes.Value into the plain Go value it holds: an object becomes
+// a map[string]any, a list or set becomes a []any, a number becomes a float64, and a
+// null or unknown value becomes nil.
+func goValue(t *testing.T, value tftypes.Value) any {
+	t.Helper()
+
+	if value.IsNull() || !value.IsKnown() {
+		return nil
+	}
+
+	switch valueType := value.Type(); {
+	case valueType.Is(tftypes.String):
 		var s string
-		if err := attribute.As(&s); err != nil {
-			t.Fatalf("failed to read attribute %q: %v", name, err)
-		}
-		result[name] = s
-	}
+		readValue(t, value, &s)
+		return s
 
-	return result
+	case valueType.Is(tftypes.Bool):
+		var b bool
+		readValue(t, value, &b)
+		return b
+
+	case valueType.Is(tftypes.Number):
+		var number big.Float
+		readValue(t, value, &number)
+		f, _ := number.Float64()
+		return f
+
+	case valueType.Is(tftypes.List{}), valueType.Is(tftypes.Set{}):
+		var elements []tftypes.Value
+		readValue(t, value, &elements)
+		converted := make([]any, 0, len(elements))
+		for _, element := range elements {
+			converted = append(converted, goValue(t, element))
+		}
+		return converted
+
+	case valueType.Is(tftypes.Object{}):
+		var attributes map[string]tftypes.Value
+		readValue(t, value, &attributes)
+		converted := make(map[string]any, len(attributes))
+		for name, attribute := range attributes {
+			converted[name] = goValue(t, attribute)
+		}
+		return converted
+
+	default:
+		t.Fatalf("cannot convert a value of type %s", valueType)
+		return nil
+	}
+}
+
+// readValue reads a tftypes.Value into target, failing the test if it does not fit.
+func readValue(t *testing.T, value tftypes.Value, target any) {
+	t.Helper()
+
+	if err := value.As(target); err != nil {
+		t.Fatalf("failed to read a value of type %s: %v", value.Type(), err)
+	}
 }
 
 // identityType builds the object type of a resource identity schema.

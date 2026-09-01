@@ -57,13 +57,19 @@ list "ionoscloud_datacenter" "prod" {
 
 ### Generate resource configuration from existing datacenters
 
-Use `terraform query` with `-generate-config-out` to produce ready-to-use `ionoscloud_datacenter` resource blocks for all existing datacenters:
+Use `terraform query` with `-generate-config-out` to produce ready-to-use `ionoscloud_datacenter` resource blocks for the datacenters the query returns:
 
 ```shell
 terraform query -generate-config-out=imported.tf
 ```
 
 Terraform will write an `ionoscloud_datacenter` resource block for each discovered datacenter into `imported.tf`, which can then be used directly in your configuration.
+
+> **Note:** The datacenters are read with a single Cloud API request, so the results are
+> bounded by the API's default page limit. A contract holding more datacenters than that
+> limit is truncated silently — no error is raised and the missing datacenters simply do
+> not appear. Check that the number of generated resource blocks matches the number of
+> datacenters you expect before treating `imported.tf` as complete.
 
 Terraform names each generated resource after the `list` block label plus an index — a `list "ionoscloud_datacenter" "smoke"` block produces `ionoscloud_datacenter.smoke_0`, `smoke_1`, and so on.
 
@@ -104,7 +110,7 @@ The `config` block supports the following arguments:
   - `field_name` - (Required) The field to filter on. Supported values: `name`, `location`.
   - `field_value` - (Required) The exact value to match against.
 
-> **Note:** The Cloud API returns datacenters from every location in a single response, so filtering by `location` does not reduce the number of API calls; it only narrows the results.
+> **Note:** The Cloud API returns datacenters from every location in a single response, so filtering by `location` does not reduce the number of API calls; it only narrows the results. Filtering happens after that response is read, so it cannot recover a datacenter left out by the page limit described above.
 
 ## Identity Attributes
 
