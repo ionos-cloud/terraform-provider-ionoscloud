@@ -65,6 +65,37 @@ terraform query -generate-config-out=imported.tf
 
 Terraform will write an `ionoscloud_datacenter` resource block for each discovered datacenter into `imported.tf`, which can then be used directly in your configuration.
 
+Terraform names each generated resource after the `list` block label plus an index — a `list "ionoscloud_datacenter" "smoke"` block produces `ionoscloud_datacenter.smoke_0`, `smoke_1`, and so on.
+
+### ⚠️ Do not reuse a `list` block label across separate imports
+
+Because the generated names are derived from the `list` block label, running a second query with the **same** label produces the **same** resource addresses. If a previous address is still in state, the generated configuration is silently applied to the datacenter already recorded at that address — not to the one you just queried.
+
+This happens because an `import` block is idempotent: Terraform skips it when the target address is already in state, so the identity in the generated `import` block is never consulted. Deleting the generated `.tf` file does **not** remove the state entry.
+
+The consequences are not limited to a harmless diff. `location` is a force-new attribute, so if the two datacenters are in different locations, the plan **destroys the datacenter already in state** and creates a replacement — the datacenter you meant to import is never touched:
+
+```hcl
+# generated for a datacenter in de/fra, but smoke_0 in state points at one in de/txl
+resource "ionoscloud_datacenter" "smoke_0" {
+  location = "de/fra"          # forces replacement of the de/txl datacenter
+  name     = "docker-machine-data-center"
+}
+```
+
+To avoid this:
+
+- Use a distinct `list` block label for each query you intend to import from, or
+- Remove the stale address before regenerating: `terraform state rm ionoscloud_datacenter.smoke_0`
+
+Always read the plan before applying. A clean import reports:
+
+```
+Plan: 1 to import, 0 to add, 0 to change, 0 to destroy.
+```
+
+Anything reporting changes, and especially `must be replaced` with `location = "..." -> "..." # forces replacement`, means the address is bound to a different datacenter — stop and clear the state entry first.
+
 ## Argument Reference
 
 The `config` block supports the following arguments:

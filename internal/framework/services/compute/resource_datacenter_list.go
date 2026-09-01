@@ -14,33 +14,14 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/identity"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/sdkv2schema"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 )
 
-// This is the reference example for adding a list resource to a resource that is
-// still implemented with terraform-plugin-sdk/v2, such as ionoscloud_datacenter.
-//
-// List resources cannot be written in SDKv2 - helper/schema answers every
-// ListResource RPC with "list resource type is not supported by this provider" -
-// so the list resource is registered on the plugin-framework side of the mux while
-// the managed resource stays where it is. tf6muxserver keeps managed resources and
-// list resources in separate routing tables, so the two halves can be served by
-// different providers under the same ionoscloud_datacenter type name.
-//
-// Two things follow from the managed resource living elsewhere:
-//
-//   - The framework has no schema for ionoscloud_datacenter, so this list resource
-//     implements list.ListResourceWithRawV6Schemas and hands it the protocol
-//     schemas that the SDKv2 provider itself advertises (see sdkv2schema).
-//     Without them the framework refuses to register the list resource at all:
-//     "ListResource Type Defined without a Matching Managed Resource Type".
-//   - The SDKv2 resource has to declare a schema.ResourceIdentity, since terraform
-//     identifies every listed instance by its identity. See the Identity block in
-//     ionoscloud/resource_datacenter.go.
-//
-// Everything else - the filters attribute, the streaming, the mapper contract - is
-// the same as for a framework-native list resource such as pgsqlv2's pg_cluster_v2.
+// A list resource for ionoscloud_datacenter, whose managed resource is still
+// implemented with terraform-plugin-sdk/v2 and therefore lives on the other half of
+// the mux. The protocol schemas the framework needs come from that resource via
+// identity.SetRawV6Schemas, and the Identity it requires is declared alongside it in
+// ionoscloud/resource_datacenter.go.
 
 const datacenterResourceType = "ionoscloud_datacenter"
 
@@ -54,9 +35,9 @@ var (
 type datacenterListResource struct {
 	bundle *bundleclient.SdkBundle
 
-	// sdkv2Provider is the SDKv2 half of the muxed provider, the source of the
+	// resourceSchema is the SDKv2 managed resource being listed, the source of the
 	// protocol schemas returned by RawV6Schemas.
-	sdkv2Provider *schema.Provider
+	resourceSchema *schema.Resource
 }
 
 // datacenterIdentityModel mirrors the resource identity declared by the SDKv2
@@ -107,9 +88,17 @@ type datacenterTimeoutsModel struct {
 }
 
 // NewDatacenterListResource creates a new list resource for ionoscloud_datacenter.
-// sdkv2Provider is the provider that defines the managed resource being listed.
-func NewDatacenterListResource(sdkv2Provider *schema.Provider) list.ListResource {
-	return &datacenterListResource{sdkv2Provider: sdkv2Provider}
+// datacenterResource is the SDKv2 managed resource being listed; it is the source of
+// the protocol schemas the framework needs.
+func NewDatacenterListResource(datacenterResource *schema.Resource) list.ListResource {
+	return &datacenterListResource{resourceSchema: datacenterResource}
+}
+
+// RawV6Schemas hands the framework the protocol schemas of the SDKv2 managed
+// resource. A framework-native list resource inherits them from the resource
+// itself; this is only needed because ionoscloud_datacenter lives on the SDKv2 side.
+func (r *datacenterListResource) RawV6Schemas(ctx context.Context, _ list.RawV6SchemaRequest, resp *list.RawV6SchemaResponse) {
+	identity.SetRawV6Schemas(ctx, resp, datacenterResourceType, r.resourceSchema)
 }
 
 // Metadata returns the type name of the managed resource being listed. It must match
@@ -117,26 +106,6 @@ func NewDatacenterListResource(sdkv2Provider *schema.Provider) list.ListResource
 // results to.
 func (r *datacenterListResource) Metadata(_ context.Context, _ resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = datacenterResourceType
-}
-
-// RawV6Schemas hands the framework the protocol schemas of the SDKv2 managed
-// resource. This is only needed because ionoscloud_datacenter is not a framework
-// resource; a framework-native list resource inherits them from the resource itself.
-func (r *datacenterListResource) RawV6Schemas(ctx context.Context, _ list.RawV6SchemaRequest, resp *list.RawV6SchemaResponse) {
-	resourceSchema, identitySchema, err := sdkv2schema.Schemas(ctx, r.sdkv2Provider, datacenterResourceType)
-	if err != nil {
-		// RawV6Schemas cannot report diagnostics. Leaving the schemas unset makes the
-		// framework reject the list resource with an actionable error of its own, so
-		// log the cause here to explain why.
-		tflog.Error(ctx, "failed to read the SDKv2 schemas for the datacenter list resource", map[string]any{
-			"resource_type": datacenterResourceType,
-			"error":         err.Error(),
-		})
-		return
-	}
-
-	resp.ProtoV6Schema = resourceSchema
-	resp.ProtoV6IdentitySchema = identitySchema
 }
 
 // Configure stores the client bundle shared by the provider.

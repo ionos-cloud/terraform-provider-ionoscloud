@@ -55,10 +55,9 @@ var (
 
 // IonosCloudProvider is the provider implementation.
 type IonosCloudProvider struct {
-	// sdkv2Provider is the SDKv2 half of the muxed provider. The framework side needs
-	// it to serve list resources for resources that are still implemented with SDKv2,
-	// because it is the only source of their protocol schemas. See
-	// internal/framework/sdkv2schema.
+	// sdkv2Provider is the SDKv2 half of the muxed provider, the only place the
+	// framework side can reach the schemas of resources that are still implemented
+	// with SDKv2 and need a list resource.
 	sdkv2Provider *sdkv2.Provider
 }
 
