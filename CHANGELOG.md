@@ -14,6 +14,9 @@
 ### Enhancements
 - Added `Sensitive: true` for multiple credential/secret attributes across the provider, several resources, and data sources.
 
+### Documentation
+- `ionoscloud_volume`: document the volume performance classes (`ESSENTIAL`, `BALANCED`, `PERFORMANCE`) as `disk_type` values.
+
 ### Testing
 - Update K8s tests with new versions. 
 
