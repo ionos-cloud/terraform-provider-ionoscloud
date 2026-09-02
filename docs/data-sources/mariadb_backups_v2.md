@@ -26,7 +26,7 @@ data "ionoscloud_mariadb_backups_v2" "for_cluster" {
 
 ## Argument Reference
 
-* `location` - (Required)[string] The location to query. Available locations: `de/fra`, `de/txl`, `es/vit`, `fr/par`, `gb/bhx`, `gb/lhr`, `us/ewr`, `us/las`, `us/mci`.
+* `location` - (Required)[string] The location to query. Available locations: `de/fra`, `de/fra/1`, `de/fra/2`, `de/txl`, `es/vit`, `fr/par`, `gb/bhx`, `gb/lhr`, `us/ewr`, `us/las`, `us/mci`.
 * `cluster_id` - (Optional)[string] Filter backups by the cluster they belong to.
 
 ## Attributes Reference

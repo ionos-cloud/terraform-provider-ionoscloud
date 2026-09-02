@@ -42,6 +42,7 @@ func resourceS3Key() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "The Object Storage Secret key.",
 				Computed:    true,
+				Sensitive:   true,
 			},
 			"active": {
 				Type:        schema.TypeBool,

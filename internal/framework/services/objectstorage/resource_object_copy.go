@@ -144,6 +144,7 @@ func (r *objectCopyResource) Schema(_ context.Context, req resource.SchemaReques
 			"server_side_encryption_customer_key": schema.StringAttribute{
 				Description: "Specifies the 256-bit, base64-encoded encryption key to use to encrypt and decrypt your data",
 				Optional:    true,
+				Sensitive:   true,
 			},
 			"server_side_encryption_customer_key_md5": schema.StringAttribute{
 				Description: "Specifies the 128-bit MD5 digest of the encryption key according to RFC 1321. IONOS Object Storage Object Copy Storage uses this header for a message integrity check  to ensure that the encryption key was transmitted without error",
@@ -157,6 +158,7 @@ func (r *objectCopyResource) Schema(_ context.Context, req resource.SchemaReques
 			"source_customer_key": schema.StringAttribute{
 				Description: "Specifies the 256-bit, base64-encoded encryption key to use to decrypt the source object",
 				Optional:    true,
+				Sensitive:   true,
 			},
 			"source_customer_key_md5": schema.StringAttribute{
 				Description: "Specifies the 128-bit MD5 digest of the encryption key according to RFC 1321. IONOS Object Storage Object Copy Storage uses this header for a message integrity check  to ensure that the encryption key was transmitted without error",

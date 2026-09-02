@@ -52,7 +52,7 @@ const (
 	RequestStatusFailed  = "FAILED"
 	RequestStatusDone    = "DONE"
 
-	Version = "6.3.10"
+	Version = "6.3.11"
 )
 
 // Constants for APIs

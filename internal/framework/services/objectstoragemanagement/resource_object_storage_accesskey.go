@@ -71,6 +71,7 @@ func (r *accesskeyResource) Schema(ctx context.Context, req resource.SchemaReque
 			"secretkey": schema.StringAttribute{
 				Description: "The secret key of the Access key.",
 				Computed:    true,
+				Sensitive:   true,
 			},
 			"canonical_user_id": schema.StringAttribute{
 				Description: "The canonical user ID which is valid for user-owned buckets.",

@@ -22,20 +22,22 @@ type ServerProperties struct {
 	Name *string `json:"name,omitempty"`
 	// The hostname of the  resource. Allowed characters are a-z, 0-9 and - (minus). Hostname should not start with minus and should not be longer than 63 characters.
 	Hostname *string `json:"hostname,omitempty"`
-	// The total number of cores for the server. It can not be supplied for the VMs that have to be created based on templates.
+	// The total number of cores for the server. It can not be supplied for the VMs that have to be created based on templates. For servers with Confidential Computing enabled, the number of cores must match the amount of cores required by the Confidential Computing image, and this field is immutable once the server has been created — update requests attempting to change it will be rejected.
 	Cores *int32 `json:"cores,omitempty"`
-	// The memory size for the enterprise server in MB, such as 2048. Size must be specified in multiples of 256 MB with a minimum of 256 MB; however, if you set ramHotPlug to TRUE then you must use a minimum of 1024 MB. If you set the RAM size more than 240GB, then ramHotPlug will be set to FALSE and can not be set to TRUE unless RAM size not set to less than 240GB. It can not be supplied for the VMs that have to be created based on templates.
+	// The memory size for the server in MB, such as 2048. Size must be specified in multiples of 256 MB with a minimum of 256 MB; however, if you set ramHotPlug to TRUE then you must use a minimum of 1024 MB. If you set the RAM size more than 240GB, then ramHotPlug will be set to FALSE and can not be set to TRUE unless RAM size not set to less than 240GB. It can not be supplied for the VMs that have to be created based on templates. For servers with Confidential Computing enabled, this field is immutable once the server has been created — update requests attempting to change it will be rejected.
 	Ram *int32 `json:"ram,omitempty"`
-	// The availability zone in which the server should be provisioned. For CUBE and GPU servers, the only value accepted is 'AUTO'
+	// The availability zone in which the server should be provisioned. For CUBE and GPU servers, the only value accepted is 'AUTO'. For servers with Confidential Computing enabled, this field is immutable once the server has been created — update requests attempting to change it will be rejected.
 	AvailabilityZone *string `json:"availabilityZone,omitempty"`
 	// Status of the virtual machine.
 	VmState    *string            `json:"vmState,omitempty"`
 	BootCdrom  *ResourceReference `json:"bootCdrom,omitempty"`
 	BootVolume *ResourceReference `json:"bootVolume,omitempty"`
-	// CPU architecture on which server gets provisioned; not all CPU architectures are available in all datacenter regions; available CPU architectures can be retrieved from the datacenter resource; must not be provided for CUBE and VCPU servers.
+	// CPU architecture on which server gets provisioned; not all CPU architectures are available in all datacenter regions; available CPU architectures can be retrieved from the datacenter resource; must not be provided for CUBE and VCPU servers. If the field is omitted from the request or the value is empty or null, an available CPU architecture will be automatically selected. This field must not be supplied when creating a server with Confidential Computing enabled (i.e. when one of the attached volumes uses a confidential computing image); in that case the CPU family is determined by the image and is selected automatically. On servers with Confidential Computing enabled this field is also immutable — update requests attempting to change it will be rejected.
 	CpuFamily *string `json:"cpuFamily,omitempty"`
-	// Server type: CUBE, ENTERPRISE, VCPU or GPU.
+	// Server type: CUBE, ENTERPRISE, VCPU or GPU. Confidential Computing can be enabled only on a server of type ENTERPRISE by creating it with a volume with a Confidential Computing image.
 	Type *string `json:"type,omitempty"`
+	// The list of features enabled on this server. An ENTERPRISE server with Confidential Computing enabled will have `SEV-SNP` as part of this list.
+	EnabledFeatures *[]string `json:"enabledFeatures,omitempty"`
 	// The placement group ID that belongs to this server; Requires system privileges, for internal usage only
 	PlacementGroupId *string `json:"placementGroupId,omitempty"`
 	// Activate or deactivate the Multi Queue feature on all NICs of this server. This feature is beneficial to  enable when the NICs are experiencing performance issues (e.g. low throughput). Toggling this feature will also initiate a restart of the server. If the specified value is `true`, the feature will  be activated; if it is not specified or set to `false`, the feature will be deactivated. It is not allowed for servers of type Cube.
@@ -478,6 +480,44 @@ func (o *ServerProperties) HasType() bool {
 	return false
 }
 
+// GetEnabledFeatures returns the EnabledFeatures field value
+// If the value is explicit nil, nil is returned
+func (o *ServerProperties) GetEnabledFeatures() *[]string {
+	if o == nil {
+		return nil
+	}
+
+	return o.EnabledFeatures
+
+}
+
+// GetEnabledFeaturesOk returns a tuple with the EnabledFeatures field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *ServerProperties) GetEnabledFeaturesOk() (*[]string, bool) {
+	if o == nil {
+		return nil, false
+	}
+
+	return o.EnabledFeatures, true
+}
+
+// SetEnabledFeatures sets field value
+func (o *ServerProperties) SetEnabledFeatures(v []string) {
+
+	o.EnabledFeatures = &v
+
+}
+
+// HasEnabledFeatures returns a boolean if a field has been set.
+func (o *ServerProperties) HasEnabledFeatures() bool {
+	if o != nil && o.EnabledFeatures != nil {
+		return true
+	}
+
+	return false
+}
+
 // GetPlacementGroupId returns the PlacementGroupId field value
 // If the value is explicit nil, nil is returned
 func (o *ServerProperties) GetPlacementGroupId() *string {
@@ -598,6 +638,10 @@ func (o ServerProperties) MarshalJSON() ([]byte, error) {
 
 	if o.Type != nil {
 		toSerialize["type"] = o.Type
+	}
+
+	if o.EnabledFeatures != nil {
+		toSerialize["enabledFeatures"] = o.EnabledFeatures
 	}
 
 	if o.PlacementGroupId != nil {

@@ -271,6 +271,7 @@ resource "ionoscloud_server" "test" {
 - `nic` - (Optional) See the [Nic](nic.md) section.
 - `firewall` - (Optional) Allows to define firewall rules inline in the server. See the [Firewall](firewall.md) section.
 - `boot_volume` - (Computed) The associated boot volume.
+- `enabled_features` - (Computed) Features enabled on the server, e.g. `SEV-SNP` for a Confidential Computing VM.
 - `boot_cdrom` - ***DEPRECATED*** Please refer to [ionoscloud_server_boot_device_selection](server_boot_device_selection.md) (Optional)(Computed)[string] The associated boot drive, if any. Must be the UUID of a bootable CDROM image that can be retrieved using the [ionoscloud_image](../data-sources/image.md) data source.
 - `boot_image` - (Optional)[string] The image or snapshot UUID / name. May also be an image alias. It is required if `licence_type` is not provided.
 - `primary_nic` - (Computed) The associated NIC.
@@ -288,6 +289,7 @@ resource "ionoscloud_server" "test" {
 - `security_groups_ids` - (Optional) The list of Security Group IDs for the
 - `allow_replace` - (Optional)[bool] When set to true, allows the update of immutable fields by first destroying and then re-creating the server.
 - `nic_multi_queue` - (Optional)[bool] Activate or deactivate the Multi Queue feature on all NICs of the server. This feature is beneficial to enable when the NICs are experiencing performance issues (e.g. low throughput). Toggling this feature will also initiate a restart of the server. If the specified value is `true`, the feature will be activated; if it is not specified or set to `false`, the feature will be deactivated. The feature cannot be activated for `CUBE` servers.
+- `confidential` - (Optional)(Computed)[bool] If set, creates a Confidential Computing (SEV-SNP) VM from a confidential boot image. Requires `type = "ENTERPRISE"`, a `volume` block, and a private SEV-SNP `image_name`. `cores` and `cpu_family` must not be set - both are derived from the image. This property is immutable (changing it re-creates the server; use `allow_replace = true`). It is computed on read from the server's enabled features, so imported servers reflect their real state instead of forcing a spurious re-creation. Only available in confidential-computing enabled locations.
 
 ⚠️ **_Warning: `allow_replace` - lets you update immutable fields, but it first destroys and then re-creates the server in order to do it. This field should be used with care, understanding the risks._**
 

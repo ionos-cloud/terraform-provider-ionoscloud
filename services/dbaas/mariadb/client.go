@@ -89,6 +89,7 @@ var (
 	locationToURL = map[string]string{
 		"":         "https://mariadb.de-txl.ionos.com",
 		"de/fra":   "https://mariadb.de-fra.ionos.com",
+		"de/fra/1": "https://mariadb.de-fra.ionos.com",
 		"de/fra/2": "https://mariadb.de-fra.ionos.com",
 		"de/txl":   "https://mariadb.de-txl.ionos.com",
 		"es/vit":   "https://mariadb.es-vit.ionos.com",
