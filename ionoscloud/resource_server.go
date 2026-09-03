@@ -743,7 +743,41 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta any)
 		}
 	}
 
+	return serverReadForType(ctx, d, meta)
+}
+
+// serverReadForType routes the post-create/update read-back to the state-writer that owns the
+// server's type. ionoscloud_vcpu_server has its own read path (resourceVCPUServerRead) that is not
+// shared with the enterprise writer, so its create/update must refresh state through it too.
+// Only called from the enterprise create/update handlers, which vcpu delegates to after setting
+// type=VCPU — so `type` is always populated here; anything non-VCPU (incl. the empty default for a
+// genuine ionoscloud_server) correctly reads via the enterprise writer.
+func serverReadForType(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
+	if strings.EqualFold(d.Get("type").(string), constant.VCPUType) {
+		return resourceVCPUServerRead(ctx, d, meta)
+	}
 	return resourceServerRead(ctx, d, meta)
+}
+
+// setServerConfidentialVisibility writes the two Confidential Computing visibility keys
+// (enabled_features, confidential) that every server state-writer must set. Centralised so the
+// enterprise (setResourceServerData) and vcpu (setResourceVCPUServerData) writers cannot drift on
+// these crash-prone keys — a missing/misspelled key here is exactly the 6.7.36 regression.
+func setServerConfidentialVisibility(d *schema.ResourceData, server *ionoscloud.Server) error {
+	if server.Properties != nil && server.Properties.EnabledFeatures != nil {
+		if err := d.Set("enabled_features", *server.Properties.EnabledFeatures); err != nil {
+			return fmt.Errorf("error setting enabled_features %w", err)
+		}
+	} else {
+		// Clear any stale value if the API no longer reports features.
+		d.Set("enabled_features", nil)
+	}
+	// Derive `confidential` from the API so imported/refreshed servers reflect their real state
+	// and don't trigger a spurious ForceNew replace.
+	if err := d.Set("confidential", serverIsConfidential(server)); err != nil {
+		return fmt.Errorf("error setting confidential %w", err)
+	}
+	return nil
 }
 
 func resourceServerRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
@@ -1144,7 +1178,7 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta any)
 		}
 
 	}
-	return resourceServerRead(ctx, d, meta)
+	return serverReadForType(ctx, d, meta)
 }
 
 func deleteInlineVolumes(ctx context.Context, d *schema.ResourceData, meta any, client *ionoscloud.APIClient) diag.Diagnostics {
@@ -1562,19 +1596,8 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 			}
 		}
 
-		if server.Properties.EnabledFeatures != nil {
-			if err := d.Set("enabled_features", *server.Properties.EnabledFeatures); err != nil {
-				return fmt.Errorf("error setting enabled_features %w", err)
-			}
-		} else {
-			// Clear any stale value if the API no longer reports features.
-			d.Set("enabled_features", nil)
-		}
-
-		// Derive `confidential` from the API so imported/refreshed servers reflect their real state
-		// and don't trigger a spurious ForceNew replace.
-		if err := d.Set("confidential", serverIsConfidential(server)); err != nil {
-			return fmt.Errorf("error setting confidential %w", err)
+		if err := setServerConfidentialVisibility(d, server); err != nil {
+			return err
 		}
 
 		if server.Properties.BootCdrom != nil {
