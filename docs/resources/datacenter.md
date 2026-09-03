@@ -81,3 +81,41 @@ The older syntax can be for importing the resource is still supported:
 terraform import ionoscloud_datacenter.mydc datacenter uuid
 ```
 
+In Terraform v1.12.0 and later, the [`import` block](https://developer.hashicorp.com/terraform/language/import) can also be used with the `identity` attribute:
+
+```hcl
+import {
+  to = ionoscloud_datacenter.example
+  identity = {
+    id = "datacenter uuid"
+  }
+}
+
+resource "ionoscloud_datacenter" "example" {
+  ### Configuration omitted for brevity ###
+}
+```
+
+### Identity Schema
+
+#### Required
+
+* `id` (String) The UUID of the datacenter.
+
+#### Optional
+
+* `location` (String) The location the datacenter lives in (e.g. `de/txl`). Only needed when the Cloud API endpoint is overridden per location.
+
+## Query (List Resource)
+
+Datacenters can be listed using `terraform query` (requires Terraform 1.14+). List blocks must be placed in a dedicated query file, whose name ends in `.tfquery.hcl` (for example `queries.tfquery.hcl`).
+
+```hcl
+list "ionoscloud_datacenter" "all" {
+  provider         = ionoscloud
+  include_resource = true
+}
+```
+
+See the [`ionoscloud_datacenter` list resource documentation](../list-resources/datacenter.md) for filters and the full attribute reference.
+

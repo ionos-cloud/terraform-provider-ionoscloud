@@ -271,6 +271,7 @@ github.com/hashicorp/terraform-plugin-mux/internal/tfprotov5tov6
 github.com/hashicorp/terraform-plugin-mux/internal/tfprotov6tov5
 github.com/hashicorp/terraform-plugin-mux/tf5muxserver
 github.com/hashicorp/terraform-plugin-mux/tf5to6server
+github.com/hashicorp/terraform-plugin-mux/tf5to6server/translate
 github.com/hashicorp/terraform-plugin-mux/tf6muxserver
 # github.com/hashicorp/terraform-plugin-sdk/v2 v2.40.1
 ## explicit; go 1.25.8
