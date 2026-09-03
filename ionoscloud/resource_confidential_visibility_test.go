@@ -57,51 +57,57 @@ func TestSetDatacenterDataCPUArchEnabledFeatures(t *testing.T) {
 	}
 }
 
-// sharedServerReadWriterKeys are the keys that setResourceServerData (the state-writer behind the
-// shared resourceServerRead) calls d.Set on unconditionally, i.e. not gated on the key existing in
-// the caller's schema. Every resource wired to resourceServerRead MUST declare all of them, or that
-// resource crashes at plan/apply/refresh with "Invalid address to set". Keep this list in sync with
-// the unconditional d.Set calls in setResourceServerData (resource_server.go).
-var sharedServerReadWriterKeys = []string{"enabled_features", "confidential"}
+// serverReadWriterKeys are the keys the server state-writers (setResourceServerData for enterprise,
+// setResourceVCPUServerData for vcpu) call d.Set on unconditionally, i.e. not gated on the key
+// existing in the schema. Every server resource whose writer sets them MUST declare all of them, or
+// that resource crashes at plan/apply/refresh with "Invalid address to set". Keep this in sync with
+// the unconditional d.Set calls in both writers.
+var serverReadWriterKeys = []string{"enabled_features", "confidential"}
 
-// sharedServerReadResources are the resources that reuse resourceServerRead / setResourceServerData
-// as their read path. ionoscloud_cube_server is deliberately excluded: it has its own reader
-// (resourceCubeServerRead) that does not set these keys.
-var sharedServerReadResources = map[string]func() *schema.Resource{
+// serverConfidentialAwareResources are the resources whose state-writer sets serverReadWriterKeys.
+// As of the un-sharing, ionoscloud_server and ionoscloud_vcpu_server have SEPARATE writers, but both
+// still set these keys, so both must declare them. ionoscloud_cube_server / ionoscloud_gpu_server are
+// excluded: their reader (resourceCubeServerRead) sets neither key.
+var serverConfidentialAwareResources = map[string]func() *schema.Resource{
 	"ionoscloud_server":      resourceServer,
 	"ionoscloud_vcpu_server": resourceVCPUServer,
 }
 
 // Regression for the 6.7.36 crash (https://github.com/ionos-cloud/terraform-provider-ionoscloud):
-// ionoscloud_vcpu_server reads through the shared server state-writer (resourceServerRead ->
-// setResourceServerData), which unconditionally calls d.Set for enabled_features and confidential.
-// Both keys must exist in every schema wired to that reader or plan/apply/refresh fails with
+// the vcpu server crashed because its schema lacked enabled_features/confidential while the writer
+// set them unconditionally. Whether the writer is shared (pre-fix) or per-type (post un-sharing),
+// every server whose writer sets these keys must declare them, or plan/apply/refresh fails with
 // "error setting enabled_features Invalid address to set". This guards the whole class, not just
 // the one attribute/one resource that broke in 6.7.36.
 func TestSharedServerReadWriterKeysPresentInSchemas(t *testing.T) {
-	for name, ctor := range sharedServerReadResources {
+	for name, ctor := range serverConfidentialAwareResources {
 		s := ctor().Schema
-		for _, key := range sharedServerReadWriterKeys {
+		for _, key := range serverReadWriterKeys {
 			if _, ok := s[key]; !ok {
-				t.Errorf("%s schema missing %q; shared server state-writer sets it unconditionally and will crash at read", name, key)
+				t.Errorf("%s schema missing %q; its server state-writer sets it unconditionally and will crash at read", name, key)
 			}
 		}
 	}
 }
 
-// Reproduces the exact failing calls from setResourceServerData (resource_server.go:1566, 1576)
-// against every shared-reader schema: enabled_features as a []string and confidential as a bool.
-// Stronger than the presence check — it also catches a type mismatch (e.g. someone re-declaring
-// enabled_features as TypeString), which would still fail d.Set at runtime.
-func TestSharedServerReadWriterSetRoundTrip(t *testing.T) {
-	for name, ctor := range sharedServerReadResources {
+// Exercises the ACTUAL writer helper both server state-writers call (setServerConfidentialVisibility)
+// against every consuming schema, with a populated Server carrying SEV-SNP. This is the real drift
+// guard after un-sharing: it runs the writer path (not a bare d.Set), so it catches the vcpu writer
+// dropping/misspelling a key, a type mismatch, or confidential being derived wrong — the exact class
+// that broke in 6.7.36. Both writers delegate here, so testing the helper covers both.
+func TestSetServerConfidentialVisibilityAcrossSchemas(t *testing.T) {
+	server := &ionoscloud.Server{
+		Properties: &ionoscloud.ServerProperties{
+			EnabledFeatures: &[]string{"SEV-SNP"},
+		},
+	}
+
+	for name, ctor := range serverConfidentialAwareResources {
 		d := schema.TestResourceDataRaw(t, ctor().Schema, nil)
 
-		if err := d.Set("enabled_features", []string{"SEV-SNP"}); err != nil {
-			t.Errorf("%s: d.Set(enabled_features) = %v, want nil", name, err)
-		}
-		if err := d.Set("confidential", true); err != nil {
-			t.Errorf("%s: d.Set(confidential) = %v, want nil", name, err)
+		if err := setServerConfidentialVisibility(d, server); err != nil {
+			t.Errorf("%s: setServerConfidentialVisibility = %v, want nil", name, err)
+			continue
 		}
 
 		feats := d.Get("enabled_features").([]any)
@@ -109,7 +115,7 @@ func TestSharedServerReadWriterSetRoundTrip(t *testing.T) {
 			t.Errorf("%s: enabled_features = %v, want [SEV-SNP]", name, feats)
 		}
 		if d.Get("confidential").(bool) != true {
-			t.Errorf("%s: confidential = false, want true", name)
+			t.Errorf("%s: confidential = false, want true (SEV-SNP present)", name)
 		}
 	}
 }

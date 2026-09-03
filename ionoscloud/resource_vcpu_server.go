@@ -16,11 +16,11 @@ import (
 func resourceVCPUServer() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceVCPUServerCreate,
-		ReadContext:   resourceServerRead,
+		ReadContext:   resourceVCPUServerRead,
 		UpdateContext: resourceServerUpdate,
 		DeleteContext: resourceServerDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: resourceServerImport,
+			StateContext: resourceVCPUServerImport,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -85,7 +85,7 @@ func resourceVCPUServer() *schema.Resource {
 			"confidential": {
 				Type:        schema.TypeBool,
 				Computed:    true,
-				Description: "Computed on read from the server's enabled features. Always false for VCPU servers, which cannot be Confidential Computing VMs.",
+				Description: "Whether the server is a Confidential Computing (SEV-SNP) VM. Derived on read from the server's enabled features; normally false for VCPU servers, which are not Confidential Computing VMs.",
 			},
 			"primary_nic": {
 				Type:        schema.TypeString,
