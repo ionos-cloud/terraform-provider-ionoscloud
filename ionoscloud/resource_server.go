@@ -1206,6 +1206,43 @@ func deleteInlineVolumes(ctx context.Context, d *schema.ResourceData, meta any, 
 	return nil
 }
 
+// detachableVolumeIDs returns the volumes attached to the server that Terraform does not own,
+// i.e. everything that is not one of the server's inline volume blocks. Those belong to separate
+// ionoscloud_volume resources with their own lifecycle, so a server delete must not take them
+// down with it.
+func detachableVolumeIDs(server *ionoscloud.Server, inlineVolumeIDs []any) []string {
+	if server == nil || server.Entities == nil || server.Entities.Volumes == nil || server.Entities.Volumes.Items == nil {
+		return nil
+	}
+
+	inline := make(map[string]struct{}, len(inlineVolumeIDs))
+	for _, id := range inlineVolumeIDs {
+		if idStr, ok := id.(string); ok {
+			inline[idStr] = struct{}{}
+		}
+	}
+
+	var detachable []string
+	for _, volume := range *server.Entities.Volumes.Items {
+		if volume.Id == nil {
+			continue
+		}
+		if _, owned := inline[*volume.Id]; !owned {
+			detachable = append(detachable, *volume.Id)
+		}
+	}
+	return detachable
+}
+
+// deleteServerRequest builds the server DELETE request. A Confidential Computing server must be
+// deleted together with its volumes: its boot volume carries a confidential image, which the API
+// refuses to leave behind on its own (VDC-5-2060), and which cannot be detached while attached.
+// Non-confidential servers keep the previous behaviour, where inline volumes are deleted first in
+// their own requests.
+func deleteServerRequest(ctx context.Context, client *ionoscloud.APIClient, dcID, serverID string, confidential bool) ionoscloud.ApiDatacentersServersDeleteRequest {
+	return client.ServersApi.DatacentersServersDelete(ctx, dcID, serverID).DeleteVolumes(confidential)
+}
+
 // serverIsConfidential reports whether the server the API returned is a Confidential Computing
 // (SEV-SNP) VM, based on its enabled features. Derived from the API rather than the user-supplied
 // confidential flag so it stays correct for imported servers and config drift.
@@ -1237,10 +1274,13 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta any)
 		return diagutil.ToDiags(d, fmt.Errorf("error occurred while fetching a server: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	// A confidential boot volume cannot be detached while attached, so it must be deleted after
-	// the server is gone rather than before it.
-	//   Normal server: volume, then server.
-	//   Confidential:  server, then volume.
+	// A confidential boot volume cannot exist on its own: the API refuses to delete a confidential
+	// server that would leave its volume behind (VDC-5-2060), and the volume cannot be deleted
+	// while attached either (VDC-5-2058). So the server delete has to take the volume with it via
+	// deleteVolumes.
+	//   Normal server: inline volumes, then server.
+	//   Confidential:  detach everything Terraform does not own, then server together with the
+	//                  volumes it does own, in one request.
 	// Confidentiality is derived from the server the API returned (not the user flag) so this stays
 	// correct for imported servers and config drift.
 	confidential := serverIsConfidential(&server)
@@ -1255,7 +1295,29 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta any)
 		}
 	}
 
-	apiResponse, err = client.ServersApi.DatacentersServersDelete(ctx, dcID, d.Id()).Execute()
+	// deleteVolumes takes down every volume still attached, so volumes owned by a separate
+	// ionoscloud_volume resource have to be detached first or they would be destroyed along with
+	// the server - silent data loss, plus a dangling ID in Terraform state.
+	if confidential {
+		for _, volumeID := range detachableVolumeIDs(&server, d.Get("inline_volume_ids").([]any)) {
+			apiResponse, err := client.ServersApi.DatacentersServersVolumesDelete(ctx, dcID, d.Id(), volumeID).Execute()
+			logApiRequestTime(apiResponse)
+			if err != nil {
+				if apiResponse.HttpNotFound() {
+					tflog.Info(ctx, "volume not found while detaching it from a confidential server", map[string]any{"volume_id": volumeID, "datacenter_id": dcID, "server_id": d.Id()})
+					continue
+				}
+				requestLocation, _ := apiResponse.SafeLocation()
+				return diagutil.ToDiags(d, fmt.Errorf("error occurred while detaching volume with ID: %s %w", volumeID, err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
+			}
+			if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
+				requestLocation, _ := apiResponse.SafeLocation()
+				return diagutil.ToDiags(d, fmt.Errorf("error getting state change for volume detach %w", errState), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
+			}
+		}
+	}
+
+	apiResponse, err = deleteServerRequest(ctx, client, dcID, d.Id(), confidential).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		requestLocation, _ := apiResponse.SafeLocation()
@@ -1265,14 +1327,7 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta any)
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
 		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, fmt.Errorf("error getting state change for datacenter delete %w", errState), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
-	}
-
-	if confidential {
-		diags := deleteInlineVolumes(ctx, d, meta, client)
-		if diags != nil {
-			return diags
-		}
+		return diagutil.ToDiags(d, fmt.Errorf("error getting state change for server delete %w", errState), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	d.SetId("")
