@@ -28,6 +28,30 @@ export IONOS_S3_ACCESS_KEY="accesskey"
 export IONOS_S3_SECRET_KEY="secretkey"
 ```
 
+Optionally, you can set these values in the provider block in your Terraform configuration. See the [Configuration Reference](#configuration-reference) section for details.
+
+```hcl
+provider "ionoscloud" {
+  token             = var.ionos_token
+#  optional, to be used only for reseller accounts
+#  contract_number = "contract_number_here"
+#  optional, does not need to be configured in most cases
+#  endpoint = "custom_cloud_api_url"
+#  s3_access_key     =  "your_access_key"
+#  s3_secret_key     =  "your_secret_key"
+```
+
+⚠️ **Note:** It's NOT usually necessary to set `endpoint` field. The SDKs know how to route requests to the correct endpoints in the API.
+
+You can either explicitly write them in the .tf file or use var.name as in the example above. For setting the var.name, environment variables can be used. The environment variables must be in the format TF_VAR_name and this will be checked last for a value. For example:
+
+```bash
+export TF_VAR_ionos_token="token"
+#export TF_VAR_ionos_s3_access_key="accesskey"
+#export TF_VAR_ionos_s3_secret_key="secretkey"
+#export TF_VAR_ionos_s3_region="region"
+```
+
 For more complex configurations, with multiple user profiles and environments with custom API URLs, you can use a YAML configuration file with the following structure:
 
 ```yaml
