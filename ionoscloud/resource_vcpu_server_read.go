@@ -173,13 +173,11 @@ func setResourceVCPUServerData(ctx context.Context, client *ionoscloud.APIClient
 	return setVCPUServerLabels(ctx, client, d, datacenterID)
 }
 
-// vcpuServerInlineVolumeIDsUpgrade seeds inline_volume_ids from boot_volume when upgrading from a
-// provider version (pre 6.4.0) that did not have the attribute. GetOk cannot be used since it also
-// returns false when inline_volume_ids is present as an empty list; the raw state is checked
-// directly so this only fires when the attribute is completely absent.
+// vcpuServerInlineVolumeIDsUpgrade seeds inline_volume_ids from boot_volume when the attribute is
+// missing (state written before 6.4.0) or empty while an inline volume block is still declared.
+// The decision is shared with the enterprise writer - see shouldSeedInlineVolumeIDs.
 func vcpuServerInlineVolumeIDsUpgrade(d *schema.ResourceData) error {
-	rawState := d.GetRawState()
-	if rawState.IsNull() || !rawState.GetAttr("inline_volume_ids").IsNull() {
+	if !shouldSeedInlineVolumeIDs(d) {
 		return nil
 	}
 	bootVolumeItf, ok := d.GetOk("boot_volume")

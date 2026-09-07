@@ -768,9 +768,9 @@ func setServerConfidentialVisibility(d *schema.ResourceData, server *ionoscloud.
 		if err := d.Set("enabled_features", *server.Properties.EnabledFeatures); err != nil {
 			return fmt.Errorf("error setting enabled_features %w", err)
 		}
-	} else {
+	} else if err := d.Set("enabled_features", nil); err != nil {
 		// Clear any stale value if the API no longer reports features.
-		d.Set("enabled_features", nil)
+		return fmt.Errorf("error clearing enabled_features %w", err)
 	}
 	// Derive `confidential` from the API so imported/refreshed servers reflect their real state
 	// and don't trigger a spurious ForceNew replace.
@@ -1206,6 +1206,34 @@ func deleteInlineVolumes(ctx context.Context, d *schema.ResourceData, meta any, 
 	return nil
 }
 
+// shouldSeedInlineVolumeIDs reports whether inline_volume_ids has to be seeded from the boot
+// volume. Two states need it:
+//
+//   - the attribute is absent entirely: state written before 6.4.0, which predates it.
+//   - the attribute is an empty list while an inline volume block is still declared. That
+//     combination is inconsistent, and leaving it alone is not harmless: the volume block is
+//     refreshed from the ownership list, so it blanks out, and every later plan then fails with
+//     "volume.0.disk_type attribute is immutable" - which also blocks destroy, leaving the server
+//     unmanageable. Seeding from the boot volume restores the invariant instead.
+//
+// An empty list is legitimate when no inline volume block is declared - every disk then belongs to
+// a separate ionoscloud_volume resource, and claiming the boot volume as inline would make a server
+// delete destroy a disk Terraform does not own. That is why emptiness alone does not seed.
+func shouldSeedInlineVolumeIDs(d *schema.ResourceData) bool {
+	rawState := d.GetRawState()
+	if rawState.IsNull() {
+		return false
+	}
+	if rawState.GetAttr("inline_volume_ids").IsNull() {
+		return true
+	}
+	if inline, ok := d.Get("inline_volume_ids").([]any); !ok || len(inline) > 0 {
+		return false
+	}
+	volumes, ok := d.Get("volume").([]any)
+	return ok && len(volumes) > 0
+}
+
 // detachableVolumeIDs returns the volumes attached to the server that Terraform does not own,
 // i.e. everything that is not one of the server's inline volume blocks. Those belong to separate
 // ionoscloud_volume resources with their own lifecycle, so a server delete must not take them
@@ -1598,10 +1626,9 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 	}
 
 	// takes care of an upgrade from a version that does not have inline_volume_ids(pre 6.4.0)
-	// to one that has it(>6.4.0). GetOk cannot be used here since it also returns false when
-	// inline_volume_ids is present in the state as an empty list; checking the raw state directly
-	// ensures this only fires when the attribute is completely absent.
-	if rawState := d.GetRawState(); !rawState.IsNull() && rawState.GetAttr("inline_volume_ids").IsNull() {
+	// to one that has it(>6.4.0), and of a state whose ownership list went empty while an inline
+	// volume block is still declared. See shouldSeedInlineVolumeIDs.
+	if shouldSeedInlineVolumeIDs(d) {
 		if bootVolumeItf, ok := d.GetOk("boot_volume"); ok {
 			bootVolume := bootVolumeItf.(string)
 			var inlineVolumeIDs []string
