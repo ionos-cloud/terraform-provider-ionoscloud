@@ -1210,16 +1210,25 @@ func deleteInlineVolumes(ctx context.Context, d *schema.ResourceData, meta any, 
 // i.e. everything that is not one of the server's inline volume blocks. Those belong to separate
 // ionoscloud_volume resources with their own lifecycle, so a server delete must not take them
 // down with it.
+//
+// The boot volume the API reports is never detachable, whatever the ownership list says. A
+// confidential boot volume cannot be detached at all (VDC-5-2058), so treating it as foreign
+// would make the server undeletable; it also has to stay attached for the server delete to take
+// it down. Ownership normally covers it - inline_volume_ids is populated on create, and on import
+// it is filled in from boot_volume - but this does not depend on that holding.
 func detachableVolumeIDs(server *ionoscloud.Server, inlineVolumeIDs []any) []string {
 	if server == nil || server.Entities == nil || server.Entities.Volumes == nil || server.Entities.Volumes.Items == nil {
 		return nil
 	}
 
-	inline := make(map[string]struct{}, len(inlineVolumeIDs))
+	inline := make(map[string]struct{}, len(inlineVolumeIDs)+1)
 	for _, id := range inlineVolumeIDs {
 		if idStr, ok := id.(string); ok {
 			inline[idStr] = struct{}{}
 		}
+	}
+	if server.Properties != nil && server.Properties.BootVolume != nil && server.Properties.BootVolume.Id != nil {
+		inline[*server.Properties.BootVolume.Id] = struct{}{}
 	}
 
 	var detachable []string

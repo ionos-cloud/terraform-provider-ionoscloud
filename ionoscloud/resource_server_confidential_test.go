@@ -179,6 +179,10 @@ func TestDetachableVolumeIDs(t *testing.T) {
 		}
 		return &ionoscloud.Server{Entities: &ionoscloud.ServerEntities{Volumes: &ionoscloud.AttachedVolumes{Items: &items}}}
 	}
+	withBootVolume := func(server *ionoscloud.Server, bootID string) *ionoscloud.Server {
+		server.Properties = &ionoscloud.ServerProperties{BootVolume: &ionoscloud.ResourceReference{Id: new(bootID)}}
+		return server
+	}
 
 	tests := []struct {
 		name   string
@@ -209,6 +213,21 @@ func TestDetachableVolumeIDs(t *testing.T) {
 			server: volumes("data"),
 			inline: nil,
 			want:   []string{"data"},
+		},
+		{
+			// The API-reported boot volume is never detachable, even when the ownership list is
+			// empty: a confidential boot volume cannot be detached (VDC-5-2058), so classifying it
+			// as foreign would leave the server undeletable.
+			name:   "boot volume excluded even with an empty ownership list",
+			server: withBootVolume(volumes("boot", "data"), "boot"),
+			inline: nil,
+			want:   []string{"data"},
+		},
+		{
+			name:   "boot volume excluded when ownership list disagrees",
+			server: withBootVolume(volumes("boot", "data"), "boot"),
+			inline: []any{"data"},
+			want:   nil,
 		},
 		{
 			name:   "nil server",
