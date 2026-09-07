@@ -81,12 +81,13 @@ func (c *Client) ChangeConfigURL(ctx context.Context, location string) {
 var (
 	ionosAPIURLLogging = "IONOS_API_URL_LOGGING"
 
-	AvailableLocations = []string{"de/fra", "de/fra/2", "de/txl", "es/vit", "gb/lhr", "fr/par"}
+	AvailableLocations = []string{"de/fra", "de/fra/1", "de/fra/2", "de/txl", "es/vit", "gb/lhr", "fr/par"}
 	// DefaultLocation is the default logging pipeline location
 	DefaultLocation = "de/txl"
 	locationToURL   = map[string]string{
 		"":         "https://logging.de-txl.ionos.com",
 		"de/fra":   "https://logging.de-fra.ionos.com",
+		"de/fra/1": "https://logging.de-fra.ionos.com",
 		"de/fra/2": "https://logging.de-fra.ionos.com",
 		"de/txl":   "https://logging.de-txl.ionos.com",
 		"es/vit":   "https://logging.es-vit.ionos.com",

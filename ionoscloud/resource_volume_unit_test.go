@@ -24,7 +24,7 @@ func volumeTestImages() []ionoscloud.Image {
 	}
 }
 
-func TestResolveVolumeImageName(t *testing.T) {
+func TestFindCompatibleVolumeImage(t *testing.T) {
 	tests := []struct {
 		name      string
 		imageName string
@@ -55,7 +55,7 @@ func TestResolveVolumeImageName(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			match, _ := resolveVolumeImageName(tt.imageName, volumeTestImages(), tt.locations)
+			match, _ := findCompatibleVolumeImage(tt.imageName, volumeTestImages(), tt.locations)
 			gotMatch := ""
 			if match != nil && match.Id != nil {
 				gotMatch = *match.Id
@@ -64,5 +64,49 @@ func TestResolveVolumeImageName(t *testing.T) {
 				t.Errorf("match = %q, want %q", gotMatch, tt.wantMatch)
 			}
 		})
+	}
+}
+
+func TestFindCompatibleVolumeImage_ExactIDMatch(t *testing.T) {
+	match, skipped := findCompatibleVolumeImage("HDD-TXL", volumeTestImages(), []string{"pc/txl/1", "de/txl"})
+
+	if match == nil || match.Id == nil || *match.Id != "hdd-txl" {
+		t.Fatalf("match id = %v, want hdd-txl", match)
+	}
+
+	if skipped != nil {
+		t.Fatalf("skipped = %v, want nil", skipped)
+	}
+}
+
+func TestFindCompatibleVolumeImage_ReturnsSkippedImageWhenFilteredOut(t *testing.T) {
+	match, skipped := findCompatibleVolumeImage("ubuntu-26.04-iso", volumeTestImages(), []string{"de/txl"})
+
+	if match != nil {
+		t.Fatalf("match = %v, want nil", match)
+	}
+
+	if skipped == nil || skipped.Id == nil || *skipped.Id != "iso-txl" {
+		t.Fatalf("skipped id = %v, want iso-txl", skipped)
+	}
+}
+
+func TestFindCompatibleVolumeImage_SkippedOnWrongLocation(t *testing.T) {
+	// hdd-las is HDD but in us/las — wrong location; should land in skipped, not match.
+	match, skipped := findCompatibleVolumeImage("ubuntu-24.04", volumeTestImages(), []string{"de/txl"})
+
+	if match != nil {
+		t.Fatalf("match = %v, want nil", match)
+	}
+	if skipped == nil || skipped.Id == nil || *skipped.Id != "hdd-las" {
+		t.Fatalf("skipped id = %v, want hdd-las", skipped)
+	}
+}
+
+func TestFindCompatibleVolumeImage_CaseInsensitiveNameMatch(t *testing.T) {
+	match, _ := findCompatibleVolumeImage("UBUNTU-26.04-20260421", volumeTestImages(), []string{"de/txl"})
+
+	if match == nil || match.Id == nil || *match.Id != "hdd-txl" {
+		t.Fatalf("match id = %v, want hdd-txl", match)
 	}
 }

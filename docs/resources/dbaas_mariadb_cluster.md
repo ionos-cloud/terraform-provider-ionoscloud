@@ -86,21 +86,21 @@ resource "random_password" "cluster_password" {
 * `instances` - (Required)[int] The total number of instances in the cluster (one primary and n-1 secondary).
 * `location`- (Optional)[string] The location in which the cluster will be created. Different service endpoints are used based on location, possible options are: "de/fra", "de/txl", "es/vit", "fr/par", "gb/lhr", "us/ewr", "us/las", "us/mci". If not set, the endpoint will be the one corresponding to "de/txl".
 * `cores` - (Required)[int] The number of CPU cores per instance.
-* `ram` - (Required)[int] The amount of memory per instance in gigabytes (GB).
-* `storage_size` - (Required)[int] The amount of storage per instance in gigabytes (GB).
+* `ram` - (Required)[int] The amount of memory per instance in gigabytes (GB). Minimum: 4.
+* `storage_size` - (Required)[int] The amount of storage per instance in gigabytes (GB). Minimum: 10, Maximum: 2000.
 * `connections` - (Required) The network connection for your cluster. Only one connection is allowed.
   * `datacenter_id` - (Required)[true] The datacenter to connect your cluster to.
   * `lan_id` - (Required)[true] The numeric LAN ID to connect your cluster to.
   * `cidr` - (Required)[true] The IP and subnet for the database. Note the following unavailable IP ranges: 10.233.64.0/18, 10.233.0.0/18, 10.233.114.0/24. Please enter in the correct format like IP/Subnet, exp: 192.168.10.0/24. See [Private IPs](https://www.ionos.com/help/server-cloud-infrastructure/private-network/private-ip-address-ranges/) and [Configuring the network](https://docs.ionos.com/cloud/compute-engine/networks/how-tos/configure-networks).
-* `display_name` - (Required)[string] The friendly name of your cluster.
+* `display_name` - (Required)[string] The friendly name of your cluster. Maximum length: 63 characters. Must contain only word characters (letters, numbers, underscores), colons, hyphens, spaces, or dots.
 * `maintenance_window` - (Optional)(Computed) A weekly 4 hour-long window, during which maintenance might occur
-  * `time` - (Required)[string] Start of the maintenance window in UTC time.
+  * `time` - (Required)[string] Start of the maintenance window in UTC time. Format: HH:MM:SS.
   * `day_of_the_week` - (Required)[string] The name of the week day.
 * `backup` - (Optional) Properties configuring the backup of the cluster. Immutable, change forces re-creation of the cluster.
   * `location` - (Required)[string] The IONOS Object Storage location where the backups will be stored.
 * `credentials` - (Required) Credentials for the database user to be created.
-    * `username` - (Required)[string] The username for the initial MariaDB user. Some system usernames are restricted (e.g 'mariadb', 'admin', 'standby').
-    * `password` - (Required)[string] The password for a MariaDB user.
+    * `username` - (Required)[string] The username for the initial MariaDB user. Some system usernames are restricted (e.g 'mariadb', 'admin', 'standby'). Length: 1-16 characters. Must start with a letter, end with a letter or number, and contain only letters, numbers, or underscores (underscores only between alphanumeric groups).
+    * `password` - (Required)[string] The password for a MariaDB user. Length: 10-63 characters.
 * `dns_name` - (Computed)[string] The DNS name pointing to your cluster.
 
 > **⚠ WARNING:** `IONOS_API_URL_MARIADB` can be used to set a custom API URL for the MariaDB Cluster. `location` field needs to be empty, otherwise it will override the custom API URL. Setting `endpoint` or `IONOS_API_URL` does not have any effect.

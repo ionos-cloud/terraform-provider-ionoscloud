@@ -49,6 +49,12 @@ func dataSourceLocation() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"enabled_features": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "Features enabled for this CPU architecture, e.g. SEV-SNP for Confidential Computing.",
+							Elem:        &schema.Schema{Type: schema.TypeString},
+						},
 					},
 				},
 			},
@@ -155,6 +161,10 @@ func setLocationData(d *schema.ResourceData, location *ionoscloud.Location) erro
 
 				if cpuArchitecture.Vendor != nil {
 					architectureEntry["vendor"] = *cpuArchitecture.Vendor
+				}
+
+				if cpuArchitecture.EnabledFeatures != nil {
+					architectureEntry["enabled_features"] = *cpuArchitecture.EnabledFeatures
 				}
 
 				cpuArchitectures = append(cpuArchitectures, architectureEntry)

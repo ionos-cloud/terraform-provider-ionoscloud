@@ -636,6 +636,11 @@ func setK8sClusterData(d *schema.ResourceData, cluster *ionoscloud.KubernetesClu
 			if err := d.Set("s3_buckets", s3Buckets); err != nil {
 				return fmt.Errorf("error while setting s3_buckets property for cluser %s: %w", d.Id(), err)
 			}
+		} else {
+			var emptySlice []any
+			if err := d.Set("s3_buckets", emptySlice); err != nil {
+				return fmt.Errorf("error while setting s3_buckets property for cluser %s: %w", d.Id(), err)
+			}
 		}
 
 	}

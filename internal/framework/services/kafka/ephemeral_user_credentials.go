@@ -97,6 +97,7 @@ func (d *userCredentialsEphemeral) Schema(ctx context.Context, req ephemeral.Sch
 			"private_key": schema.StringAttribute{
 				Description: "PEM for the private key.",
 				Computed:    true,
+				Sensitive:   true,
 			},
 			"certificate": schema.StringAttribute{
 				Description: "PEM for the certificate.",

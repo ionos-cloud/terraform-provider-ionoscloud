@@ -13,7 +13,8 @@ import (
 
 func dataSourceDBaaSInMemoryDBSnapshot() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceInMemoryDBSnapshotRead,
+		DeprecationMessage: "This data source is deprecated and will be removed in a future release.",
+		ReadContext:        dataSourceInMemoryDBSnapshotRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:        schema.TypeString,

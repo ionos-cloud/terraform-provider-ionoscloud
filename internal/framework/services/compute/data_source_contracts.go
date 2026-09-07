@@ -36,7 +36,7 @@ func (d *contractsDataSource) Schema(_ context.Context, req datasource.SchemaReq
 		Attributes: map[string]schema.Attribute{
 			"contracts": schema.ListNestedAttribute{
 				Computed:    true,
-				Description: "A list of contracts attached to your Ionos account.",
+				Description: "A list of contracts attached to your IONOS CLOUD account.",
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 						"contract_number": schema.Int64Attribute{

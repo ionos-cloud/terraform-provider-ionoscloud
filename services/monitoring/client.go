@@ -55,6 +55,7 @@ var (
 	locationToURL         = map[string]string{
 		"":         "https://monitoring.de-fra.ionos.com",
 		"de/fra":   "https://monitoring.de-fra.ionos.com",
+		"de/fra/1": "https://monitoring.de-fra.ionos.com",
 		"de/fra/2": "https://monitoring.de-fra.ionos.com",
 		"de/txl":   "https://monitoring.de-txl.ionos.com",
 		"es/vit":   "https://monitoring.es-vit.ionos.com",

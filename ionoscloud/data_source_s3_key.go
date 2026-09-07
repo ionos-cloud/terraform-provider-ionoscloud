@@ -34,6 +34,7 @@ func dataSourceObjectStorageKey() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "The Secret key.",
 				Computed:    true,
+				Sensitive:   true,
 			},
 			"active": {
 				Type:        schema.TypeBool,

@@ -59,6 +59,15 @@ func dataSourceVCPUServer() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			// Always empty for VCPU (only ENTERPRISE can be confidential), but kept because the
+			// shared setServerData reader (used by both this and the server data source) sets it
+			// whenever the API returns features, and would error if the field were absent here.
+			"enabled_features": {
+				Type:        schema.TypeList,
+				Computed:    true,
+				Description: "Features enabled on the server, e.g. SEV-SNP for a Confidential Computing VM. Always empty for VCPU servers, which cannot be confidential.",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
 			"boot_cdrom": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -72,8 +81,9 @@ func dataSourceVCPUServer() *schema.Resource {
 				Computed: true,
 			},
 			"token": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:      schema.TypeString,
+				Computed:  true,
+				Sensitive: true,
 			},
 			"cdroms": {
 				Type:     schema.TypeList,
@@ -115,8 +125,9 @@ func dataSourceVCPUServer() *schema.Resource {
 							Computed: true,
 						},
 						"image_password": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:      schema.TypeString,
+							Computed:  true,
+							Sensitive: true,
 						},
 						"ssh_keys": {
 							Type:     schema.TypeList,

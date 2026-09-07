@@ -35,7 +35,7 @@ data "ionoscloud_pg_cluster_v2" "example" {
 
 * `id` - (Optional)[string] ID of the cluster you want to search for.
 * `name` - (Optional)[string] The name of an existing cluster that you want to search for.
-* `location` - (Required)[string] The region in which to look up the cluster. Available locations: `de/fra`, `de/fra/2`, `de/txl`, `es/vit`, `fr/par`, `gb/bhx`, `gb/lhr`, `us/ewr`, `us/las`, `us/mci`.
+* `location` - (Required)[string] The region in which to look up the cluster. Available locations: `de/fra`, `de/fra/1`, `de/fra/2`, `de/txl`, `es/vit`, `fr/par`, `gb/bhx`, `gb/lhr`, `us/ewr`, `us/las`, `us/mci`.
 
 Either `id` or `name` must be provided. If none, or both are provided, the datasource will return an error.
 

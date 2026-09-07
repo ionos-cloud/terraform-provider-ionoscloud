@@ -39,8 +39,9 @@ func dataSourceVolume() *schema.Resource {
 				Computed: true,
 			},
 			"image_password": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:      schema.TypeString,
+				Computed:  true,
+				Sensitive: true,
 			},
 			"licence_type": {
 				Type:     schema.TypeString,

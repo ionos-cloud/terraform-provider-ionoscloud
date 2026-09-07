@@ -28,16 +28,17 @@ func main() {
 
 	// / tfproto6
 	ctx := context.Background()
+	sdkv2Provider := ionoscloud.Provider()
 	upgradedSdkServer, err := tf5to6server.UpgradeServer(
 		ctx,
-		ionoscloud.Provider().GRPCProvider, // Example terraform-plugin-sdk provider
+		sdkv2Provider.GRPCProvider, // Example terraform-plugin-sdk provider
 	)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	providers := []func() tfprotov6.ProviderServer{
-		providerserver.NewProtocol6(provider.New()), // Example terraform-plugin-framework provider
+		providerserver.NewProtocol6(provider.New(sdkv2Provider)), // Example terraform-plugin-framework provider
 		func() tfprotov6.ProviderServer {
 			return upgradedSdkServer
 		},

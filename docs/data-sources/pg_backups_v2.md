@@ -31,7 +31,7 @@ data "ionoscloud_pg_backups_v2" "example" {
 
 ## Argument Reference
 
-* `location` - (Required)[string] The region in which to look up backups. Available locations: `de/fra`, `de/fra/2`, `de/txl`, `es/vit`, `fr/par`, `gb/bhx`, `gb/lhr`, `us/ewr`, `us/las`, `us/mci`.
+* `location` - (Required)[string] The region in which to look up backups. Available locations: `de/fra`, `de/fra/1`, `de/fra/2`, `de/txl`, `es/vit`, `fr/par`, `gb/bhx`, `gb/lhr`, `us/ewr`, `us/las`, `us/mci`.
 * `cluster_id` - (Optional)[string] The ID (UUID) of the cluster to filter backups by.
 
 ## Attributes Reference

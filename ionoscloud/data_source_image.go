@@ -122,6 +122,12 @@ func dataSourceImage() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"required_features": {
+				Type:        schema.TypeList,
+				Computed:    true,
+				Description: "Features required to run this image, e.g. SEV-SNP for a Confidential Computing boot image.",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
 		},
 		Timeouts: &resourceDefaultTimeouts,
 	}
@@ -393,6 +399,12 @@ func ImageSetData(d *schema.ResourceData, image *ionoscloud.Image) error {
 
 		if image.Properties.RequireLegacyBios != nil {
 			if err := d.Set("require_legacy_bios", *image.Properties.RequireLegacyBios); err != nil {
+				return err
+			}
+		}
+
+		if image.Properties.RequiredFeatures != nil {
+			if err := d.Set("required_features", *image.Properties.RequiredFeatures); err != nil {
 				return err
 			}
 		}

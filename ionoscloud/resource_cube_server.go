@@ -143,6 +143,7 @@ func resourceCubeServer() *schema.Resource {
 						"image_password": {
 							Type:          schema.TypeString,
 							Optional:      true,
+							Sensitive:     true,
 							Deprecated:    "Please use image_password under server level",
 							ConflictsWith: []string{"image_password"},
 							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
@@ -593,8 +594,10 @@ func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta an
 		}
 	}
 
-	// upgrade from version without inline_volume_ids in Cube server
-	if _, ok := d.GetOk("inline_volume_ids"); !ok {
+	// upgrade from version without inline_volume_ids in Cube server. GetOk cannot be used here since
+	// it also returns false when inline_volume_ids is present in the state as an empty list; checking
+	// the raw state directly ensures this only fires when the attribute is completely absent.
+	if rawState := d.GetRawState(); !rawState.IsNull() && rawState.GetAttr("inline_volume_ids").IsNull() {
 		if bootVolume, ok := d.GetOk("boot_volume"); ok {
 			bootVolume := bootVolume.(string)
 			var inlineVolumeIDs []string

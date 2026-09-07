@@ -48,7 +48,7 @@ resource "ionoscloud_datacenter_nsg_selection" "example"{
 The following arguments are supported:
 
 * `name` - (Required)[string] The name of the Virtual Data Center.
-* `location` - (Required)[string] The regional location where the Virtual Data Center will be created. This argument is immutable. Available locations: `de/fra`, `us/las`, `us/ewr`, `de/txl`, `gb/lhr`, `gb/bhx`, `es/vit`, `fr/par`, `us/mci`, `de/fra/2` 
+* `location` - (Required)[string] The regional location where the Virtual Data Center will be created. This argument is immutable. Available locations: `de/fra`, `us/las`, `us/ewr`, `de/txl`, `gb/lhr`, `gb/bhx`, `es/vit`, `fr/par`, `us/mci`, `de/fra/1`, `de/fra/2` 
 * `description` - (Optional)[string] Description for the Virtual Data Center.
 * `sec_auth_protection` - (Optional) [bool] Boolean value representing if the data center requires extra protection e.g. two factor protection
 * `version` - (Computed) The version of that Data Center. Gets incremented with every change
@@ -59,6 +59,7 @@ The following arguments are supported:
   * `max_cores` - The maximum number of cores available
   * `max_ram` - The maximum number of RAM in MB
   * `vendor` - A valid CPU vendor name
+  * `enabled_features` - Features enabled for this CPU architecture, e.g. `SEV-SNP` for Confidential Computing
 
 ## Import
 
@@ -79,4 +80,42 @@ The older syntax can be for importing the resource is still supported:
 ```shell
 terraform import ionoscloud_datacenter.mydc datacenter uuid
 ```
+
+In Terraform v1.12.0 and later, the [`import` block](https://developer.hashicorp.com/terraform/language/import) can also be used with the `identity` attribute:
+
+```hcl
+import {
+  to = ionoscloud_datacenter.example
+  identity = {
+    id = "datacenter uuid"
+  }
+}
+
+resource "ionoscloud_datacenter" "example" {
+  ### Configuration omitted for brevity ###
+}
+```
+
+### Identity Schema
+
+#### Required
+
+* `id` (String) The UUID of the datacenter.
+
+#### Optional
+
+* `location` (String) The location the datacenter lives in (e.g. `de/txl`). Only needed when the Cloud API endpoint is overridden per location.
+
+## Query (List Resource)
+
+Datacenters can be listed using `terraform query` (requires Terraform 1.14+). List blocks must be placed in a dedicated query file, whose name ends in `.tfquery.hcl` (for example `queries.tfquery.hcl`).
+
+```hcl
+list "ionoscloud_datacenter" "all" {
+  provider         = ionoscloud
+  include_resource = true
+}
+```
+
+See the [`ionoscloud_datacenter` list resource documentation](../list-resources/datacenter.md) for filters and the full attribute reference.
 

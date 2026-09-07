@@ -37,11 +37,12 @@ func (c *Client) GetFileConfig() *fileconfiguration.FileConfig {
 var (
 	ionosAPIURLVPN = "IONOS_API_URL_VPN"
 	// AvailableLocations is a list of supported locations for VPN
-	AvailableLocations = []string{"de/fra", "de/fra/2", "de/txl", "es/vit", "gb/bhx", "gb/lhr", "us/ewr", "us/las", "us/mci", "fr/par"}
+	AvailableLocations = []string{"de/fra", "de/fra/1", "de/fra/2", "de/txl", "es/vit", "gb/bhx", "gb/lhr", "us/ewr", "us/las", "us/mci", "fr/par"}
 
 	locationToURL = map[string]string{
 		"":         "https://vpn.de-fra.ionos.com",
 		"de/fra":   "https://vpn.de-fra.ionos.com",
+		"de/fra/1": "https://vpn.de-fra.ionos.com",
 		"de/fra/2": "https://vpn.de-fra.ionos.com",
 		"de/txl":   "https://vpn.de-txl.ionos.com",
 		"es/vit":   "https://vpn.es-vit.ionos.com",

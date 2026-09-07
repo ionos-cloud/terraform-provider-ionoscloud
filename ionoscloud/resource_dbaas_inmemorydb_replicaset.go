@@ -26,10 +26,11 @@ var (
 
 func resourceDBaaSInMemoryDBReplicaSet() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: replicaSetCreate,
-		DeleteContext: replicaSetDelete,
-		ReadContext:   replicaSetRead,
-		UpdateContext: replicaSetUpdate,
+		DeprecationMessage: "Use ionoscloud_inmemorydb_cluster_v2 instead. This resource is deprecated and will be removed in a future release.",
+		CreateContext:      replicaSetCreate,
+		DeleteContext:      replicaSetDelete,
+		ReadContext:        replicaSetRead,
+		UpdateContext:      replicaSetUpdate,
 		Importer: &schema.ResourceImporter{
 			StateContext: replicaSetImport,
 		},
@@ -155,9 +156,10 @@ func resourceDBaaSInMemoryDBReplicaSet() *schema.Resource {
 										ForceNew: true,
 									},
 									"hash": {
-										Type:     schema.TypeString,
-										Required: true,
-										ForceNew: true,
+										Type:      schema.TypeString,
+										Required:  true,
+										ForceNew:  true,
+										Sensitive: true,
 									},
 								},
 							},

@@ -12,5 +12,6 @@ import (
 // GetProvider exports the two providers sdkv2 and framework
 // Used in crossplane upjet ionoscloud provider
 func GetProvider() (fwprovider.Provider, *schema.Provider) {
-	return internalfwprovider.New(), ionoscloud.Provider()
+	sdkv2Provider := ionoscloud.Provider()
+	return internalfwprovider.New(sdkv2Provider), sdkv2Provider
 }

@@ -72,6 +72,12 @@ func dataSourceDataCenter() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"enabled_features": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "Features enabled for this CPU architecture, e.g. SEV-SNP for Confidential Computing.",
+							Elem:        &schema.Schema{Type: schema.TypeString},
+						},
 					},
 				},
 			},
