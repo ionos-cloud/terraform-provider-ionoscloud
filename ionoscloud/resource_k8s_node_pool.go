@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 
@@ -1048,16 +1047,15 @@ func k8sNodepoolReady(ctx context.Context, client *ionoscloud.APIClient, d *sche
 	if resource.Metadata == nil || resource.Metadata.State == nil {
 		return false, fmt.Errorf("error while checking k8s node pool status: state is nil")
 	}
-	if utils.IsStateFailed(*resource.Metadata.State) {
-		return false, fmt.Errorf("error while checking if k8s nodepool is ready %s, state %s", *resource.Id, *resource.Metadata.State)
-	}
+
 	tflog.Info(ctx, "k8s node pool state", map[string]any{"state": *resource.Metadata.State})
 	// k8s is the only resource that has a state of ACTIVE when it is ready
 	return strings.EqualFold(*resource.Metadata.State, ionoscloud.Active), nil
 }
 
 func k8sNodepoolDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
-	resource, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, d.Get("k8s_cluster_id").(string), d.Id()).Execute()
+	clusterID := d.Get("k8s_cluster_id").(string)
+	resource, apiResponse, err := client.KubernetesApi.K8sNodepoolsFindById(ctx, clusterID, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -1067,9 +1065,7 @@ func k8sNodepoolDeleted(ctx context.Context, client *ionoscloud.APIClient, d *sc
 		return true, fmt.Errorf("error checking k8s node pool deletion status: %w", err)
 	}
 	if resource.Metadata != nil && resource.Metadata.State != nil {
-		if utils.IsStateFailed(*resource.Metadata.State) {
-			return false, fmt.Errorf("error while checking if k8s nodepool is properly deleted, nodepool ID: %s, state: %s", *resource.Id, *resource.Metadata.State)
-		}
+		tflog.Info(ctx, "k8s node pool state", map[string]any{"state": *resource.Metadata.State, "node_pool_id": d.Id(), "cluster_id": clusterID})
 	}
 	return false, nil
 }

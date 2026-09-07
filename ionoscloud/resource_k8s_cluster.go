@@ -657,17 +657,14 @@ func k8sClusterReady(ctx context.Context, client *ionoscloud.APIClient, d *schem
 	if resource.Metadata == nil || resource.Metadata.State == nil {
 		return false, fmt.Errorf("error while checking k8s cluster status: state is nil")
 	}
-	if utils.IsStateFailed(*resource.Metadata.State) {
-		return false, fmt.Errorf("error while checking if k8s cluster is ready %s, state %s", *resource.Id, *resource.Metadata.State)
-	}
-	tflog.Info(ctx, "k8s cluster state", map[string]any{"state": *resource.Metadata.State})
+	tflog.Info(ctx, "k8s cluster state", map[string]any{"state": *resource.Metadata.State, "cluster_id": d.Id()})
 	// k8s is the only resource that has a state of ACTIVE when it is ready
 	return strings.EqualFold(*resource.Metadata.State, ionoscloud.Active), nil
 }
 
 func k8sClusterDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema.ResourceData) (bool, error) {
 
-	cluster, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, d.Id()).Execute()
+	resource, apiResponse, err := client.KubernetesApi.K8sFindByClusterId(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -676,11 +673,8 @@ func k8sClusterDeleted(ctx context.Context, client *ionoscloud.APIClient, d *sch
 		}
 		return true, fmt.Errorf("error checking k8s cluster deletion status: %w", err)
 	}
-	if cluster.Metadata != nil && cluster.Metadata.State != nil {
-		if utils.IsStateFailed(*cluster.Metadata.State) {
-			return false, fmt.Errorf("error while checking if k8s cluster is deleted properly, cluster ID: %s, state: %s", *cluster.Id, *cluster.Metadata.State)
-		}
+	if resource.Metadata != nil && resource.Metadata.State != nil {
+		tflog.Info(ctx, "k8s cluster state", map[string]any{"state": *resource.Metadata.State, "cluster_id": d.Id()})
 	}
-
 	return false, nil
 }

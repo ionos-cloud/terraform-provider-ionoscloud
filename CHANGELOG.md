@@ -1,7 +1,10 @@
+
+
 ## 6.7.37
 
 ### Fixes
 - `ionoscloud_vcpu_server`: Fix `error setting enabled_features` on every plan/apply/refresh (introduced in 6.7.36 by the Confidential Computing change). Adds the missing `enabled_features` and `confidential` (both Computed) attributes to the resource schema, and gives `ionoscloud_vcpu_server` its own read/import/state-writer decoupled from `ionoscloud_server` so the two schemas can no longer break each other; create/update read-back now dispatches by server type.
+- Do not error on `FAILED` states for k8s clusters. These are transient states, especially for `CREATE` during first few minutes.
 
 ## 6.7.36
 
