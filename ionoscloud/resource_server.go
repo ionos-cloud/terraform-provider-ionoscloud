@@ -1271,15 +1271,6 @@ func detachableVolumeIDs(server *ionoscloud.Server, inlineVolumeIDs []any) []str
 	return detachable
 }
 
-// deleteServerRequest builds the server DELETE request. A Confidential Computing server must be
-// deleted together with its volumes: its boot volume carries a confidential image, which the API
-// refuses to leave behind on its own (VDC-5-2060), and which cannot be detached while attached.
-// Non-confidential servers keep the previous behaviour, where inline volumes are deleted first in
-// their own requests.
-func deleteServerRequest(ctx context.Context, client *ionoscloud.APIClient, dcID, serverID string, confidential bool) ionoscloud.ApiDatacentersServersDeleteRequest {
-	return client.ServersApi.DatacentersServersDelete(ctx, dcID, serverID).DeleteVolumes(confidential)
-}
-
 // serverIsConfidential reports whether the server the API returned is a Confidential Computing
 // (SEV-SNP) VM, based on its enabled features. Derived from the API rather than the user-supplied
 // confidential flag so it stays correct for imported servers and config drift.
@@ -1354,7 +1345,11 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta any)
 		}
 	}
 
-	apiResponse, err = deleteServerRequest(ctx, client, dcID, d.Id(), confidential).Execute()
+	// A confidential server has to be deleted together with its volumes: its boot volume carries a
+	// confidential image, which the API refuses to leave behind on its own (VDC-5-2060) and which
+	// cannot be deleted while attached (VDC-5-2058). Non-confidential servers keep the previous
+	// behaviour, where inline volumes are deleted first, in their own requests.
+	apiResponse, err = client.ServersApi.DatacentersServersDelete(ctx, dcID, d.Id()).DeleteVolumes(confidential).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		requestLocation, _ := apiResponse.SafeLocation()

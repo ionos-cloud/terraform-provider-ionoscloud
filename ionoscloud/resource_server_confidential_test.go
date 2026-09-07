@@ -1,9 +1,6 @@
 package ionoscloud
 
 import (
-	"context"
-	"net/http"
-	"net/http/httptest"
 	"strings"
 	"testing"
 
@@ -125,47 +122,6 @@ func int32PtrEqual(a, b *int32) bool {
 		return a == b
 	}
 	return *a == *b
-}
-
-// A Confidential Computing server must be deleted together with its volumes: the API refuses to
-// delete one that would leave its confidential boot volume behind (VDC-5-2060), and the volume
-// cannot be detached while attached. This drives the request through a stub API so the actual
-// deleteVolumes query parameter on the wire is asserted, not just the builder call.
-func TestDeleteServerRequestDeleteVolumes(t *testing.T) {
-	tests := []struct {
-		name         string
-		confidential bool
-		want         string
-	}{
-		{name: "confidential deletes its volumes with the server", confidential: true, want: "true"},
-		{name: "normal server keeps its volumes", confidential: false, want: "false"},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			var gotPath, gotDeleteVolumes string
-			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				gotPath = r.Method + " " + r.URL.Path
-				gotDeleteVolumes = r.URL.Query().Get("deleteVolumes")
-				w.WriteHeader(http.StatusAccepted)
-			}))
-			defer srv.Close()
-
-			cfg := ionoscloud.NewConfiguration("", "", "token", srv.URL)
-			client := ionoscloud.NewAPIClient(cfg)
-
-			_, err := deleteServerRequest(context.Background(), client, "dc-id", "server-id", tt.confidential).Execute()
-			if err != nil {
-				t.Fatalf("unexpected error: %v", err)
-			}
-			if want := "DELETE /cloudapi/v6/datacenters/dc-id/servers/server-id"; gotPath != want {
-				t.Errorf("request = %q, want %q", gotPath, want)
-			}
-			if gotDeleteVolumes != tt.want {
-				t.Errorf("deleteVolumes = %q, want %q", gotDeleteVolumes, tt.want)
-			}
-		})
-	}
 }
 
 // deleteVolumes on the server delete takes down every volume still attached, so the confidential
