@@ -14,7 +14,10 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/querycheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 )
 
 const resourceNameTargetGroup = constant.TargetGroupResource + "." + constant.TargetGroupTestResource
@@ -190,6 +193,110 @@ func TestAccTargetGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "http_health_check.0.regex", "false"),
 					resource.TestCheckResourceAttr(resourceNameTargetGroup, "http_health_check.0.negate", "false"),
 				),
+			},
+		},
+	})
+}
+
+// TestAccTargetGroupQuery covers the ionoscloud_target_group list resource and the
+// resource identity it streams, end to end through `terraform query`.
+//
+// The list resource is served by the plugin-framework half of the provider even though
+// the target group resource itself is implemented with SDKv2, so this also covers the mux
+// serving the two halves under the same type name. See
+// internal/framework/services/compute/resource_target_group_list.go.
+func TestAccTargetGroupQuery(t *testing.T) {
+	// Its own name and label, NOT constant.TargetGroupTestResource: querycheck.ExpectLength
+	// asserts a contract-wide total, so it needs a name no other test in this suite creates.
+	// TestAccTargetGroupBasic uses the shared fixture name, and a concurrent or leftover
+	// copy of it would make an ExpectLength(1) assertion here flap.
+	const (
+		targetGroupQueryName  = "tf-test-target-group-query"
+		targetGroupQueryLabel = "test_target_group_query"
+		targetGroupAddr       = constant.TargetGroupResource + "." + targetGroupQueryLabel
+	)
+
+	queryConfig := fmt.Sprintf(`
+resource %[1]q %[2]q {
+  name             = %[3]q
+  algorithm        = "ROUND_ROBIN"
+  protocol         = "HTTP"
+  protocol_version = "HTTP1"
+  targets {
+    ip     = "22.231.2.2"
+    port   = 8080
+    weight = 1
+  }
+}`, constant.TargetGroupResource, targetGroupQueryLabel, targetGroupQueryName)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() { testAccPreCheck(t) },
+		// `terraform query` and list blocks were introduced in Terraform 1.14.
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version1_14_0),
+		},
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckTargetGroupDestroyCheck,
+		Steps: []resource.TestStep{
+			{
+				Config: queryConfig,
+			},
+			// List without filters: the target group must show up with its identity. The
+			// identity is a lone `id` - target groups have no location.
+			{
+				Query: true,
+				Config: fmt.Sprintf(`list %[1]q %[2]q {
+  provider = ionoscloud
+}`, constant.TargetGroupResource, targetGroupQueryLabel),
+				QueryResultChecks: []querycheck.QueryResultCheck{
+					querycheck.ExpectIdentity(targetGroupAddr, map[string]knownvalue.Check{
+						"id": knownvalue.NotNull(),
+					}),
+				},
+			},
+			// Both filter fields the list resource advertises, ANDed. The unique name
+			// guarantees exactly one result.
+			{
+				Query: true,
+				Config: fmt.Sprintf(`list %[1]q %[2]q {
+  provider = ionoscloud
+  config {
+    filters = [
+      { field_name = "name",      field_value = %[3]q },
+      { field_name = "algorithm", field_value = "ROUND_ROBIN" },
+    ]
+  }
+}`, constant.TargetGroupResource, targetGroupQueryLabel, targetGroupQueryName),
+				QueryResultChecks: []querycheck.QueryResultCheck{
+					querycheck.ExpectLength(targetGroupAddr, 1),
+				},
+			},
+			// The same name with an algorithm the fixture does not use: proves the
+			// algorithm filter is evaluated rather than ignored. (protocol is not a filter
+			// field - the API allows only "HTTP", so it could never narrow anything.)
+			{
+				Query: true,
+				Config: fmt.Sprintf(`list %[1]q %[2]q {
+  provider = ionoscloud
+  config {
+    filters = [
+      { field_name = "name",      field_value = %[3]q },
+      { field_name = "algorithm", field_value = "SOURCE_IP" },
+    ]
+  }
+}`, constant.TargetGroupResource, targetGroupQueryLabel, targetGroupQueryName),
+				QueryResultChecks: []querycheck.QueryResultCheck{
+					querycheck.ExpectLength(targetGroupAddr, 0),
+				},
+			},
+			// Import through the resource identity that the list results carry. This kind
+			// already checks that the import succeeds, that the plan it leaves behind is a
+			// no-op and that the planned identity matches the one in state; ImportStateVerify
+			// cannot be combined with it, only ImportCommandWithID reads that field.
+			{
+				ResourceName:    targetGroupAddr,
+				ImportState:     true,
+				ImportStateKind: resource.ImportBlockWithResourceIdentity,
 			},
 		},
 	})

@@ -85,3 +85,37 @@ Resource Target Group can be imported using the `resource id`, e.g.
 ```shell
 terraform import ionoscloud_target_group.myTargetGroup target group uuid
 ```
+
+In Terraform v1.12.0 and later, the [`import` block](https://developer.hashicorp.com/terraform/language/import) can also be used with the `identity` attribute:
+
+```hcl
+import {
+  to = ionoscloud_target_group.example
+  identity = {
+    id = "target group uuid"
+  }
+}
+
+resource "ionoscloud_target_group" "example" {
+  ### Configuration omitted for brevity ###
+}
+```
+
+### Identity Schema
+
+#### Required
+
+* `id` (String) The UUID of the target group.
+
+## Query (List Resource)
+
+Target groups can be listed using `terraform query` (requires Terraform 1.14+). List blocks must be placed in a dedicated query file, whose name ends in `.tfquery.hcl` (for example `queries.tfquery.hcl`).
+
+```hcl
+list "ionoscloud_target_group" "all" {
+  provider         = ionoscloud
+  include_resource = true
+}
+```
+
+See the [`ionoscloud_target_group` list resource documentation](../list-resources/target_group.md) for filters and the full attribute reference.

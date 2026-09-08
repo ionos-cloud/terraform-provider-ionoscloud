@@ -3,10 +3,17 @@
 ### Features
 - `ionoscloud_datacenter`: New list resource, queryable with `terraform query` (requires Terraform 1.14+). This is the first list resource for an SDKv2-based resource and serves as the reference example for adding more.
 - `ionoscloud_datacenter`: Add a resource identity (`id`, `location`), which also enables `import` blocks with an `identity` attribute.
+- `ionoscloud_ipblock`: New list resource, queryable with `terraform query` (requires Terraform 1.14+).
+- `ionoscloud_ipblock`: Add a resource identity (`id`, `location`), which also enables `import` blocks with an `identity` attribute.
+- `ionoscloud_target_group`: New list resource, queryable with `terraform query` (requires Terraform 1.14+).
+- `ionoscloud_target_group`: Add a resource identity (`id`), which also enables `import` blocks with an `identity` attribute.
 
 ### Fixes
 - `ionoscloud_server`: Deleting a Confidential Computing server no longer destroys volumes owned by separate `ionoscloud_volume` resources; they are detached first.
 - `ionoscloud_vcpu_server`: Fix `error setting enabled_features` on every plan/apply/refresh (introduced in 6.7.36 by the Confidential Computing change). Adds the missing `enabled_features` and `confidential` (both Computed) attributes to the resource schema, and gives `ionoscloud_vcpu_server` its own read/import/state-writer decoupled from `ionoscloud_server` so the two schemas can no longer break each other; create/update read-back now dispatches by server type.
+
+### Documentation
+- `ionoscloud_ipblock`: Fix the docs naming the `ip_consumers` sub-attribute `nic_uuid` (the schema key is and always was `nic_id`) and typing `ips` as an integer rather than a list of strings.
 
 ## 6.7.36
 

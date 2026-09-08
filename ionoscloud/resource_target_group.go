@@ -23,6 +23,26 @@ func resourceTargetGroup() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceTargetGroupImport,
 		},
+		// The identity is what a `list "ionoscloud_target_group"` block streams back for
+		// each target group it finds, and what an import block can be written against.
+		// Terraform requires every read of a resource that declares an identity to
+		// return one, see setTargetGroupIdentity.
+		//
+		// Target groups are addressed by UUID alone - the collection is global and the
+		// resource has no location attribute - so unlike datacenter and ipblock the
+		// identity is a lone `id`.
+		Identity: &schema.ResourceIdentity{
+			Version: 0,
+			SchemaFunc: func() map[string]*schema.Schema {
+				return map[string]*schema.Schema{
+					"id": {
+						Type:              schema.TypeString,
+						RequiredForImport: true,
+						Description:       "The UUID of the target group.",
+					},
+				}
+			},
+		},
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:             schema.TypeString,
@@ -251,6 +271,10 @@ func resourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta a
 		return diagutil.ToDiags(d, err, nil)
 	}
 
+	if err := setTargetGroupIdentity(d); err != nil {
+		return diagutil.ToDiags(d, err, nil)
+	}
+
 	return nil
 }
 
@@ -342,7 +366,14 @@ func resourceTargetGroupImport(ctx context.Context, d *schema.ResourceData, meta
 		return nil, err
 	}
 
-	groupIp := d.Id()
+	groupIp, err := targetGroupImportID(d)
+	if err != nil {
+		return nil, err
+	}
+
+	// Terraform sends an empty ID for an identity-based import, so the ID has to be set
+	// here for the error diagnostics below to name the resource.
+	d.SetId(groupIp)
 
 	groupTarget, apiResponse, err := client.TargetGroupsApi.TargetgroupsFindByTargetGroupId(ctx, groupIp).Execute()
 	logApiRequestTime(apiResponse)
@@ -358,7 +389,48 @@ func resourceTargetGroupImport(ctx context.Context, d *schema.ResourceData, meta
 	if err := setTargetGroupData(d, &groupTarget); err != nil {
 		return nil, diagutil.ToError(d, err, nil)
 	}
+
+	if err := setTargetGroupIdentity(d); err != nil {
+		return nil, diagutil.ToError(d, err, nil)
+	}
+
 	return []*schema.ResourceData{d}, nil
+}
+
+// targetGroupImportID resolves the target group to import, either from the resource
+// identity - which is how an import block with an `identity` argument, and the import
+// config that `terraform query` generates, address a target group - or from the plain
+// UUID import string. Target groups have no composite import ID, so there is nothing to
+// split here.
+func targetGroupImportID(d *schema.ResourceData) (string, error) {
+	if identity, err := d.Identity(); err == nil {
+		if id, ok := identity.GetOk("id"); ok {
+			groupID, _ := id.(string)
+			return groupID, nil
+		}
+	}
+
+	if d.Id() == "" {
+		return "", fmt.Errorf("invalid import identifier: expected a target group UUID, got an empty string")
+	}
+
+	return d.Id(), nil
+}
+
+// setTargetGroupIdentity writes the resource identity from the target group already in
+// state. Terraform errors out with "Missing Resource Identity After Read" if a resource
+// that declares an identity finishes a read without returning one.
+func setTargetGroupIdentity(d *schema.ResourceData) error {
+	identity, err := d.Identity()
+	if err != nil {
+		return err
+	}
+
+	if err := identity.Set("id", d.Id()); err != nil {
+		return fmt.Errorf("error while setting id identity attribute for target group %s: %w", d.Id(), err)
+	}
+
+	return nil
 }
 
 func setTargetGroupData(d *schema.ResourceData, targetGroup *ionoscloud.TargetGroup) error {

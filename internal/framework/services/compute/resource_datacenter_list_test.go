@@ -72,7 +72,7 @@ func TestDatacenterListResource(t *testing.T) {
 	resourceType := providerSchema.ResourceSchemas[datacenterListType].ValueType()
 
 	t.Run("streams every datacenter", func(t *testing.T) {
-		results := listDatacenters(ctx, t, server, listSchema, nil)
+		results := listResults(ctx, t, server, datacenterListType, listSchema, nil)
 		if len(results) != 2 {
 			t.Fatalf("expected 2 results, got %d", len(results))
 		}
@@ -125,7 +125,7 @@ func TestDatacenterListResource(t *testing.T) {
 	})
 
 	t.Run("applies filters", func(t *testing.T) {
-		results := listDatacenters(ctx, t, server, listSchema, map[string]string{"location": "de/fra"})
+		results := listResults(ctx, t, server, datacenterListType, listSchema, map[string]string{"location": "de/fra"})
 		if len(results) != 1 {
 			t.Fatalf("expected 1 result, got %d", len(results))
 		}
@@ -239,15 +239,17 @@ func configureProvider(ctx context.Context, t *testing.T, server tfprotov6.Provi
 	failOnErrorDiagnostics(t, "ConfigureProvider", resp.Diagnostics)
 }
 
-// listDatacenters calls the ListResource RPC with the given filters and collects the
-// results, failing on the first error diagnostic.
-func listDatacenters(ctx context.Context, t *testing.T, server tfprotov6.ProviderServer, schema *tfprotov6.Schema, filters map[string]string) []tfprotov6.ListResourceResult {
+// listResults calls the ListResource RPC for typeName with the given filters and collects
+// the results, failing on the first error diagnostic. Shared by every list-resource test in
+// this package - it differs per resource only by type name, so take a parameter rather than
+// copying it.
+func listResults(ctx context.Context, t *testing.T, server tfprotov6.ProviderServer, typeName string, schema *tfprotov6.Schema, filters map[string]string) []tfprotov6.ListResourceResult {
 	t.Helper()
 
 	listServer, config := listServerAndConfig(t, server, schema, filters)
 
 	stream, err := listServer.ListResource(ctx, &tfprotov6.ListResourceRequest{
-		TypeName:        datacenterListType,
+		TypeName:        typeName,
 		Config:          &config,
 		IncludeResource: true,
 	})

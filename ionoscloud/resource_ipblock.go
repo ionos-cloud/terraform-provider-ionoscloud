@@ -26,6 +26,27 @@ func resourceIPBlock() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceIpBlockImporter,
 		},
+		// The identity is what a `list "ionoscloud_ipblock"` block streams back for
+		// each IP block it finds, and what an import block can be written against.
+		// Terraform requires every read of a resource that declares an identity to
+		// return one, see setIPBlockIdentity.
+		Identity: &schema.ResourceIdentity{
+			Version: 0,
+			SchemaFunc: func() map[string]*schema.Schema {
+				return map[string]*schema.Schema{
+					"id": {
+						Type:              schema.TypeString,
+						RequiredForImport: true,
+						Description:       "The UUID of the IP block.",
+					},
+					"location": {
+						Type:              schema.TypeString,
+						OptionalForImport: true,
+						Description:       "The location the IP block lives in. Only needed when the Cloud API endpoint is overridden per location.",
+					},
+				}
+			},
+		},
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
@@ -160,6 +181,12 @@ func resourceIPBlockRead(ctx context.Context, d *schema.ResourceData, meta any) 
 		return diagutil.ToDiags(d, err, nil)
 	}
 
+	// must run AFTER IpBlockSetData: the identity reads the location that only the
+	// data setter fills in (this matters most on an identity-based import).
+	if err := setIPBlockIdentity(d); err != nil {
+		return diagutil.ToDiags(d, err, nil)
+	}
+
 	return nil
 }
 func resourceIPBlockUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
@@ -184,6 +211,20 @@ func resourceIPBlockUpdate(ctx context.Context, d *schema.ResourceData, meta any
 	if err != nil {
 		requestLocation, _ := apiResponse.SafeLocation()
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating an ip block: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
+	}
+
+	// The SDK carries the prior identity into the apply itself (grpc_provider.go:1425
+	// -> :1461 -> resource_data.go:856), so a normal update already returns one and
+	// this is not what most resources here need. It covers the state that predates the
+	// identity - a state file written before this provider version declared one,
+	// applied with -refresh=false - where the diff carries nothing and terraform would
+	// report "Missing Resource Identity After Update". Datacenter gets that case for
+	// free because its update ends in a read; this one does not.
+	//
+	// It must write exactly the prior values: grpc_provider.go:1585 rejects any change
+	// with "Unexpected Identity Change".
+	if err := setIPBlockIdentity(d); err != nil {
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	return nil
@@ -215,18 +256,14 @@ func resourceIPBlockDelete(ctx context.Context, d *schema.ResourceData, meta any
 }
 
 func resourceIpBlockImporter(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
-	importID := d.Id()
-
-	location, parts := splitImportID(importID, ":")
-	if len(parts) != 1 {
-		return nil, fmt.Errorf("invalid import identifier: expected one of <location>:<ipblock-id> or <ipblock-id>, got: %s", importID)
+	ipBlockID, location, err := ipBlockImportParts(d)
+	if err != nil {
+		return nil, err
 	}
 
-	if err := validateImportIDParts(parts); err != nil {
-		return nil, fmt.Errorf("failed validating import identifier %q: %w", importID, err)
-	}
-
-	ipBlockID := parts[0]
+	// Terraform sends an empty ID for an identity-based import, so the ID has to be
+	// set here for the error diagnostics and the log line below to name the resource.
+	d.SetId(ipBlockID)
 
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
@@ -245,7 +282,7 @@ func resourceIpBlockImporter(ctx context.Context, d *schema.ResourceData, meta a
 
 	}
 
-	tflog.Info(ctx, "ipBlock found", map[string]any{"id": *ipBlock.Id})
+	tflog.Info(ctx, "ipBlock found", map[string]any{"id": d.Id()})
 
 	d.SetId(*ipBlock.Id)
 
@@ -253,7 +290,57 @@ func resourceIpBlockImporter(ctx context.Context, d *schema.ResourceData, meta a
 		return nil, diagutil.ToError(d, err, nil)
 	}
 
+	if err := setIPBlockIdentity(d); err != nil {
+		return nil, diagutil.ToError(d, err, nil)
+	}
+
 	return []*schema.ResourceData{d}, nil
+}
+
+// ipBlockImportParts resolves the IP block to import, either from the resource
+// identity - which is how an import block with an `identity` argument, and the
+// import config that `terraform query` generates, address an IP block - or from the
+// "<location>:<ipblock-id>" import string.
+func ipBlockImportParts(d *schema.ResourceData) (ipBlockID, location string, err error) {
+	if identity, identityErr := d.Identity(); identityErr == nil {
+		if id, ok := identity.GetOk("id"); ok {
+			loc, _ := identity.Get("location").(string)
+			ipBlockID, _ = id.(string)
+			return ipBlockID, loc, nil
+		}
+	}
+
+	importID := d.Id()
+	location, parts := splitImportID(importID, ":")
+	if len(parts) != 1 {
+		return "", "", fmt.Errorf("invalid import identifier: expected one of <location>:<ipblock-id> or <ipblock-id>, got: %s", importID)
+	}
+
+	if err := validateImportIDParts(parts); err != nil {
+		return "", "", fmt.Errorf("failed validating import identifier %q: %w", importID, err)
+	}
+
+	return parts[0], location, nil
+}
+
+// setIPBlockIdentity writes the resource identity from the IP block already in
+// state. Terraform errors out with "Missing Resource Identity After Read" if a
+// resource that declares an identity finishes a read without returning one.
+func setIPBlockIdentity(d *schema.ResourceData) error {
+	identity, err := d.Identity()
+	if err != nil {
+		return err
+	}
+
+	if err := identity.Set("id", d.Id()); err != nil {
+		return fmt.Errorf("error while setting id identity attribute for IP block %s: %w", d.Id(), err)
+	}
+
+	if err := identity.Set("location", d.Get("location")); err != nil {
+		return fmt.Errorf("error while setting location identity attribute for IP block %s: %w", d.Id(), err)
+	}
+
+	return nil
 }
 
 func IpBlockSetData(d *schema.ResourceData, ipBlock *ionoscloud.IpBlock) error {
