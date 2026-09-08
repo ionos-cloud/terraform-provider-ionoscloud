@@ -22,6 +22,11 @@ on:
         required: false
         type: boolean
         default: true
+      timeout:
+        description: "timeout for go test, e.g. 240m, 6h"
+        required: false
+        type: string
+        default: "240m"
 jobs:
   test:
     env:
@@ -31,7 +36,9 @@ jobs:
       IONOS_S3_ACCESS_KEY: ${{ secrets.IONOS_VDC_S3_ACCESS_KEY_GO_V6 }}
       IONOS_S3_SECRET_KEY: ${{ secrets.IONOS_VDC_S3_SECRET_KEY_GO_V6 }}
       TF_ACC: true
-      TF_LOG: ${{ github.event.inputs.tf-log }}
+      TF_LOG: ${{ github.event.inputs['tf-log'] }}
+      TEST_TAGS: ${{ github.event.inputs['test-tags'] }}
+      TEST_TIMEOUT: ${{ github.event.inputs.timeout }}
     strategy:
       matrix:
         os: [ubuntu-latest]
@@ -46,15 +53,18 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version-file: 'go.mod'
-      - name: Run tests for ${{ github.event.inputs.test-tags }}
-        if: ${{ github.event.inputs.test-tags != '' && github.events.inputs.failfast == true }}
-        run: go test ./... -v -failfast -timeout 240m -tags ${{ github.event.inputs.test-tags }} 2>&1 | tee /tmp/test_output.txt; exit ${PIPESTATUS[0]}
-      - name: Run tests for ${{ github.event.inputs.test-tags }} no failfast
-        if: ${{ github.event.inputs.test-tags != '' && github.events.inputs.failfast == false }}
-        run: go test ./... -v -timeout 6h -tags ${{ github.event.inputs.test-tags }} 2>&1 | tee /tmp/test_output.txt; exit ${PIPESTATUS[0]}
+      - name: Run tests for ${{ github.event.inputs['test-tags'] }}
+        if: ${{ github.event.inputs['test-tags'] != '' && github.event.inputs['fail-fast'] == 'true' }}
+        run: go test ./... -v -failfast -timeout "$TEST_TIMEOUT" -tags "$TEST_TAGS" 2>&1 | tee /tmp/test_output.txt; exit ${PIPESTATUS[0]}
+      - name: Run tests for ${{ github.event.inputs['test-tags'] }} no failfast
+        if: ${{ github.event.inputs['test-tags'] != '' && github.event.inputs['fail-fast'] == 'false' }}
+        run: go test ./... -v -timeout "$TEST_TIMEOUT" -tags "$TEST_TAGS" 2>&1 | tee /tmp/test_output.txt; exit ${PIPESTATUS[0]}
       - name: Run tests without tags
-        if: ${{ github.event.inputs.test-tags == ''}}
-        run: go test ./... -v -failfast -timeout 180m 2>&1 | tee /tmp/test_output.txt; exit ${PIPESTATUS[0]}
+        if: ${{ github.event.inputs['test-tags'] == '' && github.event.inputs['fail-fast'] == 'true' }}
+        run: go test ./... -v -failfast -timeout "$TEST_TIMEOUT" 2>&1 | tee /tmp/test_output.txt; exit ${PIPESTATUS[0]}
+      - name: Run tests without tags no failfast
+        if: ${{ github.event.inputs['test-tags'] == '' && github.event.inputs['fail-fast'] == 'false' }}
+        run: go test ./... -v -timeout "$TEST_TIMEOUT" 2>&1 | tee /tmp/test_output.txt; exit ${PIPESTATUS[0]}
       - name: Show failed tests
         if: failure()
         run: |
