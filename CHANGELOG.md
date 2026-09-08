@@ -1,5 +1,9 @@
 ## 6.7.37
 
+### Features
+- `ionoscloud_datacenter`: New list resource, queryable with `terraform query` (requires Terraform 1.14+). This is the first list resource for an SDKv2-based resource and serves as the reference example for adding more.
+- `ionoscloud_datacenter`: Add a resource identity (`id`, `location`), which also enables `import` blocks with an `identity` attribute.
+
 ### Fixes
 - `ionoscloud_server`: Deleting a Confidential Computing server no longer destroys volumes owned by separate `ionoscloud_volume` resources; they are detached first.
 - `ionoscloud_vcpu_server`: Fix `error setting enabled_features` on every plan/apply/refresh (introduced in 6.7.36 by the Confidential Computing change). Adds the missing `enabled_features` and `confidential` (both Computed) attributes to the resource schema, and gives `ionoscloud_vcpu_server` its own read/import/state-writer decoupled from `ionoscloud_server` so the two schemas can no longer break each other; create/update read-back now dispatches by server type.
@@ -10,8 +14,6 @@
 - `ionoscloud_server`: Add `confidential` flag to create Confidential Computing (SEV-SNP) VMs; `cores` and `cpu_family` are derived from the boot image and must not be set.
 - Expose Confidential Computing visibility: `required_features` on the `ionoscloud_image` data source, `enabled_features` on `ionoscloud_server`/`ionoscloud_servers`, and `cpu_architecture.enabled_features` on the `ionoscloud_datacenter` and `ionoscloud_location` data sources (and the datacenter resource).
 - Add support for the `de/fra/1` location (Frankfurt West). Like `de/fra/2`, it is a child of the `de/fra` metro region and uses the same regional endpoints.
-- `ionoscloud_datacenter`: New list resource, queryable with `terraform query` (requires Terraform 1.14+). This is the first list resource for an SDKv2-based resource and serves as the reference example for adding more.
-- `ionoscloud_datacenter`: Add a resource identity (`id`, `location`), which also enables `import` blocks with an `identity` attribute.
 
 ### Fixes
 - `ionoscloud_server`: Delete the confidential boot volume after the server on destroy, since it cannot be detached while attached.

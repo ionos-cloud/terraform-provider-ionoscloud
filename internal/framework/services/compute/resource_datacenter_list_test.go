@@ -95,10 +95,11 @@ func TestDatacenterListResource(t *testing.T) {
 		assert.Equal(t, int64(7), resource["version"])
 		assert.ElementsMatch(t, []any{"SSD", "MULTIPLE_CPU"}, resource["features"])
 		assert.Equal(t, []any{map[string]any{
-			"cpu_family": "INTEL_SKYLAKE",
-			"max_cores":  int64(32),
-			"max_ram":    int64(245760),
-			"vendor":     "GenuineIntel",
+			"cpu_family":       "INTEL_SKYLAKE",
+			"max_cores":        int64(32),
+			"max_ram":          int64(245760),
+			"vendor":           "GenuineIntel",
+			"enabled_features": []any{"SEV_SNP"},
 		}}, resource["cpu_architecture"])
 		assert.Nil(t, resource["timeouts"], "a listed datacenter has no timeouts")
 
@@ -187,10 +188,11 @@ func stubCloudAPI(t *testing.T) string {
 					SecAuthProtection: new(false),
 					Ipv6CidrBlock:     new("2001:db8::/56"),
 					CpuArchitecture: &[]ionoscloudsdk.CpuArchitectureProperties{{
-						CpuFamily: new("INTEL_SKYLAKE"),
-						MaxCores:  new(int32(32)),
-						MaxRam:    new(int32(245760)),
-						Vendor:    new("GenuineIntel"),
+						CpuFamily:       new("INTEL_SKYLAKE"),
+						MaxCores:        new(int32(32)),
+						MaxRam:          new(int32(245760)),
+						Vendor:          new("GenuineIntel"),
+						EnabledFeatures: new([]string{"SEV_SNP"}),
 					}},
 				},
 			},

@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/identity"
@@ -72,10 +73,11 @@ type datacenterResourceModel struct {
 
 // datacenterCPUArchitectureModel mirrors an entry of the cpu_architecture attribute.
 type datacenterCPUArchitectureModel struct {
-	CPUFamily *string `tfsdk:"cpu_family"`
-	MaxCores  *int32  `tfsdk:"max_cores"`
-	MaxRAM    *int32  `tfsdk:"max_ram"`
-	Vendor    *string `tfsdk:"vendor"`
+	CPUFamily       *string   `tfsdk:"cpu_family"`
+	MaxCores        *int32    `tfsdk:"max_cores"`
+	MaxRAM          *int32    `tfsdk:"max_ram"`
+	Vendor          *string   `tfsdk:"vendor"`
+	EnabledFeatures *[]string `tfsdk:"enabled_features"`
 }
 
 // datacenterTimeoutsModel mirrors the timeouts block that SDKv2 adds to the schema.
@@ -173,8 +175,8 @@ func (r *datacenterListResource) mapDatacenter(_ context.Context, includeResourc
 		return nil, nil
 	}
 
-	name := valueOrZero(dc.Properties.Name)
-	location := valueOrZero(dc.Properties.Location)
+	name := shared.ToValueDefault(dc.Properties.Name)
+	location := shared.ToValueDefault(dc.Properties.Location)
 
 	if !identity.MatchesFilters(map[string]string{
 		"name":     name,
@@ -219,22 +221,13 @@ func mapDatacenterCPUArchitecture(architectures *[]ionoscloud.CpuArchitecturePro
 	mapped := make([]datacenterCPUArchitectureModel, 0, len(*architectures))
 	for _, architecture := range *architectures {
 		mapped = append(mapped, datacenterCPUArchitectureModel{
-			CPUFamily: architecture.CpuFamily,
-			MaxCores:  architecture.MaxCores,
-			MaxRAM:    architecture.MaxRam,
-			Vendor:    architecture.Vendor,
+			CPUFamily:       architecture.CpuFamily,
+			MaxCores:        architecture.MaxCores,
+			MaxRAM:          architecture.MaxRam,
+			Vendor:          architecture.Vendor,
+			EnabledFeatures: architecture.EnabledFeatures,
 		})
 	}
 
 	return &mapped
-}
-
-// valueOrZero dereferences ptr, or returns the zero value if it is nil.
-func valueOrZero[T any](ptr *T) T {
-	if ptr == nil {
-		var zero T
-		return zero
-	}
-
-	return *ptr
 }
