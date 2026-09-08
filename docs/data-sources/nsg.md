@@ -1,7 +1,7 @@
 ---
 subcategory: "Compute Engine"
 layout: "ionoscloud"
-page_title: "IONOS CLOUD: network security group"
+page_title: "IONOS CLOUD: ionoscloud_nsg"
 sidebar_current: "docs-datasource-nsg"
 description: |-
   Get information on a IONOS CLOUD Network Security Group
