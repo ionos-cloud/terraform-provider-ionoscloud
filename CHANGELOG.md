@@ -7,7 +7,7 @@
 - Add `taints` support to the `ionoscloud_k8s_node_pool` resource and data source. Each taint has a `key`, optional `value`, and `effect` (`NoSchedule`, `NoExecute`, or `PreferNoSchedule`).
 
 ### Docs
-- Update readme, remove IONOS_TOKEN examples and further discourage usage. Remove username and password examples.
+- Update readme, remove IONOS_API_URL examples and further discourage usage. Remove username and password examples.
 
 ## 6.7.36
 

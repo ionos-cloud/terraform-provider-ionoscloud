@@ -246,7 +246,7 @@ func resourceK8sNodePool() *schema.Resource {
 							Type:             schema.TypeString,
 							Required:         true,
 							Description:      "Taint effect determines how a taint repels pods. One of: NoSchedule, NoExecute, PreferNoSchedule.",
-							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"NoSchedule", "NoExecute", "PreferNoSchedule"}, false)),
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{string(ionoscloud.NO_SCHEDULE), string(ionoscloud.NO_EXECUTE), string(ionoscloud.PREFER_NO_SCHEDULE)}, false)),
 						},
 					},
 				},
