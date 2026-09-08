@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
 // initializeCreateRequests is the pure request-builder shared by the create path. These unit
@@ -121,4 +122,94 @@ func int32PtrEqual(a, b *int32) bool {
 		return a == b
 	}
 	return *a == *b
+}
+
+// deleteVolumes on the server delete takes down every volume still attached, so the confidential
+// delete path has to detach the ones Terraform does not own first. Only inline volume blocks are
+// owned; anything else belongs to a separate ionoscloud_volume resource and must survive.
+func TestDetachableVolumeIDs(t *testing.T) {
+	volumes := func(ids ...string) *ionoscloud.Server {
+		items := make([]ionoscloud.Volume, 0, len(ids))
+		for _, id := range ids {
+			items = append(items, ionoscloud.Volume{Id: new(id)})
+		}
+		return &ionoscloud.Server{Entities: &ionoscloud.ServerEntities{Volumes: &ionoscloud.AttachedVolumes{Items: &items}}}
+	}
+	withBootVolume := func(server *ionoscloud.Server, bootID string) *ionoscloud.Server {
+		server.Properties = &ionoscloud.ServerProperties{BootVolume: &ionoscloud.ResourceReference{Id: new(bootID)}}
+		return server
+	}
+
+	tests := []struct {
+		name   string
+		server *ionoscloud.Server
+		inline []any
+		want   []string
+	}{
+		{
+			name:   "boot volume only is owned, nothing to detach",
+			server: volumes("boot"),
+			inline: []any{"boot"},
+			want:   nil,
+		},
+		{
+			name:   "separately managed data disk is detached",
+			server: volumes("boot", "data"),
+			inline: []any{"boot"},
+			want:   []string{"data"},
+		},
+		{
+			name:   "several foreign volumes are all detached",
+			server: volumes("boot", "data", "backup"),
+			inline: []any{"boot"},
+			want:   []string{"data", "backup"},
+		},
+		{
+			name:   "no inline volumes means nothing is owned",
+			server: volumes("data"),
+			inline: nil,
+			want:   []string{"data"},
+		},
+		{
+			// The API-reported boot volume is never detachable, even when the ownership list is
+			// empty: a confidential boot volume cannot be detached (VDC-5-2058), so classifying it
+			// as foreign would leave the server undeletable.
+			name:   "boot volume excluded even with an empty ownership list",
+			server: withBootVolume(volumes("boot", "data"), "boot"),
+			inline: nil,
+			want:   []string{"data"},
+		},
+		{
+			name:   "boot volume excluded when ownership list disagrees",
+			server: withBootVolume(volumes("boot", "data"), "boot"),
+			inline: []any{"data"},
+			want:   nil,
+		},
+		{
+			name:   "nil server",
+			server: nil,
+			inline: []any{"boot"},
+			want:   nil,
+		},
+		{
+			name:   "server without volumes",
+			server: &ionoscloud.Server{},
+			inline: []any{"boot"},
+			want:   nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := detachableVolumeIDs(tt.server, tt.inline)
+			if len(got) != len(tt.want) {
+				t.Fatalf("detachableVolumeIDs = %v, want %v", got, tt.want)
+			}
+			for i := range got {
+				if got[i] != tt.want[i] {
+					t.Fatalf("detachableVolumeIDs = %v, want %v", got, tt.want)
+				}
+			}
+		})
+	}
 }

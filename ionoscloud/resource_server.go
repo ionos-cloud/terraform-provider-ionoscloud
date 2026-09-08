@@ -768,9 +768,9 @@ func setServerConfidentialVisibility(d *schema.ResourceData, server *ionoscloud.
 		if err := d.Set("enabled_features", *server.Properties.EnabledFeatures); err != nil {
 			return fmt.Errorf("error setting enabled_features %w", err)
 		}
-	} else {
+	} else if err := d.Set("enabled_features", nil); err != nil {
 		// Clear any stale value if the API no longer reports features.
-		d.Set("enabled_features", nil)
+		return fmt.Errorf("error clearing enabled_features %w", err)
 	}
 	// Derive `confidential` from the API so imported/refreshed servers reflect their real state
 	// and don't trigger a spurious ForceNew replace.
@@ -1206,6 +1206,71 @@ func deleteInlineVolumes(ctx context.Context, d *schema.ResourceData, meta any, 
 	return nil
 }
 
+// shouldSeedInlineVolumeIDs reports whether inline_volume_ids has to be seeded from the boot
+// volume. Two states need it:
+//
+//   - the attribute is absent entirely: state written before 6.4.0, which predates it.
+//   - the attribute is an empty list while an inline volume block is still declared. That
+//     combination is inconsistent, and leaving it alone is not harmless: the volume block is
+//     refreshed from the ownership list, so it blanks out, and every later plan then fails with
+//     "volume.0.disk_type attribute is immutable" - which also blocks destroy, leaving the server
+//     unmanageable. Seeding from the boot volume restores the invariant instead.
+//
+// An empty list is legitimate when no inline volume block is declared - every disk then belongs to
+// a separate ionoscloud_volume resource, and claiming the boot volume as inline would make a server
+// delete destroy a disk Terraform does not own. That is why emptiness alone does not seed.
+func shouldSeedInlineVolumeIDs(d *schema.ResourceData) bool {
+	rawState := d.GetRawState()
+	if rawState.IsNull() {
+		return false
+	}
+	if rawState.GetAttr("inline_volume_ids").IsNull() {
+		return true
+	}
+	if inline, ok := d.Get("inline_volume_ids").([]any); !ok || len(inline) > 0 {
+		return false
+	}
+	volumes, ok := d.Get("volume").([]any)
+	return ok && len(volumes) > 0
+}
+
+// detachableVolumeIDs returns the volumes attached to the server that Terraform does not own,
+// i.e. everything that is not one of the server's inline volume blocks. Those belong to separate
+// ionoscloud_volume resources with their own lifecycle, so a server delete must not take them
+// down with it.
+//
+// The boot volume the API reports is never detachable, whatever the ownership list says. A
+// confidential boot volume cannot be detached at all (VDC-5-2058), so treating it as foreign
+// would make the server undeletable; it also has to stay attached for the server delete to take
+// it down. Ownership normally covers it - inline_volume_ids is populated on create, and on import
+// it is filled in from boot_volume - but this does not depend on that holding.
+func detachableVolumeIDs(server *ionoscloud.Server, inlineVolumeIDs []any) []string {
+	if server == nil || server.Entities == nil || server.Entities.Volumes == nil || server.Entities.Volumes.Items == nil {
+		return nil
+	}
+
+	inline := make(map[string]struct{}, len(inlineVolumeIDs)+1)
+	for _, id := range inlineVolumeIDs {
+		if idStr, ok := id.(string); ok {
+			inline[idStr] = struct{}{}
+		}
+	}
+	if server.Properties != nil && server.Properties.BootVolume != nil && server.Properties.BootVolume.Id != nil {
+		inline[*server.Properties.BootVolume.Id] = struct{}{}
+	}
+
+	var detachable []string
+	for _, volume := range *server.Entities.Volumes.Items {
+		if volume.Id == nil {
+			continue
+		}
+		if _, owned := inline[*volume.Id]; !owned {
+			detachable = append(detachable, *volume.Id)
+		}
+	}
+	return detachable
+}
+
 // serverIsConfidential reports whether the server the API returned is a Confidential Computing
 // (SEV-SNP) VM, based on its enabled features. Derived from the API rather than the user-supplied
 // confidential flag so it stays correct for imported servers and config drift.
@@ -1237,10 +1302,13 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta any)
 		return diagutil.ToDiags(d, fmt.Errorf("error occurred while fetching a server: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	// A confidential boot volume cannot be detached while attached, so it must be deleted after
-	// the server is gone rather than before it.
-	//   Normal server: volume, then server.
-	//   Confidential:  server, then volume.
+	// A confidential boot volume cannot exist on its own: the API refuses to delete a confidential
+	// server that would leave its volume behind (VDC-5-2060), and the volume cannot be deleted
+	// while attached either (VDC-5-2058). So the server delete has to take the volume with it via
+	// deleteVolumes.
+	//   Normal server: inline volumes, then server.
+	//   Confidential:  detach everything Terraform does not own, then server together with the
+	//                  volumes it does own, in one request.
 	// Confidentiality is derived from the server the API returned (not the user flag) so this stays
 	// correct for imported servers and config drift.
 	confidential := serverIsConfidential(&server)
@@ -1255,7 +1323,33 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta any)
 		}
 	}
 
-	apiResponse, err = client.ServersApi.DatacentersServersDelete(ctx, dcID, d.Id()).Execute()
+	// deleteVolumes takes down every volume still attached, so volumes owned by a separate
+	// ionoscloud_volume resource have to be detached first or they would be destroyed along with
+	// the server - silent data loss, plus a dangling ID in Terraform state.
+	if confidential {
+		for _, volumeID := range detachableVolumeIDs(&server, d.Get("inline_volume_ids").([]any)) {
+			apiResponse, err := client.ServersApi.DatacentersServersVolumesDelete(ctx, dcID, d.Id(), volumeID).Execute()
+			logApiRequestTime(apiResponse)
+			if err != nil {
+				if apiResponse.HttpNotFound() {
+					tflog.Info(ctx, "volume not found while detaching it from a confidential server", map[string]any{"volume_id": volumeID, "datacenter_id": dcID, "server_id": d.Id()})
+					continue
+				}
+				requestLocation, _ := apiResponse.SafeLocation()
+				return diagutil.ToDiags(d, fmt.Errorf("error occurred while detaching volume with ID: %s %w", volumeID, err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
+			}
+			if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
+				requestLocation, _ := apiResponse.SafeLocation()
+				return diagutil.ToDiags(d, fmt.Errorf("error getting state change for volume detach %w", errState), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
+			}
+		}
+	}
+
+	// A confidential server has to be deleted together with its volumes: its boot volume carries a
+	// confidential image, which the API refuses to leave behind on its own (VDC-5-2060) and which
+	// cannot be deleted while attached (VDC-5-2058). Non-confidential servers keep the previous
+	// behaviour, where inline volumes are deleted first, in their own requests.
+	apiResponse, err = client.ServersApi.DatacentersServersDelete(ctx, dcID, d.Id()).DeleteVolumes(confidential).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		requestLocation, _ := apiResponse.SafeLocation()
@@ -1265,14 +1359,7 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta any)
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
 		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, fmt.Errorf("error getting state change for datacenter delete %w", errState), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
-	}
-
-	if confidential {
-		diags := deleteInlineVolumes(ctx, d, meta, client)
-		if diags != nil {
-			return diags
-		}
+		return diagutil.ToDiags(d, fmt.Errorf("error getting state change for server delete %w", errState), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
 	d.SetId("")
@@ -1534,10 +1621,9 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 	}
 
 	// takes care of an upgrade from a version that does not have inline_volume_ids(pre 6.4.0)
-	// to one that has it(>6.4.0). GetOk cannot be used here since it also returns false when
-	// inline_volume_ids is present in the state as an empty list; checking the raw state directly
-	// ensures this only fires when the attribute is completely absent.
-	if rawState := d.GetRawState(); !rawState.IsNull() && rawState.GetAttr("inline_volume_ids").IsNull() {
+	// to one that has it(>6.4.0), and of a state whose ownership list went empty while an inline
+	// volume block is still declared. See shouldSeedInlineVolumeIDs.
+	if shouldSeedInlineVolumeIDs(d) {
 		if bootVolumeItf, ok := d.GetOk("boot_volume"); ok {
 			bootVolume := bootVolumeItf.(string)
 			var inlineVolumeIDs []string
