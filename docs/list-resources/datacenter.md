@@ -137,5 +137,6 @@ Each result exposes the following attributes when `include_resource = true`, mat
   - `max_cores` - The maximum number of cores available.
   - `max_ram` - The maximum RAM size in MB.
   - `vendor` - A valid CPU vendor name.
+  - `enabled_features` - Features enabled for this CPU architecture, e.g. `SEV-SNP` for Confidential Computing.
 - `ipv6_cidr_block` - The auto-assigned /56 IPv6 CIDR block, if IPv6 is enabled for the datacenter.
 - `timeouts` - Always null; timeouts are configuration-only and are not returned by a query.

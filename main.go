@@ -38,7 +38,7 @@ func main() {
 	}
 
 	providers := []func() tfprotov6.ProviderServer{
-		providerserver.NewProtocol6(provider.New(sdkv2Provider)), // Example terraform-plugin-framework provider
+		providerserver.NewProtocol6(provider.New(ionoscloud.ListResources()...)), // Example terraform-plugin-framework provider
 		func() tfprotov6.ProviderServer {
 			return upgradedSdkServer
 		},
