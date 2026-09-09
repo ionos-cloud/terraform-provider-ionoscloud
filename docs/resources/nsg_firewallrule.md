@@ -43,7 +43,7 @@ The following arguments are supported:
 * `nsg_id` - (Required)[string] The ID of a Network Security Group.
 * `datacenter_id` - (Required)[string] The ID of a Virtual Data Center.
 * `name` - (Optional)[string] The name of the Network Security Group.
-* `protocol` - (Required)[string] The protocol for the rule: TCP, UDP, ICMP, ANY. Property cannot be modified after creation (disallowed in update requests).
+* `protocol` - (Required)[string] The protocol for the rule: TCP, UDP, ICMP, ANY. Property cannot be modified after creation (disallowed in update requests); changing it forces a new resource to be created.
 * `name` - (Optional)[string] The name of the firewall rule.
 * `source_mac` - (Optional)[string] Only traffic originating from the respective MAC address is allowed. Valid format: aa:bb:cc:dd:ee:ff. Value null allows all source MAC address. Valid format: aa:bb:cc:dd:ee:ff.
 * `source_ip` -  (Optional)(computed)[string] Only traffic originating from the respective IPv4 address is allowed. Value null allows all source IPs.

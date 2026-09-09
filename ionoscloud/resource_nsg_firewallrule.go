@@ -30,6 +30,7 @@ func resourceNSGFirewallRule() *schema.Resource {
 			},
 			"protocol": {
 				Type:             schema.TypeString,
+				ForceNew:         true,
 				Required:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(constant.FirewallProtocolEnum, false)),
 			},
