@@ -15,7 +15,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	sdkv2 "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/compute"
@@ -55,17 +54,18 @@ var (
 
 // IonosCloudProvider is the provider implementation.
 type IonosCloudProvider struct {
-	// sdkv2Provider is the SDKv2 half of the muxed provider, the only place the
-	// framework side can reach the schemas of resources that are still implemented
-	// with SDKv2 and need a list resource.
-	sdkv2Provider *sdkv2.Provider
+	// sdkv2ListResources are the list resources of managed resources that are still
+	// implemented with SDKv2. They are declared in package ionoscloud, beside the
+	// resources they list, and passed in here because that package cannot be
+	// imported from this one.
+	sdkv2ListResources []func() list.ListResource
 }
 
-// New creates a new provider. sdkv2Provider is the SDKv2 provider this one is muxed
-// with; passing nil is allowed, but then list resources for SDKv2 resources such as
-// ionoscloud_datacenter cannot be served.
-func New(sdkv2Provider *sdkv2.Provider) provider.Provider {
-	return &IonosCloudProvider{sdkv2Provider: sdkv2Provider}
+// New creates a new provider. sdkv2ListResources are the list resources declared
+// alongside the SDKv2 managed resources they list, normally ionoscloud.ListResources();
+// passing none is allowed, and then only the framework-native list resources are served.
+func New(sdkv2ListResources ...func() list.ListResource) provider.Provider {
+	return &IonosCloudProvider{sdkv2ListResources: sdkv2ListResources}
 }
 
 // Metadata returns the metadata for the provider.
@@ -342,7 +342,7 @@ func (p *IonosCloudProvider) ListResources(_ context.Context) []func() list.List
 		pgsqlv2.ListResources(),
 		inmemorydbv2.ListResources(),
 		mariadbv2.ListResources(),
-		compute.ListResources(p.sdkv2Provider),
+		p.sdkv2ListResources,
 	}
 
 	for _, r := range listResources {

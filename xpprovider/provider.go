@@ -13,5 +13,5 @@ import (
 // Used in crossplane upjet ionoscloud provider
 func GetProvider() (fwprovider.Provider, *schema.Provider) {
 	sdkv2Provider := ionoscloud.Provider()
-	return internalfwprovider.New(sdkv2Provider), sdkv2Provider
+	return internalfwprovider.New(ionoscloud.ListResources()...), sdkv2Provider
 }

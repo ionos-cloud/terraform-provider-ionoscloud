@@ -57,7 +57,7 @@ func ProtoV6ProviderServerFactory(ctx context.Context) (func() tfprotov6.Provide
 		return nil, nil, err
 	}
 	servers := []func() tfprotov6.ProviderServer{
-		providerserver.NewProtocol6(provider.New(primary)),
+		providerserver.NewProtocol6(provider.New(ionoscloud.ListResources()...)),
 		func() tfprotov6.ProviderServer {
 			return upgradedSdkServer
 		},

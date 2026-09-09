@@ -129,7 +129,7 @@ func TestAccDataCenterBasic(t *testing.T) {
 // The list resource is served by the plugin-framework half of the provider even though
 // the datacenter resource itself is implemented with SDKv2, so this also covers the
 // mux serving the two halves under the same type name. See
-// internal/framework/services/compute/resource_datacenter_list.go.
+// resource_datacenter_list.go in this package.
 func TestAccDataCenterQuery(t *testing.T) {
 	const (
 		datacenterName = "tf-test-datacenter-query"

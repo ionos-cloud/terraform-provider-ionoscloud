@@ -1,4 +1,4 @@
-package compute_test
+package ionoscloud_test
 
 import (
 	"context"
@@ -30,8 +30,9 @@ const datacenterListType = "ionoscloud_datacenter"
 // fail at runtime: that the mux is happy with the list resource and the managed
 // resource coming from different servers, that the framework registers a list resource
 // with no framework resource behind it, that the protocol schemas handed over by
-// RawV6Schemas convert cleanly, and that the resource model fills the SDKv2 schema
-// without a type mismatch.
+// RawV6Schemas convert cleanly, and that the state the resource's own writer produces
+// survives the round trip through ResourceData.TfTypeResourceState into the list result,
+// including the timeouts block identity.MappedItemFromResourceData nulls back out.
 func TestDatacenterListResource(t *testing.T) {
 	ctx := context.Background()
 
@@ -160,7 +161,7 @@ func muxedProviderServer(ctx context.Context, t *testing.T) tfprotov6.ProviderSe
 	}
 
 	mux, err := tf6muxserver.NewMuxServer(ctx,
-		providerserver.NewProtocol6(fwprovider.New(sdkv2Provider)),
+		providerserver.NewProtocol6(fwprovider.New(ionoscloud.ListResources()...)),
 		func() tfprotov6.ProviderServer { return upgraded },
 	)
 	if err != nil {
