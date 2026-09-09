@@ -5,6 +5,12 @@
 - `ionoscloud_server`: Deleting a Confidential Computing server no longer destroys volumes owned by separate `ionoscloud_volume` resources; they are detached first.
 - `ionoscloud_vcpu_server`: Fix `error setting enabled_features` on every plan/apply/refresh (introduced in 6.7.36 by the Confidential Computing change). Adds the missing `enabled_features` and `confidential` (both Computed) attributes to the resource schema, and gives `ionoscloud_vcpu_server` its own read/import/state-writer decoupled from `ionoscloud_server` so the two schemas can no longer break each other; create/update read-back now dispatches by server type.
 
+### Features
+- Add `taints` support to the `ionoscloud_k8s_node_pool` resource and data source. Each taint has a `key`, optional `value`, and `effect` (`NoSchedule`, `NoExecute`, or `PreferNoSchedule`).
+
+### Docs
+- Update readme, remove IONOS_API_URL examples and further discourage usage. Remove username and password examples.
+
 ## 6.7.36
 
 ### Features

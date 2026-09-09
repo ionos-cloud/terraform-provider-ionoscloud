@@ -83,5 +83,9 @@ The following attributes are returned by the datasource:
         - `gateway_ip` - IPv4 or IPv6 Gateway IP for the route
 * `labels` - A map of labels in the form of key -> value
 * `annotations` - A map of annotations in the form of key -> value
+* `taints` - A list of taints applied to the nodes in this pool. Each taint has the following attributes:
+    * `key` - Taint key
+    * `value` - Taint value
+    * `effect` - Taint effect: `NoSchedule`, `NoExecute`, or `PreferNoSchedule`
 * `available_upgrade_versions` - A list of kubernetes versions available for upgrade
 * `public_ips` - The list of fixed IPs associated with this node pool

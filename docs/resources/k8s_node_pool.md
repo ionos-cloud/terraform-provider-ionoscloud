@@ -87,6 +87,11 @@ resource "ionoscloud_k8s_node_pool" "example" {
     ann1                = "value1"
     ann2                = "value2"
   }
+  taints {
+    key                 = "dedicated"
+    value               = "gpu"
+    effect              = "NoSchedule"
+  }
 }
 
 ```
@@ -123,6 +128,10 @@ The following arguments are supported:
 - `public_ips` - (Optional)[list] A list of public IPs associated with the node pool; must have at least `node_count + 1` elements  
 - `labels` - (Optional)[map] A key/value map of labels
 - `annotations` - (Optional)[map] A key/value map of annotations
+- `taints` - (Optional)[set] Taints applied to the nodes in this pool. A taint repels pods that do not have a matching toleration. Maximum 50 taints per node pool.
+    - `key` - (Required)[string] Taint key. Must be a valid Kubernetes label key format. May include an optional prefix (DNS subdomain) followed by a slash.
+    - `value` - (Optional)[string] Taint value. Must be a valid Kubernetes label value format.
+    - `effect` - (Required)[string] Taint effect determines how a taint repels pods. One of: `NoSchedule`, `NoExecute`, `PreferNoSchedule`.
 - `allow_replace` - (Optional)[bool] When set to true, allows the update of immutable fields by first destroying and then re-creating the node pool.
 
 ⚠️ **_Warning: `allow_replace` - lets you update immutable fields, but it first destroys and then re-creates the node pool in order to do it. Set the field to true only if you know what you are doing.

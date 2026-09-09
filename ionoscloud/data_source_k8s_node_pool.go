@@ -178,6 +178,30 @@ func dataSourceK8sNodePool() *schema.Resource {
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+			"taints": {
+				Type:        schema.TypeList,
+				Description: "Taints applied to nodes in this pool. A taint repels pods that do not have a matching toleration.",
+				Computed:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"key": {
+							Type:        schema.TypeString,
+							Description: "Taint key.",
+							Computed:    true,
+						},
+						"value": {
+							Type:        schema.TypeString,
+							Description: "Taint value.",
+							Computed:    true,
+						},
+						"effect": {
+							Type:        schema.TypeString,
+							Description: "Taint effect: NoSchedule, NoExecute, or PreferNoSchedule.",
+							Computed:    true,
+						},
+					},
+				},
+			},
 			"available_upgrade_versions": {
 				Type:        schema.TypeList,
 				Description: "A list of kubernetes versions available for upgrade",
