@@ -78,8 +78,8 @@ framework-native?** Determine it before writing anything.
 grep -n '= "<ionoscloud_type>"' utils/constant/constants.go
 
 # 2. Is it in the SDKv2 ResourcesMap?  Match on the FACTORY, not the constant: ResourcesMap
-#    (provider.go:93) and DataSourcesMap (:153) frequently key off the SAME constant — a bare
-#    `grep -n 'constant.DatacenterResource:'` returns :94 AND :154 — and some types have only
+#    (provider.go:96) and DataSourcesMap (:156) frequently key off the SAME constant — a bare
+#    `grep -n 'constant.DatacenterResource:'` returns :97 AND :157 — and some types have only
 #    a *DataSource constant, so the constant's own suffix does not settle it either.
 #    (The [Rr]/[Dd] classes are for the three exported autoscaling factories.)
 grep -nE 'constant.<Const>: *[Rr]esource'   ionoscloud/provider.go   # ResourcesMap   -> listable
@@ -181,7 +181,9 @@ Two checks before you settle the list:
   value is a filter that always matches everything — noise in the allow-list and a
   meaningless doc example. `ionoscloud_target_group`'s `protocol` is the case in point:
   `StringInSlice([]string{"HTTP"}, true)`, and the API model says "Only the value 'HTTP' is
-  allowed". It was proposed, then dropped. Read the `ValidateDiagFunc` of every candidate.
+  allowed". It was proposed as a filter field on a `target_group` list resource and dropped for
+  exactly this reason; that list resource was never merged, so only the managed resource's own
+  schema is in the tree to look at. Read the `ValidateDiagFunc` of every candidate.
 - **`MatchesFilters` is an exact, case-sensitive compare** (`filter.go:57-60`) against the
   value the API returned, but an SDKv2 `StringInSlice(..., true)` validator lets the *resource*
   accept any case. So a filterable enum is case-sensitive in a `list` block and
@@ -202,6 +204,16 @@ selects an endpoint override (`bundleclient.go:393-417`), it does not partition 
   says "intended for resources that do not have a location attribute", but datacenter has one
   and uses it anyway — for a *collection read* that is correct. Fanning out here re-reads the
   same global collection N times and returns every item N times.
+
+  *Known limitation of the pattern, not something you have to solve.*
+  `NewCloudAPIClientWithFailover` resolves its endpoint from **global** cloud overrides only
+  (`FilterGlobalOverrides` keeps the entries whose `location` is empty), so a file config that
+  overrides the cloud product with per-location endpoints and no global one makes it hard-error
+  with `no global failover endpoints configured for "cloud"` — on a configuration where the
+  managed resource's own `NewCloudAPIClient(ctx, location)` is fine, because that one falls back
+  the other way (location override first, global second). The shipped `ionoscloud_datacenter`
+  list resource has the same hole. Follow the pattern anyway; just have the answer ready if
+  review raises it.
 - **Regional = an sdk-go-bundle DBaaS product that exposes `AvailableLocations()`** in
   `services/dbaas/<product>/client.go` — today exactly `pgsqlv2`, `mariadbv2`, `inmemorydbv2`.
   Only then fan out; copy `internal/framework/services/pgsqlv2/resource_pg_cluster_list.go`.
@@ -232,12 +244,17 @@ Do them in that order. Step 1 is a hard prerequisite for step 2: a resource with
 ### The files
 
 On the SDKv2 branch every line you write is in **package `ionoscloud`, next to the resource
-being listed**. It has to be: the list resource calls that resource's own unexported
-`resource<X>()`, `set<X>Data()` and `set<X>Identity()`, and no package under
+being listed**. It has to be: the list resource calls that resource's own package-level
+`resource<X>()`, state writer and `set<X>Identity()`, and no package under
 `internal/framework` can import package `ionoscloud` — `ionoscloud/provider_test.go` is an
 in-package test that imports `internal/framework/provider`, so the reverse import is a cycle
 in the test build. Framework code in `ionoscloud/` looks wrong and is not; a list resource can
 only be written with terraform-plugin-framework, whichever half of the mux its resource is on.
+
+The state writer's name is **not** uniform, so read the resource file instead of assuming:
+`resource_datacenter.go` has the unexported `setDatacenterData`, `resource_ipblock.go` the
+exported `IpBlockSetData`. `set<X>Data` everywhere in this skill is a placeholder for whatever
+that resource calls its writer, not a name to grep for.
 
 | SDKv2-backed | framework-native |
 |---|---|
@@ -307,6 +324,13 @@ than at runtime. On the framework-native branch it is not — `./internal/framew
 does not reach `internal/framework/provider`, so a slip in the wiring line you were just told
 to add is invisible until rung 5 unless you run the second command.
 
+**Rung 1 can fail for a reason only rung 4 fixes — the one permitted jump in the ladder.** The
+repo vendors its dependencies (`vendor/modules.txt` exists, so `-mod=vendor` is the default) and
+the compiler sees only packages already under `vendor/`. An import of a not-yet-vendored
+subpackage therefore breaks *this* rung, as a cannot-find-module / missing-package error naming
+that import path — it does not wait for rung 4. When that is the failure, go run rung 4, then
+come back and re-run rung 1.
+
 **Rung 2 — the untagged unit test. Main iteration loop. No credentials, no network:**
 ```bash
 # SDKv2 branch (the test is ionoscloud/resource_<resource>_list_test.go, package ionoscloud_test):
@@ -361,7 +385,7 @@ change** so it goes in the same commit — do not run `git commit` yourself.
 ```bash
 go vet -tags=all ./...
 ```
-136 of the repo's 158 `_test.go` files sit behind build tags and are invisible to a plain
+136 of the repo's 157 `_test.go` files sit behind build tags and are invisible to a plain
 `go vet ./...`. That includes the `Query: true` step you wrote — the resource's acceptance
 test file is tagged (`ionoscloud/resource_datacenter_test.go` is
 `//go:build compute || all || datacenter`), so this rung is the only thing that compiles it.
@@ -411,7 +435,10 @@ the hazard in `references/docs-and-changelog.md` §2b.
 - [ ] A `Query: true` step on the resource's tagged acceptance test (written; **not run**),
       plus a non-ForceNew update step whenever Update writes the identity itself
 - [ ] `docs/list-resources/<resource>.md` + the pointer section on `docs/resources/<resource>.md`
-- [ ] CHANGELOG entry appended under the existing open version heading (do not create a new one)
+- [ ] CHANGELOG entry under the correct `## X.Y.Z` heading — decided by the **git tag, not the
+      heading**: append under the topmost heading only while no `v<that version>` tag exists; once
+      that version is tagged, create a new `## X.Y.Z+1` heading above it. The check and the #1034
+      counter-example are in `references/docs-and-changelog.md` §4 — re-run it just before merge
 - [ ] Ladder rungs 0–5 clean, **2b included**
 - [ ] The pagination decision is written down somewhere a reviewer will find it, with this
       endpoint's real default limit

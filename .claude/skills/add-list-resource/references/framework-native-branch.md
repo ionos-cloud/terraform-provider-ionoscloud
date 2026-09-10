@@ -171,9 +171,10 @@ takes — nothing there is per-resource.
 3. **Bucket does a per-item extra API call inside the mapper**, before the filter check —
    N+1 (or 2N) requests. Unavoidable for the S3 API, a bad default for a Cloud API resource
    where one `Depth(1)` call returns everything.
-4. **mariadbv2 and inmemorydbv2 have their doc comments stripped.** Don't teach the
-   stripped-down form.
-5. **Filter-field vocabulary drifts** — four use `("name","location")`, bucket
+4. **mariadbv2 and inmemorydbv2 keep only pgsqlv2's `New<X>ListResource` and `List` comments** —
+   the ones on the `clusterWithLocation` type, on `ListResourceConfigSchema`, on the mapper, and
+   the inline early-filter-read note were dropped. Don't teach the stripped-down form.
+5. **Filter-field vocabulary drifts** — three use `("name","location")`, bucket
    `("name","region")`, accesskey `("id","description","accesskey")`. Filtering on `id` is
    redundant with the identity. Match the *resource's own attribute names*, not a house style.
 6. **None of the five has a test.** That is a gap, not a convention — write one. The harness in
