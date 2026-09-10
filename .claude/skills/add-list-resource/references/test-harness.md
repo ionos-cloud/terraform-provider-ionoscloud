@@ -3,20 +3,20 @@
 Reference: `ionoscloud/resource_datacenter_list_test.go` (package `ionoscloud_test`). It drives
 the real `ListResource` RPC end to end against a stubbed Cloud API, through the same mux
 `main.go` serves — no acceptance test, no credentials, and it runs in well under a second. It is
-the oldest of the three list-resource tests in `ionoscloud/` (datacenter, ipblock,
-target_group); the five framework-native list resources under `internal/framework/services/`
-have none. Copy it, and read `ionoscloud/resource_target_group_list_test.go` too for the
-lone-`id` identity and the `MaxItems: 1` blocks.
+the older of the two list-resource tests in `ionoscloud/` (datacenter, ipblock); the five
+framework-native list resources under `internal/framework/services/` have none. Copy it, and
+read `ionoscloud/resource_ipblock_list_test.go` too — it is the smaller worked example, and the
+one that covers an `Optional` `name`, a two-attribute identity and an omitted nested block.
 
 New file: `ionoscloud/resource_<resource>_list_test.go`, package `ionoscloud_test` — beside the
 list resource, which lives beside the SDKv2 resource it lists. The **external** test package is
-what the three existing tests use: it keeps names as generic as `decode`, `listResults` and
+what both existing tests use: it keeps names as generic as `decode`, `listResults` and
 `dynamicValue` out of package `ionoscloud`'s own namespace, and it forces the test through the
 same exported surface `main.go` uses, `ionoscloud.Provider()` and `ionoscloud.ListResources()`.
 
 No `//go:build` tag. That is deliberate — it keeps the test cheap to run and puts it in
-golangci-lint's scope (which only analyses the default build). `ionoscloud/` has 115 test files
-and only ten of them are untagged, so an untagged file costs nothing to run and, unlike the
+golangci-lint's scope (which only analyses the default build). `ionoscloud/` has 114 test files
+and only nine of them are untagged, so an untagged file costs nothing to run and, unlike the
 other 105, needs no `TF_ACC` and no credentials.
 
 ---
@@ -32,7 +32,9 @@ The list resource declares no struct mirroring the SDKv2 schema. Each result is
 	fwidentity.MappedItemFromResourceData(displayName, data, includeResource)
 ```
 
-so the code under test is the resource's **own state writer**, the one `resource<X>Read` calls,
+so the code under test is the resource's **own state writer** (`set<X>Data` above is a
+placeholder: `setDatacenterData` is unexported, `IpBlockSetData` is exported — use whichever
+name the resource already has), the one `resource<X>Read` calls,
 plus the conversion in `internal/framework/identity/sdkv2.go`. What the assertions pin is
 therefore not "the resource model fills the SDKv2 schema without a type mismatch" — nothing
 fills anything — but: **the state the resource's own writer produces survives the round trip
@@ -41,9 +43,9 @@ through `ResourceData.TfTypeResourceState` into the list-result schema**, includ
 (`internal/framework/identity/sdkv2.go:82-89`, `nullTimeouts` at `:99-121`).
 
 Put that in the test's doc comment. Datacenter's says exactly it
-(`ionoscloud/resource_datacenter_list_test.go:26-35`). The ipblock and target_group headers
-still carry the older "the resource model fills the SDKv2 schema" sentence from before the
-refactor — do not copy that one forward.
+(`ionoscloud/resource_datacenter_list_test.go:26-35`), and ipblock's repeats it and then adds a
+pointer to where the shared helpers live. If you meet a header still saying "the resource model
+fills the SDKv2 schema", that is the pre-refactor wording — do not copy it forward.
 
 ---
 
@@ -131,14 +133,16 @@ The only things you write per resource are:
 **Do not copy the driver.** `listResults(ctx, t, server, typeName, schema, filters)` already
 takes the type name as a parameter for exactly this reason: the type name is the *only* thing
 that differs per resource, so call the shared one
-(`ionoscloud/resource_datacenter_list_test.go:247`). Copying it was the original instruction
-here and it is what produced two near-identical drivers before `ionoscloud_ipblock` landed.
+(`ionoscloud/resource_datacenter_list_test.go:248`). If your resource needs something the
+shared driver does not do yet, add the parameter to it in place — that is exactly what turned
+it from a datacenter-only helper into `listResults` — rather than growing a second
+near-identical copy.
 
-`resource_ipblock_list_test.go` and `resource_target_group_list_test.go` are the worked
-examples of this: each is a type-name const, one `Test<X>ListResource`, one `stub<X>API` and
-its subtests, and nothing else. Both say so in their header comment ("The shared helpers it
-calls … are declared once for the package in resource_datacenter_list_test.go") — keep that
-line, it is what stops the next author re-copying them.
+`resource_ipblock_list_test.go` is the worked example of this: a type-name const, one
+`Test<X>ListResource`, one `stub<X>API` and its subtests, and nothing else. Its header comment
+says so ("The shared helpers it calls … are declared once for the package in
+resource_datacenter_list_test.go") — keep that line, it is what stops the next author
+re-copying them.
 
 Do **not** change the reference test's *assertions or stub* — those are what make
 `resource_datacenter_list_test.go` the reference. Adding to, or parameterising, the shared
@@ -178,8 +182,8 @@ type name, one copy per package. `stubCloudAPI` → `stub<Resource>API`, one per
 
 Two lint notes on the copied code: keep the `//nolint:staticcheck` on `listServerAndConfig`
 (with its explanation — `ListResource` still lives on a temporary interface in
-terraform-plugin-go, `resource_datacenter_list_test.go:279`) and the `//nolint:prealloc` on the
-results slice (`:261`). `nolintlint` requires directives to be both specific and explained; a
+terraform-plugin-go, `resource_datacenter_list_test.go:280`) and the `//nolint:prealloc` on the
+results slice (`:262`). `nolintlint` requires directives to be both specific and explained; a
 bare `//nolint` is itself an error.
 
 ### `goValue` — the part that matters
@@ -252,7 +256,7 @@ func stub<Resource>API(t *testing.T) string {
 			},
 			{
 				// Result 3 — ONLY when `name` is Optional in the SDKv2 schema. Covers the
-				// displayName fallback (`ionoscloud/resource_ipblock_list.go:156-163`),
+				// displayName fallback (`ionoscloud/resource_ipblock_list.go:166-171`),
 				// which result 2 cannot reach because it keeps `name` set. Without this
 				// the fallback branch is dead code the test never enters.
 				Id: new("00000000-0000-0000-0000-000000000003"),
@@ -298,8 +302,7 @@ func stub<Resource>API(t *testing.T) string {
   check below never reaches the fetch closure.
   The reference stub is the wrong model for this one thing: `stubCloudAPI` asserts no query
   parameters at all. Copy the assertion block from
-  `ionoscloud/resource_ipblock_list_test.go:244-256` or
-  `ionoscloud/resource_target_group_list_test.go:251-263` instead, including the comment
+  `ionoscloud/resource_ipblock_list_test.go:245-255` instead, including the comment
   explaining why the limit is asserted as a literal rather than as `constant.<X>Limit` — that
   literal is the only thing tying `docs/list-resources/<resource>.md` to the code.
 - Match on `strings.HasSuffix`, not an exact path — the SDK prefixes `/cloudapi/v6`.
@@ -308,10 +311,11 @@ func stub<Resource>API(t *testing.T) string {
 - A **regional** product fans out, so the handler must serve more than one path and the test
   must assert the union. A **paginated** one makes more than one request, so key off
   `r.URL.Query()`.
-- **sdk-go-bundle products: `IONOS_API_URL` does not necessarily win.** Six product clients
-  read `IONOS_API_URL_<PRODUCT>` as a real endpoint override — `services/cert/provider.go:27-36`,
-  `services/vpn/client.go:75-86`, `services/objectstoragemanagement/accesskeys.go:44-54`, plus
-  `nfs`, `dbaas/mariadb`, `dbaas/inmemorydb` — and `utils/loadedconfig/loadedconfig.go:50`
+- **sdk-go-bundle products: `IONOS_API_URL` does not necessarily win.** Several product clients
+  read `IONOS_API_URL_<PRODUCT>` as a real endpoint override (`grep -rn IONOS_API_URL_ services/`
+  lists them; `services/cert/provider.go:27-36`, `services/vpn/client.go:75-86` and
+  `services/objectstoragemanagement/accesskeys.go:44-54` are the shapes it takes) — and
+  `utils/loadedconfig/loadedconfig.go:50`
   *defers* `ChangeConfigURL`, so it overwrites whatever `IONOS_API_URL` set. Worse, a regional
   client called with a non-empty location replaces the endpoint from that product's
   `locationToURL` map — a **production** URL — regardless of either variable. So for a bundle
@@ -334,7 +338,7 @@ func stub<Resource>API(t *testing.T) string {
 		identity := decode(t, results[0].Identity.IdentityData, identityType(identitySchema))
 		assert.Equal(t, "<id-1>", identity["id"])
 		// one assert per identity attribute, plus an assert.Len on the identity map when
-		// its shape is the point (target_group's is a lone id, ipblock's is id+location)
+		// its shape is the point (ipblock's is id+location, so its test asserts Len 2)
 
 		// Every attribute the writer fills is asserted here, so that writing a value to
 		// the wrong key fails the test.
@@ -357,7 +361,7 @@ func stub<Resource>API(t *testing.T) string {
 		// (Optional ± Computed with an Elem: &schema.Resource{}) assert []any{} instead —
 		// the framework reifies a null list/set block to an empty one. ipblock's
 		// ip_consumers is the worked example, with the citations, at
-		// ionoscloud/resource_ipblock_list_test.go:121-128.
+		// ionoscloud/resource_ipblock_list_test.go:120-125.
 
 		// Only when `name` is Optional: the display-name fallback, and the name still null.
 		assert.Equal(t, "<id-3>", results[2].DisplayName)
@@ -408,9 +412,10 @@ func stub<Resource>API(t *testing.T) string {
 
 The last subtest is fully generic and fails if the list resource declares
 `identity.FilterAttribute()` with no allowed-field list. When a *deliberate* non-filterable
-attribute exists, put it in the same loop as the bogus field —
-`ionoscloud/resource_target_group_list_test.go:177-192` does that for `protocol`, so widening
-the allow-list cannot pass unnoticed.
+attribute exists, loop that subtest's body over both it and the bogus field
+(`for _, field := range []string{"nope", "<not-filterable>"}`), so that widening the allow-list
+cannot pass unnoticed. Neither existing test needs that today: datacenter and ipblock both
+allow every field their mapper puts in the `MatchesFilters` map.
 
 ---
 
@@ -418,8 +423,8 @@ the allow-list cannot pass unnoticed.
 
 - **`ListResourceSchemas[type]` AND `ResourceSchemas[type]`, from one `GetProviderSchema`.**
   The first catches a list resource that is silently *not registered* — a typo in the type
-  constant, or forgetting to add `New<Resource>ListResource` to
-  `ionoscloud/list_resources.go:15-21`, produces a provider that starts fine and just has no
+  constant, or forgetting to add `New<Resource>ListResource` to `ListResources()` in
+  `ionoscloud/list_resources.go`, produces a provider that starts fine and just has no
   list resource. The second catches a double registration: the merged schema must still serve
   the SDKv2 managed resource under the same name, pinning that the framework side registered
   *only* a list resource (`tf6muxserver` refuses duplicate type names).
@@ -431,7 +436,7 @@ the allow-list cannot pass unnoticed.
   restates a `<resource>`'s shape any more, so if `set<X>Data` writes a value under the wrong
   key there is no compiler, no `tfsdk` tag and no reviewer diff to catch it — only these
   assertions and `Set`'s own type check on the way in
-  (`vendor/.../terraform-plugin-framework/internal/fwschemadata/data_set.go:20-35`, the
+  (`vendor/.../terraform-plugin-framework/internal/fwschemadata/data_set.go:21-36`, the
   `tftypes.Value` fast path `MappedItemFromResourceData` is written to hit). Assert **every**
   attribute the writer fills.
 - **Asserting the SECOND result** catches three distinct bugs: *pairing drift* (item N's
@@ -494,7 +499,7 @@ verify it the other way: **change that field's value in the stub** and confirm t
 fails. A `*string` pair in the top-level writer is always available and always
 worth doing, as is swapping the two *values* in `set<X>Identity`
 (`identity.Set("id", d.Get("location"))` and vice versa) when the identity has two attributes
-— datacenter's and ipblock's `id` + `location`; target_group's lone `id` has no pair, so
+— datacenter's and ipblock's are both `id` + `location`. A lone-`id` identity has no pair, so
 change its value in the stub instead.
 
 ```bash

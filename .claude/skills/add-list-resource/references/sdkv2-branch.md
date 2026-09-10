@@ -8,9 +8,16 @@ For a managed resource still implemented with `terraform-plugin-sdk/v2` (anythin
 - `ionoscloud/list_resources.go` — registration
 - `internal/framework/identity/sdkv2.go` — the two shared helpers everything above leans on
 
-`ionoscloud/resource_ipblock_list.go` (optional `name`, explicit `Limit`) and
-`ionoscloud/resource_target_group_list.go` (lone-`id` identity, nested blocks) are the
-second and third worked examples.
+`ionoscloud/resource_ipblock_list.go` is the second — and, today, the last — worked example:
+an optional `name` (so a `DisplayName` fallback, §2c), an explicit `Limit`, and a state writer
+that is *exported* (`IpBlockSetData`, §2d).
+
+Those two are the whole set. `ionoscloud_datacenter` and `ionoscloud_ipblock` are the only
+SDKv2 resources that declare an `Identity` at all
+(`grep -l 'ResourceIdentity{' ionoscloud/*.go`), and `ionoscloud/list_resources.go` registers
+only their two list resources. Anything below about a lone-`id` identity, a child resource, or
+`MaxItems: 1` nested blocks is extrapolation from the existing schemas, not code you can go
+read.
 
 ## Why this is not just "a framework list resource"
 
@@ -20,8 +27,10 @@ until you know why.
 
 - **The list resource lives in package `ionoscloud`, beside the SDKv2 resource — not
   under `internal/framework/services/`.** It has to. A result is produced by calling the
-  managed resource's own `resource<Resource>()`, `set<Resource>Data()` and
-  `set<Resource>Identity()`, all unexported, and the import cannot be turned around:
+  managed resource's own `resource<Resource>()`, its state writer and
+  `set<Resource>Identity()` — the constructor and the identity setter are always unexported, and
+  the writer usually is, though `IpBlockSetData` is exported — and the import cannot be turned
+  around:
   `ionoscloud/provider_test.go` is an *in-package* test (`package ionoscloud`) that
   imports `internal/framework/provider`, so any `internal/framework/...` → `ionoscloud`
   import is a cycle in the test build. Exporting the setters does not help. Other providers
@@ -115,11 +124,13 @@ cannot proceed without it. Datacenter's `location` is Optional because
 to the global endpoint. A product whose client cannot be built without a location makes it
 Required — that is what the framework-native clusters do.
 
-**Only declare what addresses the resource.** `ionoscloud_target_group` has no `location`
-attribute at all — the collection is global — so its identity is a lone `id`
-(`ionoscloud/resource_target_group.go:34-45`). Do not add a `location` for symmetry with
-datacenter and ipblock; every identity attribute has to be set on every read (1b), and one
-that is always empty is one more thing to keep stable.
+**Only declare what addresses the resource.** Both shipped identities are `id` + `location`,
+but that is not a template. `ionoscloud_target_group`, for instance, has no `location`
+attribute at all — the collection is global — so its identity would be a lone `id`. It
+declares no identity yet, so there is no file to copy that from; treat it as the reasoning,
+not as a worked example. Do not add a `location` for symmetry with datacenter and ipblock;
+every identity attribute has to be set on every read (1b), and one that is always empty is one
+more thing to keep stable.
 
 **Child resource** — one attribute per parent ID, named as the resource's own schema names
 them, all Required:
@@ -317,7 +328,11 @@ Three things worth knowing:
   rejects `""` — the fall-through returns `d.Id()` verbatim and the API is called with an
   empty ID. If your resolver does not go through `splitImportID`, add the guard yourself:
   `if d.Id() == "" { return "", fmt.Errorf("invalid import identifier: expected a <resource> UUID, got an empty string") }`.
-  See `targetGroupImportID` in `ionoscloud/resource_target_group.go:405-418`.
+  No resource in the repo carries that guard yet, because no plain-import-ID resource has been
+  given an identity. `resourceTargetGroupImport` in `ionoscloud/resource_target_group.go` is the
+  unguarded shape to recognise: it takes `groupIp := d.Id()` and calls
+  `TargetgroupsFindByTargetGroupId` with it, with nothing in between. Adding an identity to a
+  resource shaped like that is exactly what makes the guard load-bearing.
 - `d.Identity()` returns an *error*, not nil, when the resource declares no identity schema —
   which is why the resolver treats a non-nil `identityErr` as "fall back to the string import"
   rather than a failure.
@@ -413,6 +428,14 @@ func New<Resource>ListResource() list.ListResource {
   literals have to keep. This file is in `package ionoscloud`, so the constant is one import away
   (`utils/constant`); the list resources in `internal/framework/services/` predate that and use
   literals because they were written in a package that did not import it.
+- **The reference implementation does not follow that rule — this is a known divergence, not a
+  precedent.** `ionoscloud/resource_datacenter_list.go` declares
+  `const datacenterResourceType = "ionoscloud_datacenter"` and passes it to both
+  `SetRawV6Schemas` and `Metadata`, even though `constant.DatacenterResource` exists and is what
+  keys `ResourcesMap`. It predates the rule and has not been migrated.
+  `ionoscloud/resource_ipblock_list.go` is the one that gets this right
+  (`constant.IpBlockResource` in both places). Copy ipblock here, not datacenter, and do not
+  read datacenter's local const as sanctioning a new one.
 
 ### 2b. The four boilerplate methods
 
@@ -464,7 +487,7 @@ func (r *<resource>ListResource) ListResourceConfigSchema(_ context.Context, _ l
   and that `set<Resource>Identity` operates on (`ionoscloud/resource_datacenter.go:341`), so an
   unaliased import would make `identity.` mean two unrelated things a few lines apart. Go imports
   are file-scoped and the two never collide in one file today, so this is **readability, not a
-  compiler requirement** — but all three list resources do it, and the SDKv2 identity is the
+  compiler requirement** — but both SDKv2 list resources do it, and the SDKv2 identity is the
   reading a maintainer of this package expects. Keep the alias.
 - `Metadata` sets the **full** type name; it does not prepend `req.ProviderTypeName` the way
   framework-native resources do.
@@ -655,6 +678,45 @@ The three statements at the end of the mapper are the whole mapping:
 **Do not add a Go struct mirroring the SDKv2 schema.** `MappedItem.Identity` and
 `MappedItem.Resource` are `any`, so one compiles; it is the shape this design replaced.
 
+#### What the design requires of the state writer
+
+The templates spell the writer `set<Resource>Data` because that is the majority name in
+`package ionoscloud`, but **the name is not the contract, the signature is.** Grep before you
+write the mapper:
+
+```bash
+grep -n 'func .*SetData\|func set.*Data' ionoscloud/resource_<resource>.go
+```
+
+The mapper can call any writer shaped `func(d *schema.ResourceData, obj *<sdk>.<X>) error` — one
+`ResourceData`, one object of the element type the collection endpoint returns, an `error`.
+Spelling varies and does not matter: `setDatacenterData` is unexported, `IpBlockSetData` is
+exported, and the ipblock list resource calls the exported name directly with no adapter.
+
+**A writer that needs arguments the mapper cannot supply is telling you something about the
+resource.** Several writers in this package take more than that pair: `setBackupUnitData` also
+wants an `*ionoscloud.Contracts`, `setApplicationLoadBalancerData` an `*ionoscloud.FlowLog`, and
+`setResourceServerData`, `setResourceVCPUServerData` and `setGroupData` want a `context.Context`
+plus an `*ionoscloud.APIClient` so they can fetch more. The mapper is handed only
+`(ctx, includeResource, filters, item)` — one already-fetched element of the collection
+(`internal/framework/identity/list.go`, the `mapper(ctx, req.IncludeResource, filters, item)`
+call). It has no `Contracts` and no `FlowLog`, and although it can reach a client, because it is
+a method and `r.bundle` is right there, every use of one costs an extra request per item.
+
+So: **a resource is listable under this design when its full state is derivable from one element
+of the collection response at `Depth(1)`.** When it is not, pick deliberately rather than
+discovering it when the mapper will not compile:
+
+1. list it anyway and accept that the writer's extra inputs are absent — defensible only if the
+   attributes they fill are genuinely optional, which for `server` and `group` they are not;
+2. do the extra per-item fetch inside the mapper, and own the N+1 request cost a listing over
+   hundreds of items then pays;
+3. do not list this resource yet — usually the right answer, and a finding to report back rather
+   than a problem to code around.
+
+This is a constraint on the *resource*, and it is invisible until you read the writer's
+signature. Read it in step 0, not after the mapper fails to compile.
+
 #### Why no model is possible
 
 Both halves of a list result are rendered from **one** `configschema.Block`:
@@ -753,7 +815,8 @@ datacenter's `cpu_architecture`), while one that is `Optional` (± `Computed`) b
 `MaxItems: 1` changes nothing here: `core_schema.go:201-205` sets `Nesting = NestingList` from
 `s.Type` before it ever looks at `MaxItems`, so such a block is still a list, is reified when
 absent, and decodes as a **one-element list** when present — assert `[]any{map[string]any{...}}`.
-`resource_target_group_list.go` has two of them (`health_check`, `http_health_check`). The
+No shipped list resource has a `MaxItems: 1` block yet; `ionoscloud_target_group`'s
+`health_check` and `http_health_check` are the shape to expect if you are the one to list it. The
 injected `timeouts` is `NestingSingle`, so it is not reified and stays null, which is what
 `nullTimeouts` leaves behind.
 
@@ -790,7 +853,6 @@ func ListResources() []func() list.ListResource {
 	return []func() list.ListResource{
 		NewDatacenterListResource,
 		NewIPBlockListResource,
-		NewTargetGroupListResource,
 	}
 }
 ```

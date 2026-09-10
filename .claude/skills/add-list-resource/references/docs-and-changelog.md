@@ -23,7 +23,7 @@ Frontmatter conventions:
 - `subcategory` — copied **verbatim** from `docs/resources/<resource>.md`.
 - `layout` — always `"ionoscloud"`.
 - `page_title` — `"IONOS CLOUD: <resource>"`, the **bare type stem**, no `ionoscloud_` prefix.
-  All eight existing list pages use this form. Do **not** copy the resource page's title: about a
+  Every existing list page uses this form. Do **not** copy the resource page's title: about a
   third of `docs/resources/` prefixes the type (`docs/resources/pg_cluster_v2.md` has
   `IONOS CLOUD: ionoscloud_pg_cluster_v2` while `docs/list-resources/pg_cluster_v2.md` has
   `IONOS CLOUD: pg_cluster_v2`). The list page does not disambiguate itself in the title; only
@@ -139,8 +139,10 @@ block that surfaces in the result as null. The framework-native pages do not hav
 
 Two things the two oldest pages (`s3_bucket.md`, `object_storage_accesskey.md`) lack: the
 two-filter example, and the `## Identity Attributes` section. Follow the newer form instead —
-`ipblock.md` and `target_group.md` are the closest models for an SDKv2-backed resource
-(`target_group.md` for one with no `location`), then `datacenter.md` and `pg_cluster_v2.md`.
+`ipblock.md` and `datacenter.md` are the closest models for an SDKv2-backed resource, then
+`pg_cluster_v2.md`. Both SDKv2 models carry a `location`; no existing page covers an
+SDKv2-backed resource without one, so for such a resource start from `ipblock.md` and apply the
+no-location wording in §2a instead of hunting for a page to imitate.
 
 The supported-locations line and the performance note appear only on the three regional cluster
 pages — `datacenter.md` has neither, because the Cloud API is not regional. Omit them for a
@@ -169,8 +171,8 @@ Two variants — pick by whether the fetch passes an explicit `.Limit(n)`.
 ```markdown
 > **Note:** The <things> are read with a single <API name> request, which asks for up to
 > **<n>** items — the same limit the `<ionoscloud_type>` data source requests, and <k> times
-> the <sdk-fallback> the IONOS SDK falls back to when no limit is asked for. Whether the
-> server honours the requested limit in full is not verified. A contract holding more
+> the <sdk-fallback> the IONOS SDK sends for `<endpoint>` when no limit is asked for. Whether
+> the server honours the requested limit in full is not verified. A contract holding more
 > <things> than one response returns is truncated silently — no error is raised and the
 > missing <things> simply do not appear. Check that the number of generated resource blocks
 > matches the number of <things> you expect before treating `imported.tf` as complete.
@@ -192,15 +194,18 @@ so filtering saves no calls:
 If the resource has **no** location — `ionoscloud_target_group` does not — drop the first
 clause rather than inventing a location: "Filtering happens after the single API response above
 is read, so it narrows the results but does not reduce the number of API calls, and it cannot
-recover a <thing> left out by the <n>-item limit."'
+recover a <thing> left out by the <n>-item limit."
 
 **Look the limit up per endpoint, and name the number you found.** There is no module-wide
 default: the generated code sends `limit=1000` for most Cloud API collections but **100** for
-`/ipblocks`, `/targetgroups` and user management, and the vendored doc comments say "Default
-limit is the first 100 items" throughout regardless.
+`/ipblocks`, `/targetgroups` and user management. Do not trust the vendored doc comments: the
+only comment in `sdk-go/v6` that names a default says "Default limit is the first 100 items",
+and it sits on `DatacentersGet`, whose client actually sends 1000. Read the `parameterToString`
+literal, never the comment.
 
 ```bash
-grep -n 'parameterToString(1\?0*, "")' vendor/github.com/ionos-cloud/sdk-go/v6/api_<x>.go
+# the vendored file names are snake_cased: api_ip_blocks.go, api_target_groups.go
+grep -n 'Add("limit", parameterToString(' vendor/github.com/ionos-cloud/sdk-go/v6/api_<x>.go
 grep -n 'Limit(' ionoscloud/data_source_<resource>.go
 ```
 
@@ -225,7 +230,8 @@ grep -n 'CustomizeDiff' ionoscloud/resource_<resource>.go
 Many good list candidates have none — backup units, target groups, users, groups, CDN
 distributions, certificates, DNS reverse records and autoscaling groups all return zero — and a
 `CustomizeDiff` is usually not a substitute: an immutable-field check like
-`resource_certificate_manager_certificate.go:64` *errors out* rather than planning a
+`checkCertImmutableFields` in `ionoscloud/resource_certificate_manager_certificate.go`
+*errors out* rather than planning a
 replacement. If there is no force-new attribute, drop the destroy paragraph and its HCL block — but do not
 just stop, or the section trails off having described a hazard without saying what it costs.
 Replace them with one paragraph naming the in-place-update damage for *this* resource, e.g. for
@@ -381,6 +387,12 @@ fi
 ```
 
 Re-check this immediately before merge, not only when you write the entry.
+
+**This tag check is the authority for the version heading.** Run the snippet and do what it
+prints; never decide from the heading alone, in either direction. The `ionoscloud_ipblock` run got
+it right *because of* the snippet — the topmost heading's version was already tagged at master's
+own tip, so opening the next heading was correct there. That outcome is an instance of the rule,
+not a standing instruction to always bump.
 
 Format: `## <semver>` (no date, no link), then `### Features` / `### Fixes` / `### Testing` /
 `### Refactor` / `### Documentation` / `### Chore`. Resource-scoped entries lead with the

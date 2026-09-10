@@ -54,7 +54,8 @@ from `dupl`/`errcheck`/`gocyclo`/`gosec`/`unparam`/`unused` — but **not** from
 4. **`prealloc`** — `make([]T, 0, len(src))`, not `var xs []T` before a range loop.
 5. **`gocyclo`** (min-complexity 25) — the list resource has nothing left that grows: `List` is
    a fetch closure plus a call, and the mapper is a filter check, two setter calls and a
-   conversion. What can trip it is the resource's own `set<Resource>Data` if you extend it while
+   conversion. What can trip it is the resource's own state writer (`setDatacenterData`,
+   `IpBlockSetData` — the name is per-resource, and not always unexported) if you extend it while
    you are in there; split into a helper rather than growing one function.
 6. **`tagalign`** (`sort: true`, order `json, tfsdk, mapstructure`) — struct tags must be sorted
    and aligned. `` `tfsdk:"id" json:"id"` `` fails. Only the framework-native branch can trip
@@ -274,9 +275,13 @@ author and live cloud resources, so it is not a way to run a unit test. Run rung
 Writing this is part of the arc; **running it is not**. The reference is
 `ionoscloud/resource_datacenter_test.go:133-213` (`TestAccDataCenterQuery`, 92 lines added by
 `79ad9715`) — copy its shape, not just the fragments below.
-`TestAccIPBlockQuery` (`ionoscloud/resource_ipblock_test.go:131`) and
-`TestAccTargetGroupQuery` (`ionoscloud/resource_target_group_test.go:208`) are the same shape for
-an optional-`name` resource and for one with no `location`.
+`TestAccIPBlockQuery` (`ionoscloud/resource_ipblock_test.go:144-224`) is the same shape for an
+optional-`name` resource, and the only other standalone `TestAcc<Resource>Query` in `ionoscloud/`.
+The five framework-native list resources fold the same steps into their lifecycle tests instead —
+`internal/framework/services/pgsqlv2/resource_pg_cluster_v2_test.go` is the closest match. An
+earlier run of this skill also produced a `target_group` list resource, but that branch (PR #1041)
+closed unmerged, so `target_group` has no identity, no list resource and no query test today:
+nothing in the tree demonstrates a resource with no `location`.
 
 ```go
 func TestAcc<Resource>Query(t *testing.T) {
@@ -293,7 +298,7 @@ func TestAcc<Resource>Query(t *testing.T) {
 	// testAccCheck<Resource>ConfigBasic, which is keyed on constant.<Const>TestResource.
 	// The zero-result step needs a filter field that can actually discriminate: if the
 	// resource has no location, use another allow-listed field whose value the fixture does
-	// not use (target_group uses algorithm), never a field with one legal value.
+	// not use, never a field with one legal value.
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() { testAccPreCheck(t) },
@@ -359,8 +364,10 @@ The two fragments worth having in full:
 
 A malformed identity schema is caught much earlier and cheaply — but only if you run **ladder
 rung 2b**. `ionoscloud/provider_test.go`'s `TestProvider` calls `Provider().InternalValidate()`,
-which runs `InternalIdentityValidate()` on every resource in `ResourcesMap`
-(`vendor/.../helper/schema/provider.go:220-225`). Nothing else reaches it: CI compiles the test
+which runs `InternalIdentityValidate()` on every resource in `ResourcesMap` **that declares an
+identity** — the call sits behind an `if r.Identity != nil` guard
+(`vendor/.../helper/schema/provider.go:220-225`), so this rung catches a *malformed* `Identity`
+block, never a *forgotten* one. Nothing else reaches it: CI compiles the test
 files (`go vet -tags=all ./...`) but runs none of them, rung 1 compiles no test file at all, and
 rung 2's `GetResourceIdentitySchemas` assertion passes for a malformed identity.
 `go test ./ionoscloud/ -run 'TestProvider$' -count=1`.
