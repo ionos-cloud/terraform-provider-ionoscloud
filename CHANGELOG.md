@@ -1,3 +1,12 @@
+## 6.7.38
+
+### Features
+- `ionoscloud_ipblock`: New list resource, queryable with `terraform query` (requires Terraform 1.14+).
+- `ionoscloud_ipblock`: Add a resource identity (`id`, `location`), which also enables `import` blocks with an `identity` attribute.
+
+### Documentation
+- `ionoscloud_ipblock`: Fix the docs naming the `ip_consumers` sub-attribute `nic_uuid` (the schema key is and always was `nic_id`) and typing `ips` as an integer rather than a list.
+
 ## 6.7.37
 
 ### Features

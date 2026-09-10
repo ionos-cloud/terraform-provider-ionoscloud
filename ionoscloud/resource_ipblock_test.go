@@ -14,7 +14,10 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/querycheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 )
 
 const fullIpBlockResourceName = constant.IpBlockResource + "." + constant.IpBlockTestResource
@@ -105,6 +108,19 @@ func TestAccIPBlockBasic(t *testing.T) {
 				Config:      testAccDataSourceIpBlockGoodIdNameError,
 				ExpectError: regexp.MustCompile(`name of ip block \(UUID=.+, name=.+\) does not match expected name`),
 			},
+			// name is the only non-ForceNew attribute, so this step is the only one that
+			// actually enters resourceIPBlockUpdate - and therefore the only coverage of
+			// the identity write on the update path. The size change below is a
+			// destroy-and-create, which goes through Create and Read instead.
+			{
+				Config: testAccCheckIPBlockConfigUpdateNameOnly,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIPBlockExists(fullIpBlockResourceName, &ipblock),
+					testAccCheckIPBlockAttributes(fullIpBlockResourceName, location),
+					resource.TestCheckResourceAttr(fullIpBlockResourceName, "name", constant.UpdatedResources),
+					resource.TestCheckResourceAttr(fullIpBlockResourceName, "size", "1"),
+				),
+			},
 			{
 				Config: testAccCheckIPBlockConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
@@ -113,6 +129,95 @@ func TestAccIPBlockBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(fullIpBlockResourceName, "name", constant.UpdatedResources),
 					resource.TestCheckResourceAttr(fullIpBlockResourceName, "size", "2"),
 				),
+			},
+		},
+	})
+}
+
+// TestAccIPBlockQuery exercises the ionoscloud_ipblock list resource and the resource
+// identity that listing depends on.
+//
+// The list resource is served by the plugin-framework half of the provider even though
+// the ipblock resource itself is implemented with SDKv2, so this also covers the mux
+// serving the two halves under the same type name. See resource_ipblock_list.go in this
+// package.
+func TestAccIPBlockQuery(t *testing.T) {
+	const (
+		ipBlockName   = "tf-test-ipblock-query"
+		ipBlockAddr   = constant.IpBlockResource + ".test_ipblock"
+		otherLocation = "de/fra"
+	)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() { testAccPreCheck(t) },
+		// `terraform query` and list blocks were introduced in Terraform 1.14.
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version1_14_0),
+		},
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckIPBlockDestroyCheck,
+		Steps: []resource.TestStep{
+			{
+				Config: fmt.Sprintf(`
+resource %[1]q "test_ipblock" {
+  location = %[2]q
+  size     = 1
+  name     = %[3]q
+}`, constant.IpBlockResource, location, ipBlockName),
+			},
+			// List without filters: the ip block must show up with its identity.
+			{
+				Query: true,
+				Config: fmt.Sprintf(`list %[1]q "test_ipblock" {
+  provider = ionoscloud
+}`, constant.IpBlockResource),
+				QueryResultChecks: []querycheck.QueryResultCheck{
+					querycheck.ExpectIdentity(ipBlockAddr, map[string]knownvalue.Check{
+						"id":       knownvalue.NotNull(),
+						"location": knownvalue.StringExact(location),
+					}),
+				},
+			},
+			// Filter by name and location: the unique name guarantees exactly one result.
+			{
+				Query: true,
+				Config: fmt.Sprintf(`list %[1]q "test_ipblock" {
+  provider = ionoscloud
+  config {
+    filters = [
+      { field_name = "name",     field_value = %[2]q },
+      { field_name = "location", field_value = %[3]q },
+    ]
+  }
+}`, constant.IpBlockResource, ipBlockName, location),
+				QueryResultChecks: []querycheck.QueryResultCheck{
+					querycheck.ExpectLength(ipBlockAddr, 1),
+				},
+			},
+			// Same name, different location: proves the location filter is evaluated.
+			{
+				Query: true,
+				Config: fmt.Sprintf(`list %[1]q "test_ipblock" {
+  provider = ionoscloud
+  config {
+    filters = [
+      { field_name = "name",     field_value = %[2]q },
+      { field_name = "location", field_value = %[3]q },
+    ]
+  }
+}`, constant.IpBlockResource, ipBlockName, otherLocation),
+				QueryResultChecks: []querycheck.QueryResultCheck{
+					querycheck.ExpectLength(ipBlockAddr, 0),
+				},
+			},
+			// Import through the resource identity that the list results carry. This kind
+			// already checks that the import succeeds, that the plan it leaves behind is a
+			// no-op and that the planned identity matches the one in state; ImportStateVerify
+			// cannot be combined with it, only ImportCommandWithID reads that field.
+			{
+				ResourceName:    ipBlockAddr,
+				ImportState:     true,
+				ImportStateKind: resource.ImportBlockWithResourceIdentity,
 			},
 		},
 	})
@@ -202,6 +307,13 @@ resource ` + constant.IpBlockResource + ` ` + constant.IpBlockTestResource + ` {
   location = "` + location + `"
   size = 1
   name = "` + constant.IpBlockTestResource + `"
+}`
+
+const testAccCheckIPBlockConfigUpdateNameOnly = `
+resource ` + constant.IpBlockResource + ` ` + constant.IpBlockTestResource + ` {
+  location = "` + location + `"
+  size = 1
+  name = "` + constant.UpdatedResources + `"
 }`
 
 const testAccCheckIPBlockConfigUpdate = `
