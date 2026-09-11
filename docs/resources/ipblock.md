@@ -26,11 +26,11 @@ resource "ionoscloud_ipblock" "example" {
 * `name` - (Optional)[string] The name of Ip Block
 * `location` - (Required)[string] The regional location for this IP Block: us/las, us/ewr, de/fra, de/fkb.
 * `size` - (Required)[integer] The number of IP addresses to reserve for this block.
-* `ips` - (Computed)[list] The list of IP addresses associated with this block.
+* `ips` - (Computed)[integer] The list of IP addresses associated with this block.
 * `ip_consumers` (Computed) Read-Only attribute. Lists consumption detail of an individual ip
   * `ip`
   * `mac`
-  * `nic_id`
+  * `nic_uuid`
   * `server_id`
   * `server_name`
   * `datacenter_id`
@@ -69,11 +69,11 @@ resource "ionoscloud_ipblock" "example" {
 
 #### Optional
 
-* `location` (String) The location the IP block lives in. Only needed when the Cloud API endpoint is overridden per location.
+* `location` (String) The location the IP block lives in (e.g. `de/txl`). Only needed when the Cloud API endpoint is overridden per location.
 
 ## Query (List Resource)
 
-IP Blocks can be listed using `terraform query` (requires Terraform 1.14+). List blocks must be placed in a dedicated query file, whose name ends in `.tfquery.hcl` (for example `queries.tfquery.hcl`).
+IP blocks can be listed using `terraform query` (requires Terraform 1.14+). List blocks must be placed in a dedicated query file, whose name ends in `.tfquery.hcl` (for example `queries.tfquery.hcl`).
 
 ```hcl
 list "ionoscloud_ipblock" "all" {

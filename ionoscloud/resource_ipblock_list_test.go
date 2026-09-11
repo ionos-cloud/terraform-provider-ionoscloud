@@ -27,8 +27,8 @@ const ipBlockListType = "ionoscloud_ipblock"
 // including the timeouts block identity.MappedItemFromResourceData nulls back out.
 //
 // The shared helpers it calls - muxedProviderServer, configureProvider, listResults,
-// decode and the rest - are declared once for the package in
-// resource_datacenter_list_test.go.
+// listServerAndConfig, decode, identityType and the rest - are declared once for the
+// package in resource_datacenter_list_test.go.
 func TestIPBlockListResource(t *testing.T) {
 	ctx := context.Background()
 
@@ -46,10 +46,10 @@ func TestIPBlockListResource(t *testing.T) {
 	// The framework only registers a list resource that has no framework resource
 	// behind it once RawV6Schemas has supplied both protocol schemas.
 	if _, ok := providerSchema.ListResourceSchemas[ipBlockListType]; !ok {
-		t.Fatalf("the ipblock list resource was not registered; check RawV6Schemas and the SDKv2 resource identity")
+		t.Fatalf("the ip block list resource was not registered; check RawV6Schemas and the SDKv2 resource identity")
 	}
 	if _, ok := providerSchema.ResourceSchemas[ipBlockListType]; !ok {
-		t.Fatalf("the ipblock managed resource is missing from the merged schema")
+		t.Fatalf("the ip block managed resource is missing from the merged schema")
 	}
 
 	identitySchemas, err := server.GetResourceIdentitySchemas(ctx, &tfprotov6.GetResourceIdentitySchemasRequest{})
@@ -60,7 +60,7 @@ func TestIPBlockListResource(t *testing.T) {
 
 	identitySchema := identitySchemas.IdentitySchemas[ipBlockListType]
 	if identitySchema == nil {
-		t.Fatalf("the SDKv2 ipblock resource does not declare a resource identity")
+		t.Fatalf("the SDKv2 ip block resource does not declare a resource identity")
 	}
 
 	configureProvider(ctx, t, server, providerSchema.Provider)
@@ -74,93 +74,87 @@ func TestIPBlockListResource(t *testing.T) {
 			t.Fatalf("expected 3 results, got %d", len(results))
 		}
 
-		assert.Equal(t, "public-ips", results[0].DisplayName)
+		assert.Equal(t, "prod-ips", results[0].DisplayName)
 
 		identity := decode(t, results[0].Identity.IdentityData, identityType(identitySchema))
-		assert.Equal(t, "b1a0e5f2-0000-4000-8000-000000000001", identity["id"])
+		assert.Len(t, identity, 2, "the ip block identity is id plus location")
+		assert.Equal(t, "b1b07384-d9a0-4d1e-8f2a-000000000001", identity["id"])
 		assert.Equal(t, "de/txl", identity["location"])
-		assert.Len(t, identity, 2, "the ipblock identity is id plus location")
 
 		// Every attribute the writer fills is asserted here, so that writing a value to
 		// the wrong key fails the test.
 		resource := decode(t, results[0].Resource, resourceType)
-		assert.Equal(t, "b1a0e5f2-0000-4000-8000-000000000001", resource["id"])
-		assert.Equal(t, "public-ips", resource["name"])
+		assert.Equal(t, "b1b07384-d9a0-4d1e-8f2a-000000000001", resource["id"])
+		assert.Equal(t, "prod-ips", resource["name"])
 		assert.Equal(t, "de/txl", resource["location"])
 		assert.Equal(t, int64(2), resource["size"])
-		assert.Equal(t, []any{"203.0.113.10", "203.0.113.11"}, resource["ips"])
+		assert.Equal(t, []any{"203.0.113.1", "203.0.113.2"}, resource["ips"])
 		assert.Equal(t, []any{map[string]any{
-			"ip":                "203.0.113.10",
-			"mac":               "02:01:0b:1a:0e:5f",
-			"nic_id":            "c2b1a0e5-0000-4000-8000-00000000000a",
-			"server_id":         "d3c2b1a0-0000-4000-8000-00000000000b",
+			"ip":                "203.0.113.1",
+			"mac":               "02:01:0b:0d:8f:b1",
+			"nic_id":            "c1c07384-d9a0-4d1e-8f2a-00000000000a",
+			"server_id":         "c2c07384-d9a0-4d1e-8f2a-00000000000b",
 			"server_name":       "web-01",
-			"datacenter_id":     "e4d3c2b1-0000-4000-8000-00000000000c",
+			"datacenter_id":     "c3c07384-d9a0-4d1e-8f2a-00000000000c",
 			"datacenter_name":   "prod",
-			"k8s_nodepool_uuid": "f5e4d3c2-0000-4000-8000-00000000000d",
-			"k8s_cluster_uuid":  "a6f5e4d3-0000-4000-8000-00000000000e",
+			"k8s_nodepool_uuid": "c4c07384-d9a0-4d1e-8f2a-00000000000d",
+			"k8s_cluster_uuid":  "c5c07384-d9a0-4d1e-8f2a-00000000000e",
 		}}, resource["ip_consumers"])
 		assert.Nil(t, resource["timeouts"], "a listed ip block has no timeouts")
 
 		// The second ip block reports only the properties the API always sets, which
 		// pins that the pairing holds past the first result and that the properties the
 		// API left out stay null instead of turning into zero values.
-		assert.Equal(t, "spare-ips", results[1].DisplayName)
+		assert.Equal(t, "staging-ips", results[1].DisplayName)
 
-		secondIdentity := decode(t, results[1].Identity.IdentityData, identityType(identitySchema))
-		assert.Equal(t, "b1a0e5f2-0000-4000-8000-000000000002", secondIdentity["id"])
-		assert.Equal(t, "de/fra", secondIdentity["location"])
+		stagingIdentity := decode(t, results[1].Identity.IdentityData, identityType(identitySchema))
+		assert.Equal(t, "b1b07384-d9a0-4d1e-8f2a-000000000002", stagingIdentity["id"])
+		assert.Equal(t, "de/fra", stagingIdentity["location"])
 
-		second := decode(t, results[1].Resource, resourceType)
-		assert.Equal(t, "b1a0e5f2-0000-4000-8000-000000000002", second["id"])
-		assert.Equal(t, "spare-ips", second["name"])
-		assert.Equal(t, "de/fra", second["location"])
-		assert.Equal(t, int64(1), second["size"])
-		assert.Equal(t, []any{"198.51.100.7"}, second["ips"])
-		// ip_consumers is Optional + Computed with an Elem: &schema.Resource{}, so
-		// core_schema.go:108-112 renders it as a nested BLOCK rather than an attribute,
-		// and toproto6.DynamicValue's ReifyNullCollectionBlocks turns the null block the
-		// API omitted into an EMPTY list. An omitted attribute would decode to nil - see
-		// the name assertion on the third result below.
-		assert.Equal(t, []any{}, second["ip_consumers"])
+		staging := decode(t, results[1].Resource, resourceType)
+		assert.Equal(t, "b1b07384-d9a0-4d1e-8f2a-000000000002", staging["id"])
+		assert.Equal(t, "staging-ips", staging["name"])
+		assert.Equal(t, "de/fra", staging["location"])
+		assert.Equal(t, int64(1), staging["size"])
+		// `ips` is a Computed-only list of strings, so it is a protocol ATTRIBUTE and an
+		// omitted one decodes to nil (core_schema.go:102-106).
+		assert.Nil(t, staging["ips"])
+		// `ip_consumers` is Optional+Computed with an Elem: &schema.Resource, so it is a
+		// nested BLOCK (core_schema.go:108-112, :201-205). ReifyNullCollectionBlocks
+		// turns a null list block into an empty one, so an omitted block decodes to
+		// []any{} rather than nil (toproto6/dynamic_value.go:29-30).
+		assert.Equal(t, []any{}, staging["ip_consumers"])
 
-		// The third ip block has no name at all, which is legal: name is Optional on
-		// ionoscloud_ipblock. It covers the display-name fallback to the UUID, which the
-		// second result cannot reach because it keeps its name.
-		assert.Equal(t, "b1a0e5f2-0000-4000-8000-000000000003", results[2].DisplayName)
+		// The third ip block has no name, which is legal - `name` is Optional on
+		// ionoscloud_ipblock - and covers the display-name fallback to the UUID.
+		assert.Equal(t, "b1b07384-d9a0-4d1e-8f2a-000000000003", results[2].DisplayName)
 
-		third := decode(t, results[2].Resource, resourceType)
-		assert.Equal(t, "b1a0e5f2-0000-4000-8000-000000000003", third["id"])
-		assert.Nil(t, third["name"], "an omitted optional attribute decodes to null, not an empty string")
-		assert.Equal(t, "de/fra", third["location"])
-		assert.Nil(t, third["ips"], "ips is a Computed-only attribute, so an omitted one stays null")
-		assert.Equal(t, []any{}, third["ip_consumers"])
+		unnamed := decode(t, results[2].Resource, resourceType)
+		assert.Equal(t, "b1b07384-d9a0-4d1e-8f2a-000000000003", unnamed["id"])
+		assert.Nil(t, unnamed["name"])
 	})
 
-	// One subtest per field in the FilterAttribute allow-list: MatchesFilters returns
-	// false for a field_name the mapper forgot to put in its map, so an untested field
-	// is a filter that silently matches nothing while the other subtests stay green.
 	t.Run("filters by name", func(t *testing.T) {
-		results := listResults(ctx, t, server, ipBlockListType, listSchema, map[string]string{"name": "spare-ips"})
+		results := listResults(ctx, t, server, ipBlockListType, listSchema, map[string]string{"name": "staging-ips"})
 		if len(results) != 1 {
 			t.Fatalf("expected 1 result, got %d", len(results))
 		}
-		assert.Equal(t, "spare-ips", results[0].DisplayName)
+		assert.Equal(t, "staging-ips", results[0].DisplayName)
 	})
 
 	t.Run("filters by location", func(t *testing.T) {
-		results := listResults(ctx, t, server, ipBlockListType, listSchema, map[string]string{"location": "de/txl"})
+		results := listResults(ctx, t, server, ipBlockListType, listSchema, map[string]string{"location": "de/fra"})
 		if len(results) != 1 {
 			t.Fatalf("expected 1 result, got %d", len(results))
 		}
-		assert.Equal(t, "public-ips", results[0].DisplayName)
+		assert.Equal(t, "staging-ips", results[0].DisplayName)
 	})
 
-	// Two fields whose values match DIFFERENT stub items: pins that the filters are
-	// ANDed, and that neither field is wired to the other's property.
+	// The two values match DIFFERENT stub items, so this pins that the filters are
+	// ANDed and that neither field is wired to the other's property.
 	t.Run("applies every filter", func(t *testing.T) {
 		results := listResults(ctx, t, server, ipBlockListType, listSchema, map[string]string{
-			"name":     "public-ips",
+			"name":     "prod-ips",
 			"location": "de/fra",
 		})
 		if len(results) != 0 {
@@ -184,53 +178,53 @@ func TestIPBlockListResource(t *testing.T) {
 	})
 }
 
-// stubIPBlockAPI serves the ipblock collection the list resource reads, and returns the
-// URL to point IONOS_API_URL at. Every other path 404s on purpose, so an unexpected
-// extra request surfaces as an error diagnostic instead of succeeding.
+// stubIPBlockAPI serves the ip block collection the list resource reads, and returns
+// the URL to point IONOS_API_URL at. Every other path 404s on purpose, so an
+// unexpected extra request surfaces as an error diagnostic instead of succeeding.
 func stubIPBlockAPI(t *testing.T) string {
 	t.Helper()
 
 	ipBlocks := ionoscloudsdk.IpBlocks{
 		Items: &[]ionoscloudsdk.IpBlock{
 			{
-				// Every property the writer reads is set.
-				Id: new("b1a0e5f2-0000-4000-8000-000000000001"),
+				// Result 1: every property the writer reads is set.
+				Id: new("b1b07384-d9a0-4d1e-8f2a-000000000001"),
 				Properties: &ionoscloudsdk.IpBlockProperties{
-					Name:     new("public-ips"),
+					Name:     new("prod-ips"),
 					Location: new("de/txl"),
 					Size:     new(int32(2)),
-					Ips:      &[]string{"203.0.113.10", "203.0.113.11"},
+					Ips:      &[]string{"203.0.113.1", "203.0.113.2"},
 					IpConsumers: &[]ionoscloudsdk.IpConsumer{{
-						Ip:              new("203.0.113.10"),
-						Mac:             new("02:01:0b:1a:0e:5f"),
-						NicId:           new("c2b1a0e5-0000-4000-8000-00000000000a"),
-						ServerId:        new("d3c2b1a0-0000-4000-8000-00000000000b"),
+						Ip:              new("203.0.113.1"),
+						Mac:             new("02:01:0b:0d:8f:b1"),
+						NicId:           new("c1c07384-d9a0-4d1e-8f2a-00000000000a"),
+						ServerId:        new("c2c07384-d9a0-4d1e-8f2a-00000000000b"),
 						ServerName:      new("web-01"),
-						DatacenterId:    new("e4d3c2b1-0000-4000-8000-00000000000c"),
+						DatacenterId:    new("c3c07384-d9a0-4d1e-8f2a-00000000000c"),
 						DatacenterName:  new("prod"),
-						K8sNodePoolUuid: new("f5e4d3c2-0000-4000-8000-00000000000d"),
-						K8sClusterUuid:  new("a6f5e4d3-0000-4000-8000-00000000000e"),
+						K8sNodePoolUuid: new("c4c07384-d9a0-4d1e-8f2a-00000000000d"),
+						K8sClusterUuid:  new("c5c07384-d9a0-4d1e-8f2a-00000000000e"),
 					}},
 				},
 			},
 			{
-				// Only the properties the API always returns, so that ip_consumers can be
-				// asserted as the empty block it reifies to. name stays set here: the
-				// display-name and filter assertions need something to match on.
-				Id: new("b1a0e5f2-0000-4000-8000-000000000002"),
+				// Result 2: only the properties the API always returns, so that the
+				// optional ones can be asserted null. `name` stays set here - the
+				// display-name and filter assertions need a name to match on.
+				Id: new("b1b07384-d9a0-4d1e-8f2a-000000000002"),
 				Properties: &ionoscloudsdk.IpBlockProperties{
-					Name:     new("spare-ips"),
+					Name:     new("staging-ips"),
 					Location: new("de/fra"),
 					Size:     new(int32(1)),
-					Ips:      &[]string{"198.51.100.7"},
 				},
 			},
 			{
-				// No name, which is legal because name is Optional on the resource. This
-				// is what covers the displayName fallback in mapIPBlock.
-				Id: new("b1a0e5f2-0000-4000-8000-000000000003"),
+				// Result 3: no name at all, which `name` being Optional allows. It is
+				// what reaches the displayName fallback in mapIPBlock; result 2 cannot,
+				// because it keeps `name` set.
+				Id: new("b1b07384-d9a0-4d1e-8f2a-000000000003"),
 				Properties: &ionoscloudsdk.IpBlockProperties{
-					Location: new("de/fra"),
+					Location: new("de/txl"),
 					Size:     new(int32(1)),
 				},
 			},
@@ -243,13 +237,14 @@ func stubIPBlockAPI(t *testing.T) string {
 			return
 		}
 		// The request the fetch closure builds is part of what is under test - the stub
-		// answers any query string identically, so without these the options are
-		// unpinned. The limit is asserted as a literal rather than as
-		// constant.IPBlockLimit because that literal is the only thing tying the number
-		// in docs/list-resources/ipblock.md to the code.
+		// answers any query string identically, so without these the options are unpinned.
 		if got := r.URL.Query().Get("depth"); got != "1" {
 			t.Errorf("expected depth=1 on the /ipblocks request, got %q", got)
 		}
+		// Asserted as a literal rather than as constant.IPBlockLimit: this number is the
+		// only thing tying docs/list-resources/ipblock.md to the code, and the point of
+		// the assertion is that the fetch asks for more than the 100 the SDK client
+		// falls back to for /ipblocks.
 		if got := r.URL.Query().Get("limit"); got != "1000" {
 			t.Errorf("expected limit=1000 on the /ipblocks request, got %q", got)
 		}
