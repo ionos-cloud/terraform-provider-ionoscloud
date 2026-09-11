@@ -26,9 +26,10 @@ const dnsZoneListType = "ionoscloud_dns_zone"
 // survives the round trip through ResourceData.TfTypeResourceState into the list result,
 // including the timeouts block identity.MappedItemFromResourceData nulls back out.
 //
-// Unlike the datacenter and ipblock tests, the stub here answers an sdk-go-bundle
-// product: the DNS client is built from the same IONOS_API_URL, but the collection is
-// /zones and the response model has value fields rather than pointers.
+// Unlike the datacenter and ipblock list resources, ionoscloud_dns_zone is on an
+// sdk-go-bundle product: the writer under test here is dnsservice.Client.SetZoneData,
+// a method on the DNS service client in services/dns/zone.go, not a package-level
+// function in package ionoscloud.
 //
 // The shared helpers it calls - muxedProviderServer, configureProvider, listResults,
 // listServerAndConfig, decode, identityType and the rest - are declared once for the
@@ -78,43 +79,52 @@ func TestDNSZoneListResource(t *testing.T) {
 			t.Fatalf("expected 3 results, got %d", len(results))
 		}
 
-		assert.Equal(t, "example.com", results[0].DisplayName)
+		assert.Equal(t, "prod.example.com", results[0].DisplayName)
 
 		identity := decode(t, results[0].Identity.IdentityData, identityType(identitySchema))
-		assert.Len(t, identity, 1, "a dns zone has no location, so the identity is a lone id")
-		assert.Equal(t, "a1a07384-d9a0-4d1e-8f2a-000000000001", identity["id"])
+		assert.Len(t, identity, 1, "a dns zone has no location, so its identity is a lone id")
+		assert.Equal(t, "e1e07384-d9a0-4d1e-8f2a-000000000001", identity["id"])
 
 		// Every attribute the writer fills is asserted here, so that writing a value to
 		// the wrong key fails the test.
 		resource := decode(t, results[0].Resource, resourceType)
-		assert.Equal(t, "a1a07384-d9a0-4d1e-8f2a-000000000001", resource["id"])
-		assert.Equal(t, "example.com", resource["name"])
-		assert.Equal(t, "Production zone", resource["description"])
+		assert.Equal(t, "e1e07384-d9a0-4d1e-8f2a-000000000001", resource["id"])
+		assert.Equal(t, "prod.example.com", resource["name"])
+		assert.Equal(t, "the production zone", resource["description"])
 		assert.Equal(t, true, resource["enabled"])
-		assert.Equal(t, []any{"ns1.example.net", "ns2.example.net"}, resource["nameservers"])
+		assert.Equal(t, []any{"ns-ic.ui-dns.com", "ns-ic.ui-dns.de"}, resource["nameservers"])
 		assert.Nil(t, resource["timeouts"], "a listed dns zone has no timeouts")
 
-		// The second zone reports only the properties the API always sets, which pins
-		// that the pairing holds past the first result and that the properties the API
-		// left out stay null instead of turning into zero values. `description` is
-		// Optional and `enabled` Optional+Computed - both plain protocol attributes, so
-		// an omitted one decodes to nil rather than to "" or false.
+		// The second zone pins that the pairing holds past the first result: a different
+		// description on a different name is what the AND filter subtest below relies on.
 		assert.Equal(t, "staging.example.com", results[1].DisplayName)
 
 		stagingIdentity := decode(t, results[1].Identity.IdentityData, identityType(identitySchema))
-		assert.Equal(t, "a1a07384-d9a0-4d1e-8f2a-000000000002", stagingIdentity["id"])
+		assert.Equal(t, "e1e07384-d9a0-4d1e-8f2a-000000000002", stagingIdentity["id"])
 
 		staging := decode(t, results[1].Resource, resourceType)
-		assert.Equal(t, "a1a07384-d9a0-4d1e-8f2a-000000000002", staging["id"])
+		assert.Equal(t, "e1e07384-d9a0-4d1e-8f2a-000000000002", staging["id"])
 		assert.Equal(t, "staging.example.com", staging["name"])
-		assert.Nil(t, staging["description"])
-		assert.Nil(t, staging["enabled"])
-		// `nameservers` is a Computed list attribute, but SetZoneData calls d.Set on it
-		// unconditionally, and setting a nil []string on a TypeList materialises an
-		// EMPTY list rather than leaving the attribute null. So this one decodes to
-		// []any{} where description and enabled decode to nil - the null-vs-zero
-		// distinction turns on what the writer does, not only on the schema type.
-		assert.Equal(t, []any{}, staging["nameservers"])
+		assert.Equal(t, "the staging zone", staging["description"])
+		assert.Equal(t, false, staging["enabled"])
+
+		// The third zone reports only the properties the API always sets, which pins
+		// that the properties the API left out stay null instead of turning into zero
+		// values.
+		assert.Equal(t, "minimal.example.com", results[2].DisplayName)
+
+		minimal := decode(t, results[2].Resource, resourceType)
+		assert.Equal(t, "e1e07384-d9a0-4d1e-8f2a-000000000003", minimal["id"])
+		assert.Equal(t, "minimal.example.com", minimal["name"])
+		// SetZoneData only writes description and enabled when the API returned them, so
+		// an omitted one is left null rather than written as "" or false.
+		assert.Nil(t, minimal["description"])
+		assert.Nil(t, minimal["enabled"])
+		// nameservers is different, and the schema type does not explain it: it is a
+		// Computed-only list, so it is a protocol ATTRIBUTE and an unset one would
+		// decode to nil - but SetZoneData d.Set()s it unconditionally, and setting a nil
+		// slice materialises an EMPTY list. Half the answer is what the writer does.
+		assert.Equal(t, []any{}, minimal["nameservers"])
 	})
 
 	t.Run("filters by name", func(t *testing.T) {
@@ -126,44 +136,54 @@ func TestDNSZoneListResource(t *testing.T) {
 	})
 
 	t.Run("filters by description", func(t *testing.T) {
-		results := listResults(ctx, t, server, dnsZoneListType, listSchema, map[string]string{"description": "Shared zone"})
+		results := listResults(ctx, t, server, dnsZoneListType, listSchema, map[string]string{"description": "the production zone"})
 		if len(results) != 1 {
 			t.Fatalf("expected 1 result, got %d", len(results))
 		}
-		assert.Equal(t, "dev.example.com", results[0].DisplayName)
+		assert.Equal(t, "prod.example.com", results[0].DisplayName)
 	})
 
 	// The two values match DIFFERENT stub items, so this pins that the filters are
 	// ANDed and that neither field is wired to the other's property.
 	t.Run("applies every filter", func(t *testing.T) {
 		results := listResults(ctx, t, server, dnsZoneListType, listSchema, map[string]string{
-			"name":        "example.com",
-			"description": "Shared zone",
+			"name":        "prod.example.com",
+			"description": "the staging zone",
 		})
 		if len(results) != 0 {
 			t.Fatalf("expected 0 results, got %d", len(results))
 		}
 	})
 
+	// `enabled` and `nameservers` are real attributes of the resource that are
+	// deliberately left out of the allow-list, because MatchesFilters only compares
+	// strings. Looping over them here means widening the allow-list cannot pass
+	// unnoticed.
 	t.Run("rejects unknown filter fields", func(t *testing.T) {
-		listServer, config := listServerAndConfig(t, server, listSchema, map[string]string{"nope": "value"})
+		for _, field := range []string{"nope", "enabled", "nameservers"} {
+			listServer, config := listServerAndConfig(t, server, listSchema, map[string]string{field: "value"})
 
-		resp, err := listServer.ValidateListResourceConfig(ctx, &tfprotov6.ValidateListResourceConfigRequest{
-			TypeName: dnsZoneListType,
-			Config:   &config,
-		})
-		if err != nil {
-			t.Fatalf("ValidateListResourceConfig: %v", err)
-		}
-		if !hasErrorDiagnostic(resp.Diagnostics) {
-			t.Fatalf("expected a validation error for an unknown filter field")
+			resp, err := listServer.ValidateListResourceConfig(ctx, &tfprotov6.ValidateListResourceConfigRequest{
+				TypeName: dnsZoneListType,
+				Config:   &config,
+			})
+			if err != nil {
+				t.Fatalf("ValidateListResourceConfig(%s): %v", field, err)
+			}
+			if !hasErrorDiagnostic(resp.Diagnostics) {
+				t.Fatalf("expected a validation error for the filter field %q", field)
+			}
 		}
 	})
 }
 
-// stubDNSZoneAPI serves the zone collection the list resource reads, and returns the
-// URL to point IONOS_API_URL at. Every other path 404s on purpose, so an unexpected
-// extra request surfaces as an error diagnostic instead of succeeding.
+// stubDNSZoneAPI serves the zone collection the list resource reads, and returns the URL
+// to point IONOS_API_URL at. Every other path 404s on purpose, so an unexpected extra
+// request surfaces as an error diagnostic instead of succeeding.
+//
+// services/dns/client.go builds its configuration straight from clientOptions.Endpoint
+// and there is no IONOS_API_URL_DNS, so IONOS_API_URL alone is what redirects the DNS
+// client here.
 func stubDNSZoneAPI(t *testing.T) string {
 	t.Helper()
 
@@ -171,43 +191,46 @@ func stubDNSZoneAPI(t *testing.T) string {
 		Items: []dns.ZoneRead{
 			{
 				// Result 1: every property the writer reads is set.
-				Id: "a1a07384-d9a0-4d1e-8f2a-000000000001",
+				Id: "e1e07384-d9a0-4d1e-8f2a-000000000001",
 				Properties: dns.Zone{
-					ZoneName:    "example.com",
-					Description: new("Production zone"),
+					ZoneName:    "prod.example.com",
+					Description: new("the production zone"),
 					Enabled:     new(true),
 				},
 				Metadata: dns.MetadataWithStateNameservers{
+					// State is not omitempty and ProvisioningState validates itself
+					// while unmarshalling, so leaving it unset fails the fetch with
+					// " is not a valid ProvisioningState" rather than an assertion.
 					State:       dns.PROVISIONINGSTATE_AVAILABLE,
-					Nameservers: []string{"ns1.example.net", "ns2.example.net"},
+					Nameservers: []string{"ns-ic.ui-dns.com", "ns-ic.ui-dns.de"},
 				},
 			},
 			{
-				// Result 2: only the properties the API always returns, so that the
-				// optional ones can be asserted null. `name` stays set here - it is
-				// Required on the resource, and the display-name and filter assertions
-				// need a name to match on.
-				Id: "a1a07384-d9a0-4d1e-8f2a-000000000002",
+				// Result 2: a second fully-populated zone whose name and description both
+				// differ from result 1's, which is what the per-field and AND filter
+				// subtests discriminate on.
+				Id: "e1e07384-d9a0-4d1e-8f2a-000000000002",
 				Properties: dns.Zone{
-					ZoneName: "staging.example.com",
-				},
-				// State is not omitempty and the bundle SDK rejects an empty enum on
-				// unmarshal, so even the minimal stub item has to carry one.
-				Metadata: dns.MetadataWithStateNameservers{State: dns.PROVISIONINGSTATE_AVAILABLE},
-			},
-			{
-				// Result 3: a second described zone, so the description filter matches
-				// something other than result 1 and the AND case can pair a name and a
-				// description that belong to different zones.
-				Id: "a1a07384-d9a0-4d1e-8f2a-000000000003",
-				Properties: dns.Zone{
-					ZoneName:    "dev.example.com",
-					Description: new("Shared zone"),
+					ZoneName:    "staging.example.com",
+					Description: new("the staging zone"),
 					Enabled:     new(false),
 				},
 				Metadata: dns.MetadataWithStateNameservers{
 					State:       dns.PROVISIONINGSTATE_AVAILABLE,
-					Nameservers: []string{"ns1.example.net"},
+					Nameservers: []string{"ns-ic.ui-dns.org"},
+				},
+			},
+			{
+				// Result 3: only the properties the API always returns, so that the
+				// optional ones can be asserted null. `name` stays set - it is Required
+				// on the resource and non-nullable in the SDK model, and the display-name
+				// assertion needs it.
+				Id: "e1e07384-d9a0-4d1e-8f2a-000000000003",
+				Properties: dns.Zone{
+					ZoneName: "minimal.example.com",
+				},
+				Metadata: dns.MetadataWithStateNameservers{
+					State: dns.PROVISIONINGSTATE_AVAILABLE,
 				},
 			},
 		},
@@ -218,13 +241,13 @@ func stubDNSZoneAPI(t *testing.T) string {
 			http.NotFound(w, r)
 			return
 		}
-		// The request the fetch closure builds is part of what is under test, and here
-		// what is under test is that it asks for NOTHING: /zones has no depth parameter,
-		// no limit is set (the listing is deliberately unpaginated, like the data
-		// source), and the name filter is applied in the mapper rather than pushed down
-		// with filter.zoneName. The stub answers any query string identically, so
-		// without these the fetch options are unpinned.
-		for _, param := range []string{"depth", "limit", "offset", "filter.zoneName"} {
+		// The request the fetch closure builds is part of what is under test, and this
+		// one deliberately builds the bare collection GET: ApiZonesGetRequest has no
+		// depth parameter, the fetch asks for no limit (matching the data source) and
+		// pushes no filter down. Asserting the ABSENCE of all four is the only thing
+		// pinning that - the stub answers any query string identically, so a limit or a
+		// pushed-down filter added later would otherwise go unnoticed.
+		for _, param := range []string{"depth", "limit", "offset", "filter.zoneName", "filter.state"} {
 			if got := r.URL.Query().Get(param); got != "" {
 				t.Errorf("expected no %s on the /zones request, got %q", param, got)
 			}

@@ -20,16 +20,26 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
-// TestAccDNSZoneQuery covers `terraform query` against the dns zone list resource, and
-// the resource identity it streams. It uses its own zone name and its own resource label:
-// querycheck.ExpectLength asserts a CONTRACT-WIDE total, so reusing the suite's shared
-// fixture would make ExpectLength(1) flap as soon as another test creates a zone.
+// TestAccDNSZoneQuery covers `terraform query` against the dns zone list resource and
+// the resource identity it streams.
+//
+// It uses its own zone name and its own resource label rather than the suite's shared
+// DNSZoneConfig fixture: querycheck.ExpectLength asserts a CONTRACT-WIDE total, so
+// reusing a fixture another test in this package also creates would make ExpectLength(1)
+// flap as soon as the two run against the same contract.
+//
+// The zero-result step is the locationless case. ionoscloud_dns_zone has no `location` to
+// vary, so it pairs the fixture's name with a `description` the zone does not carry, and
+// the step after it updates the zone to exactly that description and re-runs the same
+// query. That update is also the only path that writes the identity without going through
+// zoneRead, and `description` is non-ForceNew, so the step is a real in-place update
+// rather than a destroy and recreate that would never enter zoneUpdate at all.
 func TestAccDNSZoneQuery(t *testing.T) {
 	const (
-		queryZoneName        = "tf-test-query.com"
+		queryZoneName        = "tf-test-query-zone.com"
+		queryZoneAddr        = constant.DNSZoneResource + ".test_zone_query"
 		queryZoneDescription = "zone for the query acceptance test"
-		queryZoneUpdatedDesc = "zone for the query acceptance test, updated"
-		queryZoneAddr        = constant.DNSZoneResource + ".test_dns_zone_query"
+		otherDescription     = "a description this zone does not have yet"
 	)
 
 	resource.Test(t, resource.TestCase{
@@ -43,17 +53,17 @@ func TestAccDNSZoneQuery(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: fmt.Sprintf(`
-resource %[1]q "test_dns_zone_query" {
+resource %[1]q "test_zone_query" {
   name        = %[2]q
   description = %[3]q
   enabled     = true
 }`, constant.DNSZoneResource, queryZoneName, queryZoneDescription),
 			},
 			// List without filters: the zone must show up with its identity. A dns zone
-			// has no location, so the identity is a lone id.
+			// has no location, so the identity is the lone id.
 			{
 				Query: true,
-				Config: fmt.Sprintf(`list %[1]q "test_dns_zone_query" {
+				Config: fmt.Sprintf(`list %[1]q "test_zone_query" {
   provider = ionoscloud
 }`, constant.DNSZoneResource),
 				QueryResultChecks: []querycheck.QueryResultCheck{
@@ -62,27 +72,28 @@ resource %[1]q "test_dns_zone_query" {
 					}),
 				},
 			},
-			// Filter by name: the unique zone name guarantees exactly one result.
+			// Filter by name and description: the unique name guarantees exactly one
+			// result, and both allow-listed filter fields are exercised at once.
 			{
 				Query: true,
-				Config: fmt.Sprintf(`list %[1]q "test_dns_zone_query" {
+				Config: fmt.Sprintf(`list %[1]q "test_zone_query" {
   provider = ionoscloud
   config {
     filters = [
-      { field_name = "name", field_value = %[2]q },
+      { field_name = "name",        field_value = %[2]q },
+      { field_name = "description", field_value = %[3]q },
     ]
   }
-}`, constant.DNSZoneResource, queryZoneName),
+}`, constant.DNSZoneResource, queryZoneName, queryZoneDescription),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLength(queryZoneAddr, 1),
 				},
 			},
-			// Same name, a description that does not belong to it. A dns zone has no
-			// location, so `description` is the only other allow-listed field that can
-			// discriminate, and this is what proves the filters are ANDed.
+			// Same name, a description the zone does not have: proves the description
+			// filter is evaluated rather than ignored.
 			{
 				Query: true,
-				Config: fmt.Sprintf(`list %[1]q "test_dns_zone_query" {
+				Config: fmt.Sprintf(`list %[1]q "test_zone_query" {
   provider = ionoscloud
   config {
     filters = [
@@ -90,32 +101,26 @@ resource %[1]q "test_dns_zone_query" {
       { field_name = "description", field_value = %[3]q },
     ]
   }
-}`, constant.DNSZoneResource, queryZoneName, queryZoneUpdatedDesc),
+}`, constant.DNSZoneResource, queryZoneName, otherDescription),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLength(queryZoneAddr, 0),
 				},
 			},
-			// Description only. `name` is ForceNew on a dns zone, so this is the one step
-			// that actually enters zoneUpdate - which writes the identity itself, because
-			// it does not delegate to the read.
+			// An in-place update - description is the resource's only non-ForceNew
+			// attribute - so that zoneUpdate, which writes the identity itself instead of
+			// delegating to zoneRead, is actually entered.
 			{
 				Config: fmt.Sprintf(`
-resource %[1]q "test_dns_zone_query" {
+resource %[1]q "test_zone_query" {
   name        = %[2]q
   description = %[3]q
   enabled     = true
-}`, constant.DNSZoneResource, queryZoneName, queryZoneUpdatedDesc),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(queryZoneAddr, "name", queryZoneName),
-					resource.TestCheckResourceAttr(queryZoneAddr, "description", queryZoneUpdatedDesc),
-				),
+}`, constant.DNSZoneResource, queryZoneName, otherDescription),
 			},
-			// The same AND filter as above, which matched nothing before the update and
-			// must match exactly this zone after it - so the listing is reading the
-			// updated state rather than a cached one.
+			// The query that returned nothing before now returns the updated zone.
 			{
 				Query: true,
-				Config: fmt.Sprintf(`list %[1]q "test_dns_zone_query" {
+				Config: fmt.Sprintf(`list %[1]q "test_zone_query" {
   provider = ionoscloud
   config {
     filters = [
@@ -123,7 +128,7 @@ resource %[1]q "test_dns_zone_query" {
       { field_name = "description", field_value = %[3]q },
     ]
   }
-}`, constant.DNSZoneResource, queryZoneName, queryZoneUpdatedDesc),
+}`, constant.DNSZoneResource, queryZoneName, otherDescription),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLength(queryZoneAddr, 1),
 				},

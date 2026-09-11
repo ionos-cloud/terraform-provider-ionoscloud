@@ -45,8 +45,7 @@ The resource can be imported using the `zone_id`, for example:
 terraform import ionoscloud_dns_zone.examplezone_id
 ```
 
-From Terraform 1.14 onwards it can also be imported through its resource identity, which is what
-`terraform query` results carry:
+In Terraform v1.12.0 and later, the [`import` block](https://developer.hashicorp.com/terraform/language/import) can also be used with the `identity` attribute:
 
 ```hcl
 import {
@@ -54,6 +53,10 @@ import {
   identity = {
     id = "zone_id"
   }
+}
+
+resource "ionoscloud_dns_zone" "example" {
+  ### Configuration omitted for brevity ###
 }
 ```
 

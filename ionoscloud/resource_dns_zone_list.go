@@ -24,15 +24,12 @@ import (
 // protocol schemas the framework needs come from that resource via
 // identity.SetRawV6Schemas.
 //
-// It lives in this package, next to the resource it lists, so it can call
-// resourceDNSZone and setDNSZoneIdentity directly. That is the whole design: results
-// are produced by the resource's own state writer, so this file declares no model of
-// the DNS zone schema and there is nothing here to keep in sync when it changes.
-//
-// Unlike the datacenter and ipblock list resources, DNS is an sdk-go-bundle product,
-// not the Cloud API: the client is the same services/dns one the managed resource uses
-// (bundle.DNSClient), the state writer is a method on it rather than a package-level
-// function, and the collection endpoint has no depth parameter.
+// It lives in this package, next to the resource it lists, so it can call resourceDNSZone
+// and setDNSZoneIdentity directly. That is the whole design: results are produced by the
+// resource's own state writer, so this file declares no model of the DNS zone schema and
+// there is nothing here to keep in sync when that schema changes. The writer itself is
+// the one piece that is not in this package - SetZoneData is a method on the DNS service
+// client, which the mapper reaches through the bundle it already holds.
 
 var (
 	_ list.ListResource                 = (*dnsZoneListResource)(nil)
@@ -88,6 +85,9 @@ func (r *dnsZoneListResource) Configure(_ context.Context, req resource.Configur
 }
 
 // ListResourceConfigSchema returns the schema for the list resource config block.
+//
+// `enabled` and `nameservers` are deliberately not filterable: MatchesFilters compares
+// strings, so a bool and a list of strings have nothing it could match against.
 func (r *dnsZoneListResource) ListResourceConfigSchema(_ context.Context, _ list.ListResourceSchemaRequest, resp *list.ListResourceSchemaResponse) {
 	resp.Schema = listschema.Schema{
 		Attributes: map[string]listschema.Attribute{
@@ -96,20 +96,27 @@ func (r *dnsZoneListResource) ListResourceConfigSchema(_ context.Context, _ list
 	}
 }
 
-// List fetches every DNS zone on the contract and streams the results. DNS is a single
-// global collection - services/dns has no per-location endpoint map and no
-// AvailableLocations - so there is nothing to fan out over here.
+// List fetches every DNS zone on the contract and streams the results. DNS is not a
+// regional product - its client is built once and held on the bundle, and GET /zones
+// returns the whole collection in one response - so unlike the regional database
+// products there is nothing to fan out over here.
 func (r *dnsZoneListResource) List(ctx context.Context, req list.ListRequest, stream *list.ListResultsStream) {
 	fwidentity.StreamList(ctx, stream, req,
 		func(ctx context.Context) ([]dns.ZoneRead, error) {
-			// ListZones is the same helper ionoscloud/data_source_dns_zone.go calls,
-			// so the list resource reads exactly what the data source reads. Its
-			// filterName argument would push a name filter down to the API, but
-			// StreamList's fetch closure is not handed the filters, so filtering
-			// stays client-side in the mapper like every other list resource here.
+			// The same call ionoscloud/data_source_dns_zone.go makes, through the same
+			// service helper, so the list resource and the data source cannot drift
+			// apart in what they can see.
 			//
-			// There is no Depth parameter on /zones: the collection returns full
-			// properties already.
+			// The empty filter argument is deliberate. ListZones can push a zone name
+			// down as filter.zoneName, but that would save no round trip here - this is
+			// a single global request either way - and the mapper has to re-check every
+			// filter regardless, so pushing it down would only add a second place for
+			// the semantics to disagree.
+			//
+			// No depth and no limit are sent: ApiZonesGetRequest has no Depth parameter
+			// at all (that is a Cloud API concept), and it sends no limit unless one is
+			// asked for, which matches the data source. See the pagination note in
+			// docs/list-resources/dns_zone.md for what that costs.
 			zones, apiResponse, err := r.bundle.DNSClient.ListZones(ctx, "")
 			if apiResponse != nil {
 				tflog.Debug(ctx, "listed dns zones", map[string]any{"status_code": apiResponse.SafeStatusCode()})
@@ -127,13 +134,14 @@ func (r *dnsZoneListResource) List(ctx context.Context, req list.ListRequest, st
 // mapDNSZone maps a DNS zone to an identity.MappedItem, or returns nil to skip it.
 //
 // The mapping itself is SetZoneData, the same state writer zoneRead uses, run against a
-// ResourceData built from the live schema. Nothing here knows what attributes a DNS
-// zone has.
+// ResourceData built from the live schema. It is a method on the DNS service client
+// rather than a package-level function in this package, which costs nothing because the
+// mapper already holds the bundle. Nothing here knows what attributes a DNS zone has.
 func (r *dnsZoneListResource) mapDNSZone(_ context.Context, includeResource bool, filters []fwidentity.Filter, zone dns.ZoneRead) (*fwidentity.MappedItem, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	// ZoneRead.Id is a plain string and Properties a value struct, so unlike the Cloud
-	// API models there is nothing to nil-check - an empty id is the only unusable item.
+	// ZoneRead.Id and .Properties are values, not pointers, the way the sdk-go-bundle
+	// generator emits them, so the only unusable item is one returned without an id.
 	if zone.Id == "" {
 		return nil, nil
 	}
@@ -146,20 +154,22 @@ func (r *dnsZoneListResource) mapDNSZone(_ context.Context, includeResource bool
 	}
 
 	data := r.resourceSchema.Data(&terraform.InstanceState{})
+	// SetZoneData takes its zone by value, and calls d.SetId itself.
 	if err := r.bundle.DNSClient.SetZoneData(data, zone); err != nil {
 		diags.AddError("Failed to map the dns zone", err.Error())
 		return nil, diags
 	}
 
 	// setDNSZoneIdentity reads the id back out of the ResourceData, so it has to run
-	// after SetZoneData - which is also what sets it.
+	// after SetZoneData.
 	if err := setDNSZoneIdentity(data); err != nil {
 		diags.AddError("Failed to map the dns zone identity", err.Error())
 		return nil, diags
 	}
 
-	// `name` is Required on ionoscloud_dns_zone and ZoneName is a non-pointer string, so
-	// there is no unnamed-zone case to fall back from.
+	// `name` is Required on ionoscloud_dns_zone and ZoneName is a plain string rather
+	// than a pointer, so there is always a display name - no fallback to the UUID of the
+	// kind ionoscloud_ipblock needs.
 	mapped, err := fwidentity.MappedItemFromResourceData(zone.Properties.ZoneName, data, includeResource)
 	if err != nil {
 		diags.AddError("Failed to convert the dns zone state", err.Error())
