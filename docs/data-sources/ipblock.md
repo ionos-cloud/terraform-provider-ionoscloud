@@ -60,7 +60,7 @@ data "ionoscloud_ipblock" "example" {
 * `ip_consumers` Read-Only attribute. Lists consumption detail of an individual ip
   * `ip`
   * `mac`
-  * `nic_id`
+  * `nic_uuid`
   * `server_id`
   * `server_name`
   * `datacenter_id`

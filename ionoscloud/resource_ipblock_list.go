@@ -19,9 +19,9 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
-// A list resource for ionoscloud_ipblock, whose managed resource is still
-// implemented with terraform-plugin-sdk/v2 and therefore lives on the other half of
-// the mux. The protocol schemas the framework needs come from that resource via
+// A list resource for ionoscloud_ipblock, whose managed resource is still implemented
+// with terraform-plugin-sdk/v2 and therefore lives on the other half of the mux. The
+// protocol schemas the framework needs come from that resource via
 // identity.SetRawV6Schemas.
 //
 // It lives in this package, next to the resource it lists, so it can call
@@ -52,15 +52,15 @@ func NewIPBlockListResource() list.ListResource {
 }
 
 // RawV6Schemas hands the framework the protocol schemas of the SDKv2 managed
-// resource. A framework-native list resource inherits them from the resource
-// itself; this is only needed because ionoscloud_ipblock lives on the SDKv2 side.
+// resource. A framework-native list resource inherits them from the resource itself;
+// this is only needed because ionoscloud_ipblock lives on the SDKv2 side.
 func (r *ipBlockListResource) RawV6Schemas(ctx context.Context, _ list.RawV6SchemaRequest, resp *list.RawV6SchemaResponse) {
 	fwidentity.SetRawV6Schemas(ctx, resp, constant.IpBlockResource, r.resourceSchema)
 }
 
 // Metadata returns the type name of the managed resource being listed. It must match
 // the SDKv2 resource exactly, otherwise terraform has no resource to attach the
-// results to.
+// results to - hence the same constant that keys ResourcesMap in provider.go.
 func (r *ipBlockListResource) Metadata(_ context.Context, _ resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = constant.IpBlockResource
 }
@@ -83,7 +83,7 @@ func (r *ipBlockListResource) Configure(_ context.Context, req resource.Configur
 	r.bundle = clientBundle
 }
 
-// ListResourceConfigSchema returns the schema for the list resource config schema.
+// ListResourceConfigSchema returns the schema for the list resource config block.
 func (r *ipBlockListResource) ListResourceConfigSchema(_ context.Context, _ list.ListResourceSchemaRequest, resp *list.ListResourceSchemaResponse) {
 	resp.Schema = listschema.Schema{
 		Attributes: map[string]listschema.Attribute{
@@ -108,9 +108,10 @@ func (r *ipBlockListResource) List(ctx context.Context, req list.ListRequest, st
 			// Depth(1) is what makes the API return the properties of every IP block
 			// instead of just its links. Filtering stays client-side, in the mapper.
 			//
-			// The explicit Limit matches what the ionoscloud_ipblock data source asks
-			// for (data_source_ipblock.go); without it the SDK client falls back to 100
-			// for /ipblocks, which would cap this listing below its own data source.
+			// The explicit Limit matches ionoscloud/data_source_ipblock.go: the SDK
+			// client falls back to limit=100 for /ipblocks (api_ip_blocks.go:489),
+			// which is ten times lower than what the data source asks for, so without
+			// it the list resource would see less than its own data source does.
 			ipBlocks, apiResponse, err := client.IPBlocksApi.IpblocksGet(ctx).Depth(1).Limit(constant.IPBlockLimit).Execute()
 			if apiResponse != nil {
 				tflog.Debug(ctx, "listed ip blocks", map[string]any{"status_code": apiResponse.SafeStatusCode()})
@@ -133,15 +134,15 @@ func (r *ipBlockListResource) List(ctx context.Context, req list.ListRequest, st
 // The mapping itself is IpBlockSetData, the same state writer resourceIPBlockRead
 // uses, run against a ResourceData built from the live schema. Nothing here knows what
 // attributes an IP block has.
-func (r *ipBlockListResource) mapIPBlock(_ context.Context, includeResource bool, filters []fwidentity.Filter, item ionoscloud.IpBlock) (*fwidentity.MappedItem, diag.Diagnostics) {
+func (r *ipBlockListResource) mapIPBlock(_ context.Context, includeResource bool, filters []fwidentity.Filter, ipBlock ionoscloud.IpBlock) (*fwidentity.MappedItem, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	if item.Id == nil || item.Properties == nil {
+	if ipBlock.Id == nil || ipBlock.Properties == nil {
 		return nil, nil
 	}
 
-	name := shared.ToValueDefault(item.Properties.Name)
-	location := shared.ToValueDefault(item.Properties.Location)
+	name := shared.ToValueDefault(ipBlock.Properties.Name)
+	location := shared.ToValueDefault(ipBlock.Properties.Location)
 
 	if !fwidentity.MatchesFilters(map[string]string{
 		"name":     name,
@@ -150,8 +151,15 @@ func (r *ipBlockListResource) mapIPBlock(_ context.Context, includeResource bool
 		return nil, nil
 	}
 
+	// `name` is Optional on ionoscloud_ipblock, so an unnamed IP block would otherwise
+	// render as a blank row in the terraform query output.
+	displayName := name
+	if displayName == "" {
+		displayName = *ipBlock.Id
+	}
+
 	data := r.resourceSchema.Data(&terraform.InstanceState{})
-	if err := IpBlockSetData(data, &item); err != nil {
+	if err := IpBlockSetData(data, &ipBlock); err != nil {
 		diags.AddError("Failed to map the ip block", err.Error())
 		return nil, diags
 	}
@@ -161,13 +169,6 @@ func (r *ipBlockListResource) mapIPBlock(_ context.Context, includeResource bool
 	if err := setIPBlockIdentity(data); err != nil {
 		diags.AddError("Failed to map the ip block identity", err.Error())
 		return nil, diags
-	}
-
-	// name is Optional on ionoscloud_ipblock, so an unnamed block would otherwise
-	// render as a blank row in the terraform query output.
-	displayName := name
-	if displayName == "" {
-		displayName = *item.Id
 	}
 
 	mapped, err := fwidentity.MappedItemFromResourceData(displayName, data, includeResource)

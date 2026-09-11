@@ -240,11 +240,9 @@ func configureProvider(ctx context.Context, t *testing.T, server tfprotov6.Provi
 	failOnErrorDiagnostics(t, "ConfigureProvider", resp.Diagnostics)
 }
 
-// listResults calls the ListResource RPC of the given type with the given filters and
+// listResults calls the ListResource RPC of typeName with the given filters and
 // collects the results, failing on the first error diagnostic. The type name is a
-// parameter because it is the only thing that differs per list resource: every list
-// resource for an SDKv2 managed resource lands in this one package, so this driver is
-// shared rather than copied per resource.
+// parameter because this driver is shared by every list-resource test in the package.
 func listResults(ctx context.Context, t *testing.T, server tfprotov6.ProviderServer, typeName string, schema *tfprotov6.Schema, filters map[string]string) []tfprotov6.ListResourceResult {
 	t.Helper()
 

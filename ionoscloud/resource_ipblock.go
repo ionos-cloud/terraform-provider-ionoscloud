@@ -181,7 +181,7 @@ func resourceIPBlockRead(ctx context.Context, d *schema.ResourceData, meta any) 
 		return diagutil.ToDiags(d, err, nil)
 	}
 
-	// must run AFTER IpBlockSetData: the identity reads attributes that only the data
+	// Must run after IpBlockSetData: the identity reads attributes that only the data
 	// setter fills in (this matters most on an identity-based import).
 	if err := setIPBlockIdentity(d); err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -189,7 +189,6 @@ func resourceIPBlockRead(ctx context.Context, d *schema.ResourceData, meta any) 
 
 	return nil
 }
-
 func resourceIPBlockUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	location := d.Get("location").(string)
 
@@ -214,17 +213,18 @@ func resourceIPBlockUpdate(ctx context.Context, d *schema.ResourceData, meta any
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating an ip block: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	// The SDK carries the prior identity into the apply on its own, so an update that
-	// never touches the identity still returns one and "Missing Resource Identity After
-	// Update" does not fire. This is the safety net for state written before the resource
-	// declared an identity - an old state file refreshed with -refresh=false, say - not
-	// the everyday path. It derives from state, never from the API response, so it cannot
-	// differ from the planned identity.
+	// Unlike Create, Update does not need this to satisfy terraform: the SDK carries the
+	// prior identity into the apply on its own, so an update that never touches the
+	// identity still returns one. It is a safety net for state written before this
+	// resource declared an identity, e.g. a refresh-free apply over an old state file.
+	// The values are read back out of state, never out of an API response, so whatever
+	// this writes equals the prior identity and the stability check cannot trip.
 	if err := setIPBlockIdentity(d); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
 
 	return nil
+
 }
 
 func resourceIPBlockDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {

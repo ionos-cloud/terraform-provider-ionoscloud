@@ -108,19 +108,6 @@ func TestAccIPBlockBasic(t *testing.T) {
 				Config:      testAccDataSourceIpBlockGoodIdNameError,
 				ExpectError: regexp.MustCompile(`name of ip block \(UUID=.+, name=.+\) does not match expected name`),
 			},
-			// name is the only non-ForceNew attribute, so this step is the only one that
-			// actually enters resourceIPBlockUpdate - and therefore the only coverage of
-			// the identity write on the update path. The size change below is a
-			// destroy-and-create, which goes through Create and Read instead.
-			{
-				Config: testAccCheckIPBlockConfigUpdateNameOnly,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIPBlockExists(fullIpBlockResourceName, &ipblock),
-					testAccCheckIPBlockAttributes(fullIpBlockResourceName, location),
-					resource.TestCheckResourceAttr(fullIpBlockResourceName, "name", constant.UpdatedResources),
-					resource.TestCheckResourceAttr(fullIpBlockResourceName, "size", "1"),
-				),
-			},
 			{
 				Config: testAccCheckIPBlockConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
@@ -143,9 +130,10 @@ func TestAccIPBlockBasic(t *testing.T) {
 // package.
 func TestAccIPBlockQuery(t *testing.T) {
 	const (
-		ipBlockName   = "tf-test-ipblock-query"
-		ipBlockAddr   = constant.IpBlockResource + ".test_ipblock"
-		otherLocation = "de/fra"
+		ipBlockName    = "tf-test-ipblock-query"
+		ipBlockRenamed = "tf-test-ipblock-query-renamed"
+		ipBlockAddr    = constant.IpBlockResource + ".test_ipblock_query"
+		otherLocation  = "de/txl"
 	)
 
 	resource.Test(t, resource.TestCase{
@@ -159,16 +147,16 @@ func TestAccIPBlockQuery(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: fmt.Sprintf(`
-resource %[1]q "test_ipblock" {
-  location = %[2]q
+resource %[1]q "test_ipblock_query" {
+  name     = %[2]q
+  location = %[3]q
   size     = 1
-  name     = %[3]q
-}`, constant.IpBlockResource, location, ipBlockName),
+}`, constant.IpBlockResource, ipBlockName, location),
 			},
 			// List without filters: the ip block must show up with its identity.
 			{
 				Query: true,
-				Config: fmt.Sprintf(`list %[1]q "test_ipblock" {
+				Config: fmt.Sprintf(`list %[1]q "test_ipblock_query" {
   provider = ionoscloud
 }`, constant.IpBlockResource),
 				QueryResultChecks: []querycheck.QueryResultCheck{
@@ -181,7 +169,7 @@ resource %[1]q "test_ipblock" {
 			// Filter by name and location: the unique name guarantees exactly one result.
 			{
 				Query: true,
-				Config: fmt.Sprintf(`list %[1]q "test_ipblock" {
+				Config: fmt.Sprintf(`list %[1]q "test_ipblock_query" {
   provider = ionoscloud
   config {
     filters = [
@@ -197,7 +185,7 @@ resource %[1]q "test_ipblock" {
 			// Same name, different location: proves the location filter is evaluated.
 			{
 				Query: true,
-				Config: fmt.Sprintf(`list %[1]q "test_ipblock" {
+				Config: fmt.Sprintf(`list %[1]q "test_ipblock_query" {
   provider = ionoscloud
   config {
     filters = [
@@ -209,6 +197,23 @@ resource %[1]q "test_ipblock" {
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLength(ipBlockAddr, 0),
 				},
+			},
+			// Rename only. `name` is the sole non-ForceNew attribute of an ip block, so
+			// this is the one step that actually enters resourceIPBlockUpdate - which
+			// writes the identity itself, because it does not delegate to the read. The
+			// existing testAccCheckIPBlockConfigUpdate flips `size` as well, which is
+			// ForceNew, so that step destroys and recreates and never covers this.
+			{
+				Config: fmt.Sprintf(`
+resource %[1]q "test_ipblock_query" {
+  name     = %[2]q
+  location = %[3]q
+  size     = 1
+}`, constant.IpBlockResource, ipBlockRenamed, location),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(ipBlockAddr, "name", ipBlockRenamed),
+					resource.TestCheckResourceAttr(ipBlockAddr, "location", location),
+				),
 			},
 			// Import through the resource identity that the list results carry. This kind
 			// already checks that the import succeeds, that the plan it leaves behind is a
@@ -307,13 +312,6 @@ resource ` + constant.IpBlockResource + ` ` + constant.IpBlockTestResource + ` {
   location = "` + location + `"
   size = 1
   name = "` + constant.IpBlockTestResource + `"
-}`
-
-const testAccCheckIPBlockConfigUpdateNameOnly = `
-resource ` + constant.IpBlockResource + ` ` + constant.IpBlockTestResource + ` {
-  location = "` + location + `"
-  size = 1
-  name = "` + constant.UpdatedResources + `"
 }`
 
 const testAccCheckIPBlockConfigUpdate = `
