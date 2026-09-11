@@ -256,7 +256,7 @@ func stub<Resource>API(t *testing.T) string {
 			},
 			{
 				// Result 3 — ONLY when `name` is Optional in the SDKv2 schema. Covers the
-				// displayName fallback (`ionoscloud/resource_ipblock_list.go:166-171`),
+				// displayName fallback (the `displayName` local in ipblock's `mapIPBlock`),
 				// which result 2 cannot reach because it keeps `name` set. Without this
 				// the fallback branch is dead code the test never enters.
 				Id: new("00000000-0000-0000-0000-000000000003"),
@@ -310,18 +310,20 @@ func stub<Resource>API(t *testing.T) string {
   does export one — `ionoscloudsdk.ToPtr` (`sdk-go/v6/utils.go:30`), already imported by the
   reference test — so "no helper exists" is not the argument to make. Either compiles; `new`
   needs no import.
-- **Assert the query params the fetch closure sets** — at minimum `depth`, and `limit`
-  whenever decision 1 in `SKILL.md` made you pass an explicit one. Dropping `.Depth(1)` in
-  production means every `Properties` is nil and the writer is never reached; dropping
-  `.Limit(...)` means silent truncation at the SDK client's fallback (100 for `/ipblocks`,
-  `sdk-go/v6/api_ip_blocks.go:487-489` — note that fallback is the *client's*, not the
-  endpoint's). Neither is visible to a stub that ignores the query string, and the mutation
-  check below never reaches the fetch closure.
+- **Assert the query the fetch closure actually builds** — whatever that is. When it sets
+  parameters, assert each: dropping `.Depth(1)` in production means every `Properties` is nil and
+  the writer is never reached, and dropping `.Limit(...)` means silent truncation at the SDK
+  client's fallback (100 for `/ipblocks`, `sdk-go/v6/api_ip_blocks.go:487-489` — note that
+  fallback is the *client's*, not the endpoint's). When it deliberately sets **none** — the common
+  bundle case, where there is no depth and decision 1 left the limit unset — assert the absence,
+  with the loop shown in the stub above. An unasserted query string is unpinned either way, and
+  the mutation check cannot reach the fetch closure on its own.
   The reference stub is the wrong model for this one thing: `stubCloudAPI` asserts no query
-  parameters at all. Copy the assertion block from
-  `ionoscloud/resource_ipblock_list_test.go:245-255` instead, including the comment
-  explaining why the limit is asserted as a literal rather than as `constant.<X>Limit` — that
-  literal is the only thing tying `docs/list-resources/<resource>.md` to the code.
+  parameters at all. Take the assertion block from the query-param assertions in
+  `ionoscloud/resource_ipblock_list_test.go`'s `stubIPBlockAPI` instead (grep for `expected depth`),
+  including the comment explaining why the limit is asserted as a literal rather than as
+  `constant.<X>Limit` — that literal is the only thing tying `docs/list-resources/<resource>.md`
+  to the code.
 - Match on `strings.HasSuffix`, not an exact path — the SDK prefixes `/cloudapi/v6`.
   Everything else 404s **on purpose**: an unexpected extra call (a pagination follow-up, a
   second region) surfaces as an error diagnostic rather than silently succeeding.
@@ -336,8 +338,11 @@ func stub<Resource>API(t *testing.T) string {
   *defers* `ChangeConfigURL`, so it overwrites whatever `IONOS_API_URL` set. Worse, a regional
   client called with a non-empty location replaces the endpoint from that product's
   `locationToURL` map — a **production** URL — regardless of either variable. So for a bundle
-  product, set `IONOS_API_URL_<PRODUCT>` as well, and read the product's client constructor
-  before assuming your stub is reachable at all.
+  product, **read that product's client constructor before assuming your stub is reachable** —
+  that is the step that actually settles it. Set `IONOS_API_URL_<PRODUCT>` too *if the product
+  reads one*; several do not. DNS is the counter-example: there is no `IONOS_API_URL_DNS`, and
+  `services/dns/client.go` takes `clientOptions.Endpoint` straight from `IONOS_API_URL`, so
+  setting a product variable there is a no-op that only looks like protection.
 
 ---
 
@@ -500,12 +505,17 @@ The original #1034 test looked thorough and asserted almost nothing: its decoder
 `map[string]string` and skipped every non-string attribute, so a writer that swapped two int
 fields still passed. **Prove your assertions are load-bearing before claiming coverage.**
 
-The thing to mutate is no longer a mapper of the list resource's own. It is `set<X>Data`, in
-`ionoscloud/resource_<resource>.go` — **a different file from the one you just wrote**, and the
-same file that holds the `Identity` block and `set<X>Identity` you added in step 1. So:
+The thing to mutate is no longer a mapper of the list resource's own. It is the state writer —
+**a different file from the one you just wrote**. Where that file is depends on the branch, and
+step 0's grep (7) already told you: `ionoscloud/resource_<resource>.go` on the Cloud API branch,
+which is also the file holding the `Identity` block and `set<X>Identity` you added in step 1; or
+`services/<product>/<x>.go` on the bundle branch, a third file step 1 never touched (dns zone's
+`SetZoneData` lives in `services/dns/zone.go`). So:
 
-> **Revert the mutation by hand.** `git checkout -- ionoscloud/resource_<resource>.go` would
-> throw the whole identity implementation away with it.
+> **Revert the mutation by hand**, wherever it landed. On the Cloud API branch
+> `git checkout -- ionoscloud/resource_<resource>.go` would throw the whole identity
+> implementation away with it; on the bundle branch the writer's file is shared with the managed
+> resource and its data source, so a stray edit left behind there is worse than a lost revert.
 
 Swap **two adjacent struct fields, or two adjacent map keys, of the same Go type** — same type,
 so it still compiles and the failure has to come from an assertion, not the compiler.
@@ -534,9 +544,11 @@ go test ./ionoscloud/ -run 'Test<Resource>ListResource' -count=1
 **Four mutations the field-swap cannot reach — they live in the list resource file, which
 `set<X>Data` mutations never touch. Run them too:**
 
-- **Delete `.Depth(1)`** (and the explicit `.Limit(...)`, if there is one) from the fetch
-  closure. The test MUST fail — on the stub's query assertions, which is why they are not
-  optional.
+- **Mutate the query the fetch closure builds.** When it sets parameters: **delete `.Depth(1)`**
+  (and the explicit `.Limit(...)`, if there is one). When it deliberately sets none, that deletion
+  has nothing to delete — run it **inverted** instead: *add* something, e.g. push a filter down
+  (`ListZones(ctx, "some-name")`) or pass a `.Limit(...)`. Either way the test MUST fail, on the
+  stub's query assertions, which is why those are not optional.
 - **Swap the two values in the `MatchesFilters` map** (`"name": location, "location": name`).
   Only the per-field filter subtests catch this; with a single filter subtest it passes.
 - **Swap the `set<X>Data` and `set<X>Identity` calls.** The identity setter reads its values

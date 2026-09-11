@@ -17,7 +17,9 @@ deliverable is the whole arc, not just the Go file:
 2. the list resource
 3. registration — one name in a `ListResources()` slice
 4. a unit test that actually asserts something
-5. a query step on the resource's tagged acceptance test (written, not run)
+5. a `TestAcc<Resource>Query` on the resource's tagged acceptance test file — a **separate**
+   test with its own fixture, not extra steps on the existing one (`references/verify-and-pr.md`
+   §5 gives the reason); written, not run
 6. `docs/list-resources/<x>.md` + an identity/query section on `docs/resources/<x>.md`
 7. `CHANGELOG.md`
 8. verification — **then stop, report what changed, and ask**
@@ -143,19 +145,45 @@ grep -rhoE "func \(a \*[A-Za-z0-9]+\) [A-Za-z0-9]+(Get|List)\(ctx _?context\.Con
   vendor/github.com/ionos-cloud/ | sed 's/^func (a \*//' | sort -u
 ```
 
-**(6) has three outcomes.** `NewCloudAPIClient` / `NewCloudAPIClientWithFailover` means the Cloud
-API (`sdk-go/v6`) and every template below applies as written. Any other field - `DNSClient`,
-`NFSClient`, `VPNClient`, … - means an **sdk-go-bundle product**, where the client, the collection
-model and the writer all differ; `references/sdkv2-branch.md` §2c has the deltas, and
-`ionoscloud_dns_zone` is the worked example. A framework-native resource takes neither.
+**(6) tells you which of three client shapes the resource uses.** Read what follows
+`meta.(bundleclient.SdkBundle)` on the CRUD paths:
 
-**(7) is a gate, not background reading.** The writer is the contract: the mapper can only call it
-if it can supply every argument. `(d *schema.ResourceData, <apiObject>)` is fine whether it is a
+- `.NewCloudAPIClient(ctx, location)` / `.NewCloudAPIClientWithFailover(ctx)` → the **Cloud API**
+  (`sdk-go/v6`); every template below applies as written.
+- a plain **field** — `.DNSClient`, `.NFSClient`, `.VPNClient`, … → an **sdk-go-bundle product**
+  whose client is already built and sitting on the bundle. `references/sdkv2-branch.md` §2c has
+  the deltas; `ionoscloud_dns_zone` is the worked example.
+- a **constructor taking a location** — `.NewContainerRegistryClient(ctx, location)`,
+  `.NewMongoClient(ctx, location)`, `.NewPsqlClient(ctx, location)`
+  (`services/bundleclient/bundleclient.go`) → also a bundle product, but there is no field to
+  take: the client is built per location, which is itself the answer to decision 4's partition
+  question. No list resource in the tree has this shape yet.
+
+A framework-native resource takes none of them.
+
+**(7) is a gate, not background reading.** Two questions, and the second is the one everybody
+skips: *can the mapper call this writer*, and *does the writer fill every **Required** attribute
+of the schema from the API object*. The whole design is that results come out of the resource's own
+writer, and `docs/list-resources/<x>.md` promises `-generate-config-out` yields ready-to-use
+resource blocks — a promise that only holds if every Required attribute is populated. Diff the
+writer's `d.Set` calls against the `Required: true` entries in the schema; where one is missing
+(typically a parent id, or a write-only field the API never returns) say so in the docs rather than
+letting a reviewer discover it, and set parent ids in the mapper (§2c).
+
+The writer is also the contract for whether the mapper can call it at all: `(d *schema.ResourceData, <apiObject>)` is fine whether it is a
 package-level func (`setDatacenterData`), an exported one (`IpBlockSetData`) or a **method on the
 product's service client** (`func (c *Client) SetZoneData(d, zone)` in `services/dns/zone.go`, which
 the mapper reaches through the bundle it already holds). A writer that needs a `context.Context`, an
 API client to make further calls, or an object the collection GET does not return is the one thing
 that can end the job: say so and stop, rather than hand-mapping attributes.
+
+**A parentless collection GET does not mean the resource has no parent.** `ionoscloud_dns_record`
+passes this gate — DNS exposes a cross-zone `RecordsGet(ctx)` — yet `zone_id` is one of its schema
+attributes and belongs in its identity. That is allowed, but it puts you on the child-resource path
+in §1a and §2c: the identity carries the parent id, and the mapper has to set it, because the state
+writer usually does not (`services/dns/record.go`'s `SetRecordData` never sets `zone_id` — the
+resource sets it by hand in Read). Check whether any schema attribute names a parent before
+treating the resource as flat.
 
 A resource whose collection GET needs a parent ID (`DatacentersLansGet(ctx, datacenterId)`,
 `K8sNodepoolsGet(ctx, clusterId)`, …) is a **bad candidate**: listing it means enumerating
@@ -192,18 +220,40 @@ already does. The default is *not* uniform — it is 1000 for most Cloud API col
 # and offset defaults, which is why this greps the limit parameter by name.
 grep -n 'Add("limit", parameterToString(' vendor/github.com/ionos-cloud/sdk-go/v6/api_<x>.go
 
-# sdk-go-bundle product: same grep, different tree.
-grep -n 'Add("limit", parameterToString(' vendor/github.com/ionos-cloud/sdk-go-bundle/products/<product>/v2/api_<x>.go
-
 grep -n 'Limit(' ionoscloud/data_source_<resource>.go
 ```
 
-**Three outcomes, not two.** A number means the client sends that default. **No hit at all** means
-the client sends no limit and the server's own page size governs - that is the bundle norm, and
-`ionoscloud_dns_zone` is the case in point, so the docs note cannot name a number and must not
-invent one. **No `Limit`/`Offset` method on the request type** means the endpoint has no paging at
-all, and both stock doc notes are then false - say the endpoint returns everything in one response
-and drop the truncation warning.
+**The bundle generator emits query params differently, so that grep is useless there** — it
+returns nothing for every bundle product whether or not a default is sent, which is a check that
+cannot fail. Read the Execute function instead:
+
+```bash
+# sdk-go-bundle product — read the emission, do not grep for the Cloud API's helper.
+sed -n '/func (a \*<X>ApiService) <Op>Execute/,/^}/p' \
+  vendor/github.com/ionos-cloud/sdk-go-bundle/products/<product>/v2/api_<x>.go | grep -n -B1 '"limit"'
+```
+
+Read what **guards** the emission. `parameterAddToHeaderOrQuery(..., "limit", r.limit, "")` sitting
+inside `if r.limit != nil { … }` means the param exists and **nothing is sent unless you ask** — no
+default. An unguarded emission, or one in an `else`, would be a default; at the time of writing
+there is not a single hard-coded limit anywhere under
+`vendor/github.com/ionos-cloud/sdk-go-bundle/products/`, so expect the guarded form and treat an
+unguarded one as worth a second look. No mention of `limit` at all means the endpoint has no limit
+parameter — check `Offset` too, and if neither exists it does not page
+(`vmautoscaling`'s `GroupsGet` is that case).
+
+**Two independent questions, and they do not move together.** *Does the client send a default?* and
+*does the endpoint page at all?* — `/zones` answers "no default" and "yes, it pages"
+(`ApiZonesGetRequest` has both `Limit` and `Offset`). Settle them separately:
+
+- a default is sent → name that number;
+- no default, but `Limit`/`Offset` exist → the server's own page size governs. Say so rather than
+  inventing a number — **but check the request type's doc comment before concluding nothing is
+  known.** The "never trust the vendored doc comment" rule further down is Cloud-API-specific,
+  where the comment contradicts generated code; for a client with no generated default the comment
+  may be the only evidence there is. Quote it, attribute it, hedge it;
+- no `Limit`/`Offset` on the request type at all → the endpoint does not page. Say the response
+  carries everything and drop the truncation warning.
 
 If the data source sets an explicit `Limit(...)` — `data_source_ipblock.go:146` passes
 `constant.IPBlockLimit` (1000) — then a bare `.Depth(1)` fetch caps the *list resource* below
@@ -223,6 +273,13 @@ exactly the key set of the map handed to `identity.MatchesFilters(...)` in the m
 Nothing enforces this; a mismatch means a filter silently matches nothing. Default to
 `name` plus the regional key under whatever name *the resource's own schema* uses
 (`location` vs `region`).
+
+**The default assumes a `name` attribute exists, and not every resource has one.**
+`ionoscloud_cdn_distribution` identifies itself by `domain`; a user has `email`. Substitute the
+closest human identifier the schema actually declares — and check it against the schema rather than
+assuming, because `FilterAttribute` allow-lists a free-form string: a `field_name` that matches no
+attribute validates fine and then silently matches nothing, since the mapper's `MatchesFilters` map
+is the only thing that gives it meaning.
 
 **If the resource has no regional key, that default leaves you with one field, and one field is not
 enough** - the mandatory AND subtest (`references/test-harness.md`) and the two-filter docs example
@@ -280,31 +337,45 @@ review raises it.
 **(b) An sdk-go-bundle product — use the client the resource itself uses.** Never
 `NewCloudAPIClientWithFailover`: it returns a `*ionoscloud.APIClient`
 (`services/bundleclient/bundleclient.go:432`), which cannot reach a bundle product's API at all.
-Take the same field the resource's CRUD takes (`r.bundle.DNSClient`, …) — it is already on the
-bundle the list resource holds, and it is also how the mapper reaches a writer that is a method on
-that client. Whether such a product is partitioned is a property of the **product**, not of the
-resource:
+If the resource takes a **field** off the bundle (`r.bundle.DNSClient`, …), take the same one — it
+is already on the bundle the list resource holds, and it is also how the mapper reaches a writer
+that is a method on that client.
+
+**Then answer the partition question from THIS resource, not from its product.** A product-level
+grep is corroboration, never the decision: a `locationToURL` map in a service package may serve
+only some of that product's APIs. `services/cert/provider.go` holds one, but it addresses the
+auto-certificate-provider paths — it says nothing about whether the certificate collection is
+partitioned. Deciding per product would decline `ionoscloud_certificate` for a map that does not
+apply to it. The three questions, in order:
+
+1. **Is the client built per location?** Grep (6) showing `.New<X>Client(ctx, location)` is a
+   direct yes — the resource cannot even construct a client without choosing a location.
+2. **Does the resource's own schema carry a `location`/`region` attribute?** If it does not, the
+   objects are not addressed by location and one call is the whole collection —
+   `ionoscloud_dns_zone` is the worked case: no location attribute, a client held as a field, one
+   `GET /zones`.
+3. **Only if 1 or 2 says partitioned**, ask whether the locations are enumerable:
 
 ```bash
-grep -rln 'locationToURL' --include=*.go services/            # partitioned by location
-grep -rln 'func AvailableLocations' --include=*.go services/  # partitioned AND enumerable
+# func form (dbaas v2) OR var form - the var is the common one, and nfs names its own differently.
+grep -rn 'AvailableLocations\|Valid[A-Za-z]*Locations *=' --include=*.go services/<product>/
 ```
 
-- **No hit in either → global, one call.** `services/dns` is the worked example
-  (`ionoscloud_dns_zone`): one `GET /zones`, no fan-out.
-- **`AvailableLocations()` → fan out over it.** Today `pgsqlv2`, `mariadbv2`, `inmemorydbv2`; copy
+- **Enumerable → fan out over it.** `pgsqlv2`, `mariadbv2`, `inmemorydbv2` expose it as a func;
+  `kafka`, `logging`, `vpn` as a package var, and `nfs` as `ValidNFSLocations` — so the fan-out
+  reads `for _, loc := range vpnservice.AvailableLocations`, not a call. Copy
   `internal/framework/services/pgsqlv2/resource_pg_cluster_list.go`. There is no
-  `AvailableLocations()` for the Cloud API, so the fan-out snippet in `sdkv2-branch.md` §2c cannot
-  be filled in for a branch (a) resource.
-- **`locationToURL` but no `AvailableLocations()` → stop and ask.** These products are
-  location-partitioned, so one call returns one location's worth of objects and a listing that
-  makes one call is silently incomplete — no error, nothing in the output to show it. Enumerating
-  the map's keys means adding an `AvailableLocations()` to that service package, which is a
-  provider change this skill does not get to make on its own. Run the greps rather than trusting a
-  list: at the time of writing the second set is `cert`, `kafka`, `logging`, `monitoring`, `nfs`,
-  `vpn`, `dbaas/mariadb`, `dbaas/inmemorydb`.
+  `AvailableLocations` for the Cloud API, so that snippet cannot be filled in for a branch (a)
+  resource.
+- **Partitioned but nothing enumerable → stop and ask.** Today that is `cert`, `monitoring`,
+  `dbaas/mariadb` and `dbaas/inmemorydb`, which have only an unexported `locationToURL`. One call
+  returns one location's worth of objects, and the listing is then silently incomplete — no error,
+  nothing in the output to show it. Enumerating the map's keys means exporting a location list
+  from that service package, a provider change this skill does not get to make on its own.
 
-Getting this wrong is silent both ways, which is why it is a decision and not a default.
+Run the greps; do not trust the product names above. They were accurate when written and the
+point of the check is that they will not stay so. Getting this wrong is silent in both directions,
+which is why it is a decision and not a default.
 
 ---
 

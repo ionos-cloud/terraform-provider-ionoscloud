@@ -279,13 +279,12 @@ author and live cloud resources, so it is not a way to run a unit test. Run rung
 Writing this is part of the arc; **running it is not**. The reference is
 `ionoscloud/resource_datacenter_test.go:133-213` (`TestAccDataCenterQuery`, 92 lines added by
 `79ad9715`) — copy its shape, not just the fragments below.
-`TestAccIPBlockQuery` (`ionoscloud/resource_ipblock_test.go:144-224`) is the same shape for an
-optional-`name` resource, and the only other standalone `TestAcc<Resource>Query` in `ionoscloud/`.
-The five framework-native list resources fold the same steps into their lifecycle tests instead —
-`internal/framework/services/pgsqlv2/resource_pg_cluster_v2_test.go` is the closest match. An
-earlier run of this skill also produced a `target_group` list resource, but that branch (PR #1041)
-closed unmerged, so `target_group` has no identity, no list resource and no query test today:
-nothing in the tree demonstrates a resource with no `location`.
+`TestAccIPBlockQuery` in `ionoscloud/resource_ipblock_test.go` is the same shape for an
+optional-`name` resource. The five framework-native list resources fold the same steps into their
+lifecycle tests instead — `internal/framework/services/pgsqlv2/resource_pg_cluster_v2_test.go` is
+the closest match. For the current set, `grep -l 'TestAcc.*Query' ionoscloud/*_test.go` rather than
+trusting a list here; note that everything it finds except the datacenter one was produced by an
+earlier run of this skill.
 
 ```go
 func TestAcc<Resource>Query(t *testing.T) {

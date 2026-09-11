@@ -8,16 +8,23 @@ For a managed resource still implemented with `terraform-plugin-sdk/v2` (anythin
 - `ionoscloud/list_resources.go` — registration
 - `internal/framework/identity/sdkv2.go` — the two shared helpers everything above leans on
 
-`ionoscloud/resource_ipblock_list.go` is the second — and, today, the last — worked example:
-an optional `name` (so a `DisplayName` fallback, §2c), an explicit `Limit`, and a state writer
-that is *exported* (`IpBlockSetData`, §2d).
+`ionoscloud/resource_ipblock_list.go` is a second worked example: an optional `name` (so a
+`DisplayName` fallback, §2c), an explicit `Limit`, and a state writer that is *exported*
+(`IpBlockSetData`, §2d).
 
-Those two are the whole set. `ionoscloud_datacenter` and `ionoscloud_ipblock` are the only
-SDKv2 resources that declare an `Identity` at all
-(`grep -l 'ResourceIdentity{' ionoscloud/*.go`), and `ionoscloud/list_resources.go` registers
-only their two list resources. Anything below about a lone-`id` identity, a child resource, or
-`MaxItems: 1` nested blocks is extrapolation from the existing schemas, not code you can go
-read.
+**Read the current set rather than a list written here — it grows every time this skill is used:**
+
+```bash
+grep -l 'ResourceIdentity{' ionoscloud/*.go   # which resources declare an identity
+cat ionoscloud/list_resources.go              # which list resources are registered
+```
+
+**Provenance matters when you read them.** `ionoscloud_datacenter` (PR #1034) is the shipped,
+independently reviewed reference. Everything else in that output was produced by an earlier run of
+*this skill* — a worked instance of these rules, still worth reading, but not independent
+corroboration of them. Where this file argues a rule from one of those, it is quoting itself.
+Guidance below about a child resource or `MaxItems: 1` nested blocks may still be extrapolation
+from the schemas; check the grep output before assuming an example exists.
 
 ## Why this is not just "a framework list resource"
 
@@ -253,6 +260,13 @@ Terraform sends an **empty `req.ID`** for an identity-based import; the real ide
 only in `d.Identity()`. So the importer must look at the identity first, and must set the ID
 itself before anything that reports on the resource.
 
+**This template is the Cloud API variant**, like §2c's: it builds
+`meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)` and calls a `FindById` on an
+`sdk-go/v6` API service. On the bundle branch take the client the resource's own importer already
+takes, drop the `location` from both the resolver signature and the client construction when the
+resource has none, and expect the fetch to be a method on the service client
+(`client.GetZoneById(ctx, id)`) rather than `<Api>.<FindById>(ctx, id).Execute()`.
+
 ```go
 func resource<Resource>Import(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	<resource>ID, location, err := <resource>ImportParts(d)
@@ -333,6 +347,9 @@ Three things worth knowing:
   rejects `""` — the fall-through returns `d.Id()` verbatim and the API is called with an
   empty ID. If your resolver does not go through `splitImportID`, add the guard yourself:
   `if d.Id() == "" { return "", fmt.Errorf("invalid import identifier: expected a <resource> UUID, got an empty string") }`.
+  That snippet returns **two** values because a plain-import-ID resource is normally locationless,
+  so its resolver is `func <resource>ImportParts(d) (string, error)`. The template above returns
+  three (`<resource>ID, location string, err error`) — match whichever arity your resolver has.
   No resource in the repo carries that guard yet, because no plain-import-ID resource has been
   given an identity. `resourceTargetGroupImport` in `ionoscloud/resource_target_group.go` is the
   unguarded shape to recognise: it takes `groupIp := d.Id()` and calls
@@ -559,11 +576,12 @@ func (r *<resource>ListResource) map<Resource>(_ context.Context, includeResourc
 		return nil, nil
 	}
 
-	name := shared.ToValueDefault(item.Properties.Name)
-	// … one local per filterable field
-
+	// Build the map from the accessors directly. Do NOT lift each filterable field into a
+	// single-use local first - the map keys already name the values, so the locals only
+	// add a line each and a second place to get the pairing wrong.
 	if !fwidentity.MatchesFilters(map[string]string{
-		"<field1>": name,
+		"<field1>": shared.ToValueDefault(item.Properties.<Field1>),
+		"<field2>": item.Properties.<Field2>,  // a value field needs no ToValueDefault
 		// … exactly the keys passed to FilterAttribute above
 	}, filters) {
 		return nil, nil
@@ -574,6 +592,14 @@ func (r *<resource>ListResource) map<Resource>(_ context.Context, includeResourc
 		diags.AddError("Failed to map the <resource>", err.Error())
 		return nil, diags
 	}
+
+	// CHILD RESOURCES ONLY: the parent ids. The state writer usually does not set them -
+	// they are not in the API object, they come from the fetch context - and the identity
+	// setter is about to read them back out. This is the one exception to "no attribute
+	// mapping of your own": set only parent ids, and only the ones the writer provably
+	// leaves unset. `ionoscloud_dns_record` is the live case, where SetRecordData never
+	// touches zone_id.
+	//   if err := data.Set("<parent>_id", <parentID>); err != nil { … }
 
 	// set<Resource>Identity reads id and location back out of the ResourceData, so it
 	// has to run after set<Resource>Data.
@@ -609,8 +635,17 @@ off the bundle rather than `NewCloudAPIClient*`, five things in the template abo
    zones, apiResponse, err := r.bundle.DNSClient.ListZones(ctx, "")
    ```
 
-2. **There is no `Depth`.** It is a Cloud API parameter. Drop it rather than hunting for an
-   equivalent — a bundle collection returns full properties already.
+2. **Check for `Depth` rather than assuming it away.** Most bundle collections have none — it is
+   primarily a Cloud API parameter, and dns, nfs, vpn, cert and kafka all lack it — but
+   `vmautoscaling`, which backs `ionoscloud_autoscaling_group`, **does** take one, and
+   `services/autoscaling/groups.go` already passes it on the by-id path. So grep before you drop:
+
+   ```bash
+   grep -n 'func (r Api<X>GetRequest) Depth' vendor/github.com/ionos-cloud/sdk-go-bundle/products/<product>/v2/api_<x>.go
+   ```
+
+   No hit → drop it, the collection returns full properties already. A hit → pass `.Depth(1)` for
+   the same reason the Cloud API branch does.
 
 3. **`Items` is a value slice**, not `*[]T`, so the `items.Items == nil` guard and the
    `*items.Items` deref both go away: `return zones.Items, nil`.
@@ -629,15 +664,32 @@ off the bundle rather than `NewCloudAPIClient*`, five things in the template abo
    the value ones.
 
 5. **The writer may be a method on that client**, called through the bundle:
-   `r.bundle.DNSClient.SetZoneData(data, zone)`, and taking its object **by value**. See §2d.
+   `r.bundle.DNSClient.SetZoneData(data, zone)`. Note it takes its object **by value** — drop the
+   `&` the Cloud API template passes (`set<Resource>Data(data, &item)`). See §2d.
 
-**One thing that does NOT change: filtering stays client-side.** A bundle list helper may accept a
-server-side filter (`ListZones(ctx, filterName)` pushes `filter.zoneName` down), but
-`StreamList`'s fetch closure is `func(context.Context) ([]T, error)` — it is never handed the
-filters, so `identity.FilterValue` cannot be reached from inside it. Pushing a filter down means
-reading `req.Config` a second time yourself, duplicating what `StreamList` already did. Pass the
-no-filter form and let the mapper filter, like every list resource in the tree; if you do push one
-down, the mapper must still re-check it.
+6. **The import block changes too.** §2a's list is Cloud-API-only: `ionoscloud
+   "github.com/ionos-cloud/sdk-go/v6"` is unused on this branch and will not compile. Import the
+   product package instead — `dns "github.com/ionos-cloud/sdk-go-bundle/products/dns/v2"` — and
+   keep `github.com/ionos-cloud/sdk-go-bundle/shared` only if you still call `ToValueDefault` on a
+   pointer field.
+
+**Push a filter down only when it removes API calls.** A bundle list helper may accept a
+server-side filter — `ListZones(ctx, filterName)` sends `filter.zoneName`. `StreamList`'s fetch
+closure is `func(context.Context) ([]T, error)` and is never handed the filters, but that is not a
+wall: the closure can capture `req` and re-read the config itself, which is exactly what the three
+regional list resources do —
+`internal/framework/services/pgsqlv2/resource_pg_cluster_list.go` calls
+`req.Config.GetAttribute(ctx, path.Root(identity.FiltersKey), &filters)` inside the fetch, then
+`identity.FilterValue(filters, "name")` and a `location` filter that narrows the fan-out, with the
+comment "Read filters early to skip unnecessary regional API calls". `mariadbv2` and
+`inmemorydbv2` are identical.
+
+That is the rule: **push down when it saves round trips** (a fan-out you can narrow, a collection
+you would otherwise page through), and otherwise pass the no-filter form and let the mapper do it —
+which is what the two Cloud API list resources and `ionoscloud_dns_zone` do, because a single
+global call costs the same either way. **Either way the mapper still re-checks**: pgsqlv2 pushes
+`name` down *and* calls `identity.MatchesFilters`, because a server-side filter's semantics are
+not guaranteed to match the exact compare the docs promise.
 
 **`DisplayName` when `name` is optional.** `DisplayName` is the label `terraform query` prints
 for each row. Datacenter's `name` is `Required: true`, so `shared.ToValueDefault(item.Properties.Name)`
@@ -646,7 +698,16 @@ is always populated — but that is not general: `ionoscloud/resource_ipblock.go
 `Name *string \`json:"name,omitempty"\``. Nothing enforces non-emptiness (the framework only
 reads `DisplayName` to detect a diagnostics-only event,
 `fwserver/server_listresource.go:189`), so an unnamed item silently renders as a blank row.
+**A third case: some resources have no `Name` property at all** — `ionoscloud_cdn_distribution`
+carries `Domain`, a user carries `Email`. Pick the closest human identifier the properties do
+carry, fall back to the id when it is empty, and never leave `DisplayName` blank: the framework
+reads a blank one as a diagnostics-only event. Which property to label rows with is a judgement
+call, so put it in the step 0.5 report rather than deciding it silently in the mapper.
+
 **Check the SDKv2 schema**: if `name` is not `Required: true`, fall back —
+
+A local **is** justified here, because the value is used twice — once to test for empty, once to
+pass on:
 
 ```go
 	displayName := shared.ToValueDefault(item.Properties.Name)
