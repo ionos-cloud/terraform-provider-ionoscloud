@@ -276,6 +276,16 @@ func stub<Resource>API(t *testing.T) string {
 			t.Errorf("expected depth=1 on the <collection-path> request, got %q", got)
 		}
 		// …and one per explicit .Limit(...)/other option the closure passes.
+		//
+		// On a fetch that sets NOTHING - an sdk-go-bundle collection has no depth, and
+		// decision 1 may leave the limit unset - assert the ABSENCE instead, or the
+		// request is entirely unpinned and a pushed-down filter added later goes
+		// unnoticed:
+		//   for _, param := range []string{"depth", "limit", "offset", "<filter-param>"} {
+		//       if got := r.URL.Query().Get(param); got != "" {
+		//           t.Errorf("expected no %s on the <collection-path> request, got %q", param, got)
+		//       }
+		//   }
 		w.Header().Set("Content-Type", "application/json")
 		if err := json.NewEncoder(w).Encode(<resource>s); err != nil {
 			t.Errorf("failed to write the stubbed response: %v", err)
@@ -287,6 +297,13 @@ func stub<Resource>API(t *testing.T) string {
 }
 ```
 
+- **An sdk-go-bundle stub must fill every non-omitempty enum field.** Bundle models validate
+  enums while unmarshalling, so a zero-valued one fails the *fetch*, not an assertion, and the
+  test dies with a diagnostic that names neither the field nor the item — the `ionoscloud_dns_zone`
+  stub first failed with `failed to list dns zones:  is not a valid ProvisioningState` because
+  `ZoneRead.Metadata.State` was left unset. Set it on **every** stub item, including the minimal
+  one whose whole point is that its optional fields are absent. The Cloud API models do not do
+  this, so nothing in the datacenter or ipblock tests prepares you for it.
 - `new("prod")` is the **Go 1.26 built-in** `new(value)`, not a local helper. `go.mod` declares
   `go 1.26.3`, so it compiles. Copilot has claimed it does not (this exact exchange happened on
   #1034); it is wrong. There is no repo-local `ptr`/`toPtr` helper, but note the vendored SDK
@@ -357,11 +374,15 @@ func stub<Resource>API(t *testing.T) string {
 		second := decode(t, results[1].Resource, resourceType)
 		assert.Equal(t, "<id-2>", second["id"])
 		assert.Nil(t, second["<optional-attribute>"])
-		// one assert.Nil per omitted optional ATTRIBUTE. For an omitted nested BLOCK
-		// (Optional ± Computed with an Elem: &schema.Resource{}) assert []any{} instead —
-		// the framework reifies a null list/set block to an empty one. ipblock's
-		// ip_consumers is the worked example, with the citations, at
-		// ionoscloud/resource_ipblock_list_test.go:120-125.
+		// one assert.Nil per omitted optional ATTRIBUTE - but check the WRITER before
+		// assuming nil. Two things produce []any{} instead:
+		//   - an omitted nested BLOCK (Optional ± Computed with an Elem: &schema.Resource{}):
+		//     the framework reifies a null list/set block to an empty one;
+		//   - a list ATTRIBUTE the writer d.Set()s unconditionally with a nil slice, which
+		//     materialises an EMPTY list rather than leaving the attribute null. SetZoneData
+		//     does exactly this with `nameservers`, so on ionoscloud_dns_zone that one
+		//     attribute decodes to []any{} while description and enabled decode to nil.
+		// Schema type alone does not settle it; what the writer does is half the answer.
 
 		// Only when `name` is Optional: the display-name fallback, and the name still null.
 		assert.Equal(t, "<id-3>", results[2].DisplayName)

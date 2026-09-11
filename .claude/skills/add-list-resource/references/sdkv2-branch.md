@@ -168,6 +168,11 @@ func set<Resource>Identity(d *schema.ResourceData) error {
 		return fmt.Errorf("error while setting id identity attribute for <resource> %s: %w", d.Id(), err)
 	}
 
+	// ONLY if `location` is in the identity you declared in 1a. A resource with no
+	// location declares a lone `id` and must not write this - setting an attribute the
+	// identity schema does not declare errors through MapFieldWriter, and panics rather
+	// than returning under TF_ACC (helper/schema/schema.go:657-659 makes panicOnError
+	// `os.Getenv("TF_ACC") != ""`). `ionoscloud_dns_zone` is the locationless example.
 	if err := identity.Set("location", d.Get("location")); err != nil {
 		return fmt.Errorf("error while setting location identity attribute for <resource> %s: %w", d.Id(), err)
 	}
@@ -508,6 +513,9 @@ func (r *<resource>ListResource) ListResourceConfigSchema(_ context.Context, _ l
 
 ### 2c. `List` and the mapper
 
+**This template is the Cloud API (`sdk-go/v6`) variant.** For an sdk-go-bundle product take the
+deltas listed after it — they are not optional adjustments, four of these lines do not compile.
+
 ```go
 func (r *<resource>ListResource) List(ctx context.Context, req list.ListRequest, stream *list.ListResultsStream) {
 	fwidentity.StreamList(ctx, stream, req,
@@ -585,6 +593,51 @@ func (r *<resource>ListResource) map<Resource>(_ context.Context, includeResourc
 ```
 
 Those last three statements are the entire mapping. §2d explains why that is enough.
+
+#### The sdk-go-bundle deltas
+
+Step 0's grep (6) told you which branch you are on. If the resource's CRUD takes a `<Product>Client`
+off the bundle rather than `NewCloudAPIClient*`, five things in the template above change.
+`ionoscloud_dns_zone` is the worked example — it was written from this list, and this list from it.
+
+1. **The client is the resource's own, and it is already on the bundle.** Not
+   `NewCloudAPIClientWithFailover`, which returns a `*ionoscloud.APIClient` that cannot reach a
+   bundle product at all. Prefer the service package's own list helper where there is one, so the
+   list resource reads exactly what the sibling data source reads:
+
+   ```go
+   zones, apiResponse, err := r.bundle.DNSClient.ListZones(ctx, "")
+   ```
+
+2. **There is no `Depth`.** It is a Cloud API parameter. Drop it rather than hunting for an
+   equivalent — a bundle collection returns full properties already.
+
+3. **`Items` is a value slice**, not `*[]T`, so the `items.Items == nil` guard and the
+   `*items.Items` deref both go away: `return zones.Items, nil`.
+
+4. **The element's `Id` and `Properties` are values, not pointers.** `if item.Id == nil ||
+   item.Properties == nil` does not compile. The only unusable item is one with an empty id:
+
+   ```go
+   if zone.Id == "" {
+       return nil, nil
+   }
+   ```
+
+   Fields *inside* `Properties` are still a mix — `ZoneName` is a plain `string`, `Description` a
+   `*string` — so `shared.ToValueDefault` still applies to the pointer ones and must not be used on
+   the value ones.
+
+5. **The writer may be a method on that client**, called through the bundle:
+   `r.bundle.DNSClient.SetZoneData(data, zone)`, and taking its object **by value**. See §2d.
+
+**One thing that does NOT change: filtering stays client-side.** A bundle list helper may accept a
+server-side filter (`ListZones(ctx, filterName)` pushes `filter.zoneName` down), but
+`StreamList`'s fetch closure is `func(context.Context) ([]T, error)` — it is never handed the
+filters, so `identity.FilterValue` cannot be reached from inside it. Pushing a filter down means
+reading `req.Config` a second time yourself, duplicating what `StreamList` already did. Pass the
+no-filter form and let the mapper filter, like every list resource in the tree; if you do push one
+down, the mapper must still re-check it.
 
 **`DisplayName` when `name` is optional.** `DisplayName` is the label `terraform query` prints
 for each row. Datacenter's `name` is `Required: true`, so `shared.ToValueDefault(item.Properties.Name)`
@@ -684,14 +737,27 @@ The templates spell the writer `set<Resource>Data` because that is the majority 
 `package ionoscloud`, but **the name is not the contract, the signature is.** Grep before you
 write the mapper:
 
+**Follow Read; do not grep for a name.** A name grep misses on both sides: `func .*SetData`
+requires the literal "SetData", `func set.*Data` also matches unrelated helpers, and for a bundle
+product the writer is not in `ionoscloud/` at all. The read function always calls it, so read the
+read function:
+
 ```bash
-grep -n 'func .*SetData\|func set.*Data' ionoscloud/resource_<resource>.go
+grep -n 'ReadContext:' ionoscloud/resource_<resource>.go   # names the read func
+sed -n '/func <thatFunc>/,/^}/p' ionoscloud/resource_<resource>.go
 ```
 
-The mapper can call any writer shaped `func(d *schema.ResourceData, obj *<sdk>.<X>) error` — one
-`ResourceData`, one object of the element type the collection endpoint returns, an `error`.
-Spelling varies and does not matter: `setDatacenterData` is unexported, `IpBlockSetData` is
-exported, and the ipblock list resource calls the exported name directly with no adapter.
+The mapper can call any writer shaped `func(d *schema.ResourceData, obj <sdk>.<X>) error` — one
+`ResourceData`, one object of the element type the collection endpoint returns, an `error`. Neither
+the spelling, the receiver, nor the package matters:
+
+- `setDatacenterData` — unexported, package-level, takes its object by pointer.
+- `IpBlockSetData` — exported, package-level; the list resource calls it directly, no adapter.
+- `SetZoneData` — a **method** on the product's service client (`services/dns/zone.go`), taking its
+  object by value. The mapper already holds the bundle, so it is reachable as
+  `r.bundle.DNSClient.SetZoneData(data, zone)` and living outside package `ionoscloud` costs
+  nothing. It also calls `d.SetId` itself, which not every writer does — check, because the
+  identity setter reads the id back out of the `ResourceData`.
 
 **A writer that needs arguments the mapper cannot supply is telling you something about the
 resource.** Several writers in this package take more than that pair: `setBackupUnitData` also

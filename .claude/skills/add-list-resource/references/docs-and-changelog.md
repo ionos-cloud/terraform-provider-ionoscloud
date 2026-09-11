@@ -154,7 +154,7 @@ non-regional resource; the template marks them "regional services only" for that
 
 ### 2a. Pagination caveat — for any single-unpaginated-call implementation
 
-Two variants — pick by whether the fetch passes an explicit `.Limit(n)`.
+Three variants — pick by what the vendored client actually sends (SKILL.md decision 1).
 
 *No explicit limit (the SDK's own fallback applies):*
 
@@ -177,6 +177,23 @@ Two variants — pick by whether the fetch passes an explicit `.Limit(n)`.
 > missing <things> simply do not appear. Check that the number of generated resource blocks
 > matches the number of <things> you expect before treating `imported.tf` as complete.
 ```
+
+*No limit sent at all — the client has no default (the sdk-go-bundle norm):*
+
+```markdown
+> **Note:** The <things> are read with a single `<METHOD> <path>` request. Unlike the Cloud API
+> endpoints, the IONOS <product> SDK sends no `limit` at all when none is asked for, so the page
+> size is whatever the server applies by default — this provider does not set one, and the value
+> the server uses is not verified here. A contract holding more <things> than one response returns
+> is truncated silently — no error is raised and the missing <things> simply do not appear. Check
+> that the number of generated resource blocks matches the number of <things> you expect before
+> treating `imported.tf` as complete.
+```
+
+This is the `ionoscloud_dns_zone` wording. Use it whenever the limit grep returns nothing: the
+honest statement is that no number is known, and inventing one to satisfy the Definition of done is
+worse than saying so. If the request type has no `Limit`/`Offset` at all, the endpoint does not page
+— say the response carries everything and drop the truncation warning entirely.
 
 **Never write "the API's default page limit".** The fallback is sent by the *SDK client*, not
 applied by the endpoint (`sdk-go/v6/api_<x>.go`, the `DefaultQueryParams.Get("limit")` branch),
@@ -206,6 +223,8 @@ literal, never the comment.
 ```bash
 # the vendored file names are snake_cased: api_ip_blocks.go, api_target_groups.go
 grep -n 'Add("limit", parameterToString(' vendor/github.com/ionos-cloud/sdk-go/v6/api_<x>.go
+# sdk-go-bundle product - same grep, different tree; expect NO hit:
+grep -n 'Add("limit", parameterToString(' vendor/github.com/ionos-cloud/sdk-go-bundle/products/<product>/v2/api_<x>.go
 grep -n 'Limit(' ionoscloud/data_source_<resource>.go
 ```
 
