@@ -20,16 +20,29 @@ deliverable is the whole arc, not just the Go file:
 5. a query step on the resource's tagged acceptance test (written, not run)
 6. `docs/list-resources/<x>.md` + an identity/query section on `docs/resources/<x>.md`
 7. `CHANGELOG.md`
-8. verification — **then stop and report**
+8. verification — **then stop, report what changed, and ask**
 
 A list resource without an identity, or with a test that passes when the mapper is wrong,
 is not done. Both were real findings on #1034.
 
-**Where the arc ends.** Deliver the files and the verification results, then stop.
-`git commit`, `git push`, `gh pr create` and replying to a review comment are writes the
-maintainer makes, or explicitly asks you to make — never a step you take because the
-checklist has one line left. `references/verify-and-pr.md` documents *how*, for when
-you are asked; it is not permission.
+**Where the arc ends.** The run ends with the work sitting **uncommitted in the working
+tree** — modified and new files, nothing staged, no branch created, no commit, no push, no
+`gh` write. Report what changed (a `git status --short` listing and the verification results),
+then **ask the user what else, if anything, to do**. Name the candidates, so the question is
+answerable rather than an open-ended nudge:
+
+- commit the change — and with what subject;
+- push the branch, open the PR;
+- run rung 5's expensive `go vet -tags=all ./...`, if you offered to leave that to CI;
+- run the tagged acceptance test, or a live `terraform query` check — both spend real IONOS
+  credentials and create real cloud resources, so neither is ever yours to start;
+- carry on to another resource.
+
+Then stop and wait for the answer. `git commit`, `git push`, `gh pr create` and replying to a
+review comment are writes the maintainer makes, or explicitly asks you to make — never a step
+you take because the checklist has one line left, and never one the closing question talks you
+into. `references/verify-and-pr.md` documents *how*, for when you are asked; it is not
+permission.
 
 ---
 
@@ -235,7 +248,7 @@ grep -rn 'func AvailableLocations' --include=*.go services/   # no hit for your 
 | 3 | The unit test, then the mutation check | `references/test-harness.md` |
 | 4 | Docs + CHANGELOG | `references/docs-and-changelog.md` |
 | 5 | Verification ladder | below |
-| 6 | **Stop and report.** Commit / PR / review replies only when the user asks | `references/verify-and-pr.md` |
+| 6 | **Stop, report, ask.** Files left uncommitted; commit / PR / review replies only when the user asks | `references/verify-and-pr.md` |
 
 Do them in that order. Step 1 is a hard prerequisite for step 2: a resource with no
 `Identity` cannot be listed at all — `identity.SetRawV6Schemas` gives up, and
@@ -379,7 +392,8 @@ go mod vendor && git status --porcelain vendor/
 `vendor/modules.txt` and adds vendored sources while leaving `go.mod`/`go.sum` untouched.
 That is exactly what happened on #1034 with `terraform-plugin-mux/tf5to6server/translate`.
 Run the vendor half even when the tidy half is clean, and **report `vendor/` as part of the
-change** so it goes in the same commit — do not run `git commit` yourself.
+change** so it lands in whatever commit the maintainer makes — do not run `git commit`
+yourself.
 
 **Rung 5 — expensive, exactly once, at the very end:**
 ```bash
@@ -442,7 +456,11 @@ the hazard in `references/docs-and-changelog.md` §2b.
 - [ ] Ladder rungs 0–5 clean, **2b included**
 - [ ] The pagination decision is written down somewhere a reviewer will find it, with this
       endpoint's real default limit
-- [ ] Reported, not committed: no `git commit`, `git push` or `gh` write unless the user asked
+- [ ] Left uncommitted: every file modified or created sits in the working tree, nothing
+      staged, nothing committed — no `git commit`, `git push` or `gh` write unless the user
+      asked for it in so many words
+- [ ] Reported what changed, then **asked what to do next** — the run ends on that question,
+      not on a silent stop and not on a next step you chose yourself
 
 ## Reference files
 

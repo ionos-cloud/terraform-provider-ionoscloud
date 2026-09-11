@@ -78,6 +78,10 @@ from `dupl`/`errcheck`/`gocyclo`/`gosec`/`unparam`/`unused` — but **not** from
 
 ## 2. Branch, commit, PR
 
+**The skill run ends before this section.** SKILL.md's "Where the arc ends" leaves the work
+uncommitted in the working tree and closes by asking the user what to do next. Nothing below
+happens until that question comes back "commit it" / "open the PR".
+
 Branch: `feat/<resource>-list-resource-identity`. The repo's dominant style is
 `<type>/<kebab-slug>` with the same vocabulary as the commit prefix.
 
