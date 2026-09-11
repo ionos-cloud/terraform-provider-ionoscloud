@@ -9,13 +9,137 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/querycheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 
 	dns "github.com/ionos-cloud/sdk-go-bundle/products/dns/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
+
+// TestAccDNSZoneQuery covers `terraform query` against the dns zone list resource, and
+// the resource identity it streams. It uses its own zone name and its own resource label:
+// querycheck.ExpectLength asserts a CONTRACT-WIDE total, so reusing the suite's shared
+// fixture would make ExpectLength(1) flap as soon as another test creates a zone.
+func TestAccDNSZoneQuery(t *testing.T) {
+	const (
+		queryZoneName        = "tf-test-query.com"
+		queryZoneDescription = "zone for the query acceptance test"
+		queryZoneUpdatedDesc = "zone for the query acceptance test, updated"
+		queryZoneAddr        = constant.DNSZoneResource + ".test_dns_zone_query"
+	)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() { testAccPreCheck(t) },
+		// `terraform query` and list blocks were introduced in Terraform 1.14.
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version1_14_0),
+		},
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccDNSZoneDestroyCheck,
+		Steps: []resource.TestStep{
+			{
+				Config: fmt.Sprintf(`
+resource %[1]q "test_dns_zone_query" {
+  name        = %[2]q
+  description = %[3]q
+  enabled     = true
+}`, constant.DNSZoneResource, queryZoneName, queryZoneDescription),
+			},
+			// List without filters: the zone must show up with its identity. A dns zone
+			// has no location, so the identity is a lone id.
+			{
+				Query: true,
+				Config: fmt.Sprintf(`list %[1]q "test_dns_zone_query" {
+  provider = ionoscloud
+}`, constant.DNSZoneResource),
+				QueryResultChecks: []querycheck.QueryResultCheck{
+					querycheck.ExpectIdentity(queryZoneAddr, map[string]knownvalue.Check{
+						"id": knownvalue.NotNull(),
+					}),
+				},
+			},
+			// Filter by name: the unique zone name guarantees exactly one result.
+			{
+				Query: true,
+				Config: fmt.Sprintf(`list %[1]q "test_dns_zone_query" {
+  provider = ionoscloud
+  config {
+    filters = [
+      { field_name = "name", field_value = %[2]q },
+    ]
+  }
+}`, constant.DNSZoneResource, queryZoneName),
+				QueryResultChecks: []querycheck.QueryResultCheck{
+					querycheck.ExpectLength(queryZoneAddr, 1),
+				},
+			},
+			// Same name, a description that does not belong to it. A dns zone has no
+			// location, so `description` is the only other allow-listed field that can
+			// discriminate, and this is what proves the filters are ANDed.
+			{
+				Query: true,
+				Config: fmt.Sprintf(`list %[1]q "test_dns_zone_query" {
+  provider = ionoscloud
+  config {
+    filters = [
+      { field_name = "name",        field_value = %[2]q },
+      { field_name = "description", field_value = %[3]q },
+    ]
+  }
+}`, constant.DNSZoneResource, queryZoneName, queryZoneUpdatedDesc),
+				QueryResultChecks: []querycheck.QueryResultCheck{
+					querycheck.ExpectLength(queryZoneAddr, 0),
+				},
+			},
+			// Description only. `name` is ForceNew on a dns zone, so this is the one step
+			// that actually enters zoneUpdate - which writes the identity itself, because
+			// it does not delegate to the read.
+			{
+				Config: fmt.Sprintf(`
+resource %[1]q "test_dns_zone_query" {
+  name        = %[2]q
+  description = %[3]q
+  enabled     = true
+}`, constant.DNSZoneResource, queryZoneName, queryZoneUpdatedDesc),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(queryZoneAddr, "name", queryZoneName),
+					resource.TestCheckResourceAttr(queryZoneAddr, "description", queryZoneUpdatedDesc),
+				),
+			},
+			// The same AND filter as above, which matched nothing before the update and
+			// must match exactly this zone after it - so the listing is reading the
+			// updated state rather than a cached one.
+			{
+				Query: true,
+				Config: fmt.Sprintf(`list %[1]q "test_dns_zone_query" {
+  provider = ionoscloud
+  config {
+    filters = [
+      { field_name = "name",        field_value = %[2]q },
+      { field_name = "description", field_value = %[3]q },
+    ]
+  }
+}`, constant.DNSZoneResource, queryZoneName, queryZoneUpdatedDesc),
+				QueryResultChecks: []querycheck.QueryResultCheck{
+					querycheck.ExpectLength(queryZoneAddr, 1),
+				},
+			},
+			// Import through the resource identity that the list results carry. This kind
+			// already checks that the import succeeds, that the plan it leaves behind is a
+			// no-op and that the planned identity matches the one in state; ImportStateVerify
+			// cannot be combined with it, only ImportCommandWithID reads that field.
+			{
+				ResourceName:    queryZoneAddr,
+				ImportState:     true,
+				ImportStateKind: resource.ImportBlockWithResourceIdentity,
+			},
+		},
+	})
+}
 
 func TestAccDNSZone(t *testing.T) {
 	var Zone dns.ZoneRead

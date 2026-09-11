@@ -44,3 +44,34 @@ The resource can be imported using the `zone_id`, for example:
 ```shell
 terraform import ionoscloud_dns_zone.examplezone_id
 ```
+
+From Terraform 1.14 onwards it can also be imported through its resource identity, which is what
+`terraform query` results carry:
+
+```hcl
+import {
+  to = ionoscloud_dns_zone.example
+  identity = {
+    id = "zone_id"
+  }
+}
+```
+
+### Identity Schema
+
+#### Required
+
+* `id` (String) The UUID of the DNS zone.
+
+## Query (List Resource)
+
+DNS zones can be listed using `terraform query` (requires Terraform 1.14+). List blocks must be placed in a dedicated query file, whose name ends in `.tfquery.hcl` (for example `queries.tfquery.hcl`).
+
+```hcl
+list "ionoscloud_dns_zone" "all" {
+  provider         = ionoscloud
+  include_resource = true
+}
+```
+
+See the [`ionoscloud_dns_zone` list resource documentation](../list-resources/dns_zone.md) for filters and the full attribute reference.

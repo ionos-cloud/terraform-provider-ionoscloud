@@ -3,6 +3,8 @@
 ### Features
 - `ionoscloud_ipblock`: New list resource, queryable with `terraform query` (requires Terraform 1.14+).
 - `ionoscloud_ipblock`: Add a resource identity (`id`, `location`), which also enables `import` blocks with an `identity` attribute.
+- `ionoscloud_dns_zone`: New list resource, queryable with `terraform query` (requires Terraform 1.14+).
+- `ionoscloud_dns_zone`: Add a resource identity (`id`), which also enables `import` blocks with an `identity` attribute.
 
 ## 6.7.37
 
