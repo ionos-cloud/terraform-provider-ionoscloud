@@ -111,6 +111,15 @@ grep -rn 'IdentitySchema' internal/framework/services/<service>/
 ls docs/list-resources/
 find ionoscloud internal/framework/services -name '*_list.go'
 cat ionoscloud/list_resources.go
+
+# 6. WHICH SDK is the resource on?  Do not skip this - it decides the client, the
+#    model shape, and where the state writer lives.  See Step 0.5 decision 4.
+grep -n 'bundleclient.SdkBundle)\.' ionoscloud/resource_<resource>.go
+
+# 7. Find the state writer by FOLLOWING READ, not by guessing its name.  Read the
+#    function ReadContext points at, and take the call it makes after the fetch.
+grep -n 'ReadContext:' ionoscloud/resource_<resource>.go   # names the read func
+sed -n '/func <thatFunc>/,/^}/p' ionoscloud/resource_<resource>.go
 ```
 
 - Hit in (2), not (3) → **SDKv2-backed**. Read `references/sdkv2-branch.md`. This is the
@@ -133,6 +142,20 @@ Then find the API call that lists them — **if there isn't one, stop**:
 grep -rhoE "func \(a \*[A-Za-z0-9]+\) [A-Za-z0-9]+(Get|List)\(ctx _?context\.Context\) Api[A-Za-z0-9]+Request" \
   vendor/github.com/ionos-cloud/ | sed 's/^func (a \*//' | sort -u
 ```
+
+**(6) has three outcomes.** `NewCloudAPIClient` / `NewCloudAPIClientWithFailover` means the Cloud
+API (`sdk-go/v6`) and every template below applies as written. Any other field - `DNSClient`,
+`NFSClient`, `VPNClient`, … - means an **sdk-go-bundle product**, where the client, the collection
+model and the writer all differ; `references/sdkv2-branch.md` §2c has the deltas, and
+`ionoscloud_dns_zone` is the worked example. A framework-native resource takes neither.
+
+**(7) is a gate, not background reading.** The writer is the contract: the mapper can only call it
+if it can supply every argument. `(d *schema.ResourceData, <apiObject>)` is fine whether it is a
+package-level func (`setDatacenterData`), an exported one (`IpBlockSetData`) or a **method on the
+product's service client** (`func (c *Client) SetZoneData(d, zone)` in `services/dns/zone.go`, which
+the mapper reaches through the bundle it already holds). A writer that needs a `context.Context`, an
+API client to make further calls, or an object the collection GET does not return is the one thing
+that can end the job: say so and stop, rather than hand-mapping attributes.
 
 A resource whose collection GET needs a parent ID (`DatacentersLansGet(ctx, datacenterId)`,
 `K8sNodepoolsGet(ctx, clusterId)`, …) is a **bad candidate**: listing it means enumerating
@@ -165,9 +188,22 @@ already does. The default is *not* uniform — it is 1000 for most Cloud API col
 `DefaultQueryParams`:
 
 ```bash
-grep -n 'parameterToString(1\?0*, "")' vendor/github.com/ionos-cloud/sdk-go/v6/api_<x>.go
+# Cloud API (sdk-go/v6). The anchored form - a bare 1\?0* also matches the depth
+# and offset defaults, which is why this greps the limit parameter by name.
+grep -n 'Add("limit", parameterToString(' vendor/github.com/ionos-cloud/sdk-go/v6/api_<x>.go
+
+# sdk-go-bundle product: same grep, different tree.
+grep -n 'Add("limit", parameterToString(' vendor/github.com/ionos-cloud/sdk-go-bundle/products/<product>/v2/api_<x>.go
+
 grep -n 'Limit(' ionoscloud/data_source_<resource>.go
 ```
+
+**Three outcomes, not two.** A number means the client sends that default. **No hit at all** means
+the client sends no limit and the server's own page size governs - that is the bundle norm, and
+`ionoscloud_dns_zone` is the case in point, so the docs note cannot name a number and must not
+invent one. **No `Limit`/`Offset` method on the request type** means the endpoint has no paging at
+all, and both stock doc notes are then false - say the endpoint returns everything in one response
+and drop the truncation warning.
 
 If the data source sets an explicit `Limit(...)` — `data_source_ipblock.go:146` passes
 `constant.IPBlockLimit` (1000) — then a bare `.Depth(1)` fetch caps the *list resource* below
@@ -188,6 +224,15 @@ Nothing enforces this; a mismatch means a filter silently matches nothing. Defau
 `name` plus the regional key under whatever name *the resource's own schema* uses
 (`location` vs `region`).
 
+**If the resource has no regional key, that default leaves you with one field, and one field is not
+enough** - the mandatory AND subtest (`references/test-harness.md`) and the two-filter docs example
+both need two allow-listed fields that can match different items. Pick the second deliberately from
+the remaining **string** attributes: `MatchesFilters` compares strings, so a bool or a list cannot
+be filtered on at all. `ionoscloud_dns_zone` is the worked case - `name` plus `description`, with
+`enabled` (bool) and `nameservers` (list) excluded for that reason. If nothing else can narrow, say
+so and drop the AND subtest and the second doc example rather than allow-listing a field that
+always matches.
+
 Two checks before you settle the list:
 
 - **Drop any field that cannot narrow.** A field whose schema validator admits exactly one
@@ -204,38 +249,62 @@ Two checks before you settle the list:
   wrongly-cased `field_value` is silent. Say so in the docs whenever a filterable field is a
   case-insensitively-validated enum.
 
-**4. Regional or global.** Decide from the **shape of the collection endpoint**, not from the
-managed resource's client constructor. The constructor is a red herring: `resource_datacenter.go`
-calls `NewCloudAPIClient(ctx, location)` on every CRUD path, yet the datacenter *list* resource
-uses `NewCloudAPIClientWithFailover(ctx)` and makes one call — because `location` there only
-selects an endpoint override (`bundleclient.go:393-417`), it does not partition the collection.
+**4. Which client, and regional or global.** Start from step 0's grep (6): the client the
+resource's own CRUD takes off `bundleclient.SdkBundle` decides which of three branches you are on.
+Read it as "which SDK", not "which endpoint" — within the Cloud API branch the constructor does
+*not* tell you whether to fan out, which is the trap below.
 
-- **Cloud API (`sdk-go/v6`) — always global.** `/datacenters`, `/ipblocks` and the rest are
-  single un-partitioned collections that return objects from every location in one response.
-  Use `NewCloudAPIClientWithFailover(ctx)` and one call; copy the client construction inside
-  `datacenterListResource.List` (`ionoscloud/resource_datacenter_list.go`). Its doc comment
-  says "intended for resources that do not have a location attribute", but datacenter has one
-  and uses it anyway — for a *collection read* that is correct. Fanning out here re-reads the
-  same global collection N times and returns every item N times.
+**(a) Cloud API (`sdk-go/v6`) — always global.** The collection endpoint shape, not the
+constructor, settles the fan-out here: `resource_datacenter.go` calls
+`NewCloudAPIClient(ctx, location)` on every CRUD path, yet the datacenter *list* resource uses
+`NewCloudAPIClientWithFailover(ctx)` and makes one call — because `location` there only selects an
+endpoint override (`bundleclient.go:393-417`), it does not partition the collection.
+`/datacenters`, `/ipblocks` and the rest are single un-partitioned collections that return objects
+from every location in one response. Use `NewCloudAPIClientWithFailover(ctx)` and one call; copy
+the client construction inside `datacenterListResource.List`
+(`ionoscloud/resource_datacenter_list.go`). Its doc comment says "intended for resources that do
+not have a location attribute", but datacenter has one and uses it anyway — for a *collection
+read* that is correct. Fanning out here re-reads the same global collection N times and returns
+every item N times.
 
-  *Known limitation of the pattern, not something you have to solve.*
-  `NewCloudAPIClientWithFailover` resolves its endpoint from **global** cloud overrides only
-  (`FilterGlobalOverrides` keeps the entries whose `location` is empty), so a file config that
-  overrides the cloud product with per-location endpoints and no global one makes it hard-error
-  with `no global failover endpoints configured for "cloud"` — on a configuration where the
-  managed resource's own `NewCloudAPIClient(ctx, location)` is fine, because that one falls back
-  the other way (location override first, global second). The shipped `ionoscloud_datacenter`
-  list resource has the same hole. Follow the pattern anyway; just have the answer ready if
-  review raises it.
-- **Regional = an sdk-go-bundle DBaaS product that exposes `AvailableLocations()`** in
-  `services/dbaas/<product>/client.go` — today exactly `pgsqlv2`, `mariadbv2`, `inmemorydbv2`.
-  Only then fan out; copy `internal/framework/services/pgsqlv2/resource_pg_cluster_list.go`.
-  There is **no `AvailableLocations()` for the Cloud API**, so the fan-out snippet in
-  `sdkv2-branch.md` §2c cannot even be filled in for one.
+*Known limitation of the pattern, not something you have to solve.*
+`NewCloudAPIClientWithFailover` resolves its endpoint from **global** cloud overrides only
+(`FilterGlobalOverrides` keeps the entries whose `location` is empty), so a file config that
+overrides the cloud product with per-location endpoints and no global one makes it hard-error
+with `no global failover endpoints configured for "cloud"` — on a configuration where the
+managed resource's own `NewCloudAPIClient(ctx, location)` is fine, because that one falls back
+the other way (location override first, global second). The shipped `ionoscloud_datacenter`
+list resource has the same hole. Follow the pattern anyway; just have the answer ready if
+review raises it.
+
+**(b) An sdk-go-bundle product — use the client the resource itself uses.** Never
+`NewCloudAPIClientWithFailover`: it returns a `*ionoscloud.APIClient`
+(`services/bundleclient/bundleclient.go:432`), which cannot reach a bundle product's API at all.
+Take the same field the resource's CRUD takes (`r.bundle.DNSClient`, …) — it is already on the
+bundle the list resource holds, and it is also how the mapper reaches a writer that is a method on
+that client. Whether such a product is partitioned is a property of the **product**, not of the
+resource:
 
 ```bash
-grep -rn 'func AvailableLocations' --include=*.go services/   # no hit for your product -> global
+grep -rln 'locationToURL' --include=*.go services/            # partitioned by location
+grep -rln 'func AvailableLocations' --include=*.go services/  # partitioned AND enumerable
 ```
+
+- **No hit in either → global, one call.** `services/dns` is the worked example
+  (`ionoscloud_dns_zone`): one `GET /zones`, no fan-out.
+- **`AvailableLocations()` → fan out over it.** Today `pgsqlv2`, `mariadbv2`, `inmemorydbv2`; copy
+  `internal/framework/services/pgsqlv2/resource_pg_cluster_list.go`. There is no
+  `AvailableLocations()` for the Cloud API, so the fan-out snippet in `sdkv2-branch.md` §2c cannot
+  be filled in for a branch (a) resource.
+- **`locationToURL` but no `AvailableLocations()` → stop and ask.** These products are
+  location-partitioned, so one call returns one location's worth of objects and a listing that
+  makes one call is silently incomplete — no error, nothing in the output to show it. Enumerating
+  the map's keys means adding an `AvailableLocations()` to that service package, which is a
+  provider change this skill does not get to make on its own. Run the greps rather than trusting a
+  list: at the time of writing the second set is `cert`, `kafka`, `logging`, `monitoring`, `nfs`,
+  `vpn`, `dbaas/mariadb`, `dbaas/inmemorydb`.
+
+Getting this wrong is silent both ways, which is why it is a decision and not a default.
 
 ---
 
@@ -264,10 +333,15 @@ in-package test that imports `internal/framework/provider`, so the reverse impor
 in the test build. Framework code in `ionoscloud/` looks wrong and is not; a list resource can
 only be written with terraform-plugin-framework, whichever half of the mux its resource is on.
 
-The state writer's name is **not** uniform, so read the resource file instead of assuming:
-`resource_datacenter.go` has the unexported `setDatacenterData`, `resource_ipblock.go` the
-exported `IpBlockSetData`. `set<X>Data` everywhere in this skill is a placeholder for whatever
-that resource calls its writer, not a name to grep for.
+The state writer's name is **not** uniform, and neither is its *kind*, so follow Read rather than
+assuming either: `resource_datacenter.go` has the unexported package-level `setDatacenterData`,
+`resource_ipblock.go` the exported `IpBlockSetData`, and `ionoscloud_dns_zone` has no writer in
+package `ionoscloud` at all — it is a method on the product's service client,
+`func (c *Client) SetZoneData(d *schema.ResourceData, zone dns.ZoneRead) error` in
+`services/dns/zone.go`, which the mapper calls as `r.bundle.DNSClient.SetZoneData(data, zone)`.
+`set<X>Data` everywhere in this skill is a placeholder for whatever that resource calls its writer,
+not a name to grep for. A writer that already calls `d.SetId` (SetZoneData does) needs nothing extra
+from the mapper; one that does not leaves the mapper to set the id before the identity setter runs.
 
 | SDKv2-backed | framework-native |
 |---|---|
@@ -444,8 +518,9 @@ the hazard in `references/docs-and-changelog.md` §2b.
       distinction (an omitted nested **block** can decode to `[]any{}` rather than nil —
       `test-harness.md`) — and **the mutation check was run and failed**
 - [ ] One filter subtest **per field** in the `FilterAttribute(...)` allow-list, plus an AND
-      case; and the stub asserts the query params the fetch closure sets (`depth`, and `limit`
-      when an explicit one is passed)
+      case; and the stub asserts the query params of the fetch request — `depth` and `limit` when
+      they are set, and their **absence** when they are not (a fetch that deliberately sets nothing
+      is unpinned otherwise, and a pushed-down filter added later goes unnoticed)
 - [ ] A `Query: true` step on the resource's tagged acceptance test (written; **not run**),
       plus a non-ForceNew update step whenever Update writes the identity itself
 - [ ] `docs/list-resources/<resource>.md` + the pointer section on `docs/resources/<resource>.md`
@@ -455,7 +530,9 @@ the hazard in `references/docs-and-changelog.md` §2b.
       counter-example are in `references/docs-and-changelog.md` §4 — re-run it just before merge
 - [ ] Ladder rungs 0–5 clean, **2b included**
 - [ ] The pagination decision is written down somewhere a reviewer will find it, with this
-      endpoint's real default limit
+      endpoint's real default limit — or, when the client sends no limit at all (the bundle norm)
+      or the endpoint has no paging, with that stated instead. Never name a number you did not
+      read out of the vendored client
 - [ ] Left uncommitted: every file modified or created sits in the working tree, nothing
       staged, nothing committed — no `git commit`, `git push` or `gh` write unless the user
       asked for it in so many words

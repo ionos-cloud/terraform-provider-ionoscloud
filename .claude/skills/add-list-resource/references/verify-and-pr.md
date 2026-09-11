@@ -302,7 +302,9 @@ func TestAcc<Resource>Query(t *testing.T) {
 	// testAccCheck<Resource>ConfigBasic, which is keyed on constant.<Const>TestResource.
 	// The zero-result step needs a filter field that can actually discriminate: if the
 	// resource has no location, use another allow-listed field whose value the fixture does
-	// not use, never a field with one legal value.
+	// not use, never a field with one legal value. The dns zone query test is the worked
+	// locationless case - it pairs the fixture's `name` with a `description` belonging to a
+	// different value, then re-queries the same pair after an update makes it match.
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() { testAccPreCheck(t) },
@@ -348,7 +350,9 @@ The two fragments worth having in full:
 ```go
 					QueryResultChecks: []querycheck.QueryResultCheck{
 						querycheck.ExpectIdentity(<resource>Addr, map[string]knownvalue.Check{
-							"id":       knownvalue.NotNull(),
+							"id": knownvalue.NotNull(),
+							// ONLY for a resource whose identity declares location. A
+							// locationless resource asserts the lone `id` and nothing else.
 							"location": knownvalue.StringExact("us/las"),
 						}),
 					},
