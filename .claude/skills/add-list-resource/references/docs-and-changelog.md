@@ -223,15 +223,22 @@ literal, never the comment.
 ```bash
 # the vendored file names are snake_cased: api_ip_blocks.go, api_target_groups.go
 grep -n 'Add("limit", parameterToString(' vendor/github.com/ionos-cloud/sdk-go/v6/api_<x>.go
-# sdk-go-bundle product - same grep, different tree; expect NO hit:
-grep -n 'Add("limit", parameterToString(' vendor/github.com/ionos-cloud/sdk-go-bundle/products/<product>/v2/api_<x>.go
+# sdk-go-bundle product: this grep is USELESS there - the bundle generator emits every query
+# param through parameterAddToHeaderOrQuery, so it returns nothing whether or not a default is
+# sent. Read the emission and what guards it: inside `if r.limit != nil` means no default.
+sed -n '/func (a \*<X>ApiService) <Op>Execute/,/^}/p' \
+  vendor/github.com/ionos-cloud/sdk-go-bundle/products/<product>/v2/api_<x>.go | grep -n -B1 '"limit"'
 grep -n 'Limit(' ionoscloud/data_source_<resource>.go
 ```
 
-If the fetch passes an explicit `.Limit(n)` — match whatever the sibling data source already
-does — say `n`. If it does not, say the endpoint's default. Note which of the two it is, and
-that whether the server honours the request is unverified. What you must not do is copy
-datacenter's "1000" onto an endpoint that defaults to 100.
+Three cases, matching SKILL.md decision 1. If the fetch passes an explicit `.Limit(n)` — match
+whatever the sibling data source already does — say `n`. If it does not and the client sends a
+default, say that default. If it does not and the client sends **nothing**, say that no limit is
+requested and the server's page size governs — and check the request type's doc comment before
+concluding no number is knowable: on a client with no generated default the comment is the only
+evidence there is, so quote it, attribute it to the doc comment, and hedge it. Note which case you
+are in, and that whether the server honours a requested limit is unverified. What you must not do
+is copy datacenter's "1000" onto an endpoint that defaults to 100.
 
 ### 2b. Label-collision warning — recommended on every page
 
