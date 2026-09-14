@@ -92,9 +92,11 @@ func (r *ipBlockListResource) ListResourceConfigSchema(_ context.Context, _ list
 	}
 }
 
-// List fetches every IP block on the contract and streams the results. The Cloud API
-// returns IP blocks from all locations from a single collection, so unlike the
-// regional products there is nothing to fan out over here.
+// List makes one capped request for the contract's IP blocks and streams the results.
+// The Cloud API returns IP blocks from all locations from a single collection, so unlike
+// the regional products there is nothing to fan out over here. It is a single page, not
+// the whole collection: a contract holding more IP blocks than one response returns is
+// truncated silently, which docs/list-resources/ipblock.md documents.
 func (r *ipBlockListResource) List(ctx context.Context, req list.ListRequest, stream *list.ListResultsStream) {
 	fwidentity.StreamList(ctx, stream, req,
 		func(ctx context.Context) ([]ionoscloud.IpBlock, error) {
@@ -111,7 +113,9 @@ func (r *ipBlockListResource) List(ctx context.Context, req list.ListRequest, st
 			// The explicit Limit matches ionoscloud/data_source_ipblock.go: the SDK
 			// client falls back to limit=100 for /ipblocks (api_ip_blocks.go:489),
 			// which is ten times lower than what the data source asks for, so without
-			// it the list resource would see less than its own data source does.
+			// it the list resource would see less than its own data source does. It
+			// raises the cap, it does not remove it - there is no offset loop here, so
+			// an IP block past constant.IPBlockLimit is dropped without an error.
 			ipBlocks, apiResponse, err := client.IPBlocksApi.IpblocksGet(ctx).Depth(1).Limit(constant.IPBlockLimit).Execute()
 			if apiResponse != nil {
 				tflog.Debug(ctx, "listed ip blocks", map[string]any{"status_code": apiResponse.SafeStatusCode()})
