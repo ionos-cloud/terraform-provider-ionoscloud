@@ -15,5 +15,6 @@ import (
 func ListResources() []func() list.ListResource {
 	return []func() list.ListResource{
 		NewDatacenterListResource,
+		NewIPBlockListResource,
 	}
 }
