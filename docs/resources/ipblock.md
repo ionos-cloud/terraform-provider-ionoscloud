@@ -45,3 +45,41 @@ Resource Ipblock can be imported using the `resource id`, e.g.
 ```shell
 terraform import ionoscloud_ipblock.myipblock ipblock uuid
 ```
+
+In Terraform v1.12.0 and later, the [`import` block](https://developer.hashicorp.com/terraform/language/import) can also be used with the `identity` attribute:
+
+```hcl
+import {
+  to = ionoscloud_ipblock.example
+  identity = {
+    id = "ipblock uuid"
+  }
+}
+
+resource "ionoscloud_ipblock" "example" {
+  ### Configuration omitted for brevity ###
+}
+```
+
+### Identity Schema
+
+#### Required
+
+* `id` (String) The UUID of the IP block.
+
+#### Optional
+
+* `location` (String) The location the IP block lives in (e.g. `de/txl`). Only needed when the Cloud API endpoint is overridden per location.
+
+## Query (List Resource)
+
+IP blocks can be listed using `terraform query` (requires Terraform 1.14+). List blocks must be placed in a dedicated query file, whose name ends in `.tfquery.hcl` (for example `queries.tfquery.hcl`).
+
+```hcl
+list "ionoscloud_ipblock" "all" {
+  provider         = ionoscloud
+  include_resource = true
+}
+```
+
+See the [`ionoscloud_ipblock` list resource documentation](../list-resources/ipblock.md) for filters and the full attribute reference.
