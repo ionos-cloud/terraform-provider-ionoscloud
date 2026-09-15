@@ -41,6 +41,11 @@ func dataSourceTemplate() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"storage_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
 			"category": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -93,6 +98,7 @@ func dataSourceTemplateRead(ctx context.Context, d *schema.ResourceData, meta an
 	cores, coresOk := d.GetOk("cores")
 	ram, ramOk := d.GetOk("ram")
 	storageSize, storageSizeOk := d.GetOk("storage_size")
+	storageType, storageTypeOk := d.GetOk("storage_type")
 	category, categoryOk := d.GetOk("category")
 
 	var results []ionoscloud.Template
@@ -146,6 +152,19 @@ func dataSourceTemplateRead(ctx context.Context, d *schema.ResourceData, meta an
 		}
 	}
 
+	if storageTypeOk {
+		storageTypeStr := storageType.(string)
+		if results != nil {
+			var storageTypeResults []ionoscloud.Template
+			for _, tmp := range results {
+				if tmp.Properties != nil && tmp.Properties.StorageType != nil && *tmp.Properties.StorageType == storageTypeStr {
+					storageTypeResults = append(storageTypeResults, tmp)
+				}
+			}
+			results = storageTypeResults
+		}
+	}
+
 	if categoryOk {
 		categoryStr := category.(string)
 		if results != nil {
@@ -162,9 +181,9 @@ func dataSourceTemplateRead(ctx context.Context, d *schema.ResourceData, meta an
 	var template ionoscloud.Template
 
 	if results == nil || len(results) == 0 {
-		return diagutil.ToDiags(d, fmt.Errorf("no template found with the specified criteria: name = %v, cores = %v, ram = %v, storage_size = %v, category = %v", name, cores, ram, storageSize, category), nil)
+		return diagutil.ToDiags(d, fmt.Errorf("no template found with the specified criteria: name = %v, cores = %v, ram = %v, storage_size = %v, storage_type = %v, category = %v", name, cores, ram, storageSize, storageType, category), nil)
 	} else if len(results) > 1 {
-		return diagutil.ToDiags(d, fmt.Errorf("more than one template found with the specified criteria: name = %v, cores = %v, ram = %v, storage_size = %v, category = %v", name, cores, ram, storageSize, category), nil)
+		return diagutil.ToDiags(d, fmt.Errorf("more than one template found with the specified criteria: name = %v, cores = %v, ram = %v, storage_size = %v, storage_type = %v, category = %v", name, cores, ram, storageSize, storageType, category), nil)
 	} else {
 		template = results[0]
 	}
@@ -199,6 +218,11 @@ func setTemplateData(d *schema.ResourceData, template *ionoscloud.Template) erro
 		}
 		if template.Properties.StorageSize != nil {
 			if err := d.Set("storage_size", *template.Properties.StorageSize); err != nil {
+				return err
+			}
+		}
+		if template.Properties.StorageType != nil {
+			if err := d.Set("storage_type", *template.Properties.StorageType); err != nil {
 				return err
 			}
 		}
