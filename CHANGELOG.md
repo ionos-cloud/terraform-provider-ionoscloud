@@ -1,3 +1,7 @@
+## 6.7.38 -- upcoming release
+### Features
+- `ionoscloud_template`: add new, optional attribute: `storage_type`
+
 ## 6.7.37
 
 ### Features
