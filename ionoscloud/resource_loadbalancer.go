@@ -133,19 +133,19 @@ func resourceLoadbalancerRead(ctx context.Context, d *schema.ResourceData, meta 
 
 	if lb.Properties.Name != nil {
 		if err := d.Set("name", *lb.Properties.Name); err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf(""), nil)
+			return diagutil.ToDiags(d, fmt.Errorf("error setting 'name': %w", err), nil)
 		}
 	}
 
 	if lb.Properties.Ip != nil {
 		if err := d.Set("ip", *lb.Properties.Ip); err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf(""), nil)
+			return diagutil.ToDiags(d, fmt.Errorf("error setting 'ip': %w", err), nil)
 		}
 	}
 
 	if lb.Properties.Dhcp != nil {
 		if err := d.Set("dhcp", *lb.Properties.Dhcp); err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf(""), nil)
+			return diagutil.ToDiags(d, fmt.Errorf("error setting 'dhcp': %w", err), nil)
 		}
 	}
 
