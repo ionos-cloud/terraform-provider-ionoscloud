@@ -372,6 +372,7 @@ func (c SdkBundle) newCloudAPIClientConfig() *shared.Configuration {
 		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
 	)
 	config.MaxRetries = constant.MaxRetries
+	config.WaitTime = constant.MaxWaitTime
 	config.MaxWaitTime = constant.MaxWaitTime
 	config.HTTPClient = &http.Client{}
 	config.HTTPClient.Transport = shared.CreateTransport(c.clientOptions.SkipTLSVerify, c.clientOptions.Certificate)
