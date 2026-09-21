@@ -353,6 +353,9 @@ func BackupUnitFindByID(ctx context.Context, backupUnitID string, client *ionosc
 	if err != nil {
 		return backupUnit, apiResponse, fmt.Errorf("error while retrieving the list of backup units: %w", err)
 	}
+	if backupUnits.Items == nil {
+		return backupUnit, apiResponse, fmt.Errorf("expected a list of backup units in the response but received 'nil' instead")
+	}
 	for _, backupUnit := range backupUnits.Items {
 		if backupUnit.Id == nil {
 			return backupUnit, apiResponse, fmt.Errorf("expected a backup unit with a valid ID but received 'nil' instead")

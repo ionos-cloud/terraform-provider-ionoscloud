@@ -89,8 +89,11 @@ func dataSourceK8sReadNodePoolNodes(ctx context.Context, d *schema.ResourceData,
 	if err != nil {
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching k8s nodes: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
-	if len(nodesList.Items) == 0 {
+	if nodesList.Items == nil {
 		return diagutil.ToDiags(d, fmt.Errorf("no nodes found for nodepool with id %s", nodePoolIDStr), nil)
+	}
+	if len(nodesList.Items) == 0 {
+		return diagutil.ToDiags(d, fmt.Errorf("nodes list is empty for of nodepool with id %s", nodePoolIDStr), nil)
 	}
 	var nodes []any
 	for _, node := range nodesList.Items {

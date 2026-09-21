@@ -239,7 +239,7 @@ func (d *contractsDataSource) Read(ctx context.Context, req datasource.ReadReque
 		resp.Diagnostics.AddError("Error reading contracts", fmt.Sprintf("Could not read contracts, unexpected error: %s", err.Error()))
 		return
 	}
-	if len(contracts.Items) == 0 {
+	if contracts.Items == nil {
 		resp.Diagnostics.AddError("Error reading contracts", "No contracts found")
 		return
 	}

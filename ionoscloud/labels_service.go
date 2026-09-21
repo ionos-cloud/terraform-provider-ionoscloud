@@ -107,6 +107,9 @@ func (ls *LabelsService) datacentersServersLabelsDelete(datacenterID, serverID s
 // Process the labels data fetched using the API and convert it a list of labels that can be
 // used to set the resource data.
 func processLabelsData(labelsData ionoscloud.LabelResources, isDataSource bool) ([]Label, error) {
+	if labelsData.Items == nil {
+		return nil, errors.New("expected a list of labels from the API but received nil instead")
+	}
 	labels := make([]Label, 0, len(labelsData.Items))
 	for _, labelData := range labelsData.Items {
 		entry := make(Label)

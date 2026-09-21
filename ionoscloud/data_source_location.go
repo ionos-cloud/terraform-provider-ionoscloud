@@ -178,5 +178,9 @@ func setLocationData(d *schema.ResourceData, location *ionoscloud.Location) erro
 		}
 	}
 
+	if err := d.Set("metro_region", shared.ToValueDefault(location.Properties.MetroRegion)); err != nil {
+		return fmt.Errorf("error while setting metro_region property for location %s: %w", d.Id(), err)
+	}
+
 	return nil
 }
