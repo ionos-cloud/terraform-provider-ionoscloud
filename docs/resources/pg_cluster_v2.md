@@ -92,7 +92,7 @@ ephemeral "random_password" "cluster_password" {
 * `name` - (Required)[string] The name of the PostgreSQL cluster.
 * `description` - (Optional)[string] Human-readable description for the cluster.
 * `version` - (Required)[string] The PostgreSQL version of the cluster.
-* `location` - (Required, RequiresReplace)[string] The location of the PostgreSQL cluster. This is used for routing to the regional API endpoint. Changing this value will destroy the existing cluster and create a new one in the specified location. Available locations: `de/fra`, `de/fra/2`, `de/txl`, `es/vit`, `fr/par`, `gb/bhx`, `gb/lhr`, `us/ewr`, `us/las`, `us/mci`.
+* `location` - (Required, RequiresReplace)[string] The location of the PostgreSQL cluster. This is used for routing to the regional API endpoint. Changing this value will destroy the existing cluster and create a new one in the specified location. Available locations: `de/fra`, `de/fra/1`, `de/fra/2`, `de/txl`, `es/vit`, `fr/par`, `gb/bhx`, `gb/lhr`, `us/ewr`, `us/las`, `us/mci`.
 * `backup` - (Required)[object] Backup location and retention configuration.
   * `location` - (Required)[string] The Object Storage location where the backups will be created. Supported locations are provided by the `ionoscloud_pg_backup_location_v2` data source. Immutable — changing this forces a new cluster.
   * `retention_days` - (Required)[int] How many days cluster backups are retained.

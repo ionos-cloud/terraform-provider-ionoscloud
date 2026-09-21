@@ -1,7 +1,7 @@
 ---
 subcategory: "Object Storage"
 layout: "ionoscloud"
-page_title: "IonosCloud: user_object_storage_bucket"
+page_title: "IONOS CLOUD: user_object_storage_bucket"
 sidebar_current: "docs-ionoscloud-datasource-user_object_storage_bucket"
 description: |-
   Get information about IONOS User-Owned Object Storage Buckets.

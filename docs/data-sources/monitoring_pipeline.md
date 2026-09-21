@@ -33,7 +33,7 @@ data "ionoscloud_monitoring_pipeline" "example" {
 ```
 
 ## Argument reference
-* `location` - (Optional)[string] The location of the Monitoring pipeline. Default is `de/fra`. It can be one of `de/fra`, `de/txl`, `gb/lhr`, `es/vit`, `fr/par`. If this is not set and if no value is provided for the `IONOS_API_URL` env var, the default `location` will be: `de/fra`.
+* `location` - (Optional)[string] The location of the Monitoring pipeline. Default is `de/fra`. It can be one of `de/fra`, `de/fra/1`, `de/fra/2`, `de/txl`, `gb/lhr`, `es/vit`, `fr/par`. If this is not set and if no value is provided for the `IONOS_API_URL` env var, the default `location` will be: `de/fra`.
 * `id` - (Optional)[string] The ID of the Monitoring pipeline you want to search for.
 * `name` - (Optional)[string] The name of the Monitoring pipeline you want to search for.
 

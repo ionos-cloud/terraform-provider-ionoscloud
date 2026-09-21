@@ -90,6 +90,52 @@ func TestAccDataSourceTemplate(t *testing.T) {
 				Config:      testAccDataSourceTemplateCategoryMismatch,
 				ExpectError: regexp.MustCompile(`no template found with the specified criteria`),
 			},
+			{
+				Config:      testAccDataSourceTemplateNoCriteriaMultipleError,
+				ExpectError: regexp.MustCompile(`more than one template found`),
+			},
+			{
+				Config:      testAccDataSourceTemplatePartialNameMultipleError,
+				ExpectError: regexp.MustCompile(`more than one template found`),
+			},
+			{
+				Config: testAccDataSourceTemplateNameStorageTypePerformance,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(templateName, "name", "H200-M"),
+					resource.TestCheckResourceAttr(templateName, "cores", "30"),
+					resource.TestCheckResourceAttr(templateName, "ram", "546816"),
+					resource.TestCheckResourceAttr(templateName, "storage_size", "1536"),
+					resource.TestCheckResourceAttr(templateName, "storage_type", "PERFORMANCE"),
+					resource.TestCheckResourceAttr(templateName, "category", "GPU Category"),
+				),
+			},
+			{
+				Config: testAccDataSourceTemplateNameStorageTypeSsdPremium,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(templateName, "name", "L40S-M"),
+					resource.TestCheckResourceAttr(templateName, "cores", "30"),
+					resource.TestCheckResourceAttr(templateName, "ram", "546816"),
+					resource.TestCheckResourceAttr(templateName, "storage_size", "600"),
+					resource.TestCheckResourceAttr(templateName, "storage_type", "SSD Premium"),
+					resource.TestCheckResourceAttr(templateName, "category", "AI Model Inference Host"),
+				),
+			},
+			{
+				Config: testAccDataSourceTemplateCategoryStorageTypeCoresRam,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(templateName, "name", "H200-M"),
+					resource.TestCheckResourceAttr(templateName, "storage_type", "PERFORMANCE"),
+					resource.TestCheckResourceAttr(templateName, "category", "GPU Category"),
+				),
+			},
+			{
+				Config:      testAccDataSourceTemplateWrongStorageTypeError,
+				ExpectError: regexp.MustCompile(`no template found with the specified criteria`),
+			},
+			{
+				Config:      testAccDataSourceTemplateNameStorageTypeMismatchError,
+				ExpectError: regexp.MustCompile(`no template found with the specified criteria`),
+			},
 		},
 	})
 
@@ -150,6 +196,15 @@ data ` + constant.TemplateResource + ` ` + constant.TemplateTestResource + ` {
 	storage_size = 50
 }`
 
+const testAccDataSourceTemplateNoCriteriaMultipleError = `
+data ` + constant.TemplateResource + ` ` + constant.TemplateTestResource + ` {
+}`
+
+const testAccDataSourceTemplatePartialNameMultipleError = `
+data ` + constant.TemplateResource + ` ` + constant.TemplateTestResource + ` {
+	name = "Basic Cube"
+}`
+
 const testAccDataSourceTemplateCategoryCoresRam = `
 data ` + constant.TemplateResource + ` ` + constant.TemplateTestResource + ` {
 	category = "Basic Templates"
@@ -172,4 +227,39 @@ const testAccDataSourceTemplateCategoryMismatch = `
 data ` + constant.TemplateResource + ` ` + constant.TemplateTestResource + ` {
 	name     = "Basic Cube S"
 	category = "NON_EXISTENT_CATEGORY"
+}`
+
+// H200-M exists as two GPU templates sharing the same name/cores/ram/storage_size,
+// distinguished only by storage_type ("PERFORMANCE" and "SSD Premium").
+const testAccDataSourceTemplateNameStorageTypePerformance = `
+data ` + constant.TemplateResource + ` ` + constant.TemplateTestResource + ` {
+	name         = "H200-M"
+	storage_type = "PERFORMANCE"
+}`
+
+const testAccDataSourceTemplateNameStorageTypeSsdPremium = `
+data ` + constant.TemplateResource + ` ` + constant.TemplateTestResource + ` {
+	name         = "L40S-M"
+	storage_type = "SSD Premium"
+}`
+
+const testAccDataSourceTemplateCategoryStorageTypeCoresRam = `
+data ` + constant.TemplateResource + ` ` + constant.TemplateTestResource + ` {
+	category     = "GPU Category"
+	storage_type = "PERFORMANCE"
+	cores        = 30
+	ram          = 546816
+}`
+
+const testAccDataSourceTemplateWrongStorageTypeError = `
+data ` + constant.TemplateResource + ` ` + constant.TemplateTestResource + ` {
+	storage_type = "NON_EXISTENT_STORAGE_TYPE"
+}`
+
+// "Basic Cube S" has no storage_type set at all, so filtering it by any storage_type
+// value returns zero results.
+const testAccDataSourceTemplateNameStorageTypeMismatchError = `
+data ` + constant.TemplateResource + ` ` + constant.TemplateTestResource + ` {
+	name         = "Basic Cube S"
+	storage_type = "HDD"
 }`

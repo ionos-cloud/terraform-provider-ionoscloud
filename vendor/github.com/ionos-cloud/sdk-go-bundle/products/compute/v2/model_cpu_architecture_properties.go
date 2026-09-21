@@ -27,6 +27,8 @@ type CpuArchitectureProperties struct {
 	MaxRam *int32 `json:"maxRam,omitempty"`
 	// A valid CPU vendor name.
 	Vendor *string `json:"vendor,omitempty"`
+	// A list of enabled CPU features.
+	EnabledFeatures []string `json:"enabledFeatures,omitempty"`
 }
 
 // NewCpuArchitectureProperties instantiates a new CpuArchitectureProperties object
@@ -175,6 +177,38 @@ func (o *CpuArchitectureProperties) SetVendor(v string) {
 	o.Vendor = &v
 }
 
+// GetEnabledFeatures returns the EnabledFeatures field value if set, zero value otherwise.
+func (o *CpuArchitectureProperties) GetEnabledFeatures() []string {
+	if o == nil || IsNil(o.EnabledFeatures) {
+		var ret []string
+		return ret
+	}
+	return o.EnabledFeatures
+}
+
+// GetEnabledFeaturesOk returns a tuple with the EnabledFeatures field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *CpuArchitectureProperties) GetEnabledFeaturesOk() ([]string, bool) {
+	if o == nil || IsNil(o.EnabledFeatures) {
+		return nil, false
+	}
+	return o.EnabledFeatures, true
+}
+
+// HasEnabledFeatures returns a boolean if a field has been set.
+func (o *CpuArchitectureProperties) HasEnabledFeatures() bool {
+	if o != nil && !IsNil(o.EnabledFeatures) {
+		return true
+	}
+
+	return false
+}
+
+// SetEnabledFeatures gets a reference to the given []string and assigns it to the EnabledFeatures field.
+func (o *CpuArchitectureProperties) SetEnabledFeatures(v []string) {
+	o.EnabledFeatures = v
+}
+
 func (o CpuArchitectureProperties) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -196,6 +230,9 @@ func (o CpuArchitectureProperties) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.Vendor) {
 		toSerialize["vendor"] = o.Vendor
+	}
+	if !IsNil(o.EnabledFeatures) {
+		toSerialize["enabledFeatures"] = o.EnabledFeatures
 	}
 	return toSerialize, nil
 }

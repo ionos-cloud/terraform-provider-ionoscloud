@@ -35,12 +35,14 @@ func Provider() *schema.Provider {
 			"password": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Sensitive:   true,
 				DefaultFunc: schema.EnvDefaultFunc(shared.IonosPasswordEnvVar, nil),
 				Description: "IONOS CLOUD password for API operations. If token is provided, token is preferred",
 			},
 			"token": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Sensitive:   true,
 				DefaultFunc: schema.EnvDefaultFunc(shared.IonosTokenEnvVar, nil),
 				Description: "IONOS CLOUD bearer token for API operations.",
 			},
@@ -71,6 +73,7 @@ func Provider() *schema.Provider {
 			"s3_secret_key": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Sensitive:   true,
 				DefaultFunc: schema.EnvDefaultFunc("IONOS_S3_SECRET_KEY", nil),
 				Description: "Secret key for IONOS Object Storage operations.",
 			},

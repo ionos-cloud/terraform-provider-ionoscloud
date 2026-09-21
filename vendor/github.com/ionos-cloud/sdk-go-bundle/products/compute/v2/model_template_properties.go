@@ -27,6 +27,8 @@ type TemplateProperties struct {
 	Ram float32 `json:"ram"`
 	// The storage size in GB.
 	StorageSize float32 `json:"storageSize"`
+	// The performance class type for the storage. The only possible value is 'SSD Premium'
+	StorageType *string `json:"storageType,omitempty"`
 	// The description of the template.
 	Category string `json:"category"`
 	// List of GPUs assigned to the template
@@ -153,6 +155,38 @@ func (o *TemplateProperties) SetStorageSize(v float32) {
 	o.StorageSize = v
 }
 
+// GetStorageType returns the StorageType field value if set, zero value otherwise.
+func (o *TemplateProperties) GetStorageType() string {
+	if o == nil || IsNil(o.StorageType) {
+		var ret string
+		return ret
+	}
+	return *o.StorageType
+}
+
+// GetStorageTypeOk returns a tuple with the StorageType field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *TemplateProperties) GetStorageTypeOk() (*string, bool) {
+	if o == nil || IsNil(o.StorageType) {
+		return nil, false
+	}
+	return o.StorageType, true
+}
+
+// HasStorageType returns a boolean if a field has been set.
+func (o *TemplateProperties) HasStorageType() bool {
+	if o != nil && !IsNil(o.StorageType) {
+		return true
+	}
+
+	return false
+}
+
+// SetStorageType gets a reference to the given string and assigns it to the StorageType field.
+func (o *TemplateProperties) SetStorageType(v string) {
+	o.StorageType = &v
+}
+
 // GetCategory returns the Category field value
 func (o *TemplateProperties) GetCategory() string {
 	if o == nil {
@@ -223,6 +257,9 @@ func (o TemplateProperties) ToMap() (map[string]interface{}, error) {
 	toSerialize["cores"] = o.Cores
 	toSerialize["ram"] = o.Ram
 	toSerialize["storageSize"] = o.StorageSize
+	if !IsNil(o.StorageType) {
+		toSerialize["storageType"] = o.StorageType
+	}
 	toSerialize["category"] = o.Category
 	if !IsNil(o.Gpus) {
 		toSerialize["gpus"] = o.Gpus

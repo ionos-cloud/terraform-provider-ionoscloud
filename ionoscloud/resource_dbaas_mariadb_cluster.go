@@ -3,6 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 
@@ -58,7 +59,7 @@ func resourceDBaaSMariaDBCluster() *schema.Resource {
 				Type:             schema.TypeInt,
 				Description:      "The amount of memory per instance in gigabytes (GB).",
 				Required:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(2)),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(4)),
 			},
 			"storage_size": {
 				Type:             schema.TypeInt,
@@ -95,9 +96,10 @@ func resourceDBaaSMariaDBCluster() *schema.Resource {
 				},
 			},
 			"display_name": {
-				Type:        schema.TypeString,
-				Description: "The friendly name of your cluster.",
-				Required:    true,
+				Type:             schema.TypeString,
+				Description:      "The friendly name of your cluster.",
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.All(validation.StringLenBetween(1, 63), validation.StringMatch(regexp.MustCompile(`^(\w|:|\-|\ |\.)+$`), "must contain only word characters, colons, hyphens, spaces, or dots"))),
 			},
 			"credentials": {
 				Type:        schema.TypeList,
@@ -110,14 +112,14 @@ func resourceDBaaSMariaDBCluster() *schema.Resource {
 							Type:             schema.TypeString,
 							Description:      "The username for the initial MariaDB user. Some system usernames are restricted (e.g 'mariadb', 'admin', 'standby').",
 							Required:         true,
-							ValidateDiagFunc: validation.ToDiagFunc(validation.All(validation.StringIsNotWhiteSpace, validation.StringLenBetween(1, 63))),
+							ValidateDiagFunc: validation.ToDiagFunc(validation.All(validation.StringLenBetween(1, 16), validation.StringMatch(regexp.MustCompile(`^[a-zA-Z]([a-zA-Z0-9]+_)*[a-zA-Z0-9]+$`), "must start with a letter, end with a letter or number, and contain only letters, numbers, or underscores (underscores only between alphanumeric groups)"))),
 						},
 						"password": {
 							Type:             schema.TypeString,
 							Description:      "The password for a MariaDB user.",
 							Required:         true,
 							Sensitive:        true,
-							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+							ValidateDiagFunc: validation.ToDiagFunc(validation.All(validation.StringLenBetween(10, 63), validation.StringIsNotWhiteSpace)),
 						},
 					},
 				},
@@ -134,7 +136,7 @@ func resourceDBaaSMariaDBCluster() *schema.Resource {
 							Type:             schema.TypeString,
 							Description:      "Start of the maintenance window in UTC time.",
 							Required:         true,
-							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringMatch(regexp.MustCompile(`^(2[0-3]|[01]?[0-9]):([0-5]?[0-9]):([0-5]?[0-9])$`), "must be in HH:MM:SS format")),
 						},
 						"day_of_the_week": {
 							Type:             schema.TypeString,

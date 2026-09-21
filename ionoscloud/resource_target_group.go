@@ -423,57 +423,57 @@ func setTargetGroupData(d *schema.ResourceData, targetGroup *ionoscloud.TargetGr
 	}
 
 	if targetGroup.Properties.HealthCheck != nil {
-			healthCheck := make([]any, 1)
+		healthCheck := make([]any, 1)
 
-			healthCheckEntry := make(map[string]any)
+		healthCheckEntry := make(map[string]any)
 
-			if targetGroup.Properties.HealthCheck.CheckTimeout != nil {
-				healthCheckEntry["check_timeout"] = *targetGroup.Properties.HealthCheck.CheckTimeout
-			}
-
-			if targetGroup.Properties.HealthCheck.CheckInterval != nil {
-				healthCheckEntry["check_interval"] = *targetGroup.Properties.HealthCheck.CheckInterval
-			}
-
-			if targetGroup.Properties.HealthCheck.Retries != nil {
-				healthCheckEntry["retries"] = *targetGroup.Properties.HealthCheck.Retries
-			}
-
-			healthCheck[0] = healthCheckEntry
-			err := d.Set("health_check", healthCheck)
-			if err != nil {
-				return fmt.Errorf("error while setting health_check property for target group %s: %w", d.Id(), err)
-			}
+		if targetGroup.Properties.HealthCheck.CheckTimeout != nil {
+			healthCheckEntry["check_timeout"] = *targetGroup.Properties.HealthCheck.CheckTimeout
 		}
 
-		if targetGroup.Properties.HttpHealthCheck != nil {
-			httpHealthCheck := make([]any, 1)
+		if targetGroup.Properties.HealthCheck.CheckInterval != nil {
+			healthCheckEntry["check_interval"] = *targetGroup.Properties.HealthCheck.CheckInterval
+		}
 
-			httpHealthCheckEntry := make(map[string]any)
+		if targetGroup.Properties.HealthCheck.Retries != nil {
+			healthCheckEntry["retries"] = *targetGroup.Properties.HealthCheck.Retries
+		}
 
-			if targetGroup.Properties.HttpHealthCheck.Path != nil {
-				httpHealthCheckEntry["path"] = *targetGroup.Properties.HttpHealthCheck.Path
-			}
+		healthCheck[0] = healthCheckEntry
+		err := d.Set("health_check", healthCheck)
+		if err != nil {
+			return fmt.Errorf("error while setting health_check property for target group %s: %w", d.Id(), err)
+		}
+	}
 
-			if targetGroup.Properties.HttpHealthCheck.Method != nil {
-				httpHealthCheckEntry["method"] = *targetGroup.Properties.HttpHealthCheck.Method
-			}
+	if targetGroup.Properties.HttpHealthCheck != nil {
+		httpHealthCheck := make([]any, 1)
 
-			if targetGroup.Properties.HttpHealthCheck.MatchType != "" {
-				httpHealthCheckEntry["match_type"] = targetGroup.Properties.HttpHealthCheck.MatchType
-			}
+		httpHealthCheckEntry := make(map[string]any)
 
-			if targetGroup.Properties.HttpHealthCheck.Response != "" {
-				httpHealthCheckEntry["response"] = targetGroup.Properties.HttpHealthCheck.Response
-			}
+		if targetGroup.Properties.HttpHealthCheck.Path != nil {
+			httpHealthCheckEntry["path"] = *targetGroup.Properties.HttpHealthCheck.Path
+		}
 
-			if targetGroup.Properties.HttpHealthCheck.Regex != nil {
-				httpHealthCheckEntry["regex"] = *targetGroup.Properties.HttpHealthCheck.Regex
-			}
+		if targetGroup.Properties.HttpHealthCheck.Method != nil {
+			httpHealthCheckEntry["method"] = *targetGroup.Properties.HttpHealthCheck.Method
+		}
 
-			if targetGroup.Properties.HttpHealthCheck.Negate != nil {
-				httpHealthCheckEntry["negate"] = *targetGroup.Properties.HttpHealthCheck.Negate
-			}
+		if targetGroup.Properties.HttpHealthCheck.MatchType != "" {
+			httpHealthCheckEntry["match_type"] = targetGroup.Properties.HttpHealthCheck.MatchType
+		}
+
+		if targetGroup.Properties.HttpHealthCheck.Response != "" {
+			httpHealthCheckEntry["response"] = targetGroup.Properties.HttpHealthCheck.Response
+		}
+
+		if targetGroup.Properties.HttpHealthCheck.Regex != nil {
+			httpHealthCheckEntry["regex"] = *targetGroup.Properties.HttpHealthCheck.Regex
+		}
+
+		if targetGroup.Properties.HttpHealthCheck.Negate != nil {
+			httpHealthCheckEntry["negate"] = *targetGroup.Properties.HttpHealthCheck.Negate
+		}
 
 		httpHealthCheck[0] = httpHealthCheckEntry
 		if err := d.Set("http_health_check", httpHealthCheck); err != nil {

@@ -121,7 +121,7 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta an
 		return diagutil.ToDiags(d, fmt.Errorf("id and name cannot be both specified in the same time"), nil)
 	}
 	if !idOk && !nameOk {
-		return diagutil.ToDiags(d, fmt.Errorf("please provide either the server id or name"), nil)
+		return diagutil.ToDiags(d, fmt.Errorf("please provide either the snapshot id or name"), nil)
 	}
 
 	var snapshot ionoscloud.Snapshot
@@ -141,7 +141,7 @@ func dataSourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta an
 		logApiRequestTime(apiResponse)
 
 		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching IONOS CLOUD locations %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching IONOS CLOUD snapshots: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 
 		for _, snp := range snapshots.Items {

@@ -67,6 +67,18 @@ func TestAccLanBasic(t *testing.T) {
 				ExpectError: regexp.MustCompile(`no lan found with the specified name`),
 			},
 			{
+				Config:      testAccDataSourceLanBothIdAndNameError,
+				ExpectError: regexp.MustCompile(`id and name cannot be both specified in the same time`),
+			},
+			{
+				Config:      testAccDataSourceLanNoIdNoNameError,
+				ExpectError: regexp.MustCompile(`please provide either the lan id or name`),
+			},
+			{
+				Config:      testAccDataSourceLanWrongIdError,
+				ExpectError: regexp.MustCompile(`an error occurred while fetching lan with ID`),
+			},
+			{
 				Config: testAccCheckLanConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(constant.LanResource+"."+constant.LanTestResource, "name", constant.UpdatedResources),
@@ -221,5 +233,26 @@ const testAccDataSourceLanWrongNameError = testAccCheckLanConfigBasic + `
 data ` + constant.LanResource + ` ` + constant.LanDataSourceByName + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   name			= "wrong_name"
+}
+`
+
+const testAccDataSourceLanBothIdAndNameError = testAccCheckLanConfigBasic + `
+data ` + constant.LanResource + ` ` + constant.LanDataSourceByName + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  id            = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
+  name          = "` + constant.LanTestResource + `"
+}
+`
+
+const testAccDataSourceLanNoIdNoNameError = testAccCheckLanConfigBasic + `
+data ` + constant.LanResource + ` ` + constant.LanDataSourceByName + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+}
+`
+
+const testAccDataSourceLanWrongIdError = testAccCheckLanConfigBasic + `
+data ` + constant.LanResource + ` ` + constant.LanDataSourceByID + ` {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  id            = "00000000-0000-0000-0000-000000000000"
 }
 `

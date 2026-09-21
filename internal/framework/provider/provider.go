@@ -18,7 +18,9 @@ import (
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/compute"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/inmemorydbv2"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/kafka"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/mariadbv2"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/monitoring"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/objectstorage"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/objectstoragemanagement"
@@ -52,11 +54,18 @@ var (
 
 // IonosCloudProvider is the provider implementation.
 type IonosCloudProvider struct {
+	// sdkv2ListResources are the list resources of managed resources that are still
+	// implemented with SDKv2. They are declared in package ionoscloud, beside the
+	// resources they list, and passed in here because that package cannot be
+	// imported from this one.
+	sdkv2ListResources []func() list.ListResource
 }
 
-// New creates a new provider.
-func New() provider.Provider {
-	return &IonosCloudProvider{}
+// New creates a new provider. sdkv2ListResources are the list resources declared
+// alongside the SDKv2 managed resources they list, normally ionoscloud.ListResources();
+// passing none is allowed, and then only the framework-native list resources are served.
+func New(sdkv2ListResources ...func() list.ListResource) provider.Provider {
+	return &IonosCloudProvider{sdkv2ListResources: sdkv2ListResources}
 }
 
 // Metadata returns the metadata for the provider.
@@ -74,10 +83,12 @@ func (p *IonosCloudProvider) Schema(ctx context.Context, req provider.SchemaRequ
 			},
 			"password": schema.StringAttribute{
 				Optional:    true,
+				Sensitive:   true,
 				Description: "IONOS CLOUD password for API operations. If token is provided, token is preferred",
 			},
 			"token": schema.StringAttribute{
 				Optional:    true,
+				Sensitive:   true,
 				Description: "IONOS CLOUD bearer token for API operations.",
 			},
 			"endpoint": schema.StringAttribute{
@@ -94,6 +105,7 @@ func (p *IonosCloudProvider) Schema(ctx context.Context, req provider.SchemaRequ
 			},
 			"s3_secret_key": schema.StringAttribute{
 				Optional:    true,
+				Sensitive:   true,
 				Description: "Secret key for IONOS Object Storage operations.",
 			},
 			"s3_access_key": schema.StringAttribute{
@@ -275,6 +287,8 @@ func (p *IonosCloudProvider) Resources(_ context.Context) []func() resource.Reso
 		monitoring.Resources(),
 		pgsqlv2.Resources(),
 		userobjectstorage.Resources(),
+		inmemorydbv2.Resources(),
+		mariadbv2.Resources(),
 	}
 
 	for _, r := range resources {
@@ -295,6 +309,8 @@ func (p *IonosCloudProvider) DataSources(_ context.Context) []func() datasource.
 		kafka.DataSources(),
 		pgsqlv2.DataSources(),
 		userobjectstorage.DataSources(),
+		inmemorydbv2.DataSources(),
+		mariadbv2.DataSources(),
 	}
 
 	for _, r := range dataSources {
@@ -324,6 +340,9 @@ func (p *IonosCloudProvider) ListResources(_ context.Context) []func() list.List
 		objectstorage.ListResources(),
 		objectstoragemanagement.ListResources(),
 		pgsqlv2.ListResources(),
+		inmemorydbv2.ListResources(),
+		mariadbv2.ListResources(),
+		p.sdkv2ListResources,
 	}
 
 	for _, r := range listResources {

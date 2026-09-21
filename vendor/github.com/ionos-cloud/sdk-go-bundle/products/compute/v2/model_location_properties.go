@@ -21,6 +21,8 @@ var _ MappedNullable = &LocationProperties{}
 type LocationProperties struct {
 	// The location name.
 	Name *string `json:"name,omitempty"`
+	// the metro region, to which this datacenter location belongs to
+	MetroRegion *string `json:"metroRegion,omitempty"`
 	// A list of available features in the location.
 	Features []string `json:"features,omitempty"`
 	// A list of image aliases available in the location.
@@ -79,6 +81,38 @@ func (o *LocationProperties) HasName() bool {
 // SetName gets a reference to the given string and assigns it to the Name field.
 func (o *LocationProperties) SetName(v string) {
 	o.Name = &v
+}
+
+// GetMetroRegion returns the MetroRegion field value if set, zero value otherwise.
+func (o *LocationProperties) GetMetroRegion() string {
+	if o == nil || IsNil(o.MetroRegion) {
+		var ret string
+		return ret
+	}
+	return *o.MetroRegion
+}
+
+// GetMetroRegionOk returns a tuple with the MetroRegion field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *LocationProperties) GetMetroRegionOk() (*string, bool) {
+	if o == nil || IsNil(o.MetroRegion) {
+		return nil, false
+	}
+	return o.MetroRegion, true
+}
+
+// HasMetroRegion returns a boolean if a field has been set.
+func (o *LocationProperties) HasMetroRegion() bool {
+	if o != nil && !IsNil(o.MetroRegion) {
+		return true
+	}
+
+	return false
+}
+
+// SetMetroRegion gets a reference to the given string and assigns it to the MetroRegion field.
+func (o *LocationProperties) SetMetroRegion(v string) {
+	o.MetroRegion = &v
 }
 
 // GetFeatures returns the Features field value if set, zero value otherwise.
@@ -221,6 +255,9 @@ func (o LocationProperties) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Name) {
 		toSerialize["name"] = o.Name
+	}
+	if !IsNil(o.MetroRegion) {
+		toSerialize["metroRegion"] = o.MetroRegion
 	}
 	if !IsNil(o.Features) {
 		toSerialize["features"] = o.Features

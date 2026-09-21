@@ -12,8 +12,8 @@ func testImages() []ionoscloud.Image {
 	img := func(id, name, location, imageType string, aliases ...string) ionoscloud.Image {
 		return ionoscloud.Image{
 			Id: &id,
-			Properties: &ionoscloud.ImageProperties{
-				Name: &name, Location: &location, ImageType: &imageType, ImageAliases: &aliases,
+			Properties: ionoscloud.ImageProperties{
+				Name: &name, Location: &location, ImageType: &imageType, ImageAliases: aliases,
 			},
 		}
 	}

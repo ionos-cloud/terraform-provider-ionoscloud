@@ -97,6 +97,7 @@ func (d *userCredentialsDataSource) Schema(ctx context.Context, req datasource.S
 			"private_key": schema.StringAttribute{
 				Description: "PEM for the private key.",
 				Computed:    true,
+				Sensitive:   true,
 			},
 			"certificate": schema.StringAttribute{
 				Description: "PEM for the certificate.",

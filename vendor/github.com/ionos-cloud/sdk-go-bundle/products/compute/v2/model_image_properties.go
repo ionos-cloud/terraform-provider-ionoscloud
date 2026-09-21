@@ -61,6 +61,8 @@ type ImageProperties struct {
 	Public *bool `json:"public,omitempty"`
 	// List of image aliases mapped for this image
 	ImageAliases []string `json:"imageAliases,omitempty"`
+	// The list of features required by this image. If `SEV-SNP` is part of this list, then the image supports Confidential Computing.
+	RequiredFeatures []string `json:"requiredFeatures,omitempty"`
 	// Cloud init compatibility.
 	CloudInit *string `json:"cloudInit,omitempty"`
 }
@@ -757,6 +759,38 @@ func (o *ImageProperties) SetImageAliases(v []string) {
 	o.ImageAliases = v
 }
 
+// GetRequiredFeatures returns the RequiredFeatures field value if set, zero value otherwise.
+func (o *ImageProperties) GetRequiredFeatures() []string {
+	if o == nil || IsNil(o.RequiredFeatures) {
+		var ret []string
+		return ret
+	}
+	return o.RequiredFeatures
+}
+
+// GetRequiredFeaturesOk returns a tuple with the RequiredFeatures field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ImageProperties) GetRequiredFeaturesOk() ([]string, bool) {
+	if o == nil || IsNil(o.RequiredFeatures) {
+		return nil, false
+	}
+	return o.RequiredFeatures, true
+}
+
+// HasRequiredFeatures returns a boolean if a field has been set.
+func (o *ImageProperties) HasRequiredFeatures() bool {
+	if o != nil && !IsNil(o.RequiredFeatures) {
+		return true
+	}
+
+	return false
+}
+
+// SetRequiredFeatures gets a reference to the given []string and assigns it to the RequiredFeatures field.
+func (o *ImageProperties) SetRequiredFeatures(v []string) {
+	o.RequiredFeatures = v
+}
+
 // GetCloudInit returns the CloudInit field value if set, zero value otherwise.
 func (o *ImageProperties) GetCloudInit() string {
 	if o == nil || IsNil(o.CloudInit) {
@@ -859,6 +893,9 @@ func (o ImageProperties) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.ImageAliases) {
 		toSerialize["imageAliases"] = o.ImageAliases
+	}
+	if !IsNil(o.RequiredFeatures) {
+		toSerialize["requiredFeatures"] = o.RequiredFeatures
 	}
 	if !IsNil(o.CloudInit) {
 		toSerialize["cloudInit"] = o.CloudInit

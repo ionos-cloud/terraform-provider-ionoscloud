@@ -9,8 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/iancoleman/strcase"
-	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/serverutil"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
@@ -83,6 +83,12 @@ func dataSourceServers() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"enabled_features": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "Features enabled on the server, e.g. SEV-SNP for a Confidential Computing VM.",
+							Elem:        &schema.Schema{Type: schema.TypeString},
+						},
 						"boot_cdrom": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -96,8 +102,9 @@ func dataSourceServers() *schema.Resource {
 							Computed: true,
 						},
 						"token": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:      schema.TypeString,
+							Computed:  true,
+							Sensitive: true,
 						},
 						"cdroms": {
 							Type:     schema.TypeList,
@@ -134,8 +141,9 @@ func dataSourceServers() *schema.Resource {
 										Computed: true,
 									},
 									"image_password": {
-										Type:     schema.TypeString,
-										Computed: true,
+										Type:      schema.TypeString,
+										Computed:  true,
+										Sensitive: true,
 									},
 									"ssh_keys": {
 										Type:     schema.TypeList,
@@ -393,6 +401,7 @@ func SetServerProperties(server ionoscloud.Server) map[string]any {
 	utils.SetPropWithNilCheck(serverMap, "ram", server.Properties.Ram)
 	utils.SetPropWithNilCheck(serverMap, "availability_zone", server.Properties.AvailabilityZone)
 	utils.SetPropWithNilCheck(serverMap, "cpu_family", server.Properties.CpuFamily)
+	utils.SetPropWithNilCheck(serverMap, "enabled_features", server.Properties.EnabledFeatures)
 	utils.SetPropWithNilCheck(serverMap, "type", server.Properties.Type)
 	utils.SetPropWithNilCheck(serverMap, "nic_multi_queue", server.Properties.NicMultiQueue)
 	if server.Properties.BootCdrom != nil && server.Properties.BootCdrom.Id != "" {

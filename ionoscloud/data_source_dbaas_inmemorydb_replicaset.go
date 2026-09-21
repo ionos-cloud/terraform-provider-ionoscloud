@@ -16,7 +16,8 @@ import (
 
 func dataSourceDBaaSInMemoryDBReplicaSet() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceReplicaSetRead,
+		DeprecationMessage: "Use ionoscloud_inmemorydb_cluster_v2 instead. This data source is deprecated and will be removed in a future release.",
+		ReadContext:        dataSourceReplicaSetRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:        schema.TypeString,

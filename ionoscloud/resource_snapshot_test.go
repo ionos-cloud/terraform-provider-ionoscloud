@@ -103,6 +103,22 @@ func TestAccSnapshotBasic(t *testing.T) {
 				ExpectError: regexp.MustCompile(`no snapshot found with the specified criteria`),
 			},
 			{
+				Config:      testAccDataSourceSnapshotBothIdAndNameError,
+				ExpectError: regexp.MustCompile(`id and name cannot be both specified in the same time`),
+			},
+			{
+				Config:      testAccDataSourceSnapshotNoIdNoNameError,
+				ExpectError: regexp.MustCompile(`please provide either the snapshot id or name`),
+			},
+			{
+				Config:      testAccDataSourceSnapshotWrongIdError,
+				ExpectError: regexp.MustCompile(`an error occurred while fetching the snapshot with ID`),
+			},
+			{
+				Config:      testAccDataSourceSnapshotMultipleResultsError,
+				ExpectError: regexp.MustCompile(`more than one snapshot found with the specified criteria`),
+			},
+			{
 				Config: testAccCheckSnapshotConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(constant.SnapshotResource+"."+constant.SnapshotTestResource, "name", constant.UpdatedResources),
@@ -251,6 +267,35 @@ data ` + constant.SnapshotResource + ` ` + constant.SnapshotDataSourceByName + `
     name = ` + constant.SnapshotResource + `.` + constant.SnapshotTestResource + `.name
     location = ` + constant.SnapshotResource + `.` + constant.SnapshotTestResource + `.location
     size = 1234
+}`
+
+const testAccDataSourceSnapshotBothIdAndNameError = testAccCheckSnapshotConfigBasic + `
+data ` + constant.SnapshotResource + ` ` + constant.SnapshotDataSourceByName + ` {
+    id   = ` + constant.SnapshotResource + `.` + constant.SnapshotTestResource + `.id
+    name = ` + constant.SnapshotResource + `.` + constant.SnapshotTestResource + `.name
+}`
+
+const testAccDataSourceSnapshotNoIdNoNameError = testAccCheckSnapshotConfigBasic + `
+data ` + constant.SnapshotResource + ` ` + constant.SnapshotDataSourceByName + ` {
+}`
+
+const testAccDataSourceSnapshotWrongIdError = testAccCheckSnapshotConfigBasic + `
+data ` + constant.SnapshotResource + ` ` + constant.SnapshotDataSourceById + ` {
+    id = "00000000-0000-0000-0000-000000000000"
+}`
+
+const testAccDataSourceSnapshotMultipleResultsError = testAccCheckSnapshotConfigBasic + `
+resource ` + constant.SnapshotResource + ` ` + constant.SnapshotTestResource + `_same_name {
+  datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+  volume_id     = ` + constant.ServerResource + `.` + constant.ServerTestResource + `.boot_volume
+  name          = "` + constant.SnapshotTestResource + `"
+  description   = "` + constant.SnapshotTestResource + `_dup"
+  licence_type  = "LINUX"
+}
+
+data ` + constant.SnapshotResource + ` ` + constant.SnapshotDataSourceByName + ` {
+    name       = "` + constant.SnapshotTestResource + `"
+    depends_on = [` + constant.SnapshotResource + `.` + constant.SnapshotTestResource + `_same_name]
 }`
 
 const testAccCheckSnapshotConfigUpdateOnlyAttrs = testSnapshotServer + `

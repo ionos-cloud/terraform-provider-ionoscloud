@@ -35,11 +35,12 @@ func (c *Client) GetConfig() *shared.Configuration {
 
 var (
 	// AvailableLocations is a list of available locations for Kafka
-	AvailableLocations = []string{"de/fra", "de/fra/2", "de/txl", "fr/par", "es/vit", "gb/lhr", "gb/bhx", "us/las", "us/mci", "us/ewr"}
+	AvailableLocations = []string{"de/fra", "de/fra/1", "de/fra/2", "de/txl", "fr/par", "es/vit", "gb/lhr", "gb/bhx", "us/las", "us/mci", "us/ewr"}
 
 	locationToURL = map[string]string{
 		"":         "https://kafka.de-fra.ionos.com",
 		"de/fra":   "https://kafka.de-fra.ionos.com",
+		"de/fra/1": "https://kafka.de-fra.ionos.com",
 		"de/fra/2": "https://kafka.de-fra.ionos.com",
 		"de/txl":   "https://kafka.de-txl.ionos.com",
 		"fr/par":   "https://kafka.fr-par.ionos.com",

@@ -75,6 +75,12 @@ func dataSourceServer() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"enabled_features": {
+				Type:        schema.TypeList,
+				Computed:    true,
+				Description: "Features enabled on the server, e.g. SEV-SNP for a Confidential Computing VM.",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
 			"boot_cdrom": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -88,8 +94,9 @@ func dataSourceServer() *schema.Resource {
 				Computed: true,
 			},
 			"token": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:      schema.TypeString,
+				Computed:  true,
+				Sensitive: true,
 			},
 			"cdroms": {
 				Type:     schema.TypeList,
@@ -126,8 +133,9 @@ func dataSourceServer() *schema.Resource {
 							Computed: true,
 						},
 						"image_password": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:      schema.TypeString,
+							Computed:  true,
+							Sensitive: true,
 						},
 						"ssh_keys": {
 							Type:     schema.TypeList,
@@ -316,6 +324,13 @@ func setServerData(d *schema.ResourceData, server *ionoscloud.Server, token *ion
 			return err
 		}
 	}
+
+	if len(server.Properties.EnabledFeatures) > 0 {
+		if err := d.Set("enabled_features", server.Properties.EnabledFeatures); err != nil {
+			return err
+		}
+	}
+
 	if server.Properties.BootCdrom != nil && server.Properties.BootCdrom.Id != "" {
 		if err := d.Set("boot_cdrom", server.Properties.BootCdrom.Id); err != nil {
 			return err

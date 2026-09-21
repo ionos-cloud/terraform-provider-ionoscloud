@@ -14,7 +14,10 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/querycheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 )
 
 func TestAccDataCenterBasic(t *testing.T) {
@@ -91,6 +94,22 @@ func TestAccDataCenterBasic(t *testing.T) {
 				ExpectError: regexp.MustCompile("no datacenter found with the specified criteria"),
 			},
 			{
+				Config:      testAccDataSourceDatacenterNoFilterError,
+				ExpectError: regexp.MustCompile(`either id, location or name must be set`),
+			},
+			{
+				Config:      testAccDataSourceDatacenterWrongIdError,
+				ExpectError: regexp.MustCompile(`error getting datacenter with id`),
+			},
+			{
+				Config:      testAccDataSourceDatacenterIdNameMismatchError,
+				ExpectError: regexp.MustCompile(`name of dc \(UUID=.+, name=.+\) does not match expected name`),
+			},
+			{
+				Config:      testAccDataSourceDatacenterIdLocationMismatchError,
+				ExpectError: regexp.MustCompile(`location of dc \(UUID=.+, location=.+\) does not match expected location`),
+			},
+			{
 				Config: testAccCheckDatacenterConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDatacenterExists(constant.DatacenterResource+"."+constant.DatacenterTestResource, &datacenter),
@@ -99,6 +118,95 @@ func TestAccDataCenterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.DatacenterResource+"."+constant.DatacenterTestResource, "description", "Test Datacenter Description Updated"),
 					resource.TestCheckResourceAttr(constant.DatacenterResource+"."+constant.DatacenterTestResource, "sec_auth_protection", "false"),
 				),
+			},
+		},
+	})
+}
+
+// TestAccDataCenterQuery exercises the ionoscloud_datacenter list resource and the
+// resource identity that listing depends on.
+//
+// The list resource is served by the plugin-framework half of the provider even though
+// the datacenter resource itself is implemented with SDKv2, so this also covers the
+// mux serving the two halves under the same type name. See
+// resource_datacenter_list.go in this package.
+func TestAccDataCenterQuery(t *testing.T) {
+	const (
+		datacenterName = "tf-test-datacenter-query"
+		datacenterAddr = constant.DatacenterResource + ".test_datacenter"
+		otherLocation  = "de/txl"
+	)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() { testAccPreCheck(t) },
+		// `terraform query` and list blocks were introduced in Terraform 1.14.
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version1_14_0),
+		},
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckDatacenterDestroyCheck,
+		Steps: []resource.TestStep{
+			{
+				Config: fmt.Sprintf(`
+resource %[1]q "test_datacenter" {
+  name        = %[2]q
+  location    = "us/las"
+  description = "Datacenter for the list resource acceptance test"
+}`, constant.DatacenterResource, datacenterName),
+			},
+			// List without filters: the datacenter must show up with its identity.
+			{
+				Query: true,
+				Config: fmt.Sprintf(`list %[1]q "test_datacenter" {
+  provider = ionoscloud
+}`, constant.DatacenterResource),
+				QueryResultChecks: []querycheck.QueryResultCheck{
+					querycheck.ExpectIdentity(datacenterAddr, map[string]knownvalue.Check{
+						"id":       knownvalue.NotNull(),
+						"location": knownvalue.StringExact("us/las"),
+					}),
+				},
+			},
+			// Filter by name and location: the unique name guarantees exactly one result.
+			{
+				Query: true,
+				Config: fmt.Sprintf(`list %[1]q "test_datacenter" {
+  provider = ionoscloud
+  config {
+    filters = [
+      { field_name = "name",     field_value = %[2]q },
+      { field_name = "location", field_value = "us/las" },
+    ]
+  }
+}`, constant.DatacenterResource, datacenterName),
+				QueryResultChecks: []querycheck.QueryResultCheck{
+					querycheck.ExpectLength(datacenterAddr, 1),
+				},
+			},
+			// Same name, different location: proves the location filter is evaluated.
+			{
+				Query: true,
+				Config: fmt.Sprintf(`list %[1]q "test_datacenter" {
+  provider = ionoscloud
+  config {
+    filters = [
+      { field_name = "name",     field_value = %[2]q },
+      { field_name = "location", field_value = %[3]q },
+    ]
+  }
+}`, constant.DatacenterResource, datacenterName, otherLocation),
+				QueryResultChecks: []querycheck.QueryResultCheck{
+					querycheck.ExpectLength(datacenterAddr, 0),
+				},
+			},
+			// Import through the resource identity that the list results carry. This kind
+			// already checks that the import succeeds, that the plan it leaves behind is a
+			// no-op and that the planned identity matches the one in state; ImportStateVerify
+			// cannot be combined with it, only ImportCommandWithID reads that field.
+			{
+				ResourceName:    datacenterAddr,
+				ImportState:     true,
+				ImportStateKind: resource.ImportBlockWithResourceIdentity,
 			},
 		},
 	})
@@ -219,4 +327,25 @@ const testAccDataSourceDatacenterWrongNameAndLocationError = testAccCheckDatacen
 data ` + constant.DatacenterResource + ` ` + constant.DatacenterDataSourceMatching + ` {
     name =  "wrong_name"
     location =  "wrong_location"
+}`
+
+const testAccDataSourceDatacenterNoFilterError = testAccCheckDatacenterConfigBasic + `
+data ` + constant.DatacenterResource + ` ` + constant.DatacenterDataSourceMatching + ` {
+}`
+
+const testAccDataSourceDatacenterWrongIdError = testAccCheckDatacenterConfigBasic + `
+data ` + constant.DatacenterResource + ` ` + constant.DatacenterDataSourceById + ` {
+    id = "00000000-0000-0000-0000-000000000000"
+}`
+
+const testAccDataSourceDatacenterIdNameMismatchError = testAccCheckDatacenterConfigBasic + `
+data ` + constant.DatacenterResource + ` ` + constant.DatacenterDataSourceMatching + ` {
+    id   = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+    name = "wrong_name"
+}`
+
+const testAccDataSourceDatacenterIdLocationMismatchError = testAccCheckDatacenterConfigBasic + `
+data ` + constant.DatacenterResource + ` ` + constant.DatacenterDataSourceMatching + ` {
+    id       = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
+    location = "wrong_location"
 }`

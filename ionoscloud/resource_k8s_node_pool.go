@@ -226,6 +226,32 @@ func resourceK8sNodePool() *schema.Resource {
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+			"taints": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: "Taints applied to nodes in this pool. A taint repels pods that do not have a matching toleration. Maximum 50 taints per node pool.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"key": {
+							Type:             schema.TypeString,
+							Required:         true,
+							Description:      "Taint key. Must be a valid Kubernetes label key format. May include an optional prefix (DNS subdomain) followed by a slash.",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+						},
+						"value": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "Optional taint value. Must be a valid Kubernetes label value format.",
+						},
+						"effect": {
+							Type:             schema.TypeString,
+							Required:         true,
+							Description:      "Taint effect determines how a taint repels pods. One of: NoSchedule, NoExecute, PreferNoSchedule.",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{string(ionoscloud.NO_SCHEDULE), string(ionoscloud.NO_EXECUTE), string(ionoscloud.PREFER_NO_SCHEDULE)}, false)),
+						},
+					},
+				},
+			},
 			"allow_replace": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -530,6 +556,10 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 		k8sNodepool.Properties.Annotations = &annotations
 	}
 
+	if taintsVal, taintsOk := d.GetOk("taints"); taintsOk {
+		k8sNodepool.Properties.Taints = getK8sNodePoolTaintsData(ctx, taintsVal.(*schema.Set))
+	}
+
 	createdNodepool, apiResponse, err := client.KubernetesApi.
 		K8sNodepoolsPost(ctx, d.Get("k8s_cluster_id").(string)).
 		KubernetesNodePool(k8sNodepool).
@@ -749,6 +779,12 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 			}
 		}
 		request.Properties.Annotations = &annotations
+	}
+
+	if d.HasChange("taints") {
+		oldTaints, newTaints := d.GetChange("taints")
+		tflog.Info(ctx, "node pool taints changed", map[string]any{"old": oldTaints, "new": newTaints})
+		request.Properties.Taints = getK8sNodePoolTaintsData(ctx, newTaints.(*schema.Set))
 	}
 
 	b, jErr := json.Marshal(request)
@@ -1017,6 +1053,10 @@ func setK8sNodePoolData(d *schema.ResourceData, nodePool *ionoscloud.KubernetesN
 		return fmt.Errorf("error while setting the annotations property for k8sNodepool %s: %w", d.Id(), err)
 	}
 
+	if err := d.Set("taints", setK8sNodePoolTaints(nodePool.Properties.Taints)); err != nil {
+		return fmt.Errorf("error while setting the taints property for k8sNodepool %s: %w", d.Id(), err)
+	}
+
 	return nil
 }
 
@@ -1090,4 +1130,46 @@ func getK8sNodePoolLans(lans []ionoscloud.KubernetesNodePoolLan) []any {
 
 	return nodePoolLans
 
+}
+
+// getK8sNodePoolTaintsData converts the taints defined in the Terraform schema into the SDK representation.
+func getK8sNodePoolTaintsData(ctx context.Context, taintsSet *schema.Set) []ionoscloud.KubernetesNodePoolTaint {
+	taints := make([]ionoscloud.KubernetesNodePoolTaint, 0, taintsSet.Len())
+	for _, taintItem := range taintsSet.List() {
+		taintContent := taintItem.(map[string]any)
+		taint := ionoscloud.KubernetesNodePoolTaint{}
+
+		if key, ok := taintContent["key"].(string); ok && key != "" {
+			taint.Key = key
+		}
+
+		// value is optional; treat an empty value as unset so it is not serialized.
+		if value, ok := taintContent["value"].(string); ok && value != "" {
+			taint.Value = &value
+		}
+
+		if effect, ok := taintContent["effect"].(string); ok && effect != "" {
+			taint.Effect = ionoscloud.TaintEffect(effect)
+		}
+
+		tflog.Info(ctx, "adding taint to node pool", map[string]any{"key": taintContent["key"], "effect": taintContent["effect"]})
+		taints = append(taints, taint)
+	}
+	return taints
+}
+
+// setK8sNodePoolTaints converts the taints from the SDK representation into the Terraform state representation.
+func setK8sNodePoolTaints(taints []ionoscloud.KubernetesNodePoolTaint) []any {
+	nodePoolTaints := make([]any, 0, len(taints))
+	for _, taint := range taints {
+		taintEntry := map[string]any{
+			"key":    taint.Key,
+			"effect": string(taint.Effect),
+		}
+		if taint.Value != nil {
+			taintEntry["value"] = *taint.Value
+		}
+		nodePoolTaints = append(nodePoolTaints, taintEntry)
+	}
+	return nodePoolTaints
 }

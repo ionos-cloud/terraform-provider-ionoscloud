@@ -48,6 +48,8 @@ type KubernetesNodePoolProperties struct {
 	Labels *map[string]string `json:"labels,omitempty"`
 	// The annotations attached to the node pool.
 	Annotations *map[string]string `json:"annotations,omitempty"`
+	// Taints applied to nodes in this pool. A taint repels pods that do not have a matching toleration. Maximum 50 taints per node pool.
+	Taints []KubernetesNodePoolTaint `json:"taints,omitempty"`
 	// Optional array of reserved public IP addresses to be used by the nodes. The IPs must be from the exact location of the node pool's data center. If autoscaling is used, the array must contain one more IP than the maximum possible number of nodes (nodeCount+1 for a fixed number of nodes or maxNodeCount+1). The extra IP is used when the nodes are rebuilt.
 	PublicIps []string `json:"publicIps,omitempty"`
 	// The list of available versions for upgrading the node pool.
@@ -533,6 +535,38 @@ func (o *KubernetesNodePoolProperties) SetAnnotations(v map[string]string) {
 	o.Annotations = &v
 }
 
+// GetTaints returns the Taints field value if set, zero value otherwise.
+func (o *KubernetesNodePoolProperties) GetTaints() []KubernetesNodePoolTaint {
+	if o == nil || IsNil(o.Taints) {
+		var ret []KubernetesNodePoolTaint
+		return ret
+	}
+	return o.Taints
+}
+
+// GetTaintsOk returns a tuple with the Taints field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *KubernetesNodePoolProperties) GetTaintsOk() ([]KubernetesNodePoolTaint, bool) {
+	if o == nil || IsNil(o.Taints) {
+		return nil, false
+	}
+	return o.Taints, true
+}
+
+// HasTaints returns a boolean if a field has been set.
+func (o *KubernetesNodePoolProperties) HasTaints() bool {
+	if o != nil && !IsNil(o.Taints) {
+		return true
+	}
+
+	return false
+}
+
+// SetTaints gets a reference to the given []KubernetesNodePoolTaint and assigns it to the Taints field.
+func (o *KubernetesNodePoolProperties) SetTaints(v []KubernetesNodePoolTaint) {
+	o.Taints = v
+}
+
 // GetPublicIps returns the PublicIps field value if set, zero value otherwise.
 func (o *KubernetesNodePoolProperties) GetPublicIps() []string {
 	if o == nil || IsNil(o.PublicIps) {
@@ -638,6 +672,9 @@ func (o KubernetesNodePoolProperties) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.Annotations) {
 		toSerialize["annotations"] = o.Annotations
+	}
+	if !IsNil(o.Taints) {
+		toSerialize["taints"] = o.Taints
 	}
 	if !IsNil(o.PublicIps) {
 		toSerialize["publicIps"] = o.PublicIps

@@ -9,7 +9,7 @@ description: |-
 
 # ionoscloud_template
 
-The **Template data source** can be used to search for and return existing templates by providing any of template properties (name, cores, ram, storage_size).
+The **Template data source** can be used to search for and return existing templates by providing any of template properties (name, cores, ram, storage_size, storage_type).
 If a single match is found, it will be returned. If your search results in multiple matches, an error will be returned.
 When this happens, please refine your search string so that it is specific enough to return only one result.
 
@@ -43,12 +43,21 @@ data "ionoscloud_template" "example" {
 }
 ```
 
+### By Storage Type
+```hcl
+data "ionoscloud_template" "example" {
+	name         = "H200-M"
+	storage_type = "PERFORMANCE"
+}
+```
+
 ## Argument Reference
 
 * `name` - (Optional) A name of that resource.
 * `cores` - (Optional) The CPU cores count.
 * `ram` - (Optional) The RAM size in MB.
 * `storage_size` - (Optional) The storage size in GB.
+* `storage_type` - (Optional) The storage type of the template.
 * `category` - (Optional) The category of the template.
 
 Any of the arguments ca be provided. If none, the datasource will return an error.
@@ -62,6 +71,7 @@ The following attributes are returned by the datasource:
 * `cores`- The CPU cores count
 * `ram` - The RAM size in MB
 * `storage_size` - The storage size in GB
+* `storage_type` - The storage type of the template
 * `category` - The category of the template
 * `gpus` - List of GPUs in the template
   * `count` - The number of GPUs

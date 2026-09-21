@@ -1,7 +1,7 @@
 ---
 subcategory: "Compute Engine"
 layout: "ionoscloud"
-page_title: "IONOS CLOUD: Datacenter NSG Selection"
+page_title: "IONOS CLOUD: ionoscloud_datacenter_nsg_selection"
 sidebar_current: "docs-resource-datacenter-nsg-selection"
 description: |-
   Links a Network Security Group to a IONOS CLOUD datacenter.

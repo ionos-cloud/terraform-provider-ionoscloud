@@ -22,50 +22,26 @@ You can use token authentication. We strongly suggest to use token authenticatio
 export IONOS_TOKEN="token"
 ```
 
-You can set the environment variables for HTTP basic authentication:
-
-```bash
-export IONOS_USERNAME="username"
-export IONOS_PASSWORD="password"
-```
 For managing IONOS Object Storage resources you need to set the following environment variables with your credentials
 ```bash
 export IONOS_S3_ACCESS_KEY="accesskey"
 export IONOS_S3_SECRET_KEY="secretkey"
 ```
 
-Also, you can overwrite the api endpoint: `api.ionos.com` via the following environment variable:
-
-```bash
-export IONOS_API_URL="api-url"
-```
-
-Note: if `IONOS_API_URL` environment variable is set, it is recommended to have the `api.ionos.com` value (not `api.ionos.com/cloudapi/v5`).
-
-Another way of configuring it, is by providing your credentials/api_url in a `.tf` configuration file in the `provider` block as shown in the below example.
+Optionally, you can set these values in the provider block in your Terraform configuration. See the [Configuration Reference](#configuration-reference) section for details.
 
 ```hcl
 provider "ionoscloud" {
-#  we encourage users to use token authentication for security reasons
-#  username          = var.ionos_username
-#  password          = var.ionos_password
   token             = var.ionos_token
 #  optional, to be used only for reseller accounts
 #  contract_number = "contract_number_here"
-#  optional, does not need to be configured in most cases
-#  endpoint = "custom_cloud_api_url"
 #  s3_access_key     =  "your_access_key"
 #  s3_secret_key     =  "your_secret_key"
 ```
-
-⚠️ **Note:** It's NOT usually necessary to set `endpoint` field. The SDKs know how to route requests to the correct endpoints in the API. 
-
 You can either explicitly write them in the .tf file or use var.name as in the example above. For setting the var.name, environment variables can be used. The environment variables must be in the format TF_VAR_name and this will be checked last for a value. For example:
 
 ```bash
 export TF_VAR_ionos_token="token"
-#export TF_VAR_ionos_username="username"
-#export TF_VAR_ionos_password="password"
 #export TF_VAR_ionos_s3_access_key="accesskey"
 #export TF_VAR_ionos_s3_secret_key="secretkey"
 #export TF_VAR_ionos_s3_region="region"
@@ -126,13 +102,8 @@ terraform {
 
 provider "ionoscloud" {
   token                = var.ionos_token
-  #  we encourage users to use token authentication
-  #  username          = var.ionos_username
-  #  password          = var.ionos_password
-  #  optional, to be used only for reseller accounts
+   #  optional, to be used only for reseller accounts
   #  contract_number = "contract_number_here"
-  #  optional, does not need to be configured in most cases
-  #  endpoint = "custom_cloud_api_url"
   #  s3_access_key     =  "your_access_key"
   #  s3_secret_key     =  "your_secret_key"
   #  s3_region     =  "your_bucket_region"
@@ -293,20 +264,20 @@ The following arguments are supported:
 
 ### Environment Variables
 
-| Environment Variable    | Description                                                                                                                                                               |
-|-------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `IONOS_USERNAME`        | Specify the username used to login, to authenticate against the IONOS CLOUD API                                                                                           |
-| `IONOS_PASSWORD`        | Specify the password used to login, to authenticate against the IONOS CLOUD API                                                                                           |
-| `IONOS_TOKEN`           | Specify the token used to login, if a token is being used instead of username and password                                                                                |
-| `IONOS_API_URL`         | Specify the API URL. It will overwrite the API endpoint default value `api.ionos.com`.  It is not necessary to override this value unless you have special routing config |
-| `IONOS_LOG_LEVEL`       | Specify the Log Level used to log messages. Possible values: Off, Debug, Trace                                                                                            |
-| `IONOS_PINNED_CERT`     | Specify the SHA-256 public fingerprint here, enables certificate pinning                                                                                                  |
-| `IONOS_CONTRACT_NUMBER` | Specify the contract number on which you wish to provision. Only valid for reseller accounts, for other types of accounts the header will be ignored                      |
-| `IONOS_S3_ACCESS_KEY`   | Specify the access key used to authenticate against the IONOS Object Storage API                                                                                          |
-| `IONOS_S3_SECRET_KEY`   | Specify the secret key used to authenticate against the IONOS Object Storage API                                                                                          |
-| `IONOS_S3_REGION`       | Region for IONOS Contract Owned Object Storage operations. Default value: eu-central-3. **If you use IONOS_API_URL_OBJECT_STORAGE, `IONOS_S3_REGION` is mandatory**       |
-| `IONOS_CONFIG_FILE`     | Specify the path to the YAML configuration file. Default value: `~/.ionos/config.yaml`.                                                                                   |
-| `IONOS_CURRENT_PROFILE` | Specify the current profile to use from the YAML configuration file.                                                                                                      |
+| Environment Variable    | Description                                                                                                                                                                                              |
+|-------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `IONOS_USERNAME`        | Specify the username used to login, to authenticate against the IONOS CLOUD API                                                                                                                          |
+| `IONOS_PASSWORD`        | Specify the password used to login, to authenticate against the IONOS CLOUD API                                                                                                                          |
+| `IONOS_TOKEN`           | Specify the token used to login, if a token is being used instead of username and password                                                                                                               |
+| `IONOS_API_URL`         | DO NOT USE unless for testing. Specify the API URL. It will overwrite the API endpoint default value `api.ionos.com`.  It is not necessary to override this value unless you have special routing config |
+| `IONOS_LOG_LEVEL`       | Specify the Log Level used to log messages. Possible values: Off, Debug, Trace                                                                                                                           |
+| `IONOS_PINNED_CERT`     | Specify the SHA-256 public fingerprint here, enables certificate pinning                                                                                                                                 |
+| `IONOS_CONTRACT_NUMBER` | Specify the contract number on which you wish to provision. Only valid for reseller accounts, for other types of accounts the header will be ignored                                                     |
+| `IONOS_S3_ACCESS_KEY`   | Specify the access key used to authenticate against the IONOS Object Storage API                                                                                                                         |
+| `IONOS_S3_SECRET_KEY`   | Specify the secret key used to authenticate against the IONOS Object Storage API                                                                                                                         |
+| `IONOS_S3_REGION`       | Region for IONOS Contract Owned Object Storage operations. Default value: eu-central-3. **If you use IONOS_API_URL_OBJECT_STORAGE, `IONOS_S3_REGION` is mandatory**                                      |
+| `IONOS_CONFIG_FILE`     | Specify the path to the YAML configuration file. Default value: `~/.ionos/config.yaml`.                                                                                                                  |
+| `IONOS_CURRENT_PROFILE` | Specify the current profile to use from the YAML configuration file.                                                                                                                                     |
 
 ## Resource Timeout
 
