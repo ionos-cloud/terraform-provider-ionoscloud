@@ -1,3 +1,5 @@
+//go:build vpn || all || wireguard
+
 package ionoscloud
 
 import (
