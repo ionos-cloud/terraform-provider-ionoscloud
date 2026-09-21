@@ -38,10 +38,16 @@ func ResolveParentLocation(ctx context.Context, client *ionoscloud.APIClient, lo
 			map[string]any{"location": locationID, "error": err.Error()})
 		return locationIDs
 	}
-	// The compute bundle's LocationProperties does not expose a MetroRegion field,
-	// so parent-location resolution is not available; fall back to the requested location only.
-	_ = location
-	return locationIDs
+	if location == nil || location.Properties.MetroRegion == nil || *location.Properties.MetroRegion == "" {
+		return locationIDs
+	}
+	// Classic locations carry a self-referential metroRegion (e.g. de/fra -> de/fra):
+	// they are their own parent, not children.
+	if strings.EqualFold(*location.Properties.MetroRegion, locationID) {
+		return locationIDs
+	}
+
+	return append(locationIDs, *location.Properties.MetroRegion)
 }
 
 // LocationInSet reports whether loc is one of the given location ids, case-insensitively.
