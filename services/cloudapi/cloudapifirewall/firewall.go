@@ -97,11 +97,11 @@ func SetProperties(firewall ionoscloud.FirewallRule) map[string]any {
 	utils.SetPropWithNilCheck(fw, "port_range_start", firewall.Properties.PortRangeStart)
 	utils.SetPropWithNilCheck(fw, "port_range_end", firewall.Properties.PortRangeEnd)
 	utils.SetPropWithNilCheck(fw, "type", firewall.Properties.Type)
-	if firewall.Properties.IcmpType.IsSet() {
-		fw["icmp_type"] = strconv.Itoa(int(*firewall.Properties.IcmpType.Get()))
+	if icmpType := firewall.Properties.IcmpType.Get(); icmpType != nil {
+		fw["icmp_type"] = strconv.Itoa(int(*icmpType))
 	}
-	if firewall.Properties.IcmpCode.IsSet() {
-		fw["icmp_code"] = strconv.Itoa(int(*firewall.Properties.IcmpCode.Get()))
+	if icmpCode := firewall.Properties.IcmpCode.Get(); icmpCode != nil {
+		fw["icmp_code"] = strconv.Itoa(int(*icmpCode))
 	}
 	return fw
 }

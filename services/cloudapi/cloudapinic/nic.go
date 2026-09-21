@@ -233,8 +233,8 @@ func NicSetData(ctx context.Context, d *schema.ResourceData, nic *ionoscloud.Nic
 		}
 	}
 
-	if nic.Properties.Dhcpv6.IsSet() {
-		if err := d.Set("dhcpv6", *nic.Properties.Dhcpv6.Get()); err != nil {
+	if dhcpv6 := nic.Properties.Dhcpv6.Get(); dhcpv6 != nil {
+		if err := d.Set("dhcpv6", *dhcpv6); err != nil {
 			return fmt.Errorf("error setting dhcpv6 %w", err)
 		}
 	}
@@ -256,8 +256,8 @@ func NicSetData(ctx context.Context, d *schema.ResourceData, nic *ionoscloud.Nic
 	if err := d.Set("ipv6_ips", nic.Properties.Ipv6Ips); err != nil {
 		return fmt.Errorf("error setting ipv6_ips %w", err)
 	}
-	if nic.Properties.Ipv6CidrBlock.IsSet() {
-		if err := d.Set("ipv6_cidr_block", *nic.Properties.Ipv6CidrBlock.Get()); err != nil {
+	if ipv6CidrBlock := nic.Properties.Ipv6CidrBlock.Get(); ipv6CidrBlock != nil {
+		if err := d.Set("ipv6_cidr_block", *ipv6CidrBlock); err != nil {
 			return fmt.Errorf("error setting ipv6_cidr_block %w", err)
 		}
 	}
