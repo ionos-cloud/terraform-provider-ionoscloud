@@ -279,11 +279,15 @@ func ExtractOrderedFirewallIDs(foundRules, sentRules []ionoscloud.FirewallRule) 
 			if foundRule.Properties.IpVersion.IsSet() {
 				rule.Properties.IpVersion = foundRule.Properties.IpVersion
 			}
-			// The API can return icmpCode/icmpType as an explicit null (isSet=true, value=nil) for a
-			// rule where we never sent them (isSet=false, value=nil). Both mean "no value", but
-			// reflect.DeepEqual treats isSet as significant, so align them before comparing.
+			// The API can return icmpCode/icmpType/sourceMac/sourceIp/targetIp as an explicit null
+			// (isSet=true, value=nil) for a rule where we never sent them (isSet=false, value=nil).
+			// Both mean "no value", but reflect.DeepEqual treats isSet as significant, so align
+			// them before comparing.
 			alignNullableInt32Nil(&rule.Properties.IcmpCode, foundRule.Properties.IcmpCode)
 			alignNullableInt32Nil(&rule.Properties.IcmpType, foundRule.Properties.IcmpType)
+			alignNullableStringNil(&rule.Properties.SourceMac, foundRule.Properties.SourceMac)
+			alignNullableStringNil(&rule.Properties.SourceIp, foundRule.Properties.SourceIp)
+			alignNullableStringNil(&rule.Properties.TargetIp, foundRule.Properties.TargetIp)
 			// we need deepEqual here, because the structures contain pointers and cannot be compared using the stricter `==`
 			if reflect.DeepEqual(rule.Properties, foundRule.Properties) {
 				ruleIDs = append(ruleIDs, *foundRule.Id)
@@ -296,6 +300,14 @@ func ExtractOrderedFirewallIDs(foundRules, sentRules []ionoscloud.FirewallRule) 
 // alignNullableInt32Nil copies found into sent when both hold no value (nil), so a locally-unset
 // field (isSet=false) compares equal to the API's explicit null (isSet=true, value=nil).
 func alignNullableInt32Nil(sent *ionoscloud.NullableInt32, found ionoscloud.NullableInt32) {
+	if sent.Get() == nil && found.Get() == nil {
+		*sent = found
+	}
+}
+
+// alignNullableStringNil copies found into sent when both hold no value (nil), so a locally-unset
+// field (isSet=false) compares equal to the API's explicit null (isSet=true, value=nil).
+func alignNullableStringNil(sent *ionoscloud.NullableString, found ionoscloud.NullableString) {
 	if sent.Get() == nil && found.Get() == nil {
 		*sent = found
 	}
