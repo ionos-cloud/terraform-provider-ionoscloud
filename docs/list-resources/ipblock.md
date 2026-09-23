@@ -10,7 +10,7 @@ description: |-
 
 ⚠️ **Note:** List Resources require HashiCorp Terraform version 1.14 or later and are queried using `terraform query`.
 
-Lists **IP Blocks** on IONOS CLOUD. IP Blocks contain reserved public IP addresses that can be assigned to servers or other resources — see the [`ionoscloud_ipblock` resource](../resources/ipblock.md) for how to manage one.
+Lists reserved **IP Blocks** on IONOS CLOUD. IP Blocks contain reserved public IP addresses that can be assigned to servers or other resources.
 
 ## Example Usage
 
@@ -28,13 +28,13 @@ list "ionoscloud_ipblock" "all" {
 ### Filter IP blocks by location
 
 ```hcl
-list "ionoscloud_ipblock" "de_txl" {
+list "ionoscloud_ipblock" "us_las" {
   provider         = ionoscloud
   include_resource = true
   config {
     filters = [{
       field_name  = "location"
-      field_value = "de/txl"
+      field_value = "us/las"
     }]
   }
 }
@@ -43,13 +43,13 @@ list "ionoscloud_ipblock" "de_txl" {
 ### Filter IP blocks by name and location
 
 ```hcl
-list "ionoscloud_ipblock" "prod" {
+list "ionoscloud_ipblock" "webserver" {
   provider         = ionoscloud
   include_resource = true
   config {
     filters = [
-      { field_name = "name",     field_value = "production" },
-      { field_name = "location", field_value = "de/txl" },
+      { field_name = "name",     field_value = "webserver-ips" },
+      { field_name = "location", field_value = "us/las" },
     ]
   }
 }
@@ -65,13 +65,11 @@ terraform query -generate-config-out=imported.tf
 
 Terraform will write an `ionoscloud_ipblock` resource block for each discovered IP block into `imported.tf`, which can then be used directly in your configuration.
 
-> **Note:** The IP blocks are read with a single Cloud API `GET /ipblocks` request, which asks
-> for up to **1000** items — the same limit the `ionoscloud_ipblock` data source requests, and
-> ten times the 100 the IONOS SDK sends for `/ipblocks` when no limit is asked for. Whether the
-> server honours the requested limit in full is not verified. A contract holding more IP blocks
-> than one response returns is truncated silently — no error is raised and the missing IP blocks
-> simply do not appear. Check that the number of generated resource blocks matches the number of
-> IP blocks you expect before treating `imported.tf` as complete.
+> **Note:** The IP blocks are read with a single Cloud API request, which asks for up to
+> **1000** items — the same limit the `ionoscloud_ipblock` data source requests. A contract
+> holding more IP blocks than that limit is truncated silently — no error is raised and the
+> missing IP blocks simply do not appear. Check that the number of generated resource blocks
+> matches the number of IP blocks you expect before treating `imported.tf` as complete.
 
 Terraform names each generated resource after the `list` block label plus an index — a `list "ionoscloud_ipblock" "smoke"` block produces `ionoscloud_ipblock.smoke_0`, `smoke_1`, and so on.
 
@@ -81,25 +79,28 @@ Because the generated names are derived from the `list` block label, running a s
 
 This happens because an `import` block is idempotent: Terraform skips it when the target address is already in state, so the identity in the generated `import` block is never consulted. Deleting the generated `.tf` file does **not** remove the state entry.
 
-The consequences are not limited to a harmless diff. `location` and `size` are both force-new attributes, so if the two IP blocks differ in either, the plan **destroys the IP block already in state** and creates a replacement — the IP block you meant to import is never touched, and the public IP addresses it held are released back to IONOS:
+The consequences are not limited to a harmless diff. Both `location` and `size` are force-new attributes, so if the two IP blocks differ in either, the plan **destroys the IP block already in state** and reserves a replacement — the IP block you meant to import is never touched, and the public IP addresses it held are released:
 
 ```hcl
-# generated for an IP block in de/fra, but smoke_0 in state points at one in us/las
+# generated for a /30 in de/fra, but smoke_0 in state points at a single IP in us/las
 resource "ionoscloud_ipblock" "smoke_0" {
   location = "de/fra"          # forces replacement of the us/las IP block
-  size     = 1
-  name     = "IP Block Example"
+  size     = 4                 # also forces replacement
+  name     = "webserver-ips"
 }
 ```
 
 To avoid this:
 
 - Use a distinct `list` block label for each query you intend to import from, or
-- Clear the address deliberately: run `terraform state show ionoscloud_ipblock.smoke_0` first
-  and confirm it is the leftover import and not an IP block you still manage, then
-  `terraform state rm ionoscloud_ipblock.smoke_0`. Removing the address does not delete the
-  IP block — it stops Terraform managing it, and it has to be re-imported to come back under
-  management.
+- Confirm what the stale address is bound to and remove it before regenerating:
+
+```shell
+terraform state show ionoscloud_ipblock.smoke_0
+terraform state rm ionoscloud_ipblock.smoke_0
+```
+
+`terraform state rm` stops Terraform managing that IP block until it is imported again; it does not release the reserved addresses.
 
 Always read the plan before applying. A clean import reports:
 
@@ -115,9 +116,9 @@ The `config` block supports the following arguments:
 
 - `filters` - (Optional) List of filters to apply. All filters must match (AND logic). Each filter supports:
   - `field_name` - (Required) The field to filter on. Supported values: `name`, `location`.
-  - `field_value` - (Required) The exact value to match against. Matching is case-sensitive and compares against the value the API returned, so `location` has to be written exactly as the API reports it, for example `de/txl`.
+  - `field_value` - (Required) The exact value to match against.
 
-> **Note:** The Cloud API returns IP blocks from every location in a single response, so filtering by `location` does not reduce the number of API calls; it only narrows the results. Filtering happens after that response is read, so it cannot recover an IP block left out by the limit described above.
+> **Note:** The Cloud API returns IP blocks from every location in a single response, so filtering by `location` does not reduce the number of API calls; it only narrows the results. Filtering happens after that response is read, so it cannot recover an IP block left out by the page limit described above. Filter values are matched exactly and are case-sensitive; an unknown `field_name` is rejected at plan time, but a mis-cased `field_value` simply matches nothing.
 
 ## Identity Attributes
 
@@ -126,21 +127,21 @@ Each result exposes the following identity attributes, usable for import:
 | Attribute  | Description                                                                                                            |
 |------------|------------------------------------------------------------------------------------------------------------------------|
 | `id`       | The UUID of the IP block.                                                                                              |
-| `location` | The location the IP block lives in (e.g. `de/txl`). Only needed when the Cloud API endpoint is overridden per location. |
+| `location` | The location the IP block is reserved in (e.g. `us/las`). Only needed when the Cloud API endpoint is overridden per location. |
 
 ## Attributes Reference
 
 Each result exposes the following attributes when `include_resource = true`, matching the `ionoscloud_ipblock` resource schema:
 
 - `id` - The UUID of the IP block.
-- `name` - The name of the IP block. Optional on the resource, so it can be null; results with no name are labelled by their UUID instead.
-- `location` - The regional location of the IP block (e.g. `us/las`, `de/txl`).
+- `name` - The name of the IP block. Optional on an IP block; a result without one is labelled by its UUID in the query output.
+- `location` - The regional location the IP block is reserved in (e.g. `us/las`).
 - `size` - The number of IP addresses reserved in this block.
 - `ips` - The list of IP addresses associated with this block.
-- `ip_consumers` - Consumption detail for each IP in the block. Empty when no IP in the block is in use:
+- `ip_consumers` - Consumption detail for each IP of the block:
   - `ip` - The IP address being consumed.
   - `mac` - The MAC address of the NIC the IP is assigned to.
-  - `nic_id` - The UUID of the NIC the IP is assigned to.
+  - `nic_id` - The UUID of that NIC.
   - `server_id` - The UUID of the server the NIC belongs to.
   - `server_name` - The name of that server.
   - `datacenter_id` - The UUID of the datacenter the server lives in.

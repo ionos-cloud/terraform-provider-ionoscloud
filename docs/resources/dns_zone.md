@@ -68,7 +68,7 @@ resource "ionoscloud_dns_zone" "example" {
 
 ## Query (List Resource)
 
-DNS zones can be listed using `terraform query` (requires Terraform 1.14+). List blocks must be placed in a dedicated query file, whose name ends in `.tfquery.hcl` (for example `queries.tfquery.hcl`).
+DNS Zones can be listed using `terraform query` (requires Terraform 1.14+). List blocks must be placed in a dedicated query file, whose name ends in `.tfquery.hcl` (for example `queries.tfquery.hcl`).
 
 ```hcl
 list "ionoscloud_dns_zone" "all" {

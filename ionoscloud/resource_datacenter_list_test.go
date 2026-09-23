@@ -241,8 +241,7 @@ func configureProvider(ctx context.Context, t *testing.T, server tfprotov6.Provi
 }
 
 // listResults calls the ListResource RPC of typeName with the given filters and
-// collects the results, failing on the first error diagnostic. The type name is a
-// parameter because this driver is shared by every list-resource test in the package.
+// collects the results, failing on the first error diagnostic.
 func listResults(ctx context.Context, t *testing.T, server tfprotov6.ProviderServer, typeName string, schema *tfprotov6.Schema, filters map[string]string) []tfprotov6.ListResourceResult {
 	t.Helper()
 

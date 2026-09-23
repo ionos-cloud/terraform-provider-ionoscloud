@@ -26,10 +26,10 @@ func resourceIPBlock() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceIpBlockImporter,
 		},
-		// The identity is what a `list "ionoscloud_ipblock"` block streams back for
-		// each IP block it finds, and what an import block can be written against.
-		// Terraform requires every read of a resource that declares an identity to
-		// return one, see setIPBlockIdentity.
+		// The identity is what a `list "ionoscloud_ipblock"` block streams back for each
+		// IP block it finds, and what an import block can be written against. Terraform
+		// requires every read of a resource that declares an identity to return one, see
+		// setIPBlockIdentity.
 		Identity: &schema.ResourceIdentity{
 			Version: 0,
 			SchemaFunc: func() map[string]*schema.Schema {
@@ -42,7 +42,7 @@ func resourceIPBlock() *schema.Resource {
 					"location": {
 						Type:              schema.TypeString,
 						OptionalForImport: true,
-						Description:       "The location the IP block lives in. Only needed when the Cloud API endpoint is overridden per location.",
+						Description:       "The location the IP block is reserved in. Only needed when the Cloud API endpoint is overridden per location.",
 					},
 				}
 			},
@@ -181,8 +181,6 @@ func resourceIPBlockRead(ctx context.Context, d *schema.ResourceData, meta any) 
 		return diagutil.ToDiags(d, err, nil)
 	}
 
-	// Must run after IpBlockSetData: the identity reads attributes that only the data
-	// setter fills in (this matters most on an identity-based import).
 	if err := setIPBlockIdentity(d); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
@@ -213,12 +211,10 @@ func resourceIPBlockUpdate(ctx context.Context, d *schema.ResourceData, meta any
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating an ip block: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	// Unlike Create, Update does not need this to satisfy terraform: the SDK carries the
-	// prior identity into the apply on its own, so an update that never touches the
-	// identity still returns one. It is a safety net for state written before this
-	// resource declared an identity, e.g. a refresh-free apply over an old state file.
-	// The values are read back out of state, never out of an API response, so whatever
-	// this writes equals the prior identity and the stability check cannot trip.
+	// The SDK carries the identity terraform sent into the apply, so "Missing Resource
+	// Identity After Update" does not fire here. This is the safety net for state
+	// written before the resource declared an identity, and it writes the same values
+	// the prior identity holds: neither the ID nor the location can be patched.
 	if err := setIPBlockIdentity(d); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
@@ -294,8 +290,8 @@ func resourceIpBlockImporter(ctx context.Context, d *schema.ResourceData, meta a
 }
 
 // ipBlockImportParts resolves the IP block to import, either from the resource
-// identity - which is how an import block with an `identity` argument, and the
-// import config that `terraform query` generates, address an IP block - or from the
+// identity - which is how an import block with an `identity` argument, and the import
+// config that `terraform query` generates, address an IP block - or from the
 // "<location>:<ipblock-id>" import string.
 func ipBlockImportParts(d *schema.ResourceData) (ipBlockID, location string, err error) {
 	if identity, identityErr := d.Identity(); identityErr == nil {

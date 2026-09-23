@@ -125,16 +125,20 @@ func TestAccIPBlockBasic(t *testing.T) {
 // identity that listing depends on.
 //
 // The list resource is served by the plugin-framework half of the provider even though
-// the ipblock resource itself is implemented with SDKv2, so this also covers the mux
-// serving the two halves under the same type name. See resource_ipblock_list.go in this
-// package.
+// the ip block resource itself is implemented with SDKv2, so this also covers the mux
+// serving the two halves under the same type name. See resource_ipblock_list.go in
+// this package.
 func TestAccIPBlockQuery(t *testing.T) {
 	const (
-		ipBlockName    = "tf-test-ipblock-query"
-		ipBlockRenamed = "tf-test-ipblock-query-renamed"
-		ipBlockAddr    = constant.IpBlockResource + ".test_ipblock_query"
-		otherLocation  = "de/txl"
+		ipBlockName        = "tf-test-ipblock-query"
+		ipBlockUpdatedName = "tf-test-ipblock-query-updated"
+		ipBlockAddr        = constant.IpBlockResource + ".test_ipblock_query"
+		otherLocation      = "de/txl"
 	)
+
+	// Its own name, label and create step rather than testAccCheckIPBlockConfigBasic:
+	// ExpectLength asserts a contract-wide total, so an ip block another test in this
+	// package reserves under the same name would make ExpectLength(1) flap.
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() { testAccPreCheck(t) },
@@ -152,6 +156,19 @@ resource %[1]q "test_ipblock_query" {
   location = %[3]q
   size     = 1
 }`, constant.IpBlockResource, ipBlockName, location),
+			},
+			// name is the only attribute of an ip block that is not force-new, so this is
+			// the only step that enters Update - where the identity is written again.
+			{
+				Config: fmt.Sprintf(`
+resource %[1]q "test_ipblock_query" {
+  name     = %[2]q
+  location = %[3]q
+  size     = 1
+}`, constant.IpBlockResource, ipBlockUpdatedName, location),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(ipBlockAddr, "name", ipBlockUpdatedName),
+				),
 			},
 			// List without filters: the ip block must show up with its identity.
 			{
@@ -177,7 +194,7 @@ resource %[1]q "test_ipblock_query" {
       { field_name = "location", field_value = %[3]q },
     ]
   }
-}`, constant.IpBlockResource, ipBlockName, location),
+}`, constant.IpBlockResource, ipBlockUpdatedName, location),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLength(ipBlockAddr, 1),
 				},
@@ -193,27 +210,10 @@ resource %[1]q "test_ipblock_query" {
       { field_name = "location", field_value = %[3]q },
     ]
   }
-}`, constant.IpBlockResource, ipBlockName, otherLocation),
+}`, constant.IpBlockResource, ipBlockUpdatedName, otherLocation),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLength(ipBlockAddr, 0),
 				},
-			},
-			// Rename only. `name` is the sole non-ForceNew attribute of an ip block, so
-			// this is the one step that actually enters resourceIPBlockUpdate - which
-			// writes the identity itself, because it does not delegate to the read. The
-			// existing testAccCheckIPBlockConfigUpdate flips `size` as well, which is
-			// ForceNew, so that step destroys and recreates and never covers this.
-			{
-				Config: fmt.Sprintf(`
-resource %[1]q "test_ipblock_query" {
-  name     = %[2]q
-  location = %[3]q
-  size     = 1
-}`, constant.IpBlockResource, ipBlockRenamed, location),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(ipBlockAddr, "name", ipBlockRenamed),
-					resource.TestCheckResourceAttr(ipBlockAddr, "location", location),
-				),
 			},
 			// Import through the resource identity that the list results carry. This kind
 			// already checks that the import succeeds, that the plan it leaves behind is a

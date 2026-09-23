@@ -69,7 +69,7 @@ resource "ionoscloud_ipblock" "example" {
 
 #### Optional
 
-* `location` (String) The location the IP block lives in (e.g. `de/txl`). Only needed when the Cloud API endpoint is overridden per location.
+* `location` (String) The location the IP block is reserved in (e.g. `us/las`). Only needed when the Cloud API endpoint is overridden per location.
 
 ## Query (List Resource)
 

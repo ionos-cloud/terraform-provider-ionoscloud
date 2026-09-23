@@ -23,6 +23,10 @@ func resourceDNSZone() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: zoneImport,
 		},
+		// The identity is what a `list "ionoscloud_dns_zone"` block streams back for each
+		// zone it finds, and what an import block can be written against. Terraform
+		// requires every read of a resource that declares an identity to return one, see
+		// setDNSZoneIdentity.
 		Identity: &schema.ResourceIdentity{
 			Version: 0,
 			SchemaFunc: func() map[string]*schema.Schema {
@@ -99,8 +103,6 @@ func zoneRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagno
 		return diagutil.ToDiags(d, err, nil)
 	}
 
-	// Must run after SetZoneData: the identity reads attributes that only the data
-	// setter fills in (this matters most on an identity-based import).
 	if err := setDNSZoneIdentity(d); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
@@ -121,12 +123,10 @@ func zoneUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diag
 			"please check again the values defined in the plan"), nil)
 	}
 
-	// Unlike Create, Update does not need this to satisfy terraform: the SDK carries the
-	// prior identity into the apply on its own, so an update that never touches the
-	// identity still returns one. It is a safety net for state written before this
-	// resource declared an identity, e.g. a refresh-free apply over an old state file.
-	// The value is read back out of state, never out of an API response, so whatever this
-	// writes equals the prior identity and the stability check cannot trip.
+	// The SDK carries the identity terraform sent into the apply, so "Missing Resource
+	// Identity After Update" does not fire here. This is the safety net for state
+	// written before the resource declared an identity, and it writes the same value
+	// the prior identity holds: the zone ID cannot change on an update.
 	if err := setDNSZoneIdentity(d); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
@@ -155,7 +155,6 @@ func zoneDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diag
 
 func zoneImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	client := meta.(bundleclient.SdkBundle).DNSClient
-
 	zoneID, err := dnsZoneImportParts(d)
 	if err != nil {
 		return nil, err
@@ -186,9 +185,10 @@ func zoneImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schem
 	return []*schema.ResourceData{d}, nil
 }
 
-// dnsZoneImportParts resolves the zone ID from either import mode: the `id` attribute of
-// an identity-based import block, or the legacy plain-UUID import string. A DNS zone has
-// no location, so the identity is a lone `id` and there is nothing to split.
+// dnsZoneImportParts resolves the DNS zone to import, either from the resource identity
+// - which is how an import block with an `identity` argument, and the import config that
+// `terraform query` generates, address a zone - or from the plain "<zone-id>" import
+// string.
 func dnsZoneImportParts(d *schema.ResourceData) (string, error) {
 	if identity, identityErr := d.Identity(); identityErr == nil {
 		if id, ok := identity.GetOk("id"); ok {
@@ -197,16 +197,19 @@ func dnsZoneImportParts(d *schema.ResourceData) (string, error) {
 		}
 	}
 
-	zoneID := d.Id()
-	if zoneID == "" {
+	// A zone is addressed by a bare UUID, so there is no composite import identifier to
+	// validate here and nothing else rejects an empty one: an identity whose id is the
+	// empty string reads as unset and falls through to this branch.
+	if d.Id() == "" {
 		return "", fmt.Errorf("invalid import identifier: expected a DNS zone UUID, got an empty string")
 	}
 
-	return zoneID, nil
+	return d.Id(), nil
 }
 
-// setDNSZoneIdentity writes the resource identity. It reads the id back out of the
-// ResourceData, so it must run after the state writer on every path that produces state.
+// setDNSZoneIdentity writes the resource identity from the DNS zone already in state.
+// Terraform errors out with "Missing Resource Identity After Read" if a resource that
+// declares an identity finishes a read without returning one.
 func setDNSZoneIdentity(d *schema.ResourceData) error {
 	identity, err := d.Identity()
 	if err != nil {
