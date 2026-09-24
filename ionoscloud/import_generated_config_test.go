@@ -3,6 +3,7 @@
 package ionoscloud
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -11,10 +12,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
+
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 )
 
 const (
 	importGenServerAddr   = "ionoscloud_server.import_gen"
+	importGenOtherSrvAddr = "ionoscloud_server.import_gen_other"
 	importGenVolumeAddr   = "ionoscloud_volume.import_gen_unattached"
 	importGenGeneratedSrv = "ionoscloud_server.generated"
 	importGenGeneratedVol = "ionoscloud_volume.generated"
@@ -25,7 +29,8 @@ const (
 
 // TestAccImportGeneratedConfigNoOp imports resources the way a whole-datacenter import does: an
 // import block plus generated config, which must plan as a pure no-op import. It covers a server
-// without a boot volume whose NIC is a separate ionoscloud_nic, and a volume attached to no server.
+// without a boot volume whose NIC is a separate ionoscloud_nic, and a volume attached to no server,
+// then attached, moved to another server and detached again.
 func TestAccImportGeneratedConfigNoOp(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
@@ -94,6 +99,7 @@ func TestAccImportGeneratedConfigNoOp(t *testing.T) {
 				},
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(importGenVolumeAddr, "server_id", importGenServerAddr, "id"),
+					testAccCheckImportGenAttachedVolumes(importGenServerAddr, 1),
 				),
 			},
 			{
@@ -108,8 +114,71 @@ func TestAccImportGeneratedConfigNoOp(t *testing.T) {
 					},
 				},
 			},
+			{
+				// Moving the volume to another server detaches it from the first one before
+				// attaching it, in place, and the next plan is empty.
+				Config: testAccImportGenConfig("server_id = ionoscloud_server.import_gen_other.id"),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction(importGenVolumeAddr, plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair(importGenVolumeAddr, "server_id", importGenOtherSrvAddr, "id"),
+					testAccCheckImportGenAttachedVolumes(importGenServerAddr, 0),
+					testAccCheckImportGenAttachedVolumes(importGenOtherSrvAddr, 1),
+				),
+			},
+			{
+				// Removing server_id only detaches the volume: it is updated in place, the API no
+				// longer lists it on any server, and the next plan is empty.
+				Config: testAccImportGenConfig(""),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction(importGenVolumeAddr, plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					// SDKv2 stores an optional string removed from config as "", not null, so the
+					// API check below is what proves the volume is detached.
+					resource.TestCheckResourceAttr(importGenVolumeAddr, "server_id", ""),
+					testAccCheckImportGenAttachedVolumes(importGenServerAddr, 0),
+					testAccCheckImportGenAttachedVolumes(importGenOtherSrvAddr, 0),
+				),
+			},
 		},
 	})
+}
+
+// testAccCheckImportGenAttachedVolumes checks on the API, not in state, how many volumes are
+// attached to the server at serverAddr.
+func testAccCheckImportGenAttachedVolumes(serverAddr string, want int) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[serverAddr]
+		if !ok {
+			return fmt.Errorf("resource %s not found in state", serverAddr)
+		}
+		ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Default)
+		defer cancel()
+
+		client, err := testAccProvider.Meta().(bundleclient.SdkBundle).NewCloudAPIClient(ctx, rs.Primary.Attributes["location"])
+		if err != nil {
+			return err
+		}
+		volumes, apiResponse, err := client.ServersApi.DatacentersServersVolumesGet(ctx, rs.Primary.Attributes["datacenter_id"], rs.Primary.ID).Execute()
+		logApiRequestTime(apiResponse)
+		if err != nil {
+			return fmt.Errorf("listing volumes attached to server %s: %w", rs.Primary.ID, err)
+		}
+		got := 0
+		if volumes.Items != nil {
+			got = len(*volumes.Items)
+		}
+		if got != want {
+			return fmt.Errorf("server %s has %d attached volume(s), want %d", rs.Primary.ID, got, want)
+		}
+		return nil
+	}
 }
 
 func testAccImportGenServerID(s *terraform.State) (string, error) {
@@ -137,7 +206,7 @@ func testAccImportGenAttachedVolumeID(s *terraform.State) (string, error) {
 }
 
 // testAccImportGenConfig is the smallest datacenter holding the shapes the import has to handle.
-// volumeAttachment is inserted into the data volume, so a step can attach it to the server.
+// volumeAttachment is inserted into the data volume, so a step can attach it to a server.
 func testAccImportGenConfig(volumeAttachment string) string {
 	return fmt.Sprintf(`
 resource "ionoscloud_datacenter" "import_gen" {
@@ -154,6 +223,14 @@ resource "ionoscloud_lan" "import_gen" {
 # No volume block: the server has no boot volume.
 resource "ionoscloud_server" "import_gen" {
   name          = "tf-acctest-import-gen-srv"
+  datacenter_id = ionoscloud_datacenter.import_gen.id
+  cores         = 1
+  ram           = 1024
+}
+
+# A second server, so a step can move the volume between servers.
+resource "ionoscloud_server" "import_gen_other" {
+  name          = "tf-acctest-import-gen-srv2"
   datacenter_id = ionoscloud_datacenter.import_gen.id
   cores         = 1
   ram           = 1024
