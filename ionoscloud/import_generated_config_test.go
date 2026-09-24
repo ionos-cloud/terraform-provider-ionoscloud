@@ -177,3 +177,105 @@ resource "ionoscloud_volume" "import_gen_unattached" {
 }
 `, volumeAttachment)
 }
+
+const (
+	importGenFailoverLanAddr = "ionoscloud_lan.import_gen_failover"
+	importGenFailoverIPBAddr = "ionoscloud_ipblock.import_gen_failover"
+	importGenGeneratedLan    = "ionoscloud_lan.generated"
+	importGenGeneratedIPB    = "ionoscloud_ipblock.generated"
+)
+
+// TestAccImportGeneratedConfigComputedBlocksNoOp imports a LAN with an IP failover and the IP
+// block it uses. Generated config writes one empty ip_failover {} / ip_consumers {} block per
+// entry, because every nested attribute is computed. Dropping Optional would stop that but break
+// configurations that already hold such blocks, so the blocks stay and must plan as a no-op.
+func TestAccImportGeneratedConfigComputedBlocksNoOp(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy: resource.ComposeTestCheckFunc(
+			testAccCheckIPBlockDestroyCheck,
+			testAccCheckDatacenterDestroyCheck,
+		),
+		Steps: []resource.TestStep{
+			{
+				// The LAN and IP block are read before the failover exists; the import steps
+				// below read them afresh and assert one entry each.
+				Config: testAccImportGenFailoverConfig,
+			},
+			{
+				ResourceName:    importGenFailoverLanAddr,
+				ImportState:     true,
+				ImportStateKind: resource.ImportBlockWithID,
+				ImportStateIdFunc: func(s *terraform.State) (string, error) {
+					rs, ok := s.RootModule().Resources[importGenFailoverLanAddr]
+					if !ok {
+						return "", fmt.Errorf("resource %s not found in state", importGenFailoverLanAddr)
+					}
+					return fmt.Sprintf("%s/%s", rs.Primary.Attributes["datacenter_id"], rs.Primary.ID), nil
+				},
+				GenerateConfig: true,
+				ImportPlanChecks: resource.ImportPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction(importGenGeneratedLan, plancheck.ResourceActionNoop),
+						plancheck.ExpectKnownValue(importGenGeneratedLan, tfjsonpath.New("ip_failover"), knownvalue.ListSizeExact(1)),
+					},
+				},
+			},
+			{
+				ResourceName:    importGenFailoverIPBAddr,
+				ImportState:     true,
+				ImportStateKind: resource.ImportBlockWithID,
+				GenerateConfig:  true,
+				ImportPlanChecks: resource.ImportPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction(importGenGeneratedIPB, plancheck.ResourceActionNoop),
+						plancheck.ExpectKnownValue(importGenGeneratedIPB, tfjsonpath.New("ip_consumers"), knownvalue.ListSizeExact(1)),
+					},
+				},
+			},
+		},
+	})
+}
+
+const testAccImportGenFailoverConfig = `
+resource "ionoscloud_datacenter" "import_gen_failover" {
+  name     = "tf-acctest-import-gen-failover"
+  location = "de/txl"
+}
+
+resource "ionoscloud_ipblock" "import_gen_failover" {
+  location = ionoscloud_datacenter.import_gen_failover.location
+  size     = 1
+  name     = "tf-acctest-import-gen-failover"
+}
+
+resource "ionoscloud_lan" "import_gen_failover" {
+  datacenter_id = ionoscloud_datacenter.import_gen_failover.id
+  public        = true
+  name          = "tf-acctest-import-gen-failover"
+}
+
+resource "ionoscloud_server" "import_gen_failover" {
+  name          = "tf-acctest-import-gen-failover"
+  datacenter_id = ionoscloud_datacenter.import_gen_failover.id
+  cores         = 1
+  ram           = 1024
+}
+
+resource "ionoscloud_nic" "import_gen_failover" {
+  datacenter_id = ionoscloud_datacenter.import_gen_failover.id
+  server_id     = ionoscloud_server.import_gen_failover.id
+  lan           = ionoscloud_lan.import_gen_failover.id
+  name          = "tf-acctest-import-gen-failover"
+  dhcp          = true
+  ips           = [ionoscloud_ipblock.import_gen_failover.ips[0]]
+}
+
+resource "ionoscloud_ipfailover" "import_gen_failover" {
+  datacenter_id = ionoscloud_datacenter.import_gen_failover.id
+  lan_id        = ionoscloud_lan.import_gen_failover.id
+  ip            = ionoscloud_ipblock.import_gen_failover.ips[0]
+  nicuuid       = ionoscloud_nic.import_gen_failover.id
+}
+`

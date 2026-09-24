@@ -11,7 +11,7 @@
 
 ### Docs
 - `ionoscloud_server`, `ionoscloud_vcpu_server`: Correct the import docs: `<datacenter-id>/<server-id>` imports the server without an inline `nic`; its NICs are separate `ionoscloud_nic` resources.
-- `ionoscloud_lan`, `ionoscloud_ipblock`: Note that generated configuration contains an empty `ip_failover {}` / `ip_consumers {}` block for these computed attributes.
+- `ionoscloud_lan`, `ionoscloud_ipblock`: Note that generated configuration contains an empty `ip_failover {}` / `ip_consumers {}` block per entry for these computed attributes. The blocks plan as a no-op and can be removed.
 
 ## 6.7.37
 
