@@ -7,7 +7,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	cloudapiflowlog "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/flowlog"
@@ -115,7 +116,7 @@ func dataSourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceDa
 		return diagutil.ToDiags(d, fmt.Errorf("please provide either the lan id or name"), nil)
 	}
 	var networkLoadBalancer ionoscloud.NetworkLoadBalancer
-	var apiResponse *ionoscloud.APIResponse
+	var apiResponse *shared.APIResponse
 
 	if idOk {
 		/* search by ID */
@@ -135,16 +136,14 @@ func dataSourceNetworkLoadBalancerRead(ctx context.Context, d *schema.ResourceDa
 		}
 
 		var results []ionoscloud.NetworkLoadBalancer
-		if networkLoadBalancers.Items != nil {
-			for _, nlb := range *networkLoadBalancers.Items {
-				if nlb.Properties != nil && nlb.Properties.Name != nil && strings.EqualFold(*nlb.Properties.Name, name.(string)) {
-					tmpNetworkLoadBalancer, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFindByNetworkLoadBalancerId(ctx, dcID, *nlb.Id).Depth(4).Execute()
-					logApiRequestTime(apiResponse)
-					if err != nil {
-						return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching network loadbalancer with ID %s: %w", *nlb.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
-					}
-					results = append(results, tmpNetworkLoadBalancer)
+		for _, nlb := range networkLoadBalancers.Items {
+			if strings.EqualFold(nlb.Properties.Name, name.(string)) {
+				tmpNetworkLoadBalancer, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFindByNetworkLoadBalancerId(ctx, dcID, *nlb.Id).Depth(4).Execute()
+				logApiRequestTime(apiResponse)
+				if err != nil {
+					return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching network loadbalancer with ID %s: %w", *nlb.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 				}
+				results = append(results, tmpNetworkLoadBalancer)
 			}
 		}
 

@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/tf/writeonly"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
@@ -114,7 +114,7 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta any) d
 		return diag.FromErr(err)
 	}
 	request := ionoscloud.UserPost{
-		Properties: &ionoscloud.UserPropertiesPost{},
+		Properties: ionoscloud.UserPropertiesPost{},
 	}
 
 	tflog.Debug(ctx, "creating user", map[string]any{"first_name": d.Get("first_name")})
@@ -160,7 +160,7 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta any) d
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating a user: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
@@ -170,7 +170,7 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta any) d
 		if bundleclient.IsRequestFailed(errState) {
 			d.SetId("")
 		}
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
@@ -205,7 +205,7 @@ func resourceUserRead(ctx context.Context, d *schema.ResourceData, meta any) dia
 			d.SetId("")
 			return nil
 		}
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching a User: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
@@ -225,22 +225,20 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta any) d
 	foundUser, apiResponse, err := client.UserManagementApi.UmUsersFindById(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching a User: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	userReq := ionoscloud.UserPut{
-		Properties: &ionoscloud.UserPropertiesPut{},
+		Properties: ionoscloud.UserPropertiesPut{},
 	}
 	// this is a PUT, so we first fill everything, then we change what has been modified
-	if foundUser.Properties != nil {
-		userReq.Properties.Firstname = foundUser.Properties.Firstname
-		userReq.Properties.Lastname = foundUser.Properties.Lastname
-		userReq.Properties.Email = foundUser.Properties.Email
-		userReq.Properties.Active = foundUser.Properties.Active
-		userReq.Properties.Administrator = foundUser.Properties.Administrator
-		userReq.Properties.ForceSecAuth = foundUser.Properties.ForceSecAuth
-	}
+	userReq.Properties.Firstname = foundUser.Properties.Firstname
+	userReq.Properties.Lastname = foundUser.Properties.Lastname
+	userReq.Properties.Email = foundUser.Properties.Email
+	userReq.Properties.Active = foundUser.Properties.Active
+	userReq.Properties.Administrator = foundUser.Properties.Administrator
+	userReq.Properties.ForceSecAuth = foundUser.Properties.ForceSecAuth
 
 	if d.HasChange("first_name") {
 		_, newValue := d.GetChange("first_name")
@@ -315,12 +313,12 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta any) d
 	_, apiResponse, err = client.UserManagementApi.UmUsersPut(ctx, d.Id()).User(userReq).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while patching a user: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
@@ -336,12 +334,12 @@ func resourceUserDelete(ctx context.Context, d *schema.ResourceData, meta any) d
 	apiResponse, err := client.UserManagementApi.UmUsersDelete(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, err, &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
@@ -386,50 +384,48 @@ func resourceUserImporter(ctx context.Context, d *schema.ResourceData, meta any)
 func setUserData(d *schema.ResourceData, user *ionoscloud.User) error {
 	d.SetId(*user.Id)
 
-	if user.Properties != nil {
-		if user.Properties.Firstname != nil {
-			if err := d.Set("first_name", *user.Properties.Firstname); err != nil {
-				return err
-			}
+	if user.Properties.Firstname != nil {
+		if err := d.Set("first_name", *user.Properties.Firstname); err != nil {
+			return err
 		}
+	}
 
-		if user.Properties.Lastname != nil {
-			if err := d.Set("last_name", *user.Properties.Lastname); err != nil {
-				return err
-			}
+	if user.Properties.Lastname != nil {
+		if err := d.Set("last_name", *user.Properties.Lastname); err != nil {
+			return err
 		}
-		if user.Properties.Email != nil {
-			if err := d.Set("email", *user.Properties.Email); err != nil {
-				return err
-			}
+	}
+	if user.Properties.Email != nil {
+		if err := d.Set("email", *user.Properties.Email); err != nil {
+			return err
 		}
-		if user.Properties.Administrator != nil {
-			if err := d.Set("administrator", *user.Properties.Administrator); err != nil {
-				return err
-			}
+	}
+	if user.Properties.Administrator != nil {
+		if err := d.Set("administrator", *user.Properties.Administrator); err != nil {
+			return err
 		}
-		if user.Properties.ForceSecAuth != nil {
-			if err := d.Set("force_sec_auth", *user.Properties.ForceSecAuth); err != nil {
-				return err
-			}
+	}
+	if user.Properties.ForceSecAuth != nil {
+		if err := d.Set("force_sec_auth", *user.Properties.ForceSecAuth); err != nil {
+			return err
 		}
+	}
 
-		if user.Properties.SecAuthActive != nil {
-			if err := d.Set("sec_auth_active", *user.Properties.SecAuthActive); err != nil {
-				return err
-			}
+	if user.Properties.SecAuthActive != nil {
+		if err := d.Set("sec_auth_active", *user.Properties.SecAuthActive); err != nil {
+			return err
 		}
+	}
 
-		if user.Properties.S3CanonicalUserId != nil {
-			if err := d.Set("s3_canonical_user_id", *user.Properties.S3CanonicalUserId); err != nil {
-				return err
-			}
+	if user.Properties.S3CanonicalUserId != nil {
+		if err := d.Set("s3_canonical_user_id", *user.Properties.S3CanonicalUserId); err != nil {
+			return err
 		}
+	}
 
-		if user.Properties.Active != nil {
-			if err := d.Set("active", *user.Properties.Active); err != nil {
-				return err
-			}
+	if user.Properties.Active != nil {
+		if err := d.Set("active", *user.Properties.Active); err != nil {
+			return err
 		}
 	}
 
@@ -446,12 +442,7 @@ func getUserGroups(user *ionoscloud.User) []string {
 		return groupIDs
 	}
 
-	if user.Entities.Groups.Items == nil {
-		return groupIDs
-	}
-
-	groups := *user.Entities.Groups.Items
-	for _, g := range groups {
+	for _, g := range user.Entities.Groups.Items {
 		if g.Id != nil {
 			groupIDs = append(groupIDs, *g.Id)
 		}

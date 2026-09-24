@@ -2,6 +2,12 @@
 ### Features
 - `ionoscloud_template`: add new, optional attribute: `storage_type`
 
+### Fixes
+- `ionoscloud_server`, `ionoscloud_vcpu_server`: Fix inline `nic.firewall` rules (and, as a side effect, `nic.security_groups_ids`) being dropped from state right after create, causing a perpetual diff on the next plan. The API returns `icmpCode`/`icmpType`/`sourceMac`/`sourceIp`/`targetIp` as an explicit `null` even when the rule never set them, which failed the equality check used to match the created rule back to its id.
+
+### Chore
+- Migrate the Cloud API client from `github.com/ionos-cloud/sdk-go/v6` to `github.com/ionos-cloud/sdk-go-bundle/products/compute/v2`, so every product is now served by the SDK bundle. This is an internal refactor with no user-facing behaviour change.
+
 ## 6.7.37
 
 ### Features

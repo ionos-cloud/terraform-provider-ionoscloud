@@ -8,7 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	cloudapiflowlog "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/flowlog"
@@ -118,7 +119,7 @@ func dataSourceApplicationLoadBalancerRead(ctx context.Context, d *schema.Resour
 	}
 
 	var applicationLoadBalancer ionoscloud.ApplicationLoadBalancer
-	var apiResponse *ionoscloud.APIResponse
+	var apiResponse *shared.APIResponse
 
 	if idOk {
 		/* search by ID */
@@ -144,7 +145,7 @@ func dataSourceApplicationLoadBalancerRead(ctx context.Context, d *schema.Resour
 				return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching application load balancers: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 			}
 
-			results = *applicationLoadBalancers.Items
+			results = applicationLoadBalancers.Items
 		} else {
 			applicationLoadBalancers, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersGet(ctx, datacenterID).Depth(1).Execute()
 			logApiRequestTime(apiResponse)
@@ -153,9 +154,9 @@ func dataSourceApplicationLoadBalancerRead(ctx context.Context, d *schema.Resour
 				return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching application load balancers: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 			}
 
-			if applicationLoadBalancers.Items != nil {
-				for _, alb := range *applicationLoadBalancers.Items {
-					if alb.Properties != nil && alb.Properties.Name != nil && strings.EqualFold(*alb.Properties.Name, name) {
+			if len(applicationLoadBalancers.Items) > 0 {
+				for _, alb := range applicationLoadBalancers.Items {
+					if strings.EqualFold(alb.Properties.Name, name) {
 						tmpAlb, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFindByApplicationLoadBalancerId(ctx, datacenterID, *alb.Id).Execute()
 						logApiRequestTime(apiResponse)
 						if err != nil {

@@ -6,7 +6,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
@@ -93,13 +94,9 @@ func dataSourcePcc() *schema.Resource {
 	}
 }
 
-func convertPccPeers(peers *[]ionoscloud.Peer) []any {
-	if peers == nil {
-		return make([]any, 0)
-	}
-
-	ret := make([]any, len(*peers), len(*peers))
-	for i, peer := range *peers {
+func convertPccPeers(peers []ionoscloud.Peer) []any {
+	ret := make([]any, len(peers))
+	for i, peer := range peers {
 		entry := make(map[string]any)
 
 		entry["lan_id"] = peer.Id
@@ -114,13 +111,9 @@ func convertPccPeers(peers *[]ionoscloud.Peer) []any {
 	return ret
 }
 
-func convertConnectableDatacenters(dcs *[]ionoscloud.ConnectableDatacenter) []any {
-	if dcs == nil {
-		return make([]any, 0)
-	}
-
-	ret := make([]any, len(*dcs), len(*dcs))
-	for i, dc := range *dcs {
+func convertConnectableDatacenters(dcs []ionoscloud.ConnectableDatacenter) []any {
+	ret := make([]any, len(dcs))
+	for i, dc := range dcs {
 		entry := make(map[string]any)
 
 		entry["id"] = dc.Id
@@ -139,26 +132,24 @@ func setPccDataSource(d *schema.ResourceData, pcc *ionoscloud.PrivateCrossConnec
 		d.SetId(*pcc.Id)
 	}
 
-	if pcc.Properties != nil {
-		if pcc.Properties.Name != nil {
-			if err := d.Set("name", *pcc.Properties.Name); err != nil {
-				return err
-			}
+	if pcc.Properties.Name != nil {
+		if err := d.Set("name", *pcc.Properties.Name); err != nil {
+			return err
 		}
-		if pcc.Properties.Description != nil {
-			if err := d.Set("description", *pcc.Properties.Description); err != nil {
-				return err
-			}
+	}
+	if pcc.Properties.Description != nil {
+		if err := d.Set("description", *pcc.Properties.Description); err != nil {
+			return err
 		}
-		if pcc.Properties.Peers != nil {
-			if err := d.Set("peers", convertPccPeers(pcc.Properties.Peers)); err != nil {
-				return err
-			}
+	}
+	if len(pcc.Properties.Peers) > 0 {
+		if err := d.Set("peers", convertPccPeers(pcc.Properties.Peers)); err != nil {
+			return err
 		}
-		if pcc.Properties.ConnectableDatacenters != nil && len(*pcc.Properties.ConnectableDatacenters) > 0 {
-			if err := d.Set("connectable_datacenters", convertConnectableDatacenters(pcc.Properties.ConnectableDatacenters)); err != nil {
-				return err
-			}
+	}
+	if len(pcc.Properties.ConnectableDatacenters) > 0 {
+		if err := d.Set("connectable_datacenters", convertConnectableDatacenters(pcc.Properties.ConnectableDatacenters)); err != nil {
+			return err
 		}
 	}
 	return nil
@@ -182,7 +173,7 @@ func dataSourcePccRead(ctx context.Context, d *schema.ResourceData, meta any) di
 	}
 
 	var pcc ionoscloud.PrivateCrossConnect
-	var apiResponse *ionoscloud.APIResponse
+	var apiResponse *shared.APIResponse
 
 	if idOk {
 		/* search by ID */
@@ -203,16 +194,14 @@ func dataSourcePccRead(ctx context.Context, d *schema.ResourceData, meta any) di
 
 		var results []ionoscloud.PrivateCrossConnect
 
-		if pccs.Items != nil {
-			for _, p := range *pccs.Items {
-				if p.Properties != nil && p.Properties.Name != nil && *p.Properties.Name == name.(string) {
-					pcc, apiResponse, err = client.PrivateCrossConnectsApi.PccsFindById(ctx, *p.Id).Execute()
-					logApiRequestTime(apiResponse)
-					if err != nil {
-						return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the pcc with ID %s: %w", *p.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
-					}
-					results = append(results, pcc)
+		for _, p := range pccs.Items {
+			if p.Properties.Name != nil && *p.Properties.Name == name.(string) {
+				pcc, apiResponse, err = client.PrivateCrossConnectsApi.PccsFindById(ctx, *p.Id).Execute()
+				logApiRequestTime(apiResponse)
+				if err != nil {
+					return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching the pcc with ID %s: %w", *p.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 				}
+				results = append(results, pcc)
 			}
 		}
 

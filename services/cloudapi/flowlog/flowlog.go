@@ -6,7 +6,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
@@ -89,7 +90,7 @@ func (fw *Service) CreateOrPatchForServer(ctx context.Context, dcID, srvID, nicI
 			return fmt.Errorf("error occurred while creating flowlog in datacenter %s, server %s nic %s : %w", dcID, srvID, nicID, err)
 		}
 	} else {
-		_, _, err := fw.Client.FlowLogsApi.DatacentersServersNicsFlowlogsPatch(ctx, dcID, srvID, nicID, id).Flowlog(*flowLog.Properties).Execute()
+		_, _, err := fw.Client.FlowLogsApi.DatacentersServersNicsFlowlogsPatch(ctx, dcID, srvID, nicID, id).Flowlog(flowLog.Properties).Execute()
 		if err != nil {
 			return fmt.Errorf("error occurred while updating flowlog %s datacenter %s, server %s nic %s : %w", id, dcID, srvID, nicID, err)
 		}
@@ -104,7 +105,7 @@ func (fw *Service) CreateOrPatchForNLB(ctx context.Context, dcID, nlbID, id stri
 			return fmt.Errorf("error occurred while creating flowlog in datacenter %s, nlb %s : %w", dcID, nlbID, err)
 		}
 	} else {
-		_, _, err := fw.Client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFlowlogsPatch(ctx, dcID, nlbID, id).NetworkLoadBalancerFlowLogProperties(*flowLog.Properties).Execute()
+		_, _, err := fw.Client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFlowlogsPatch(ctx, dcID, nlbID, id).NetworkLoadBalancerFlowLogProperties(flowLog.Properties).Execute()
 		if err != nil {
 			return fmt.Errorf("error occurred while updating flowlog %s datacenter %s, nlb %s : %w", id, dcID, nlbID, err)
 		}
@@ -119,7 +120,7 @@ func (fw *Service) CreateOrPatchForALB(ctx context.Context, dcID, albID, id stri
 			return fmt.Errorf("error occurred while creating flowlog in datacenter %s, alb %s : %w", dcID, albID, err)
 		}
 	} else {
-		_, _, err := fw.Client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFlowlogsPatch(ctx, dcID, albID, id).ApplicationLoadBalancerFlowLogProperties(*flowLog.Properties).Execute()
+		_, _, err := fw.Client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFlowlogsPatch(ctx, dcID, albID, id).ApplicationLoadBalancerFlowLogProperties(flowLog.Properties).Execute()
 		if err != nil {
 			return fmt.Errorf("error occurred while updating flowlog %s, datacenter %s, alb %s : %w", id, dcID, albID, err)
 		}
@@ -128,13 +129,13 @@ func (fw *Service) CreateOrPatchForALB(ctx context.Context, dcID, albID, id stri
 }
 
 // GetFlowLogForALB - there can be only one flowlog per alb
-func (fw *Service) GetFlowLogForALB(ctx context.Context, dcID, albID string, depth int32) (*ionoscloud.FlowLog, *ionoscloud.APIResponse, error) {
+func (fw *Service) GetFlowLogForALB(ctx context.Context, dcID, albID string, depth int32) (*ionoscloud.FlowLog, *shared.APIResponse, error) {
 	flowLogs, apiResponse, err := fw.Client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFlowlogsGet(ctx, dcID, albID).Depth(depth).Execute()
 	if err != nil {
 		return nil, apiResponse, fmt.Errorf("error occurred while finding datacenter %s, alb %s : %w", dcID, albID, err)
 	}
-	if flowLogs.Items != nil && len(*flowLogs.Items) > 0 {
-		return &(*flowLogs.Items)[0], apiResponse, nil
+	if len(flowLogs.Items) > 0 {
+		return &flowLogs.Items[0], apiResponse, nil
 	}
 	return nil, apiResponse, nil
 }
@@ -149,9 +150,9 @@ func (fw *Service) Delete(ctx context.Context, dcID string, srvID string, nicID,
 }
 func GetFlowlogFromMap(flowLogMap map[string]any) ionoscloud.FlowLog {
 	flowlog := ionoscloud.NewFlowLog(*ionoscloud.NewFlowLogProperties("", "", "", ""))
-	*flowlog.Properties.Action = flowLogMap["action"].(string)
-	*flowlog.Properties.Bucket = flowLogMap["bucket"].(string)
-	*flowlog.Properties.Direction = flowLogMap["direction"].(string)
-	*flowlog.Properties.Name = flowLogMap["name"].(string)
+	flowlog.Properties.Action = flowLogMap["action"].(string)
+	flowlog.Properties.Bucket = flowLogMap["bucket"].(string)
+	flowlog.Properties.Direction = flowLogMap["direction"].(string)
+	flowlog.Properties.Name = flowLogMap["name"].(string)
 	return *flowlog
 }

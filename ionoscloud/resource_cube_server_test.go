@@ -8,7 +8,7 @@ import (
 	"regexp"
 	"testing"
 
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
@@ -51,8 +51,8 @@ func TestAccCubeServerBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.dhcp", "true"),
 					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.firewall_active", "true"),
 					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.firewall_type", "BIDIRECTIONAL"),
-					resource.TestCheckResourceAttrPair(constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.ips.0", "ionoscloud_ipblock.webserver_ipblock", "ips.0"),
-					resource.TestCheckResourceAttrPair(constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.ips.1", "ionoscloud_ipblock.webserver_ipblock", "ips.1"),
+					resource.TestCheckTypeSetElemAttrPair(constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.ips.*", "ionoscloud_ipblock.webserver_ipblock", "ips.0"),
+					resource.TestCheckTypeSetElemAttrPair(constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.ips.*", "ionoscloud_ipblock.webserver_ipblock", "ips.1"),
 					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.firewall.0.protocol", "TCP"),
 					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.firewall.0.name", "SSH"),
 					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.firewall.0.port_range_start", "22"),
@@ -82,8 +82,8 @@ func TestAccCubeServerBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceById, "nics.0.dhcp", constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.dhcp"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceById, "nics.0.firewall_active", constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.firewall_active"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceById, "nics.0.firewall_type", constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.firewall_type"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceById, "nics.0.ips.0", constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.ips.0"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceById, "nics.0.ips.1", constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.ips.1"),
+					resource.TestCheckTypeSetElemAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceById, "nics.0.ips.*", constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.ips.0"),
+					resource.TestCheckTypeSetElemAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceById, "nics.0.ips.*", constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.ips.1"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceById, "nics.0.firewall_rules.0.protocol", constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.firewall.0.protocol"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceById, "nics.0.firewall_rules.0.name", constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.firewall.0.name"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceById, "nics.0.firewall_rules.0.port_range_start", constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.firewall.0.port_range_start"),
@@ -112,8 +112,8 @@ func TestAccCubeServerBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceByName, "nics.0.dhcp", constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.dhcp"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceByName, "nics.0.firewall_active", constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.firewall_active"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceByName, "nics.0.firewall_type", constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.firewall_type"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceByName, "nics.0.ips.0", constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.ips.0"),
-					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceByName, "nics.0.ips.1", constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.ips.1"),
+					resource.TestCheckTypeSetElemAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceByName, "nics.0.ips.*", constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.ips.0"),
+					resource.TestCheckTypeSetElemAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceByName, "nics.0.ips.*", constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.ips.1"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceByName, "nics.0.firewall_rules.0.protocol", constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.firewall.0.protocol"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceByName, "nics.0.firewall_rules.0.name", constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.firewall.0.name"),
 					resource.TestCheckResourceAttrPair(constant.DataSource+"."+constant.ServerCubeResource+"."+constant.ServerDataSourceByName, "nics.0.firewall_rules.0.port_range_start", constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.firewall.0.port_range_start"),
@@ -163,8 +163,8 @@ func TestAccCubeServerBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.name", constant.UpdatedResources),
 					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.dhcp", "true"),
 					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.firewall_active", "true"),
-					resource.TestCheckResourceAttrPair(constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.ips.0", "ionoscloud_ipblock.webserver_ipblock", "ips.0"),
-					resource.TestCheckResourceAttrPair(constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.ips.1", "ionoscloud_ipblock.webserver_ipblock", "ips.1"),
+					resource.TestCheckTypeSetElemAttrPair(constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.ips.*", "ionoscloud_ipblock.webserver_ipblock", "ips.0"),
+					resource.TestCheckTypeSetElemAttrPair(constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.ips.*", "ionoscloud_ipblock.webserver_ipblock", "ips.1"),
 					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.firewall.0.protocol", "TCP"),
 					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.firewall.0.name", constant.UpdatedResources),
 					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.firewall.0.port_range_start", "22"),
@@ -449,7 +449,7 @@ data "ionoscloud_template" ` + constant.ServerTestResource + ` {
 
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "server-test"
-	location = "de/fra"
+	location = "de/txl"
 }
 
 resource "ionoscloud_ipblock" "webserver_ipblock" {
@@ -578,7 +578,7 @@ data "ionoscloud_template" ` + constant.ServerTestResource + ` {
 
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "server-test"
-	location   = "de/fra"
+	location   = "de/txl"
 }
 resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
@@ -619,7 +619,7 @@ data "ionoscloud_template" ` + constant.ServerTestResource + ` {
 
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
   name        = "test_server"
-  location    = "de/fra"
+  location    = "de/txl"
   description = "Test datacenter done by TF"
 }
 resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
@@ -662,7 +662,7 @@ data "ionoscloud_template" ` + constant.ServerTestResource + ` {
 
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "volume-test"
-	location   = "de/fra"
+	location   = "de/txl"
 }
 resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
@@ -720,7 +720,7 @@ data "ionoscloud_template" ` + constant.ServerTestResource + ` {
 
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "server-test"
-	location = "de/fra"
+	location = "de/txl"
 }
 resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
@@ -763,7 +763,7 @@ data "ionoscloud_template" ` + constant.ServerTestResource + ` {
 
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "server-test"
-	location = "de/fra"
+	location = "de/txl"
 }
 resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id

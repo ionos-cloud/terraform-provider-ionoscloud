@@ -8,7 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
@@ -81,12 +82,12 @@ func resourceLoadbalancerCreate(ctx context.Context, d *schema.ResourceData, met
 
 	name := d.Get("name").(string)
 	lb := &ionoscloud.Loadbalancer{
-		Properties: &ionoscloud.LoadbalancerProperties{
+		Properties: ionoscloud.LoadbalancerProperties{
 			Name: &name,
 		},
 		Entities: &ionoscloud.LoadbalancerEntities{
 			Balancednics: &ionoscloud.BalancedNics{
-				Items: &nicIDs,
+				Items: nicIDs,
 			},
 		},
 	}
@@ -97,7 +98,7 @@ func resourceLoadbalancerCreate(ctx context.Context, d *schema.ResourceData, met
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, fmt.Errorf("error occurred while creating a loadbalancer %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
@@ -107,7 +108,7 @@ func resourceLoadbalancerCreate(ctx context.Context, d *schema.ResourceData, met
 		if bundleclient.IsRequestFailed(errState) {
 			d.SetId("")
 		}
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
@@ -137,8 +138,8 @@ func resourceLoadbalancerRead(ctx context.Context, d *schema.ResourceData, meta 
 		}
 	}
 
-	if lb.Properties.Ip != nil {
-		if err := d.Set("ip", *lb.Properties.Ip); err != nil {
+	if lb.Properties.Ip.IsSet() {
+		if err := d.Set("ip", shared.ToValueDefault(lb.Properties.Ip.Get())); err != nil {
 			return diagutil.ToDiags(d, fmt.Errorf(""), nil)
 		}
 	}
@@ -171,7 +172,7 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 	if d.HasChange("ip") {
 		_, newVal := d.GetChange("ip")
 		ip := newVal.(string)
-		properties.Ip = &ip
+		properties.Ip.Set(&ip)
 		hasChangeCount++
 	}
 	if d.HasChange("dhcp") {
@@ -185,7 +186,7 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 		_, apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersPatch(ctx, d.Get("datacenter_id").(string), d.Id()).Loadbalancer(*properties).Execute()
 		logApiRequestTime(apiResponse)
 		if err != nil {
-			requestLocation, _ := apiResponse.SafeLocation()
+			requestLocation := safeLocation(apiResponse)
 			return diagutil.ToDiags(d, fmt.Errorf("error while updating loadbalancer: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 		}
 	}
@@ -209,7 +210,7 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 				}
 			} else {
 				if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-					requestLocation, _ := apiResponse.SafeLocation()
+					requestLocation := safeLocation(apiResponse)
 					return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 				}
 			}
@@ -223,11 +224,11 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 			_, apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersBalancednicsPost(ctx, d.Get("datacenter_id").(string), d.Id()).Nic(nic).Execute()
 			logApiRequestTime(apiResponse)
 			if err != nil {
-				requestLocation, _ := apiResponse.SafeLocation()
+				requestLocation := safeLocation(apiResponse)
 				return diagutil.ToDiags(d, fmt.Errorf("[load balancer update] an error occurred while creating a balanced nic: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 			}
 			if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-				requestLocation, _ := apiResponse.SafeLocation()
+				requestLocation := safeLocation(apiResponse)
 				return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 			}
 		}
@@ -249,12 +250,12 @@ func resourceLoadbalancerDelete(ctx context.Context, d *schema.ResourceData, met
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, fmt.Errorf("[load balancer delete] an error occurred while deleting a loadbalancer: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
@@ -313,8 +314,8 @@ func resourceLoadbalancerImporter(ctx context.Context, d *schema.ResourceData, m
 		}
 	}
 
-	if loadbalancer.Properties.Ip != nil {
-		if err := d.Set("ip", *loadbalancer.Properties.Ip); err != nil {
+	if loadbalancer.Properties.Ip.IsSet() {
+		if err := d.Set("ip", shared.ToValueDefault(loadbalancer.Properties.Ip.Get())); err != nil {
 			return nil, diagutil.ToError(d, err, nil)
 		}
 	}
@@ -326,11 +327,11 @@ func resourceLoadbalancerImporter(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	if loadbalancer.Entities != nil && loadbalancer.Entities.Balancednics != nil &&
-		loadbalancer.Entities.Balancednics.Items != nil && len(*loadbalancer.Entities.Balancednics.Items) > 0 {
+		len(loadbalancer.Entities.Balancednics.Items) > 0 {
 
 		var lans []string
-		for _, lan := range *loadbalancer.Entities.Balancednics.Items {
-			if *lan.Id != "" {
+		for _, lan := range loadbalancer.Entities.Balancednics.Items {
+			if lan.Id != nil && *lan.Id != "" {
 				lans = append(lans, *lan.Id)
 			}
 		}

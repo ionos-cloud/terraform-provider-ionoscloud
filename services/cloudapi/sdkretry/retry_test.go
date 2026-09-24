@@ -12,7 +12,8 @@ import (
 	"testing"
 	"time"
 
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 )
 
 // newMockClient returns an APIClient whose requests are served by handler, with
@@ -23,7 +24,7 @@ func newMockClient(t *testing.T, maxRetries int, handler http.HandlerFunc) *iono
 	srv := httptest.NewServer(handler)
 	t.Cleanup(srv.Close)
 
-	cfg := ionoscloud.NewConfiguration("", "", "", srv.URL)
+	cfg := shared.NewConfiguration("", "", "", srv.URL)
 	cfg.MaxRetries = maxRetries
 	cfg.WaitTime = time.Millisecond
 	cfg.MaxWaitTime = 10 * time.Millisecond
@@ -90,7 +91,7 @@ func TestNoRetryOn500ForPOST(t *testing.T) {
 
 	// The mock returns 500 regardless of the body, so an empty request is enough
 	// to exercise the POST path.
-	dc := ionoscloud.DatacenterPost{Properties: &ionoscloud.DatacenterPropertiesPost{}}
+	dc := ionoscloud.DatacenterPost{Properties: ionoscloud.DatacenterPropertiesPost{}}
 	_, _, err := client.DataCentersApi.DatacentersPost(context.Background()).Datacenter(dc).Execute()
 	if err == nil {
 		t.Fatal("expected an error from the 500 response, got nil")

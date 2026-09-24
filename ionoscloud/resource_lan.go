@@ -18,7 +18,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 )
 
 func resourceLan() *schema.Resource {
@@ -104,7 +105,7 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta any) di
 
 	public := d.Get("public").(bool)
 	request := ionoscloud.Lan{
-		Properties: &ionoscloud.LanProperties{
+		Properties: ionoscloud.LanProperties{
 			Public: &public,
 		},
 	}
@@ -123,7 +124,7 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta any) di
 	if d.Get("ipv6_cidr_block") != nil {
 		ipv6 := d.Get("ipv6_cidr_block").(string)
 		tflog.Info(ctx, "setting ipv6CidrBlock for LAN", map[string]any{"lan_id": d.Id(), "ipv6_cidr_block": ipv6})
-		request.Properties.Ipv6CidrBlock = &ipv6
+		request.Properties.Ipv6CidrBlock.Set(&ipv6)
 	} else {
 		request.Properties.SetIpv6CidrBlockNil()
 	}
@@ -134,7 +135,7 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta any) di
 
 	if err != nil {
 		d.SetId("")
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating LAN: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
@@ -148,7 +149,7 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta any) di
 				d.SetId("")
 			}
 		}
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
@@ -242,7 +243,7 @@ func resourceLanUpdate(ctx context.Context, d *schema.ResourceData, meta any) di
 		if newIpv6 != nil && newIpv6.(string) != "" {
 			tflog.Info(ctx, "setting ipv6CidrBlock for LAN", map[string]any{"lan_id": d.Id(), "ipv6_cidr_block": newIpv6.(string)})
 			ipv6 := newIpv6.(string)
-			properties.Ipv6CidrBlock = &ipv6
+			properties.Ipv6CidrBlock.Set(&ipv6)
 		} else {
 			properties.SetIpv6CidrBlockNil()
 		}
@@ -254,12 +255,12 @@ func resourceLanUpdate(ctx context.Context, d *schema.ResourceData, meta any) di
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while patching a lan: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
@@ -305,7 +306,7 @@ func resourceLanDelete(ctx context.Context, d *schema.ResourceData, meta any) di
 	d.SetId("")
 	return nil
 }
-func isDeleteProtected(apiResponse *ionoscloud.APIResponse, errMessage string) bool {
+func isDeleteProtected(apiResponse *shared.APIResponse, errMessage string) bool {
 	if apiResponse.SafeStatusCode() == 403 {
 		if strings.Contains(errMessage, "is delete-protected by") {
 			return true
@@ -366,38 +367,36 @@ func resourceLanImport(ctx context.Context, d *schema.ResourceData, meta any) ([
 func setLanData(d *schema.ResourceData, lan *ionoscloud.Lan) error {
 	d.SetId(*lan.Id)
 
-	if lan.Properties != nil {
-		if lan.Properties.Name != nil {
-			if err := d.Set("name", *lan.Properties.Name); err != nil {
-				return err
-			}
+	if lan.Properties.Name != nil {
+		if err := d.Set("name", *lan.Properties.Name); err != nil {
+			return err
 		}
-		if lan.Properties.IpFailover != nil && len(*lan.Properties.IpFailover) > 0 {
-			if err := d.Set("ip_failover", convertIpFailoverList(lan.Properties.IpFailover)); err != nil {
-				return err
-			}
+	}
+	if len(lan.Properties.IpFailover) > 0 {
+		if err := d.Set("ip_failover", convertIpFailoverList(lan.Properties.IpFailover)); err != nil {
+			return err
 		}
-		if lan.Properties.Pcc != nil {
-			if err := d.Set("pcc", *lan.Properties.Pcc); err != nil {
-				return err
-			}
+	}
+	if lan.Properties.Pcc != nil {
+		if err := d.Set("pcc", *lan.Properties.Pcc); err != nil {
+			return err
 		}
-		if lan.Properties.Public != nil {
-			if err := d.Set("public", *lan.Properties.Public); err != nil {
-				return err
-			}
+	}
+	if lan.Properties.Public != nil {
+		if err := d.Set("public", *lan.Properties.Public); err != nil {
+			return err
 		}
+	}
 
-		if lan.Properties.Ipv4CidrBlock != nil {
-			if err := d.Set("ipv4_cidr_block", *lan.Properties.Ipv4CidrBlock); err != nil {
-				return utils.GenerateSetError("lan", "ipv4_cidr_block", err)
-			}
+	if lan.Properties.Ipv4CidrBlock != nil {
+		if err := d.Set("ipv4_cidr_block", *lan.Properties.Ipv4CidrBlock); err != nil {
+			return utils.GenerateSetError("lan", "ipv4_cidr_block", err)
 		}
+	}
 
-		if lan.Properties.Ipv6CidrBlock != nil {
-			if err := d.Set("ipv6_cidr_block", *lan.Properties.Ipv6CidrBlock); err != nil {
-				return utils.GenerateSetError("lan", "ipv6_cidr_block", err)
-			}
+	if lan.Properties.Ipv6CidrBlock.IsSet() {
+		if err := d.Set("ipv6_cidr_block", shared.ToValueDefault(lan.Properties.Ipv6CidrBlock.Get())); err != nil {
+			return utils.GenerateSetError("lan", "ipv6_cidr_block", err)
 		}
 	}
 
@@ -479,7 +478,7 @@ func lanNicsDeleted(ctx context.Context, client *ionoscloud.APIClient, d *schema
 		return false, fmt.Errorf("an error occurred while searching for nics in datacenter with id: %s for lan with: id %s %w", dcID, d.Id(), err)
 	}
 
-	if nics.Items != nil && len(*nics.Items) > 0 {
+	if len(nics.Items) > 0 {
 		tflog.Info(ctx, "nics still present under LAN", map[string]any{"lan_id": d.Id()})
 		return false, nil
 	}

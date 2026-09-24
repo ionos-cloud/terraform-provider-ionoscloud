@@ -9,7 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
@@ -128,9 +129,9 @@ func resourceDatacenterCreate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	datacenter := ionoscloud.DatacenterPost{
-		Properties: &ionoscloud.DatacenterPropertiesPost{
+		Properties: ionoscloud.DatacenterPropertiesPost{
 			Name:     &datacenterName,
-			Location: &datacenterLocation,
+			Location: datacenterLocation,
 		},
 	}
 	if attr, ok := d.GetOk("description"); ok {
@@ -146,7 +147,7 @@ func resourceDatacenterCreate(ctx context.Context, d *schema.ResourceData, meta 
 	createdDatacenter, apiResponse, err := client.DataCentersApi.DatacentersPost(ctx).Datacenter(datacenter).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, err, &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 	d.SetId(*createdDatacenter.Id)
@@ -157,7 +158,7 @@ func resourceDatacenterCreate(ctx context.Context, d *schema.ResourceData, meta 
 		if bundleclient.IsRequestFailed(errState) {
 			d.SetId("")
 		}
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
@@ -232,12 +233,12 @@ func resourceDatacenterUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, err, &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
@@ -256,12 +257,12 @@ func resourceDatacenterDelete(ctx context.Context, d *schema.ResourceData, meta 
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, err, &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
@@ -360,91 +361,87 @@ func setDatacenterData(d *schema.ResourceData, datacenter *ionoscloud.Datacenter
 		d.SetId(*datacenter.Id)
 	}
 
-	if datacenter.Properties != nil {
-		if datacenter.Properties.Location != nil {
-			err := d.Set("location", *datacenter.Properties.Location)
-			if err != nil {
-				return fmt.Errorf("error while setting location property for datacenter %s: %w", d.Id(), err)
+	if datacenter.Properties.Location != "" {
+		err := d.Set("location", datacenter.Properties.Location)
+		if err != nil {
+			return fmt.Errorf("error while setting location property for datacenter %s: %w", d.Id(), err)
+		}
+	}
+
+	if datacenter.Properties.Description != nil {
+		err := d.Set("description", *datacenter.Properties.Description)
+		if err != nil {
+			return fmt.Errorf("error while setting description property for datacenter %s: %w", d.Id(), err)
+		}
+	}
+
+	if datacenter.Properties.Name != nil {
+		err := d.Set("name", *datacenter.Properties.Name)
+		if err != nil {
+			return fmt.Errorf("error while setting name property for datacenter %s: %w", d.Id(), err)
+		}
+	}
+
+	if datacenter.Properties.Version != nil {
+		err := d.Set("version", *datacenter.Properties.Version)
+		if err != nil {
+			return fmt.Errorf("error while setting version property for datacenter %s: %w", d.Id(), err)
+		}
+	}
+
+	if len(datacenter.Properties.Features) > 0 {
+		err := d.Set("features", datacenter.Properties.Features)
+		if err != nil {
+			return fmt.Errorf("error while setting features property for datacenter %s: %w", d.Id(), err)
+		}
+	}
+
+	if datacenter.Properties.SecAuthProtection != nil {
+		err := d.Set("sec_auth_protection", *datacenter.Properties.SecAuthProtection)
+		if err != nil {
+			return fmt.Errorf("error while setting sec_auth_protection property for datacenter %s: %w", d.Id(), err)
+		}
+	}
+
+	if len(datacenter.Properties.CpuArchitecture) > 0 {
+		var cpuArchitectures []any
+		for _, cpuArchitecture := range datacenter.Properties.CpuArchitecture {
+			architectureEntry := make(map[string]any)
+
+			if cpuArchitecture.CpuFamily != nil {
+				architectureEntry["cpu_family"] = *cpuArchitecture.CpuFamily
+			}
+
+			if cpuArchitecture.MaxCores != nil {
+				architectureEntry["max_cores"] = *cpuArchitecture.MaxCores
+			}
+
+			if cpuArchitecture.MaxRam != nil {
+				architectureEntry["max_ram"] = *cpuArchitecture.MaxRam
+			}
+
+			if cpuArchitecture.Vendor != nil {
+				architectureEntry["vendor"] = *cpuArchitecture.Vendor
+			}
+
+			if len(cpuArchitecture.EnabledFeatures) > 0 {
+				architectureEntry["enabled_features"] = cpuArchitecture.EnabledFeatures
+			}
+
+			cpuArchitectures = append(cpuArchitectures, architectureEntry)
+		}
+		if len(cpuArchitectures) > 0 {
+			if err := d.Set("cpu_architecture", cpuArchitectures); err != nil {
+				return fmt.Errorf("error while setting cpu_architecture property for datacenter %s: %w", d.Id(), err)
 			}
 		}
+	}
 
-		if datacenter.Properties.Description != nil {
-			err := d.Set("description", *datacenter.Properties.Description)
-			if err != nil {
-				return fmt.Errorf("error while setting description property for datacenter %s: %w", d.Id(), err)
-			}
+	if datacenter.Properties.Ipv6CidrBlock.IsSet() {
+		err := d.Set("ipv6_cidr_block", shared.ToValueDefault(datacenter.Properties.Ipv6CidrBlock.Get()))
+		if err != nil {
+			return fmt.Errorf("error while setting ipv6_cidr_block property for datacenter %s: %w", d.Id(), err)
 		}
-
-		if datacenter.Properties.Name != nil {
-			err := d.Set("name", *datacenter.Properties.Name)
-			if err != nil {
-				return fmt.Errorf("error while setting name property for datacenter %s: %w", d.Id(), err)
-			}
-		}
-
-		if datacenter.Properties.Version != nil {
-			err := d.Set("version", *datacenter.Properties.Version)
-			if err != nil {
-				return fmt.Errorf("error while setting version property for datacenter %s: %w", d.Id(), err)
-			}
-		}
-
-		if datacenter.Properties.Features != nil && len(*datacenter.Properties.Features) > 0 {
-			err := d.Set("features", *datacenter.Properties.Features)
-			if err != nil {
-				return fmt.Errorf("error while setting features property for datacenter %s: %w", d.Id(), err)
-			}
-		}
-
-		if datacenter.Properties.SecAuthProtection != nil {
-			err := d.Set("sec_auth_protection", *datacenter.Properties.SecAuthProtection)
-			if err != nil {
-				return fmt.Errorf("error while setting sec_auth_protection property for datacenter %s: %w", d.Id(), err)
-			}
-		}
-
-		if datacenter.Properties.CpuArchitecture != nil && len(*datacenter.Properties.CpuArchitecture) > 0 {
-			var cpuArchitectures []any
-			for _, cpuArchitecture := range *datacenter.Properties.CpuArchitecture {
-				architectureEntry := make(map[string]any)
-
-				if cpuArchitecture.CpuFamily != nil {
-					architectureEntry["cpu_family"] = *cpuArchitecture.CpuFamily
-				}
-
-				if cpuArchitecture.MaxCores != nil {
-					architectureEntry["max_cores"] = *cpuArchitecture.MaxCores
-				}
-
-				if cpuArchitecture.MaxRam != nil {
-					architectureEntry["max_ram"] = *cpuArchitecture.MaxRam
-				}
-
-				if cpuArchitecture.Vendor != nil {
-					architectureEntry["vendor"] = *cpuArchitecture.Vendor
-				}
-
-				if cpuArchitecture.EnabledFeatures != nil {
-					architectureEntry["enabled_features"] = *cpuArchitecture.EnabledFeatures
-				}
-
-				cpuArchitectures = append(cpuArchitectures, architectureEntry)
-
-				if len(cpuArchitectures) > 0 {
-					if err := d.Set("cpu_architecture", cpuArchitectures); err != nil {
-						return fmt.Errorf("error while setting cpu_architecture property for datacenter %s: %w", d.Id(), err)
-					}
-				}
-			}
-		}
-
-		if datacenter.Properties.Ipv6CidrBlock != nil {
-			err := d.Set("ipv6_cidr_block", *datacenter.Properties.Ipv6CidrBlock)
-			if err != nil {
-				return fmt.Errorf("error while setting ipv6_cidr_block property for datacenter %s: %w", d.Id(), err)
-			}
-		}
-
 	}
 
 	return nil

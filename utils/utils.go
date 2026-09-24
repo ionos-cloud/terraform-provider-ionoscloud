@@ -16,7 +16,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -276,7 +276,7 @@ func WaitForResourceToBeDeleted(ctx context.Context, d *schema.ResourceData, fn 
 // used to decode values from TypeList and TypeSet of schema(`d`) directly into sdk structs
 func DecodeInterfaceToStruct(ctx context.Context, input, output any) error {
 	config := mapstructure.DecoderConfig{
-		DecodeHook:       PointerEmptyToNil(),
+		DecodeHook:       mapstructure.ComposeDecodeHookFunc(NullableSDKTypes(), PointerEmptyToNil()),
 		ErrorUnused:      false,
 		ErrorUnset:       false,
 		ZeroFields:       false,
@@ -307,6 +307,59 @@ func PointerEmptyToNil() mapstructure.DecodeHookFuncType {
 		}
 		return data, nil
 	}
+}
+
+// NullableSDKTypes converts a plain schema value into the Cloud API SDK's Nullable
+// wrapper for the target field. Those wrappers are structs holding unexported fields,
+// so mapstructure can neither populate them nor cope with a nil input for one: without
+// this hook an empty value panics the decoder and a non-empty one is silently dropped
+// from the request.
+func NullableSDKTypes() mapstructure.DecodeHookFuncType {
+	return func(f reflect.Type, t reflect.Type, data any) (any, error) {
+		switch t {
+		case reflect.TypeFor[ionoscloud.NullableString]():
+			value, ok := nullableInput(data)
+			if !ok {
+				return ionoscloud.NullableString{}, nil
+			}
+			return *ionoscloud.NewNullableString(&value), nil
+		case reflect.TypeFor[ionoscloud.NullableInt32]():
+			value, ok := nullableInput(data)
+			if !ok {
+				return ionoscloud.NullableInt32{}, nil
+			}
+			parsed, err := strconv.ParseInt(value, 10, 32)
+			if err != nil {
+				return nil, fmt.Errorf("expected an int32 value, got %q: %w", value, err)
+			}
+			converted := int32(parsed)
+			return *ionoscloud.NewNullableInt32(&converted), nil
+		case reflect.TypeFor[ionoscloud.NullableBool]():
+			value, ok := nullableInput(data)
+			if !ok {
+				return ionoscloud.NullableBool{}, nil
+			}
+			parsed, err := strconv.ParseBool(value)
+			if err != nil {
+				return nil, fmt.Errorf("expected a bool value, got %q: %w", value, err)
+			}
+			return *ionoscloud.NewNullableBool(&parsed), nil
+		}
+		return data, nil
+	}
+}
+
+// nullableInput normalises a schema value destined for a Nullable field, reporting
+// false when the value is absent and the field must be left unset.
+func nullableInput(data any) (string, bool) {
+	if data == nil {
+		return "", false
+	}
+	value := strings.TrimSpace(fmt.Sprintf("%v", data))
+	if value == "" {
+		return "", false
+	}
+	return value, true
 }
 
 // checks if value['1'] of key[`id`] is present inside a slice of maps[string]interface{}

@@ -8,7 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
@@ -185,7 +186,7 @@ func dataSourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *sch
 		return diagutil.ToDiags(d, fmt.Errorf("please provide either the lan id or name"), nil)
 	}
 	var networkLoadBalancerForwardingRule ionoscloud.NetworkLoadBalancerForwardingRule
-	var apiResponse *ionoscloud.APIResponse
+	var apiResponse *shared.APIResponse
 
 	if idOk {
 		/* search by ID */
@@ -205,16 +206,14 @@ func dataSourceNetworkLoadBalancerForwardingRuleRead(ctx context.Context, d *sch
 		}
 
 		var results []ionoscloud.NetworkLoadBalancerForwardingRule
-		if networkLoadBalancerForwardingRules.Items != nil {
-			for _, nlbfr := range *networkLoadBalancerForwardingRules.Items {
-				if nlbfr.Properties != nil && nlbfr.Properties.Name != nil && strings.EqualFold(*nlbfr.Properties.Name, name.(string)) {
-					tmpNetworkLoadBalancerForwardingRule, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterID.(string), networkloadbalancerID.(string), *nlbfr.Id).Depth(1).Execute()
-					logApiRequestTime(apiResponse)
-					if err != nil {
-						return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching network loadbalancer forwarding rule with ID %s: %w", *nlbfr.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
-					}
-					results = append(results, tmpNetworkLoadBalancerForwardingRule)
+		for _, nlbfr := range networkLoadBalancerForwardingRules.Items {
+			if strings.EqualFold(nlbfr.Properties.Name, name.(string)) {
+				tmpNetworkLoadBalancerForwardingRule, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterID.(string), networkloadbalancerID.(string), *nlbfr.Id).Depth(1).Execute()
+				logApiRequestTime(apiResponse)
+				if err != nil {
+					return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching network loadbalancer forwarding rule with ID %s: %w", *nlbfr.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 				}
+				results = append(results, tmpNetworkLoadBalancerForwardingRule)
 			}
 		}
 

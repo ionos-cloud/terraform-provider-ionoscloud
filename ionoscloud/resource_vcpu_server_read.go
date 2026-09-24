@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapifirewall"
@@ -121,16 +121,16 @@ func resourceVCPUServerImport(ctx context.Context, d *schema.ResourceData, meta 
 
 // setVCPUServerPrimaryIPFromNic sets primary_ip from the entity matching the imported primary nic id.
 func setVCPUServerPrimaryIPFromNic(ctx context.Context, d *schema.ResourceData, server *ionoscloud.Server, primaryNicID string) error {
-	if server.Entities == nil || server.Entities.Nics == nil || server.Entities.Nics.Items == nil {
+	if server.Entities == nil || server.Entities.Nics == nil || len(server.Entities.Nics.Items) == 0 {
 		return nil
 	}
-	for _, nic := range *server.Entities.Nics.Items {
+	for _, nic := range server.Entities.Nics.Items {
 		if nic.Id == nil || *nic.Id != primaryNicID {
 			continue
 		}
-		if nic.Properties != nil && nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
-			tflog.Debug(ctx, "setting primary_ip", map[string]any{"primary_ip": (*nic.Properties.Ips)[0]})
-			if err := d.Set("primary_ip", (*nic.Properties.Ips)[0]); err != nil {
+		if len(nic.Properties.Ips) > 0 {
+			tflog.Debug(ctx, "setting primary_ip", map[string]any{"primary_ip": nic.Properties.Ips[0]})
+			if err := d.Set("primary_ip", nic.Properties.Ips[0]); err != nil {
 				return fmt.Errorf("error while setting primary ip: %w", err)
 			}
 		}
@@ -194,9 +194,6 @@ func vcpuServerInlineVolumeIDsUpgrade(d *schema.ResourceData) error {
 // setVCPUServerProperties writes the scalar server properties (name, sizing, boot references,
 // enabled_features/confidential, security groups) into state.
 func setVCPUServerProperties(d *schema.ResourceData, server *ionoscloud.Server) error {
-	if server.Properties == nil {
-		return nil
-	}
 	strProps := map[string]*string{
 		"name":              server.Properties.Name,
 		"hostname":          server.Properties.Hostname,
@@ -237,15 +234,15 @@ func setVCPUServerProperties(d *schema.ResourceData, server *ionoscloud.Server) 
 
 // setVCPUServerBootAndSecurity writes the boot references (cdrom/volume/image) and security groups.
 func setVCPUServerBootAndSecurity(d *schema.ResourceData, server *ionoscloud.Server) error {
-	if server.Properties != nil && server.Properties.BootCdrom != nil {
-		if err := d.Set("boot_cdrom", *server.Properties.BootCdrom.Id); err != nil {
+	if server.Properties.BootCdrom != nil && server.Properties.BootCdrom.Id != "" {
+		if err := d.Set("boot_cdrom", server.Properties.BootCdrom.Id); err != nil {
 			return fmt.Errorf("error setting boot_cdrom %w", err)
 		}
 	} else {
 		d.Set("boot_cdrom", nil)
 	}
-	if server.Properties != nil && server.Properties.BootVolume != nil {
-		if err := d.Set("boot_volume", *server.Properties.BootVolume.Id); err != nil {
+	if server.Properties.BootVolume != nil && server.Properties.BootVolume.Id != "" {
+		if err := d.Set("boot_volume", server.Properties.BootVolume.Id); err != nil {
 			return fmt.Errorf("error setting bootVolume %w", err)
 		}
 	} else {
@@ -254,9 +251,9 @@ func setVCPUServerBootAndSecurity(d *schema.ResourceData, server *ionoscloud.Ser
 	if server.Entities == nil {
 		return nil
 	}
-	if server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil && len(*server.Entities.Volumes.Items) > 0 &&
-		(*server.Entities.Volumes.Items)[0].Properties != nil && (*server.Entities.Volumes.Items)[0].Properties.Image != nil {
-		if err := d.Set("boot_image", *(*server.Entities.Volumes.Items)[0].Properties.Image); err != nil {
+	if server.Entities.Volumes != nil && len(server.Entities.Volumes.Items) > 0 &&
+		server.Entities.Volumes.Items[0].Properties != nil && server.Entities.Volumes.Items[0].Properties.Image != nil {
+		if err := d.Set("boot_image", *server.Entities.Volumes.Items[0].Properties.Image); err != nil {
 			return fmt.Errorf("error setting boot_image %w", err)
 		}
 	}
@@ -353,10 +350,10 @@ func vcpuServerNicEntry(ctx context.Context, client *ionoscloud.APIClient, d *sc
 	var nicEntry map[string]any
 	var fwRulesEntries []map[string]any
 
-	if nic != nil && nic.Properties != nil {
+	if nic != nil {
 		// fixes #467
-		if nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
-			if err := d.Set("primary_ip", (*nic.Properties.Ips)[0]); err != nil {
+		if len(nic.Properties.Ips) > 0 {
+			if err := d.Set("primary_ip", nic.Properties.Ips[0]); err != nil {
 				return nil, err
 			}
 		}
@@ -376,7 +373,7 @@ func vcpuServerNicEntry(ctx context.Context, client *ionoscloud.APIClient, d *sc
 	}
 	if nic != nil && nic.Entities != nil && nic.Entities.Securitygroups != nil && nic.Entities.Securitygroups.Items != nil {
 		nsgIDs := make([]string, 0)
-		for _, group := range *nic.Entities.Securitygroups.Items {
+		for _, group := range nic.Entities.Securitygroups.Items {
 			if group.Id != nil {
 				nsgIDs = append(nsgIDs, *group.Id)
 			}

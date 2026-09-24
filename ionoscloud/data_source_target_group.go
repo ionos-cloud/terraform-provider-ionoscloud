@@ -12,7 +12,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 )
 
 func dataSourceTargetGroup() *schema.Resource {
@@ -174,7 +175,7 @@ func dataSourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta
 		return diagutil.ToDiags(d, fmt.Errorf("please provide either the target group id or name"), nil)
 	}
 	var targetGroup ionoscloud.TargetGroup
-	var apiResponse *ionoscloud.APIResponse
+	var apiResponse *shared.APIResponse
 
 	if idOk {
 		/* search by ID */
@@ -201,7 +202,7 @@ func dataSourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta
 				return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching target groups: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 			}
 
-			results = *targetGroups.Items
+			results = targetGroups.Items
 		} else {
 			targetGroups, apiResponse, err := client.TargetGroupsApi.TargetgroupsGet(ctx).Depth(1).Limit(constant.TargetGroupLimit).Execute()
 			logApiRequestTime(apiResponse)
@@ -210,17 +211,14 @@ func dataSourceTargetGroupRead(ctx context.Context, d *schema.ResourceData, meta
 				return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching target groups: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 			}
 
-			if targetGroups.Items != nil {
-				for _, t := range *targetGroups.Items {
-					if t.Properties.Name != nil && strings.EqualFold(*t.Properties.Name, name) {
-						tmpTargetGroup, apiResponse, err := client.TargetGroupsApi.TargetgroupsFindByTargetGroupId(ctx, *t.Id).Execute()
-						logApiRequestTime(apiResponse)
-						if err != nil {
-							return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching target group with ID %s: %w", *t.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
-						}
-						results = append(results, tmpTargetGroup)
-
+			for _, t := range targetGroups.Items {
+				if strings.EqualFold(t.Properties.Name, name) {
+					tmpTargetGroup, apiResponse, err := client.TargetGroupsApi.TargetgroupsFindByTargetGroupId(ctx, *t.Id).Execute()
+					logApiRequestTime(apiResponse)
+					if err != nil {
+						return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching target group with ID %s: %w", *t.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 					}
+					results = append(results, tmpTargetGroup)
 				}
 			}
 		}

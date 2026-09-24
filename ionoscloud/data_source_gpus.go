@@ -83,28 +83,24 @@ func dataSourceGpusRead(ctx context.Context, d *schema.ResourceData, meta any) d
 	d.SetId(fmt.Sprintf("%s/gpus", serverID))
 
 	var gpuList []map[string]any
-	if gpus.Items != nil {
-		for _, gpu := range *gpus.Items {
-			gpuMap := make(map[string]any)
-			if gpu.Id != nil {
-				gpuMap["id"] = *gpu.Id
-			}
-			if gpu.Properties != nil {
-				if gpu.Properties.Name != nil {
-					gpuMap["name"] = *gpu.Properties.Name
-				}
-				if gpu.Properties.Vendor != nil {
-					gpuMap["vendor"] = *gpu.Properties.Vendor
-				}
-				if gpu.Properties.Type != nil {
-					gpuMap["type"] = *gpu.Properties.Type
-				}
-				if gpu.Properties.Model != nil {
-					gpuMap["model"] = *gpu.Properties.Model
-				}
-			}
-			gpuList = append(gpuList, gpuMap)
+	for _, gpu := range gpus.Items {
+		gpuMap := make(map[string]any)
+		if gpu.Id != nil {
+			gpuMap["id"] = *gpu.Id
 		}
+		if gpu.Properties.Name != nil {
+			gpuMap["name"] = *gpu.Properties.Name
+		}
+		if gpu.Properties.Vendor != nil {
+			gpuMap["vendor"] = *gpu.Properties.Vendor
+		}
+		if gpu.Properties.Type != nil {
+			gpuMap["type"] = *gpu.Properties.Type
+		}
+		if gpu.Properties.Model != nil {
+			gpuMap["model"] = *gpu.Properties.Model
+		}
+		gpuList = append(gpuList, gpuMap)
 	}
 
 	if err := d.Set("gpus", gpuList); err != nil {

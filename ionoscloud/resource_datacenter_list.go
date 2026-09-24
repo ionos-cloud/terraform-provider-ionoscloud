@@ -11,8 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	fwidentity "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/identity"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
@@ -115,11 +115,7 @@ func (r *datacenterListResource) List(ctx context.Context, req list.ListRequest,
 			if err != nil {
 				return nil, fmt.Errorf("failed to list datacenters: %w", err)
 			}
-			if datacenters.Items == nil {
-				return nil, nil
-			}
-
-			return *datacenters.Items, nil
+			return datacenters.Items, nil
 		},
 		r.mapDatacenter,
 	)
@@ -133,12 +129,12 @@ func (r *datacenterListResource) List(ctx context.Context, req list.ListRequest,
 func (r *datacenterListResource) mapDatacenter(_ context.Context, includeResource bool, filters []fwidentity.Filter, dc ionoscloud.Datacenter) (*fwidentity.MappedItem, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	if dc.Id == nil || dc.Properties == nil {
+	if dc.Id == nil {
 		return nil, nil
 	}
 
 	name := shared.ToValueDefault(dc.Properties.Name)
-	location := shared.ToValueDefault(dc.Properties.Location)
+	location := dc.Properties.Location
 
 	if !fwidentity.MatchesFilters(map[string]string{
 		"name":     name,

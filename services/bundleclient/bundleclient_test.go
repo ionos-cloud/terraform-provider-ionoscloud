@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
 
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/failover"
@@ -209,6 +209,9 @@ func assertDefaultServer(t *testing.T, client *ionoscloud.APIClient) {
 	}
 }
 
+// assertServerURLs checks the configured endpoints against the overrides they were built
+// from. The compute SDK appends its base path to any custom endpoint that does not already
+// carry one, so the expected URLs are normalised the same way before comparing.
 func assertServerURLs(t *testing.T, client *ionoscloud.APIClient, wantURLs ...string) {
 	t.Helper()
 	servers := client.GetConfig().Servers
@@ -216,8 +219,12 @@ func assertServerURLs(t *testing.T, client *ionoscloud.APIClient, wantURLs ...st
 		t.Fatalf("expected %d servers, got %d: %v", len(wantURLs), len(servers), servers)
 	}
 	for i, url := range wantURLs {
-		if servers[i].URL != url {
-			t.Errorf("servers[%d].URL: want %q, got %q", i, url, servers[i].URL)
+		want := url
+		if want != "" && !strings.HasSuffix(want, ionoscloud.DefaultIonosBasePath) {
+			want += ionoscloud.DefaultIonosBasePath
+		}
+		if servers[i].URL != want {
+			t.Errorf("servers[%d].URL: want %q, got %q", i, want, servers[i].URL)
 		}
 	}
 }

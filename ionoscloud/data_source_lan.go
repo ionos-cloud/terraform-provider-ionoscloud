@@ -7,7 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
@@ -75,13 +76,9 @@ func dataSourceLan() *schema.Resource {
 	}
 }
 
-func convertIpFailoverList(ips *[]ionoscloud.IPFailover) []any {
-	if ips == nil {
-		return make([]any, 0)
-	}
-
-	ret := make([]any, len(*ips), len(*ips))
-	for i, ip := range *ips {
+func convertIpFailoverList(ips []ionoscloud.IPFailover) []any {
+	ret := make([]any, len(ips))
+	for i, ip := range ips {
 		entry := make(map[string]any)
 
 		entry["ip"] = ip.Ip
@@ -110,7 +107,7 @@ func dataSourceLanRead(ctx context.Context, d *schema.ResourceData, meta any) di
 	}
 	var lan ionoscloud.Lan
 	var err error
-	var apiResponse *ionoscloud.APIResponse
+	var apiResponse *shared.APIResponse
 
 	location := d.Get("location").(string)
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
@@ -137,17 +134,15 @@ func dataSourceLanRead(ctx context.Context, d *schema.ResourceData, meta any) di
 
 		var results []ionoscloud.Lan
 
-		if lans.Items != nil {
-			for _, l := range *lans.Items {
-				if l.Properties != nil && l.Properties.Name != nil && *l.Properties.Name == name.(string) {
-					/* lan found */
-					lan, apiResponse, err = client.LANsApi.DatacentersLansFindById(ctx, datacenterID.(string), *l.Id).Execute()
-					logApiRequestTime(apiResponse)
-					if err != nil {
-						return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching lan %s: %w", *l.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
-					}
-					results = append(results, l)
+		for _, l := range lans.Items {
+			if l.Properties.Name != nil && *l.Properties.Name == name.(string) {
+				/* lan found */
+				lan, apiResponse, err = client.LANsApi.DatacentersLansFindById(ctx, datacenterID.(string), *l.Id).Execute()
+				logApiRequestTime(apiResponse)
+				if err != nil {
+					return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching lan %s: %w", *l.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 				}
+				results = append(results, l)
 			}
 		}
 

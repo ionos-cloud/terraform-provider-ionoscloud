@@ -7,7 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
@@ -109,7 +110,7 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta an
 		return diagutil.ToDiags(d, fmt.Errorf("please provide either the firewall rule id or name"), nil)
 	}
 	var firewall ionoscloud.FirewallRule
-	var apiResponse *ionoscloud.APIResponse
+	var apiResponse *shared.APIResponse
 
 	if idOk {
 		/* search by ID */
@@ -131,16 +132,14 @@ func dataSourceFirewallRead(ctx context.Context, d *schema.ResourceData, meta an
 
 		var results []ionoscloud.FirewallRule
 
-		if firewalls.Items != nil {
-			for _, fr := range *firewalls.Items {
-				if fr.Properties != nil && fr.Properties.Name != nil && *fr.Properties.Name == name.(string) {
-					tmpFirewall, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterID, serverID, nicID, *fr.Id).Execute()
-					logApiRequestTime(apiResponse)
-					if err != nil {
-						return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching firewall rule with ID %s: %w", *fr.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
-					}
-					results = append(results, tmpFirewall)
+		for _, fr := range firewalls.Items {
+			if fr.Properties.Name != nil && *fr.Properties.Name == name.(string) {
+				tmpFirewall, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, datacenterID, serverID, nicID, *fr.Id).Execute()
+				logApiRequestTime(apiResponse)
+				if err != nil {
+					return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching firewall rule with ID %s: %w", *fr.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 				}
+				results = append(results, tmpFirewall)
 			}
 		}
 

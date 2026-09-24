@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
 )
 
 // findLocationById retrieves a single location by its "<region>/<id>" identifier.
@@ -38,8 +38,7 @@ func ResolveParentLocation(ctx context.Context, client *ionoscloud.APIClient, lo
 			map[string]any{"location": locationID, "error": err.Error()})
 		return locationIDs
 	}
-	if location == nil || location.Properties == nil ||
-		location.Properties.MetroRegion == nil || *location.Properties.MetroRegion == "" {
+	if location == nil || location.Properties.MetroRegion == nil || *location.Properties.MetroRegion == "" {
 		return locationIDs
 	}
 	// Classic locations carry a self-referential metroRegion (e.g. de/fra -> de/fra):

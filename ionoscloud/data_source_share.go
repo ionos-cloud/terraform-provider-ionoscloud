@@ -59,9 +59,6 @@ func dataSourceShareRead(ctx context.Context, d *schema.ResourceData, meta any) 
 		}
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching a share with group_id %s resource_id %s %w", groupID, resourceID, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
-	if rsp.Properties == nil {
-		return diagutil.ToDiags(d, fmt.Errorf("no properties found in the response"), nil)
-	}
 	d.SetId(*rsp.Id)
 	if err := d.Set("edit_privilege", *rsp.Properties.EditPrivilege); err != nil {
 		return diagutil.ToDiags(d, utils.GenerateSetError("share", "edit_privilege", err), nil)

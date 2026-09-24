@@ -342,6 +342,9 @@ github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2
 # github.com/ionos-cloud/sdk-go-bundle/products/cert/v2 v2.2.0
 ## explicit; go 1.22
 github.com/ionos-cloud/sdk-go-bundle/products/cert/v2
+# github.com/ionos-cloud/sdk-go-bundle/products/compute/v2 v2.0.7
+## explicit; go 1.24
+github.com/ionos-cloud/sdk-go-bundle/products/compute/v2
 # github.com/ionos-cloud/sdk-go-bundle/products/containerregistry/v2 v2.1.0
 ## explicit; go 1.22
 github.com/ionos-cloud/sdk-go-bundle/products/containerregistry/v2
@@ -402,9 +405,6 @@ github.com/ionos-cloud/sdk-go-bundle/shared
 github.com/ionos-cloud/sdk-go-bundle/shared/failover
 github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration
 github.com/ionos-cloud/sdk-go-bundle/shared/retry
-# github.com/ionos-cloud/sdk-go/v6 v6.3.11
-## explicit; go 1.24
-github.com/ionos-cloud/sdk-go/v6
 # github.com/jmespath/go-jmespath v0.4.0
 ## explicit; go 1.14
 github.com/jmespath/go-jmespath
