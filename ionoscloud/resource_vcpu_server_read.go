@@ -93,7 +93,7 @@ func resourceVCPUServerImport(ctx context.Context, d *schema.ResourceData, meta 
 		if err := d.Set("primary_nic", primaryNicID); err != nil {
 			return nil, diagutil.ToError(d, fmt.Errorf("error setting primary_nic id %w", err), nil)
 		}
-		if err := setVCPUServerPrimaryIPFromNic(ctx, d, &server, primaryNicID); err != nil {
+		if err := setServerPrimaryIPFromNic(ctx, d, &server, primaryNicID); err != nil {
 			return nil, diagutil.ToError(d, err, nil)
 		}
 	}
@@ -119,8 +119,9 @@ func resourceVCPUServerImport(ctx context.Context, d *schema.ResourceData, meta 
 	return []*schema.ResourceData{d}, nil
 }
 
-// setVCPUServerPrimaryIPFromNic sets primary_ip from the entity matching the imported primary nic id.
-func setVCPUServerPrimaryIPFromNic(ctx context.Context, d *schema.ResourceData, server *ionoscloud.Server, primaryNicID string) error {
+// setServerPrimaryIPFromNic sets primary_ip from the entity matching the imported primary nic id.
+// Shared by the enterprise and VCPU importers.
+func setServerPrimaryIPFromNic(ctx context.Context, d *schema.ResourceData, server *ionoscloud.Server, primaryNicID string) error {
 	if server.Entities == nil || server.Entities.Nics == nil || server.Entities.Nics.Items == nil {
 		return nil
 	}
@@ -173,19 +174,15 @@ func setResourceVCPUServerData(ctx context.Context, client *ionoscloud.APIClient
 	return setVCPUServerLabels(ctx, client, d, datacenterID)
 }
 
-// vcpuServerInlineVolumeIDsUpgrade seeds inline_volume_ids from boot_volume when the attribute is
-// missing (state written before 6.4.0) or empty while an inline volume block is still declared.
+// vcpuServerInlineVolumeIDsUpgrade seeds inline_volume_ids from boot_volume (or with an empty list
+// when there is none) when the attribute is missing (state written before 6.4.0, or a fresh
+// import) or empty while an inline volume block is still declared.
 // The decision is shared with the enterprise writer - see shouldSeedInlineVolumeIDs.
 func vcpuServerInlineVolumeIDsUpgrade(d *schema.ResourceData) error {
 	if !shouldSeedInlineVolumeIDs(d) {
 		return nil
 	}
-	bootVolumeItf, ok := d.GetOk("boot_volume")
-	if !ok {
-		return nil
-	}
-	inlineVolumeIDs := []string{bootVolumeItf.(string)}
-	if err := d.Set("inline_volume_ids", inlineVolumeIDs); err != nil {
+	if err := d.Set("inline_volume_ids", seedInlineVolumeIDs(d)); err != nil {
 		return utils.GenerateSetError("vcpu server", "inline_volume_ids", err)
 	}
 	return nil

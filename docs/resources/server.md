@@ -308,7 +308,7 @@ resource "ionoscloud_server" "test" {
 
 ## Import
 
-Resource Server can be imported using the `resource id` and the `datacenter id`, e.g.. Passing only resource id and datacenter id means that the first nic found linked to the server will be attached to it.
+Resource Server can be imported using the `resource id` and the `datacenter id`, e.g.. Passing only the datacenter id and the resource id imports the server without an inline `nic` block: its NICs are left to separate `ionoscloud_nic` resources, which can be imported on their own.
 
 ```hcl
 import {

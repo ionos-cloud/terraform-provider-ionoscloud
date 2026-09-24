@@ -129,7 +129,7 @@ resource "random_password" "server_image_password" {
 
 ## Import
 
-Resource VCPU Server can be imported using the `resource id` and the `datacenter id`, for example, passing only resource id and datacenter id means that the first nic found linked to the server will be attached to it.
+Resource VCPU Server can be imported using the `resource id` and the `datacenter id`. Passing only the datacenter id and the resource id imports the server without an inline `nic` block: its NICs are left to separate `ionoscloud_nic` resources, which can be imported on their own.
 
 ```shell
 terraform import ionoscloud_vcpu_server.myserver datacenter uuid/server uuid
