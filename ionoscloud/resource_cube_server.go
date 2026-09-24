@@ -667,7 +667,8 @@ func setCubeServerPrimaryNic(ctx context.Context, d *schema.ResourceData, meta a
 	if err != nil {
 		if httpNotFound(apiResponse) {
 			tflog.Debug(ctx, "primary nic not found, clearing primary_nic/primary_ip/nic", map[string]any{"server_id": serverID, "primary_nic_id": primarynic.(string)})
-			for _, key := range []string{"primary_nic", "primary_ip", "nic"} {
+			// The NIC's firewall rule went with it, so its id is stale too.
+			for _, key := range []string{"primary_nic", "primary_ip", "firewallrule_id", "nic"} {
 				if err := d.Set(key, nil); err != nil {
 					return diagutil.ToDiags(d, err, nil)
 				}
@@ -837,14 +838,9 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 	// Nic stuff
 	if d.HasChange("nic") {
-		nic := &ionoscloud.Nic{}
-		nicStr := d.Get("primary_nic").(string)
-		for _, n := range *server.Entities.Nics.Items {
-			if *n.Id == nicStr {
-				nic = &n
-				break
-			}
-		}
+		// nil when the primary NIC was deleted outside Terraform (read then clears primary_nic) or
+		// never existed after an import; the NIC is created below instead of patched.
+		nic := findServerNic(&server, d.Get("primary_nic").(string))
 
 		lan := int32(d.Get("nic.0.lan").(int))
 		properties := ionoscloud.NicProperties{
@@ -898,7 +894,7 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 			properties.FirewallType = &vStr
 		}
 
-		if d.HasChange("nic.0.firewall") {
+		if d.HasChange("nic.0.firewall") && nic != nil {
 
 			firewallID := d.Get("firewallrule_id").(string)
 			update := true
@@ -958,9 +954,17 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 		tflog.Debug(ctx, "updating cube nic properties", map[string]any{"properties": string(mProp)})
 		ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
-		_, apiResponse, err = ns.Update(ctx, d.Get("datacenter_id").(string), *server.Id, *nic.Id, properties)
-		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("error updating nic (%w)", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		if nic == nil {
+			created, diags := createCubeServerNic(ctx, d, client, ns, dcID, *server.Id, properties)
+			if diags != nil {
+				return diags
+			}
+			nic = created
+		} else {
+			_, apiResponse, err = ns.Update(ctx, d.Get("datacenter_id").(string), *server.Id, *nic.Id, properties)
+			if err != nil {
+				return diagutil.ToDiags(d, fmt.Errorf("error updating nic (%w)", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			}
 		}
 
 		if d.HasChange("nic.0.security_groups_ids") {
@@ -987,6 +991,61 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	return resourceCubeServerRead(ctx, d, meta)
+}
+
+// createCubeServerNic recreates the primary NIC of a cube or GPU server that has none, with the
+// inline firewall rule if one is configured, and records the new primary_nic and firewallrule_id.
+func createCubeServerNic(ctx context.Context, d *schema.ResourceData, client *ionoscloud.APIClient, ns cloudapinic.Service, dcID, serverID string, properties ionoscloud.NicProperties) (*ionoscloud.Nic, diag.Diagnostics) {
+	nic := ionoscloud.Nic{Properties: &properties}
+	if firewalls, ok := d.Get("nic.0.firewall").([]any); ok && len(firewalls) > 0 {
+		firewall, diags := getFirewallData(d, "nic.0.firewall.0.", false)
+		if diags != nil {
+			return nil, diags
+		}
+		nic.Entities = &ionoscloud.NicEntities{Firewallrules: &ionoscloud.FirewallRules{Items: &[]ionoscloud.FirewallRule{firewall}}}
+	}
+
+	created, apiResponse, err := ns.Create(ctx, dcID, serverID, nic)
+	if err != nil {
+		return nil, diagutil.ToDiags(d, fmt.Errorf("error creating nic (%w)", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+	}
+	if created.Id == nil {
+		return nil, diagutil.ToDiags(d, fmt.Errorf("created nic for server %s has no id", serverID), nil)
+	}
+	if err := d.Set("primary_nic", *created.Id); err != nil {
+		return nil, diagutil.ToDiags(d, err, nil)
+	}
+
+	// The rule posted with the NIC comes back only on a fresh read of the NIC's rules.
+	firewallRuleID := ""
+	if nic.Entities != nil {
+		rules, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, dcID, serverID, *created.Id).Execute()
+		logApiRequestTime(apiResponse)
+		if err != nil {
+			return nil, diagutil.ToDiags(d, fmt.Errorf("error fetching firewall rules of nic %s: %w", *created.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		}
+		if rules.Items != nil && len(*rules.Items) > 0 && (*rules.Items)[0].Id != nil {
+			firewallRuleID = *(*rules.Items)[0].Id
+		}
+	}
+	if err := d.Set("firewallrule_id", firewallRuleID); err != nil {
+		return nil, diagutil.ToDiags(d, err, nil)
+	}
+	return created, nil
+}
+
+// findServerNic returns the server's NIC with the given id, or nil when id is empty or the
+// server has no such NIC.
+func findServerNic(server *ionoscloud.Server, id string) *ionoscloud.Nic {
+	if id == "" || server == nil || server.Entities == nil || server.Entities.Nics == nil || server.Entities.Nics.Items == nil {
+		return nil
+	}
+	for _, n := range *server.Entities.Nics.Items {
+		if n.Id != nil && *n.Id == id {
+			return &n
+		}
+	}
+	return nil
 }
 
 func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {

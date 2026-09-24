@@ -5,6 +5,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"strings"
 	"testing"
 	"time"
 
@@ -65,6 +66,25 @@ func TestAccCubeServerImportWithoutNic(t *testing.T) {
 					}
 					return nil
 				},
+			},
+			{
+				// Refresh clears the deleted NIC; apply must recreate it (with the firewall rule
+				// added here) instead of patching a NIC without an id, which used to panic.
+				Config: testAccCubeServerImportNoNicConfigWithFirewall,
+				Check: resource.ComposeTestCheckFunc(
+					func(s *terraform.State) error {
+						attrs := s.RootModule().Resources[importNoNicCubeAddr].Primary.Attributes
+						if attrs["primary_nic"] == "" || attrs["primary_nic"] == nicID {
+							return fmt.Errorf("expected a recreated primary_nic, got %q (deleted %q)", attrs["primary_nic"], nicID)
+						}
+						if attrs["firewallrule_id"] == "" {
+							return fmt.Errorf("recreated nic has no firewallrule_id")
+						}
+						return nil
+					},
+					resource.TestCheckResourceAttr(importNoNicCubeAddr, "nic.#", "1"),
+					resource.TestCheckResourceAttr(importNoNicCubeAddr, "nic.0.firewall.0.name", "tf-acctest-import-cube-no-nic"),
+				),
 			},
 		},
 	})
@@ -148,3 +168,14 @@ resource "ionoscloud_cube_server" "import_no_nic" {
   }
 }
 `
+
+var testAccCubeServerImportNoNicConfigWithFirewall = strings.Replace(testAccCubeServerImportNoNicConfig, `    dhcp = true
+  }`, `    dhcp = true
+    firewall_active = true
+    firewall {
+      name             = "tf-acctest-import-cube-no-nic"
+      protocol         = "TCP"
+      port_range_start = 22
+      port_range_end   = 22
+    }
+  }`, 1)

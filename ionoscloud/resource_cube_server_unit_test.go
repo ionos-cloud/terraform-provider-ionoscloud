@@ -91,3 +91,42 @@ func TestFirstVolumeImage(t *testing.T) {
 		})
 	}
 }
+
+// resourceCubeServerUpdate patched *nic.Id for a primary NIC it could not find (deleted outside
+// Terraform, so primary_nic was cleared) and panicked; findServerNic must return nil instead.
+func TestFindServerNic(t *testing.T) {
+	id1, id2 := "nic-1", "nic-2"
+	withNics := func(items *[]ionoscloud.Nic) *ionoscloud.Server {
+		return &ionoscloud.Server{Entities: &ionoscloud.ServerEntities{Nics: &ionoscloud.Nics{Items: items}}}
+	}
+	nics := &[]ionoscloud.Nic{{}, {Id: &id1}, {Id: &id2}}
+
+	tests := []struct {
+		name   string
+		server *ionoscloud.Server
+		id     string
+		wantID string
+	}{
+		{name: "nil server", server: nil, id: id1},
+		{name: "nil entities", server: &ionoscloud.Server{}, id: id1},
+		{name: "nil nics", server: &ionoscloud.Server{Entities: &ionoscloud.ServerEntities{}}, id: id1},
+		{name: "nil items", server: withNics(nil), id: id1},
+		{name: "empty id", server: withNics(nics), id: ""},
+		{name: "not found", server: withNics(nics), id: "nic-3"},
+		{name: "found after a nic without id", server: withNics(nics), id: id2, wantID: id2},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := findServerNic(tt.server, tt.id)
+			if tt.wantID == "" {
+				if got != nil {
+					t.Fatalf("findServerNic = %+v, want nil", got)
+				}
+				return
+			}
+			if got == nil || got.Id == nil || *got.Id != tt.wantID {
+				t.Fatalf("findServerNic = %+v, want id %q", got, tt.wantID)
+			}
+		})
+	}
+}
