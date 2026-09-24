@@ -3,6 +3,8 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"regexp"
+	"strings"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapilan"
@@ -269,21 +271,10 @@ func resourceLanIPFailoverDelete(ctx context.Context, d *schema.ResourceData, me
 func resourceIpFailoverImporter(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	importID := d.Id()
 
-	location, parts := splitImportID(importID, "/")
-	if len(parts) != 3 {
-		return nil, diagutil.ToError(d, fmt.Errorf(
-			"invalid import identifier: expected one of <location>:<datacenter>/<lan>/<ip> "+
-				"or <datacenter>/<lan>/<ip>, got: %s", importID,
-		), nil)
+	location, dcID, lanID, ip, err := parseIPFailoverImportID(importID)
+	if err != nil {
+		return nil, diagutil.ToError(d, err, nil)
 	}
-
-	if err := validateImportIDParts(parts); err != nil {
-		return nil, diagutil.ToError(d, fmt.Errorf("failed validating import identifier %q: %w", importID, err), nil)
-	}
-
-	dcID := parts[0]
-	lanID := parts[1]
-	ip := parts[2]
 
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
@@ -307,11 +298,10 @@ func resourceIpFailoverImporter(ctx context.Context, d *schema.ResourceData, met
 		return nil, err
 	}
 
-	ipFailoverGroups := lan.Properties.IpFailover
-	if lan.Properties != nil && ipFailoverGroups != nil && len(*ipFailoverGroups) > 0 {
-		for _, ipFailoverGroup := range *ipFailoverGroups {
+	if lan.Properties != nil && lan.Properties.IpFailover != nil {
+		for _, ipFailoverGroup := range *lan.Properties.IpFailover {
 			// Search for the appropriate IP Failover Group using the provided IP
-			if *ipFailoverGroup.Ip == ip {
+			if ipFailoverGroup.Ip != nil && ipFailoverGroup.NicUuid != nil && *ipFailoverGroup.Ip == ip {
 				// Set all the information only if the IP Failover Group exists
 				// Use the IP in order to generate the resource ID
 				d.SetId(uuidgen.GenerateUuidFromName(ip))
@@ -334,4 +324,30 @@ func resourceIpFailoverImporter(ctx context.Context, d *schema.ResourceData, met
 		}
 	}
 	return nil, diagutil.ToError(d, fmt.Errorf("IP Failover Group with IP: %s does not exist in the LAN with ID: %s, datacenter ID: %s", ip, lanID, dcID), nil)
+}
+
+// ipFailoverLocationPrefix matches the optional "<location>:" prefix of an import ID, e.g. "de/fra"
+// or "de/fra/2".
+var ipFailoverLocationPrefix = regexp.MustCompile(`^[a-z]{2}/[a-z]{3}(/[0-9]+)?$`)
+
+// parseIPFailoverImportID splits [<location>:]<datacenter-id>/<lan-id>/<ip>. The IP may be an IPv6
+// address, which contains ":" itself, so the text before the first ":" only counts as a location
+// when it looks like one.
+func parseIPFailoverImportID(importID string) (location, dcID, lanID, ip string, err error) {
+	rest := importID
+	if before, after, found := strings.Cut(importID, ":"); found && ipFailoverLocationPrefix.MatchString(before) {
+		location, rest = before, after
+	}
+
+	parts := strings.SplitN(rest, "/", 3)
+	if len(parts) != 3 || strings.Contains(parts[2], "/") {
+		return "", "", "", "", fmt.Errorf(
+			"invalid import identifier: expected one of <location>:<datacenter>/<lan>/<ip> "+
+				"or <datacenter>/<lan>/<ip>, got: %s", importID,
+		)
+	}
+	if err := validateImportIDParts(parts); err != nil {
+		return "", "", "", "", fmt.Errorf("failed validating import identifier %q: %w", importID, err)
+	}
+	return location, parts[0], parts[1], parts[2], nil
 }
