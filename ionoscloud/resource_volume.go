@@ -149,7 +149,8 @@ func resourceVolume() *schema.Resource {
 			},
 			"server_id": {
 				Type:             schema.TypeString,
-				Required:         true,
+				Optional:         true,
+				Description:      "The ID of the server the volume is attached to. Leave unset for a volume that is not attached to any server.",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"datacenter_id": {
@@ -295,32 +296,62 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta any)
 		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
-	volumeToAttach := ionoscloud.Volume{Id: volume.Id}
-	volume, apiResponse, err = client.ServersApi.DatacentersServersVolumesPost(ctx, dcID, serverID).Volume(volumeToAttach).Execute()
-	logApiRequestTime(apiResponse)
-
-	if err != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while attaching a volume dcID: %s server_id: %s ID: %s Response: %w", dcID, serverID, *volumeToAttach.Id, err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
+	// A volume without server_id stays unattached.
+	if serverID == "" {
+		return resourceVolumeRead(ctx, d, meta)
 	}
 
-	sErr := d.Set("server_id", serverID)
-
-	if sErr != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error while setting serverID %s: %w", serverID, sErr), nil)
-	}
-
-	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
-		if bundleclient.IsRequestFailed(errState) {
-			if sErr := d.Set("server_id", ""); sErr != nil {
-				return diagutil.ToDiags(d, fmt.Errorf("error while setting serverID: %w", sErr), nil)
-			}
-		}
-		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation)})
+	if diags := attachVolume(ctx, d, meta, client, dcID, serverID, schema.TimeoutCreate); diags != nil {
+		return diags
 	}
 
 	return resourceVolumeRead(ctx, d, meta)
+}
+
+// attachVolume attaches the volume to serverID and records the attachment in server_id.
+func attachVolume(ctx context.Context, d *schema.ResourceData, meta any, client *ionoscloud.APIClient, dcID, serverID, timeout string) diag.Diagnostics {
+	volumeID := d.Id()
+	_, apiResponse, err := client.ServersApi.DatacentersServersVolumesPost(ctx, dcID, serverID).Volume(ionoscloud.Volume{Id: &volumeID}).Execute()
+	logApiRequestTime(apiResponse)
+	if err != nil {
+		requestLocation, _ := apiResponse.SafeLocation()
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while attaching a volume dcID: %s server_id: %s ID: %s Response: %w", dcID, serverID, volumeID, err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
+	}
+
+	if err := d.Set("server_id", serverID); err != nil {
+		return diagutil.ToDiags(d, fmt.Errorf("error while setting serverID %s: %w", serverID, err), nil)
+	}
+
+	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, timeout); errState != nil {
+		if bundleclient.IsRequestFailed(errState) {
+			if err := d.Set("server_id", ""); err != nil {
+				return diagutil.ToDiags(d, fmt.Errorf("error while setting serverID: %w", err), nil)
+			}
+		}
+		requestLocation, _ := apiResponse.SafeLocation()
+		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(timeout).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
+	}
+	return nil
+}
+
+// detachVolume detaches the volume from serverID. A volume that is no longer attached there
+// counts as detached.
+func detachVolume(ctx context.Context, d *schema.ResourceData, meta any, client *ionoscloud.APIClient, dcID, serverID string) diag.Diagnostics {
+	apiResponse, err := client.ServersApi.DatacentersServersVolumesDelete(ctx, dcID, serverID, d.Id()).Execute()
+	logApiRequestTime(apiResponse)
+	if err != nil {
+		if httpNotFound(apiResponse) {
+			return nil
+		}
+		requestLocation, _ := apiResponse.SafeLocation()
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while detaching a volume dcID: %s server_id: %s ID: %s Response: %w", dcID, serverID, d.Id(), err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
+	}
+
+	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
+		requestLocation, _ := apiResponse.SafeLocation()
+		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
+	}
+	return nil
 }
 
 func resourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
@@ -345,12 +376,16 @@ func resourceVolumeRead(ctx context.Context, d *schema.ResourceData, meta any) d
 		return diagutil.ToDiags(d, fmt.Errorf("error occurred while fetching volume: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	_, apiResponse, err = client.ServersApi.DatacentersServersVolumesFindById(ctx, dcID, serverID, volumeID).Execute()
-	logApiRequestTime(apiResponse)
-	if err != nil {
-		if err2 := d.Set("server_id", ""); err2 != nil {
-			requestLocation, _ := apiResponse.SafeLocation()
-			return diagutil.ToDiags(d, err2, &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
+	// Only a configured attachment can be verified. Leaving server_id untouched for an
+	// unattached volume keeps it null, so generated config stays valid.
+	if serverID != "" {
+		_, apiResponse, err = client.ServersApi.DatacentersServersVolumesFindById(ctx, dcID, serverID, volumeID).Execute()
+		logApiRequestTime(apiResponse)
+		if err != nil {
+			if err2 := d.Set("server_id", ""); err2 != nil {
+				requestLocation, _ := apiResponse.SafeLocation()
+				return diagutil.ToDiags(d, err2, &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
+			}
 		}
 	}
 
@@ -400,41 +435,42 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta any)
 		properties.RequireLegacyBios = &requireLegacyBios
 	}
 
-	volume, apiResponse, err := client.VolumesApi.DatacentersVolumesPatch(ctx, dcID, d.Id()).Volume(properties).Execute()
-	logApiRequestTime(apiResponse)
+	// An update that only moves the attachment must not send an empty PATCH.
+	if properties != (ionoscloud.VolumeProperties{}) {
+		_, apiResponse, err := client.VolumesApi.DatacentersVolumesPatch(ctx, dcID, d.Id()).Volume(properties).Execute()
+		logApiRequestTime(apiResponse)
 
-	if err != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating volume: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
+		if err != nil {
+			requestLocation, _ := apiResponse.SafeLocation()
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating volume: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 
-	}
+		}
 
-	// Wait, catching any errors
-	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
-	}
+		// Wait, catching any errors
+		if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
+			requestLocation, _ := apiResponse.SafeLocation()
+			return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
+		}
 
-	if apiResponse.SafeStatusCode() > 299 {
-		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating a volume, status code: %d", apiResponse.SafeStatusCode()), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
+		if apiResponse.SafeStatusCode() > 299 {
+			requestLocation, _ := apiResponse.SafeLocation()
+			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating a volume, status code: %d", apiResponse.SafeStatusCode()), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
+		}
 	}
 
 	if d.HasChange("server_id") {
-		_, newValue := d.GetChange("server_id")
-		serverID := newValue.(string)
-		volumeToAttach := ionoscloud.Volume{Id: volume.Id}
-		_, apiResponse, err := client.ServersApi.DatacentersServersVolumesPost(ctx, dcID, serverID).Volume(volumeToAttach).Execute()
-		logApiRequestTime(apiResponse)
-		if err != nil {
-			requestLocation, _ := apiResponse.SafeLocation()
-			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while attaching a volume dcID: %s server_id: %s ID: %s Response: %w",
-				dcID, serverID, *volume.Id, err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
+		oldValue, newValue := d.GetChange("server_id")
+		oldServerID, newServerID := oldValue.(string), newValue.(string)
+		// A volume can only be attached to one server, so moving it detaches it first.
+		if oldServerID != "" {
+			if diags := detachVolume(ctx, d, meta, client, dcID, oldServerID); diags != nil {
+				return diags
+			}
 		}
-
-		if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
-			requestLocation, _ := apiResponse.SafeLocation()
-			return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
+		if newServerID != "" {
+			if diags := attachVolume(ctx, d, meta, client, dcID, newServerID, schema.TimeoutUpdate); diags != nil {
+				return diags
+			}
 		}
 	}
 
@@ -470,21 +506,10 @@ func resourceVolumeDelete(ctx context.Context, d *schema.ResourceData, meta any)
 func resourceVolumeImporter(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	importID := d.Id()
 
-	location, parts := splitImportID(importID, "/")
-	if len(parts) != 3 {
-		return nil, diagutil.ToError(d, fmt.Errorf(
-			"invalid import identifier: expected one of <location>:<datacenter-id>/<server-id>/<volume-id> "+
-				"or <datacenter-id>/<server-id>/<volume-id>, got: %s", importID,
-		), nil)
+	location, dcID, srvID, volumeID, err := parseVolumeImportID(importID)
+	if err != nil {
+		return nil, diagutil.ToError(d, err, nil)
 	}
-
-	if err := validateImportIDParts(parts); err != nil {
-		return nil, diagutil.ToError(d, fmt.Errorf("failed validating import identifier %q: %w", importID, err), nil)
-	}
-
-	dcID := parts[0]
-	srvID := parts[1]
-	volumeID := parts[2]
 
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
@@ -509,8 +534,10 @@ func resourceVolumeImporter(ctx context.Context, d *schema.ResourceData, meta an
 		return nil, diagutil.ToError(d, err, nil)
 	}
 
-	if err := d.Set("server_id", srvID); err != nil {
-		return nil, diagutil.ToError(d, err, nil)
+	if srvID != "" {
+		if err := d.Set("server_id", srvID); err != nil {
+			return nil, diagutil.ToError(d, err, nil)
+		}
 	}
 
 	if err := d.Set("location", location); err != nil {
@@ -522,6 +549,31 @@ func resourceVolumeImporter(ctx context.Context, d *schema.ResourceData, meta an
 	}
 
 	return []*schema.ResourceData{d}, nil
+}
+
+// parseVolumeImportID splits a volume import ID. The server part is optional so that volumes
+// not attached to any server can be imported too:
+//
+//	[<location>:]<datacenter-id>/<server-id>/<volume-id>
+//	[<location>:]<datacenter-id>/<volume-id>
+func parseVolumeImportID(importID string) (location, dcID, serverID, volumeID string, err error) {
+	location, parts := splitImportID(importID, "/")
+	if len(parts) != 2 && len(parts) != 3 {
+		return "", "", "", "", fmt.Errorf(
+			"invalid import identifier: expected one of <location>:<datacenter-id>/<server-id>/<volume-id>, "+
+				"<datacenter-id>/<server-id>/<volume-id>, <location>:<datacenter-id>/<volume-id> "+
+				"or <datacenter-id>/<volume-id>, got: %s", importID,
+		)
+	}
+
+	if err := validateImportIDParts(parts); err != nil {
+		return "", "", "", "", fmt.Errorf("failed validating import identifier %q: %w", importID, err)
+	}
+
+	if len(parts) == 2 {
+		return location, parts[0], "", parts[1], nil
+	}
+	return location, parts[0], parts[1], parts[2], nil
 }
 
 func setVolumeData(d *schema.ResourceData, volume *ionoscloud.Volume) error {
