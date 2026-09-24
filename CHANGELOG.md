@@ -3,7 +3,7 @@
 - `ionoscloud_template`: add new, optional attribute: `storage_type`
 
 ### Fixes
-- `ionoscloud_volume`: Volumes that are not attached to any server can now be managed and imported. `server_id` is optional, and `<datacenter-id>/<volume-id>` imports a standalone volume without producing an invalid `server_id = ""` in generated configuration. Changing `server_id` now detaches the volume from the previous server before attaching it to the new one, and an update that only changes the attachment no longer sends an empty volume PATCH.
+- `ionoscloud_volume`: Volumes that are not attached to any server can now be managed and imported. `server_id` is optional, and `<datacenter-id>/<volume-id>` imports a standalone volume without producing an invalid `server_id = ""` in generated configuration. Changing `server_id` now detaches the volume from the previous server before attaching it to the new one, removing `server_id` detaches the volume, and an update that only changes the attachment no longer sends an empty volume PATCH.
 - `ionoscloud_server`, `ionoscloud_vcpu_server`, `ionoscloud_cube_server`, `ionoscloud_gpu_server`: A server without a boot volume no longer plans `inline_volume_ids` as "known after apply" on every plan, so importing it is a no-op instead of an update. Updates that change no server property no longer send an empty server PATCH.
 - `ionoscloud_cube_server`, `ionoscloud_gpu_server`: Fix a panic when importing a server that has no NIC, and a read error (which also blocked destroy) when the primary NIC was deleted outside Terraform. The next apply recreates the configured `nic` instead of trying to update the missing one.
 - `ionoscloud_server`: Fix a possible panic when importing with a primary NIC id whose NIC has no IPs.
