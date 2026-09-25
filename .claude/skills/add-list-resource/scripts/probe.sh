@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# add-list-resource: step 0 and the verification ladder. Run it, do not read it.
-# Read-only except rung*, which compile/test/lint: one at a time, never in parallel.
+# Read-only except rung*, which build/test/lint: never in parallel.
 . "$(dirname "$0")/_lib.sh"
 root
 
 usage() { cat >&2 <<'U'
 usage: scripts/probe.sh <subcommand> [args]
   discover <ionoscloud_type> [Const] [suffix] [resource]  step 0, all seven questions
+                            (Const is optional: the full identifier, e.g. IpBlockResource)
   listcalls [filter]        every parentless collection GET in the vendored SDKs
   limit-cloud <Op> | limit-bundle <Op>   what limit the client sends (one probe, both SDKs)
   datasource-limit <resource> | locations <product>
@@ -22,23 +22,29 @@ discover)
   c=${3:-}; sfx=${4:-${t#ionoscloud_}}; r=${5:-${t#ionoscloud_}}
   need utils/constant/constants.go ionoscloud/provider.go \
        ionoscloud/list_resources.go internal/framework/services
-  # 1. ResourcesMap is keyed by the CONSTANT, never the literal: an unresolvable type
-  #    name is itself the answer - no such resource.
-  [ -n "$c" ] || c=$(grep -E "^[[:space:]]*[A-Za-z0-9]+[[:space:]]+=[[:space:]]+\"$t\"" \
-      utils/constant/constants.go | awk '{print $1}' | head -1)
-  [ -n "$c" ] || die "no constant holds \"$t\" - the type does not exist"
-  printf '== 1. type constant ==\nconstant.%s = "%s"\n\n' "$c" "$t"
-  # 2/3. Which branch. ResourcesMap and DataSourcesMap key off the SAME constant, so
-  #      match the FACTORY. Only a DataSource hit, or only a data_source_*.go in (3):
-  #      no managed resource, nothing to list.
-  grep -nE "constant\.$c: *[Rr]esource" ionoscloud/provider.go |
+  # Every constant holding the type: a data source and a resource often share one string.
+  all=$(grep -E "^[[:space:]]*[A-Za-z0-9]+[[:space:]]+=[[:space:]]+\"$t\"" \
+      utils/constant/constants.go | awk '{print $1}')
+  [ -n "$all" ] || die "no constant holds \"$t\" - the type does not exist"
+  alt=$(printf '%s\n' "$all" | paste -sd'|')
+  if [ -n "$c" ]; then
+    printf '%s\n' "$all" | grep -qx "$c" ||
+      die "constant.$c does not hold \"$t\" - pass the full identifier ($(printf '%s\n' "$all" | paste -sd' ')) or omit it"
+  else
+    c=$(grep -oE "constant\.($alt): *[Rr]esource" ionoscloud/provider.go | head -1 | sed 's/constant\.//; s/:.*//')
+    [ -n "$c" ] || c=$(printf '%s\n' "$all" | head -1)
+  fi
+  printf '== 1. type constant ==\nconstant.%s = "%s" (every constant holding it: %s)\n\n' \
+    "$c" "$t" "$(printf '%s\n' "$all" | paste -sd' ')"
+  # 2/2b. Both maps key off those constants: match the FACTORY.
+  grep -nE "constant\.($alt): *[Rr]esource" ionoscloud/provider.go |
     q "2. SDKv2 ResourcesMap (listable, the harder branch)" "not an SDKv2 managed resource"
-  grep -nE "constant\.$c: *[Dd]ataSource" ionoscloud/provider.go |
+  grep -nE "constant\.($alt): *[Dd]ataSource" ionoscloud/provider.go |
     q "2b. SDKv2 DataSourcesMap (this alone: nothing to list)" "no SDKv2 data source"
   grep -rn "ProviderTypeName + \"_$sfx\"" internal/framework/services/ --include=*.go |
     grep -v _test.go |
     q "3. framework-native (only a resource_*.go hit counts)" "not framework-native"
-  # 4. The list resource requires an identity; a second one is a bug.
+  # 4. A second identity is a bug.
   { grep -n 'ResourceIdentity' "ionoscloud/resource_$r.go" 2>/dev/null
     grep -rn 'IdentitySchema' internal/framework/services/ --include=*.go | grep -i "$sfx"
   } | q "4. identity already declared" "none yet - you add it"
@@ -47,7 +53,6 @@ discover)
     ls docs/list-resources/ 2>/dev/null
   } | grep -Ei "$(printf '%s' "$sfx" | sed 's/_/_?/g')" |
     q "5. list resource already registered / documented" "none yet - you add it"
-  # 6/7. SDKv2 gates only: a framework-native resource has no ionoscloud/resource_*.go.
   if [ -f "ionoscloud/resource_$r.go" ]; then
     sdk_client "ionoscloud/resource_$r.go"
     "$SCRIPTS/sdkv2.sh" writer "$r"
@@ -56,16 +61,8 @@ discover)
   fi
   ;;
 
-# listcalls [filter] - is there a PARENTLESS collection GET at all? None for yours =>
-# it cannot be listed; stop. [A-Za-z0-9]+ is load-bearing: without the digits this
-# silently misses K8sGet.
-# listcalls [resource_or_product] - every parentless collection GET in the vendored SDKs.
-# The filter matches the SDK FILE PATH as well as the signature, because the product name
-# lives only in the path: mariadb's collection GET is ClustersGet in
-# products/dbaas/mariadb/v2/api_clusters.go, and a signature-only filter says "not
-# vendored" and wrongly stops the run at gate 2. Underscore-separated parts must ALL
-# appear somewhere in path+signature, so `listcalls mariadb_cluster` narrows to mariadb
-# while a bare `cluster` does not drown you. An empty result here is a REAL stop.
+# The filter matches the SDK file path too, where the product name lives (mariadb's ClustersGet:
+# products/dbaas/mariadb/v2/api_clusters.go); [A-Za-z0-9]+ keeps K8sGet. Every _-part must match.
 listcalls)
   need vendor/github.com/ionos-cloud
   out=$(grep -rnoE "func \(a \*[A-Za-z0-9]+\) [A-Za-z0-9]+(Get|List)\(ctx _?context\.Context\) Api[A-Za-z0-9]+Request" \
@@ -80,7 +77,7 @@ listcalls)
       if narrowed=$(printf '%s\n' "$out" | grep -i -- "$p") && [ -n "$narrowed" ]; then
         out=$narrowed; kept="$kept $p"
       else
-        dropped="$dropped $p"          # narrowing on this part would empty the set
+        dropped="$dropped $p"
       fi
     done
   fi
@@ -93,44 +90,37 @@ listcalls)
 
 limit-cloud|limit-bundle) limit_probe "${2:?operation, e.g. DatacentersGet}" ;;
 
-# datasource-limit - a hit means a bare fetch would cap the list resource BELOW its own
-# data source. No match = the data source sends none either; claim no number in docs.
 datasource-limit)
   need "ionoscloud/data_source_${2:?resource}.go"
   grep -n 'Limit(' "ionoscloud/data_source_$2.go" |
     q "explicit .Limit(n) in the sibling data source" "it sends none either"
   ;;
 
-# locations <product> - only when the resource is partitioned by location. No match =>
-# partitioned with nothing to enumerate: stop and ask, do not ship a partial listing.
 locations)
   need "services/${2:?product}/"
   grep -rn 'AvailableLocations\|Valid[A-Za-z]*Locations *=' --include=*.go "services/$2/" |
     q "enumerable locations for $2" "not enumerable in-tree"
   ;;
 
-# ---- verification ladder: cheapest first, strictly sequential, one at a time. ----
-# rung0 - never with an empty argument list: gofmt then reads stdin and reports green
-# having inspected nothing.
-rung0) gofmt -l -d ./ionoscloud ./internal ./utils ;;
-# rung1 - only the packages you touched. framework-native: the service package, plus
-# ./internal/framework/provider/ ONLY if the list resource went in a new one.
-rung1) shift; go build "${@:-./ionoscloud/}" ;;
+rung0)
+  out=$(gofmt -l -d ./ionoscloud ./internal ./utils) || die "gofmt failed - see the error above"
+  if [ -n "$out" ]; then printf '%s\nVERDICT: NOT CLEAN - gofmt the files above\n' "$out"; exit 1; fi
+  echo 'VERDICT: gofmt clean' ;;
+rung1) shift; go build "${@:-./ionoscloud/}" && echo 'VERDICT: builds' ;;
 rung2) go test "${2:?pkg}" -run "${3:?TestName}" -count=1 ;;
-# rung2b - the only thing that runs InternalIdentityValidate() on your Identity. Rung 2
-# passes with a malformed one and nothing in CI checks.
+# rung2b - the only thing that runs InternalIdentityValidate() on your Identity.
 rung2b) go test ./ionoscloud/ -run 'TestProvider$' -count=1 ;;
-# rung3 - your own lines only. Never drop --new-from-rev (hundreds of pre-existing
-# issues) nor the path argument (`make lint` has none: all 60 packages, ~45 linters).
-rung3) shift; golangci-lint run --new-from-rev "$(git merge-base origin/master HEAD)" "$@" ;;
-# rung4 - only if imports changed. Run the vendor half EVEN WHEN tidy is clean: a new
-# subpackage of a module already in go.mod moves vendor/modules.txt alone (#1034).
-rung4) go mod tidy && git diff --exit-code -- go.mod go.sum
+# rung3 - never drop --new-from-rev nor the path argument (`make lint` has none: all packages).
+rung3) shift; havegit "rung 3 needs git merge-base: lint where git is allowed"
+       golangci-lint run --new-from-rev "$(git merge-base origin/master HEAD)" "$@" ;;
+# rung4 - the vendor half runs EVEN WHEN tidy is clean: a new subpackage of a module already
+# in go.mod moves vendor/modules.txt alone.
+rung4) havegit "rung 4 diffs go.mod and vendor/ with git"
+       go mod tidy && git diff --exit-code -- go.mod go.sum
        go mod vendor && git status --porcelain vendor/ ;;
-rung5-scoped) shift; go vet -tags=all ./ionoscloud/ ./internal/framework/provider/ ./internal/acctest/ "$@" ;;
-# rung5-full - EXPENSIVE, heavier than `go build ./...`: ASK THE USER FIRST. The only
-# thing that compiles the tagged acceptance file holding your Query: true step.
-rung5-full) go vet -tags=all ./... ;;
+rung5-scoped) shift; go vet -tags=all ./ionoscloud/ ./internal/framework/provider/ ./internal/acctest/ "$@" &&
+  echo 'VERDICT: vet clean - the tagged tests compile' ;;
+rung5-full) go vet -tags=all ./... && echo 'VERDICT: vet clean' ;;
 
 *) usage ;;
 esac

@@ -1,32 +1,32 @@
 #!/usr/bin/env bash
-# Shared helpers. Sourced by the other scripts, never run on its own.
-# Every check ends in exactly one of:
-#   VERDICT: FOUND ...     the lines above are the answer
-#   VERDICT: NO MATCH - X  the repo really has none; X says what that means
-#   BROKEN: ... (exit 3)   the probe could not look (wrong tree, path gone)
-# Silence is never a verdict: a check that cannot fail answers nothing.
+# Every check ends in VERDICT: FOUND, VERDICT: NO MATCH - <meaning>, or BROKEN; never silence.
 set -u
 SCRIPTS=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)   # resolved before any cd
 
 die() { printf 'BROKEN: %s\n' "$*" >&2; exit 3; }
 
-# cd to the provider repo - the caller's cwd if that is it, else this skill's own
-# checkout - so every path below is repo-relative from wherever you ran this.
+# root - cd to the first directory, up from $PWD and then from this script, that holds the
+# provider (utils/constant/constants.go and go.mod). Needs no git.
 root() {
-  local d r
-  for d in . "$SCRIPTS"; do
-    r=$(git -C "$d" rev-parse --show-toplevel 2>/dev/null) || continue
-    [ -f "$r/utils/constant/constants.go" ] || continue
-    cd "$r" || die "cannot cd to $r"; return
+  local d
+  for d in "$PWD" "$SCRIPTS"; do
+    while [ -n "$d" ] && [ "$d" != / ]; do
+      if [ -f "$d/utils/constant/constants.go" ] && [ -f "$d/go.mod" ]; then
+        cd "$d" || die "cannot cd to $d"
+        return
+      fi
+      d=$(dirname "$d")
+    done
   done
   die "terraform-provider-ionoscloud not found - run from inside it"
 }
 
-# need PATH... - a missing path means the probe cannot look, not that the answer is
-# empty. A *_list.go firing here means you are on a tree without it.
+# havegit WHY - only the checks that need git call this; without it they stop, never guess.
+havegit() { git rev-parse --is-inside-work-tree >/dev/null 2>&1 || die "git unavailable - $1"; }
+
+# need PATH... - a missing path is BROKEN (the probe cannot look), never an empty answer.
 need() { local p; for p in "$@"; do [ -e "$p" ] || die "no such path: $p"; done; }
 
-# q LABEL NOMATCH_MEANING - reads a check's output on stdin, prints it with a verdict.
 q() {
   local out; out=$(cat)
   if [ -n "$out" ]; then
@@ -36,10 +36,7 @@ q() {
   fi
 }
 
-# sdk_client FILE - which client does CRUD take off the bundle? Classified on the
-# MATCHED TEXT, never a hit count: resource_target_group.go (Cloud API) and
-# resource_dns_zone.go (bundle) both have 5 `bundleclient.SdkBundle).` hits; only the
-# symbol after the dot separates them.
+# sdk_client FILE - classify on the symbol after `SdkBundle).`, never on a hit count.
 sdk_client() {
   need "$1"
   local hits
@@ -61,13 +58,7 @@ sdk_client() {
   printf '\n'
 }
 
-# limit_probe OP - how many items does the vendored client ask for on this collection
-# when the caller sets no .Limit(n)? OP is the operation: DatacentersGet, ZonesGet...
-# The file is resolved here, so sdk-go/v6 vs sdk-go-bundle does not matter: both
-# emissions are read. Never read the doc comment - the only sdk-go/v6 comment naming a
-# default says "the first 100 items" and sits on DatacentersGet, whose client sends 1000.
-# NO MATCH on the file = no such operation is vendored; get the name from `listcalls`.
-# The doc comment block immediately above the request builder for <op>.
+# op_doc_comment OP FILE - the comment block right above OP's request builder.
 op_doc_comment() {
   local op=$1 f=$2 ln
   ln=$(grep -n "func (a \*[A-Za-z0-9]*ApiService) ${op}(" "$f" | head -1 | cut -d: -f1)
@@ -75,8 +66,10 @@ op_doc_comment() {
   sed -n "1,$((ln - 1))p" "$f" | tac | sed -E '/^[[:space:]]*(\/\/|\*|\/\*)/!Q' | tac
 }
 
+# limit_probe OP - an emitted default beats the doc comment: DatacentersGet's says "the first
+# 100 items", its client sends 1000.
 limit_probe() {
-  local op=$1 f body n
+  local op=$1 f body n doc
   f=$(grep -rl "func (a \*[A-Za-z0-9]*ApiService) ${op}Execute" vendor/github.com/ionos-cloud/ 2>/dev/null | head -1)
   if [ -z "$f" ]; then
     printf '== limit on %s ==\nVERDICT: NO MATCH - nothing vendored has %sExecute; check the name with listcalls.\n\n' "$op" "$op"; return

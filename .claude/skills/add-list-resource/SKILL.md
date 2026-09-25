@@ -7,220 +7,123 @@ argument-hint: <ionoscloud_type>, e.g. ionoscloud_ipblock
 
 # Add a list resource + resource identity
 
-Target: **$ARGUMENTS** (if empty, ask which `ionoscloud_*` type).
+Target: **$ARGUMENTS** (if empty, ask which `ionoscloud_*` type). Reproduces PR #1034
+(reference: `ionoscloud/resource_datacenter_list.go`).
 
-Reproduces PR #1034's work for `ionoscloud_datacenter` (reference:
-`ionoscloud/resource_datacenter_list.go`). A list resource with no identity, or a test that passes
-when the mapper is wrong, is not done — real #1034 findings.
-
-**Where the arc ends.** The run ends with the work **uncommitted in the working tree** — nothing
-staged, no branch, no commit, no push, no `gh` write. Report what changed (`git status --short` plus
-the verification results), then **ask the user what else, if anything, to do**. Name the
-candidates: commit, and with what subject; push the branch and open the PR; run rung 5
-(`go vet -tags=all ./...`) if you left it to CI; run the tagged acceptance test or a live
-`terraform query` check — both spend real IONOS credentials and create real cloud resources, never
-yours to start; carry on to another resource.
-
-Then wait. `git commit`, `git push`, `gh pr create` and replying to a review comment are writes the
-maintainer makes, or explicitly asks you to make — never a step you take because the checklist has
-one line left; `references/verify-and-pr.md` documents *how*, for when you are asked, and is not
-permission.
-
----
+**Where the arc ends.** The work stays **uncommitted**: no staging, branch, commit, push,
+`gh pr create` or review reply unless the user explicitly asks (`references/verify-and-pr.md` is
+*how*, not permission). Report every file you created or edited (`git status --short` where git
+is allowed) and the verification results, ask what next (commit, the PR, the tagged acceptance
+test or a live `terraform query` — never yours to start — another resource), then wait. **No user
+to answer** (a harnessed run): take your own recommendation at step 0.5; the decisions, their
+evidence and the question go in the report.
 
 ## Machine limits — read first
 
-12-core laptop in use while you work; a fan-out once hit load 55 (`references/why.md`).
-
-- **Do not fan out to subagents**, and never build in parallel or in the background.
-- **Never** `make testacc` or any `go test` with a build tag: `GNUmakefile:22-23` sets `TF_ACC=1` and
-  `-tags`, so those suites use real credentials and create live cloud resources.
-- **Avoid** `go build ./...`, `go test ./...`, `make test`: `TEST` is all 60 non-vendor packages at
-  `-parallel=4` — load, not cloud. An **untagged, package-scoped `go test` is always safe**; if it
-  drags, stop.
-
----
+**No subagents**, no parallel or background builds: a 12-core laptop in use. **Never**
+`make testacc` or a build-tagged `go test` (`TF_ACC=1`, live cloud). No `go build ./...`,
+`go test ./...`, `make test`; a package-scoped untagged `go test` is fine.
 
 ## Step 0 — Discovery, and six gates
 
-Everything downstream depends on one branch: **SDKv2 or framework-native?** Settle it and the gates
-below first; `scripts/probe.sh discover <ionoscloud_type> <Const> <suffix> <resource>` answers their
-seven numbered questions.
+`scripts/probe.sh discover <ionoscloud_type>` answers seven numbered questions.
 
-**Gate 1 — which branch, or none.** (2) not (3) → **SDKv2-backed**, the harder path. (3) from a
-`resource_*.go`, not (2) → **framework-native**: far less work, more methods on the *same* struct. Only `[Dd]ataSource` in (2), or `data_source_*.go`/`ephemeral_*.go` in (3) → **no
-managed resource**, nothing to list. Both → ask; neither → no such type.
+**Gate 1 — branch.** (2) found, (3) not → SDKv2-backed. (3) from a `resource_*.go`, (2) not →
+framework-native: more methods on the *same* struct. Only (2b), or only `data_source_*.go` /
+`ephemeral_*.go` in (3) → nothing to list. Both → ask; neither → no such type.
 
-**Gate 2 — a parentless collection GET?** `scripts/probe.sh listcalls` prints every one in the
-vendored SDKs. None for yours → **stop**.
+**Gate 2 — a parentless collection GET?** `scripts/probe.sh listcalls <type>`; none → stop.
 
-**Gate 3 — which of three client shapes (6)?** `.NewCloudAPIClient(ctx, location)` or
-`...WithFailover(ctx)` → the **Cloud API** (`sdk-go/v6`), templates as written. A plain **field**
-(`.DNSClient`, `.NFSClient`, …) → an **sdk-go-bundle product** whose client is already on the bundle
-(deltas: `sdkv2-branch.md` §2c). A **constructor taking a location** (`.NewMongoClient`) → a product
-built per location — decision 4's answer.
+**Gate 3 — client (6).** `.NewCloudAPIClient(ctx, location)` / `...WithFailover(ctx)` → Cloud API
+(`sdk-go/v6`), templates as written; a plain field (`.DNSClient`) → sdk-go-bundle product
+(`sdkv2-branch.md` §2c deltas); a constructor taking a location (`.NewMongoClient`) → decision 4.
 
-**Gate 4 — the state writer. (7) is a gate, not background reading.** Two questions, the second the
-one everybody skips: *can the mapper call this writer*, and *does it fill every **Required**
-attribute of the schema from the API object* — `-generate-config-out` yields usable blocks only when
-it does. Diff its `d.Set` calls against the schema's `Required: true` entries; a gap (a parent id, a
-write-only field) goes in the docs, and parent ids are set in the mapper (§2c).
+**Gate 4 — the state writer (7).** Found by **following Read**, never a name grep: any
+`func(d *schema.ResourceData, obj <sdk>.<X>) error`, whatever its name, receiver or package
+(`setDatacenterData`, `ionoscloud/resource_datacenter.go:357`; the by-value
+`SetZoneData(d, dns.ZoneRead)`). **Diff its `d.Set`s against the schema's `Required: true`
+entries** (`-generate-config-out` needs them all): a gap (a parent id, a write-only field) goes in
+the docs, parent ids into the mapper (§2c). It must need nothing but one collection element: one
+needing a `context.Context`, a client or more objects (`setBackupUnitData`, `setGroupData`) →
+stop and report; never hand-map.
 
-Find it by **following Read**, never by grepping for a name. **The name is not the contract, the
-signature is:** the mapper calls any writer shaped `func(d *schema.ResourceData, obj <sdk>.<X>)
-error` — spelling, receiver and package do not matter.
+**Gate 5 — a parent in the schema?** (`ionoscloud_dns_record`: `zone_id`, cross-zone
+`RecordsGet(ctx)`) → the child path (§1a, §2c): the identity carries it, the **mapper** sets it.
 
-- `setDatacenterData` (`ionoscloud/resource_datacenter.go:357`) — unexported, package-level, by
-  pointer.
-- `IpBlockSetData` (`ionoscloud/resource_ipblock.go:259`) — exported, package-level, called directly.
-- `SetZoneData` (`services/dns/zone.go:60`) — a **method** on the product's service client, by value:
-  `r.bundle.DNSClient.SetZoneData(data, zone)`. It also calls `d.SetId`, which not every writer does
-  — check: the identity setter reads the id back out.
+**Gate 6 — a bad candidate: stop.** A GET needing a parent ID (`DatacentersLansGet`) is an
+unbounded N+1; an association-only resource (`ionoscloud_ipfailover`) has no API object.
 
-`set<X>Data` is a placeholder, not a name to grep for. A writer needing a `context.Context`, an API
-client for further calls, or an object the collection GET does not return ends the job: stop and say
-so rather than hand-map attributes.
-
-**Gate 5 — does a schema attribute name a parent?** A parentless GET does not mean no parent:
-`ionoscloud_dns_record` passes gate 2 on a cross-zone `RecordsGet(ctx)`, yet `zone_id` belongs in its
-identity — the child-resource path (§1a, §2c), where the **mapper** sets the parent id because
-`SetRecordData` (`services/dns/record.go`) does not.
-
-**Gate 6 — a bad candidate?** A collection GET needing a parent ID (`DatacentersLansGet`,
-`K8sNodepoolsGet`) is an unbounded N+1 over every parent, with no precedent here; association-only
-resources (`ionoscloud_ipfailover`, `ionoscloud_datacenter_nsg_selection`) have no API object. Stop.
-
-**Only then open the branch reference** (`sdkv2-branch.md` or `framework-native-branch.md`) — long
-files, and the gates stop a doomed run first.
-
----
+Then open `references/sdkv2-branch.md` or `references/framework-native-branch.md`.
 
 ## Step 0.5 — Four decisions for the user, before any code
 
-Agreed up front, not discovered in review. Present them together, briefly, with your
-recommendation, then wait. Evidence: `references/decisions-evidence.md`.
+Present them together, each with your recommendation and its evidence, then wait.
 
-**1. Pagination.** Decide explicitly. Provider-wide there is exactly **one** offset/limit loop
-(`services/dbaas/pgsqlv2/cluster.go`; it stops on a short page because `Links.HasNext()` stays
-populated past the last page and spins forever), S3 uses continuation tokens, everything else is
-unpaginated. On #1034 the user **declined** pagination and documented the limitation instead: fixing
-only the list resource would leave it inconsistent with the identical unpaginated call in
-`ionoscloud/data_source_datacenter.go`. That precedent is reusable — but then **the docs must say
-so** (wording in `references/docs-and-changelog.md`), and Copilot will raise pagination on the PR.
+**1. Pagination.** `scripts/probe.sh limit-cloud <Op>` / `limit-bundle <Op>`: what the client
+sends unasked; no `Limit`/`Offset` on the request type → it does not page. `datasource-limit
+<resource>`: a higher `.Limit(n)` in the sibling data source → send the same. The one offset/limit
+loop is `services/dbaas/pgsqlv2/cluster.go` (stop on a short page: `Links.HasNext()` stays set).
+#1034 declined one, as `ionoscloud/data_source_datacenter.go` makes the same call unpaginated:
+fine, but **the docs must say so** (`docs-and-changelog.md` §2a).
 
-**2. Identity attributes** — the tuple the import ID parses into (`splitImportID`,
-`ionoscloud/utils.go`), never a mutable one such as `name`: Terraform fails refresh when an identity
-attribute changes. **3. Filter fields** — the `identity.FilterAttribute(...)` allow-list must be
-exactly the key set of the mapper's `identity.MatchesFilters(...)` map, or a filter silently matches
-nothing; two string attributes that really narrow.
+**2. Identity**: the import ID's tuple (`splitImportID`, `ionoscloud/utils.go`): `location` if the
+resource has one, then one string per parsed part, its own being `id`; never a mutable `name`.
 
-**4. Which client, regional or global.** Cloud API → always **global**: one
-`NewCloudAPIClientWithFailover(ctx)` call, as in `datacenterListResource.List` — those collections
-are not partitioned, and fanning out returns every item N times. A bundle product → the resource's
-own client; settle whether *this resource* is partitioned and its locations enumerable, else ask.
+**3. Filters**: `name`, plus the regional key as *the resource's own schema* spells it
+(`location`/`region`), else another string attribute (never a bool or list), the two matching
+different items; none narrows → none, say why; a one-value validator cannot narrow. The
+`FilterAttribute(...)` allow-list is exactly the mapper's `MatchesFilters(...)` key set, or a
+filter silently matches nothing. Matching is case-sensitive.
 
-*A known hole, not yours to fix.* `NewCloudAPIClientWithFailover` resolves its endpoint from
-**global** cloud overrides only (`FilterGlobalOverrides` keeps entries whose `location` is empty —
-`services/bundleclient/bundleclient.go:443`), so a file config overriding the cloud product per
-location with no global entry hard-errors `no global failover endpoints configured for "cloud"`,
-where the resource's own `NewCloudAPIClient(ctx, location)` is fine. `ionoscloud_datacenter` has the
-same hole: follow it anyway.
-
----
+**4. Client, regional or global.** Cloud API → one global `NewCloudAPIClientWithFailover(ctx)`
+call, as `datacenterListResource.List` (CRUD's per-location client picks an endpoint override,
+not a partition: a fan-out returns each item N times; its `FilterGlobalOverrides` hole is known,
+not yours). A bundle product → its own client: built per location (`.New<X>Client(ctx,
+location)`) → partitioned, else one call covers every location. Partitioned: `scripts/probe.sh
+locations <product>`; enumerable → fan out; **nothing enumerable → stop and ask** (one call =
+one location's objects, silently incomplete).
 
 ## The plan
 
-1 identity, 2 list resource + registration, 3 unit test + mutation check, 4 docs + CHANGELOG,
-5 ladder, 6 stop and ask. Step 1 gates step 2: without an `Identity` nothing can be listed, and the
-only trace is a `tflog.Error` line.
-
-The branch reference walks the files. On the SDKv2 branch they all sit in package `ionoscloud` beside
-the resource — forced by an import cycle (`references/why.md`), so framework code there is not a
-mistake — and the new `_list_test.go` (package `ionoscloud_test`) reuses the helpers in
-`ionoscloud/resource_datacenter_list_test.go`. `internal/framework/provider/provider.go` is **not**
-touched, nothing new belongs in `internal/framework/identity/`.
-
----
+Identity, list resource + registration, tests, docs + CHANGELOG, ladder, report. Nothing new in
+`internal/framework/identity/`; SDKv2 leaves `internal/framework/provider/provider.go` **untouched**.
 
 ## Verification ladder
 
-Cheapest first, one at a time; `scripts/probe.sh rung0` … `rung5-full` runs them,
-`references/why.md` says why.
-
-0. **`gofmt`** after every edit — never with an empty argument list (it reads stdin and passes).
-1. **Build the packages you touched** — main loop. SDKv2: `./ionoscloud/` covers registration too;
-   framework-native: also `./internal/framework/provider/` if the service package is new.
-
-**Rung 1 can fail for a reason only rung 4 fixes — the one permitted jump in the ladder.** The repo
-vendors its dependencies, so an import of a not-yet-vendored subpackage breaks *this* rung — a
-cannot-find-module / missing-package error naming that import path. Run rung 4, then re-run rung 1.
-2. **The untagged unit test** — main loop, no credentials, no network.
-2b. **`TestProvider$` (SDKv2)** — the **only** thing that validates your new `Identity`; rung 2
-   passes for a malformed one.
-3. **Lint your own lines** — keep `--new-from-rev` and the path argument.
-4. **Only if imports changed** — the vendor half even when tidy is clean; **report `vendor/`** (#1034).
-5. **Expensive, once, at the end — ask first**: the only rung that compiles your tagged
-   `Query: true` step. Offer `rung5-scoped`.
-
-**No test job runs on PRs** — rungs 2 and 2b are on you. The ladder tests the ListResource *RPC*,
-never `terraform query`: that needs `dev_overrides` and real credentials, **only on explicit
-request** (`docs-and-changelog.md` §2b).
-
----
+`scripts/probe.sh rung0` … `rung5-scoped`, in order, one at a time: 0 `gofmt` after every edit;
+1 build (SDKv2 `./ionoscloud/`; framework-native also `./internal/framework/provider/` for a new
+package; a not-yet-vendored import fails here: rung 4, then 1); 2 the untagged unit test; 2b
+`TestProvider$` (SDKv2), the **only** check of your `Identity`; 3 lint your own lines (keep
+`--new-from-rev` and the path); 4 only if imports changed: vendor even when tidy is clean, report
+`vendor/`; 5 `rung5-scoped`, once, last: the only compile of the tagged acceptance test. CI runs
+no test: 2 and 2b are yours. `terraform query` itself: **only on explicit request**.
 
 ## Definition of done
 
-- [ ] `Identity` on the managed resource, every attribute set on **every** read path
-- [ ] `d.SetId(...)` right after parsing the import parts (SDKv2); the legacy string import still
-      works unchanged
-- [ ] `git diff ionoscloud/resource_<resource>.go` read line by line: every `-` line is one the
-      identity forced. No `d.SetId` dropped as redundant, no re-worded comment, no drive-by tidy
-- [ ] List resource registered in a `ListResources()` — `ionoscloud/list_resources.go` (SDKv2), or
-      the `<service>` package's plus a `<service>.ListResources(),` provider line **only** when that
-      package is new
-- [ ] **No model, no attribute mapping of your own** (SDKv2): `map<X>` does the filter check and
-      nothing else — every result is `r.resourceSchema.Data(&terraform.InstanceState{})` →
-      `set<X>Data` → `set<X>Identity` → `identity.MappedItemFromResourceData`, in that order. No
-      `tfsdk`-tagged struct
-- [ ] Unit test asserts every mapped attribute and stub result, and null vs zero (an omitted nested
-      **block** decodes to `[]any{}`, not nil); **the mutation check ran and failed**
-- [ ] One filter subtest **per field** in the allow-list, plus an AND case; the stub asserts the
-      fetch's query params, absences included
-- [ ] A `Query: true` step on the tagged acceptance test — a **separate** `TestAcc<Resource>Query`
-      with its own fixture, never extra steps on the existing one (`verify-and-pr.md` §4); written,
-      **not run**; plus a non-ForceNew update step if Update writes the identity
-- [ ] `docs/list-resources/<resource>.md` + the pointer section on `docs/resources/<resource>.md`
-- [ ] CHANGELOG entry under the correct `## X.Y.Z` heading — decided by the **git tag, not the
-      heading**: append under the topmost heading while no `v<that version>` tag exists; once it is
-      tagged, open a new `## X.Y.Z+1` heading above it. The check and the #1034
-      counter-example: `references/docs-and-changelog.md` §4 — re-run it just before merge
-- [ ] Ladder rungs 0–5 clean, **2b included**
-- [ ] The pagination decision written where a reviewer will find it, with this endpoint's real
-      default limit — or, when the client sends none (the bundle norm) or it does not page, say so.
-      Never a number you did not read out of the vendored client
-- [ ] Left uncommitted: nothing staged, nothing committed, no `git commit`, `git push` or `gh`
-      write — unless the user asked for it in so many words
-- [ ] Reported what changed, then **asked what to do next** — the run ends on that question, not on
-      a silent stop or a step you chose yourself
+- [ ] `Identity` declared, every attribute set on **every** read path; the import `d.SetId`s right
+  after parsing; the legacy string import unchanged
+- [ ] The resource file's diff against its pre-edit content (`git diff`, or a copy taken first)
+  read line by line: every `-` line forced by the identity; no redundant `d.SetId` dropped, no
+  re-worded comment, no tidying
+- [ ] The list file's fetch and mapper read against the reference's (`sdkv2-branch.md` §2c): no
+  check dropped, `apiResponse` never `_`
+- [ ] Registered (`ionoscloud/list_resources.go`, or the service package's `ListResources()` plus
+  a provider line **only** for a new package); **no model, no mapping of your own** (SDKv2)
+- [ ] The tests `references/test-harness.md` lists; **the mutation check ran and failed**; the
+  acceptance test written, **not run**
+- [ ] The list page, the resource page's pointer section, the CHANGELOG (the **git tag** decides)
+- [ ] Rungs 0–5 clean, **2b included**
+- [ ] The pagination bound in the docs note and the fetch comment, read from the vendored client
+- [ ] **Every comment and docs sentence states only what the code beside it does or checks, or
+  what the vendored SDK or the resource's docs say**: no "every", "all" or "the whole contract"
+  the code does not enforce, no reason it does not bear out, no unsourced product behaviour, no
+  wording from this skill
+- [ ] Uncommitted, no push or `gh` write, unless asked in so many words; reported, then asked
 
 ## Where to look things up
 
-Paths are relative to this skill's directory. **Run the scripts, do not read them** — run one bare
-for its subcommands and arguments; every check ends in a verdict line saying what "no match" means.
-(`scripts/_lib.sh` is shared code, sourced by the rest, never run on its own.)
-
-- `scripts/probe.sh` — step 0 (`discover`, `listcalls`), step 0.5 limits and locations, the ladder
-  (`rung0` … `rung5-full`).
-- `scripts/sdkv2.sh` — steps 1–2 on the SDKv2 branch: `identities`, `depth`, `writer`.
-- `scripts/docs.sh` — step 4; `changelog-heading` is the tag authority.
-- `scripts/test.sh` — step 3: which shared test helpers exist and where.
-- `scripts/review.sh` — `test-unit`, `queries` during the run; `pr-create`, `review`,
-  `threads`, `reply` only once the user asks.
-
-- `references/decisions-evidence.md` — step 0.5, while the four decisions are open.
-- `references/sdkv2-branch.md` — SDKv2 branch, after the gates. **The traps live here.**
-- `references/framework-native-branch.md` — the other branch.
-- `references/test-harness.md` — step 3: fixture, stub, subtests, mutation check.
-- `references/docs-and-changelog.md` — step 4: the two doc pages, the CHANGELOG heading rule.
-- `references/verify-and-pr.md` — PR and review replies; on request only.
-- `references/why.md` — the rationale and the dead ends; not opened on a normal run.
+Paths are relative to this skill's directory. **Run the scripts, never read them**: bare, each
+prints its subcommands; each check ends in a VERDICT line. `review.sh` beyond `test-unit` and
+`queries` only once the user asks. References, in order: `sdkv2-branch.md` (**the traps live
+here**) or `framework-native-branch.md`; `test-harness.md`; `docs-and-changelog.md`;
+`verify-and-pr.md` only for a commit, PR or review.

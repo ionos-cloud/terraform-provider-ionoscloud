@@ -1,79 +1,51 @@
 # Test harness
 
-`ionoscloud/resource_datacenter_list_test.go` (`ionoscloud_test`) drives the real `ListResource`
-RPC against a stubbed API, through the mux `main.go:30-47` serves. Why, and what the assertions
-catch: `references/why.md`. Yours lives in `ionoscloud/resource_<resource>_list_test.go`, same
-external package, **no `//go:build` tag** (no `TF_ACC` or credentials; stays in lint scope).
-`set<X>Data` = the resource's own state writer (`sdkv2-branch.md` §2d). Everything here is
-branch-agnostic except the `ListResourceSchemas`/`GetResourceIdentitySchemas` assertions, which
-prove `RawV6Schemas` and so are SDKv2-only.
+Model: `ionoscloud/resource_datacenter_list_test.go`. Yours:
+`ionoscloud/resource_<resource>_list_test.go`, package `ionoscloud_test`, **no `//go:build` tag**;
+only its `ListResourceSchemas`/`GetResourceIdentitySchemas` assertions are SDKv2-specific.
 
-## Fixture
+## Fixture and helpers
 
-`TestDatacenterListResource:36-73`, up to `resourceType`, is identical in every list test. Take
-that block, change only the names, and take nothing else from that file: its assertions are
-datacenter-specific and its stub is the wrong model. Keep all five of its `t.Fatalf` guards — the
-two RPC-error ones (`:46`, `:61`) and the three that name the failure: list resource not registered
-(`:53`), managed resource missing from the merged schema (`:56`), no identity declared (`:67`).
-The `t.Setenv`s must precede the server, or `~/.ionos/config` overrides the stub URL;
-`const <resource>ListType` is package-level.
+`TestDatacenterListResource:36-73`, up to `resourceType`, is the fixture: copy it, renaming only,
+its five `t.Fatalf` guards included; nothing else from that test. The `t.Setenv`s precede the
+server, or `~/.ionos/config` wins. `const <resource>ListType` is package-level.
 
-## The shared helpers exist — write none of them
+**Shared helpers exist — write none**: `scripts/test.sh` prints them, their file and the driver's
+signature. `decode`/`goValue` give numbers as `int64`, never `float64`; `hasErrorDiagnostic` is the
+bool, `failOnErrorDiagnostics` the fatal.
 
-`scripts/test.sh` says which and where — on the SDKv2 branch, all of them in
-`resource_datacenter_list_test.go`; re-declaring one is a compile error. You add the const,
-the test, `stub<Resource>API` and its subtests.
-
-| Helpers | For |
-|---|---|
-| `muxedProviderServer`, `configureProvider` | the server, configured from env |
-| `decode`, `goValue`, `readValue` | `DynamicValue`/`tftypes.Value` → Go |
-| `identityType`, `nullObject`, `dynamicValue` | building the RPCs' input values |
-| `failOnErrorDiagnostics`, `hasErrorDiagnostic` | fatal on a diagnostic; bool, last subtest |
-| `listServerAndConfig`, `listConfig` | the list server and its `filters` config |
-| the list driver | `listDatacenters` on master, generic once parameterised — see below |
-
-- **Rename the stub.** `stubCloudAPI` is pinned to `/datacenters` (`:212`); reusing it is the
-  collision that does not announce itself: it compiles, then 404s every request.
-- **Parameterise the driver, never fork it.** On master it is
-  `listDatacenters(ctx, t, server, schema, filters)` (`:245`) and it hardcodes
-  `datacenterListType`. Add a `typeName` parameter in place, give it a generic name, and fix
-  its call sites — the next list test reuses it. If a generic driver already exists (someone
-  got there first), just call it. **Run `scripts/test.sh` and trust what it prints over any
-  name quoted here**: this is the line most likely to be stale.
-- Keep the two explained `//nolint`s (`:259`, `:277`) if you touch them.
-- `goValue` decodes numbers as `int64`; it has no `Map`/`Tuple` case (`why.md`).
+- **Your own stub**: `stubCloudAPI` is pinned to `/datacenters`; reused, it 404s every request.
+- **The driver: call it, never fork it.** Already `listResults(ctx, t, server, typeName, schema,
+  filters, includeResource)`? Call it. Else parameterise master's `listDatacenters` in place:
+  rename it `listResults`, add `typeName` and `includeResource bool` (the nil-Resource `t.Fatalf`
+  only when true), fix the datacenter call sites, keep its explained `//nolint`s.
 
 ## The stub
 
-`stubCloudAPI:176-226` is the skeleton: a `strings.HasSuffix` match (the SDK prefixes
-`/cloudapi/v6`), all else 404 **on purpose**. Three differences.
+`stubCloudAPI` (`:176-226`) is the skeleton: a `strings.HasSuffix` match, all else 404 on purpose.
 
-- **Items.** Result 1: everything the writer reads. Result 2: only what the API always returns,
-  `name` still set even when Optional (the display-name and filter assertions need it) and a
-  *different* optional one omitted. Result 3 **only when `name` is Optional**: `Name` unset, for
-  the `displayName` fallback. Match the count assertion.
-- **A bundle stub must fill every non-omitempty enum field on every item, minimal one included** —
-  enums validate while unmarshalling, so a zero value fails the *fetch*, naming neither field nor
-  item. Check too that `IONOS_API_URL` reaches that client (`why.md`).
-- **Assert the query the fetch closure builds**; the reference asserts none, the one thing not to
-  copy. One per explicit option —
-  `if got := r.URL.Query().Get("depth"); got != "1" { t.Errorf(...) }` — a limit as a literal, not
-  `constant.<X>Limit`. If it sets **nothing** deliberately, assert the absence: loop `depth`,
-  `limit`, `offset`, `<filter-param>`, `t.Errorf`ing on any set.
+- **Items.** Result 1: every field the writer reads, lists and blocks included. Result 2:
+  **minimal** — the id, `name`, required attributes and SDK-validated enums, nothing else. Result
+  3 **only for an Optional `name`**: `Name` unset.
+- **Bundle stubs fill every non-omitempty enum** on every item, commented: the SDK validates enums
+  while unmarshalling, and a missing one fails the *fetch*, naming neither field nor item. Check
+  that `IONOS_API_URL` reaches the client (`utils/loadedconfig` defers `ChangeConfigURL` over it).
+- **Assert the query the fetch sends**, each value a literal (`"1000"`, not `constant.<X>Limit`):
+  the Cloud API client always sends `depth`, `offset` and `limit` (`0`, `0`, `100` unless set), so
+  assert all three; a bundle client sends only what is set: assert every other parameter it knows
+  is absent (`r.URL.Query().Has`). The stub's comment names exactly what it checks.
 
 ## The subtests
 
 ```go
 	t.Run("streams every <resource>", func(t *testing.T) {
-		results := <driver>(ctx, t, server, <resource>ListType, listSchema, nil)
-		// N = the number of stub items: 2, or 3 when the optional-name result 3 exists
-		if len(results) != N {
+		results := listResults(ctx, t, server, <resource>ListType, listSchema, nil, true)
+		if len(results) != N { // N = stub items
 			t.Fatalf("expected N results, got %d", len(results))
 		}
 		assert.Equal(t, "<display-name-1>", results[0].DisplayName)
 		identity := decode(t, results[0].Identity.IdentityData, identityType(identitySchema))
-		assert.Equal(t, "<id-1>", identity["id"])   // one per identity attribute
+		assert.Equal(t, "<id-1>", identity["id"]) // every identity attribute, on every result
 
 		resource := decode(t, results[0].Resource, resourceType)    // EVERY attribute the writer
 		assert.Equal(t, "<id-1>", resource["id"])                   // fills: a wrong key must fail
@@ -81,53 +53,67 @@ the test, `stub<Resource>API` and its subtests.
 		assert.Equal(t, []any{map[string]any{ /* … */ }}, resource["<block>"]) // form: :98-104
 		assert.Nil(t, resource["timeouts"], "a listed <resource> has no timeouts")
 
-		assert.Equal(t, "<display-name-2>", results[1].DisplayName) // result 2: pairing holds
-		second := decode(t, results[1].Resource, resourceType)
-		assert.Equal(t, "<id-2>", second["id"])
-		assert.Nil(t, second["<optional-attribute>"])  // per omitted optional ATTRIBUTE — check
-		// the WRITER: an omitted nested BLOCK reifies null→empty, and a list attribute d.Set() with
-		// a nil slice materialises empty (SetZoneData does that with `nameservers`).
+		second := decode(t, results[1].Resource, resourceType) // result 2: DisplayName, identity,
+		assert.Nil(t, second["<optional-attribute>"])           // required values, and each
+		assert.Equal(t, []any{}, second["<block-or-list>"])     // omitted one as sdkv2 §2d says
 
-		// Only when `name` is Optional, and why N is 3 then — the displayName fallback:
-		assert.Equal(t, "<id-3>", results[2].DisplayName)
+		assert.Equal(t, "<id-3>", results[2].DisplayName) // Optional name: the fallback
 		assert.Nil(t, decode(t, results[2].Resource, resourceType)["name"])
 	})
 ```
 
-Per `:128-148`: **one subtest per field in the `FilterAttribute(...)` allow-list** (an untested
-field silently matches nothing, forever); **`applies every filter`**, two fields matching
-*different* items, expecting 0; and **`rejects unknown filter fields`**, which also fails if
-`FilterAttribute()` has no allow-list.
+Then, as `:128-148`: a subtest per `FilterAttribute(...)` field (Optional `name`: one matching the
+unnamed item and another, in order); `applies every filter`, two fields matching *different*
+items, expecting 0; `identity only` (`includeResource` false: identity and DisplayName set,
+`Resource` nil); `rejects unknown filter fields`, over `"nope"` and each attribute kept out of the
+allow-list on purpose (its reason a comment on `FilterAttribute`); `accepts every allowed filter
+field`, the same validation, error-free for each allowed one.
 
-`go test ./ionoscloud/ -run Test<Resource>ListResource -count=1`; CI will not
-(`verify-and-pr.md` §1).
+## The mutation check — mandatory
 
-## The mutation check — mandatory, not advice
+Mutate the state writer, **not your file** (`ionoscloud/resource_<x>.go`, or
+`services/<product>/<x>.go`); **revert by hand**, never `git checkout --` (it may hold your
+identity).
 
-**Prove the assertions are load-bearing before claiming coverage.** Mutate the state writer — **a
-different file from the one you just wrote** (step 0's grep (7)): `ionoscloud/resource_<x>.go`, or
-`services/<product>/<x>.go` on the bundle branch (`SetZoneData`: `services/dns/zone.go:60`).
+- Swap the **key strings** of two adjacent `d.Set` calls or map entries of one Go type, values
+  and nil guards left in place (datacenter: `max_cores` ↔ `max_ram`), one pair per type, one in a
+  nested block if any; no pair: change that field's value in the stub.
+- The identity setter: swap its two values, or write `d.Id()+"x"` for a lone `id`.
+- The list file: drop `.Depth(1)` and any `.Limit(...)` (none sent? add one, or a server-side
+  filter to a bundle helper); swap the two `MatchesFilters` values; swap the writer and setter
+  calls; delete the `displayName` fallback; drop a field from `FilterAttribute(...)`.
 
-> **Revert every mutation by hand.** `git checkout --` discards the whole identity implementation
-> on the Cloud API branch; on the bundle branch that file is shared with the managed resource and
-> its data source.
+Each: mutate → run → it **must fail** → revert → green. A pass means an assertion is missing: add
+it. Claim the check done only if you saw each one fail.
 
-Swap **two adjacent fields or map keys of the same Go type** (so the compiler cannot stand in for
-the assertion), one pair **per type the writer sets**, preferring one in a nested block:
-datacenter's `max_cores` ↔ `max_ram` (`ionoscloud/resource_datacenter.go:416-420`, both `*int32`).
-No adjacent pair? Change that field's value in the stub. Mutate `set<X>Identity` too: swap its
-two values if it sets two (`setDatacenterIdentity` sets `id` and `location`,
-`ionoscloud/resource_datacenter.go:340-353`). **A single-attribute identity has no pair — do not
-skip it:** make the setter write something other than `d.Id()`, e.g. `identity.Set("id", d.Id()+"x")`.
-If the test still passes, nothing is asserting the identity and the coverage claim is false.
+## The acceptance query step
 
-Each: mutate → run → it **MUST** fail, naming both attributes → revert by hand → confirm green. A
-**pass** means the assertion set is incomplete; add the missing assertion first, and the same to a
-field only result 2 leaves unset.
+`TestAcc<Resource>Query`, in the resource's existing acceptance-test file, keeping its `//go:build`
+line. **Write it, never run it**; rung 5 compiles it. Model: `TestAccDataCenterQuery`
+(`ionoscloud/resource_datacenter_test.go:133-212`): its `TestCase` fields, `ExpectIdentity` check,
+`filters` blocks and identity-import step (and why no `ImportStateVerify`), but your own fixture:
 
-**Four more, in the list resource file:** delete `.Depth(1)` and any `.Limit(...)` from the fetch
-closure (sets none deliberately? invert it: *add* one); swap the `MatchesFilters` map's two values,
-which only the per-field subtests catch; swap the `set<X>Data` and `set<X>Identity` calls; and, for
-optional-`name`, delete the `if displayName == ""` fallback.
+```go
+	const (
+		<resource>Name = "tf-test-<resource>-query"
+		<resource>Addr = constant.<Const> + ".test_<resource>_query"
+		otherLocation  = "de/txl" // the zero-result filter value: set by NO step
+	)
 
-Report the mutation check as done only if you ran it and saw it fail.
+	// Own name, own label, own create step — NOT testAccCheck<Resource>ConfigBasic:
+	// ExpectLength asserts a CONTRACT-WIDE total, so a same-named resource made by
+	// another test in the package makes ExpectLength(1) flap.  (copy this comment in)
+
+	// Steps: create; Query: true + no filters → ExpectIdentity; Query: true + filters matching
+	// exactly one → ExpectLength 1; Query: true + same name, otherLocation → ExpectLength 0;
+	// only if Update does not end in Read (sdkv2-branch.md 1c), a non-ForceNew change with
+	//   ConfigPlanChecks: resource.ConfigPlanChecks{PreApply: []plancheck.PlanCheck{
+	//     plancheck.ExpectResourceAction(<resource>Addr, plancheck.ResourceActionUpdate)}},
+	//   Check: resource.TestCheckResourceAttr(<resource>Addr, "<attribute>", <updated value>),
+	// then the ImportBlockWithResourceIdentity import.
+```
+
+- **`ProtoV6ProviderFactories`, not `ProviderFactories`**, which cannot see the list resource.
+- **`Query: true` on every list step**, or its `QueryResultChecks` silently never run.
+- **Keep the zero-result step**: it alone proves the filter is not a no-op. Locationless: another
+  filtered field, its value a const of its own.
