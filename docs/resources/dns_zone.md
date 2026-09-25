@@ -42,7 +42,7 @@ resource "ionoscloud_dns_zone" "example" {
 The resource can be imported using the `zone_id`, for example:
 
 ```shell
-terraform import ionoscloud_dns_zone.examplezone_id
+terraform import ionoscloud_dns_zone.example zone_id
 ```
 
 In Terraform v1.12.0 and later, the [`import` block](https://developer.hashicorp.com/terraform/language/import) can also be used with the `identity` attribute:

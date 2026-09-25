@@ -43,7 +43,7 @@ resource "ionoscloud_ipblock" "example" {
 Resource Ipblock can be imported using the `resource id`, e.g.
 
 ```shell
-terraform import ionoscloud_ipblock.myipblock ipblock uuid
+terraform import ionoscloud_ipblock.myipblock ipblock_uuid
 ```
 
 In Terraform v1.12.0 and later, the [`import` block](https://developer.hashicorp.com/terraform/language/import) can also be used with the `identity` attribute:
