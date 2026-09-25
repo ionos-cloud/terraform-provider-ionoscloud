@@ -449,7 +449,7 @@ data "ionoscloud_template" ` + constant.ServerTestResource + ` {
 
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "server-test"
-	location = "de/fra"
+	location = "de/txl"
 }
 
 resource "ionoscloud_ipblock" "webserver_ipblock" {
@@ -578,7 +578,7 @@ data "ionoscloud_template" ` + constant.ServerTestResource + ` {
 
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "server-test"
-	location   = "de/fra"
+	location   = "de/txl"
 }
 resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
@@ -619,7 +619,7 @@ data "ionoscloud_template" ` + constant.ServerTestResource + ` {
 
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
   name        = "test_server"
-  location    = "de/fra"
+  location    = "de/txl"
   description = "Test datacenter done by TF"
 }
 resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
@@ -662,7 +662,7 @@ data "ionoscloud_template" ` + constant.ServerTestResource + ` {
 
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "volume-test"
-	location   = "de/fra"
+	location   = "de/txl"
 }
 resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
@@ -720,7 +720,7 @@ data "ionoscloud_template" ` + constant.ServerTestResource + ` {
 
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "server-test"
-	location = "de/fra"
+	location = "de/txl"
 }
 resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
@@ -763,7 +763,7 @@ data "ionoscloud_template" ` + constant.ServerTestResource + ` {
 
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "server-test"
-	location = "de/fra"
+	location = "de/txl"
 }
 resource ` + constant.LanResource + ` ` + constant.LanTestResource + ` {
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
