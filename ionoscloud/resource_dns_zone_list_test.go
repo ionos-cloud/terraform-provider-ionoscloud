@@ -16,19 +16,11 @@ import (
 const dnsZoneListType = "ionoscloud_dns_zone"
 
 // TestDNSZoneListResource drives the ListResource RPC end to end against a stubbed
-// Cloud DNS API, through the same muxed provider server that main.go serves.
-//
-// It covers the parts of a list resource for an SDKv2 managed resource that can only
-// fail at runtime: that the mux is happy with the list resource and the managed
-// resource coming from different servers, that the framework registers a list resource
-// with no framework resource behind it, that the protocol schemas handed over by
-// RawV6Schemas convert cleanly, and that the state the resource's own writer produces
-// survives the round trip through ResourceData.TfTypeResourceState into the list result,
-// including the timeouts block identity.MappedItemFromResourceData nulls back out.
+// DNS API, through the same muxed provider server that main.go serves.
 func TestDNSZoneListResource(t *testing.T) {
 	ctx := context.Background()
 
-	t.Setenv("IONOS_API_URL", stubDNSZoneAPI(t))
+	t.Setenv("IONOS_API_URL", stubDNSZonesAPI(t))
 	t.Setenv("IONOS_TOKEN", "token-for-the-stub")
 
 	server := muxedProviderServer(ctx, t)
@@ -42,10 +34,10 @@ func TestDNSZoneListResource(t *testing.T) {
 	// The framework only registers a list resource that has no framework resource
 	// behind it once RawV6Schemas has supplied both protocol schemas.
 	if _, ok := providerSchema.ListResourceSchemas[dnsZoneListType]; !ok {
-		t.Fatalf("the dns zone list resource was not registered; check RawV6Schemas and the SDKv2 resource identity")
+		t.Fatalf("the DNS Zone list resource was not registered; check RawV6Schemas and the SDKv2 resource identity")
 	}
 	if _, ok := providerSchema.ResourceSchemas[dnsZoneListType]; !ok {
-		t.Fatalf("the dns zone managed resource is missing from the merged schema")
+		t.Fatalf("the DNS Zone managed resource is missing from the merged schema")
 	}
 
 	identitySchemas, err := server.GetResourceIdentitySchemas(ctx, &tfprotov6.GetResourceIdentitySchemasRequest{})
@@ -56,7 +48,7 @@ func TestDNSZoneListResource(t *testing.T) {
 
 	identitySchema := identitySchemas.IdentitySchemas[dnsZoneListType]
 	if identitySchema == nil {
-		t.Fatalf("the SDKv2 dns zone resource does not declare a resource identity")
+		t.Fatalf("the SDKv2 DNS Zone resource does not declare a resource identity")
 	}
 
 	configureProvider(ctx, t, server, providerSchema.Provider)
@@ -64,8 +56,8 @@ func TestDNSZoneListResource(t *testing.T) {
 	listSchema := providerSchema.ListResourceSchemas[dnsZoneListType]
 	resourceType := providerSchema.ResourceSchemas[dnsZoneListType].ValueType()
 
-	t.Run("streams every dns zone", func(t *testing.T) {
-		results := listResults(ctx, t, server, dnsZoneListType, listSchema, nil)
+	t.Run("streams every DNS Zone", func(t *testing.T) {
+		results := listResults(ctx, t, server, dnsZoneListType, listSchema, nil, true)
 		if len(results) != 2 {
 			t.Fatalf("expected 2 results, got %d", len(results))
 		}
@@ -73,91 +65,129 @@ func TestDNSZoneListResource(t *testing.T) {
 		assert.Equal(t, "example.com", results[0].DisplayName)
 
 		identity := decode(t, results[0].Identity.IdentityData, identityType(identitySchema))
-		assert.Equal(t, "d3b07384-d9a0-4d1e-8f2a-000000000001", identity["id"])
+		assert.Equal(t, "9b2f4c1e-6a3d-4e8b-9c7f-000000000001", identity["id"])
 
-		// Every attribute the mapper fills is asserted here, so that mapping a value
+		// Every attribute the writer fills is asserted here, so that mapping a value
 		// to the wrong attribute fails the test.
 		resource := decode(t, results[0].Resource, resourceType)
-		assert.Equal(t, "d3b07384-d9a0-4d1e-8f2a-000000000001", resource["id"])
+		assert.Equal(t, "9b2f4c1e-6a3d-4e8b-9c7f-000000000001", resource["id"])
 		assert.Equal(t, "example.com", resource["name"])
 		assert.Equal(t, "the production zone", resource["description"])
-		assert.Equal(t, true, resource["enabled"])
+		assert.Equal(t, false, resource["enabled"])
 		assert.Equal(t, []any{"ns-ic.ui-dns.com", "ns-ic.ui-dns.de"}, resource["nameservers"])
-		assert.Nil(t, resource["timeouts"], "a listed dns zone has no timeouts")
+		assert.Nil(t, resource["timeouts"], "a listed DNS Zone has no timeouts")
 
-		// The second zone reports only the properties the API always sets, which pins
-		// that the pairing holds past the first result and that the properties the API
-		// left out do not turn into values of the first zone's.
-		assert.Equal(t, "staging.example.com", results[1].DisplayName)
+		// The second DNS Zone carries only its id, name and state, which pins that the
+		// pairing holds past the first result and that what the API left out stays
+		// null, or an empty list, instead of a zero value.
+		assert.Equal(t, "example.org", results[1].DisplayName)
 
-		stagingIdentity := decode(t, results[1].Identity.IdentityData, identityType(identitySchema))
-		assert.Equal(t, "d3b07384-d9a0-4d1e-8f2a-000000000002", stagingIdentity["id"])
+		secondIdentity := decode(t, results[1].Identity.IdentityData, identityType(identitySchema))
+		assert.Equal(t, "9b2f4c1e-6a3d-4e8b-9c7f-000000000002", secondIdentity["id"])
 
-		staging := decode(t, results[1].Resource, resourceType)
-		assert.Equal(t, "d3b07384-d9a0-4d1e-8f2a-000000000002", staging["id"])
-		assert.Equal(t, "staging.example.com", staging["name"])
-		assert.Equal(t, "the staging zone", staging["description"])
-		assert.Nil(t, staging["enabled"])
-		// SetZoneData always sets nameservers, so a zone the API returns none for ends
-		// up with an empty list rather than a null one.
-		assert.Equal(t, []any{}, staging["nameservers"])
+		second := decode(t, results[1].Resource, resourceType)
+		assert.Equal(t, "9b2f4c1e-6a3d-4e8b-9c7f-000000000002", second["id"])
+		assert.Equal(t, "example.org", second["name"])
+		assert.Nil(t, second["description"])
+		assert.Nil(t, second["enabled"])
+		assert.Equal(t, []any{}, second["nameservers"])
 	})
 
 	t.Run("filters by name", func(t *testing.T) {
-		results := listResults(ctx, t, server, dnsZoneListType, listSchema, map[string]string{"name": "example.com"})
+		results := listResults(ctx, t, server, dnsZoneListType, listSchema, map[string]string{"name": "example.org"}, true)
+		if len(results) != 1 {
+			t.Fatalf("expected 1 result, got %d", len(results))
+		}
+		assert.Equal(t, "example.org", results[0].DisplayName)
+	})
+
+	t.Run("filters by description", func(t *testing.T) {
+		results := listResults(ctx, t, server, dnsZoneListType, listSchema, map[string]string{"description": "the production zone"}, true)
 		if len(results) != 1 {
 			t.Fatalf("expected 1 result, got %d", len(results))
 		}
 		assert.Equal(t, "example.com", results[0].DisplayName)
-	})
 
-	t.Run("filters by description", func(t *testing.T) {
-		results := listResults(ctx, t, server, dnsZoneListType, listSchema, map[string]string{"description": "the staging zone"})
-		if len(results) != 1 {
-			t.Fatalf("expected 1 result, got %d", len(results))
+		// A DNS Zone without a description is matched by an empty field_value.
+		undescribed := listResults(ctx, t, server, dnsZoneListType, listSchema, map[string]string{"description": ""}, true)
+		if len(undescribed) != 1 {
+			t.Fatalf("expected 1 result, got %d", len(undescribed))
 		}
-		assert.Equal(t, "staging.example.com", results[0].DisplayName)
+		assert.Equal(t, "example.org", undescribed[0].DisplayName)
 	})
 
 	t.Run("applies every filter", func(t *testing.T) {
-		results := listResults(ctx, t, server, dnsZoneListType, listSchema, map[string]string{
-			"name":        "example.com",
-			"description": "the staging zone",
-		})
+		// The description belongs to example.com, so no DNS Zone matches both filters.
+		results := listResults(ctx, t, server, dnsZoneListType, listSchema, map[string]string{"name": "example.org", "description": "the production zone"}, true)
 		if len(results) != 0 {
-			t.Fatalf("expected no result for a name and a description that belong to different zones, got %d", len(results))
+			t.Fatalf("expected no results, got %d", len(results))
+		}
+	})
+
+	t.Run("identity only", func(t *testing.T) {
+		results := listResults(ctx, t, server, dnsZoneListType, listSchema, nil, false)
+		if len(results) != 2 {
+			t.Fatalf("expected 2 results, got %d", len(results))
+		}
+
+		assert.Equal(t, "example.com", results[0].DisplayName)
+
+		identity := decode(t, results[0].Identity.IdentityData, identityType(identitySchema))
+		assert.Equal(t, "9b2f4c1e-6a3d-4e8b-9c7f-000000000001", identity["id"])
+
+		for _, result := range results {
+			assert.Nil(t, result.Resource, "IncludeResource was not set, so no result carries a resource")
 		}
 	})
 
 	t.Run("rejects unknown filter fields", func(t *testing.T) {
-		listServer, config := listServerAndConfig(t, server, listSchema, map[string]string{"nope": "value"})
+		// enabled and nameservers are kept out of the allow-list, see
+		// ListResourceConfigSchema.
+		for _, field := range []string{"nope", "enabled", "nameservers"} {
+			listServer, config := listServerAndConfig(t, server, listSchema, map[string]string{field: "value"})
 
-		resp, err := listServer.ValidateListResourceConfig(ctx, &tfprotov6.ValidateListResourceConfigRequest{
-			TypeName: dnsZoneListType,
-			Config:   &config,
-		})
-		if err != nil {
-			t.Fatalf("ValidateListResourceConfig: %v", err)
+			resp, err := listServer.ValidateListResourceConfig(ctx, &tfprotov6.ValidateListResourceConfigRequest{
+				TypeName: dnsZoneListType,
+				Config:   &config,
+			})
+			if err != nil {
+				t.Fatalf("ValidateListResourceConfig: %v", err)
+			}
+			if !hasErrorDiagnostic(resp.Diagnostics) {
+				t.Fatalf("expected a validation error for the filter field %q", field)
+			}
 		}
-		if !hasErrorDiagnostic(resp.Diagnostics) {
-			t.Fatalf("expected a validation error for an unknown filter field")
+	})
+
+	t.Run("accepts every allowed filter field", func(t *testing.T) {
+		for _, field := range []string{"name", "description"} {
+			listServer, config := listServerAndConfig(t, server, listSchema, map[string]string{field: "value"})
+
+			resp, err := listServer.ValidateListResourceConfig(ctx, &tfprotov6.ValidateListResourceConfigRequest{
+				TypeName: dnsZoneListType,
+				Config:   &config,
+			})
+			if err != nil {
+				t.Fatalf("ValidateListResourceConfig: %v", err)
+			}
+			failOnErrorDiagnostics(t, "ValidateListResourceConfig", resp.Diagnostics)
 		}
 	})
 }
 
-// stubDNSZoneAPI serves the zone collection the list resource reads, asserts the query
-// the fetch closure builds, and returns the URL to point IONOS_API_URL at.
-func stubDNSZoneAPI(t *testing.T) string {
+// stubDNSZonesAPI serves the DNS Zone collection the list resource reads, and returns
+// the URL to point IONOS_API_URL at. A request for that collection must carry none
+// of the query parameters ZonesGet knows - filter.state, filter.zoneName, offset and
+// limit; any other path gets a 404.
+func stubDNSZonesAPI(t *testing.T) string {
 	t.Helper()
 
+	// Every item sets Metadata.State: the SDK validates that enum while unmarshalling,
+	// and an empty one fails the whole fetch.
 	zones := dns.ZoneReadList{
 		Items: []dns.ZoneRead{
 			{
-				Id:   "d3b07384-d9a0-4d1e-8f2a-000000000001",
-				Type: "zone",
-				Href: "/zones/d3b07384-d9a0-4d1e-8f2a-000000000001",
-				// State is an enum the SDK validates while unmarshalling, so every item
-				// has to carry one or the fetch itself fails.
+				Id: "9b2f4c1e-6a3d-4e8b-9c7f-000000000001",
 				Metadata: dns.MetadataWithStateNameservers{
 					State:       dns.PROVISIONINGSTATE_AVAILABLE,
 					Nameservers: []string{"ns-ic.ui-dns.com", "ns-ic.ui-dns.de"},
@@ -165,19 +195,16 @@ func stubDNSZoneAPI(t *testing.T) string {
 				Properties: dns.Zone{
 					ZoneName:    "example.com",
 					Description: new("the production zone"),
-					Enabled:     new(true),
+					Enabled:     new(false),
 				},
 			},
 			{
-				Id:   "d3b07384-d9a0-4d1e-8f2a-000000000002",
-				Type: "zone",
-				Href: "/zones/d3b07384-d9a0-4d1e-8f2a-000000000002",
+				Id: "9b2f4c1e-6a3d-4e8b-9c7f-000000000002",
 				Metadata: dns.MetadataWithStateNameservers{
 					State: dns.PROVISIONINGSTATE_AVAILABLE,
 				},
 				Properties: dns.Zone{
-					ZoneName:    "staging.example.com",
-					Description: new("the staging zone"),
+					ZoneName: "example.org",
 				},
 			},
 		},
@@ -188,12 +215,9 @@ func stubDNSZoneAPI(t *testing.T) string {
 			http.NotFound(w, r)
 			return
 		}
-		// The fetch closure sets no option at all: the collection takes no depth, the
-		// provider sends no limit or offset, and the name filter is applied in the
-		// mapper rather than pushed down to filter.zoneName.
-		for _, param := range []string{"depth", "limit", "offset", "filter.zoneName"} {
-			if got := r.URL.Query().Get(param); got != "" {
-				t.Errorf("expected the dns zone listing to send no %s, got %q", param, got)
+		for _, param := range []string{"filter.state", "filter.zoneName", "offset", "limit"} {
+			if r.URL.Query().Has(param) {
+				t.Errorf("expected no %s on the DNS Zone list request, got %q", param, r.URL.Query().Get(param))
 			}
 		}
 		w.Header().Set("Content-Type", "application/json")

@@ -19,16 +19,15 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
-// A list resource for ionoscloud_ipblock, whose managed resource is still implemented
-// with terraform-plugin-sdk/v2 and therefore lives on the other half of the mux. The
-// protocol schemas the framework needs come from that resource via
+// A list resource for ionoscloud_ipblock, whose managed resource is still
+// implemented with terraform-plugin-sdk/v2 and therefore lives on the other half of
+// the mux. The protocol schemas the framework needs come from that resource via
 // identity.SetRawV6Schemas.
 //
 // It lives in this package, next to the resource it lists, so it can call
-// resourceIPBlock, IpBlockSetData and setIPBlockIdentity directly. That is the whole
-// design: results are produced by the resource's own state writer, so this file
-// declares no model of the IP block schema and there is nothing here to keep in sync
-// when that schema changes.
+// resourceIPBlock, IpBlockSetData and setIPBlockIdentity directly. Results are
+// produced by the resource's own state writer, so this file declares no model of the
+// IP Block schema.
 
 var (
 	_ list.ListResource                 = (*ipBlockListResource)(nil)
@@ -52,8 +51,8 @@ func NewIPBlockListResource() list.ListResource {
 }
 
 // RawV6Schemas hands the framework the protocol schemas of the SDKv2 managed
-// resource. A framework-native list resource inherits them from the resource itself;
-// this is only needed because ionoscloud_ipblock lives on the SDKv2 side.
+// resource. A framework-native list resource inherits them from the resource
+// itself; this is only needed because ionoscloud_ipblock lives on the SDKv2 side.
 func (r *ipBlockListResource) RawV6Schemas(ctx context.Context, _ list.RawV6SchemaRequest, resp *list.RawV6SchemaResponse) {
 	fwidentity.SetRawV6Schemas(ctx, resp, constant.IpBlockResource, r.resourceSchema)
 }
@@ -87,35 +86,35 @@ func (r *ipBlockListResource) Configure(_ context.Context, req resource.Configur
 func (r *ipBlockListResource) ListResourceConfigSchema(_ context.Context, _ list.ListResourceSchemaRequest, resp *list.ListResourceSchemaResponse) {
 	resp.Schema = listschema.Schema{
 		Attributes: map[string]listschema.Attribute{
+			// Only string attributes: MatchesFilters compares one string value per
+			// field, which size, a number, and the lists ips and ip_consumers are not.
 			fwidentity.FiltersKey: fwidentity.FilterAttribute("name", "location"),
 		},
 	}
 }
 
-// List fetches every IP block on the contract and streams the results. The Cloud API
-// returns IP blocks from all locations from a single collection, so unlike the
-// regional products there is nothing to fan out over here.
+// List fetches up to constant.IPBlockLimit (1000) IP Blocks with a single Cloud API
+// request and streams those that match the filters.
 func (r *ipBlockListResource) List(ctx context.Context, req list.ListRequest, stream *list.ListResultsStream) {
 	fwidentity.StreamList(ctx, stream, req,
 		func(ctx context.Context) ([]ionoscloud.IpBlock, error) {
-			// The IP block collection is not location-scoped, so this uses the same
-			// client every other global Cloud API listing uses.
+			// IpblocksGet takes no location, so this client is built for the global
+			// Cloud API endpoints rather than for one location.
 			client, err := r.bundle.NewCloudAPIClientWithFailover(ctx)
 			if err != nil {
 				return nil, fmt.Errorf("failed to create the Cloud API client: %w", err)
 			}
 
-			// Depth(1) is what makes the API return the properties of every IP block
-			// instead of just its links. Without an explicit Limit the SDK client sends
-			// limit=100, which would cap this listing below the ionoscloud_ipblock data
-			// source; constant.IPBlockLimit is the one that data source asks for.
-			// Filtering stays client-side, in the mapper.
+			// Depth(1) and Limit(constant.IPBlockLimit) are what the ionoscloud_ipblock
+			// data source sends with this call: the limit asks for up to 1000 IP Blocks,
+			// where the SDK client would send 100 without it. Filtering stays
+			// client-side, in the mapper.
 			ipBlocks, apiResponse, err := client.IPBlocksApi.IpblocksGet(ctx).Depth(1).Limit(constant.IPBlockLimit).Execute()
 			if apiResponse != nil {
-				tflog.Debug(ctx, "listed ip blocks", map[string]any{"status_code": apiResponse.SafeStatusCode()})
+				tflog.Debug(ctx, "listed IP Blocks", map[string]any{"status_code": apiResponse.SafeStatusCode()})
 			}
 			if err != nil {
-				return nil, fmt.Errorf("failed to list ip blocks: %w", err)
+				return nil, fmt.Errorf("failed to list IP Blocks: %w", err)
 			}
 			if ipBlocks.Items == nil {
 				return nil, nil
@@ -127,11 +126,10 @@ func (r *ipBlockListResource) List(ctx context.Context, req list.ListRequest, st
 	)
 }
 
-// mapIPBlock maps an IP block to an identity.MappedItem, or returns nil to skip it.
+// mapIPBlock maps an IP Block to an identity.MappedItem, or returns nil to skip it.
 //
 // The mapping itself is IpBlockSetData, the same state writer resourceIPBlockRead
-// uses, run against a ResourceData built from the live schema. Nothing here knows what
-// attributes an IP block has.
+// uses, run against a ResourceData built from the live schema.
 func (r *ipBlockListResource) mapIPBlock(_ context.Context, includeResource bool, filters []fwidentity.Filter, ipBlock ionoscloud.IpBlock) (*fwidentity.MappedItem, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
@@ -148,19 +146,18 @@ func (r *ipBlockListResource) mapIPBlock(_ context.Context, includeResource bool
 
 	data := r.resourceSchema.Data(&terraform.InstanceState{})
 	if err := IpBlockSetData(data, &ipBlock); err != nil {
-		diags.AddError("Failed to map the ip block", err.Error())
+		diags.AddError("Failed to map the IP Block", err.Error())
 		return nil, diags
 	}
 
-	// setIPBlockIdentity reads id and location back out of the ResourceData, so it has
-	// to run after IpBlockSetData.
+	// setIPBlockIdentity reads id and location back out of the ResourceData, so it
+	// has to run after IpBlockSetData.
 	if err := setIPBlockIdentity(data); err != nil {
-		diags.AddError("Failed to map the ip block identity", err.Error())
+		diags.AddError("Failed to map the IP Block identity", err.Error())
 		return nil, diags
 	}
 
-	// name is optional on an IP block, and a blank display name is read by the
-	// framework as a diagnostics-only event, so an unnamed block is labelled by its ID.
+	// name is Optional, so an IP Block without one is labelled with its id.
 	displayName := shared.ToValueDefault(ipBlock.Properties.Name)
 	if displayName == "" {
 		displayName = *ipBlock.Id
@@ -168,7 +165,7 @@ func (r *ipBlockListResource) mapIPBlock(_ context.Context, includeResource bool
 
 	mapped, err := fwidentity.MappedItemFromResourceData(displayName, data, includeResource)
 	if err != nil {
-		diags.AddError("Failed to convert the ip block state", err.Error())
+		diags.AddError("Failed to convert the IP Block state", err.Error())
 		return nil, diags
 	}
 

@@ -23,10 +23,10 @@ func resourceDNSZone() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: zoneImport,
 		},
-		// The identity is what a `list "ionoscloud_dns_zone"` block streams back for each
-		// zone it finds, and what an import block can be written against. Terraform
-		// requires every read of a resource that declares an identity to return one, see
-		// setDNSZoneIdentity.
+		// The identity is what a `list "ionoscloud_dns_zone"` block streams back for
+		// each DNS Zone it finds, and what an import block can be written against.
+		// Terraform requires every read of a resource that declares an identity to
+		// return one, see setDNSZoneIdentity.
 		Identity: &schema.ResourceIdentity{
 			Version: 0,
 			SchemaFunc: func() map[string]*schema.Schema {
@@ -34,7 +34,7 @@ func resourceDNSZone() *schema.Resource {
 					"id": {
 						Type:              schema.TypeString,
 						RequiredForImport: true,
-						Description:       "The UUID of the DNS zone.",
+						Description:       "The UUID of the DNS Zone.",
 					},
 				}
 			},
@@ -123,10 +123,11 @@ func zoneUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diag
 			"please check again the values defined in the plan"), nil)
 	}
 
-	// The SDK carries the identity terraform sent into the apply, so "Missing Resource
-	// Identity After Update" does not fire here. This is the safety net for state
-	// written before the resource declared an identity, and it writes the same value
-	// the prior identity holds: the zone ID cannot change on an update.
+	// The SDK carries the planned identity into this apply, so this call only matters
+	// for a plan without one, which state written before this resource declared an
+	// identity can produce: the apply would then fail with "Missing Resource Identity
+	// After Update". Otherwise it writes what the plan holds: the id is the only
+	// identity attribute, and nothing in this function changes d.Id().
 	if err := setDNSZoneIdentity(d); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
@@ -155,13 +156,13 @@ func zoneDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diag
 
 func zoneImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	client := meta.(bundleclient.SdkBundle).DNSClient
-	zoneID, err := dnsZoneImportParts(d)
+	zoneID, err := dnsZoneImportID(d)
 	if err != nil {
 		return nil, err
 	}
 
-	// Terraform sends an empty ID for an identity-based import, so the ID has to be set
-	// here for the error diagnostics and the log line below to name the resource.
+	// Terraform sends an empty ID for an identity-based import, so the ID has to be
+	// set here for the fetch error diagnostic below to name the resource.
 	d.SetId(zoneID)
 
 	zone, apiResponse, err := client.GetZoneById(ctx, zoneID)
@@ -185,11 +186,11 @@ func zoneImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schem
 	return []*schema.ResourceData{d}, nil
 }
 
-// dnsZoneImportParts resolves the DNS zone to import, either from the resource identity
-// - which is how an import block with an `identity` argument, and the import config that
-// `terraform query` generates, address a zone - or from the plain "<zone-id>" import
-// string.
-func dnsZoneImportParts(d *schema.ResourceData) (string, error) {
+// dnsZoneImportID resolves the DNS Zone to import, either from the resource
+// identity - which is how an import block with an `identity` argument, and the
+// import config that `terraform query` generates, address a DNS Zone - or from the
+// import string, which is the zone ID itself.
+func dnsZoneImportID(d *schema.ResourceData) (string, error) {
 	if identity, identityErr := d.Identity(); identityErr == nil {
 		if id, ok := identity.GetOk("id"); ok {
 			zoneID, _ := id.(string)
@@ -197,19 +198,18 @@ func dnsZoneImportParts(d *schema.ResourceData) (string, error) {
 		}
 	}
 
-	// A zone is addressed by a bare UUID, so there is no composite import identifier to
-	// validate here and nothing else rejects an empty one: an identity whose id is the
-	// empty string reads as unset and falls through to this branch.
+	// Catches an empty import string, and an identity whose id is "", which GetOk
+	// reports as unset: both would otherwise reach the API as an empty zone ID.
 	if d.Id() == "" {
-		return "", fmt.Errorf("invalid import identifier: expected a DNS zone UUID, got an empty string")
+		return "", fmt.Errorf("invalid import identifier: expected a DNS Zone UUID, got an empty string")
 	}
 
 	return d.Id(), nil
 }
 
-// setDNSZoneIdentity writes the resource identity from the DNS zone already in state.
-// Terraform errors out with "Missing Resource Identity After Read" if a resource that
-// declares an identity finishes a read without returning one.
+// setDNSZoneIdentity writes the resource identity from the DNS Zone already in
+// state. Terraform errors out with "Missing Resource Identity After Read" if a
+// resource that declares an identity finishes a read without returning one.
 func setDNSZoneIdentity(d *schema.ResourceData) error {
 	identity, err := d.Identity()
 	if err != nil {
@@ -217,7 +217,7 @@ func setDNSZoneIdentity(d *schema.ResourceData) error {
 	}
 
 	if err := identity.Set("id", d.Id()); err != nil {
-		return fmt.Errorf("error while setting id identity attribute for DNS zone %s: %w", d.Id(), err)
+		return fmt.Errorf("error while setting id identity attribute for DNS Zone %s: %w", d.Id(), err)
 	}
 
 	return nil

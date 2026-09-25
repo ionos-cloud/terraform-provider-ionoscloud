@@ -26,10 +26,10 @@ func resourceIPBlock() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceIpBlockImporter,
 		},
-		// The identity is what a `list "ionoscloud_ipblock"` block streams back for each
-		// IP block it finds, and what an import block can be written against. Terraform
-		// requires every read of a resource that declares an identity to return one, see
-		// setIPBlockIdentity.
+		// The identity is what a `list "ionoscloud_ipblock"` block streams back for
+		// each IP Block it finds, and what an import block can be written against.
+		// Terraform requires every read of a resource that declares an identity to
+		// return one, see setIPBlockIdentity.
 		Identity: &schema.ResourceIdentity{
 			Version: 0,
 			SchemaFunc: func() map[string]*schema.Schema {
@@ -37,12 +37,12 @@ func resourceIPBlock() *schema.Resource {
 					"id": {
 						Type:              schema.TypeString,
 						RequiredForImport: true,
-						Description:       "The UUID of the IP block.",
+						Description:       "The UUID of the IP Block.",
 					},
 					"location": {
 						Type:              schema.TypeString,
 						OptionalForImport: true,
-						Description:       "The location the IP block is reserved in. Only needed when the Cloud API endpoint is overridden per location.",
+						Description:       "The regional location of the IP Block. Only needed when the Cloud API endpoint is overridden per location.",
 					},
 				}
 			},
@@ -211,10 +211,11 @@ func resourceIPBlockUpdate(ctx context.Context, d *schema.ResourceData, meta any
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating an ip block: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
-	// The SDK carries the identity terraform sent into the apply, so "Missing Resource
-	// Identity After Update" does not fire here. This is the safety net for state
-	// written before the resource declared an identity, and it writes the same values
-	// the prior identity holds: neither the ID nor the location can be patched.
+	// The SDK carries the planned identity into this apply, so this call only matters
+	// for a plan without one, which state written before this resource declared an
+	// identity can produce: the apply would then fail with "Missing Resource Identity
+	// After Update". Otherwise it writes what the plan holds, since an update changes
+	// neither the id, which the API assigns, nor location, which is ForceNew.
 	if err := setIPBlockIdentity(d); err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
@@ -254,7 +255,7 @@ func resourceIpBlockImporter(ctx context.Context, d *schema.ResourceData, meta a
 	}
 
 	// Terraform sends an empty ID for an identity-based import, so the ID has to be
-	// set here for the error diagnostics and the log line below to name the resource.
+	// set here for the fetch error diagnostic below to name the resource.
 	d.SetId(ipBlockID)
 
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
@@ -289,10 +290,10 @@ func resourceIpBlockImporter(ctx context.Context, d *schema.ResourceData, meta a
 	return []*schema.ResourceData{d}, nil
 }
 
-// ipBlockImportParts resolves the IP block to import, either from the resource
-// identity - which is how an import block with an `identity` argument, and the import
-// config that `terraform query` generates, address an IP block - or from the
-// "<location>:<ipblock-id>" import string.
+// ipBlockImportParts resolves the IP Block to import, either from the resource
+// identity - which is how an import block with an `identity` argument, and the
+// import config that `terraform query` generates, address an IP Block - or from the
+// "<location>:<ipblock-id>" or "<ipblock-id>" import string.
 func ipBlockImportParts(d *schema.ResourceData) (ipBlockID, location string, err error) {
 	if identity, identityErr := d.Identity(); identityErr == nil {
 		if id, ok := identity.GetOk("id"); ok {
@@ -303,6 +304,7 @@ func ipBlockImportParts(d *schema.ResourceData) (ipBlockID, location string, err
 	}
 
 	importID := d.Id()
+
 	location, parts := splitImportID(importID, ":")
 	if len(parts) != 1 {
 		return "", "", fmt.Errorf("invalid import identifier: expected one of <location>:<ipblock-id> or <ipblock-id>, got: %s", importID)
@@ -315,9 +317,9 @@ func ipBlockImportParts(d *schema.ResourceData) (ipBlockID, location string, err
 	return parts[0], location, nil
 }
 
-// setIPBlockIdentity writes the resource identity from the IP block already in state.
-// Terraform errors out with "Missing Resource Identity After Read" if a resource that
-// declares an identity finishes a read without returning one.
+// setIPBlockIdentity writes the resource identity from the IP Block already in
+// state. Terraform errors out with "Missing Resource Identity After Read" if a
+// resource that declares an identity finishes a read without returning one.
 func setIPBlockIdentity(d *schema.ResourceData) error {
 	identity, err := d.Identity()
 	if err != nil {
@@ -325,11 +327,11 @@ func setIPBlockIdentity(d *schema.ResourceData) error {
 	}
 
 	if err := identity.Set("id", d.Id()); err != nil {
-		return fmt.Errorf("error while setting id identity attribute for ip block %s: %w", d.Id(), err)
+		return fmt.Errorf("error while setting id identity attribute for IP Block %s: %w", d.Id(), err)
 	}
 
 	if err := identity.Set("location", d.Get("location")); err != nil {
-		return fmt.Errorf("error while setting location identity attribute for ip block %s: %w", d.Id(), err)
+		return fmt.Errorf("error while setting location identity attribute for IP Block %s: %w", d.Id(), err)
 	}
 
 	return nil

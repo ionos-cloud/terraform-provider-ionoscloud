@@ -15,6 +15,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/querycheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-plugin-testing/tfversion"
@@ -121,24 +122,24 @@ func TestAccIPBlockBasic(t *testing.T) {
 	})
 }
 
-// TestAccIPBlockQuery exercises the ionoscloud_ipblock list resource and the resource
-// identity that listing depends on.
+// TestAccIPBlockQuery exercises the ionoscloud_ipblock list resource and the
+// resource identity that listing depends on.
 //
 // The list resource is served by the plugin-framework half of the provider even though
-// the ip block resource itself is implemented with SDKv2, so this also covers the mux
-// serving the two halves under the same type name. See resource_ipblock_list.go in
-// this package.
+// the IP Block resource itself is implemented with SDKv2, so this also covers the
+// mux serving the two halves under the same type name. See
+// resource_ipblock_list.go in this package.
 func TestAccIPBlockQuery(t *testing.T) {
 	const (
 		ipBlockName        = "tf-test-ipblock-query"
 		ipBlockUpdatedName = "tf-test-ipblock-query-updated"
 		ipBlockAddr        = constant.IpBlockResource + ".test_ipblock_query"
-		otherLocation      = "de/txl"
+		otherLocation      = "de/txl" // the zero-result filter value: no step creates an IP Block there
 	)
 
-	// Its own name, label and create step rather than testAccCheckIPBlockConfigBasic:
-	// ExpectLength asserts a contract-wide total, so an ip block another test in this
-	// package reserves under the same name would make ExpectLength(1) flap.
+	// Own name, own label, own create step - not testAccCheckIPBlockConfigBasic:
+	// ExpectLength asserts a contract-wide total, so a same-named resource made by
+	// another test in the package makes ExpectLength(1) flap.
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() { testAccPreCheck(t) },
@@ -157,20 +158,7 @@ resource %[1]q "test_ipblock_query" {
   size     = 1
 }`, constant.IpBlockResource, ipBlockName, location),
 			},
-			// name is the only attribute of an ip block that is not force-new, so this is
-			// the only step that enters Update - where the identity is written again.
-			{
-				Config: fmt.Sprintf(`
-resource %[1]q "test_ipblock_query" {
-  name     = %[2]q
-  location = %[3]q
-  size     = 1
-}`, constant.IpBlockResource, ipBlockUpdatedName, location),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(ipBlockAddr, "name", ipBlockUpdatedName),
-				),
-			},
-			// List without filters: the ip block must show up with its identity.
+			// List without filters: the IP Block must show up with its identity.
 			{
 				Query: true,
 				Config: fmt.Sprintf(`list %[1]q "test_ipblock_query" {
@@ -194,7 +182,7 @@ resource %[1]q "test_ipblock_query" {
       { field_name = "location", field_value = %[3]q },
     ]
   }
-}`, constant.IpBlockResource, ipBlockUpdatedName, location),
+}`, constant.IpBlockResource, ipBlockName, location),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLength(ipBlockAddr, 1),
 				},
@@ -210,10 +198,26 @@ resource %[1]q "test_ipblock_query" {
       { field_name = "location", field_value = %[3]q },
     ]
   }
-}`, constant.IpBlockResource, ipBlockUpdatedName, otherLocation),
+}`, constant.IpBlockResource, ipBlockName, otherLocation),
 				QueryResultChecks: []querycheck.QueryResultCheck{
 					querycheck.ExpectLength(ipBlockAddr, 0),
 				},
+			},
+			// Rename in place: resourceIPBlockUpdate does not end in a read but writes the
+			// identity itself, which the SDK compares with the planned one on this apply.
+			{
+				Config: fmt.Sprintf(`
+resource %[1]q "test_ipblock_query" {
+  name     = %[2]q
+  location = %[3]q
+  size     = 1
+}`, constant.IpBlockResource, ipBlockUpdatedName, location),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction(ipBlockAddr, plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.TestCheckResourceAttr(ipBlockAddr, "name", ipBlockUpdatedName),
 			},
 			// Import through the resource identity that the list results carry. This kind
 			// already checks that the import succeeds, that the plan it leaves behind is a

@@ -10,6 +10,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/querycheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-plugin-testing/tfversion"
@@ -96,25 +97,25 @@ func TestAccDNSZone(t *testing.T) {
 	})
 }
 
-// TestAccDNSZoneQuery exercises the ionoscloud_dns_zone list resource and the resource
-// identity that listing depends on.
+// TestAccDNSZoneQuery exercises the ionoscloud_dns_zone list resource and the
+// resource identity that listing depends on.
 //
 // The list resource is served by the plugin-framework half of the provider even though
-// the DNS zone resource itself is implemented with SDKv2, so this also covers the mux
-// serving the two halves under the same type name. See resource_dns_zone_list.go in this
-// package.
+// the DNS Zone resource itself is implemented with SDKv2, so this also covers the
+// mux serving the two halves under the same type name. See
+// resource_dns_zone_list.go in this package.
 func TestAccDNSZoneQuery(t *testing.T) {
 	const (
-		queryZoneName        = "tf-test-query-zone.com"
-		queryZoneDescription = "the zone the query test looks for"
-		queryZoneUpdatedDesc = "the zone the query test looks for, updated"
-		queryZoneAddr        = constant.DNSZoneResource + ".test_dns_zone_query"
-		otherDescription     = "a description no zone in this test carries"
+		dnsZoneName               = "tf-test-dns-zone-query.com"
+		dnsZoneDescription        = "DNS Zone for the list resource acceptance test"
+		dnsZoneUpdatedDescription = "DNS Zone for the list resource acceptance test, updated"
+		dnsZoneAddr               = constant.DNSZoneResource + ".test_dns_zone_query"
+		otherDescription          = "no DNS Zone has this description" // the zero-result filter value: no step sets it
 	)
 
-	// Its own name, label and create step rather than DNSZoneConfig: ExpectLength asserts
-	// a contract-wide total, so a zone another test in this package creates under the same
-	// name would make ExpectLength(1) flap.
+	// Own name, own label, own create step - not DNSZoneConfig:
+	// ExpectLength asserts a contract-wide total, so a same-named resource made by
+	// another test in the package makes ExpectLength(1) flap.
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() { testAccPreCheck(t) },
@@ -130,29 +131,16 @@ func TestAccDNSZoneQuery(t *testing.T) {
 resource %[1]q "test_dns_zone_query" {
   name        = %[2]q
   description = %[3]q
-}`, constant.DNSZoneResource, queryZoneName, queryZoneDescription),
+}`, constant.DNSZoneResource, dnsZoneName, dnsZoneDescription),
 			},
-			// name is force-new, so description is what an update step can change: zoneUpdate
-			// does not delegate to zoneRead, and this is the only step that enters it - where
-			// the identity is written again.
-			{
-				Config: fmt.Sprintf(`
-resource %[1]q "test_dns_zone_query" {
-  name        = %[2]q
-  description = %[3]q
-}`, constant.DNSZoneResource, queryZoneName, queryZoneUpdatedDesc),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(queryZoneAddr, zoneDescriptionAttribute, queryZoneUpdatedDesc),
-				),
-			},
-			// List without filters: the zone must show up with its identity.
+			// List without filters: the DNS Zone must show up with its identity.
 			{
 				Query: true,
 				Config: fmt.Sprintf(`list %[1]q "test_dns_zone_query" {
   provider = ionoscloud
 }`, constant.DNSZoneResource),
 				QueryResultChecks: []querycheck.QueryResultCheck{
-					querycheck.ExpectIdentity(queryZoneAddr, map[string]knownvalue.Check{
+					querycheck.ExpectIdentity(dnsZoneAddr, map[string]knownvalue.Check{
 						"id": knownvalue.NotNull(),
 					}),
 				},
@@ -168,13 +156,12 @@ resource %[1]q "test_dns_zone_query" {
       { field_name = "description", field_value = %[3]q },
     ]
   }
-}`, constant.DNSZoneResource, queryZoneName, queryZoneUpdatedDesc),
+}`, constant.DNSZoneResource, dnsZoneName, dnsZoneDescription),
 				QueryResultChecks: []querycheck.QueryResultCheck{
-					querycheck.ExpectLength(queryZoneAddr, 1),
+					querycheck.ExpectLength(dnsZoneAddr, 1),
 				},
 			},
-			// Same name, a description no zone carries: proves the description filter is
-			// evaluated rather than ignored.
+			// Same name, different description: proves the description filter is evaluated.
 			{
 				Query: true,
 				Config: fmt.Sprintf(`list %[1]q "test_dns_zone_query" {
@@ -185,17 +172,32 @@ resource %[1]q "test_dns_zone_query" {
       { field_name = "description", field_value = %[3]q },
     ]
   }
-}`, constant.DNSZoneResource, queryZoneName, otherDescription),
+}`, constant.DNSZoneResource, dnsZoneName, otherDescription),
 				QueryResultChecks: []querycheck.QueryResultCheck{
-					querycheck.ExpectLength(queryZoneAddr, 0),
+					querycheck.ExpectLength(dnsZoneAddr, 0),
 				},
+			},
+			// Change the description in place: zoneUpdate does not end in a read but writes
+			// the identity itself, which the SDK compares with the planned one on this apply.
+			{
+				Config: fmt.Sprintf(`
+resource %[1]q "test_dns_zone_query" {
+  name        = %[2]q
+  description = %[3]q
+}`, constant.DNSZoneResource, dnsZoneName, dnsZoneUpdatedDescription),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction(dnsZoneAddr, plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.TestCheckResourceAttr(dnsZoneAddr, "description", dnsZoneUpdatedDescription),
 			},
 			// Import through the resource identity that the list results carry. This kind
 			// already checks that the import succeeds, that the plan it leaves behind is a
 			// no-op and that the planned identity matches the one in state; ImportStateVerify
 			// cannot be combined with it, only ImportCommandWithID reads that field.
 			{
-				ResourceName:    queryZoneAddr,
+				ResourceName:    dnsZoneAddr,
 				ImportState:     true,
 				ImportStateKind: resource.ImportBlockWithResourceIdentity,
 			},

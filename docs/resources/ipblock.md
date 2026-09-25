@@ -65,15 +65,15 @@ resource "ionoscloud_ipblock" "example" {
 
 #### Required
 
-* `id` (String) The UUID of the IP block.
+* `id` (String) The UUID of the IP Block.
 
 #### Optional
 
-* `location` (String) The location the IP block is reserved in (e.g. `us/las`). Only needed when the Cloud API endpoint is overridden per location.
+* `location` (String) The regional location of the IP Block (e.g. `de/fra`). Only needed when the Cloud API endpoint is overridden per location.
 
 ## Query (List Resource)
 
-IP blocks can be listed using `terraform query` (requires Terraform 1.14+). List blocks must be placed in a dedicated query file, whose name ends in `.tfquery.hcl` (for example `queries.tfquery.hcl`).
+IP Blocks can be listed using `terraform query` (requires Terraform 1.14+). List blocks must be placed in a dedicated query file, whose name ends in `.tfquery.hcl` (for example `queries.tfquery.hcl`).
 
 ```hcl
 list "ionoscloud_ipblock" "all" {

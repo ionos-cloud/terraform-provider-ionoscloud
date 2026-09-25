@@ -64,7 +64,7 @@ resource "ionoscloud_dns_zone" "example" {
 
 #### Required
 
-* `id` (String) The UUID of the DNS zone.
+* `id` (String) The UUID of the DNS Zone.
 
 ## Query (List Resource)
 

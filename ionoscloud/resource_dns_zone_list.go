@@ -19,16 +19,15 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
-// A list resource for ionoscloud_dns_zone, whose managed resource is still implemented
-// with terraform-plugin-sdk/v2 and therefore lives on the other half of the mux. The
-// protocol schemas the framework needs come from that resource via
+// A list resource for ionoscloud_dns_zone, whose managed resource is still
+// implemented with terraform-plugin-sdk/v2 and therefore lives on the other half of
+// the mux. The protocol schemas the framework needs come from that resource via
 // identity.SetRawV6Schemas.
 //
 // It lives in this package, next to the resource it lists, so it can call
-// resourceDNSZone and setDNSZoneIdentity directly, and hand results to the same
-// SetZoneData the DNS service client gives zoneRead. That is the whole design: results
-// are produced by the resource's own state writer, so this file declares no model of
-// the zone schema and there is nothing here to keep in sync when that schema changes.
+// resourceDNSZone and setDNSZoneIdentity directly. Results are produced by the
+// resource's own state writer, DNSClient.SetZoneData, so this file declares no model
+// of the DNS Zone schema.
 
 var (
 	_ list.ListResource                 = (*dnsZoneListResource)(nil)
@@ -51,9 +50,9 @@ func NewDNSZoneListResource() list.ListResource {
 	return &dnsZoneListResource{resourceSchema: resourceDNSZone()}
 }
 
-// RawV6Schemas hands the framework the protocol schemas of the SDKv2 managed resource.
-// A framework-native list resource inherits them from the resource itself; this is only
-// needed because ionoscloud_dns_zone lives on the SDKv2 side.
+// RawV6Schemas hands the framework the protocol schemas of the SDKv2 managed
+// resource. A framework-native list resource inherits them from the resource
+// itself; this is only needed because ionoscloud_dns_zone lives on the SDKv2 side.
 func (r *dnsZoneListResource) RawV6Schemas(ctx context.Context, _ list.RawV6SchemaRequest, resp *list.RawV6SchemaResponse) {
 	fwidentity.SetRawV6Schemas(ctx, resp, constant.DNSZoneResource, r.resourceSchema)
 }
@@ -87,27 +86,27 @@ func (r *dnsZoneListResource) Configure(_ context.Context, req resource.Configur
 func (r *dnsZoneListResource) ListResourceConfigSchema(_ context.Context, _ list.ListResourceSchemaRequest, resp *list.ListResourceSchemaResponse) {
 	resp.Schema = listschema.Schema{
 		Attributes: map[string]listschema.Attribute{
+			// Only string attributes: MatchesFilters compares one string value per
+			// field, which enabled, a bool, and the list nameservers are not.
 			fwidentity.FiltersKey: fwidentity.FilterAttribute("name", "description"),
 		},
 	}
 }
 
-// List fetches every DNS zone on the contract and streams the results. Cloud DNS is not
-// a regional product - the zones of a contract come from a single endpoint - so there is
-// nothing to fan out over here.
+// List fetches up to 100 DNS Zones, the DNS API's default page, with a single request
+// and streams those that match the filters.
 func (r *dnsZoneListResource) List(ctx context.Context, req list.ListRequest, stream *list.ListResultsStream) {
 	fwidentity.StreamList(ctx, stream, req,
 		func(ctx context.Context) ([]dns.ZoneRead, error) {
-			// The same helper the ionoscloud_dns_zone data source lists with, called with
-			// no server-side name filter: filtering stays client-side, in the mapper, so
-			// that every filter field behaves the same way. The collection takes no depth
-			// and the provider sends no limit, which leaves the page size to the DNS API.
+			// With an empty name, ListZones sends neither a zone name filter nor a limit,
+			// so the DNS API returns its default page, which the ZonesGet doc comment gives
+			// as the first 100 items. Filtering stays client-side, in the mapper.
 			zones, apiResponse, err := r.bundle.DNSClient.ListZones(ctx, "")
 			if apiResponse != nil {
-				tflog.Debug(ctx, "listed dns zones", map[string]any{"status_code": apiResponse.SafeStatusCode()})
+				tflog.Debug(ctx, "listed DNS Zones", map[string]any{"status_code": apiResponse.SafeStatusCode()})
 			}
 			if err != nil {
-				return nil, fmt.Errorf("failed to list dns zones: %w", err)
+				return nil, fmt.Errorf("failed to list DNS Zones: %w", err)
 			}
 
 			return zones.Items, nil
@@ -116,10 +115,10 @@ func (r *dnsZoneListResource) List(ctx context.Context, req list.ListRequest, st
 	)
 }
 
-// mapDNSZone maps a DNS zone to an identity.MappedItem, or returns nil to skip it.
+// mapDNSZone maps a DNS Zone to an identity.MappedItem, or returns nil to skip it.
 //
-// The mapping itself is SetZoneData, the same state writer zoneRead uses, run against a
-// ResourceData built from the live schema. Nothing here knows what attributes a zone has.
+// The mapping itself is DNSClient.SetZoneData, the same state writer zoneRead uses,
+// run against a ResourceData built from the live schema.
 func (r *dnsZoneListResource) mapDNSZone(_ context.Context, includeResource bool, filters []fwidentity.Filter, zone dns.ZoneRead) (*fwidentity.MappedItem, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
@@ -136,20 +135,20 @@ func (r *dnsZoneListResource) mapDNSZone(_ context.Context, includeResource bool
 
 	data := r.resourceSchema.Data(&terraform.InstanceState{})
 	if err := r.bundle.DNSClient.SetZoneData(data, zone); err != nil {
-		diags.AddError("Failed to map the dns zone", err.Error())
+		diags.AddError("Failed to map the DNS Zone", err.Error())
 		return nil, diags
 	}
 
 	// setDNSZoneIdentity reads the id back out of the ResourceData, so it has to run
-	// after SetZoneData - which is also what sets that id in the first place.
+	// after SetZoneData.
 	if err := setDNSZoneIdentity(data); err != nil {
-		diags.AddError("Failed to map the dns zone identity", err.Error())
+		diags.AddError("Failed to map the DNS Zone identity", err.Error())
 		return nil, diags
 	}
 
 	mapped, err := fwidentity.MappedItemFromResourceData(zone.Properties.ZoneName, data, includeResource)
 	if err != nil {
-		diags.AddError("Failed to convert the dns zone state", err.Error())
+		diags.AddError("Failed to convert the DNS Zone state", err.Error())
 		return nil, diags
 	}
 
