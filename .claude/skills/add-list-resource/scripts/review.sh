@@ -6,8 +6,8 @@ REPO=ionos-cloud/terraform-provider-ionoscloud
 case "${1:-}" in
 
 test-unit)
-  go test ./ionoscloud/ -run "Test${2:?Resource, e.g. DNSZone}ListResource" -count=1
-  go test ./ionoscloud/ -run 'TestProvider$' -count=1
+  go test ./ionoscloud/ -run "Test${2:?Resource, e.g. DNSZone}ListResource" -count=1 &&
+    go test ./ionoscloud/ -run 'TestProvider$' -count=1
   ;;
 
 # queries - framework-native services fold query steps into lifecycle tests.
@@ -30,9 +30,9 @@ pr-create)
 review)
   n=${2:?PR number}
   echo "--- 1. inline review comments (the id that reply takes) ---"
-  gh api "repos/$REPO/pulls/$n/comments" --paginate --jq '.[] | {id, in_reply_to_id, user: .user.login, path, line, body}'
+  gh api "repos/$REPO/pulls/$n/comments" --paginate --jq '.[] | {id, in_reply_to_id, user: .user.login, path, line, body}' || die "endpoint 1 failed - see the error above"
   echo "--- 2. review bodies: summaries and suppressed findings ---"
-  gh api "repos/$REPO/pulls/$n/reviews" --paginate --jq '.[] | {id, user: .user.login, state, submitted_at, body}'
+  gh api "repos/$REPO/pulls/$n/reviews" --paginate --jq '.[] | {id, user: .user.login, state, submitted_at, body}' || die "endpoint 2 failed - see the error above"
   echo "--- 3. top-level conversation (Sonar gate, humans) ---"
   gh api "repos/$REPO/issues/$n/comments" --paginate --jq '.[] | {id, user: .user.login, body}'
   ;;

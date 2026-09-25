@@ -116,8 +116,8 @@ rung3) shift; havegit "rung 3 needs git merge-base: lint where git is allowed"
 # rung4 - the vendor half runs EVEN WHEN tidy is clean: a new subpackage of a module already
 # in go.mod moves vendor/modules.txt alone.
 rung4) havegit "rung 4 diffs go.mod and vendor/ with git"
-       go mod tidy && git diff --exit-code -- go.mod go.sum
-       go mod vendor && git status --porcelain vendor/ ;;
+       go mod tidy && git diff --exit-code -- go.mod go.sum; mod=$?
+       go mod vendor && git status --porcelain vendor/ && exit "$mod" ;;
 rung5-scoped) shift; go vet -tags=all ./ionoscloud/ ./internal/framework/provider/ ./internal/acctest/ "$@" &&
   echo 'VERDICT: vet clean - the tagged tests compile' ;;
 rung5-full) go vet -tags=all ./... && echo 'VERDICT: vet clean' ;;
