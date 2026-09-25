@@ -112,6 +112,8 @@ Resource IpFailover can be imported using the `datacenter id`, `lan id` and `ip 
 terraform import ionoscloud_ipfailover.myipfailover datacenter_uuid/lan_uuid/ip_address
 ```
 
+The IP address may be an IPv4 or an IPv6 address, e.g. `datacenter_uuid/1/2001:db8::10`.
+
 
 ## A note on multiple NICs on an IP Failover
 If you want to add a secondary NIC to an IP Failover, follow these steps:

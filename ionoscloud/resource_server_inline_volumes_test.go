@@ -2,10 +2,13 @@ package ionoscloud
 
 import (
 	"maps"
+	"slices"
+	"strconv"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 )
 
 // inline_volume_ids drives both the volume-block refresh and the delete path, so a state carrying
@@ -91,4 +94,79 @@ func seedingStateData(t *testing.T, res *schema.Resource, attrs map[string]any) 
 	state.RawState = raw
 
 	return res.Data(state)
+}
+
+// A server imported without a boot volume must end up with an empty (not null) ownership list:
+// a null computed list is planned as "known after apply" forever, which turned the import into an
+// update that sent an empty PATCH and never converged.
+func TestSeedInlineVolumeIDs(t *testing.T) {
+	tests := []struct {
+		name  string
+		state map[string]any
+		want  []string
+	}{
+		{
+			name:  "boot volume is seeded",
+			state: map[string]any{"boot_volume": "vol-1"},
+			want:  []string{"vol-1"},
+		},
+		{
+			name:  "no boot volume seeds an empty list",
+			state: map[string]any{"boot_volume": ""},
+			want:  []string{},
+		},
+		{
+			name:  "boot volume absent seeds an empty list",
+			state: map[string]any{},
+			want:  []string{},
+		},
+	}
+
+	for resName, res := range map[string]*schema.Resource{"server": resourceServer(), "vcpu_server": resourceVCPUServer()} {
+		for _, tt := range tests {
+			t.Run(resName+"/"+tt.name, func(t *testing.T) {
+				d := seedingStateData(t, res, tt.state)
+				if !shouldSeedInlineVolumeIDs(d) {
+					t.Fatal("shouldSeedInlineVolumeIDs = false for an imported state, want true")
+				}
+				got := seedInlineVolumeIDs(d)
+				if got == nil || !slices.Equal(got, tt.want) {
+					t.Fatalf("seedInlineVolumeIDs = %#v, want %#v", got, tt.want)
+				}
+
+				if err := d.Set("inline_volume_ids", got); err != nil {
+					t.Fatalf("setting inline_volume_ids: %v", err)
+				}
+				wantCount := strconv.Itoa(len(tt.want))
+				if count, ok := d.State().Attributes["inline_volume_ids.#"]; !ok || count != wantCount {
+					t.Errorf("inline_volume_ids.# = %q (present: %v), want %q", count, ok, wantCount)
+				}
+			})
+		}
+	}
+}
+
+func TestIsEmptyServerPatch(t *testing.T) {
+	name := "patched-name"
+	cores := int32(2)
+	multiQueue := false
+
+	tests := []struct {
+		name    string
+		request ionoscloud.ServerProperties
+		want    bool
+	}{
+		{name: "no field", request: ionoscloud.ServerProperties{}, want: true},
+		{name: "name", request: ionoscloud.ServerProperties{Name: &name}, want: false},
+		{name: "cores", request: ionoscloud.ServerProperties{Cores: &cores}, want: false},
+		{name: "explicit false", request: ionoscloud.ServerProperties{NicMultiQueue: &multiQueue}, want: false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := isEmptyServerPatch(tt.request); got != tt.want {
+				t.Errorf("isEmptyServerPatch = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }

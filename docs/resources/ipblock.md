@@ -37,6 +37,8 @@ resource "ionoscloud_ipblock" "example" {
   * `datacenter_name`
   * `k8s_nodepool_uuid`
   * `k8s_cluster_uuid`
+
+> **Note:** `terraform plan -generate-config-out` writes one empty `ip_consumers {}` block per entry of this computed attribute. The blocks plan as a no-op and can be removed from the generated configuration.
   
 ## Import
 
