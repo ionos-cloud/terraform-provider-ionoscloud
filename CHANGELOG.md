@@ -1,6 +1,13 @@
 ## 6.7.38 -- upcoming release
 ### Features
 - `ionoscloud_template`: add new, optional attribute: `storage_type`
+- `ionoscloud_ipblock`: New list resource, queryable with `terraform query` (requires Terraform 1.14+).
+- `ionoscloud_ipblock`: Add a resource identity (`id`, `location`), which also enables `import` blocks with an `identity` attribute.
+- `ionoscloud_dns_zone`: New list resource, queryable with `terraform query` (requires Terraform 1.14+).
+- `ionoscloud_dns_zone`: Add a resource identity (`id`), which also enables `import` blocks with an `identity` attribute.
+
+### Docs
+- Fix the malformed `terraform import` examples in the `ionoscloud_dns_zone` and `ionoscloud_ipblock` docs.
 
 ## 6.7.37
 
