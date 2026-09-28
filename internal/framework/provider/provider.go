@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"log"
 	"os"
 	"runtime/debug"
@@ -207,19 +208,18 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 	}
 
 	fileConfig, readFileErr := configlog.LoadFileConfigWithLogging(ctx)
+	if readFileErr != nil && !errors.Is(readFileErr, configlog.ErrDefaultConfigUnavailable) {
+		resp.Diagnostics.AddError("invalid IONOS file config", readFileErr.Error())
+		return
+	}
 	configlog.LogEndpointEnvVars(ctx)
 
 	fileConfigUsed := false
 	profileName := ""
 	if token == "" && (username == "" || password == "") {
-		if readFileErr != nil {
-			resp.Diagnostics.AddError("missing credentials", "either token or username and password must be set")
-			resp.Diagnostics.AddError("while opening file", readFileErr.Error())
-			return
-		}
 		profile := fileConfig.GetCurrentProfile()
 		if profile == nil {
-			resp.Diagnostics.AddError("missing credentials", "either token or username and password must be set")
+			resp.Diagnostics.AddError("missing credentials", "either token or username and password must be set"+configlog.MissingCredentialsHint(readFileErr))
 			return
 		}
 		token = profile.Credentials.Token
@@ -229,12 +229,10 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 		profileName = profile.Name
 	}
 	if accessKey == "" || secretKey == "" {
-		if readFileErr == nil {
-			profile := fileConfig.GetCurrentProfile()
-			if profile != nil {
-				accessKey = profile.Credentials.S3AccessKey
-				secretKey = profile.Credentials.S3SecretKey
-			}
+		profile := fileConfig.GetCurrentProfile()
+		if profile != nil {
+			accessKey = profile.Credentials.S3AccessKey
+			secretKey = profile.Credentials.S3SecretKey
 		}
 	}
 

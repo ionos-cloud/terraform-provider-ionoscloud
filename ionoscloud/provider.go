@@ -2,6 +2,7 @@ package ionoscloud
 
 import (
 	"context"
+	"errors"
 	"os"
 	"runtime/debug"
 
@@ -271,18 +272,18 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, terraformVer
 	insecureBool := false
 
 	fileConfig, readFileErr := configlog.LoadFileConfigWithLogging(ctx)
+	if readFileErr != nil && !errors.Is(readFileErr, configlog.ErrDefaultConfigUnavailable) {
+		return nil, diag.Errorf("invalid IONOS file config: %s", readFileErr.Error())
+	}
 	configlog.LogEndpointEnvVars(ctx)
 
 	fileConfigUsed := false
 	profileName := ""
 	if !tokenOk {
 		if !usernameOk || !passwordOk {
-			if readFileErr != nil {
-				return nil, diag.Errorf("missing credentials, either token or username and password must be set, %s", readFileErr.Error())
-			}
 			profile := fileConfig.GetCurrentProfile()
 			if profile == nil {
-				return nil, diag.Errorf("missing credentials, either token or username and password must be set")
+				return nil, diag.Errorf("missing credentials, either token or username and password must be set%s", configlog.MissingCredentialsHint(readFileErr))
 			}
 			token = profile.Credentials.Token
 			username = profile.Credentials.Username
@@ -291,7 +292,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, terraformVer
 			profileName = profile.Name
 		}
 		if token == "" && (username == "" || password == "") {
-			return nil, diag.Errorf("missing credentials, either token or username and password must be set")
+			return nil, diag.Errorf("missing credentials, either token or username and password must be set%s", configlog.MissingCredentialsHint(readFileErr))
 		}
 	}
 

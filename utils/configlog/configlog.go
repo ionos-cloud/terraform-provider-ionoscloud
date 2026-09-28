@@ -3,6 +3,7 @@ package configlog
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"sort"
@@ -15,8 +16,29 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 )
 
+// ErrDefaultConfigUnavailable signals that the default config file could not be used,
+// either because its path could not be determined (e.g. the home directory is unknown)
+// or because the file does not exist. It is non-fatal on its own: callers should
+// proceed with other credential sources and only fail when none are available.
+var ErrDefaultConfigUnavailable = errors.New("default config file unavailable")
+
+// MissingCredentialsHint returns extra context to append to a "missing credentials"
+// error when the default config file could not be used, so the real cause is not
+// masked. It returns an empty string for any other error.
+func MissingCredentialsHint(readFileErr error) string {
+	if errors.Is(readFileErr, ErrDefaultConfigUnavailable) {
+		return fmt.Sprintf(" (%s)", readFileErr.Error())
+	}
+	return ""
+}
+
 // LoadFileConfigWithLogging wraps fileconfiguration.NewFromEnv() with pre/post logging
 // so that users can trace config file loading with TF_LOG=DEBUG.
+//
+// When the default config file cannot be used (its path is unresolvable or the file
+// does not exist), the returned error wraps ErrDefaultConfigUnavailable, which callers
+// should treat as non-fatal unless no other credentials are available. Any other
+// returned error is a hard failure.
 func LoadFileConfigWithLogging(ctx context.Context) (*fileconfiguration.FileConfig, error) {
 	// Resolve path for logging
 	filePath := os.Getenv(shared.IonosFilePathEnvVar)
@@ -26,27 +48,35 @@ func LoadFileConfigWithLogging(ctx context.Context) (*fileconfiguration.FileConf
 		defaultPath, err := fileconfiguration.DefaultConfigFileName()
 		if err != nil {
 			tflog.Debug(ctx, "could not determine default config file path", map[string]any{"error": err.Error()})
+			return nil, fmt.Errorf("%w: could not determine the default config file path: %v", ErrDefaultConfigUnavailable, err)
+		}
+		filePath = defaultPath
+	}
+
+	info, statErr := os.Stat(filePath) //nolint:gosec // G703 - path from user's own env var
+	if os.IsNotExist(statErr) {
+		tflog.Debug(ctx, "config file", map[string]any{"path": filePath, "source": source, "status": "not found"})
+		if source == "default" {
+			// The default config file is optional: non-fatal unless no other credentials exist.
+			return nil, fmt.Errorf("%w: default config file %q not found", ErrDefaultConfigUnavailable, filePath)
+		}
+		// IONOS_CONFIG_FILE explicitly points at a file that does not exist: treat it as a hard error.
+		return nil, fmt.Errorf("file config %q set via %s does not exist", filePath, shared.IonosFilePathEnvVar)
+	}
+
+	status := "found"
+	if statErr != nil {
+		status = fmt.Sprintf("stat failed: %v", statErr)
+	} else {
+		if f, readErr := os.Open(filePath); readErr != nil { //nolint:gosec // G304 - path from user's own env var
+			status = fmt.Sprintf("found but unreadable (permissions: %04o)", info.Mode().Perm())
 		} else {
-			filePath = defaultPath
+			_ = f.Close()
 		}
 	}
+	tflog.Debug(ctx, "config file", map[string]any{"path": filePath, "source": source, "status": status})
 
-	if filePath != "" {
-		var status string
-		info, err := os.Stat(filePath) //nolint:gosec // G703 - path from user's own env var
-		if err == nil {
-			status = "found"
-			if f, readErr := os.Open(filePath); readErr != nil { //nolint:gosec // G304 - path from user's own env var
-				status = fmt.Sprintf("found but unreadable (permissions: %04o)", info.Mode().Perm())
-			} else {
-				_ = f.Close()
-			}
-		} else if os.IsNotExist(err) {
-			status = "not found"
-		}
-		tflog.Debug(ctx, "config file", map[string]any{"path": filePath, "source": source, "status": status})
-	}
-
+	// NewFromEnv parses and validates the file config; any problem is a hard error.
 	fileConfig, err := fileconfiguration.NewFromEnv()
 	if err != nil {
 		tflog.Debug(ctx, "config file not loaded", map[string]any{"error": err.Error()})

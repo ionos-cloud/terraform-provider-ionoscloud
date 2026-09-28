@@ -2,6 +2,7 @@ package configlog
 
 import (
 	"context"
+	"errors"
 	"os"
 	"strings"
 	"testing"
@@ -366,13 +367,14 @@ func TestLoadFileConfigWithLogging_UnreadableFile(t *testing.T) {
 	assertContains(t, output, "0000")
 }
 
-func TestLoadFileConfigWithLogging_NoFile(t *testing.T) {
+func TestLoadFileConfigWithLogging_ExplicitMissingFile(t *testing.T) {
 	t.Setenv(shared.IonosFilePathEnvVar, "/tmp/nonexistent-ionos-config-test-file")
 
+	// An explicitly-requested file (via IONOS_CONFIG_FILE) that is missing is a hard error.
 	output := captureLog(t, func(ctx context.Context) {
 		cfg, err := LoadFileConfigWithLogging(ctx)
 		if err == nil {
-			t.Error("expected error for nonexistent file")
+			t.Error("expected error for explicitly-set but nonexistent file")
 		}
 		if cfg != nil {
 			t.Error("expected nil config for nonexistent file")
@@ -382,6 +384,97 @@ func TestLoadFileConfigWithLogging_NoFile(t *testing.T) {
 	assertContains(t, output, "/tmp/nonexistent-ionos-config-test-file")
 	assertContains(t, output, "IONOS_CONFIG_FILE")
 	assertContains(t, output, "not found")
+}
+
+func TestLoadFileConfigWithLogging_DefaultMissingFile(t *testing.T) {
+	// No IONOS_CONFIG_FILE set, and HOME points at a dir with no .ionos/config:
+	// a missing default file is non-fatal, returned as ErrDefaultConfigUnavailable so
+	// callers can fall back to other credentials.
+	t.Setenv(shared.IonosFilePathEnvVar, "")
+	t.Setenv("HOME", t.TempDir())
+
+	cfg, err := LoadFileConfigWithLogging(context.Background())
+	if err == nil {
+		t.Fatal("expected an error for a missing default file")
+	}
+	if !errors.Is(err, ErrDefaultConfigUnavailable) {
+		t.Errorf("expected ErrDefaultConfigUnavailable, got: %v", err)
+	}
+	if cfg != nil {
+		t.Error("expected nil config for missing default file")
+	}
+}
+
+func TestLoadFileConfigWithLogging_DefaultPathUnresolved(t *testing.T) {
+	// No IONOS_CONFIG_FILE and no resolvable home directory: the default path cannot
+	// be determined. This is returned as the non-fatal ErrDefaultConfigUnavailable
+	// sentinel so callers can fall back to other credentials.
+	t.Setenv(shared.IonosFilePathEnvVar, "")
+	t.Setenv("HOME", "")
+
+	output := captureLog(t, func(ctx context.Context) {
+		cfg, err := LoadFileConfigWithLogging(ctx)
+		if err == nil {
+			t.Fatal("expected an error when the default path cannot be resolved")
+		}
+		if !errors.Is(err, ErrDefaultConfigUnavailable) {
+			t.Errorf("expected ErrDefaultConfigUnavailable, got: %v", err)
+		}
+		if cfg != nil {
+			t.Error("expected nil config when the default path cannot be resolved")
+		}
+	})
+
+	assertContains(t, output, "could not determine default config file path")
+}
+
+func TestMissingCredentialsHint(t *testing.T) {
+	wrapped := errors.Join(ErrDefaultConfigUnavailable) // keeps errors.Is true
+	if hint := MissingCredentialsHint(wrapped); !strings.Contains(hint, ErrDefaultConfigUnavailable.Error()) {
+		t.Errorf("expected hint to mention the unavailable default config, got %q", hint)
+	}
+	if hint := MissingCredentialsHint(errors.New("some other error")); hint != "" {
+		t.Errorf("expected empty hint for unrelated error, got %q", hint)
+	}
+	if hint := MissingCredentialsHint(nil); hint != "" {
+		t.Errorf("expected empty hint for nil error, got %q", hint)
+	}
+}
+
+func TestLoadFileConfigWithLogging_InvalidFile(t *testing.T) {
+	tmpFile, err := os.CreateTemp("", "ionos-config-invalid-*.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.Remove(tmpFile.Name())
+
+	// Parses fine, but "clod" is not a known product, so Validate() must fail.
+	content := `version: 1.0
+environments:
+  - name: dev
+    products:
+      - name: clod
+        endpoints:
+          - name: https://api.example.com
+`
+	if _, err := tmpFile.WriteString(content); err != nil {
+		t.Fatal(err)
+	}
+	tmpFile.Close()
+
+	t.Setenv(shared.IonosFilePathEnvVar, tmpFile.Name())
+
+	// A present but invalid file is a hard error, and the config is not returned.
+	output := captureLog(t, func(ctx context.Context) {
+		cfg, loadErr := LoadFileConfigWithLogging(ctx)
+		if loadErr == nil {
+			t.Error("expected error for invalid file")
+		}
+		if cfg != nil {
+			t.Error("expected nil config for invalid file")
+		}
+	})
+
 	assertContains(t, output, "config file not loaded")
 }
 
