@@ -63,6 +63,8 @@ resource "ionoscloud_lan" "example" {
 * `ip_failover` - (Computed) IP failover configurations for lan
   * `ip`
   * `nic_uuid`
+
+> **Note:** `terraform plan -generate-config-out` writes one empty `ip_failover {}` block per entry of this computed attribute. The blocks plan as a no-op and can be removed from the generated configuration.
   
 ## Import
 

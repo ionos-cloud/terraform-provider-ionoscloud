@@ -116,7 +116,7 @@ resource "random_password" "volume_image_password" {
 ## Argument reference
 
 * `datacenter_id` - (Required)[string] The ID of a Virtual Data Center.
-* `server_id` - (Required)[string] The ID of a server.
+* `server_id` - (Optional)[string] The ID of the server the volume is attached to. Leave it unset for a volume that is not attached to any server. Changing it attaches the volume to the new server, detaching it from the previous one first.
 * `disk_type` - (Required)[string] The volume type. Possible values: `HDD`, `SSD`, `SSD Standard`, `SSD Premium`, `DAS`, `ISO`, `ESSENTIAL`, `BALANCED`, `PERFORMANCE`. This property is immutable.
 * `bus` - (Optional)[Boolean] The bus type of the volume: VIRTIO or IDE.
 * `size` -  (Required)[integer] The size of the volume in GB.
@@ -155,4 +155,10 @@ Resource Volume can be imported using the `resource id`, e.g.
 
 ```shell
 terraform import ionoscloud_volume.myvolume datacenter uuid/server uuid/volume uuid
+```
+
+A volume that is not attached to any server is imported without the server part, and `server_id` stays unset:
+
+```shell
+terraform import ionoscloud_volume.myvolume datacenter uuid/volume uuid
 ```

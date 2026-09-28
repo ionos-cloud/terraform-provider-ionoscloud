@@ -598,13 +598,8 @@ func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta an
 	// it also returns false when inline_volume_ids is present in the state as an empty list; checking
 	// the raw state directly ensures this only fires when the attribute is completely absent.
 	if rawState := d.GetRawState(); !rawState.IsNull() && rawState.GetAttr("inline_volume_ids").IsNull() {
-		if bootVolume, ok := d.GetOk("boot_volume"); ok {
-			bootVolume := bootVolume.(string)
-			var inlineVolumeIDs []string
-			inlineVolumeIDs = append(inlineVolumeIDs, bootVolume)
-			if err := d.Set("inline_volume_ids", inlineVolumeIDs); err != nil {
-				return diagutil.ToDiags(d, utils.GenerateSetError("cube_server", "inline_volume_ids", err), nil)
-			}
+		if err := d.Set("inline_volume_ids", seedInlineVolumeIDs(d)); err != nil {
+			return diagutil.ToDiags(d, utils.GenerateSetError("cube_server", "inline_volume_ids", err), nil)
 		}
 	}
 
@@ -614,53 +609,14 @@ func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta an
 		}
 	}
 
-	if server.Entities != nil && server.Entities.Volumes != nil && server.Entities.Volumes.Items != nil && len(*server.Entities.Volumes.Items) > 0 &&
-		(*server.Entities.Volumes.Items)[0].Properties.Image != nil {
-		if err := d.Set("boot_image", *(*server.Entities.Volumes.Items)[0].Properties.Image); err != nil {
+	if image, ok := firstVolumeImage(&server); ok {
+		if err := d.Set("boot_image", image); err != nil {
 			return diagutil.ToDiags(d, err, nil)
 		}
 	}
 
-	if primarynic, ok := d.GetOk("primary_nic"); ok {
-		if err := d.Set("primary_nic", primarynic.(string)); err != nil {
-			return diagutil.ToDiags(d, err, nil)
-		}
-		ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
-
-		nic, apiResponse, err := ns.Get(ctx, dcID, serverID, primarynic.(string), 0)
-		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("error occurred while fetching nic %s %w", primarynic.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
-		}
-
-		if len(*nic.Properties.Ips) > 0 {
-			if err := d.Set("primary_ip", (*nic.Properties.Ips)[0]); err != nil {
-				return diagutil.ToDiags(d, err, nil)
-			}
-		}
-
-		network := cloudapinic.SetNetworkProperties(*nic)
-
-		if nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
-			network["ips"] = *nic.Properties.Ips
-		}
-
-		if firewallID, ok := d.GetOk("firewallrule_id"); ok {
-			firewall, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, dcID, serverID, primarynic.(string), firewallID.(string)).Execute()
-			logApiRequestTime(apiResponse)
-			if err != nil {
-				requestLocation, _ := apiResponse.SafeLocation()
-				return diagutil.ToDiags(d, fmt.Errorf("error occurred while fetching firewallrule %s for server ID %s %w", firewallID.(string), serverID, err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
-			}
-
-			fw := cloudapifirewall.SetProperties(firewall)
-
-			network["firewall"] = []map[string]any{fw}
-		}
-
-		networks := []map[string]any{network}
-		if err := d.Set("nic", networks); err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("[ERROR] unable to save nic to state IONOS CLOUD Server (%s): %w", serverID, err), nil)
-		}
+	if diags := setCubeServerPrimaryNic(ctx, d, meta, client, dcID, serverID); diags != nil {
+		return diags
 	}
 
 	inlineVolumeIDs := d.Get("inline_volume_ids")
@@ -694,6 +650,63 @@ func resourceCubeServerRead(ctx context.Context, d *schema.ResourceData, meta an
 		}
 	}
 
+	return nil
+}
+
+// setCubeServerPrimaryNic refreshes primary_ip and the inline nic block from the primary NIC. A
+// primary NIC deleted outside Terraform clears them instead of failing the read, which would
+// otherwise also block destroy.
+func setCubeServerPrimaryNic(ctx context.Context, d *schema.ResourceData, meta any, client *ionoscloud.APIClient, dcID, serverID string) diag.Diagnostics {
+	primarynic, ok := d.GetOk("primary_nic")
+	if !ok {
+		return nil
+	}
+	ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
+
+	nic, apiResponse, err := ns.Get(ctx, dcID, serverID, primarynic.(string), 0)
+	if err != nil {
+		if httpNotFound(apiResponse) {
+			tflog.Debug(ctx, "primary nic not found, clearing primary_nic/primary_ip/nic", map[string]any{"server_id": serverID, "primary_nic_id": primarynic.(string)})
+			// The NIC's firewall rule went with it, so its id is stale too.
+			for _, key := range []string{"primary_nic", "primary_ip", "firewallrule_id", "nic"} {
+				if err := d.Set(key, nil); err != nil {
+					return diagutil.ToDiags(d, err, nil)
+				}
+			}
+			return nil
+		}
+		return diagutil.ToDiags(d, fmt.Errorf("error occurred while fetching nic %s %w", primarynic.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+	}
+
+	if nic.Properties != nil && nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
+		if err := d.Set("primary_ip", (*nic.Properties.Ips)[0]); err != nil {
+			return diagutil.ToDiags(d, err, nil)
+		}
+	}
+
+	network := cloudapinic.SetNetworkProperties(*nic)
+
+	if nic.Properties != nil && nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
+		network["ips"] = *nic.Properties.Ips
+	}
+
+	if firewallID, ok := d.GetOk("firewallrule_id"); ok {
+		firewall, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesFindById(ctx, dcID, serverID, primarynic.(string), firewallID.(string)).Execute()
+		logApiRequestTime(apiResponse)
+		if err != nil {
+			requestLocation, _ := apiResponse.SafeLocation()
+			return diagutil.ToDiags(d, fmt.Errorf("error occurred while fetching firewallrule %s for server ID %s %w", firewallID.(string), serverID, err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
+		}
+
+		fw := cloudapifirewall.SetProperties(firewall)
+
+		network["firewall"] = []map[string]any{fw}
+	}
+
+	networks := []map[string]any{network}
+	if err := d.Set("nic", networks); err != nil {
+		return diagutil.ToDiags(d, fmt.Errorf("[ERROR] unable to save nic to state IONOS CLOUD Server (%s): %w", serverID, err), nil)
+	}
 	return nil
 }
 
@@ -754,18 +767,11 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		}
 	}
 
-	server, apiResponse, err := client.ServersApi.DatacentersServersPatch(ctx, dcID, d.Id()).Server(request).Depth(3).Execute()
-	logApiRequestTime(apiResponse)
-
-	if err != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, fmt.Errorf("error occurred while updating server: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
+	server, diags := patchServerProperties(ctx, d, meta, client, dcID, request)
+	if diags != nil {
+		return diags
 	}
-
-	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
-	}
+	var apiResponse *ionoscloud.APIResponse
 
 	if d.HasChange("security_groups_ids") {
 		if v, ok := d.GetOk("security_groups_ids"); ok {
@@ -832,14 +838,9 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 	// Nic stuff
 	if d.HasChange("nic") {
-		nic := &ionoscloud.Nic{}
-		nicStr := d.Get("primary_nic").(string)
-		for _, n := range *server.Entities.Nics.Items {
-			if *n.Id == nicStr {
-				nic = &n
-				break
-			}
-		}
+		// nil when the primary NIC was deleted outside Terraform (read then clears primary_nic) or
+		// never existed after an import; the NIC is created below instead of patched.
+		nic := findServerNic(&server, d.Get("primary_nic").(string))
 
 		lan := int32(d.Get("nic.0.lan").(int))
 		properties := ionoscloud.NicProperties{
@@ -893,7 +894,7 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 			properties.FirewallType = &vStr
 		}
 
-		if d.HasChange("nic.0.firewall") {
+		if d.HasChange("nic.0.firewall") && nic != nil {
 
 			firewallID := d.Get("firewallrule_id").(string)
 			update := true
@@ -953,9 +954,17 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 		tflog.Debug(ctx, "updating cube nic properties", map[string]any{"properties": string(mProp)})
 		ns := cloudapinic.Service{Client: client, Meta: meta, D: d}
-		_, apiResponse, err = ns.Update(ctx, d.Get("datacenter_id").(string), *server.Id, *nic.Id, properties)
-		if err != nil {
-			return diagutil.ToDiags(d, fmt.Errorf("error updating nic (%w)", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		if nic == nil {
+			created, diags := createCubeServerNic(ctx, d, client, ns, dcID, *server.Id, properties)
+			if diags != nil {
+				return diags
+			}
+			nic = created
+		} else {
+			_, apiResponse, err = ns.Update(ctx, d.Get("datacenter_id").(string), *server.Id, *nic.Id, properties)
+			if err != nil {
+				return diagutil.ToDiags(d, fmt.Errorf("error updating nic (%w)", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+			}
 		}
 
 		if d.HasChange("nic.0.security_groups_ids") {
@@ -982,6 +991,61 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	return resourceCubeServerRead(ctx, d, meta)
+}
+
+// createCubeServerNic recreates the primary NIC of a cube or GPU server that has none, with the
+// inline firewall rule if one is configured, and records the new primary_nic and firewallrule_id.
+func createCubeServerNic(ctx context.Context, d *schema.ResourceData, client *ionoscloud.APIClient, ns cloudapinic.Service, dcID, serverID string, properties ionoscloud.NicProperties) (*ionoscloud.Nic, diag.Diagnostics) {
+	nic := ionoscloud.Nic{Properties: &properties}
+	if firewalls, ok := d.Get("nic.0.firewall").([]any); ok && len(firewalls) > 0 {
+		firewall, diags := getFirewallData(d, "nic.0.firewall.0.", false)
+		if diags != nil {
+			return nil, diags
+		}
+		nic.Entities = &ionoscloud.NicEntities{Firewallrules: &ionoscloud.FirewallRules{Items: &[]ionoscloud.FirewallRule{firewall}}}
+	}
+
+	created, apiResponse, err := ns.Create(ctx, dcID, serverID, nic)
+	if err != nil {
+		return nil, diagutil.ToDiags(d, fmt.Errorf("error creating nic (%w)", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+	}
+	if created.Id == nil {
+		return nil, diagutil.ToDiags(d, fmt.Errorf("created nic for server %s has no id", serverID), nil)
+	}
+	if err := d.Set("primary_nic", *created.Id); err != nil {
+		return nil, diagutil.ToDiags(d, err, nil)
+	}
+
+	// The rule posted with the NIC comes back only on a fresh read of the NIC's rules.
+	firewallRuleID := ""
+	if nic.Entities != nil {
+		rules, apiResponse, err := client.FirewallRulesApi.DatacentersServersNicsFirewallrulesGet(ctx, dcID, serverID, *created.Id).Execute()
+		logApiRequestTime(apiResponse)
+		if err != nil {
+			return nil, diagutil.ToDiags(d, fmt.Errorf("error fetching firewall rules of nic %s: %w", *created.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		}
+		if rules.Items != nil && len(*rules.Items) > 0 && (*rules.Items)[0].Id != nil {
+			firewallRuleID = *(*rules.Items)[0].Id
+		}
+	}
+	if err := d.Set("firewallrule_id", firewallRuleID); err != nil {
+		return nil, diagutil.ToDiags(d, err, nil)
+	}
+	return created, nil
+}
+
+// findServerNic returns the server's NIC with the given id, or nil when id is empty or the
+// server has no such NIC.
+func findServerNic(server *ionoscloud.Server, id string) *ionoscloud.Nic {
+	if id == "" || server == nil || server.Entities == nil || server.Entities.Nics == nil || server.Entities.Nics.Items == nil {
+		return nil
+	}
+	for _, n := range *server.Entities.Nics.Items {
+		if n.Id != nil && *n.Id == id {
+			return &n
+		}
+	}
+	return nil
 }
 
 func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
@@ -1020,12 +1084,9 @@ func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta 
 
 	d.SetId(*server.Id)
 
-	firstNicItem := (*server.Entities.Nics.Items)[0]
-	if server.Entities != nil && server.Entities.Nics != nil && firstNicItem.Properties != nil &&
-		firstNicItem.Properties.Ips != nil &&
-		len(*firstNicItem.Properties.Ips) > 0 {
-		tflog.Debug(ctx, "setting primary_ip", map[string]any{"primary_ip": (*firstNicItem.Properties.Ips)[0]})
-		if err := d.Set("primary_ip", (*firstNicItem.Properties.Ips)[0]); err != nil {
+	if primaryIP, ok := primaryIPFromNics(&server); ok {
+		tflog.Debug(ctx, "setting primary_ip", map[string]any{"primary_ip": primaryIP})
+		if err := d.Set("primary_ip", primaryIP); err != nil {
 			return nil, diagutil.ToError(d, fmt.Errorf("error while setting primary ip: %w", err), nil)
 		}
 	}
@@ -1067,16 +1128,14 @@ func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta 
 		}
 	}
 
-	if server.Entities != nil && server.Entities.Volumes != nil &&
-		len(*server.Entities.Volumes.Items) > 0 &&
-		(*server.Entities.Volumes.Items)[0].Properties.Image != nil {
-		if err := d.Set("boot_image", *(*server.Entities.Volumes.Items)[0].Properties.Image); err != nil {
+	if image, ok := firstVolumeImage(&server); ok {
+		if err := d.Set("boot_image", image); err != nil {
 			return nil, diagutil.ToError(d, fmt.Errorf("error setting boot_image %w", err), nil)
 		}
 	}
 
-	if server.Entities != nil && server.Entities.Nics != nil && len(*server.Entities.Nics.Items) > 0 && (*server.Entities.Nics.Items)[0].Id != nil {
-		primaryNic := *(*server.Entities.Nics.Items)[0].Id
+	if firstNic := firstServerNic(&server); firstNic != nil && firstNic.Id != nil {
+		primaryNic := *firstNic.Id
 		if err := d.Set("primary_nic", primaryNic); err != nil {
 			return nil, diagutil.ToError(d, fmt.Errorf("error setting primary_nic %w", err), nil)
 		}
@@ -1087,7 +1146,7 @@ func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta 
 			return nil, diagutil.ToError(d, err, nil)
 		}
 
-		if len(*nic.Properties.Ips) > 0 {
+		if nic.Properties != nil && nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
 			if err := d.Set("primary_ip", (*nic.Properties.Ips)[0]); err != nil {
 				return nil, diagutil.ToError(d, fmt.Errorf("error setting primary_ip %w", err), nil)
 			}
@@ -1160,4 +1219,36 @@ func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta 
 	d.SetId(parts[1])
 
 	return []*schema.ResourceData{d}, nil
+}
+
+// firstServerNic returns the server's first NIC, or nil when it has none. A cube or GPU server
+// can lose its NIC after creation, so importing or reading it must not assume one exists.
+func firstServerNic(server *ionoscloud.Server) *ionoscloud.Nic {
+	if server == nil || server.Entities == nil || server.Entities.Nics == nil || server.Entities.Nics.Items == nil ||
+		len(*server.Entities.Nics.Items) == 0 {
+		return nil
+	}
+	return &(*server.Entities.Nics.Items)[0]
+}
+
+// primaryIPFromNics returns the first IP of the server's first NIC, if there is one.
+func primaryIPFromNics(server *ionoscloud.Server) (string, bool) {
+	nic := firstServerNic(server)
+	if nic == nil || nic.Properties == nil || nic.Properties.Ips == nil || len(*nic.Properties.Ips) == 0 {
+		return "", false
+	}
+	return (*nic.Properties.Ips)[0], true
+}
+
+// firstVolumeImage returns the image of the server's first attached volume, if it has one.
+func firstVolumeImage(server *ionoscloud.Server) (string, bool) {
+	if server == nil || server.Entities == nil || server.Entities.Volumes == nil || server.Entities.Volumes.Items == nil ||
+		len(*server.Entities.Volumes.Items) == 0 {
+		return "", false
+	}
+	volume := (*server.Entities.Volumes.Items)[0]
+	if volume.Properties == nil || volume.Properties.Image == nil {
+		return "", false
+	}
+	return *volume.Properties.Image, true
 }

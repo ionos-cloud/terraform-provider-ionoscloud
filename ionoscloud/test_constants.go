@@ -445,7 +445,7 @@ const testAccCheckServerConfigMultipleFeaturesUpdate = `
 const testAccCheckInvalidServerConfigCubeNicMultiQueue = `
 	resource "ionoscloud_datacenter" "test_datacenter_nmq" {
     	name                  = "Test datacenter for Cube servers with nicMultiQueue"
-    	location              = "de/fra"
+    	location              = "de/txl"
 	}
 
 	resource "ionoscloud_lan" "test_lan_nmq" {
@@ -483,7 +483,7 @@ const testAccCheckInvalidServerConfigCubeNicMultiQueue = `
 const testAccCheckCubeServerConfig = `
 	resource "ionoscloud_datacenter" "test_datacenter_nmq" {
     	name                  = "Test datacenter for Cube servers with nicMultiQueue"
-    	location              = "de/fra"
+    	location              = "de/txl"
 	}
 
 	resource "ionoscloud_lan" "test_lan_nmq" {
@@ -871,7 +871,7 @@ data "ionoscloud_template" ` + constant.ServerTestResource + ` {
 }
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "server-test"
-	location = "de/fra"
+	location = "de/txl"
 }
 resource "ionoscloud_ipblock" "webserver_ipblock" {
   location = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.location
@@ -927,7 +927,7 @@ data "ionoscloud_template" ` + constant.ServerTestResource + ` {
 }
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
   name       = "server-test"
-  location = "de/fra"
+  location = "de/txl"
 }
 resource "ionoscloud_ipblock" "webserver_ipblock" {
   location = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.location
@@ -995,7 +995,7 @@ data "ionoscloud_template" ` + constant.ServerTestResource + ` {
 }
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
   name       = "server-test"
-  location   = "de/fra"
+  location   = "de/txl"
 }
 resource "ionoscloud_ipblock" "webserver_ipblock" {
   location = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.location
@@ -1063,7 +1063,7 @@ data "ionoscloud_template" ` + constant.ServerTestResource + ` {
 }
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
   name       = "server-test"
-  location   = "de/fra"
+  location   = "de/txl"
 }
 resource "ionoscloud_ipblock" "webserver_ipblock" {
   location = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.location
@@ -1124,7 +1124,7 @@ data "ionoscloud_template" ` + constant.ServerTestResource + ` {
 }
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
   name       = "server-test"
-  location   = "de/fra"
+  location   = "de/txl"
 }
 resource "ionoscloud_ipblock" "webserver_ipblock" {
   location = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.location
@@ -1186,7 +1186,7 @@ data "ionoscloud_template" ` + constant.ServerTestResource + ` {
 }
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
   name       = "server-test"
-  location   = "de/fra"
+  location   = "de/txl"
 }
 resource "ionoscloud_ipblock" "webserver_ipblock" {
   location = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.location
