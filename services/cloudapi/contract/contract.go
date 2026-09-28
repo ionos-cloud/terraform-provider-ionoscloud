@@ -11,7 +11,7 @@ import (
 // GetContractNumber fetches the contract number from the API.
 // Returns the contract number if exactly one contract is found, empty string otherwise.
 func GetContractNumber(ctx context.Context, client *bundleclient.SdkBundle) string {
-	apiClient, err := client.NewCloudAPIClient(ctx, "")
+	apiClient, err := client.NewCloudAPIClientWithFailover(ctx)
 	if err != nil {
 		return ""
 	}

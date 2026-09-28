@@ -381,102 +381,97 @@ func (c SdkBundle) newCloudAPIClientConfig() *ionoscloud.Configuration {
 	return config
 }
 
-// NewCloudAPIClient creates a new *ionoscloud.APIClient for the given location.
+// NewCloudAPIClient creates a new *ionoscloud.APIClient for the given location. It is
+// intended for location-settable Cloud resources.
+//
 // The endpoint is determined in the following order of precedence:
 //  1. IONOS_API_URL environment variable
 //  2. If no file config is provided, use the default endpoint from the SDK
 //  3. If file config is provided but no product overrides exist for the cloud product, use the default endpoint from the SDK
 //  4. If file config is provided and product overrides for cloud are found:
-//     a. If a location override is found for the provided location, use that endpoint
-//     b. If no location override is found but a global override exists, use the global endpoint as fallback
-//     c. If neither is found, return an error
+//     a. If the cloud product defines location based endpoints, the requested
+//     location must be among them - those endpoints are used (failover across them).
+//     If the location is not defined, return an error.
+//     b. If the cloud product defines no regional endpoints, the global endpoints are used
+//     (failover across them).
 func (c SdkBundle) NewCloudAPIClient(ctx context.Context, location string) (*ionoscloud.APIClient, error) {
 	config := c.newCloudAPIClientConfig()
 	if !c.shouldApplyOverrides(ctx, fileconfiguration.Cloud) {
 		return ionoscloud.NewAPIClient(config), nil
 	}
 
-	endpoint := c.fileConfig.GetLocationOverridesWithGlobalFallback(fileconfiguration.Cloud, location)
-	if endpoint == nil {
+	scope := "location based"
+	endpoints := c.fileConfig.FilterLocationOverrides(fileconfiguration.Cloud)
+	if len(endpoints) > 0 {
+		endpoints = c.fileConfig.FilterOverrides(fileconfiguration.Cloud, func(ep fileconfiguration.Endpoint) bool {
+			return strings.EqualFold(strings.TrimSpace(ep.Location), strings.TrimSpace(location))
+		})
+		if len(endpoints) == 0 {
+			return nil, fmt.Errorf(
+				"could not instantiate Cloud API client: no endpoint defined for location %q of the %q product in the file config",
+				location, fileconfiguration.Cloud,
+			)
+		}
+	} else {
+		scope = "global"
+		endpoints = c.fileConfig.FilterGlobalOverrides(fileconfiguration.Cloud)
+	}
+
+	endpointURLs := make([]string, 0, len(endpoints))
+	for _, ep := range endpoints {
+		endpointURLs = append(endpointURLs, ep.Name)
+	}
+	tflog.Debug(ctx, "cloud endpoints from file config", map[string]any{
+		"product": fileconfiguration.Cloud, "scope": scope,
+		"location": configlog.FormatLocation(location), "endpoints": endpointURLs,
+	})
+	if len(endpoints) == 0 {
 		return nil, fmt.Errorf(
-			"could not instantiate Cloud API client: invalid config found for %q product in file config: "+
-				"missing endpoint in location %q and no global endpoints defined for fallback",
-			fileconfiguration.Cloud, location,
+			"could not instantiate Cloud API client: no endpoint defined for the %q product in the file config",
+			fileconfiguration.Cloud,
 		)
 	}
-	tflog.Debug(ctx, "Cloud API: endpoint for location", map[string]any{"location": configlog.FormatLocation(location), "url": endpoint.Name})
-	config.Servers = ionoscloud.ServerConfigurations{
-		{
-			URL:         endpoint.Name,
-			Description: shared.EndpointOverridden + location,
-		},
-	}
-	config.HTTPClient = &http.Client{
-		Transport: shared.CreateTransport(endpoint.SkipTLSVerify, endpoint.CertificateAuthData),
+	if err := configureFailover(ctx, config, fileconfiguration.Cloud, endpoints, c.fileConfig.GetFailoverOptions()); err != nil {
+		return nil, err
 	}
 	return ionoscloud.NewAPIClient(config), nil
 }
 
 // NewCloudAPIClientWithFailover creates a new *ionoscloud.APIClient that distributes requests
 // across all global endpoints configured for the cloud product using the failover strategy
-// defined in the file config. It is intended for resources that do not have a location attribute.
+// defined in the file config. It is intended for global resources that do not have a location
+// attribute, which must always use global endpoints.
 // The endpoint is determined in the following order of precedence:
 //  1. IONOS_API_URL environment variable
 //  2. If no file config is provided, use the default endpoint from the SDK
 //  3. If file config is provided but no product overrides exist for the cloud product, use the default endpoint from the SDK
-//  4. If file config is provided and product overrides for cloud are found:
-//     a. If no failover block is defined, or the strategy is "none", use first endpoint found in file configuration
-//     b. If the strategy is "roundRobin", configure failover across all global endpoints in the file configuration
-//     c. If no global endpoints are found, return an error
-//     d. Any other strategy value is an error
+//  4. If file config is provided and global endpoints for cloud are found, configure failover across them.
+//  5. If file config is provided but the cloud product defines only regional endpoints, return an error:
+//     global resources cannot be used with a regional file config.
 func (c SdkBundle) NewCloudAPIClientWithFailover(ctx context.Context) (*ionoscloud.APIClient, error) {
 	config := c.newCloudAPIClientConfig()
 	if !c.shouldApplyOverrides(ctx, fileconfiguration.Cloud) {
 		return ionoscloud.NewAPIClient(config), nil
 	}
 
-	failoverOptions := c.fileConfig.GetFailoverOptions()
-	if failoverOptions == nil {
-		failoverOptions = &failover.Options{Strategy: failover.None}
-	}
-
 	endpoints := c.fileConfig.FilterGlobalOverrides(fileconfiguration.Cloud)
-	var failoverEndpoints []failover.Endpoint
-	var servers ionoscloud.ServerConfigurations
+	if len(endpoints) == 0 {
+		return nil, fmt.Errorf(
+			"could not instantiate Cloud API client: global resources require global endpoints, "+
+				"but the %q product in the file config doesn't define global endpoints",
+			fileconfiguration.Cloud,
+		)
+	}
+	endpointURLs := make([]string, 0, len(endpoints))
 	for _, ep := range endpoints {
-		failoverEndpoints = append(failoverEndpoints, failover.Endpoint{
-			URL:                 ep.Name,
-			SkipTLSVerify:       ep.SkipTLSVerify,
-			CertificateAuthData: ep.CertificateAuthData,
-		})
-		servers = append(servers, ionoscloud.ServerConfiguration{
-			URL:         ep.Name,
-			Description: shared.EndpointOverridden + "global",
-		})
-		tflog.Debug(ctx, "adding global override endpoint from file config", map[string]any{"url": ep.Name, "skip_tls_verify": ep.SkipTLSVerify, "product": fileconfiguration.Cloud})
-		if ep.CertificateAuthData != "" {
-			tflog.Debug(ctx, "certificateAuthData present", map[string]any{"product": fileconfiguration.Cloud, "cert_auth_data_len": len(ep.CertificateAuthData), "url": ep.Name})
-		}
+		endpointURLs = append(endpointURLs, ep.Name)
 	}
-	tflog.Debug(ctx, "failover config", map[string]any{"product": fileconfiguration.Cloud, "strategy": failoverOptions.Strategy, "endpoints": len(failoverEndpoints)})
-	if len(failoverEndpoints) == 0 {
-		return nil, fmt.Errorf("no global failover endpoints configured for %q", fileconfiguration.Cloud)
+	tflog.Debug(ctx, "global endpoints from file config", map[string]any{
+		"product": fileconfiguration.Cloud, "endpoints": endpointURLs,
+	})
+	if err := configureFailover(ctx, config, fileconfiguration.Cloud, endpoints, c.fileConfig.GetFailoverOptions()); err != nil {
+		return nil, err
 	}
-	//nolint:exhaustive
-	switch failover.NormalizeStrategy(failoverOptions.Strategy) {
-	case failover.NormalizeStrategy(failover.RoundRobin):
-		config.HTTPClient.Transport = failover.NewRoundTripper(failoverEndpoints, *failoverOptions, config.HTTPClient.Transport)
-	case failover.NormalizeStrategy(failover.None), "":
-		servers = servers[0:1]
-		ep := failoverEndpoints[0]
-		if ep.SkipTLSVerify || ep.CertificateAuthData != "" {
-			config.HTTPClient.Transport = shared.CreateTransport(ep.SkipTLSVerify, ep.CertificateAuthData)
-		}
-	default:
-		return nil, fmt.Errorf("invalid failover strategy %q defined in file config, only %q, %q or an empty value are supported",
-			failoverOptions.Strategy, failover.RoundRobin, failover.None)
-	}
-	config.Servers = servers
 	return ionoscloud.NewAPIClient(config), nil
 }
 
