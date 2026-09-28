@@ -152,6 +152,24 @@ func TestAccLanIpv4CidrBlock(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccLanIpv4CidrBlockConfig(true, ""),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "public", "true"),
+				),
+			},
+			{
+				Config: testAccLanIpv4CidrBlockConfig(false, "192.168.42.0/28"),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction(resourceName, plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "public", "false"),
+					resource.TestCheckResourceAttr(resourceName, "ipv4_cidr_block", "192.168.42.0/28"),
+				),
+			},
+			{
 				ResourceName:            resourceName,
 				ImportStateIdFunc:       testAccLanImportStateID,
 				ImportState:             true,
@@ -245,15 +263,20 @@ data ` + constant.LanResource + ` ` + constant.LanDataSourceByID + ` {
 }
 `
 
+// testAccLanIpv4CidrBlockConfig leaves ipv4_cidr_block unset when ipv4CidrBlock is empty.
 func testAccLanIpv4CidrBlockConfig(public bool, ipv4CidrBlock string) string {
+	cidr := "null"
+	if ipv4CidrBlock != "" {
+		cidr = fmt.Sprintf("%q", ipv4CidrBlock)
+	}
 	return testAccCheckDatacenterConfigBasic + fmt.Sprintf(`
 resource %s %s {
   datacenter_id   = %s.%s.id
   public          = %t
   name            = "%s"
-  ipv4_cidr_block = "%s"
+  ipv4_cidr_block = %s
 }`, constant.LanResource, constant.PrivateLANTestResource, constant.DatacenterResource, constant.DatacenterTestResource,
-		public, constant.PrivateLANTestResource, ipv4CidrBlock)
+		public, constant.PrivateLANTestResource, cidr)
 }
 
 const testAccDataSourceLanMatchID = testAccCheckLanConfigBasic + `

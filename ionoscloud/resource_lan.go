@@ -406,20 +406,20 @@ func setLanData(d *schema.ResourceData, lan *ionoscloud.Lan) error {
 			}
 		}
 
-		// A public LAN has no IPv4 CIDR block. Clear it instead of keeping a stale value, so that switching the
-		// LAN back to private with a configured block is planned as a change.
-		ipv4CidrBlock := ""
 		if lan.Properties.Ipv4CidrBlock != nil {
-			ipv4CidrBlock = *lan.Properties.Ipv4CidrBlock
-		}
-		if err := d.Set("ipv4_cidr_block", ipv4CidrBlock); err != nil {
-			return utils.GenerateSetError("lan", "ipv4_cidr_block", err)
+			if err := d.Set("ipv4_cidr_block", *lan.Properties.Ipv4CidrBlock); err != nil {
+				return utils.GenerateSetError("lan", "ipv4_cidr_block", err)
+			}
+		} else {
+			d.Set("ipv4_cidr_block", nil)
 		}
 
 		if lan.Properties.Ipv6CidrBlock != nil {
 			if err := d.Set("ipv6_cidr_block", *lan.Properties.Ipv6CidrBlock); err != nil {
 				return utils.GenerateSetError("lan", "ipv6_cidr_block", err)
 			}
+		} else {
+			d.Set("ipv6_cidr_block", nil)
 		}
 	}
 

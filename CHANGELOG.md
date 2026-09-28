@@ -4,7 +4,7 @@
 - `ionoscloud_lan`: `ipv4_cidr_block` is now an optional argument, so a private LAN can use a chosen IPv4 CIDR block (e.g. `10.5.0.0/24`) instead of the automatically assigned /23. It can only be set on private LANs and can be changed in place.
 
 ### Fixes
-- `ionoscloud_lan`: `ipv4_cidr_block` is now cleared from the state when the API returns no block (a public LAN), instead of keeping the block of a LAN that was switched from private to public.
+- `ionoscloud_lan`: `ipv6_cidr_block` is now cleared from the state when the API returns no block, e.g. after IPv6 is turned off outside Terraform, instead of keeping the old block.
 
 ## 6.7.37
 
