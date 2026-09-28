@@ -170,7 +170,10 @@ func testAccCheckImportGenAttachedVolumes(serverAddr string, want int) resource.
 		if err != nil {
 			return fmt.Errorf("listing volumes attached to server %s: %w", rs.Primary.ID, err)
 		}
-		got := len(volumes.Items)
+		got := 0
+		if volumes.Items != nil {
+			got = len(volumes.Items)
+		}
 		if got != want {
 			return fmt.Errorf("server %s has %d attached volume(s), want %d", rs.Primary.ID, got, want)
 		}

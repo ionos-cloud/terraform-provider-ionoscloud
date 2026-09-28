@@ -26,6 +26,7 @@ func TestPrimaryIPFromNics(t *testing.T) {
 		{name: "nil nics", server: &ionoscloud.Server{Entities: &ionoscloud.ServerEntities{}}},
 		{name: "nil items", server: withNics(nil)},
 		{name: "no nics", server: withNics([]ionoscloud.Nic{})},
+		{name: "nic without properties", server: withNics([]ionoscloud.Nic{{Id: &nicID}}), wantNicID: nicID},
 		{
 			name:      "nic without ips",
 			server:    withNics([]ionoscloud.Nic{{Id: &nicID, Properties: ionoscloud.NicProperties{}}}),

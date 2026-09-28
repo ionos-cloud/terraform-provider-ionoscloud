@@ -160,18 +160,33 @@ func TestIsEmptyServerPatch(t *testing.T) {
 		{name: "name", request: ionoscloud.ServerProperties{Name: &name}, want: false},
 		{name: "cores", request: ionoscloud.ServerProperties{Cores: &cores}, want: false},
 		{name: "explicit false", request: ionoscloud.ServerProperties{NicMultiQueue: &multiQueue}, want: false},
-		{name: "empty enabled features list", request: ionoscloud.ServerProperties{EnabledFeatures: []string{}}, want: false},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// The expectation must agree with the body the SDK would send.
-			if body, err := tt.request.ToMap(); err != nil || (len(body) == 0) != tt.want {
-				t.Fatalf("SDK request body = %v (err: %v), want empty = %v", body, err, tt.want)
-			}
 			if got := isEmptyServerPatch(tt.request); got != tt.want {
 				t.Errorf("isEmptyServerPatch = %v, want %v", got, tt.want)
 			}
 		})
+	}
+}
+
+// The bundle's EnabledFeatures slice makes ServerProperties non-comparable with ==, so the zero
+// check uses reflect.DeepEqual. It must agree with the body the SDK sends, which includes an empty
+// but non-nil slice.
+func TestIsEmptyServerPatchMatchesRequestBody(t *testing.T) {
+	name := "patched-name"
+	for _, request := range []ionoscloud.ServerProperties{
+		{},
+		{Name: &name},
+		{EnabledFeatures: []string{}},
+	} {
+		body, err := request.ToMap()
+		if err != nil {
+			t.Fatalf("ToMap: %v", err)
+		}
+		if got, want := isEmptyServerPatch(request), len(body) == 0; got != want {
+			t.Errorf("isEmptyServerPatch(%+v) = %v, but the SDK request body is %v", request, got, body)
+		}
 	}
 }

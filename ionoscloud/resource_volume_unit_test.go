@@ -150,6 +150,14 @@ func TestParseVolumeImportID(t *testing.T) {
 	}
 }
 
+// server_id must stay optional: an unattached volume has no server, and import leaves it null.
+func TestResourceVolumeServerIDOptional(t *testing.T) {
+	s := resourceVolume().Schema["server_id"]
+	if s.Required || !s.Optional {
+		t.Fatalf("server_id: Required=%v Optional=%v, want optional", s.Required, s.Optional)
+	}
+}
+
 func TestIsEmptyVolumePatch(t *testing.T) {
 	name := "patched-name"
 	nullBootOrder := ionoscloud.VolumeProperties{}
@@ -176,13 +184,5 @@ func TestIsEmptyVolumePatch(t *testing.T) {
 				t.Errorf("isEmptyVolumePatch = %v, want %v", got, tt.want)
 			}
 		})
-	}
-}
-
-// server_id must stay optional: an unattached volume has no server, and import leaves it null.
-func TestResourceVolumeServerIDOptional(t *testing.T) {
-	s := resourceVolume().Schema["server_id"]
-	if s.Required || !s.Optional {
-		t.Fatalf("server_id: Required=%v Optional=%v, want optional", s.Required, s.Optional)
 	}
 }
