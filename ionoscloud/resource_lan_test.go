@@ -14,6 +14,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
@@ -112,6 +113,73 @@ func TestAccLanBasic(t *testing.T) {
 	})
 }
 
+func TestAccLanIpv4CidrBlock(t *testing.T) {
+	var lan ionoscloud.Lan
+	resourceName := constant.LanResource + "." + constant.PrivateLANTestResource
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactoriesInternal(t, &testAccProvider),
+		CheckDestroy:             testAccCheckLanDestroyCheck,
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccLanIpv4CidrBlockConfig(false, "10.5.0.1/24"),
+				ExpectError: regexp.MustCompile(`"errorCode"\s*:\s*"536"`),
+			},
+			{
+				Config:      testAccLanIpv4CidrBlockConfig(true, "10.5.0.0/24"),
+				ExpectError: regexp.MustCompile(`"errorCode"\s*:\s*"656"`),
+			},
+			{
+				Config: testAccLanIpv4CidrBlockConfig(false, "10.5.0.0/24"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckLanExists(resourceName, &lan),
+					resource.TestCheckResourceAttr(resourceName, "public", "false"),
+					resource.TestCheckResourceAttr(resourceName, "ipv4_cidr_block", "10.5.0.0/24"),
+				),
+			},
+			{
+				Config: testAccLanIpv4CidrBlockConfig(false, "192.168.42.0/28"),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction(resourceName, plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "ipv4_cidr_block", "192.168.42.0/28"),
+				),
+			},
+			{
+				Config: testAccLanIpv4CidrBlockConfig(true, ""),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "public", "true"),
+				),
+			},
+			{
+				Config: testAccLanIpv4CidrBlockConfig(false, "192.168.42.0/28"),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction(resourceName, plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "public", "false"),
+					resource.TestCheckResourceAttr(resourceName, "ipv4_cidr_block", "192.168.42.0/28"),
+				),
+			},
+			{
+				ResourceName:            resourceName,
+				ImportStateIdFunc:       testAccLanImportStateID,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location"},
+			},
+		},
+	})
+}
+
 func testAccCheckLanDestroyCheck(s *terraform.State) error {
 	ctx, cancel := context.WithTimeout(context.Background(), *resourceDefaultTimeouts.Delete)
 
@@ -194,6 +262,22 @@ data ` + constant.LanResource + ` ` + constant.LanDataSourceByID + ` {
   id = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
 }
 `
+
+// testAccLanIpv4CidrBlockConfig leaves ipv4_cidr_block unset when ipv4CidrBlock is empty.
+func testAccLanIpv4CidrBlockConfig(public bool, ipv4CidrBlock string) string {
+	cidr := "null"
+	if ipv4CidrBlock != "" {
+		cidr = fmt.Sprintf("%q", ipv4CidrBlock)
+	}
+	return testAccCheckDatacenterConfigBasic + fmt.Sprintf(`
+resource %s %s {
+  datacenter_id   = %s.%s.id
+  public          = %t
+  name            = "%s"
+  ipv4_cidr_block = %s
+}`, constant.LanResource, constant.PrivateLANTestResource, constant.DatacenterResource, constant.DatacenterTestResource,
+		public, constant.PrivateLANTestResource, cidr)
+}
 
 const testAccDataSourceLanMatchID = testAccCheckLanConfigBasic + `
 data ` + constant.LanResource + ` ` + constant.LanDataSourceByID + ` {

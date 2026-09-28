@@ -74,9 +74,11 @@ func resourceLan() *schema.Resource {
 				},
 			},
 			"ipv4_cidr_block": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "For public LANs this property is null, for private LANs it contains the private IPv4 CIDR range. This property is a read only property.",
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				Description:      "For public LANs this property is null, for private LANs it contains the private IPv4 CIDR range. If not set on a private LAN, a range is assigned automatically.",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IsCIDR),
 			},
 			"ipv6_cidr_block": {
 				Type:        schema.TypeString,
@@ -127,6 +129,13 @@ func resourceLanCreate(ctx context.Context, d *schema.ResourceData, meta any) di
 		request.Properties.Ipv6CidrBlock.Set(&ipv6)
 	} else {
 		request.Properties.SetIpv6CidrBlockNil()
+	}
+
+	// Omitted from the request when not configured, so that the API assigns a block automatically.
+	if v, ok := d.GetOk("ipv4_cidr_block"); ok {
+		ipv4 := v.(string)
+		tflog.Info(ctx, "setting ipv4CidrBlock for LAN", map[string]any{"ipv4_cidr_block": ipv4})
+		request.Properties.Ipv4CidrBlock = &ipv4
 	}
 
 	dcid := d.Get("datacenter_id").(string)
@@ -246,6 +255,15 @@ func resourceLanUpdate(ctx context.Context, d *schema.ResourceData, meta any) di
 			properties.Ipv6CidrBlock.Set(&ipv6)
 		} else {
 			properties.SetIpv6CidrBlockNil()
+		}
+	}
+
+	if d.HasChange("ipv4_cidr_block") {
+		_, newIpv4 := d.GetChange("ipv4_cidr_block")
+		if newIpv4 != nil && newIpv4.(string) != "" {
+			tflog.Info(ctx, "setting ipv4CidrBlock for LAN", map[string]any{"lan_id": d.Id(), "ipv4_cidr_block": newIpv4.(string)})
+			ipv4 := newIpv4.(string)
+			properties.Ipv4CidrBlock = &ipv4
 		}
 	}
 
@@ -392,12 +410,16 @@ func setLanData(d *schema.ResourceData, lan *ionoscloud.Lan) error {
 		if err := d.Set("ipv4_cidr_block", *lan.Properties.Ipv4CidrBlock); err != nil {
 			return utils.GenerateSetError("lan", "ipv4_cidr_block", err)
 		}
+	} else {
+		d.Set("ipv4_cidr_block", nil)
 	}
 
-	if lan.Properties.Ipv6CidrBlock.IsSet() {
-		if err := d.Set("ipv6_cidr_block", shared.ToValueDefault(lan.Properties.Ipv6CidrBlock.Get())); err != nil {
+	if ipv6CidrBlock := lan.Properties.Ipv6CidrBlock.Get(); ipv6CidrBlock != nil {
+		if err := d.Set("ipv6_cidr_block", *ipv6CidrBlock); err != nil {
 			return utils.GenerateSetError("lan", "ipv6_cidr_block", err)
 		}
+	} else {
+		d.Set("ipv6_cidr_block", nil)
 	}
 
 	return nil
