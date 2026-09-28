@@ -26,27 +26,32 @@ func LoadFileConfigWithLogging(ctx context.Context) (*fileconfiguration.FileConf
 		defaultPath, err := fileconfiguration.DefaultConfigFileName()
 		if err != nil {
 			tflog.Debug(ctx, "could not determine default config file path", map[string]any{"error": err.Error()})
+			return nil, nil
+		}
+		filePath = defaultPath
+	}
+
+	info, statErr := os.Stat(filePath) //nolint:gosec // G703 - path from user's own env var
+	if os.IsNotExist(statErr) {
+		tflog.Debug(ctx, "config file", map[string]any{"path": filePath, "source": source, "status": "not found"})
+		if source == "default" {
+			return nil, nil
+		}
+		// IONOS_CONFIG_FILE explicitly points at a file that does not exist: treat it as a hard error.
+		return nil, fmt.Errorf("file config %q set via %s does not exist", filePath, shared.IonosFilePathEnvVar)
+	}
+
+	status := "found"
+	if statErr == nil {
+		if f, readErr := os.Open(filePath); readErr != nil { //nolint:gosec // G304 - path from user's own env var
+			status = fmt.Sprintf("found but unreadable (permissions: %04o)", info.Mode().Perm())
 		} else {
-			filePath = defaultPath
+			_ = f.Close()
 		}
 	}
+	tflog.Debug(ctx, "config file", map[string]any{"path": filePath, "source": source, "status": status})
 
-	if filePath != "" {
-		var status string
-		info, err := os.Stat(filePath) //nolint:gosec // G703 - path from user's own env var
-		if err == nil {
-			status = "found"
-			if f, readErr := os.Open(filePath); readErr != nil { //nolint:gosec // G304 - path from user's own env var
-				status = fmt.Sprintf("found but unreadable (permissions: %04o)", info.Mode().Perm())
-			} else {
-				_ = f.Close()
-			}
-		} else if os.IsNotExist(err) {
-			status = "not found"
-		}
-		tflog.Debug(ctx, "config file", map[string]any{"path": filePath, "source": source, "status": status})
-	}
-
+	// NewFromEnv parses and validates the file config; any problem is a hard error.
 	fileConfig, err := fileconfiguration.NewFromEnv()
 	if err != nil {
 		tflog.Debug(ctx, "config file not loaded", map[string]any{"error": err.Error()})

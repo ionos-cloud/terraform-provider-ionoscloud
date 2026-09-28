@@ -366,13 +366,14 @@ func TestLoadFileConfigWithLogging_UnreadableFile(t *testing.T) {
 	assertContains(t, output, "0000")
 }
 
-func TestLoadFileConfigWithLogging_NoFile(t *testing.T) {
+func TestLoadFileConfigWithLogging_ExplicitMissingFile(t *testing.T) {
 	t.Setenv(shared.IonosFilePathEnvVar, "/tmp/nonexistent-ionos-config-test-file")
 
+	// An explicitly-requested file (via IONOS_CONFIG_FILE) that is missing is a hard error.
 	output := captureLog(t, func(ctx context.Context) {
 		cfg, err := LoadFileConfigWithLogging(ctx)
 		if err == nil {
-			t.Error("expected error for nonexistent file")
+			t.Error("expected error for explicitly-set but nonexistent file")
 		}
 		if cfg != nil {
 			t.Error("expected nil config for nonexistent file")
@@ -382,6 +383,57 @@ func TestLoadFileConfigWithLogging_NoFile(t *testing.T) {
 	assertContains(t, output, "/tmp/nonexistent-ionos-config-test-file")
 	assertContains(t, output, "IONOS_CONFIG_FILE")
 	assertContains(t, output, "not found")
+}
+
+func TestLoadFileConfigWithLogging_DefaultMissingFile(t *testing.T) {
+	// No IONOS_CONFIG_FILE set, and HOME points at a dir with no .ionos/config:
+	// a missing default file is not an error - proceed on defaults.
+	t.Setenv(shared.IonosFilePathEnvVar, "")
+	t.Setenv("HOME", t.TempDir())
+
+	cfg, err := LoadFileConfigWithLogging(context.Background())
+	if err != nil {
+		t.Errorf("expected no error for missing default file, got: %s", err)
+	}
+	if cfg != nil {
+		t.Error("expected nil config for missing default file")
+	}
+}
+
+func TestLoadFileConfigWithLogging_InvalidFile(t *testing.T) {
+	tmpFile, err := os.CreateTemp("", "ionos-config-invalid-*.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.Remove(tmpFile.Name())
+
+	// Parses fine, but "clod" is not a known product, so Validate() must fail.
+	content := `version: 1.0
+environments:
+  - name: dev
+    products:
+      - name: clod
+        endpoints:
+          - name: https://api.example.com
+`
+	if _, err := tmpFile.WriteString(content); err != nil {
+		t.Fatal(err)
+	}
+	tmpFile.Close()
+
+	t.Setenv(shared.IonosFilePathEnvVar, tmpFile.Name())
+
+	// A present but invalid file is a hard error, and the config is not returned.
+	output := captureLog(t, func(ctx context.Context) {
+		cfg, loadErr := LoadFileConfigWithLogging(ctx)
+		if loadErr == nil {
+			t.Error("expected error for invalid file")
+		}
+		if cfg != nil {
+			t.Error("expected nil config for invalid file")
+		}
+	})
+
 	assertContains(t, output, "config file not loaded")
 }
 
