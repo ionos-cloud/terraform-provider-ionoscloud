@@ -1,6 +1,10 @@
 ## 6.7.38 -- upcoming release
 ### Features
 - `ionoscloud_template`: add new, optional attribute: `storage_type`
+- `ionoscloud_lan`: `ipv4_cidr_block` is now an optional argument, so a private LAN can use a chosen IPv4 CIDR block (e.g. `10.5.0.0/24`) instead of the automatically assigned /23. It can only be set on private LANs and can be changed in place.
+
+### Fixes
+- `ionoscloud_lan`: `ipv6_cidr_block` is now cleared from the state when the API returns no block, e.g. after IPv6 is turned off outside Terraform, instead of keeping the old block.
 
 ### Fixes
 - `ionoscloud_volume`: Volumes that are not attached to any server can now be managed and imported. `server_id` is optional, and `<datacenter-id>/<volume-id>` imports a standalone volume without producing an invalid `server_id = ""` in generated configuration. Changing `server_id` now detaches the volume from the previous server before attaching it to the new one, removing `server_id` detaches the volume, and an update that only changes the attachment no longer sends an empty volume PATCH.
