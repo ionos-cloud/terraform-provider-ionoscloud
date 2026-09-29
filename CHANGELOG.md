@@ -1,6 +1,5 @@
-## 6.7.38 -- upcoming release
+## 6.7.39 -- upcoming release
 ### Features
-- `ionoscloud_template`: add new, optional attribute: `storage_type`
 - `ionoscloud_ipblock`: New list resource, queryable with `terraform query` (requires Terraform 1.14+).
 - `ionoscloud_ipblock`: Add a resource identity (`id`, `location`), which also enables `import` blocks with an `identity` attribute.
 - `ionoscloud_dns_zone`: New list resource, queryable with `terraform query` (requires Terraform 1.14+).
@@ -8,6 +7,25 @@
 
 ### Docs
 - Fix the malformed `terraform import` examples in the `ionoscloud_dns_zone` and `ionoscloud_ipblock` docs.
+
+## 6.7.38
+### Features
+- `ionoscloud_template`: add new, optional attribute: `storage_type`
+- `ionoscloud_lan`: `ipv4_cidr_block` is now an optional argument, so a private LAN can use a chosen IPv4 CIDR block (e.g. `10.5.0.0/24`) instead of the automatically assigned /23. It can only be set on private LANs and can be changed in place.
+
+### Fixes
+- `ionoscloud_lan`: `ipv6_cidr_block` is now cleared from the state when the API returns no block, e.g. after IPv6 is turned off outside Terraform, instead of keeping the old block.
+
+### Fixes
+- `ionoscloud_volume`: Volumes that are not attached to any server can now be managed and imported. `server_id` is optional, and `<datacenter-id>/<volume-id>` imports a standalone volume without producing an invalid `server_id = ""` in generated configuration. Changing `server_id` now detaches the volume from the previous server before attaching it to the new one, removing `server_id` detaches the volume, and an update that only changes the attachment no longer sends an empty volume PATCH.
+- `ionoscloud_server`, `ionoscloud_vcpu_server`, `ionoscloud_cube_server`, `ionoscloud_gpu_server`: A server without a boot volume no longer plans `inline_volume_ids` as "known after apply" on every plan, so importing it is a no-op instead of an update. Updates that change no server property no longer send an empty server PATCH.
+- `ionoscloud_cube_server`, `ionoscloud_gpu_server`: Fix a panic when importing a server that has no NIC, and a read error (which also blocked destroy) when the primary NIC was deleted outside Terraform. The next apply recreates the configured `nic` instead of trying to update the missing one.
+- `ionoscloud_server`: Fix a possible panic when importing with a primary NIC id whose NIC has no IPs.
+- `ionoscloud_ipfailover`: Fix importing an IPv6 IP failover (`<datacenter-id>/<lan-id>/<ipv6>`): the address was misread as a `<location>:` prefix.
+
+### Docs
+- `ionoscloud_server`, `ionoscloud_vcpu_server`: Correct the import docs: `<datacenter-id>/<server-id>` imports the server without an inline `nic`; its NICs are separate `ionoscloud_nic` resources.
+- `ionoscloud_lan`, `ionoscloud_ipblock`: Note that generated configuration contains an empty `ip_failover {}` / `ip_consumers {}` block per entry for these computed attributes. The blocks plan as a no-op and can be removed.
 
 ## 6.7.37
 

@@ -110,3 +110,50 @@ func TestFindCompatibleVolumeImage_CaseInsensitiveNameMatch(t *testing.T) {
 		t.Fatalf("match id = %v, want hdd-txl", match)
 	}
 }
+
+func TestParseVolumeImportID(t *testing.T) {
+	const dc, srv, vol = "dc-1", "srv-a", "vol-1"
+
+	tests := []struct {
+		name                                   string
+		importID                               string
+		wantLocation, wantDC, wantSrv, wantVol string
+		wantErr                                bool
+	}{
+		{name: "attached", importID: "dc-1/srv-a/vol-1", wantDC: dc, wantSrv: srv, wantVol: vol},
+		{name: "attached with location", importID: "de/fra:dc-1/srv-a/vol-1", wantLocation: "de/fra", wantDC: dc, wantSrv: srv, wantVol: vol},
+		{name: "unattached", importID: "dc-1/vol-1", wantDC: dc, wantVol: vol},
+		{name: "unattached with location", importID: "de/txl:dc-1/vol-1", wantLocation: "de/txl", wantDC: dc, wantVol: vol},
+		{name: "volume id only", importID: "vol", wantErr: true},
+		{name: "too many parts", importID: "dc-1/srv-a/vol-1/extra", wantErr: true},
+		{name: "empty server part", importID: "dc-1//vol-1", wantErr: true},
+		{name: "empty volume part", importID: "dc-1/", wantErr: true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			location, dcID, serverID, volumeID, err := parseVolumeImportID(tt.importID)
+			if tt.wantErr {
+				if err == nil {
+					t.Fatalf("parseVolumeImportID(%q) error = nil, want an error", tt.importID)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("parseVolumeImportID(%q) unexpected error: %v", tt.importID, err)
+			}
+			if location != tt.wantLocation || dcID != tt.wantDC || serverID != tt.wantSrv || volumeID != tt.wantVol {
+				t.Errorf("parseVolumeImportID(%q) = (%q, %q, %q, %q), want (%q, %q, %q, %q)", tt.importID,
+					location, dcID, serverID, volumeID, tt.wantLocation, tt.wantDC, tt.wantSrv, tt.wantVol)
+			}
+		})
+	}
+}
+
+// server_id must stay optional: an unattached volume has no server, and import leaves it null.
+func TestResourceVolumeServerIDOptional(t *testing.T) {
+	s := resourceVolume().Schema["server_id"]
+	if s.Required || !s.Optional {
+		t.Fatalf("server_id: Required=%v Optional=%v, want optional", s.Required, s.Optional)
+	}
+}

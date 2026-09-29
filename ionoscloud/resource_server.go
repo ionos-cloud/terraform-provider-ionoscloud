@@ -719,16 +719,15 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta any)
 
 	}
 
-	// Set inline volumes
+	// Set inline volumes. Always set, even when empty: see seedInlineVolumeIDs.
+	inlineVolumeIDs := []string{}
 	if foundServer.Entities.Volumes != nil && foundServer.Entities.Volumes.Items != nil {
-		var inlineVolumeIDs []string
 		for _, volume := range *foundServer.Entities.Volumes.Items {
 			inlineVolumeIDs = append(inlineVolumeIDs, *volume.Id)
 		}
-
-		if err := d.Set("inline_volume_ids", inlineVolumeIDs); err != nil {
-			return diagutil.ToDiags(d, utils.GenerateSetError("server", "inline_volume_ids", err), nil)
-		}
+	}
+	if err := d.Set("inline_volume_ids", inlineVolumeIDs); err != nil {
+		return diagutil.ToDiags(d, utils.GenerateSetError("server", "inline_volume_ids", err), nil)
 	}
 
 	if initialState, ok := d.GetOk("vm_state"); ok {
@@ -918,18 +917,11 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta any)
 		request.NicMultiQueue = &nicMultiQueue
 	}
 
-	server, apiResponse, err := client.ServersApi.DatacentersServersPatch(ctx, dcID, d.Id()).Server(request).Depth(3).Execute()
-	logApiRequestTime(apiResponse)
-
-	if err != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, fmt.Errorf("error occurred while updating server: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
+	server, diags := patchServerProperties(ctx, d, meta, client, dcID, request)
+	if diags != nil {
+		return diags
 	}
-
-	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
-		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
-	}
+	var apiResponse *ionoscloud.APIResponse
 
 	if d.HasChange("security_groups_ids") {
 		_, v := d.GetChange("security_groups_ids")
@@ -1181,6 +1173,38 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, meta any)
 	return serverReadForType(ctx, d, meta)
 }
 
+// patchServerProperties sends the server properties PATCH and returns the server at depth 3. When
+// no property changed it only reads the server: an empty PATCH is still a real write request, and
+// updates that touch nothing but volumes, NICs, labels or computed attributes must not issue one.
+func patchServerProperties(ctx context.Context, d *schema.ResourceData, meta any, client *ionoscloud.APIClient, dcID string, request ionoscloud.ServerProperties) (ionoscloud.Server, diag.Diagnostics) {
+	if isEmptyServerPatch(request) {
+		server, apiResponse, err := client.ServersApi.DatacentersServersFindById(ctx, dcID, d.Id()).Depth(3).Execute()
+		logApiRequestTime(apiResponse)
+		if err != nil {
+			return server, diagutil.ToDiags(d, fmt.Errorf("error occurred while fetching server: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+		}
+		return server, nil
+	}
+
+	server, apiResponse, err := client.ServersApi.DatacentersServersPatch(ctx, dcID, d.Id()).Server(request).Depth(3).Execute()
+	logApiRequestTime(apiResponse)
+	if err != nil {
+		requestLocation, _ := apiResponse.SafeLocation()
+		return server, diagutil.ToDiags(d, fmt.Errorf("error occurred while updating server: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
+	}
+
+	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
+		requestLocation, _ := apiResponse.SafeLocation()
+		return server, diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
+	}
+	return server, nil
+}
+
+// isEmptyServerPatch reports whether a server properties PATCH would carry no field.
+func isEmptyServerPatch(request ionoscloud.ServerProperties) bool {
+	return request == ionoscloud.ServerProperties{}
+}
+
 func deleteInlineVolumes(ctx context.Context, d *schema.ResourceData, meta any, client *ionoscloud.APIClient) diag.Diagnostics {
 	dcID := d.Get("datacenter_id").(string)
 
@@ -1232,6 +1256,16 @@ func shouldSeedInlineVolumeIDs(d *schema.ResourceData) bool {
 	}
 	volumes, ok := d.Get("volume").([]any)
 	return ok && len(volumes) > 0
+}
+
+// seedInlineVolumeIDs returns the ownership list to seed: the boot volume, or an empty list for a
+// server without one. Never null - a null computed list is planned as "known after apply" on every
+// plan, so an imported server without a boot volume would never converge.
+func seedInlineVolumeIDs(d *schema.ResourceData) []string {
+	if bootVolume, ok := d.GetOk("boot_volume"); ok {
+		return []string{bootVolume.(string)}
+	}
+	return []string{}
 }
 
 // detachableVolumeIDs returns the volumes attached to the server that Terraform does not own,
@@ -1366,7 +1400,9 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, meta any)
 	return nil
 }
 
-// resourceServerImport can be either ionoscloud_server.myserver {datacenter uuid}/{server uuid} or  ionoscloud_server.myserver {datacenter uuid}/{server uuid}/{primary nic id}/{firewall rule id}
+// resourceServerImport accepts {datacenter uuid}/{server uuid}, which imports the server without an
+// inline nic, or {datacenter uuid}/{server uuid}/{primary nic id}[/{firewall rule id}], which also
+// imports that NIC (and firewall rule) inline.
 func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	importID := d.Id()
 	location, parts := splitImportID(importID, "/")
@@ -1400,34 +1436,16 @@ func resourceServerImport(ctx context.Context, d *schema.ResourceData, meta any)
 		}
 		return nil, diagutil.ToError(d, fmt.Errorf("error occurred while fetching a server ID %s %w", importID, err), nil)
 	}
-	var primaryNic ionoscloud.Nic
 	d.SetId(*server.Id)
-	primaryNicID := ""
-	// first we try to get primary nic from parts, then if that fails, we get it from entities.
+	// Only an explicit third part makes a NIC the inline primary nic. With <datacenter-id>/<server-id>
+	// the server manages no NIC, so its NICs can be imported as separate ionoscloud_nic resources.
 	if len(parts) > 2 {
-		primaryNicID = parts[2]
+		primaryNicID := parts[2]
 		if err := d.Set("primary_nic", primaryNicID); err != nil {
 			return nil, diagutil.ToError(d, fmt.Errorf("error setting primary_nic id %w", err), nil)
 		}
-	} else {
-		if server.Entities != nil && server.Entities.Nics != nil && len(*server.Entities.Nics.Items) > 0 {
-			primaryNic = (*server.Entities.Nics.Items)[0]
-		}
-	}
-	if primaryNicID != "" {
-		if server.Entities != nil && server.Entities.Nics != nil && server.Entities.Nics.Items != nil {
-			for _, nic := range *server.Entities.Nics.Items {
-				if *nic.Id == primaryNicID {
-					primaryNic = nic
-					if primaryNic.Properties != nil && *nic.Properties.Ips != nil && len(*nic.Properties.Ips) > 0 {
-						tflog.Debug(ctx, "setting primary_ip", map[string]any{"primary_ip": (*primaryNic.Properties.Ips)[0]})
-						if err := d.Set("primary_ip", (*primaryNic.Properties.Ips)[0]); err != nil {
-							return nil, diagutil.ToError(d, fmt.Errorf("error while setting primary ip: %w", err), nil)
-						}
-					}
-					break
-				}
-			}
+		if err := setServerPrimaryIPFromNic(ctx, d, &server, primaryNicID); err != nil {
+			return nil, diagutil.ToError(d, err, nil)
 		}
 	}
 
@@ -1624,13 +1642,8 @@ func setResourceServerData(ctx context.Context, client *ionoscloud.APIClient, d 
 	// to one that has it(>6.4.0), and of a state whose ownership list went empty while an inline
 	// volume block is still declared. See shouldSeedInlineVolumeIDs.
 	if shouldSeedInlineVolumeIDs(d) {
-		if bootVolumeItf, ok := d.GetOk("boot_volume"); ok {
-			bootVolume := bootVolumeItf.(string)
-			var inlineVolumeIDs []string
-			inlineVolumeIDs = append(inlineVolumeIDs, bootVolume)
-			if err := d.Set("inline_volume_ids", inlineVolumeIDs); err != nil {
-				return utils.GenerateSetError("server", "inline_volume_ids", err)
-			}
+		if err := d.Set("inline_volume_ids", seedInlineVolumeIDs(d)); err != nil {
+			return utils.GenerateSetError("server", "inline_volume_ids", err)
 		}
 	}
 
