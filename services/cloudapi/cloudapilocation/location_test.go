@@ -8,7 +8,8 @@ import (
 	"slices"
 	"testing"
 
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 )
 
 // newMockAPIClient returns an APIClient whose requests are served by handler. The SDK
@@ -18,7 +19,7 @@ func newMockAPIClient(t *testing.T, handler http.HandlerFunc) *ionoscloud.APICli
 	t.Helper()
 	srv := httptest.NewServer(handler)
 	t.Cleanup(srv.Close)
-	return ionoscloud.NewAPIClient(ionoscloud.NewConfiguration("", "", "", srv.URL))
+	return ionoscloud.NewAPIClient(shared.NewConfiguration("", "", "", srv.URL))
 }
 
 func TestResolveParentLocation(t *testing.T) {

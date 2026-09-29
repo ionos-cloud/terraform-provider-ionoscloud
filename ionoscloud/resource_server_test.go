@@ -11,7 +11,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -989,7 +989,7 @@ func testAccCheckServerAndVolumesDestroyed(dcName string) resource.TestCheckFunc
 		logApiRequestTime(apiResponse)
 		if err == nil {
 			if serverItems, ok := servers.GetItemsOk(); ok {
-				if len(*serverItems) > 0 {
+				if len(serverItems) > 0 {
 					return fmt.Errorf("server still exists for data center with ID: %s", dcID)
 				}
 			}
@@ -1001,7 +1001,7 @@ func testAccCheckServerAndVolumesDestroyed(dcName string) resource.TestCheckFunc
 		logApiRequestTime(apiResponse)
 		if err == nil {
 			if volItems, ok := volumes.GetItemsOk(); ok {
-				if len(*volItems) > 0 {
+				if len(volItems) > 0 {
 					return fmt.Errorf("volumes still exists for data center with ID: %s", dcID)
 				}
 			}

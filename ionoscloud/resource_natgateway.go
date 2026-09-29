@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
@@ -90,8 +90,8 @@ func resourceNatGatewayCreate(ctx context.Context, d *schema.ResourceData, meta 
 	name := d.Get("name").(string)
 
 	natGateway := ionoscloud.NatGateway{
-		Properties: &ionoscloud.NatGatewayProperties{
-			Name: &name,
+		Properties: ionoscloud.NatGatewayProperties{
+			Name: name,
 		},
 	}
 
@@ -102,7 +102,7 @@ func resourceNatGatewayCreate(ctx context.Context, d *schema.ResourceData, meta 
 			for _, publicIp := range publicIpsVal {
 				publicIps = append(publicIps, publicIp.(string))
 			}
-			natGateway.Properties.PublicIps = &publicIps
+			natGateway.Properties.PublicIps = publicIps
 		} else {
 			return diagutil.ToDiags(d, fmt.Errorf("you must provide public_ips for nat gateway resource"), nil)
 		}
@@ -117,8 +117,7 @@ func resourceNatGatewayCreate(ctx context.Context, d *schema.ResourceData, meta 
 				lan := ionoscloud.NatGatewayLanProperties{}
 				addLan := false
 				if lanID, lanIDOk := d.GetOk(fmt.Sprintf("lans.%d.id", lanIndex)); lanIDOk {
-					lanID := int32(lanID.(int))
-					lan.Id = &lanID
+					lan.Id = int32(lanID.(int))
 					addLan = true
 				}
 				if lanGatewayIps, lanGatewayIpsOk := d.GetOk(fmt.Sprintf("lans.%d.gateway_ips", lanIndex)); lanGatewayIpsOk {
@@ -128,7 +127,7 @@ func resourceNatGatewayCreate(ctx context.Context, d *schema.ResourceData, meta 
 						for idx := range lanGatewayIps {
 							gatewayIps[idx] = fmt.Sprint(lanGatewayIps[idx])
 						}
-						lan.GatewayIps = &gatewayIps
+						lan.GatewayIps = gatewayIps
 					}
 				}
 				if addLan {
@@ -142,7 +141,7 @@ func resourceNatGatewayCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 			if updateLans == true {
 				tflog.Info(ctx, "setting NatGateway LANs", map[string]any{"lan_count": len(lans)})
-				natGateway.Properties.Lans = &lans
+				natGateway.Properties.Lans = lans
 			} else {
 				return diagutil.ToDiags(d, fmt.Errorf("you must provide lans for the nat gateway resource"), nil)
 			}
@@ -157,7 +156,7 @@ func resourceNatGatewayCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 	if err != nil {
 		d.SetId("")
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, fmt.Errorf("error creating natGateway: %w, %s", err, responseBody(apiResponse)), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
@@ -167,7 +166,7 @@ func resourceNatGatewayCreate(ctx context.Context, d *schema.ResourceData, meta 
 		if bundleclient.IsRequestFailed(errState) {
 			d.SetId("")
 		}
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
@@ -210,15 +209,14 @@ func resourceNatGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		return diag.FromErr(err)
 	}
 	request := ionoscloud.NatGateway{
-		Properties: &ionoscloud.NatGatewayProperties{},
+		Properties: ionoscloud.NatGatewayProperties{},
 	}
 
 	dcID := d.Get("datacenter_id").(string)
 
 	if d.HasChange("name") {
 		_, v := d.GetChange("name")
-		vStr := v.(string)
-		request.Properties.Name = &vStr
+		request.Properties.Name = v.(string)
 	}
 
 	if d.HasChange("public_ips") {
@@ -230,7 +228,7 @@ func resourceNatGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta 
 			for _, publicIp := range publicIpsVal {
 				publicIps = append(publicIps, publicIp.(string))
 			}
-			request.Properties.PublicIps = &publicIps
+			request.Properties.PublicIps = publicIps
 		}
 	}
 
@@ -244,8 +242,7 @@ func resourceNatGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta 
 				lan := ionoscloud.NatGatewayLanProperties{}
 				addLan := false
 				if lanID, lanIDOk := d.GetOk(fmt.Sprintf("lans.%d.id", lanIndex)); lanIDOk {
-					lanID := int32(lanID.(int))
-					lan.Id = &lanID
+					lan.Id = int32(lanID.(int))
 					addLan = true
 				}
 				if lanGatewayIps, lanGatewayIpsOk := d.GetOk(fmt.Sprintf("lans.%d.gateway_ips", lanIndex)); lanGatewayIpsOk {
@@ -255,7 +252,7 @@ func resourceNatGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta 
 						for _, lanGatewayIp := range lanGatewayIps {
 							gatewayIps = append(gatewayIps, lanGatewayIp.(string))
 						}
-						lan.GatewayIps = &gatewayIps
+						lan.GatewayIps = gatewayIps
 					}
 				}
 				if addLan {
@@ -269,21 +266,21 @@ func resourceNatGatewayUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 			if updateLans == true {
 				tflog.Info(ctx, "nat gateway LANs changed", map[string]any{"old": oldLANs, "new": newLANs})
-				request.Properties.Lans = &lans
+				request.Properties.Lans = lans
 			}
 		}
 	}
 
-	_, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysPatch(ctx, dcID, d.Id()).NatGatewayProperties(*request.Properties).Execute()
+	_, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysPatch(ctx, dcID, d.Id()).NatGatewayProperties(request.Properties).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating a nat gateway: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutUpdate); errState != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
@@ -303,12 +300,12 @@ func resourceNatGatewayDelete(ctx context.Context, d *schema.ResourceData, meta 
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while deleting a nat gateway: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
@@ -372,46 +369,39 @@ func setNatGatewayData(d *schema.ResourceData, natGateway *ionoscloud.NatGateway
 		d.SetId(*natGateway.Id)
 	}
 
-	if natGateway.Properties != nil {
-		if natGateway.Properties.Name != nil {
-			err := d.Set("name", *natGateway.Properties.Name)
-			if err != nil {
-				return fmt.Errorf("error while setting name property for nat gateway %s: %w", d.Id(), err)
+	if natGateway.Properties.Name != "" {
+		if err := d.Set("name", natGateway.Properties.Name); err != nil {
+			return fmt.Errorf("error while setting name property for nat gateway %s: %w", d.Id(), err)
+		}
+	}
+
+	if len(natGateway.Properties.PublicIps) > 0 {
+		if err := d.Set("public_ips", natGateway.Properties.PublicIps); err != nil {
+			return fmt.Errorf("error while setting public_ips property for nat gateway %s: %w", d.Id(), err)
+		}
+	}
+
+	if len(natGateway.Properties.Lans) > 0 {
+		var natGatewayLans []any
+		for _, lan := range natGateway.Properties.Lans {
+			lanEntry := make(map[string]any)
+
+			lanEntry["id"] = lan.Id
+
+			if len(lan.GatewayIps) > 0 {
+				var gatewayIps []any
+				for _, gatewayIp := range lan.GatewayIps {
+					gatewayIps = append(gatewayIps, gatewayIp)
+				}
+				lanEntry["gateway_ips"] = gatewayIps
 			}
+
+			natGatewayLans = append(natGatewayLans, lanEntry)
 		}
 
-		if natGateway.Properties.PublicIps != nil {
-			err := d.Set("public_ips", *natGateway.Properties.PublicIps)
-			if err != nil {
-				return fmt.Errorf("error while setting public_ips property for nat gateway %s: %w", d.Id(), err)
-			}
-		}
-
-		if natGateway.Properties.Lans != nil && len(*natGateway.Properties.Lans) > 0 {
-			var natGatewayLans []any
-			for _, lan := range *natGateway.Properties.Lans {
-				lanEntry := make(map[string]any)
-
-				if lan.Id != nil {
-					lanEntry["id"] = *lan.Id
-				}
-
-				if len(*lan.GatewayIps) > 0 {
-					var gatewayIps []any
-					for _, gatewayIp := range *lan.GatewayIps {
-						gatewayIps = append(gatewayIps, gatewayIp)
-					}
-					lanEntry["gateway_ips"] = gatewayIps
-
-				}
-
-				natGatewayLans = append(natGatewayLans, lanEntry)
-			}
-
-			if len(natGatewayLans) > 0 {
-				if err := d.Set("lans", natGatewayLans); err != nil {
-					return fmt.Errorf("error while setting lans property for nat gateway %s: %w", d.Id(), err)
-				}
+		if len(natGatewayLans) > 0 {
+			if err := d.Set("lans", natGatewayLans); err != nil {
+				return fmt.Errorf("error while setting lans property for nat gateway %s: %w", d.Id(), err)
 			}
 		}
 	}

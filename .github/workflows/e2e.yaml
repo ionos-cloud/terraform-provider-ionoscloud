@@ -21,7 +21,7 @@ jobs:
       IONOS_S3_ACCESS_KEY: ${{ secrets.IONOS_VDC_S3_ACCESS_KEY_GO_V6 }}
       IONOS_S3_SECRET_KEY: ${{ secrets.IONOS_VDC_S3_SECRET_KEY_GO_V6 }}
       TF_ACC: true
-      TF_LOG: "DEBUG"
+#      TF_LOG: "DEBUG"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -62,7 +62,19 @@ jobs:
 
       - name: Run E2E tests with specified tag
         run: |
-          go test ./... -v -timeout 6h -tags "${{ github.event.inputs.tag }}"
+          set -o pipefail
+          go test ./... \
+            -v \
+            -timeout 6h \
+            -tags "${{ github.event.inputs.tag }}" \
+            2>&1 | tee test-output.log
+
+      - name: Upload E2E test output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-test-output
+          path: test-output.log
 
       - name: Create Successful Status Check
         env:

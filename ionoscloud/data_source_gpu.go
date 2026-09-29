@@ -8,7 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
@@ -93,7 +94,7 @@ func dataSourceGpuRead(ctx context.Context, d *schema.ResourceData, meta any) di
 	}
 
 	var gpu ionoscloud.Gpu
-	var apiResponse *ionoscloud.APIResponse
+	var apiResponse *shared.APIResponse
 
 	if idOk {
 		/* search by ID */
@@ -114,20 +115,18 @@ func dataSourceGpuRead(ctx context.Context, d *schema.ResourceData, meta any) di
 		}
 
 		var results []ionoscloud.Gpu
-		if gpus.Items != nil {
-			for _, g := range *gpus.Items {
-				if g.Properties != nil && g.Properties.Name != nil && *g.Properties.Name == nameStr {
-					/* GPU found */
-					if g.Id == nil {
-						return diagutil.ToDiags(d, fmt.Errorf("GPU found with name %s but returned without an ID", nameStr), nil)
-					}
-					gpu, apiResponse, err = client.GraphicsProcessingUnitCardsApi.DatacentersServersGPUsFindById(ctx, datacenterID, serverID, *g.Id).Execute()
-					logApiRequestTime(apiResponse)
-					if err != nil {
-						return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching GPU %s: %w", *g.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
-					}
-					results = append(results, gpu)
+		for _, g := range gpus.Items {
+			if g.Properties.Name != nil && *g.Properties.Name == nameStr {
+				/* GPU found */
+				if g.Id == nil {
+					return diagutil.ToDiags(d, fmt.Errorf("GPU found with name %s but returned without an ID", nameStr), nil)
 				}
+				gpu, apiResponse, err = client.GraphicsProcessingUnitCardsApi.DatacentersServersGPUsFindById(ctx, datacenterID, serverID, *g.Id).Execute()
+				logApiRequestTime(apiResponse)
+				if err != nil {
+					return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching GPU %s: %w", *g.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
+				}
+				results = append(results, gpu)
 			}
 		}
 
@@ -154,26 +153,24 @@ func dataSourceGpuRead(ctx context.Context, d *schema.ResourceData, meta any) di
 		return diagutil.ToDiags(d, err, nil)
 	}
 
-	if gpu.Properties != nil {
-		if gpu.Properties.Name != nil {
-			if err := d.Set("name", *gpu.Properties.Name); err != nil {
-				return diagutil.ToDiags(d, err, nil)
-			}
+	if gpu.Properties.Name != nil {
+		if err := d.Set("name", *gpu.Properties.Name); err != nil {
+			return diagutil.ToDiags(d, err, nil)
 		}
-		if gpu.Properties.Vendor != nil {
-			if err := d.Set("vendor", *gpu.Properties.Vendor); err != nil {
-				return diagutil.ToDiags(d, err, nil)
-			}
+	}
+	if gpu.Properties.Vendor != nil {
+		if err := d.Set("vendor", *gpu.Properties.Vendor); err != nil {
+			return diagutil.ToDiags(d, err, nil)
 		}
-		if gpu.Properties.Type != nil {
-			if err := d.Set("type", *gpu.Properties.Type); err != nil {
-				return diagutil.ToDiags(d, err, nil)
-			}
+	}
+	if gpu.Properties.Type != nil {
+		if err := d.Set("type", *gpu.Properties.Type); err != nil {
+			return diagutil.ToDiags(d, err, nil)
 		}
-		if gpu.Properties.Model != nil {
-			if err := d.Set("model", *gpu.Properties.Model); err != nil {
-				return diagutil.ToDiags(d, err, nil)
-			}
+	}
+	if gpu.Properties.Model != nil {
+		if err := d.Set("model", *gpu.Properties.Model); err != nil {
+			return diagutil.ToDiags(d, err, nil)
 		}
 	}
 

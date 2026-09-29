@@ -11,8 +11,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"

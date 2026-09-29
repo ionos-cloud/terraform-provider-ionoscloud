@@ -10,7 +10,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
@@ -143,11 +144,9 @@ func dataSourceNSGRead(ctx context.Context, d *schema.ResourceData, meta any) di
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while retrieving network security groups: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	var results []ionoscloud.SecurityGroup
-	if securityGroups.Items != nil {
-		for _, sg := range *securityGroups.Items {
-			if sg.Properties != nil && sg.Properties.Name != nil && strings.EqualFold(*sg.Properties.Name, name.(string)) {
-				results = append(results, sg)
-			}
+	for _, sg := range securityGroups.Items {
+		if strings.EqualFold(sg.Properties.Name, name.(string)) {
+			results = append(results, sg)
 		}
 	}
 
@@ -168,51 +167,49 @@ func setNSGDataSource(d *schema.ResourceData, securityGroup *ionoscloud.Security
 	if err := setNSGData(d, securityGroup); err != nil {
 		return err
 	}
-	if securityGroup.Entities != nil {
-		if securityGroup.Entities.Rules != nil && securityGroup.Entities.Rules.Items != nil {
-			rulesData := make([]map[string]any, 0, len(*securityGroup.Entities.Rules.Items))
-			for _, rule := range *securityGroup.Entities.Rules.Items {
-				ruleData := make(map[string]any)
-				if rule.Id == nil || rule.Properties == nil {
-					continue
-				}
-				ruleData["id"] = *rule.Id
-				if rule.Properties.Name != nil {
-					ruleData["name"] = *rule.Properties.Name
-				}
-				if rule.Properties.SourceMac != nil {
-					ruleData["source_mac"] = *rule.Properties.SourceMac
-				}
-				if rule.Properties.SourceIp != nil {
-					ruleData["source_ip"] = *rule.Properties.SourceIp
-				}
-				if rule.Properties.TargetIp != nil {
-					ruleData["target_ip"] = *rule.Properties.TargetIp
-				}
-				if rule.Properties.Protocol != nil {
-					ruleData["protocol"] = *rule.Properties.Protocol
-				}
-				if rule.Properties.Type != nil {
-					ruleData["type"] = *rule.Properties.Type
-				}
-				if rule.Properties.PortRangeStart != nil {
-					ruleData["port_range_start"] = *rule.Properties.PortRangeStart
-				}
-				if rule.Properties.PortRangeEnd != nil {
-					ruleData["port_range_end"] = *rule.Properties.PortRangeEnd
-				}
-				if rule.Properties.IcmpType != nil {
-					ruleData["icmp_type"] = strconv.Itoa(int(*rule.Properties.IcmpType))
-				}
-				if rule.Properties.IcmpCode != nil {
-					ruleData["icmp_code"] = strconv.Itoa(int(*rule.Properties.IcmpCode))
-				}
-				rulesData = append(rulesData, ruleData)
+	if securityGroup.Entities != nil && securityGroup.Entities.Rules != nil {
+		rulesData := make([]map[string]any, 0, len(securityGroup.Entities.Rules.Items))
+		for _, rule := range securityGroup.Entities.Rules.Items {
+			ruleData := make(map[string]any)
+			if rule.Id == nil {
+				continue
 			}
-			if len(rulesData) > 0 {
-				if err := d.Set("rules", rulesData); err != nil {
-					return fmt.Errorf("error while setting rules property for NSG data source %s: %w", d.Id(), err)
-				}
+			ruleData["id"] = *rule.Id
+			if rule.Properties.Name != nil {
+				ruleData["name"] = *rule.Properties.Name
+			}
+			if rule.Properties.SourceMac.IsSet() {
+				ruleData["source_mac"] = shared.ToValueDefault(rule.Properties.SourceMac.Get())
+			}
+			if rule.Properties.SourceIp.IsSet() {
+				ruleData["source_ip"] = shared.ToValueDefault(rule.Properties.SourceIp.Get())
+			}
+			if rule.Properties.TargetIp.IsSet() {
+				ruleData["target_ip"] = shared.ToValueDefault(rule.Properties.TargetIp.Get())
+			}
+			if rule.Properties.Protocol != nil {
+				ruleData["protocol"] = *rule.Properties.Protocol
+			}
+			if rule.Properties.Type != nil {
+				ruleData["type"] = *rule.Properties.Type
+			}
+			if rule.Properties.PortRangeStart != nil {
+				ruleData["port_range_start"] = *rule.Properties.PortRangeStart
+			}
+			if rule.Properties.PortRangeEnd != nil {
+				ruleData["port_range_end"] = *rule.Properties.PortRangeEnd
+			}
+			if rule.Properties.IcmpType.IsSet() && rule.Properties.IcmpType.Get() != nil {
+				ruleData["icmp_type"] = strconv.Itoa(int(*rule.Properties.IcmpType.Get()))
+			}
+			if rule.Properties.IcmpCode.IsSet() && rule.Properties.IcmpCode.Get() != nil {
+				ruleData["icmp_code"] = strconv.Itoa(int(*rule.Properties.IcmpCode.Get()))
+			}
+			rulesData = append(rulesData, ruleData)
+		}
+		if len(rulesData) > 0 {
+			if err := d.Set("rules", rulesData); err != nil {
+				return fmt.Errorf("error while setting rules property for NSG data source %s: %w", d.Id(), err)
 			}
 		}
 	}

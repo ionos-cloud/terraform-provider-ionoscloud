@@ -14,7 +14,7 @@ import (
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
 )
 
 func resourceIPBlock() *schema.Resource {
@@ -103,9 +103,9 @@ func resourceIPBlockCreate(ctx context.Context, d *schema.ResourceData, meta any
 	location := d.Get("location").(string)
 	name := d.Get("name").(string)
 	ipblock := ionoscloud.IpBlock{
-		Properties: &ionoscloud.IpBlockProperties{
-			Size:     &sizeConverted,
-			Location: &location,
+		Properties: ionoscloud.IpBlockProperties{
+			Size:     sizeConverted,
+			Location: location,
 			Name:     &name,
 		},
 	}
@@ -119,7 +119,7 @@ func resourceIPBlockCreate(ctx context.Context, d *schema.ResourceData, meta any
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while reserving an ip block: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 	d.SetId(*ipblock.Id)
@@ -128,7 +128,7 @@ func resourceIPBlockCreate(ctx context.Context, d *schema.ResourceData, meta any
 		if bundleclient.IsRequestFailed(errState) {
 			d.SetId("")
 		}
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
@@ -154,7 +154,7 @@ func resourceIPBlockRead(ctx context.Context, d *schema.ResourceData, meta any) 
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching an ip block: %w", err), nil)
 	}
 
-	tflog.Info(ctx, "ip block fetched", map[string]any{"ips": strings.Join(*ipBlock.Properties.Ips, ",")})
+	tflog.Info(ctx, "ip block fetched", map[string]any{"ips": strings.Join(ipBlock.Properties.Ips, ",")})
 
 	if err := IpBlockSetData(d, &ipBlock); err != nil {
 		return diagutil.ToDiags(d, err, nil)
@@ -182,7 +182,7 @@ func resourceIPBlockUpdate(ctx context.Context, d *schema.ResourceData, meta any
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating an ip block: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
@@ -201,12 +201,12 @@ func resourceIPBlockDelete(ctx context.Context, d *schema.ResourceData, meta any
 	apiResponse, err := client.IPBlocksApi.IpblocksDelete(ctx, d.Id()).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while releasing an ipblock: %w", err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
 	}
 
 	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutDelete); errState != nil {
-		requestLocation, _ := apiResponse.SafeLocation()
+		requestLocation := safeLocation(apiResponse)
 		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutDelete).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
@@ -265,22 +265,20 @@ func IpBlockSetData(d *schema.ResourceData, ipBlock *ionoscloud.IpBlock) error {
 		d.SetId(*ipBlock.Id)
 	}
 
-	if ipBlock.Properties.Ips != nil && len(*ipBlock.Properties.Ips) > 0 {
-		if err := d.Set("ips", *ipBlock.Properties.Ips); err != nil {
+	if len(ipBlock.Properties.Ips) > 0 {
+		if err := d.Set("ips", ipBlock.Properties.Ips); err != nil {
 			return err
 		}
 	}
 
-	if ipBlock.Properties.Location != nil {
-		if err := d.Set("location", *ipBlock.Properties.Location); err != nil {
+	if ipBlock.Properties.Location != "" {
+		if err := d.Set("location", ipBlock.Properties.Location); err != nil {
 			return err
 		}
 	}
 
-	if ipBlock.Properties.Size != nil {
-		if err := d.Set("size", *ipBlock.Properties.Size); err != nil {
-			return err
-		}
+	if err := d.Set("size", ipBlock.Properties.Size); err != nil {
+		return err
 	}
 
 	if ipBlock.Properties.Name != nil {
@@ -289,9 +287,9 @@ func IpBlockSetData(d *schema.ResourceData, ipBlock *ionoscloud.IpBlock) error {
 		}
 	}
 
-	if ipBlock.Properties.IpConsumers != nil && len(*ipBlock.Properties.IpConsumers) > 0 {
+	if len(ipBlock.Properties.IpConsumers) > 0 {
 		var ipConsumers []any
-		for _, ipConsumer := range *ipBlock.Properties.IpConsumers {
+		for _, ipConsumer := range ipBlock.Properties.IpConsumers {
 			ipConsumerEntry := make(map[string]any)
 			utils.SetPropWithNilCheck(ipConsumerEntry, "ip", ipConsumer.Ip)
 			utils.SetPropWithNilCheck(ipConsumerEntry, "mac", ipConsumer.Mac)

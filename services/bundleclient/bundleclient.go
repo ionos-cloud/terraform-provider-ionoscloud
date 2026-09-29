@@ -10,6 +10,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/meta"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
 	cr "github.com/ionos-cloud/sdk-go-bundle/products/containerregistry/v2"
 	inmemorydbv3sdk "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/inmemorydb/v3"
 	mariadbv3sdk "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb/v3"
@@ -20,7 +21,6 @@ import (
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/failover"
 	"github.com/ionos-cloud/sdk-go-bundle/shared/fileconfiguration"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	autoscalingservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/autoscaling"
 	cdnservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cdn"
@@ -361,21 +361,19 @@ func (c SdkBundle) NewMariaDBV2Client(ctx context.Context, location string) (*ma
 	return mariadbv2service.NewClientFromConfig(config), nil
 }
 
-// newCloudAPIClientConfig creates a new *ionoscloud.Configuration using the client options defined in the SdkBundle struct.
-func (c SdkBundle) newCloudAPIClientConfig() *ionoscloud.Configuration {
-	config := ionoscloud.NewConfiguration(
+// newCloudAPIClientConfig creates a new *shared.Configuration for the Cloud API using the client options defined in the SdkBundle struct.
+func (c SdkBundle) newCloudAPIClientConfig() *shared.Configuration {
+	config := shared.NewConfiguration(
 		c.clientOptions.Credentials.Username, c.clientOptions.Credentials.Password, c.clientOptions.Credentials.Token, c.clientOptions.Endpoint,
 	)
 	config.UserAgent = fmt.Sprintf(
-		"terraform-provider/%s_ionos-cloud-sdk-go/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
+		"terraform-provider/%s_ionos-cloud-sdk-go-compute/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
 		c.clientOptions.Version, ionoscloud.Version, c.clientOptions.TerraformVersion,
 		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck
 	)
-	if os.Getenv(constant.IonosDebug) != "" {
-		config.Debug = true
-	}
 	config.MaxRetries = constant.MaxRetries
 	config.WaitTime = constant.MaxWaitTime
+	config.MaxWaitTime = constant.MaxWaitTime
 	config.HTTPClient = &http.Client{}
 	config.HTTPClient.Transport = shared.CreateTransport(c.clientOptions.SkipTLSVerify, c.clientOptions.Certificate)
 	return config
@@ -405,7 +403,7 @@ func (c SdkBundle) NewCloudAPIClient(ctx context.Context, location string) (*ion
 		)
 	}
 	tflog.Debug(ctx, "Cloud API: endpoint for location", map[string]any{"location": configlog.FormatLocation(location), "url": endpoint.Name})
-	config.Servers = ionoscloud.ServerConfigurations{
+	config.Servers = shared.ServerConfigurations{
 		{
 			URL:         endpoint.Name,
 			Description: shared.EndpointOverridden + location,
@@ -442,14 +440,14 @@ func (c SdkBundle) NewCloudAPIClientWithFailover(ctx context.Context) (*ionosclo
 
 	endpoints := c.fileConfig.FilterGlobalOverrides(fileconfiguration.Cloud)
 	var failoverEndpoints []failover.Endpoint
-	var servers ionoscloud.ServerConfigurations
+	var servers shared.ServerConfigurations
 	for _, ep := range endpoints {
 		failoverEndpoints = append(failoverEndpoints, failover.Endpoint{
 			URL:                 ep.Name,
 			SkipTLSVerify:       ep.SkipTLSVerify,
 			CertificateAuthData: ep.CertificateAuthData,
 		})
-		servers = append(servers, ionoscloud.ServerConfiguration{
+		servers = append(servers, shared.ServerConfiguration{
 			URL:         ep.Name,
 			Description: shared.EndpointOverridden + "global",
 		})

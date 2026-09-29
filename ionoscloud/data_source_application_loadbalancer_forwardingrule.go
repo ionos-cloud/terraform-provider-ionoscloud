@@ -9,7 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
@@ -191,7 +192,7 @@ func dataSourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d 
 	}
 
 	var applicationLoadBalancerForwardingRule ionoscloud.ApplicationLoadBalancerForwardingRule
-	var apiResponse *ionoscloud.APIResponse
+	var apiResponse *shared.APIResponse
 
 	if idOk {
 		/* search by ID */
@@ -217,7 +218,7 @@ func dataSourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d 
 				return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching application loadbalancer forwarding rules: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 			}
 
-			results = *applicationLoadBalancersForwardingRules.Items
+			results = applicationLoadBalancersForwardingRules.Items
 		} else {
 			applicationLoadBalancersForwardingRules, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesGet(ctx, datacenterID, albID).Depth(1).Execute()
 			logApiRequestTime(apiResponse)
@@ -226,16 +227,14 @@ func dataSourceApplicationLoadBalancerForwardingRuleRead(ctx context.Context, d 
 				return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching application loadbalancer forwarding rules: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 			}
 
-			if applicationLoadBalancersForwardingRules.Items != nil {
-				for _, albFr := range *applicationLoadBalancersForwardingRules.Items {
-					if albFr.Properties != nil && albFr.Properties.Name != nil && strings.EqualFold(*albFr.Properties.Name, name) {
-						tmpAlbFr, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterID, albID, *albFr.Id).Execute()
-						logApiRequestTime(apiResponse)
-						if err != nil {
-							return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching application load balancer forwarding rule with ID %s: %w", *albFr.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
-						}
-						results = append(results, tmpAlbFr)
+			for _, albFr := range applicationLoadBalancersForwardingRules.Items {
+				if strings.EqualFold(albFr.Properties.Name, name) {
+					tmpAlbFr, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersForwardingrulesFindByForwardingRuleId(ctx, datacenterID, albID, *albFr.Id).Execute()
+					logApiRequestTime(apiResponse)
+					if err != nil {
+						return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching application load balancer forwarding rule with ID %s: %w", *albFr.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 					}
+					results = append(results, tmpAlbFr)
 				}
 			}
 		}

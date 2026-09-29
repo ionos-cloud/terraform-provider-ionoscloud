@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
 )
 
 // The enterprise server importer indexed the primary NIC's IPs unchecked and panicked on a NIC
@@ -12,7 +12,7 @@ import (
 func TestSetServerPrimaryIPFromNic(t *testing.T) {
 	primaryID, otherID := "nic-primary", "nic-other"
 	ips := []string{"198.51.100.10", "198.51.100.11"}
-	withNics := func(items *[]ionoscloud.Nic) *ionoscloud.Server {
+	withNics := func(items []ionoscloud.Nic) *ionoscloud.Server {
 		return &ionoscloud.Server{Entities: &ionoscloud.ServerEntities{Nics: &ionoscloud.Nics{Items: items}}}
 	}
 
@@ -24,16 +24,16 @@ func TestSetServerPrimaryIPFromNic(t *testing.T) {
 		{name: "nil entities", server: &ionoscloud.Server{}},
 		{name: "nil nics", server: &ionoscloud.Server{Entities: &ionoscloud.ServerEntities{}}},
 		{name: "nil items", server: withNics(nil)},
-		{name: "nic with nil id", server: withNics(&[]ionoscloud.Nic{{Properties: &ionoscloud.NicProperties{Ips: &ips}}})},
-		{name: "primary nic with nil properties", server: withNics(&[]ionoscloud.Nic{{Id: &primaryID}})},
-		{name: "primary nic with nil ips", server: withNics(&[]ionoscloud.Nic{{Id: &primaryID, Properties: &ionoscloud.NicProperties{}}})},
-		{name: "primary nic with empty ips", server: withNics(&[]ionoscloud.Nic{{Id: &primaryID, Properties: &ionoscloud.NicProperties{Ips: &[]string{}}}})},
-		{name: "only another nic has ips", server: withNics(&[]ionoscloud.Nic{{Id: &otherID, Properties: &ionoscloud.NicProperties{Ips: &ips}}})},
+		{name: "nic with nil id", server: withNics([]ionoscloud.Nic{{Properties: ionoscloud.NicProperties{Ips: ips}}})},
+		{name: "primary nic with nil properties", server: withNics([]ionoscloud.Nic{{Id: &primaryID}})},
+		{name: "primary nic with nil ips", server: withNics([]ionoscloud.Nic{{Id: &primaryID, Properties: ionoscloud.NicProperties{}}})},
+		{name: "primary nic with empty ips", server: withNics([]ionoscloud.Nic{{Id: &primaryID, Properties: ionoscloud.NicProperties{Ips: []string{}}}})},
+		{name: "only another nic has ips", server: withNics([]ionoscloud.Nic{{Id: &otherID, Properties: ionoscloud.NicProperties{Ips: ips}}})},
 		{
 			name: "first ip of the primary nic",
-			server: withNics(&[]ionoscloud.Nic{
-				{Id: &otherID, Properties: &ionoscloud.NicProperties{Ips: &[]string{"203.0.113.1"}}},
-				{Id: &primaryID, Properties: &ionoscloud.NicProperties{Ips: &ips}},
+			server: withNics([]ionoscloud.Nic{
+				{Id: &otherID, Properties: ionoscloud.NicProperties{Ips: []string{"203.0.113.1"}}},
+				{Id: &primaryID, Properties: ionoscloud.NicProperties{Ips: ips}},
 			}),
 			wantIP: "198.51.100.10",
 		},

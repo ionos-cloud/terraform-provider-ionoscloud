@@ -17,6 +17,12 @@
 - `ionoscloud_server`, `ionoscloud_vcpu_server`: Correct the import docs: `<datacenter-id>/<server-id>` imports the server without an inline `nic`; its NICs are separate `ionoscloud_nic` resources.
 - `ionoscloud_lan`, `ionoscloud_ipblock`: Note that generated configuration contains an empty `ip_failover {}` / `ip_consumers {}` block per entry for these computed attributes. The blocks plan as a no-op and can be removed.
 
+### Fixes
+- `ionoscloud_server`, `ionoscloud_vcpu_server`: Fix inline `nic.firewall` rules (and, as a side effect, `nic.security_groups_ids`) being dropped from state right after create, causing a perpetual diff on the next plan. The API returns `icmpCode`/`icmpType`/`sourceMac`/`sourceIp`/`targetIp` as an explicit `null` even when the rule never set them, which failed the equality check used to match the created rule back to its id.
+
+### Chore
+- Migrate the Cloud API client from `github.com/ionos-cloud/sdk-go/v6` to `github.com/ionos-cloud/sdk-go-bundle/products/compute/v2`, so every product is now served by the SDK bundle. This is an internal refactor with no user-facing behaviour change.
+
 ## 6.7.37
 
 ### Features

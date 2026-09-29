@@ -14,7 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
 	"github.com/hashicorp/terraform-plugin-mux/tf5to6server"
 	"github.com/hashicorp/terraform-plugin-mux/tf6muxserver"
-	ionoscloudsdk "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloudsdk "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
 	"github.com/stretchr/testify/assert"
 
 	fwprovider "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/provider"
@@ -177,31 +177,31 @@ func stubCloudAPI(t *testing.T) string {
 	t.Helper()
 
 	datacenters := ionoscloudsdk.Datacenters{
-		Items: &[]ionoscloudsdk.Datacenter{
+		Items: []ionoscloudsdk.Datacenter{
 			{
 				Id: new("d3b07384-d9a0-4d1e-8f2a-000000000001"),
-				Properties: &ionoscloudsdk.DatacenterProperties{
+				Properties: ionoscloudsdk.DatacenterProperties{
 					Name:              new("prod"),
 					Description:       new("the production datacenter"),
-					Location:          new("de/txl"),
+					Location:          "de/txl",
 					Version:           new(int32(7)),
-					Features:          &[]string{"SSD", "MULTIPLE_CPU"},
+					Features:          []string{"SSD", "MULTIPLE_CPU"},
 					SecAuthProtection: new(false),
-					Ipv6CidrBlock:     new("2001:db8::/56"),
-					CpuArchitecture: &[]ionoscloudsdk.CpuArchitectureProperties{{
+					Ipv6CidrBlock:     *ionoscloudsdk.NewNullableString(new("2001:db8::/56")),
+					CpuArchitecture: []ionoscloudsdk.CpuArchitectureProperties{{
 						CpuFamily:       new("INTEL_SKYLAKE"),
 						MaxCores:        new(int32(32)),
 						MaxRam:          new(int32(245760)),
 						Vendor:          new("GenuineIntel"),
-						EnabledFeatures: new([]string{"SEV_SNP"}),
+						EnabledFeatures: []string{"SEV_SNP"},
 					}},
 				},
 			},
 			{
 				Id: new("d3b07384-d9a0-4d1e-8f2a-000000000002"),
-				Properties: &ionoscloudsdk.DatacenterProperties{
+				Properties: ionoscloudsdk.DatacenterProperties{
 					Name:     new("staging"),
-					Location: new("de/fra"),
+					Location: "de/fra",
 					Version:  new(int32(1)),
 				},
 			},

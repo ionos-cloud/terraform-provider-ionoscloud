@@ -12,7 +12,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 )
 
 func dataSourceIpBlock() *schema.Resource {
@@ -112,7 +113,7 @@ func datasourceIpBlockRead(ctx context.Context, d *schema.ResourceData, meta any
 	}
 	var ipBlock ionoscloud.IpBlock
 	var err error
-	var apiResponse *ionoscloud.APIResponse
+	var apiResponse *shared.APIResponse
 
 	client, err := meta.(bundleclient.SdkBundle).NewCloudAPIClient(ctx, location)
 	if err != nil {
@@ -129,18 +130,18 @@ func datasourceIpBlockRead(ctx context.Context, d *schema.ResourceData, meta any
 			return diagutil.ToDiags(d, fmt.Errorf("error getting ip block with id %s %w", id.(string), err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 		}
 		if nameOk {
-			if ipBlock.Properties != nil && *ipBlock.Properties.Name != name {
+			if ipBlock.Properties.Name != nil && *ipBlock.Properties.Name != name {
 				return diagutil.ToDiags(d, fmt.Errorf("name of ip block (UUID=%s, name=%s) does not match expected name: %s",
-					*ipBlock.Id, *ipBlock.Properties.Name, name), nil)
+					*ipBlock.Id, shared.ToValueDefault(ipBlock.Properties.Name), name), nil)
 			}
 		}
 		if locationOk {
-			if ipBlock.Properties != nil && *ipBlock.Properties.Location != location {
+			if ipBlock.Properties.Location != location {
 				return diagutil.ToDiags(d, fmt.Errorf("location of ip block (UUID=%s, location=%s) does not match expected location: %s",
-					*ipBlock.Id, *ipBlock.Properties.Location, location), nil)
+					*ipBlock.Id, ipBlock.Properties.Location, location), nil)
 			}
 		}
-		tflog.Info(ctx, "got ip block", map[string]any{"name": *ipBlock.Properties.Name, "location": *ipBlock.Properties.Location})
+		tflog.Info(ctx, "got ip block", map[string]any{"name": shared.ToValueDefault(ipBlock.Properties.Name), "location": ipBlock.Properties.Location})
 	} else {
 
 		ipBlocks, apiResponse, err := client.IPBlocksApi.IpblocksGet(ctx).Depth(1).Limit(constant.IPBlockLimit).Execute()
@@ -152,9 +153,9 @@ func datasourceIpBlockRead(ctx context.Context, d *schema.ResourceData, meta any
 
 		var results []ionoscloud.IpBlock
 
-		if nameOk && ipBlocks.Items != nil {
-			for _, block := range *ipBlocks.Items {
-				if block.Properties != nil && block.Properties.Name != nil && *block.Properties.Name == name {
+		if nameOk {
+			for _, block := range ipBlocks.Items {
+				if block.Properties.Name != nil && *block.Properties.Name == name {
 					results = append(results, block)
 				}
 			}
@@ -168,15 +169,15 @@ func datasourceIpBlockRead(ctx context.Context, d *schema.ResourceData, meta any
 			if results != nil {
 				var locationResults []ionoscloud.IpBlock
 				for _, block := range results {
-					if block.Properties != nil && block.Properties.Location != nil && *block.Properties.Location == location {
+					if block.Properties.Location == location {
 						locationResults = append(locationResults, block)
 					}
 				}
 				results = locationResults
-			} else if ipBlocks.Items != nil {
+			} else {
 				/* find the first ipblock matching the location */
-				for _, block := range *ipBlocks.Items {
-					if block.Properties != nil && block.Properties.Location != nil && *block.Properties.Location == location {
+				for _, block := range ipBlocks.Items {
+					if block.Properties.Location == location {
 						results = append(results, block)
 					}
 				}

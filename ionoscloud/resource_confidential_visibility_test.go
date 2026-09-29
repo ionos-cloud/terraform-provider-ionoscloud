@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
 )
 
 // These unit tests cover the Confidential Computing visibility wiring (enabled_features on the
@@ -12,8 +12,8 @@ import (
 
 func TestSetServerPropertiesEnabledFeatures(t *testing.T) {
 	server := ionoscloud.Server{
-		Properties: &ionoscloud.ServerProperties{
-			EnabledFeatures: &[]string{"SEV-SNP"},
+		Properties: ionoscloud.ServerProperties{
+			EnabledFeatures: []string{"SEV-SNP"},
 		},
 	}
 
@@ -32,11 +32,11 @@ func TestSetDatacenterDataCPUArchEnabledFeatures(t *testing.T) {
 	d := schema.TestResourceDataRaw(t, resourceDatacenter().Schema, nil)
 
 	dc := &ionoscloud.Datacenter{
-		Properties: &ionoscloud.DatacenterProperties{
-			CpuArchitecture: &[]ionoscloud.CpuArchitectureProperties{
+		Properties: ionoscloud.DatacenterProperties{
+			CpuArchitecture: []ionoscloud.CpuArchitectureProperties{
 				{
 					CpuFamily:       new("AMD_TURIN"),
-					EnabledFeatures: &[]string{"SEV-SNP"},
+					EnabledFeatures: []string{"SEV-SNP"},
 				},
 			},
 		},
@@ -97,8 +97,8 @@ func TestSharedServerReadWriterKeysPresentInSchemas(t *testing.T) {
 // that broke in 6.7.36. Both writers delegate here, so testing the helper covers both.
 func TestSetServerConfidentialVisibilityAcrossSchemas(t *testing.T) {
 	server := &ionoscloud.Server{
-		Properties: &ionoscloud.ServerProperties{
-			EnabledFeatures: &[]string{"SEV-SNP"},
+		Properties: ionoscloud.ServerProperties{
+			EnabledFeatures: []string{"SEV-SNP"},
 		},
 	}
 
@@ -128,25 +128,25 @@ func TestServerIsConfidential(t *testing.T) {
 		server ionoscloud.Server
 		want   bool
 	}{
-		{name: "nil properties", server: ionoscloud.Server{}, want: false},
+		{name: "zero value properties", server: ionoscloud.Server{}, want: false},
 		{
 			name:   "no features",
-			server: ionoscloud.Server{Properties: &ionoscloud.ServerProperties{}},
+			server: ionoscloud.Server{Properties: ionoscloud.ServerProperties{}},
 			want:   false,
 		},
 		{
 			name:   "other feature only",
-			server: ionoscloud.Server{Properties: &ionoscloud.ServerProperties{EnabledFeatures: &[]string{"SOMETHING"}}},
+			server: ionoscloud.Server{Properties: ionoscloud.ServerProperties{EnabledFeatures: []string{"SOMETHING"}}},
 			want:   false,
 		},
 		{
 			name:   "sev-snp present",
-			server: ionoscloud.Server{Properties: &ionoscloud.ServerProperties{EnabledFeatures: &[]string{"SEV-SNP"}}},
+			server: ionoscloud.Server{Properties: ionoscloud.ServerProperties{EnabledFeatures: []string{"SEV-SNP"}}},
 			want:   true,
 		},
 		{
 			name:   "case-insensitive match",
-			server: ionoscloud.Server{Properties: &ionoscloud.ServerProperties{EnabledFeatures: &[]string{"sev-snp"}}},
+			server: ionoscloud.Server{Properties: ionoscloud.ServerProperties{EnabledFeatures: []string{"sev-snp"}}},
 			want:   true,
 		},
 	}

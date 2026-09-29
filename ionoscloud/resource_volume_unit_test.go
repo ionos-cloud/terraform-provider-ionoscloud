@@ -3,7 +3,7 @@ package ionoscloud
 import (
 	"testing"
 
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
 )
 
 // volumeTestImages: a child location (pc/txl/1) owns no images — everything usable from
@@ -12,8 +12,8 @@ func volumeTestImages() []ionoscloud.Image {
 	img := func(id, name, location, imageType string, aliases ...string) ionoscloud.Image {
 		return ionoscloud.Image{
 			Id: &id,
-			Properties: &ionoscloud.ImageProperties{
-				Name: &name, Location: &location, ImageType: &imageType, ImageAliases: &aliases,
+			Properties: ionoscloud.ImageProperties{
+				Name: &name, Location: &location, ImageType: &imageType, ImageAliases: aliases,
 			},
 		}
 	}
@@ -155,5 +155,34 @@ func TestResourceVolumeServerIDOptional(t *testing.T) {
 	s := resourceVolume().Schema["server_id"]
 	if s.Required || !s.Optional {
 		t.Fatalf("server_id: Required=%v Optional=%v, want optional", s.Required, s.Optional)
+	}
+}
+
+func TestIsEmptyVolumePatch(t *testing.T) {
+	name := "patched-name"
+	nullBootOrder := ionoscloud.VolumeProperties{}
+	nullBootOrder.SetBootOrderNil()
+
+	tests := []struct {
+		name       string
+		properties ionoscloud.VolumeProperties
+		want       bool
+	}{
+		{name: "no field", properties: ionoscloud.VolumeProperties{}, want: true},
+		{name: "name set", properties: ionoscloud.VolumeProperties{Name: &name}, want: false},
+		{name: "empty ssh keys list", properties: ionoscloud.VolumeProperties{SshKeys: []string{}}, want: false},
+		{name: "boot order set to null", properties: nullBootOrder, want: false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// The expectation must agree with the body the SDK would send.
+			if body, err := tt.properties.ToMap(); err != nil || (len(body) == 0) != tt.want {
+				t.Fatalf("SDK request body = %v (err: %v), want empty = %v", body, err, tt.want)
+			}
+			if got := isEmptyVolumePatch(tt.properties); got != tt.want {
+				t.Errorf("isEmptyVolumePatch = %v, want %v", got, tt.want)
+			}
+		})
 	}
 }

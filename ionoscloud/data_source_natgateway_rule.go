@@ -7,7 +7,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
@@ -127,7 +128,7 @@ func dataSourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	var natGatewayRule ionoscloud.NatGatewayRule
-	var apiResponse *ionoscloud.APIResponse
+	var apiResponse *shared.APIResponse
 
 	if idOk {
 		/* search by ID */
@@ -147,17 +148,14 @@ func dataSourceNatGatewayRuleRead(ctx context.Context, d *schema.ResourceData, m
 		}
 
 		var results []ionoscloud.NatGatewayRule
-		if natGatewayRules.Items != nil {
-			for _, ngr := range *natGatewayRules.Items {
-				if ngr.Properties != nil && ngr.Properties.Name != nil && strings.EqualFold(*ngr.Properties.Name, name.(string)) {
-					tmpNatGatewayRule, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesFindByNatGatewayRuleId(ctx, datacenterID.(string), natgatewayID.(string), *ngr.Id).Execute()
-					logApiRequestTime(apiResponse)
-					if err != nil {
-						return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching nat gateway rule with ID %s: %w", *ngr.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
-					}
-					results = append(results, tmpNatGatewayRule)
+		for _, ngr := range natGatewayRules.Items {
+			if strings.EqualFold(ngr.Properties.Name, name.(string)) {
+				tmpNatGatewayRule, apiResponse, err := client.NATGatewaysApi.DatacentersNatgatewaysRulesFindByNatGatewayRuleId(ctx, datacenterID.(string), natgatewayID.(string), *ngr.Id).Execute()
+				logApiRequestTime(apiResponse)
+				if err != nil {
+					return diagutil.ToDiags(d, fmt.Errorf("an error occurred while fetching nat gateway rule with ID %s: %w", *ngr.Id, err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 				}
-
+				results = append(results, tmpNatGatewayRule)
 			}
 		}
 
