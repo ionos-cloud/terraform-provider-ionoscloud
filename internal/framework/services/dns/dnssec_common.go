@@ -7,6 +7,7 @@ import (
 	dnssdk "github.com/ionos-cloud/sdk-go-bundle/products/dns/v2"
 
 	dnsservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dns"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/convptr"
 )
 
 // dnssecKeyModel holds the attributes describing the signing key of a zone, as returned by the API.
@@ -52,14 +53,14 @@ func (m *dnssecKeyModel) setFromKeys(keys dnssdk.DnssecKeyReadList, fallbackAlgo
 		nsecMode = keys.Properties.NsecParameters.NsecMode
 	}
 
-	m.KeyTag = int64Value(key.KeyTag)
+	m.KeyTag = types.Int64PointerValue(convptr.Int32ToInt64(key.KeyTag))
 	m.ComposedKeyData = types.StringPointerValue(key.ComposedKeyData)
 	m.Digest = types.StringPointerValue(key.Digest)
 	m.DigestAlgorithmMnemonic = types.StringPointerValue(key.DigestAlgorithmMnemonic)
 	m.Flags = types.Int64Null()
 	m.PublicKey = types.StringNull()
 	if key.KeyData != nil {
-		m.Flags = int64Value(key.KeyData.Flags)
+		m.Flags = types.Int64PointerValue(convptr.Int32ToInt64(key.KeyData.Flags))
 		m.PublicKey = types.StringPointerValue(key.KeyData.PubKey)
 	}
 
@@ -80,13 +81,6 @@ func (m *dnssecKeyModel) setFromKeys(keys dnssdk.DnssecKeyReadList, fallbackAlgo
 	}
 
 	return true, algorithm, nsecMode
-}
-
-func int64Value(v *int32) types.Int64 {
-	if v == nil {
-		return types.Int64Null()
-	}
-	return types.Int64Value(int64(*v))
 }
 
 func zoneNotFoundMessage(zoneID string) string {
