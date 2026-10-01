@@ -205,6 +205,8 @@ github.com/hashicorp/terraform-plugin-framework/resource/schema
 github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault
 github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier
 github.com/hashicorp/terraform-plugin-framework/resource/schema/defaults
+github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default
+github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier
 github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier
 github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault
 github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier
@@ -342,6 +344,9 @@ github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2
 # github.com/ionos-cloud/sdk-go-bundle/products/cert/v2 v2.2.0
 ## explicit; go 1.22
 github.com/ionos-cloud/sdk-go-bundle/products/cert/v2
+# github.com/ionos-cloud/sdk-go-bundle/products/compute/v2 v2.0.7
+## explicit; go 1.24
+github.com/ionos-cloud/sdk-go-bundle/products/compute/v2
 # github.com/ionos-cloud/sdk-go-bundle/products/containerregistry/v2 v2.1.0
 ## explicit; go 1.22
 github.com/ionos-cloud/sdk-go-bundle/products/containerregistry/v2
