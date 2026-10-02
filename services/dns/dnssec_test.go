@@ -134,14 +134,12 @@ func TestIsZoneAvailable(t *testing.T) {
 
 			err := client.IsZoneAvailable(context.Background(), "zone")
 			if !tc.wantErr {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				return
 			}
-			if !assert.Error(t, err) {
-				return
-			}
+			require.Error(t, err)
 			var permanent *backoff.PermanentError
-			assert.Equal(t, tc.permanent, errors.As(err, &permanent))
+			require.Equal(t, tc.permanent, errors.As(err, &permanent))
 
 			// The retry loop must stop at once for permanent errors instead of waiting for the timeout.
 			calls := 0
@@ -150,7 +148,7 @@ func TestIsZoneAvailable(t *testing.T) {
 				calls++
 				return client.IsZoneAvailable(context.Background(), "zone")
 			}, backoff.WithContext(backoff.NewExponentialBackOff(backoff.WithMaxElapsedTime(2*time.Second)), context.Background()))
-			assert.Error(t, retryErr)
+			require.Error(t, retryErr)
 			if tc.permanent {
 				assert.Equal(t, 1, calls)
 				assert.Less(t, time.Since(start), time.Second)
