@@ -97,7 +97,7 @@ func (d *zoneDNSSECDataSource) Read(ctx context.Context, req datasource.ReadRequ
 		return
 	}
 
-	found, algorithm, nsecMode := data.dnssecKeyModel.setFromKeys(keys, dnssdk.ALGORITHM_RSASHA256)
+	found, algorithm, nsecMode := data.setFromKeys(keys, dnssdk.ALGORITHM_RSASHA256)
 	if !found {
 		resp.Diagnostics.AddError("DNSSEC key not found", zoneNotFoundMessage(zoneID))
 		return

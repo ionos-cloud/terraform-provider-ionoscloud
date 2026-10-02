@@ -1,3 +1,5 @@
+//go:build all || dns
+
 package dns_test
 
 import (

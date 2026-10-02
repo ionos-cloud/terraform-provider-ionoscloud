@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 	"net/http"
 	"time"
 
@@ -150,6 +151,7 @@ func (r *zoneDNSSECResource) Schema(ctx context.Context, _ resource.SchemaReques
 				Computed:      true,
 				Default:       int64default.StaticInt64(0),
 				Description:   "The number of NSEC3 iterations. Defaults to `0`.",
+				Validators:    []validator.Int64{int64validator.Between(0, math.MaxInt32)},
 				PlanModifiers: []planmodifier.Int64{requiresReplaceInt64()},
 			},
 			"nsec3_salt_bits": schema.Int64Attribute{
@@ -157,11 +159,13 @@ func (r *zoneDNSSECResource) Schema(ctx context.Context, _ resource.SchemaReques
 				Computed:      true,
 				Default:       int64default.StaticInt64(64),
 				Description:   "The NSEC3 salt length in bits. Defaults to `64`.",
+				Validators:    []validator.Int64{int64validator.Between(0, math.MaxInt32)},
 				PlanModifiers: []planmodifier.Int64{requiresReplaceInt64()},
 			},
 			"validity": schema.Int64Attribute{
 				Required:      true,
 				Description:   "The signature validity in days.",
+				Validators:    []validator.Int64{int64validator.Between(1, math.MaxInt32)},
 				PlanModifiers: []planmodifier.Int64{requiresReplaceInt64()},
 			},
 			"key_tag":                   computedInt64(descKeyTag),
@@ -214,6 +218,11 @@ func (r *zoneDNSSECResource) Create(ctx context.Context, req resource.CreateRequ
 		return
 	}
 
+	// The create timeout bounds the whole creation (waiting for the zone, requesting the key, waiting for the key),
+	// not each of those steps on its own.
+	ctx, cancel := context.WithTimeout(ctx, createTimeout)
+	defer cancel()
+
 	zoneID := data.ZoneID.ValueString()
 	errCtx := &diagutil.ErrorContext{ResourceID: zoneID, Timeout: createTimeout.String()}
 
@@ -226,55 +235,65 @@ func (r *zoneDNSSECResource) Create(ctx context.Context, req resource.CreateRequ
 	properties := dnssdk.DnssecKeyParameters{
 		KeyParameters: dnssdk.KeyParameters{
 			Algorithm: dnssdk.Algorithm(data.Algorithm.ValueString()),
-			KskBits:   dnssdk.KskBits(data.KskBits.ValueInt64()),
-			ZskBits:   dnssdk.ZskBits(data.ZskBits.ValueInt64()),
+			KskBits:   dnssdk.KskBits(data.KskBits.ValueInt64()), //nolint:gosec // restricted to 1024/2048/4096 by validator
+			ZskBits:   dnssdk.ZskBits(data.ZskBits.ValueInt64()), //nolint:gosec // restricted to 1024/2048/4096 by validator
 		},
 		NsecParameters: dnssdk.NsecParameters{
 			NsecMode:        dnssdk.NsecMode(data.NsecMode.ValueString()),
-			Nsec3Iterations: int32(data.Nsec3Iterations.ValueInt64()),
-			Nsec3SaltBits:   int32(data.Nsec3SaltBits.ValueInt64()),
+			Nsec3Iterations: int32(data.Nsec3Iterations.ValueInt64()), //nolint:gosec // bounded by validator
+			Nsec3SaltBits:   int32(data.Nsec3SaltBits.ValueInt64()),   //nolint:gosec // bounded by validator
 		},
-		Validity: int32(data.Validity.ValueInt64()),
+		Validity: int32(data.Validity.ValueInt64()), //nolint:gosec // bounded by validator
 	}
 
-	_, apiResponse, err := r.client.CreateDNSSECKey(ctx, zoneID, properties)
+	// The zone rejects new operations while it still processes earlier ones, e.g. the asynchronous removal of the key
+	// that is being replaced. Repeat the request until it is accepted.
+	var apiResponse *shared.APIResponse
+	err := retry(ctx, createTimeout, func() error {
+		var err error
+		_, apiResponse, err = r.client.CreateDNSSECKey(ctx, zoneID, properties)
+		if err != nil && !dnsservice.IsZoneBusy(apiResponse) {
+			return backoff.Permanent(err)
+		}
+		return err
+	})
 	if err != nil {
 		errCtx.StatusCode = apiResponse.SafeStatusCode()
 		summary := "failed to enable DNSSEC for the DNS zone"
-		if errCtx.StatusCode == http.StatusConflict {
+		switch {
+		case dnsservice.IsZoneBusy(apiResponse):
+			summary = "the DNS zone still has operations in progress, e.g. the removal of a previous DNSSEC key; try again later"
+		case errCtx.StatusCode == http.StatusConflict:
 			summary = "DNSSEC is already enabled for the DNS zone; import the existing key with `terraform import` or remove it first"
 		}
 		resp.Diagnostics.AddError(summary, diagutil.WrapError(err, errCtx).Error())
 		return
 	}
 
-	// The key material is not part of the creation response, so wait for it to show up in the zone.
-	var keys dnssdk.DnssecKeyReadList
-	err = retry(ctx, createTimeout, func() error {
-		if err := r.client.IsZoneAvailable(ctx, zoneID); err != nil {
-			return err
-		}
-		var getResponse *shared.APIResponse
-		keys, getResponse, err = r.client.GetDNSSECKeys(ctx, zoneID)
-		if err != nil {
-			// The key is created asynchronously; until then the API reports the zone as not signed.
-			if getResponse.HttpNotFound() || dnsservice.IsZoneNotSigned(getResponse) {
-				return err
-			}
-			return backoff.Permanent(err)
-		}
-		if _, found := dnsservice.SigningKey(keys); !found {
-			return errors.New(zoneNotFoundMessage(zoneID))
-		}
-		return nil
-	})
-	if err != nil {
-		resp.Diagnostics.AddError("error while waiting for the DNSSEC key to become available", diagutil.WrapError(err, errCtx).Error())
+	// The key exists from now on. Record the resource before waiting for its key material, so that a failed or
+	// timed-out wait does not leave a DNSSEC-enabled zone untracked (the next apply would conflict with the existing key).
+	// The key attributes stay null until they are read from the API.
+	data.ID = data.ZoneID
+	data.dnssecKeyModel = dnssecKeyModel{}
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	data.ID = data.ZoneID
-	data.dnssecKeyModel.setFromKeys(keys, dnssdk.Algorithm(data.Algorithm.ValueString()))
+	// The key material is not part of the creation response, so wait for it to show up in the zone.
+	keys, err := waitForKey(ctx, createTimeout, zoneID, r.client.IsZoneAvailable, r.client.GetDNSSECKeys)
+	if err != nil {
+		// A warning instead of an error: failing here would taint the resource, and replacing the key changes its key
+		// tag and digest, which would force an update of the DS record at the registrar for a key that is most likely fine.
+		// The key attributes are filled in by the next refresh.
+		resp.Diagnostics.AddWarning(
+			"the DNSSEC key is not available yet",
+			fmt.Sprintf("DNSSEC was enabled for the DNS zone, but waiting for the key failed: %s. The resource is tracked in the state and its key attributes are populated on the next refresh (`terraform apply -refresh-only`).", diagutil.WrapError(err, errCtx).Error()),
+		)
+		return
+	}
+
+	data.setFromKeys(keys, dnssdk.Algorithm(data.Algorithm.ValueString()))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -288,17 +307,27 @@ func (r *zoneDNSSECResource) Read(ctx context.Context, req resource.ReadRequest,
 
 	zoneID := data.ZoneID.ValueString()
 	keys, apiResponse, err := r.client.GetDNSSECKeys(ctx, zoneID)
-	if err != nil {
-		if apiResponse.HttpNotFound() || dnsservice.IsZoneNotSigned(apiResponse) {
-			resp.State.RemoveResource(ctx)
-			return
-		}
+	if err != nil && !isKeyAbsent(apiResponse) {
 		resp.Diagnostics.AddError("error while fetching the DNSSEC key of the DNS zone", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceID: zoneID, StatusCode: apiResponse.SafeStatusCode()}).Error())
 		return
 	}
 
-	found, algorithm, nsecMode := data.dnssecKeyModel.setFromKeys(keys, dnssdk.Algorithm(data.Algorithm.ValueString()))
+	var (
+		found     bool
+		algorithm dnssdk.Algorithm
+		nsecMode  *dnssdk.NsecMode
+	)
+	if err == nil {
+		found, algorithm, nsecMode = data.setFromKeys(keys, dnssdk.Algorithm(data.Algorithm.ValueString()))
+	}
 	if !found {
+		if data.keyPending() {
+			// The API reports a zone without key while the key that Create requested is still being set up. Removing the
+			// resource now would make the next apply conflict with that key.
+			resp.Diagnostics.AddWarning("the DNSSEC key is not available yet", fmt.Sprintf("DNSSEC was enabled for zone %s, but the API does not return its key yet. The key attributes are populated once it does.", zoneID))
+			resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+			return
+		}
 		resp.State.RemoveResource(ctx)
 		return
 	}
@@ -319,6 +348,10 @@ func (r *zoneDNSSECResource) Update(ctx context.Context, req resource.UpdateRequ
 	if resp.Diagnostics.HasError() {
 		return
 	}
+	// Key attributes that Create could not read yet are planned as unknown, but must not stay unknown after apply.
+	if plan.Digest.IsUnknown() {
+		plan.dnssecKeyModel = dnssecKeyModel{}
+	}
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
@@ -335,7 +368,7 @@ func (r *zoneDNSSECResource) Delete(ctx context.Context, req resource.DeleteRequ
 
 	apiResponse, err := r.client.DeleteDNSSECKey(ctx, zoneID)
 	if err != nil {
-		if apiResponse.HttpNotFound() {
+		if isKeyAbsent(apiResponse) {
 			return
 		}
 		errCtx.StatusCode = apiResponse.SafeStatusCode()
@@ -343,18 +376,52 @@ func (r *zoneDNSSECResource) Delete(ctx context.Context, req resource.DeleteRequ
 		return
 	}
 
-	// The API only acknowledges the request; the key is removed asynchronously and the zone stays signed until the
-	// change has propagated, which may take several hours. Do not block on it.
-	resp.Diagnostics.AddWarning(
-		"DNSSEC removal is asynchronous",
-		"The API accepted the request to disable DNSSEC. The key is removed asynchronously, which may take several hours, and enabling DNSSEC again for the zone fails until then.",
-	)
+	// The API only acknowledges the request and removes the key asynchronously. Do not block on it: Create repeats
+	// its request while the zone still has operations in progress.
 }
 
 // ImportState imports the DNSSEC key of a zone using the zone ID.
 func (r *zoneDNSSECResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), req.ID)...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("zone_id"), req.ID)...)
+}
+
+// keyPending reports whether the state was written by Create before the key became visible in the API: the creation
+// arguments are known, but no key attribute has been read yet. An imported resource has no creation arguments.
+func (m *zoneDNSSECResourceModel) keyPending() bool {
+	return m.Digest.IsNull() && !m.KskBits.IsNull()
+}
+
+// isKeyAbsent reports whether the API response means that the zone has no DNSSEC key (yet, or any more).
+func isKeyAbsent(apiResponse *shared.APIResponse) bool {
+	return apiResponse.HttpNotFound() || dnsservice.IsZoneNotSigned(apiResponse)
+}
+
+// keysFetcher retrieves the DNSSEC keys of a zone.
+type keysFetcher func(ctx context.Context, zoneID string) (dnssdk.DnssecKeyReadList, *shared.APIResponse, error)
+
+// waitForKey polls until the zone is available and exposes a signing key. The key is created asynchronously; until
+// then the API reports the zone as not signed.
+func waitForKey(ctx context.Context, timeout time.Duration, zoneID string, zoneAvailable func(context.Context, string) error, fetch keysFetcher) (dnssdk.DnssecKeyReadList, error) {
+	var keys dnssdk.DnssecKeyReadList
+	err := retry(ctx, timeout, func() error {
+		if err := zoneAvailable(ctx, zoneID); err != nil {
+			return err
+		}
+		fetched, apiResponse, err := fetch(ctx, zoneID)
+		if err != nil {
+			if isKeyAbsent(apiResponse) {
+				return err
+			}
+			return backoff.Permanent(err)
+		}
+		if _, found := dnsservice.SigningKey(fetched); !found {
+			return errors.New(zoneNotFoundMessage(zoneID))
+		}
+		keys = fetched
+		return nil
+	})
+	return keys, err
 }
 
 // retry runs op with exponential backoff until it succeeds, returns a permanent error, or the timeout elapses.

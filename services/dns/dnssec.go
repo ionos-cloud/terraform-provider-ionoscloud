@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/cenkalti/backoff/v4"
 	dns "github.com/ionos-cloud/sdk-go-bundle/products/dns/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 )
@@ -27,6 +28,9 @@ var dnssecDigestTypes = map[string]int64{
 
 // zoneNotSignedErrorCode is the API error code returned when a zone has no DNSSEC key.
 const zoneNotSignedErrorCode = "paas-dns-rest-0438"
+
+// zoneBusyErrorCode is the API error code (409) returned when a zone has too many operations in progress.
+const zoneBusyErrorCode = "paas-dns-rest-0513"
 
 // DNSSECDSRecord holds the values needed to publish a DS record at the registrar.
 type DNSSECDSRecord struct {
@@ -62,11 +66,13 @@ func (c *Client) DeleteDNSSECKey(ctx context.Context, zoneID string) (*shared.AP
 	return apiResponse, err
 }
 
-// IsZoneAvailable returns an error unless the zone is in the AVAILABLE state. It is meant to be used with a retry loop.
+// IsZoneAvailable returns an error unless the zone is in the AVAILABLE state. It is meant to be used with a retry loop:
+// a zone in another state is a retryable error, while a failed request (e.g. missing zone, invalid credentials) is
+// wrapped in backoff.Permanent, which stops the retry.
 func (c *Client) IsZoneAvailable(ctx context.Context, zoneID string) error {
 	zone, _, err := c.GetZoneById(ctx, zoneID)
 	if err != nil {
-		return err
+		return backoff.Permanent(err)
 	}
 	if !strings.EqualFold(string(zone.Metadata.State), string(dns.PROVISIONINGSTATE_AVAILABLE)) {
 		return fmt.Errorf("zone %s is in state %s, expected %s", zoneID, zone.Metadata.State, dns.PROVISIONINGSTATE_AVAILABLE)
@@ -82,6 +88,16 @@ func IsZoneNotSigned(apiResponse *shared.APIResponse) bool {
 	}
 	return strings.Contains(string(apiResponse.Payload), zoneNotSignedErrorCode) ||
 		strings.Contains(strings.ToLower(string(apiResponse.Payload)), "zone is not signed")
+}
+
+// IsZoneBusy reports whether the API rejected a request because the zone still has operations in progress, e.g. the
+// asynchronous removal of a previous key. The request can be repeated later.
+func IsZoneBusy(apiResponse *shared.APIResponse) bool {
+	if apiResponse.SafeStatusCode() != http.StatusConflict {
+		return false
+	}
+	return strings.Contains(string(apiResponse.Payload), zoneBusyErrorCode) ||
+		strings.Contains(strings.ToLower(string(apiResponse.Payload)), "too many operations in progress")
 }
 
 // SigningKey returns the key that is published to the registrar, i.e. the first entry that carries a digest.

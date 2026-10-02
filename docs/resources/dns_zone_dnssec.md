@@ -74,11 +74,9 @@ The provider only restricts the values the API defines as enumerations (`algorit
 
 The DNSSEC API only supports creating, reading and deleting a key; there is no update operation. Changing `zone_id`, `algorithm`, `ksk_bits`, `zsk_bits`, `nsec_mode`, `nsec3_iterations`, `nsec3_salt_bits` or `validity` therefore plans a replacement: the key is deleted and a new one is created. Only `timeouts` can be changed in place.
 
-Disabling DNSSEC is **asynchronous** in the API: the request is only acknowledged, and the key is removed after the change has propagated, which may take several hours. The provider does not wait for the removal to complete, and a zone can have only one key, so creating the replacement key fails with a conflict until the old one is gone. To change a key:
+Enabling and disabling DNSSEC are acknowledged by the API and carried out asynchronously, one operation after another per zone. The provider does not wait for the removal of a deleted key. If the zone still has operations in progress when the replacement key is requested, the API rejects the request with `409 ... too many operations in progress`; the provider repeats the request until the `create` timeout is reached. Replacing a key is therefore a slow operation that should be rare, and shortly after a replacement the key attributes (`key_tag`, `digest`, `ds_record`, ...) may still describe the previous key until the API has processed the operations. Run `terraform apply -refresh-only` to pick up the current key before handing the DS record to your registrar.
 
-1. Remove the `ionoscloud_dns_zone_dnssec` resource and apply.
-2. Wait until the old key is gone (`ionoscloud_dns_zone_dnssec` data source for the zone fails with "DNSSEC key not found").
-3. Add the resource back with the new arguments and apply.
+If the key does not become available within the `create` timeout, a warning is shown and the resource is kept in the state with empty key attributes (`ds_record`, `key_tag`, ...). They are populated by the next refresh (`terraform apply -refresh-only`).
 
 A new key has a new `key_tag` and `digest`, so the DS record at your registrar must be updated as well.
 
