@@ -4,6 +4,7 @@
 - `ionoscloud_ipblock`: Add a resource identity (`id`, `location`), which also enables `import` blocks with an `identity` attribute.
 - `ionoscloud_dns_zone`: New list resource, queryable with `terraform query` (requires Terraform 1.14+).
 - `ionoscloud_dns_zone`: Add a resource identity (`id`), which also enables `import` blocks with an `identity` attribute.
+- `ionoscloud_dns_zone_dnssec`: new resource and data source to enable DNSSEC for a DNS zone and export the values needed for the DS record (`ds_record`, `key_tag`, `digest`, ...)
 
 ### Docs
 - Fix the malformed `terraform import` examples in the `ionoscloud_dns_zone` and `ionoscloud_ipblock` docs.
