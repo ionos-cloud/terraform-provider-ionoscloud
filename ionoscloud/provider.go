@@ -271,15 +271,15 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, terraformVer
 	insecureBool := false
 
 	fileConfig, readFileErr := configlog.LoadFileConfigWithLogging(ctx)
+	if readFileErr != nil {
+		return nil, diag.Errorf("invalid IONOS file config: %s", readFileErr.Error())
+	}
 	configlog.LogEndpointEnvVars(ctx)
 
 	fileConfigUsed := false
 	profileName := ""
 	if !tokenOk {
 		if !usernameOk || !passwordOk {
-			if readFileErr != nil {
-				return nil, diag.Errorf("missing credentials, either token or username and password must be set, %s", readFileErr.Error())
-			}
 			profile := fileConfig.GetCurrentProfile()
 			if profile == nil {
 				return nil, diag.Errorf("missing credentials, either token or username and password must be set")
