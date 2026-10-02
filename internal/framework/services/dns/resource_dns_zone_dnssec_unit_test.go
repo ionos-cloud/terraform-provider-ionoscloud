@@ -9,6 +9,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	dnssdk "github.com/ionos-cloud/sdk-go-bundle/products/dns/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
@@ -83,23 +84,23 @@ func TestWaitForKey(t *testing.T) {
 			fetchResult{keys: signedKeys(), resp: apiResp(http.StatusOK, "")},
 		)
 		keys, err := waitForKey(context.Background(), time.Minute, "zone", available, fetch)
-		assert.NoError(t, err)
-		assert.Equal(t, 2, *calls)
+		require.NoError(t, err)
+		require.Equal(t, 2, *calls)
 		_, found := dnsservice.SigningKey(keys)
-		assert.True(t, found)
+		require.True(t, found)
 	})
 
 	t.Run("other API errors are not retried", func(t *testing.T) {
 		fetch, calls := fetchSequence(fetchResult{resp: apiResp(http.StatusInternalServerError, ""), err: errors.New("boom")})
 		_, err := waitForKey(context.Background(), time.Minute, "zone", available, fetch)
-		assert.Error(t, err)
-		assert.Equal(t, 1, *calls)
+		require.Error(t, err)
+		require.Equal(t, 1, *calls)
 	})
 
 	t.Run("times out while the key never appears", func(t *testing.T) {
 		fetch, _ := fetchSequence(fetchResult{resp: apiResp(http.StatusBadRequest, notSignedBody), err: errors.New("zone is not signed")})
 		_, err := waitForKey(context.Background(), time.Millisecond, "zone", available, fetch)
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 
 	t.Run("waits for the zone to be available", func(t *testing.T) {
@@ -113,7 +114,7 @@ func TestWaitForKey(t *testing.T) {
 		}
 		fetch, _ := fetchSequence(fetchResult{keys: signedKeys()})
 		_, err := waitForKey(context.Background(), time.Minute, "zone", zoneAvailable, fetch)
-		assert.NoError(t, err)
-		assert.Equal(t, 2, zoneCalls)
+		require.NoError(t, err)
+		require.Equal(t, 2, zoneCalls)
 	})
 }
