@@ -52,7 +52,7 @@ const (
 	RequestStatusFailed  = "FAILED"
 	RequestStatusDone    = "DONE"
 
-	Version               = "products/compute/v2.0.7"
+	Version               = "products/compute/v2.0.8"
 	DefaultIonosServerUrl = "https://api.ionos.com/cloudapi/v6"
 	DefaultIonosBasePath  = "/cloudapi/v6"
 )
@@ -165,7 +165,7 @@ func NewAPIClient(cfg *shared.Configuration) *APIClient {
 	}
 
 	if cfgCopy.UserAgent == "" {
-		cfgCopy.UserAgent = "sdk-go-bundle/products/compute/v2.0.7"
+		cfgCopy.UserAgent = "sdk-go-bundle/products/compute/v2.0.8"
 	}
 
 	// Initialize default values in the copied configuration

@@ -389,30 +389,13 @@ func resourceNetworkLoadBalancerForwardingRuleUpdate(ctx context.Context, d *sch
 	dcID := d.Get("datacenter_id").(string)
 	nlbID := d.Get("networkloadbalancer_id").(string)
 
-	if d.HasChange("name") {
-		_, v := d.GetChange("name")
-		request.Properties.Name = v.(string)
-	}
-
-	if d.HasChange("algorithm") {
-		_, v := d.GetChange("algorithm")
-		request.Properties.Algorithm = v.(string)
-	}
-
-	if d.HasChange("protocol") {
-		_, v := d.GetChange("protocol")
-		request.Properties.Protocol = v.(string)
-	}
-
-	if d.HasChange("listener_ip") {
-		_, v := d.GetChange("listener_ip")
-		request.Properties.ListenerIp = v.(string)
-	}
-
-	if d.HasChange("listener_port") {
-		_, v := d.GetChange("listener_port")
-		request.Properties.ListenerPort = int32(v.(int))
-	}
+	// The PATCH body type requires these fields and always sends them, so they carry their current
+	// values; left unset they would go out as "", 0 and null.
+	request.Properties.Name = d.Get("name").(string)
+	request.Properties.Algorithm = d.Get("algorithm").(string)
+	request.Properties.Protocol = d.Get("protocol").(string)
+	request.Properties.ListenerIp = d.Get("listener_ip").(string)
+	request.Properties.ListenerPort = int32(d.Get("listener_port").(int))
 
 	if d.HasChange("health_check.0") {
 		_, v := d.GetChange("health_check.0")
@@ -458,13 +441,13 @@ func resourceNetworkLoadBalancerForwardingRuleUpdate(ctx context.Context, d *sch
 
 	if d.HasChange("targets") {
 		oldTargets, newTargets := d.GetChange("targets")
-		targets, diags := getTargetsData(newTargets)
-		if diags != nil {
-			return diags
-		}
 		tflog.Info(ctx, "nlb forwarding rule targets changed", map[string]any{"old": oldTargets, "new": newTargets})
-		request.Properties.Targets = targets
 	}
+	targets, diags := getTargetsData(d.Get("targets"))
+	if diags != nil {
+		return diags
+	}
+	request.Properties.Targets = targets
 	_, apiResponse, err := client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesPatch(ctx, dcID, nlbID, d.Id()).NetworkLoadBalancerForwardingRuleProperties(request.Properties).Execute()
 	logApiRequestTime(apiResponse)
 

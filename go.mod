@@ -17,7 +17,7 @@ require (
 	github.com/iancoleman/strcase v0.3.0
 	github.com/ionos-cloud/sdk-go-bundle/products/cdn/v2 v2.1.0
 	github.com/ionos-cloud/sdk-go-bundle/products/cert/v2 v2.2.0
-	github.com/ionos-cloud/sdk-go-bundle/products/compute/v2 v2.0.7
+	github.com/ionos-cloud/sdk-go-bundle/products/compute/v2 v2.0.8
 	github.com/ionos-cloud/sdk-go-bundle/products/containerregistry/v2 v2.1.0
 	github.com/ionos-cloud/sdk-go-bundle/products/dbaas/inmemorydb/v2 v2.0.1
 	github.com/ionos-cloud/sdk-go-bundle/products/dbaas/inmemorydb/v3 v3.0.0

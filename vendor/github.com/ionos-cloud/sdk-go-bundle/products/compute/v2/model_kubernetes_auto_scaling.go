@@ -20,20 +20,17 @@ var _ MappedNullable = &KubernetesAutoScaling{}
 // KubernetesAutoScaling struct for KubernetesAutoScaling
 type KubernetesAutoScaling struct {
 	// The minimum number of working nodes that the managed node pool can scale must be >= 1 and >= nodeCount. Required if autoScaling is specified.
-	MinNodeCount int32 `json:"minNodeCount"`
+	MinNodeCount NullableInt32 `json:"minNodeCount,omitempty"`
 	// The maximum number of worker nodes that the managed node pool can scale in. Must be >= minNodeCount and must be >= nodeCount. Required if autoScaling is specified.
-	MaxNodeCount int32 `json:"maxNodeCount"`
+	MaxNodeCount NullableInt32 `json:"maxNodeCount,omitempty"`
 }
 
 // NewKubernetesAutoScaling instantiates a new KubernetesAutoScaling object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewKubernetesAutoScaling(minNodeCount int32, maxNodeCount int32) *KubernetesAutoScaling {
+func NewKubernetesAutoScaling() *KubernetesAutoScaling {
 	this := KubernetesAutoScaling{}
-
-	this.MinNodeCount = minNodeCount
-	this.MaxNodeCount = maxNodeCount
 
 	return &this
 }
@@ -46,52 +43,90 @@ func NewKubernetesAutoScalingWithDefaults() *KubernetesAutoScaling {
 	return &this
 }
 
-// GetMinNodeCount returns the MinNodeCount field value
+// GetMinNodeCount returns the MinNodeCount field value if set, zero value otherwise (both if not set or set to explicit null).
 func (o *KubernetesAutoScaling) GetMinNodeCount() int32 {
-	if o == nil {
+	if o == nil || IsNil(o.MinNodeCount.Get()) {
 		var ret int32
 		return ret
 	}
-
-	return o.MinNodeCount
+	return *o.MinNodeCount.Get()
 }
 
-// GetMinNodeCountOk returns a tuple with the MinNodeCount field value
+// GetMinNodeCountOk returns a tuple with the MinNodeCount field value if set, nil otherwise
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *KubernetesAutoScaling) GetMinNodeCountOk() (*int32, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.MinNodeCount, true
+	return o.MinNodeCount.Get(), o.MinNodeCount.IsSet()
 }
 
-// SetMinNodeCount sets field value
+// HasMinNodeCount returns a boolean if a field has been set.
+func (o *KubernetesAutoScaling) HasMinNodeCount() bool {
+	if o != nil && o.MinNodeCount.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetMinNodeCount gets a reference to the given NullableInt32 and assigns it to the MinNodeCount field.
 func (o *KubernetesAutoScaling) SetMinNodeCount(v int32) {
-	o.MinNodeCount = v
+	o.MinNodeCount.Set(&v)
 }
 
-// GetMaxNodeCount returns the MaxNodeCount field value
+// SetMinNodeCountNil sets the value for MinNodeCount to be an explicit nil
+func (o *KubernetesAutoScaling) SetMinNodeCountNil() {
+	o.MinNodeCount.Set(nil)
+}
+
+// UnsetMinNodeCount ensures that no value is present for MinNodeCount, not even an explicit nil
+func (o *KubernetesAutoScaling) UnsetMinNodeCount() {
+	o.MinNodeCount.Unset()
+}
+
+// GetMaxNodeCount returns the MaxNodeCount field value if set, zero value otherwise (both if not set or set to explicit null).
 func (o *KubernetesAutoScaling) GetMaxNodeCount() int32 {
-	if o == nil {
+	if o == nil || IsNil(o.MaxNodeCount.Get()) {
 		var ret int32
 		return ret
 	}
-
-	return o.MaxNodeCount
+	return *o.MaxNodeCount.Get()
 }
 
-// GetMaxNodeCountOk returns a tuple with the MaxNodeCount field value
+// GetMaxNodeCountOk returns a tuple with the MaxNodeCount field value if set, nil otherwise
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *KubernetesAutoScaling) GetMaxNodeCountOk() (*int32, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.MaxNodeCount, true
+	return o.MaxNodeCount.Get(), o.MaxNodeCount.IsSet()
 }
 
-// SetMaxNodeCount sets field value
+// HasMaxNodeCount returns a boolean if a field has been set.
+func (o *KubernetesAutoScaling) HasMaxNodeCount() bool {
+	if o != nil && o.MaxNodeCount.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetMaxNodeCount gets a reference to the given NullableInt32 and assigns it to the MaxNodeCount field.
 func (o *KubernetesAutoScaling) SetMaxNodeCount(v int32) {
-	o.MaxNodeCount = v
+	o.MaxNodeCount.Set(&v)
+}
+
+// SetMaxNodeCountNil sets the value for MaxNodeCount to be an explicit nil
+func (o *KubernetesAutoScaling) SetMaxNodeCountNil() {
+	o.MaxNodeCount.Set(nil)
+}
+
+// UnsetMaxNodeCount ensures that no value is present for MaxNodeCount, not even an explicit nil
+func (o *KubernetesAutoScaling) UnsetMaxNodeCount() {
+	o.MaxNodeCount.Unset()
 }
 
 func (o KubernetesAutoScaling) MarshalJSON() ([]byte, error) {
@@ -104,8 +139,12 @@ func (o KubernetesAutoScaling) MarshalJSON() ([]byte, error) {
 
 func (o KubernetesAutoScaling) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	toSerialize["minNodeCount"] = o.MinNodeCount
-	toSerialize["maxNodeCount"] = o.MaxNodeCount
+	if o.MinNodeCount.IsSet() {
+		toSerialize["minNodeCount"] = o.MinNodeCount.Get()
+	}
+	if o.MaxNodeCount.IsSet() {
+		toSerialize["maxNodeCount"] = o.MaxNodeCount.Get()
+	}
 	return toSerialize, nil
 }
 

@@ -22,7 +22,7 @@ type ApplicationLoadBalancerHttpRuleCondition struct {
 	// The HTTP rule condition type.
 	Type string `json:"type"`
 	// The matching rule for the HTTP rule condition attribute; this parameter is mandatory for 'HEADER', 'PATH', 'QUERY', 'METHOD', 'HOST', and 'COOKIE' types. It must be 'null' if the type is 'SOURCE_IP'.
-	Condition string `json:"condition"`
+	Condition *string `json:"condition,omitempty"`
 	// Specifies whether the condition should be negated; the default value is 'FALSE'.
 	Negate *bool `json:"negate,omitempty"`
 	// The key can only be set when the HTTP rule condition type is 'COOKIES', 'HEADER', or 'QUERY'. For the type 'PATH', 'METHOD', 'HOST', or 'SOURCE_IP' the value must be 'null'.
@@ -35,11 +35,10 @@ type ApplicationLoadBalancerHttpRuleCondition struct {
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewApplicationLoadBalancerHttpRuleCondition(type_ string, condition string) *ApplicationLoadBalancerHttpRuleCondition {
+func NewApplicationLoadBalancerHttpRuleCondition(type_ string) *ApplicationLoadBalancerHttpRuleCondition {
 	this := ApplicationLoadBalancerHttpRuleCondition{}
 
 	this.Type = type_
-	this.Condition = condition
 
 	return &this
 }
@@ -76,28 +75,36 @@ func (o *ApplicationLoadBalancerHttpRuleCondition) SetType(v string) {
 	o.Type = v
 }
 
-// GetCondition returns the Condition field value
+// GetCondition returns the Condition field value if set, zero value otherwise.
 func (o *ApplicationLoadBalancerHttpRuleCondition) GetCondition() string {
-	if o == nil {
+	if o == nil || IsNil(o.Condition) {
 		var ret string
 		return ret
 	}
-
-	return o.Condition
+	return *o.Condition
 }
 
-// GetConditionOk returns a tuple with the Condition field value
+// GetConditionOk returns a tuple with the Condition field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *ApplicationLoadBalancerHttpRuleCondition) GetConditionOk() (*string, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.Condition) {
 		return nil, false
 	}
-	return &o.Condition, true
+	return o.Condition, true
 }
 
-// SetCondition sets field value
+// HasCondition returns a boolean if a field has been set.
+func (o *ApplicationLoadBalancerHttpRuleCondition) HasCondition() bool {
+	if o != nil && !IsNil(o.Condition) {
+		return true
+	}
+
+	return false
+}
+
+// SetCondition gets a reference to the given string and assigns it to the Condition field.
 func (o *ApplicationLoadBalancerHttpRuleCondition) SetCondition(v string) {
-	o.Condition = v
+	o.Condition = &v
 }
 
 // GetNegate returns the Negate field value if set, zero value otherwise.
@@ -207,7 +214,9 @@ func (o ApplicationLoadBalancerHttpRuleCondition) MarshalJSON() ([]byte, error) 
 func (o ApplicationLoadBalancerHttpRuleCondition) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["type"] = o.Type
-	toSerialize["condition"] = o.Condition
+	if !IsNil(o.Condition) {
+		toSerialize["condition"] = o.Condition
+	}
 	if !IsNil(o.Negate) {
 		toSerialize["negate"] = o.Negate
 	}

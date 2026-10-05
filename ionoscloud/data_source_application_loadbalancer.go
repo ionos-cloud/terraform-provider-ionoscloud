@@ -156,7 +156,7 @@ func dataSourceApplicationLoadBalancerRead(ctx context.Context, d *schema.Resour
 
 			if len(applicationLoadBalancers.Items) > 0 {
 				for _, alb := range applicationLoadBalancers.Items {
-					if strings.EqualFold(alb.Properties.Name, name) {
+					if alb.Properties.Name != nil && strings.EqualFold(*alb.Properties.Name, name) {
 						tmpAlb, apiResponse, err := client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFindByApplicationLoadBalancerId(ctx, datacenterID, *alb.Id).Execute()
 						logApiRequestTime(apiResponse)
 						if err != nil {

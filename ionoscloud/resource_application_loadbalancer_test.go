@@ -53,8 +53,8 @@ func TestAccApplicationLoadBalancerBasic(t *testing.T) {
 				Config: testAccDataSourceApplicationLoadBalancerMatchID,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(resourceNameAlb, "name", dataSourceNameAlbByID, "name"),
-					resource.TestCheckResourceAttrPair(resourceNameAlb, "central_logging", "false", "central_logging"),
-					resource.TestCheckResourceAttrPair(resourceNameAlb, "logging_format", `%{+Q}o %{-Q}ci - - [%trg] %r %ST %B "" "" %cp %ms %ft %b %s %TR %Tw %Tc %Tr %Ta %tsc %ac %fc %bc %sc %rc %sq %bq %CC %CS %hrl %hsl`, "logging_format"),
+					resource.TestCheckResourceAttrPair(resourceNameAlb, "central_logging", dataSourceNameAlbByID, "central_logging"),
+					resource.TestCheckResourceAttrPair(resourceNameAlb, "logging_format", dataSourceNameAlbByID, "logging_format"),
 					resource.TestCheckResourceAttrPair(resourceNameAlb, "listener_lan", dataSourceNameAlbByID, "listener_lan"),
 					resource.TestCheckResourceAttrPair(resourceNameAlb, "target_lan", dataSourceNameAlbByID, "target_lan"),
 					resource.TestCheckResourceAttrPair(resourceNameAlb, "ips.0", dataSourceNameAlbByID, "ips.0"),

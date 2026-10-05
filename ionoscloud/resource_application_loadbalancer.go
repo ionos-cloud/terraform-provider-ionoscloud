@@ -108,14 +108,14 @@ func resourceApplicationLoadBalancerCreate(ctx context.Context, d *schema.Resour
 
 	if name, nameOk := d.GetOk("name"); nameOk {
 		name := name.(string)
-		applicationLoadBalancer.Properties.Name = name
+		applicationLoadBalancer.Properties.Name = &name
 	} else {
 		return diagutil.ToDiags(d, fmt.Errorf("name must be provided for application loadbalancer"), nil)
 	}
 
 	if listenerLan, listenerLanOk := d.GetOk("listener_lan"); listenerLanOk {
 		listener := int32(listenerLan.(int))
-		applicationLoadBalancer.Properties.ListenerLan = listener
+		applicationLoadBalancer.Properties.ListenerLan = &listener
 	} else {
 		return diagutil.ToDiags(d, fmt.Errorf("listener_lan must be provided for application loadbalancer"), nil)
 	}
@@ -145,7 +145,7 @@ func resourceApplicationLoadBalancerCreate(ctx context.Context, d *schema.Resour
 
 	if targetLan, targetLanOk := d.GetOk("target_lan"); targetLanOk {
 		targetLan := int32(targetLan.(int))
-		applicationLoadBalancer.Properties.TargetLan = targetLan
+		applicationLoadBalancer.Properties.TargetLan = &targetLan
 	} else {
 		return diagutil.ToDiags(d, fmt.Errorf("target_lan must be provided for application loadbalancer"), nil)
 	}
@@ -264,13 +264,13 @@ func resourceApplicationLoadBalancerUpdate(ctx context.Context, d *schema.Resour
 	if d.HasChange("name") {
 		_, v := d.GetChange("name")
 		vStr := v.(string)
-		request.Properties.Name = vStr
+		request.Properties.Name = &vStr
 	}
 
 	if d.HasChange("listener_lan") {
 		_, v := d.GetChange("listener_lan")
 		vInt := int32(v.(int))
-		request.Properties.ListenerLan = vInt
+		request.Properties.ListenerLan = &vInt
 	}
 
 	if d.HasChange("ips") {
@@ -300,7 +300,7 @@ func resourceApplicationLoadBalancerUpdate(ctx context.Context, d *schema.Resour
 	if d.HasChange("target_lan") {
 		_, v := d.GetChange("target_lan")
 		vInt := int32(v.(int))
-		request.Properties.TargetLan = vInt
+		request.Properties.TargetLan = &vInt
 	}
 
 	if d.HasChange("lb_private_ips") {
@@ -452,8 +452,8 @@ func setApplicationLoadBalancerData(d *schema.ResourceData, applicationLoadBalan
 		d.SetId(*applicationLoadBalancer.Id)
 	}
 
-	if applicationLoadBalancer.Properties.Name != "" {
-		if err := d.Set("name", applicationLoadBalancer.Properties.Name); err != nil {
+	if applicationLoadBalancer.Properties.Name != nil {
+		if err := d.Set("name", *applicationLoadBalancer.Properties.Name); err != nil {
 			return fmt.Errorf("error while setting name property for application loadbalancer %s: %w", d.Id(), err)
 		}
 	}

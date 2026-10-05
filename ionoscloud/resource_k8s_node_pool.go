@@ -438,9 +438,9 @@ func getAutoscalingData(ctx context.Context, d *schema.ResourceData) (*ionosclou
 		}
 
 		tflog.Info(ctx, "setting autoscaling min node count", map[string]any{"min_node_count": asmnVal})
-		autoscaling.MinNodeCount = asmnVal
+		autoscaling.SetMinNodeCount(asmnVal)
 		tflog.Info(ctx, "setting autoscaling max node count", map[string]any{"max_node_count": asmxnVal})
-		autoscaling.MaxNodeCount = asmxnVal
+		autoscaling.SetMaxNodeCount(asmxnVal)
 	}
 
 	return &autoscaling, nil
@@ -506,7 +506,7 @@ func resourcek8sNodePoolCreate(ctx context.Context, d *schema.ResourceData, meta
 		k8sNodepool.Properties.AutoScaling = autoscaling
 	}
 
-	if k8sNodepool.Properties.AutoScaling != nil && k8sNodepool.Properties.NodeCount < k8sNodepool.Properties.AutoScaling.MinNodeCount {
+	if k8sNodepool.Properties.AutoScaling != nil && k8sNodepool.Properties.NodeCount < k8sNodepool.Properties.AutoScaling.GetMinNodeCount() {
 		d.SetId("")
 		return diagutil.ToDiags(d, fmt.Errorf("error creating k8s node pool: node_count cannot be lower than min_node_count"), nil)
 	}
@@ -660,7 +660,7 @@ func resourcek8sNodePoolUpdate(ctx context.Context, d *schema.ResourceData, meta
 		request.Properties.AutoScaling = autoscaling
 	}
 
-	if request.Properties.AutoScaling != nil && request.Properties.NodeCount < request.Properties.AutoScaling.MinNodeCount {
+	if request.Properties.AutoScaling != nil && request.Properties.NodeCount < request.Properties.AutoScaling.GetMinNodeCount() {
 		d.SetId("")
 		return diagutil.ToDiags(d, fmt.Errorf("error creating k8s node pool: node_count cannot be lower than min_node_count"), nil)
 	}
@@ -1005,12 +1005,12 @@ func setK8sNodePoolData(d *schema.ResourceData, nodePool *ionoscloud.KubernetesN
 		}
 	}
 
-	if nodePool.Properties.AutoScaling != nil && (nodePool.Properties.AutoScaling.MinNodeCount != 0 &&
-		nodePool.Properties.AutoScaling.MaxNodeCount != 0) {
+	if nodePool.Properties.AutoScaling != nil && (nodePool.Properties.AutoScaling.GetMinNodeCount() != 0 &&
+		nodePool.Properties.AutoScaling.GetMaxNodeCount() != 0) {
 		if err := d.Set("auto_scaling", []map[string]uint32{
 			{
-				"min_node_count": uint32(nodePool.Properties.AutoScaling.MinNodeCount),
-				"max_node_count": uint32(nodePool.Properties.AutoScaling.MaxNodeCount),
+				"min_node_count": uint32(nodePool.Properties.AutoScaling.GetMinNodeCount()),
+				"max_node_count": uint32(nodePool.Properties.AutoScaling.GetMaxNodeCount()),
 			},
 		}); err != nil {
 			return err

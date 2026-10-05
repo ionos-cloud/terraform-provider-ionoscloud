@@ -20,13 +20,13 @@ var _ MappedNullable = &NetworkLoadBalancerProperties{}
 // NetworkLoadBalancerProperties struct for NetworkLoadBalancerProperties
 type NetworkLoadBalancerProperties struct {
 	// The name of the Network Load Balancer.
-	Name string `json:"name"`
+	Name *string `json:"name,omitempty"`
 	// ID of the listening LAN (inbound).
-	ListenerLan int32 `json:"listenerLan"`
+	ListenerLan *int32 `json:"listenerLan,omitempty"`
 	// Collection of the Network Load Balancer IP addresses. (Inbound and outbound) IPs of the listenerLan must be customer-reserved IPs for public Load Balancers, and private IPs for private Load Balancers.
 	Ips []string `json:"ips,omitempty"`
 	// ID of the balanced private target LAN (outbound).
-	TargetLan int32 `json:"targetLan"`
+	TargetLan *int32 `json:"targetLan,omitempty"`
 	// Collection of private IP addresses with subnet mask of the Network Load Balancer. IPs must contain a valid subnet mask. If no IP is provided, the system will generate an IP with /24 subnet.
 	LbPrivateIps []string `json:"lbPrivateIps,omitempty"`
 	// Turn logging on and off for this product. Default value is 'false'.
@@ -39,12 +39,8 @@ type NetworkLoadBalancerProperties struct {
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewNetworkLoadBalancerProperties(name string, listenerLan int32, targetLan int32) *NetworkLoadBalancerProperties {
+func NewNetworkLoadBalancerProperties() *NetworkLoadBalancerProperties {
 	this := NetworkLoadBalancerProperties{}
-
-	this.Name = name
-	this.ListenerLan = listenerLan
-	this.TargetLan = targetLan
 
 	return &this
 }
@@ -57,52 +53,68 @@ func NewNetworkLoadBalancerPropertiesWithDefaults() *NetworkLoadBalancerProperti
 	return &this
 }
 
-// GetName returns the Name field value
+// GetName returns the Name field value if set, zero value otherwise.
 func (o *NetworkLoadBalancerProperties) GetName() string {
-	if o == nil {
+	if o == nil || IsNil(o.Name) {
 		var ret string
 		return ret
 	}
-
-	return o.Name
+	return *o.Name
 }
 
-// GetNameOk returns a tuple with the Name field value
+// GetNameOk returns a tuple with the Name field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *NetworkLoadBalancerProperties) GetNameOk() (*string, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.Name) {
 		return nil, false
 	}
-	return &o.Name, true
+	return o.Name, true
 }
 
-// SetName sets field value
+// HasName returns a boolean if a field has been set.
+func (o *NetworkLoadBalancerProperties) HasName() bool {
+	if o != nil && !IsNil(o.Name) {
+		return true
+	}
+
+	return false
+}
+
+// SetName gets a reference to the given string and assigns it to the Name field.
 func (o *NetworkLoadBalancerProperties) SetName(v string) {
-	o.Name = v
+	o.Name = &v
 }
 
-// GetListenerLan returns the ListenerLan field value
+// GetListenerLan returns the ListenerLan field value if set, zero value otherwise.
 func (o *NetworkLoadBalancerProperties) GetListenerLan() int32 {
-	if o == nil {
+	if o == nil || IsNil(o.ListenerLan) {
 		var ret int32
 		return ret
 	}
-
-	return o.ListenerLan
+	return *o.ListenerLan
 }
 
-// GetListenerLanOk returns a tuple with the ListenerLan field value
+// GetListenerLanOk returns a tuple with the ListenerLan field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *NetworkLoadBalancerProperties) GetListenerLanOk() (*int32, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.ListenerLan) {
 		return nil, false
 	}
-	return &o.ListenerLan, true
+	return o.ListenerLan, true
 }
 
-// SetListenerLan sets field value
+// HasListenerLan returns a boolean if a field has been set.
+func (o *NetworkLoadBalancerProperties) HasListenerLan() bool {
+	if o != nil && !IsNil(o.ListenerLan) {
+		return true
+	}
+
+	return false
+}
+
+// SetListenerLan gets a reference to the given int32 and assigns it to the ListenerLan field.
 func (o *NetworkLoadBalancerProperties) SetListenerLan(v int32) {
-	o.ListenerLan = v
+	o.ListenerLan = &v
 }
 
 // GetIps returns the Ips field value if set, zero value otherwise.
@@ -137,28 +149,36 @@ func (o *NetworkLoadBalancerProperties) SetIps(v []string) {
 	o.Ips = v
 }
 
-// GetTargetLan returns the TargetLan field value
+// GetTargetLan returns the TargetLan field value if set, zero value otherwise.
 func (o *NetworkLoadBalancerProperties) GetTargetLan() int32 {
-	if o == nil {
+	if o == nil || IsNil(o.TargetLan) {
 		var ret int32
 		return ret
 	}
-
-	return o.TargetLan
+	return *o.TargetLan
 }
 
-// GetTargetLanOk returns a tuple with the TargetLan field value
+// GetTargetLanOk returns a tuple with the TargetLan field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *NetworkLoadBalancerProperties) GetTargetLanOk() (*int32, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.TargetLan) {
 		return nil, false
 	}
-	return &o.TargetLan, true
+	return o.TargetLan, true
 }
 
-// SetTargetLan sets field value
+// HasTargetLan returns a boolean if a field has been set.
+func (o *NetworkLoadBalancerProperties) HasTargetLan() bool {
+	if o != nil && !IsNil(o.TargetLan) {
+		return true
+	}
+
+	return false
+}
+
+// SetTargetLan gets a reference to the given int32 and assigns it to the TargetLan field.
 func (o *NetworkLoadBalancerProperties) SetTargetLan(v int32) {
-	o.TargetLan = v
+	o.TargetLan = &v
 }
 
 // GetLbPrivateIps returns the LbPrivateIps field value if set, zero value otherwise.
@@ -267,12 +287,18 @@ func (o NetworkLoadBalancerProperties) MarshalJSON() ([]byte, error) {
 
 func (o NetworkLoadBalancerProperties) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	toSerialize["name"] = o.Name
-	toSerialize["listenerLan"] = o.ListenerLan
+	if !IsNil(o.Name) {
+		toSerialize["name"] = o.Name
+	}
+	if !IsNil(o.ListenerLan) {
+		toSerialize["listenerLan"] = o.ListenerLan
+	}
 	if !IsNil(o.Ips) {
 		toSerialize["ips"] = o.Ips
 	}
-	toSerialize["targetLan"] = o.TargetLan
+	if !IsNil(o.TargetLan) {
+		toSerialize["targetLan"] = o.TargetLan
+	}
 	if !IsNil(o.LbPrivateIps) {
 		toSerialize["lbPrivateIps"] = o.LbPrivateIps
 	}

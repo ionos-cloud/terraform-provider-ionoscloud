@@ -308,29 +308,12 @@ func resourceApplicationLoadBalancerForwardingRuleUpdate(ctx context.Context, d 
 	dcID := d.Get("datacenter_id").(string)
 	albID := d.Get("application_loadbalancer_id").(string)
 
-	if d.HasChange("name") {
-		_, v := d.GetChange("name")
-		vStr := v.(string)
-		request.Properties.Name = vStr
-	}
-
-	if d.HasChange("protocol") {
-		_, v := d.GetChange("protocol")
-		vStr := v.(string)
-		request.Properties.Protocol = vStr
-	}
-
-	if d.HasChange("listener_ip") {
-		_, v := d.GetChange("listener_ip")
-		vStr := v.(string)
-		request.Properties.ListenerIp = vStr
-	}
-
-	if d.HasChange("listener_port") {
-		_, v := d.GetChange("listener_port")
-		vStr := int32(v.(int))
-		request.Properties.ListenerPort = vStr
-	}
+	// The PATCH body type requires these fields and always sends them, so they carry their current
+	// values; left unset they would go out as "" and 0.
+	request.Properties.Name = d.Get("name").(string)
+	request.Properties.Protocol = d.Get("protocol").(string)
+	request.Properties.ListenerIp = d.Get("listener_ip").(string)
+	request.Properties.ListenerPort = int32(d.Get("listener_port").(int))
 
 	if d.HasChange("client_timeout") {
 		_, v := d.GetChange("client_timeout")
@@ -533,7 +516,9 @@ func setApplicationLoadBalancerForwardingRuleData(d *schema.ResourceData, applic
 					conditionEntry := make(map[string]any)
 
 					conditionEntry["type"] = condition.Type
-					conditionEntry["condition"] = condition.Condition
+					if condition.Condition != nil {
+						conditionEntry["condition"] = *condition.Condition
+					}
 
 					if condition.Negate != nil {
 						conditionEntry["negate"] = *condition.Negate
@@ -625,7 +610,8 @@ func getAlbHttpRulesData(d *schema.ResourceData) (*[]ionoscloud.ApplicationLoadB
 					condition.Type = typeVal
 
 					if conditionVal, conditionOk := d.GetOk(fmt.Sprintf("http_rules.%d.conditions.%d.condition", httpRuleIndex, conditionIndex)); conditionOk {
-						condition.Condition = conditionVal.(string)
+						conditionVal := conditionVal.(string)
+						condition.Condition = &conditionVal
 					} else if !strings.EqualFold(typeVal, "SOURCE_IP") {
 						return nil, diagutil.ToError(d, fmt.Errorf("condition must be provided for application loadbalancer forwarding rule http rule condition"), nil)
 					}

@@ -117,19 +117,22 @@ func resourceNetworkLoadBalancerCreate(ctx context.Context, d *schema.ResourceDa
 	}
 
 	if name, nameOk := d.GetOk("name"); nameOk {
-		networkLoadBalancer.Properties.Name = name.(string)
+		name := name.(string)
+		networkLoadBalancer.Properties.Name = &name
 	} else {
 		return diagutil.ToDiags(d, fmt.Errorf("name must be provided for network loadbalancer"), nil)
 	}
 
 	if listenerLan, listenerLanOk := d.GetOk("listener_lan"); listenerLanOk {
-		networkLoadBalancer.Properties.ListenerLan = int32(listenerLan.(int))
+		listenerLan := int32(listenerLan.(int))
+		networkLoadBalancer.Properties.ListenerLan = &listenerLan
 	} else {
 		return diagutil.ToDiags(d, fmt.Errorf("listener lan must be provided for network loadbalancer"), nil)
 	}
 
 	if targetLan, targetLanOk := d.GetOk("target_lan"); targetLanOk {
-		networkLoadBalancer.Properties.TargetLan = int32(targetLan.(int))
+		targetLan := int32(targetLan.(int))
+		networkLoadBalancer.Properties.TargetLan = &targetLan
 	} else {
 		return diagutil.ToDiags(d, fmt.Errorf("target lan must be provided for network loadbalancer"), nil)
 	}
@@ -247,17 +250,20 @@ func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceDa
 
 	if d.HasChange("name") {
 		_, v := d.GetChange("name")
-		request.Properties.Name = v.(string)
+		vStr := v.(string)
+		request.Properties.Name = &vStr
 	}
 
 	if d.HasChange("listener_lan") {
 		_, v := d.GetChange("listener_lan")
-		request.Properties.ListenerLan = int32(v.(int))
+		vInt := int32(v.(int))
+		request.Properties.ListenerLan = &vInt
 	}
 
 	if d.HasChange("target_lan") {
 		_, v := d.GetChange("target_lan")
-		request.Properties.TargetLan = int32(v.(int))
+		vInt := int32(v.(int))
+		request.Properties.TargetLan = &vInt
 	}
 
 	if d.HasChange("central_logging") {
@@ -432,8 +438,8 @@ func setNetworkLoadBalancerData(d *schema.ResourceData, networkLoadBalancer *ion
 		d.SetId(*networkLoadBalancer.Id)
 	}
 
-	if networkLoadBalancer.Properties.Name != "" {
-		if err := d.Set("name", networkLoadBalancer.Properties.Name); err != nil {
+	if networkLoadBalancer.Properties.Name != nil {
+		if err := d.Set("name", *networkLoadBalancer.Properties.Name); err != nil {
 			return fmt.Errorf("error while setting name property for network load balancer %s: %w", d.Id(), err)
 		}
 	}
