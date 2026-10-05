@@ -1,4 +1,14 @@
-## 6.7.38 -- upcoming release
+## 6.7.39 -- upcoming release
+### Features
+- `ionoscloud_ipblock`: New list resource, queryable with `terraform query` (requires Terraform 1.14+).
+- `ionoscloud_ipblock`: Add a resource identity (`id`, `location`), which also enables `import` blocks with an `identity` attribute.
+- `ionoscloud_dns_zone`: New list resource, queryable with `terraform query` (requires Terraform 1.14+).
+- `ionoscloud_dns_zone`: Add a resource identity (`id`), which also enables `import` blocks with an `identity` attribute.
+
+### Docs
+- Fix the malformed `terraform import` examples in the `ionoscloud_dns_zone` and `ionoscloud_ipblock` docs.
+
+## 6.7.38
 ### Features
 - `ionoscloud_template`: add new, optional attribute: `storage_type`
 - `ionoscloud_lan`: `ipv4_cidr_block` is now an optional argument, so a private LAN can use a chosen IPv4 CIDR block (e.g. `10.5.0.0/24`) instead of the automatically assigned /23. It can only be set on private LANs and can be changed in place.
