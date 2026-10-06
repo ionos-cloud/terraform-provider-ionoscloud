@@ -325,6 +325,7 @@ func resourceNetworkLoadBalancerUpdate(ctx context.Context, d *schema.ResourceDa
 					fw := cloudapiflowlog.Service{
 						D:      d,
 						Client: client,
+						Meta:   meta,
 					}
 					err := fw.CreateOrPatchForNLB(ctx, dcID, d.Id(), firstFlowLogID, flowLog)
 					if err != nil {

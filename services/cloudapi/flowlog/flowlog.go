@@ -9,6 +9,7 @@ import (
 	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
 
@@ -100,14 +101,20 @@ func (fw *Service) CreateOrPatchForServer(ctx context.Context, dcID, srvID, nicI
 
 func (fw *Service) CreateOrPatchForNLB(ctx context.Context, dcID, nlbID, id string, flowLog ionoscloud.FlowLog) error {
 	if id == "" {
-		_, _, err := fw.Client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFlowlogsPost(ctx, dcID, nlbID).NetworkLoadBalancerFlowLog(flowLog).Execute()
+		_, apiResponse, err := fw.Client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFlowlogsPost(ctx, dcID, nlbID).NetworkLoadBalancerFlowLog(flowLog).Execute()
 		if err != nil {
 			return fmt.Errorf("error occurred while creating flowlog in datacenter %s, nlb %s : %w", dcID, nlbID, err)
 		}
+		if errState := bundleclient.WaitForStateChange(ctx, fw.Meta, fw.D, apiResponse, schema.TimeoutCreate); errState != nil {
+			return fmt.Errorf("error occurred while waiting for flowlog creation in datacenter %s, nlb %s : %w", dcID, nlbID, errState)
+		}
 	} else {
-		_, _, err := fw.Client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFlowlogsPatch(ctx, dcID, nlbID, id).NetworkLoadBalancerFlowLogProperties(flowLog.Properties).Execute()
+		_, apiResponse, err := fw.Client.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersFlowlogsPatch(ctx, dcID, nlbID, id).NetworkLoadBalancerFlowLogProperties(flowLog.Properties).Execute()
 		if err != nil {
 			return fmt.Errorf("error occurred while updating flowlog %s datacenter %s, nlb %s : %w", id, dcID, nlbID, err)
+		}
+		if errState := bundleclient.WaitForStateChange(ctx, fw.Meta, fw.D, apiResponse, schema.TimeoutUpdate); errState != nil {
+			return fmt.Errorf("error occurred while waiting for flowlog %s update in datacenter %s, nlb %s : %w", id, dcID, nlbID, errState)
 		}
 	}
 	return nil
@@ -115,14 +122,20 @@ func (fw *Service) CreateOrPatchForNLB(ctx context.Context, dcID, nlbID, id stri
 
 func (fw *Service) CreateOrPatchForALB(ctx context.Context, dcID, albID, id string, flowLog ionoscloud.FlowLog) error {
 	if id == "" {
-		_, _, err := fw.Client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFlowlogsPost(ctx, dcID, albID).ApplicationLoadBalancerFlowLog(flowLog).Execute()
+		_, apiResponse, err := fw.Client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFlowlogsPost(ctx, dcID, albID).ApplicationLoadBalancerFlowLog(flowLog).Execute()
 		if err != nil {
 			return fmt.Errorf("error occurred while creating flowlog in datacenter %s, alb %s : %w", dcID, albID, err)
 		}
+		if errState := bundleclient.WaitForStateChange(ctx, fw.Meta, fw.D, apiResponse, schema.TimeoutCreate); errState != nil {
+			return fmt.Errorf("error occurred while waiting for flowlog creation in datacenter %s, alb %s : %w", dcID, albID, errState)
+		}
 	} else {
-		_, _, err := fw.Client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFlowlogsPatch(ctx, dcID, albID, id).ApplicationLoadBalancerFlowLogProperties(flowLog.Properties).Execute()
+		_, apiResponse, err := fw.Client.ApplicationLoadBalancersApi.DatacentersApplicationloadbalancersFlowlogsPatch(ctx, dcID, albID, id).ApplicationLoadBalancerFlowLogProperties(flowLog.Properties).Execute()
 		if err != nil {
 			return fmt.Errorf("error occurred while updating flowlog %s, datacenter %s, alb %s : %w", id, dcID, albID, err)
+		}
+		if errState := bundleclient.WaitForStateChange(ctx, fw.Meta, fw.D, apiResponse, schema.TimeoutUpdate); errState != nil {
+			return fmt.Errorf("error occurred while waiting for flowlog %s update in datacenter %s, alb %s : %w", id, dcID, albID, errState)
 		}
 	}
 	return nil

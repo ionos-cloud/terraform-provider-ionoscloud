@@ -188,6 +188,7 @@ func resourceApplicationLoadBalancerCreate(ctx context.Context, d *schema.Resour
 		fw := cloudapiflowlog.Service{
 			D:      d,
 			Client: client,
+			Meta:   meta,
 		}
 		if flowLogList, ok := flowLogs.([]any); ok {
 			for _, flowLogData := range flowLogList {
@@ -330,6 +331,7 @@ func resourceApplicationLoadBalancerUpdate(ctx context.Context, d *schema.Resour
 					fw := cloudapiflowlog.Service{
 						D:      d,
 						Client: client,
+						Meta:   meta,
 					}
 					err := fw.CreateOrPatchForALB(ctx, dcID, d.Id(), firstFlowLogID, flowLog)
 					if err != nil {
