@@ -64,26 +64,13 @@ func (r *zoneDNSSECResource) Metadata(_ context.Context, req resource.MetadataRe
 	resp.TypeName = req.ProviderTypeName + "_dns_zone_dnssec"
 }
 
-// replaceIfChanged reports whether a configured value that differs from the one in state requires replacement.
+// requiresReplaceInt64 replaces the key when a configured value differs from the one in state.
 // The API does not return every creation parameter, so after an import the state holds nulls; those are adopted
 // from the configuration instead of forcing the key to be recreated.
-func replaceIfChanged(stateIsNull, planIsNull, equal bool) bool {
-	return !stateIsNull && !planIsNull && !equal
-}
-
-func requiresReplaceString() planmodifier.String {
-	return stringplanmodifier.RequiresReplaceIf(
-		func(_ context.Context, req planmodifier.StringRequest, resp *stringplanmodifier.RequiresReplaceIfFuncResponse) {
-			resp.RequiresReplace = replaceIfChanged(req.StateValue.IsNull(), req.PlanValue.IsNull(), req.PlanValue.Equal(req.StateValue))
-		},
-		"Changing this value recreates the DNSSEC key.", "Changing this value recreates the DNSSEC key.",
-	)
-}
-
 func requiresReplaceInt64() planmodifier.Int64 {
 	return int64planmodifier.RequiresReplaceIf(
 		func(_ context.Context, req planmodifier.Int64Request, resp *int64planmodifier.RequiresReplaceIfFuncResponse) {
-			resp.RequiresReplace = replaceIfChanged(req.StateValue.IsNull(), req.PlanValue.IsNull(), req.PlanValue.Equal(req.StateValue))
+			resp.RequiresReplace = !req.StateValue.IsNull() && !req.PlanValue.IsNull() && !req.PlanValue.Equal(req.StateValue)
 		},
 		"Changing this value recreates the DNSSEC key.", "Changing this value recreates the DNSSEC key.",
 	)
@@ -126,7 +113,7 @@ func (r *zoneDNSSECResource) Schema(ctx context.Context, _ resource.SchemaReques
 				Default:       stringdefault.StaticString(string(dnssdk.ALGORITHM_RSASHA256)),
 				Description:   "The signing algorithm. Only `RSASHA256` is supported. Defaults to `RSASHA256`.",
 				Validators:    []validator.String{stringvalidator.OneOf(string(dnssdk.ALGORITHM_RSASHA256))},
-				PlanModifiers: []planmodifier.String{requiresReplaceString()},
+				PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 			"ksk_bits": schema.Int64Attribute{
 				Required:      true,
@@ -144,7 +131,7 @@ func (r *zoneDNSSECResource) Schema(ctx context.Context, _ resource.SchemaReques
 				Required:      true,
 				Description:   "The authenticated denial of existence mode. One of `NSEC`, `NSEC3`.",
 				Validators:    []validator.String{stringvalidator.OneOf(string(dnssdk.NSECMODE_NSEC), string(dnssdk.NSECMODE_NSEC3))},
-				PlanModifiers: []planmodifier.String{requiresReplaceString()},
+				PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 			"nsec3_iterations": schema.Int64Attribute{
 				Optional:      true,

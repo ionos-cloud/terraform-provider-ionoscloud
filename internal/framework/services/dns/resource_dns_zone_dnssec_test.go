@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/acctest"
@@ -52,6 +53,37 @@ func TestAccZoneDNSSEC(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"ksk_bits", "zsk_bits", "nsec3_iterations", "nsec3_salt_bits", "validity", "timeouts"},
 			},
 			{
+				// Forget the key without deleting it, so that it can be imported into the state used by the next steps.
+				Config: dnssecZoneConfig(zoneName) + `
+removed {
+  from = ionoscloud_dns_zone_dnssec.test
+  lifecycle {
+    destroy = false
+  }
+}`,
+			},
+			{
+				Config:             dnssecConfig(zoneName, 2048, 1024),
+				ResourceName:       dnssecResource,
+				ImportState:        true,
+				ImportStateIdFunc:  zoneIDFunc("ionoscloud_dns_zone.test"),
+				ImportStatePersist: true,
+			},
+			{
+				// The imported state lacks the creation parameters: they are adopted from the configuration in place,
+				// without recreating the key.
+				Config: dnssecConfig(zoneName, 2048, 1024),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{plancheck.ExpectResourceAction(dnssecResource, plancheck.ResourceActionUpdate)},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(dnssecResource, "algorithm", "RSASHA256"),
+					resource.TestCheckResourceAttr(dnssecResource, "nsec_mode", "NSEC3"),
+					resource.TestCheckResourceAttr(dnssecResource, "ksk_bits", "2048"),
+					resource.TestCheckResourceAttr(dnssecResource, "validity", "120"),
+				),
+			},
+			{
 				Config: dnssecConfig(zoneName, 2048, 1024) + `
 data "ionoscloud_dns_zone_dnssec" "test" {
   zone_id = ionoscloud_dns_zone_dnssec.test.zone_id
@@ -66,12 +98,16 @@ data "ionoscloud_dns_zone_dnssec" "test" {
 	})
 }
 
-func dnssecConfig(zoneName string, kskBits, zskBits int) string {
+func dnssecZoneConfig(zoneName string) string {
 	return fmt.Sprintf(`
 resource "ionoscloud_dns_zone" "test" {
   name = %q
 }
+`, zoneName)
+}
 
+func dnssecConfig(zoneName string, kskBits, zskBits int) string {
+	return dnssecZoneConfig(zoneName) + fmt.Sprintf(`
 resource "ionoscloud_dns_zone_dnssec" "test" {
   zone_id          = ionoscloud_dns_zone.test.id
   ksk_bits         = %d
@@ -81,7 +117,18 @@ resource "ionoscloud_dns_zone_dnssec" "test" {
   nsec3_salt_bits  = 64
   validity         = 120
 }
-`, zoneName, kskBits, zskBits)
+`, kskBits, zskBits)
+}
+
+// zoneIDFunc returns the ID of the given zone resource, to import a resource that is no longer in the state.
+func zoneIDFunc(zoneResource string) resource.ImportStateIdFunc {
+	return func(s *terraform.State) (string, error) {
+		rs, ok := s.RootModule().Resources[zoneResource]
+		if !ok {
+			return "", fmt.Errorf("resource %s not found in state", zoneResource)
+		}
+		return rs.Primary.ID, nil
+	}
 }
 
 func checkZoneDestroy(s *terraform.State) error {
