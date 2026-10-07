@@ -41,7 +41,6 @@ output "ds_record" {
 ## Argument reference
 
 * `zone_id` - (Required)[string] The ID (UUID) of the DNS zone. Changing it recreates the resource.
-* `algorithm` - (Optional)[string] The signing algorithm. Only `RSASHA256` is supported. Defaults to `RSASHA256`.
 * `ksk_bits` - (Required)[int] The size in bits of the key signing key. One of `1024`, `2048`, `4096`.
 * `zsk_bits` - (Required)[int] The size in bits of the zone signing key. One of `1024`, `2048`, `4096`.
 * `nsec_mode` - (Required)[string] The authenticated denial of existence mode. One of `NSEC`, `NSEC3`.
@@ -52,6 +51,7 @@ output "ds_record" {
 ## Attributes reference
 
 * `id` - The ID of the resource, equal to `zone_id`.
+* `algorithm` - The signing algorithm of the key. The API only supports `RSASHA256`.
 * `ds_record` - The DS record to hand over to the registrar, formatted as `<key_tag> <algorithm_number> <digest_type> <digest>`.
 * `key_tag` - The key tag of the zone signing key.
 * `algorithm_number` - The IANA DNS Security Algorithm Number (`8` for `RSASHA256`).
@@ -64,7 +64,7 @@ output "ds_record" {
 
 ## Value limits
 
-The provider only restricts the values the API defines as enumerations (`algorithm`, `ksk_bits`, `zsk_bits`, `nsec_mode`). Numeric limits are enforced by the API and reported when the key is created. At the time of writing they are: `validity` between 90 and 365 days, `nsec3_iterations` between 0 and 50, `nsec3_salt_bits` between 64 and 128 in multiples of 8, and `ksk_bits` greater than or equal to `zsk_bits`.
+The provider only restricts the values the API defines as enumerations (`ksk_bits`, `zsk_bits`, `nsec_mode`). Numeric limits are enforced by the API and reported when the key is created. At the time of writing they are: `validity` between 90 and 365 days, `nsec3_iterations` between 0 and 50, `nsec3_salt_bits` between 64 and 128 in multiples of 8, and `ksk_bits` greater than or equal to `zsk_bits`.
 
 ## Timeouts
 
@@ -72,11 +72,11 @@ The provider only restricts the values the API defines as enumerations (`algorit
 
 ## Changing arguments
 
-The DNSSEC API only supports creating, reading and deleting a key; there is no update operation. Changing `zone_id`, `algorithm`, `ksk_bits`, `zsk_bits`, `nsec_mode`, `nsec3_iterations`, `nsec3_salt_bits` or `validity` therefore plans a replacement: the key is deleted and a new one is created. Only `timeouts` can be changed in place.
+The DNSSEC API only supports creating, reading and deleting a key; there is no update operation. Changing `zone_id`, `ksk_bits`, `zsk_bits`, `nsec_mode`, `nsec3_iterations`, `nsec3_salt_bits` or `validity` therefore plans a replacement: the key is deleted and a new one is created. Only `timeouts` can be changed in place.
 
 Enabling and disabling DNSSEC are acknowledged by the API and carried out asynchronously, one operation after another per zone. The provider does not wait for the removal of a deleted key. If the zone still has operations in progress when the replacement key is requested, the API rejects the request with `409 ... too many operations in progress`; the provider repeats the request until the `create` timeout is reached. Replacing a key is therefore a slow operation that should be rare, and shortly after a replacement the key attributes (`key_tag`, `digest`, `ds_record`, ...) may still describe the previous key until the API has processed the operations. Run `terraform apply -refresh-only` to pick up the current key before handing the DS record to your registrar.
 
-If the key does not become available within the `create` timeout, a warning is shown and the resource is kept in the state with empty key attributes (`ds_record`, `key_tag`, ...). They are populated by the next refresh (`terraform apply -refresh-only`).
+If the key does not become available within the `create` timeout, a warning is shown and the resource is kept in the state with empty key attributes (`ds_record`, `key_tag`, ...). They are populated by a refresh (e.g. `terraform apply -refresh-only`) once the API returns the key; until then each refresh shows a warning. If the key never becomes available, e.g. because the API failed to set it up, recreate it with `terraform apply -replace=ionoscloud_dns_zone_dnssec.<name>`.
 
 A new key has a new `key_tag` and `digest`, so the DS record at your registrar must be updated as well.
 

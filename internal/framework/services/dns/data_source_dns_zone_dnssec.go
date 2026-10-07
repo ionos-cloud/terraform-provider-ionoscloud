@@ -90,16 +90,17 @@ func (d *zoneDNSSECDataSource) Read(ctx context.Context, req datasource.ReadRequ
 	keys, apiResponse, err := d.client.GetDNSSECKeys(ctx, zoneID)
 	if err != nil {
 		if dnsservice.IsZoneNotSigned(apiResponse) {
-			resp.Diagnostics.AddError("DNSSEC key not found", zoneNotFoundMessage(zoneID))
+			resp.Diagnostics.AddError("DNSSEC key not found", dnssecNotEnabledMessage(zoneID))
 			return
 		}
 		resp.Diagnostics.AddError("failed to get the DNSSEC key of the DNS zone", diagutil.WrapError(err, &diagutil.ErrorContext{ResourceID: zoneID, StatusCode: apiResponse.SafeStatusCode()}).Error())
 		return
 	}
 
-	found, algorithm, nsecMode := data.setFromKeys(keys, dnssdk.ALGORITHM_RSASHA256)
+	found, algorithm, nsecMode, diags := data.setFromKeys(keys, dnssdk.ALGORITHM_RSASHA256)
+	resp.Diagnostics.Append(diags...)
 	if !found {
-		resp.Diagnostics.AddError("DNSSEC key not found", zoneNotFoundMessage(zoneID))
+		resp.Diagnostics.AddError("DNSSEC key not found", dnssecNotEnabledMessage(zoneID))
 		return
 	}
 

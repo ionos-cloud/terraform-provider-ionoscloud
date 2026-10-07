@@ -3,6 +3,7 @@ package dns
 import (
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	dnssdk "github.com/ionos-cloud/sdk-go-bundle/products/dns/v2"
 
@@ -38,11 +39,12 @@ const (
 )
 
 // setFromKeys fills the key attributes from the API response. The algorithm is the one the key was created with.
-// The DS record is left null if it cannot be derived, so that it does not break the read of a valid key.
-func (m *dnssecKeyModel) setFromKeys(keys dnssdk.DnssecKeyReadList, fallbackAlgorithm dnssdk.Algorithm) (found bool, algorithm dnssdk.Algorithm, nsecMode *dnssdk.NsecMode) {
+// The DS record and the values derived for it are left null if they cannot be derived, so that it does not break the
+// read of a valid key; a warning tells why, once per cause.
+func (m *dnssecKeyModel) setFromKeys(keys dnssdk.DnssecKeyReadList, fallbackAlgorithm dnssdk.Algorithm) (found bool, algorithm dnssdk.Algorithm, nsecMode *dnssdk.NsecMode, diags diag.Diagnostics) {
 	key, found := dnsservice.SigningKey(keys)
 	if !found {
-		return false, "", nil
+		return false, "", nil, nil
 	}
 
 	algorithm = fallbackAlgorithm
@@ -68,21 +70,38 @@ func (m *dnssecKeyModel) setFromKeys(keys dnssdk.DnssecKeyReadList, fallbackAlgo
 	if key.DigestAlgorithmMnemonic != nil {
 		if digestType, err := dnsservice.DigestTypeFromMnemonic(*key.DigestAlgorithmMnemonic); err == nil {
 			m.DigestType = types.Int64Value(digestType)
+		} else {
+			diags.AddWarning(
+				"the digest type of the DNSSEC key could not be derived",
+				fmt.Sprintf("%s. The `digest_type` and `ds_record` attributes are left empty. The key itself is valid; a newer provider version may support it.", err),
+			)
 		}
 	}
 	m.AlgorithmNumber = types.Int64Null()
 	if algorithmNumber, err := dnsservice.AlgorithmNumber(algorithm); err == nil {
 		m.AlgorithmNumber = types.Int64Value(algorithmNumber)
+	} else {
+		diags.AddWarning(
+			"the algorithm number of the DNSSEC key could not be derived",
+			fmt.Sprintf("%s. The `algorithm_number` and `ds_record` attributes are left empty. The key itself is valid; a newer provider version may support it.", err),
+		)
 	}
 
 	m.DSRecord = types.StringNull()
 	if ds, err := dnsservice.BuildDSRecord(key, algorithm); err == nil {
 		m.DSRecord = types.StringValue(ds.String())
+	} else if diags.WarningsCount() == 0 {
+		// An unsupported digest type or algorithm is already reported above; only report the other causes.
+		diags.AddWarning(
+			"the DS record of the DNSSEC key could not be derived",
+			fmt.Sprintf("%s. The `ds_record` attribute is left empty.", err),
+		)
 	}
 
-	return true, algorithm, nsecMode
+	return true, algorithm, nsecMode, diags
 }
 
-func zoneNotFoundMessage(zoneID string) string {
+// dnssecNotEnabledMessage describes a zone that exists but has no DNSSEC key.
+func dnssecNotEnabledMessage(zoneID string) string {
 	return fmt.Sprintf("DNSSEC is not enabled for zone %s", zoneID)
 }

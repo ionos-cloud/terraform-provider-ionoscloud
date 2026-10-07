@@ -18,7 +18,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -108,12 +107,9 @@ func (r *zoneDNSSECResource) Schema(ctx context.Context, _ resource.SchemaReques
 				PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 			"algorithm": schema.StringAttribute{
-				Optional:      true,
 				Computed:      true,
-				Default:       stringdefault.StaticString(string(dnssdk.ALGORITHM_RSASHA256)),
-				Description:   "The signing algorithm. Only `RSASHA256` is supported. Defaults to `RSASHA256`.",
-				Validators:    []validator.String{stringvalidator.OneOf(string(dnssdk.ALGORITHM_RSASHA256))},
-				PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()},
+				Description:   "The signing algorithm of the key. The API only supports `RSASHA256`.",
+				PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()},
 			},
 			"ksk_bits": schema.Int64Attribute{
 				Required:      true,
@@ -221,7 +217,7 @@ func (r *zoneDNSSECResource) Create(ctx context.Context, req resource.CreateRequ
 
 	properties := dnssdk.DnssecKeyParameters{
 		KeyParameters: dnssdk.KeyParameters{
-			Algorithm: dnssdk.Algorithm(data.Algorithm.ValueString()),
+			Algorithm: dnssdk.ALGORITHM_RSASHA256,
 			KskBits:   dnssdk.KskBits(data.KskBits.ValueInt64()), //nolint:gosec // restricted to 1024/2048/4096 by validator
 			ZskBits:   dnssdk.ZskBits(data.ZskBits.ValueInt64()), //nolint:gosec // restricted to 1024/2048/4096 by validator
 		},
@@ -261,6 +257,7 @@ func (r *zoneDNSSECResource) Create(ctx context.Context, req resource.CreateRequ
 	// timed-out wait does not leave a DNSSEC-enabled zone untracked (the next apply would conflict with the existing key).
 	// The key attributes stay null until they are read from the API.
 	data.ID = data.ZoneID
+	data.Algorithm = types.StringValue(string(dnssdk.ALGORITHM_RSASHA256))
 	data.dnssecKeyModel = dnssecKeyModel{}
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
@@ -272,15 +269,17 @@ func (r *zoneDNSSECResource) Create(ctx context.Context, req resource.CreateRequ
 	if err != nil {
 		// A warning instead of an error: failing here would taint the resource, and replacing the key changes its key
 		// tag and digest, which would force an update of the DS record at the registrar for a key that is most likely fine.
-		// The key attributes are filled in by the next refresh.
+		// The key attributes are filled in by a later refresh, once the API returns the key.
 		resp.Diagnostics.AddWarning(
 			"the DNSSEC key is not available yet",
-			fmt.Sprintf("DNSSEC was enabled for the DNS zone, but waiting for the key failed: %s. The resource is tracked in the state and its key attributes are populated on the next refresh (`terraform apply -refresh-only`).", diagutil.WrapError(err, errCtx).Error()),
+			fmt.Sprintf("DNSSEC was enabled for the DNS zone, but waiting for the key failed: %s. The resource is tracked in the state; its key attributes are populated by a refresh (e.g. `terraform apply -refresh-only`) once the API returns the key.", diagutil.WrapError(err, errCtx).Error()),
 		)
 		return
 	}
 
-	data.setFromKeys(keys, dnssdk.Algorithm(data.Algorithm.ValueString()))
+	_, algorithm, _, diags := data.setFromKeys(keys, dnssdk.ALGORITHM_RSASHA256)
+	resp.Diagnostics.Append(diags...)
+	data.Algorithm = types.StringValue(string(algorithm))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -299,32 +298,28 @@ func (r *zoneDNSSECResource) Read(ctx context.Context, req resource.ReadRequest,
 		return
 	}
 
-	var (
-		found     bool
-		algorithm dnssdk.Algorithm
-		nsecMode  *dnssdk.NsecMode
-	)
 	if err == nil {
-		found, algorithm, nsecMode = data.setFromKeys(keys, dnssdk.Algorithm(data.Algorithm.ValueString()))
-	}
-	if !found {
-		if data.keyPending() {
-			// The API reports a zone without key while the key that Create requested is still being set up. Removing the
-			// resource now would make the next apply conflict with that key.
-			resp.Diagnostics.AddWarning("the DNSSEC key is not available yet", fmt.Sprintf("DNSSEC was enabled for zone %s, but the API does not return its key yet. The key attributes are populated once it does.", zoneID))
+		found, algorithm, nsecMode, diags := data.setFromKeys(keys, dnssdk.ALGORITHM_RSASHA256)
+		resp.Diagnostics.Append(diags...)
+		if found {
+			data.ID = data.ZoneID
+			data.Algorithm = types.StringValue(string(algorithm))
+			if nsecMode != nil {
+				data.NsecMode = types.StringValue(string(*nsecMode))
+			}
 			resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 			return
 		}
-		resp.State.RemoveResource(ctx)
-		return
 	}
 
-	data.ID = data.ZoneID
-	data.Algorithm = types.StringValue(string(algorithm))
-	if nsecMode != nil {
-		data.NsecMode = types.StringValue(string(*nsecMode))
+	if data.keyPending() {
+		// The API reports a zone without key while the key that Create requested is still being set up. Removing the
+		// resource now would make the next apply conflict with that key.
+		resp.Diagnostics.AddWarning("the DNSSEC key is not available yet", fmt.Sprintf("DNSSEC was enabled for zone %s, but the API does not return its key yet. The key attributes are populated once it does.", zoneID))
+		resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+		return
 	}
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	resp.State.RemoveResource(ctx)
 }
 
 // Update only runs to adopt configured values for parameters that the API does not return (e.g. after an import),
@@ -403,7 +398,7 @@ func waitForKey(ctx context.Context, timeout time.Duration, zoneID string, zoneA
 			return backoff.Permanent(err)
 		}
 		if _, found := dnsservice.SigningKey(fetched); !found {
-			return errors.New(zoneNotFoundMessage(zoneID))
+			return errors.New(dnssecNotEnabledMessage(zoneID))
 		}
 		keys = fetched
 		return nil

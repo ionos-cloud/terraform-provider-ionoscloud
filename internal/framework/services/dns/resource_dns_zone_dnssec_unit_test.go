@@ -28,13 +28,13 @@ func signedKeys() dnssdk.DnssecKeyReadList {
 	return dnssdk.DnssecKeyReadList{Metadata: &dnssdk.DnssecKeyReadListMetadata{Items: []dnssdk.DnssecKey{{Digest: &digest}}}}
 }
 
-// fetchSequence returns a keysFetcher that answers with the given results in order, repeating the last one.
 type fetchResult struct {
 	keys dnssdk.DnssecKeyReadList
 	resp *shared.APIResponse
 	err  error
 }
 
+// fetchSequence returns a keysFetcher that answers with the given results in order, repeating the last one.
 func fetchSequence(results ...fetchResult) (keysFetcher, *int) {
 	calls := 0
 	return func(context.Context, string) (dnssdk.DnssecKeyReadList, *shared.APIResponse, error) {
@@ -117,4 +117,78 @@ func TestWaitForKey(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, 2, zoneCalls)
 	})
+}
+
+func TestSetFromKeys(t *testing.T) {
+	key := func(mnemonic string) dnssdk.DnssecKeyReadList {
+		keyTag, digest := int32(12345), "ABCD"
+		return dnssdk.DnssecKeyReadList{Metadata: &dnssdk.DnssecKeyReadListMetadata{Items: []dnssdk.DnssecKey{{
+			KeyTag: &keyTag, Digest: &digest, DigestAlgorithmMnemonic: &mnemonic,
+		}}}}
+	}
+
+	tests := map[string]struct {
+		keys            dnssdk.DnssecKeyReadList
+		algorithm       dnssdk.Algorithm
+		wantDSRecord    types.String
+		wantDigestType  types.Int64
+		wantAlgorithmNo types.Int64
+		wantWarnings    int
+	}{
+		"DS record derived": {
+			keys:            key("SHA256"),
+			algorithm:       dnssdk.ALGORITHM_RSASHA256,
+			wantDSRecord:    types.StringValue("12345 8 2 ABCD"),
+			wantDigestType:  types.Int64Value(2),
+			wantAlgorithmNo: types.Int64Value(8),
+		},
+		"unsupported digest algorithm": {
+			keys:            key("SHA512"),
+			algorithm:       dnssdk.ALGORITHM_RSASHA256,
+			wantDSRecord:    types.StringNull(),
+			wantDigestType:  types.Int64Null(),
+			wantAlgorithmNo: types.Int64Value(8),
+			wantWarnings:    1,
+		},
+		"unsupported algorithm": {
+			keys:            key("SHA256"),
+			algorithm:       "ED25519",
+			wantDSRecord:    types.StringNull(),
+			wantDigestType:  types.Int64Value(2),
+			wantAlgorithmNo: types.Int64Null(),
+			wantWarnings:    1,
+		},
+		"unsupported digest algorithm and algorithm": {
+			keys:            key("SHA512"),
+			algorithm:       "ED25519",
+			wantDSRecord:    types.StringNull(),
+			wantDigestType:  types.Int64Null(),
+			wantAlgorithmNo: types.Int64Null(),
+			wantWarnings:    2,
+		},
+		"key tag missing": {
+			keys: func() dnssdk.DnssecKeyReadList {
+				keys := key("SHA256")
+				keys.Metadata.Items[0].KeyTag = nil
+				return keys
+			}(),
+			algorithm:       dnssdk.ALGORITHM_RSASHA256,
+			wantDSRecord:    types.StringNull(),
+			wantDigestType:  types.Int64Value(2),
+			wantAlgorithmNo: types.Int64Value(8),
+			wantWarnings:    1,
+		},
+	}
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			var m dnssecKeyModel
+			found, _, _, diags := m.setFromKeys(tc.keys, tc.algorithm)
+			require.True(t, found)
+			assert.False(t, diags.HasError())
+			assert.Equal(t, tc.wantWarnings, diags.WarningsCount())
+			assert.Equal(t, tc.wantDSRecord, m.DSRecord)
+			assert.Equal(t, tc.wantDigestType, m.DigestType)
+			assert.Equal(t, tc.wantAlgorithmNo, m.AlgorithmNumber)
+		})
+	}
 }
