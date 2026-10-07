@@ -22,9 +22,9 @@ type IpBlockProperties struct {
 	// Collection of IPs, associated with the IP Block.
 	Ips []string `json:"ips,omitempty"`
 	// Location of that IP block. Property cannot be modified after it is created (disallowed in update requests).
-	Location string `json:"location"`
+	Location *string `json:"location,omitempty"`
 	// The size of the IP block.
-	Size int32 `json:"size"`
+	Size *int32 `json:"size,omitempty"`
 	// The name of the  resource.
 	Name *string `json:"name,omitempty"`
 	// Read-Only attribute. Lists consumption detail for an individual IP
@@ -35,11 +35,8 @@ type IpBlockProperties struct {
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewIpBlockProperties(location string, size int32) *IpBlockProperties {
+func NewIpBlockProperties() *IpBlockProperties {
 	this := IpBlockProperties{}
-
-	this.Location = location
-	this.Size = size
 
 	return &this
 }
@@ -84,52 +81,68 @@ func (o *IpBlockProperties) SetIps(v []string) {
 	o.Ips = v
 }
 
-// GetLocation returns the Location field value
+// GetLocation returns the Location field value if set, zero value otherwise.
 func (o *IpBlockProperties) GetLocation() string {
-	if o == nil {
+	if o == nil || IsNil(o.Location) {
 		var ret string
 		return ret
 	}
-
-	return o.Location
+	return *o.Location
 }
 
-// GetLocationOk returns a tuple with the Location field value
+// GetLocationOk returns a tuple with the Location field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *IpBlockProperties) GetLocationOk() (*string, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.Location) {
 		return nil, false
 	}
-	return &o.Location, true
+	return o.Location, true
 }
 
-// SetLocation sets field value
+// HasLocation returns a boolean if a field has been set.
+func (o *IpBlockProperties) HasLocation() bool {
+	if o != nil && !IsNil(o.Location) {
+		return true
+	}
+
+	return false
+}
+
+// SetLocation gets a reference to the given string and assigns it to the Location field.
 func (o *IpBlockProperties) SetLocation(v string) {
-	o.Location = v
+	o.Location = &v
 }
 
-// GetSize returns the Size field value
+// GetSize returns the Size field value if set, zero value otherwise.
 func (o *IpBlockProperties) GetSize() int32 {
-	if o == nil {
+	if o == nil || IsNil(o.Size) {
 		var ret int32
 		return ret
 	}
-
-	return o.Size
+	return *o.Size
 }
 
-// GetSizeOk returns a tuple with the Size field value
+// GetSizeOk returns a tuple with the Size field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *IpBlockProperties) GetSizeOk() (*int32, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.Size) {
 		return nil, false
 	}
-	return &o.Size, true
+	return o.Size, true
 }
 
-// SetSize sets field value
+// HasSize returns a boolean if a field has been set.
+func (o *IpBlockProperties) HasSize() bool {
+	if o != nil && !IsNil(o.Size) {
+		return true
+	}
+
+	return false
+}
+
+// SetSize gets a reference to the given int32 and assigns it to the Size field.
 func (o *IpBlockProperties) SetSize(v int32) {
-	o.Size = v
+	o.Size = &v
 }
 
 // GetName returns the Name field value if set, zero value otherwise.
@@ -209,8 +222,12 @@ func (o IpBlockProperties) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Ips) {
 		toSerialize["ips"] = o.Ips
 	}
-	toSerialize["location"] = o.Location
-	toSerialize["size"] = o.Size
+	if !IsNil(o.Location) {
+		toSerialize["location"] = o.Location
+	}
+	if !IsNil(o.Size) {
+		toSerialize["size"] = o.Size
+	}
 	if !IsNil(o.Name) {
 		toSerialize["name"] = o.Name
 	}

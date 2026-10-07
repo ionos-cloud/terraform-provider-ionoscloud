@@ -140,7 +140,7 @@ func (r *ipBlockListResource) mapIPBlock(_ context.Context, includeResource bool
 
 	if !fwidentity.MatchesFilters(map[string]string{
 		"name":     shared.ToValueDefault(ipBlock.Properties.Name),
-		"location": ipBlock.Properties.Location,
+		"location": shared.ToValueDefault(ipBlock.Properties.Location),
 	}, filters) {
 		return nil, nil
 	}

@@ -125,8 +125,8 @@ func resourceIPBlockCreate(ctx context.Context, d *schema.ResourceData, meta any
 	name := d.Get("name").(string)
 	ipblock := ionoscloud.IpBlock{
 		Properties: ionoscloud.IpBlockProperties{
-			Size:     sizeConverted,
-			Location: location,
+			Size:     &sizeConverted,
+			Location: &location,
 			Name:     &name,
 		},
 	}
@@ -352,14 +352,16 @@ func IpBlockSetData(d *schema.ResourceData, ipBlock *ionoscloud.IpBlock) error {
 		}
 	}
 
-	if ipBlock.Properties.Location != "" {
-		if err := d.Set("location", ipBlock.Properties.Location); err != nil {
+	if ipBlock.Properties.Location != nil {
+		if err := d.Set("location", *ipBlock.Properties.Location); err != nil {
 			return err
 		}
 	}
 
-	if err := d.Set("size", ipBlock.Properties.Size); err != nil {
-		return err
+	if ipBlock.Properties.Size != nil {
+		if err := d.Set("size", *ipBlock.Properties.Size); err != nil {
+			return err
+		}
 	}
 
 	if ipBlock.Properties.Name != nil {

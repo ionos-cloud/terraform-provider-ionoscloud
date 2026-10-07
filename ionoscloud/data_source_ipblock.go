@@ -136,9 +136,9 @@ func datasourceIpBlockRead(ctx context.Context, d *schema.ResourceData, meta any
 			}
 		}
 		if locationOk {
-			if ipBlock.Properties.Location != location {
+			if shared.ToValueDefault(ipBlock.Properties.Location) != location {
 				return diagutil.ToDiags(d, fmt.Errorf("location of ip block (UUID=%s, location=%s) does not match expected location: %s",
-					*ipBlock.Id, ipBlock.Properties.Location, location), nil)
+					*ipBlock.Id, shared.ToValueDefault(ipBlock.Properties.Location), location), nil)
 			}
 		}
 		tflog.Info(ctx, "got ip block", map[string]any{"name": shared.ToValueDefault(ipBlock.Properties.Name), "location": ipBlock.Properties.Location})
@@ -169,7 +169,7 @@ func datasourceIpBlockRead(ctx context.Context, d *schema.ResourceData, meta any
 			if results != nil {
 				var locationResults []ionoscloud.IpBlock
 				for _, block := range results {
-					if block.Properties.Location == location {
+					if shared.ToValueDefault(block.Properties.Location) == location {
 						locationResults = append(locationResults, block)
 					}
 				}
@@ -177,7 +177,7 @@ func datasourceIpBlockRead(ctx context.Context, d *schema.ResourceData, meta any
 			} else {
 				/* find the first ipblock matching the location */
 				for _, block := range ipBlocks.Items {
-					if block.Properties.Location == location {
+					if shared.ToValueDefault(block.Properties.Location) == location {
 						results = append(results, block)
 					}
 				}

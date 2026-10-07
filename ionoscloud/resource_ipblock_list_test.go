@@ -211,8 +211,8 @@ func stubIPBlocksAPI(t *testing.T) string {
 				Id: new("7c3e9a12-4b5d-4f6e-8a9b-000000000001"),
 				Properties: ionoscloudsdk.IpBlockProperties{
 					Name:     new("web"),
-					Location: "de/fra",
-					Size:     2,
+					Location: new("de/fra"),
+					Size:     new(int32(2)),
 					Ips:      []string{"203.0.113.10", "203.0.113.11"},
 					IpConsumers: []ionoscloudsdk.IpConsumer{{
 						Ip:              new("203.0.113.10"),
@@ -231,15 +231,15 @@ func stubIPBlocksAPI(t *testing.T) string {
 				Id: new("7c3e9a12-4b5d-4f6e-8a9b-000000000002"),
 				Properties: ionoscloudsdk.IpBlockProperties{
 					Name:     new("db"),
-					Location: "us/las",
-					Size:     1,
+					Location: new("us/las"),
+					Size:     new(int32(1)),
 				},
 			},
 			{
 				Id: new("7c3e9a12-4b5d-4f6e-8a9b-000000000003"),
 				Properties: ionoscloudsdk.IpBlockProperties{
-					Location: "de/txl",
-					Size:     1,
+					Location: new("de/txl"),
+					Size:     new(int32(1)),
 				},
 			},
 		},
