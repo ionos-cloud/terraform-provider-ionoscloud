@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
 )
 
 // A block in the state is cleared when the API returns none, e.g. after IPv6 is turned off outside Terraform.
@@ -17,7 +17,7 @@ func TestSetLanDataClearsCidrBlocks(t *testing.T) {
 		},
 	})
 
-	lan := &ionoscloud.Lan{Id: new("1"), Properties: &ionoscloud.LanProperties{Public: new(false)}}
+	lan := &ionoscloud.Lan{Id: new("1"), Properties: ionoscloud.LanProperties{Public: new(false)}}
 	if err := setLanData(d, lan); err != nil {
 		t.Fatalf("setLanData = %v, want nil", err)
 	}

@@ -9,7 +9,7 @@ import (
 	"regexp"
 	"testing"
 
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
@@ -455,10 +455,10 @@ func TestK8sNodePoolGetTaintsDataUnit(t *testing.T) {
 
 	byKey := make(map[string]ionoscloud.KubernetesNodePoolTaint, len(taints))
 	for _, taint := range taints {
-		if taint.Key == nil {
-			t.Fatalf("taint key should not be nil")
+		if taint.Key == "" {
+			t.Fatalf("taint key should not be empty")
 		}
-		byKey[*taint.Key] = taint
+		byKey[taint.Key] = taint
 	}
 
 	dedicated, ok := byKey["dedicated"]
@@ -468,7 +468,7 @@ func TestK8sNodePoolGetTaintsDataUnit(t *testing.T) {
 	if dedicated.Value == nil || *dedicated.Value != "gpu" {
 		t.Errorf("expected value 'gpu', got %v", dedicated.Value)
 	}
-	if dedicated.Effect == nil || *dedicated.Effect != ionoscloud.NO_SCHEDULE {
+	if dedicated.Effect != ionoscloud.NO_SCHEDULE {
 		t.Errorf("expected effect NoSchedule, got %v", dedicated.Effect)
 	}
 
@@ -480,21 +480,18 @@ func TestK8sNodePoolGetTaintsDataUnit(t *testing.T) {
 	if spot.Value != nil {
 		t.Errorf("expected nil value for empty taint value, got %q", *spot.Value)
 	}
-	if spot.Effect == nil || *spot.Effect != ionoscloud.NO_EXECUTE {
+	if spot.Effect != ionoscloud.NO_EXECUTE {
 		t.Errorf("expected effect NoExecute, got %v", spot.Effect)
 	}
 }
 
 // TestK8sNodePoolSetTaintsUnit verifies the conversion from the SDK taint slice into the Terraform state representation.
 func TestK8sNodePoolSetTaintsUnit(t *testing.T) {
-	key1, val1 := "dedicated", "gpu"
-	effect1 := ionoscloud.NO_SCHEDULE
-	key2 := "spot"
-	effect2 := ionoscloud.PREFER_NO_SCHEDULE
+	val1 := "gpu"
 
 	taints := []ionoscloud.KubernetesNodePoolTaint{
-		{Key: &key1, Value: &val1, Effect: &effect1},
-		{Key: &key2, Effect: &effect2},
+		{Key: "dedicated", Value: &val1, Effect: ionoscloud.NO_SCHEDULE},
+		{Key: "spot", Effect: ionoscloud.PREFER_NO_SCHEDULE},
 	}
 
 	result := setK8sNodePoolTaints(taints)

@@ -8,7 +8,7 @@ import (
 	"regexp"
 	"testing"
 
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
@@ -21,6 +21,10 @@ const networkLoadBalancerResource = constant.NetworkLoadBalancerResource + "." +
 
 const dataSourceNetworkLoadBalancerID = constant.DataSource + "." + constant.NetworkLoadBalancerResource + "." + constant.NetworkLoadBalancerDataSourceById
 const dataSourceNetworkLoadBalancerName = constant.DataSource + "." + constant.NetworkLoadBalancerResource + "." + constant.NetworkLoadBalancerDataSourceByName
+
+// nlbLoggingFormat uses only fields the API accepts for a TCP load balancer; the HTTP fields of the
+// ALB format (e.g. %r, %TR, %CC) are rejected with "Attribute does not match the pattern".
+const nlbLoggingFormat = `%ci:%cp [%t] %ft %b/%s %Tw/%Tc/%Tt %B %ts %ac/%fc/%bc/%sc/%rc %sq/%bq`
 
 func TestAccNetworkLoadBalancerBasic(t *testing.T) {
 	var networkLoadBalancer ionoscloud.NetworkLoadBalancer
@@ -54,8 +58,8 @@ func TestAccNetworkLoadBalancerBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(networkLoadBalancerResource, "name", constant.NetworkLoadBalancerTestResource),
 					resource.TestCheckResourceAttr(networkLoadBalancerResource, "ips.0", "10.12.118.224"),
 					resource.TestCheckResourceAttr(networkLoadBalancerResource, "lb_private_ips.0", "10.13.72.225/24"),
-					resource.TestCheckResourceAttr(networkLoadBalancerResource, "central_logging", "true"),
-					resource.TestCheckResourceAttr(networkLoadBalancerResource, "logging_format", `%{+Q}o %{-Q}ci - - [%trg] %r %ST %B "" "" %cp %ms %ft %b %s %TR %Tw %Tc %Tr %Ta %tsc %ac %fc %bc %sc %rc %sq %bq %CC %CS %hrl %hsl`),
+					resource.TestCheckResourceAttr(networkLoadBalancerResource, "central_logging", "false"),
+					resource.TestCheckResourceAttr(networkLoadBalancerResource, "logging_format", nlbLoggingFormat),
 					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "listener_lan", constant.LanResource+".nlb_lan_1", "id"),
 					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "target_lan", constant.LanResource+".nlb_lan_2", "id"),
 					resource.TestCheckResourceAttr(networkLoadBalancerResource, "flowlog.0.name", "test_flowlog"),
@@ -72,8 +76,8 @@ func TestAccNetworkLoadBalancerBasic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "ips", dataSourceNetworkLoadBalancerID, "ips"),
 					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "target_lan", dataSourceNetworkLoadBalancerID, "target_lan"),
 					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "lb_private_ips", dataSourceNetworkLoadBalancerID, "lb_private_ips"),
-					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "central_logging", "true", "central_logging"),
-					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "logging_format", `%{+Q}o %{-Q}ci - - [%trg] %r %ST %B "" "" %cp %ms %ft %b %s %TR %Tw %Tc %Tr %Ta %tsc %ac %fc %bc %sc %rc %sq %bq %CC %CS %hrl %hsl`, "logging_format"),
+					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "central_logging", dataSourceNetworkLoadBalancerID, "central_logging"),
+					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "logging_format", dataSourceNetworkLoadBalancerID, "logging_format"),
 					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerID, "flowlog.0.name", networkLoadBalancerResource, "flowlog.0.name"),
 					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerID, "flowlog.0.action", networkLoadBalancerResource, "flowlog.0.action"),
 					resource.TestCheckResourceAttrPair(dataSourceNetworkLoadBalancerID, "flowlog.0.direction", networkLoadBalancerResource, "flowlog.0.direction"),
@@ -103,7 +107,7 @@ func TestAccNetworkLoadBalancerBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(networkLoadBalancerResource, "lb_private_ips.0", "10.13.72.225/24"),
 					resource.TestCheckResourceAttr(networkLoadBalancerResource, "lb_private_ips.1", "10.13.73.225/24"),
 					resource.TestCheckResourceAttr(networkLoadBalancerResource, "central_logging", "false"),
-					resource.TestCheckResourceAttr(networkLoadBalancerResource, "logging_format", `%{+Q}o %{-Q}ci - - [%trg] %r %ST %B "" "" %cp %ms %ft %b %s %TR %Tw %Tc %Tr %Ta %tsc %ac %fc %bc %sc %rc %sq %bq %CC %CS %hrl %hsl`),
+					resource.TestCheckResourceAttr(networkLoadBalancerResource, "logging_format", nlbLoggingFormat),
 					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "listener_lan", constant.LanResource+".nlb_lan_3", "id"),
 					resource.TestCheckResourceAttrPair(networkLoadBalancerResource, "target_lan", constant.LanResource+".nlb_lan_4", "id"),
 					resource.TestCheckResourceAttr(networkLoadBalancerResource, "flowlog.0.name", "test_flowlog_updated"),
@@ -251,8 +255,8 @@ resource ` + constant.NetworkLoadBalancerResource + ` ` + constant.NetworkLoadBa
   target_lan    = ` + constant.LanResource + `.nlb_lan_2.id
   ips           = ["10.12.118.224"]
   lb_private_ips = ["10.13.72.225/24"]
-  central_logging   = true
-  logging_format	= "%%{+Q}o %%{-Q}ci - - [%trg] %r %ST %B \"\" \"\" %cp %ms %ft %b %s %TR %Tw %Tc %Tr %Ta %tsc %ac %fc %bc %sc %rc %sq %bq %CC %CS %hrl %hsl"
+  central_logging   = false
+  logging_format	= "` + nlbLoggingFormat + `"
   flowlog {
     name = "test_flowlog"
     action = "ALL"
@@ -301,7 +305,7 @@ resource ` + constant.NetworkLoadBalancerResource + ` ` + constant.NetworkLoadBa
   ips           = ["10.12.118.224", "10.12.119.224"]
   lb_private_ips = ["10.13.72.225/24", "10.13.73.225/24"]
   central_logging   = false
-  logging_format	= "%%{+Q}o %%{-Q}ci - - [%trg] %r %ST %B \"\" \"\" %cp %ms %ft %b %s %TR %Tw %Tc %Tr %Ta %tsc %ac %fc %bc %sc %rc %sq %bq %CC %CS %hrl %hsl"
+  logging_format	= "` + nlbLoggingFormat + `"
   flowlog {
     name = "test_flowlog_updated"
     action = "REJECTED"

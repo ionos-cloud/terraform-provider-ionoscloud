@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/cloudapi/cloudapilocation"
 )
@@ -20,10 +20,7 @@ func GetAllImages(ctx context.Context, client *ionoscloud.APIClient) ([]ionosclo
 	if err != nil {
 		return nil, err
 	}
-	if images.Items == nil {
-		return nil, nil
-	}
-	return *images.Items, nil
+	return images.Items, nil
 }
 
 // GetImageAlias returns the alias matching want carried by any of the given images in one
@@ -36,11 +33,11 @@ func GetImageAlias(want string, images []ionoscloud.Image, locations []string) s
 		return ""
 	}
 	for _, img := range images {
-		if img.Properties == nil || img.Properties.ImageAliases == nil ||
+		if !img.Properties.HasImageAliases() ||
 			img.Properties.Location == nil || !cloudapilocation.LocationInSet(locations, *img.Properties.Location) {
 			continue
 		}
-		if alias := matchImageAlias(*img.Properties.ImageAliases, want); alias != "" {
+		if alias := matchImageAlias(img.Properties.ImageAliases, want); alias != "" {
 			return alias
 		}
 	}

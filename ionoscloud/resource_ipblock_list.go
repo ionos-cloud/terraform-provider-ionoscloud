@@ -11,8 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
 
 	fwidentity "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/identity"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
@@ -108,8 +108,9 @@ func (r *ipBlockListResource) List(ctx context.Context, req list.ListRequest, st
 			// Depth(1) and Limit(constant.IPBlockLimit) are what the ionoscloud_ipblock
 			// data source sends with this call: the limit asks for up to 1000 IP Blocks,
 			// where the SDK client would send 100 without it. Filtering stays
-			// client-side, in the mapper.
-			ipBlocks, apiResponse, err := client.IPBlocksApi.IpblocksGet(ctx).Depth(1).Limit(constant.IPBlockLimit).Execute()
+			// client-side, in the mapper. Offset(0) is explicit because the SDK only sends
+			// the parameters that are set; sdk-go v6 always sent offset=0.
+			ipBlocks, apiResponse, err := client.IPBlocksApi.IpblocksGet(ctx).Depth(1).Offset(0).Limit(constant.IPBlockLimit).Execute()
 			if apiResponse != nil {
 				tflog.Debug(ctx, "listed IP Blocks", map[string]any{"status_code": apiResponse.SafeStatusCode()})
 			}
@@ -120,7 +121,7 @@ func (r *ipBlockListResource) List(ctx context.Context, req list.ListRequest, st
 				return nil, nil
 			}
 
-			return *ipBlocks.Items, nil
+			return ipBlocks.Items, nil
 		},
 		r.mapIPBlock,
 	)
@@ -133,7 +134,7 @@ func (r *ipBlockListResource) List(ctx context.Context, req list.ListRequest, st
 func (r *ipBlockListResource) mapIPBlock(_ context.Context, includeResource bool, filters []fwidentity.Filter, ipBlock ionoscloud.IpBlock) (*fwidentity.MappedItem, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	if ipBlock.Id == nil || ipBlock.Properties == nil {
+	if ipBlock.Id == nil {
 		return nil, nil
 	}
 

@@ -3,7 +3,7 @@ package ionoscloud
 import (
 	"testing"
 
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
 )
 
 // Cube and GPU servers share resourceCubeServerImport, which used to index the first NIC before
@@ -11,7 +11,7 @@ import (
 func TestPrimaryIPFromNics(t *testing.T) {
 	nicID := "nic-1"
 	ips := []string{"198.51.100.10", "198.51.100.11"}
-	withNics := func(items *[]ionoscloud.Nic) *ionoscloud.Server {
+	withNics := func(items []ionoscloud.Nic) *ionoscloud.Server {
 		return &ionoscloud.Server{Entities: &ionoscloud.ServerEntities{Nics: &ionoscloud.Nics{Items: items}}}
 	}
 
@@ -25,21 +25,21 @@ func TestPrimaryIPFromNics(t *testing.T) {
 		{name: "nil entities", server: &ionoscloud.Server{}},
 		{name: "nil nics", server: &ionoscloud.Server{Entities: &ionoscloud.ServerEntities{}}},
 		{name: "nil items", server: withNics(nil)},
-		{name: "no nics", server: withNics(&[]ionoscloud.Nic{})},
-		{name: "nic without properties", server: withNics(&[]ionoscloud.Nic{{Id: &nicID}}), wantNicID: nicID},
+		{name: "no nics", server: withNics([]ionoscloud.Nic{})},
+		{name: "nic without properties", server: withNics([]ionoscloud.Nic{{Id: &nicID}}), wantNicID: nicID},
 		{
 			name:      "nic without ips",
-			server:    withNics(&[]ionoscloud.Nic{{Id: &nicID, Properties: &ionoscloud.NicProperties{}}}),
+			server:    withNics([]ionoscloud.Nic{{Id: &nicID, Properties: ionoscloud.NicProperties{}}}),
 			wantNicID: nicID,
 		},
 		{
 			name:      "nic with empty ips",
-			server:    withNics(&[]ionoscloud.Nic{{Id: &nicID, Properties: &ionoscloud.NicProperties{Ips: &[]string{}}}}),
+			server:    withNics([]ionoscloud.Nic{{Id: &nicID, Properties: ionoscloud.NicProperties{Ips: []string{}}}}),
 			wantNicID: nicID,
 		},
 		{
 			name:      "first ip of the first nic",
-			server:    withNics(&[]ionoscloud.Nic{{Id: &nicID, Properties: &ionoscloud.NicProperties{Ips: &ips}}}),
+			server:    withNics([]ionoscloud.Nic{{Id: &nicID, Properties: ionoscloud.NicProperties{Ips: ips}}}),
 			wantNicID: nicID,
 			wantIP:    "198.51.100.10",
 		},
@@ -65,7 +65,7 @@ func TestPrimaryIPFromNics(t *testing.T) {
 
 func TestFirstVolumeImage(t *testing.T) {
 	image := "img-1"
-	withVolumes := func(items *[]ionoscloud.Volume) *ionoscloud.Server {
+	withVolumes := func(items []ionoscloud.Volume) *ionoscloud.Server {
 		return &ionoscloud.Server{Entities: &ionoscloud.ServerEntities{Volumes: &ionoscloud.AttachedVolumes{Items: items}}}
 	}
 
@@ -76,10 +76,10 @@ func TestFirstVolumeImage(t *testing.T) {
 	}{
 		{name: "nil entities", server: &ionoscloud.Server{}},
 		{name: "nil items", server: withVolumes(nil)},
-		{name: "no volumes", server: withVolumes(&[]ionoscloud.Volume{})},
-		{name: "volume without properties", server: withVolumes(&[]ionoscloud.Volume{{}})},
-		{name: "volume without image", server: withVolumes(&[]ionoscloud.Volume{{Properties: &ionoscloud.VolumeProperties{}}})},
-		{name: "volume with image", server: withVolumes(&[]ionoscloud.Volume{{Properties: &ionoscloud.VolumeProperties{Image: &image}}}), want: image},
+		{name: "no volumes", server: withVolumes([]ionoscloud.Volume{})},
+		{name: "volume without properties", server: withVolumes([]ionoscloud.Volume{{}})},
+		{name: "volume without image", server: withVolumes([]ionoscloud.Volume{{Properties: &ionoscloud.VolumeProperties{}}})},
+		{name: "volume with image", server: withVolumes([]ionoscloud.Volume{{Properties: &ionoscloud.VolumeProperties{Image: &image}}}), want: image},
 	}
 
 	for _, tt := range tests {
@@ -96,10 +96,10 @@ func TestFirstVolumeImage(t *testing.T) {
 // Terraform, so primary_nic was cleared) and panicked; findServerNic must return nil instead.
 func TestFindServerNic(t *testing.T) {
 	id1, id2 := "nic-1", "nic-2"
-	withNics := func(items *[]ionoscloud.Nic) *ionoscloud.Server {
+	withNics := func(items []ionoscloud.Nic) *ionoscloud.Server {
 		return &ionoscloud.Server{Entities: &ionoscloud.ServerEntities{Nics: &ionoscloud.Nics{Items: items}}}
 	}
-	nics := &[]ionoscloud.Nic{{}, {Id: &id1}, {Id: &id2}}
+	nics := []ionoscloud.Nic{{}, {Id: &id1}, {Id: &id2}}
 
 	tests := []struct {
 		name   string

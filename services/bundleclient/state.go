@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -86,7 +86,7 @@ func resourceStateRefreshFunc(ctx context.Context, meta any, location, path stri
 }
 
 // WaitForStateChange tracks state change progress of a resource
-func WaitForStateChange(ctx context.Context, meta any, d *schema.ResourceData, apiResponse *ionoscloud.APIResponse, opTimeout string) error {
+func WaitForStateChange(ctx context.Context, meta any, d *schema.ResourceData, apiResponse *shared.APIResponse, opTimeout string) error {
 	var err error
 	var loc *url.URL
 
@@ -94,7 +94,10 @@ func WaitForStateChange(ctx context.Context, meta any, d *schema.ResourceData, a
 		return fmt.Errorf("cannot track resource state change, apiResponse was nil")
 	}
 
-	if loc, err = apiResponse.SafeLocation(); err != nil {
+	if apiResponse.Response == nil {
+		return fmt.Errorf("error retrieving 'location' header: response is nil")
+	}
+	if loc, err = apiResponse.Response.Location(); err != nil {
 		return fmt.Errorf("error retrieving 'location' header: %w", err)
 	}
 	_, errState := GetStateChangeConf(ctx, meta, d, loc.String(), opTimeout).WaitForStateContext(ctx)

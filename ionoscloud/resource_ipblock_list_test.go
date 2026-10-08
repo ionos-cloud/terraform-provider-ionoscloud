@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
-	ionoscloudsdk "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloudsdk "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -206,15 +206,15 @@ func stubIPBlocksAPI(t *testing.T) string {
 	t.Helper()
 
 	ipBlocks := ionoscloudsdk.IpBlocks{
-		Items: &[]ionoscloudsdk.IpBlock{
+		Items: []ionoscloudsdk.IpBlock{
 			{
 				Id: new("7c3e9a12-4b5d-4f6e-8a9b-000000000001"),
-				Properties: &ionoscloudsdk.IpBlockProperties{
+				Properties: ionoscloudsdk.IpBlockProperties{
 					Name:     new("web"),
 					Location: new("de/fra"),
 					Size:     new(int32(2)),
-					Ips:      &[]string{"203.0.113.10", "203.0.113.11"},
-					IpConsumers: &[]ionoscloudsdk.IpConsumer{{
+					Ips:      []string{"203.0.113.10", "203.0.113.11"},
+					IpConsumers: []ionoscloudsdk.IpConsumer{{
 						Ip:              new("203.0.113.10"),
 						Mac:             new("02:01:5e:00:00:01"),
 						NicId:           new("5a1b2c3d-0000-4000-8000-0000000000a1"),
@@ -229,7 +229,7 @@ func stubIPBlocksAPI(t *testing.T) string {
 			},
 			{
 				Id: new("7c3e9a12-4b5d-4f6e-8a9b-000000000002"),
-				Properties: &ionoscloudsdk.IpBlockProperties{
+				Properties: ionoscloudsdk.IpBlockProperties{
 					Name:     new("db"),
 					Location: new("us/las"),
 					Size:     new(int32(1)),
@@ -237,7 +237,7 @@ func stubIPBlocksAPI(t *testing.T) string {
 			},
 			{
 				Id: new("7c3e9a12-4b5d-4f6e-8a9b-000000000003"),
-				Properties: &ionoscloudsdk.IpBlockProperties{
+				Properties: ionoscloudsdk.IpBlockProperties{
 					Location: new("de/txl"),
 					Size:     new(int32(1)),
 				},

@@ -8,7 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
 )
 
 // inline_volume_ids drives both the volume-block refresh and the delete path, so a state carrying
@@ -168,5 +168,25 @@ func TestIsEmptyServerPatch(t *testing.T) {
 				t.Errorf("isEmptyServerPatch = %v, want %v", got, tt.want)
 			}
 		})
+	}
+}
+
+// The bundle's EnabledFeatures slice makes ServerProperties non-comparable with ==, so the zero
+// check uses reflect.DeepEqual. It must agree with the body the SDK sends, which includes an empty
+// but non-nil slice.
+func TestIsEmptyServerPatchMatchesRequestBody(t *testing.T) {
+	name := "patched-name"
+	for _, request := range []ionoscloud.ServerProperties{
+		{},
+		{Name: &name},
+		{EnabledFeatures: []string{}},
+	} {
+		body, err := request.ToMap()
+		if err != nil {
+			t.Fatalf("ToMap: %v", err)
+		}
+		if got, want := isEmptyServerPatch(request), len(body) == 0; got != want {
+			t.Errorf("isEmptyServerPatch(%+v) = %v, but the SDK request body is %v", request, got, body)
+		}
 	}
 }

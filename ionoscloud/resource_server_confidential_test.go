@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	ionoscloud "github.com/ionos-cloud/sdk-go/v6"
+	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
 )
 
 // initializeCreateRequests is the pure request-builder shared by the create path. These unit
@@ -133,10 +133,10 @@ func TestDetachableVolumeIDs(t *testing.T) {
 		for _, id := range ids {
 			items = append(items, ionoscloud.Volume{Id: new(id)})
 		}
-		return &ionoscloud.Server{Entities: &ionoscloud.ServerEntities{Volumes: &ionoscloud.AttachedVolumes{Items: &items}}}
+		return &ionoscloud.Server{Entities: &ionoscloud.ServerEntities{Volumes: &ionoscloud.AttachedVolumes{Items: items}}}
 	}
 	withBootVolume := func(server *ionoscloud.Server, bootID string) *ionoscloud.Server {
-		server.Properties = &ionoscloud.ServerProperties{BootVolume: &ionoscloud.ResourceReference{Id: new(bootID)}}
+		server.Properties = ionoscloud.ServerProperties{BootVolume: &ionoscloud.ResourceReference{Id: bootID}}
 		return server
 	}
 
