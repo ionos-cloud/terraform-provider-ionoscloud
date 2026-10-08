@@ -15,9 +15,16 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
 )
 
-// newBundle creates an SdkBundle with empty credentials, suitable for unit tests.
-func newBundle(fileConfig *fileconfiguration.FileConfig) *bundleclient.SdkBundle {
-	return bundleclient.New(context.Background(), clientoptions.TerraformClientOptions{}, fileConfig)
+// newBundle creates an SdkBundle for unit tests. An optional endpoint sets
+// clientOptions.Endpoint, mirroring how providerConfigure propagates IONOS_API_URL.
+func newBundle(fileConfig *fileconfiguration.FileConfig, endpoint ...string) *bundleclient.SdkBundle {
+	var ep string
+	if len(endpoint) > 0 {
+		ep = endpoint[0]
+	}
+	return bundleclient.New(context.Background(), clientoptions.TerraformClientOptions{
+		ClientOptions: shared.ClientOptions{Endpoint: ep},
+	}, fileConfig)
 }
 
 // newCloudFileConfig builds a minimal FileConfig with a Cloud product entry and the given failover options.
@@ -121,40 +128,16 @@ func TestNewCloudAPIClientWithFailover(t *testing.T) {
 			},
 		},
 		{
-			name:            "roundRobin with no global endpoints returns error",
+			name:            "no global endpoints returns error",
 			fileConfig:      newCloudFileConfig([]fileconfiguration.Endpoint{locationEp}, roundRobinFO),
 			wantErr:         true,
-			wantErrContains: "no global failover endpoints configured",
-		},
-		{
-			name:            "none strategy with no global endpoints returns error",
-			fileConfig:      newCloudFileConfig([]fileconfiguration.Endpoint{locationEp}, noneFO),
-			wantErr:         true,
-			wantErrContains: "no global failover endpoints configured",
+			wantErrContains: "global resources require global endpoints",
 		},
 		{
 			name:            "invalid strategy returns descriptive error",
 			fileConfig:      newCloudFileConfig([]fileconfiguration.Endpoint{globalEp1}, invalidFO),
 			wantErr:         true,
 			wantErrContains: "invalid failover strategy",
-		},
-		{
-			name:       "roundRobin skips location endpoints and uses only global ones",
-			fileConfig: newCloudFileConfig([]fileconfiguration.Endpoint{locationEp, globalEp1, globalEp2}, roundRobinFO),
-			validateClient: func(t *testing.T, client *ionoscloud.APIClient) {
-				if _, ok := client.GetConfig().HTTPClient.Transport.(*failover.RoundTripper); !ok {
-					t.Errorf("expected *failover.RoundTripper, got %T", client.GetConfig().HTTPClient.Transport)
-				}
-				cfg := client.GetConfig()
-				if len(cfg.Servers) != 2 {
-					t.Fatalf("expected 2 global servers, got %d: %v", len(cfg.Servers), cfg.Servers)
-				}
-				for _, srv := range cfg.Servers {
-					if srv.URL == locationEp.Name {
-						t.Errorf("location endpoint %q should not appear in servers", locationEp.Name)
-					}
-				}
-			},
 		},
 	}
 
@@ -197,6 +180,13 @@ func assertNotFailoverTransport(t *testing.T, client *ionoscloud.APIClient) {
 	}
 }
 
+func assertFailoverTransport(t *testing.T, client *ionoscloud.APIClient) {
+	t.Helper()
+	if _, ok := client.GetConfig().HTTPClient.Transport.(*failover.RoundTripper); !ok {
+		t.Errorf("expected *failover.RoundTripper, got %T", client.GetConfig().HTTPClient.Transport)
+	}
+}
+
 func assertDefaultServer(t *testing.T, client *ionoscloud.APIClient) {
 	t.Helper()
 	servers := client.GetConfig().Servers
@@ -219,5 +209,144 @@ func assertServerURLs(t *testing.T, client *ionoscloud.APIClient, wantURLs ...st
 		if servers[i].URL != url {
 			t.Errorf("servers[%d].URL: want %q, got %q", i, url, servers[i].URL)
 		}
+	}
+}
+
+func TestNewCloudAPIClient(t *testing.T) {
+	fra1 := fileconfiguration.Endpoint{Name: "https://fra1.example.com", Location: "de/fra"}
+	fra2 := fileconfiguration.Endpoint{Name: "https://fra2.example.com", Location: "de/fra"}
+	txl := fileconfiguration.Endpoint{Name: "https://txl.example.com", Location: "de/txl"}
+	global1 := fileconfiguration.Endpoint{Name: "https://g1.example.com"}
+	global2 := fileconfiguration.Endpoint{Name: "https://g2.example.com"}
+
+	roundRobinFO := &failover.Options{Strategy: failover.RoundRobin}
+	noneFO := &failover.Options{Strategy: failover.None}
+	invalidFO := &failover.Options{Strategy: "random"}
+
+	tests := []struct {
+		name            string
+		setup           func(t *testing.T)
+		fileConfig      *fileconfiguration.FileConfig
+		location        string
+		endpoint        string
+		wantErr         bool
+		wantErrContains string
+		validateClient  func(t *testing.T, client *ionoscloud.APIClient)
+	}{
+		{
+			name:       "nil fileConfig returns default client",
+			fileConfig: nil,
+			location:   "de/fra",
+			validateClient: func(t *testing.T, client *ionoscloud.APIClient) {
+				assertNotFailoverTransport(t, client)
+				assertDefaultServer(t, client)
+			},
+		},
+		{
+			name: "IONOS_API_URL set bypasses fileConfig and failover",
+			setup: func(t *testing.T) {
+				t.Setenv(shared.IonosApiUrlEnvVar, "https://custom.ionos.com")
+			},
+			fileConfig: newCloudFileConfig([]fileconfiguration.Endpoint{fra1}, roundRobinFO),
+			location:   "de/fra",
+			endpoint:   "https://custom.ionos.com",
+			validateClient: func(t *testing.T, client *ionoscloud.APIClient) {
+				assertNotFailoverTransport(t, client)
+				assertServerURLs(t, client, "https://custom.ionos.com/cloudapi/v6")
+			},
+		},
+		{
+			name: "fileConfig without Cloud product overrides returns default client",
+			fileConfig: &fileconfiguration.FileConfig{
+				Environments: []fileconfiguration.Environment{
+					{Name: "test", Products: []fileconfiguration.Product{{Name: "dns"}}},
+				},
+			},
+			location: "de/fra",
+			validateClient: func(t *testing.T, client *ionoscloud.APIClient) {
+				assertNotFailoverTransport(t, client)
+				assertDefaultServer(t, client)
+			},
+		},
+		{
+			name:       "location match with roundRobin uses location endpoints with failover",
+			fileConfig: newCloudFileConfig([]fileconfiguration.Endpoint{fra1, fra2}, roundRobinFO),
+			location:   "de/fra",
+			validateClient: func(t *testing.T, client *ionoscloud.APIClient) {
+				assertFailoverTransport(t, client)
+				assertServerURLs(t, client, fra1.Name, fra2.Name)
+			},
+		},
+		{
+			name:       "location match with none uses first location endpoint",
+			fileConfig: newCloudFileConfig([]fileconfiguration.Endpoint{fra1, fra2}, noneFO),
+			location:   "de/fra",
+			validateClient: func(t *testing.T, client *ionoscloud.APIClient) {
+				assertNotFailoverTransport(t, client)
+				assertServerURLs(t, client, fra1.Name)
+			},
+		},
+		{
+			name:       "selects only endpoints for the requested location",
+			fileConfig: newCloudFileConfig([]fileconfiguration.Endpoint{fra1, txl}, roundRobinFO),
+			location:   "de/txl",
+			validateClient: func(t *testing.T, client *ionoscloud.APIClient) {
+				assertServerURLs(t, client, txl.Name)
+			},
+		},
+		{
+			name:            "location not defined returns error and does not fall back to global",
+			fileConfig:      newCloudFileConfig([]fileconfiguration.Endpoint{fra1}, roundRobinFO),
+			location:        "us/las",
+			wantErr:         true,
+			wantErrContains: "no endpoint defined for location",
+		},
+		{
+			name:       "no regional endpoints falls back to global endpoints",
+			fileConfig: newCloudFileConfig([]fileconfiguration.Endpoint{global1, global2}, roundRobinFO),
+			location:   "de/fra",
+			validateClient: func(t *testing.T, client *ionoscloud.APIClient) {
+				assertFailoverTransport(t, client)
+				assertServerURLs(t, client, global1.Name, global2.Name)
+			},
+		},
+		{
+			name:            "invalid strategy returns descriptive error",
+			fileConfig:      newCloudFileConfig([]fileconfiguration.Endpoint{fra1}, invalidFO),
+			location:        "de/fra",
+			wantErr:         true,
+			wantErrContains: "invalid failover strategy",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.setup != nil {
+				tt.setup(t)
+			}
+
+			bundle := newBundle(tt.fileConfig, tt.endpoint)
+			client, err := bundle.NewCloudAPIClient(context.Background(), tt.location)
+
+			if tt.wantErr {
+				if err == nil {
+					t.Fatal("expected error, got nil")
+				}
+				if tt.wantErrContains != "" && !strings.Contains(err.Error(), tt.wantErrContains) {
+					t.Errorf("error %q does not contain %q", err.Error(), tt.wantErrContains)
+				}
+				return
+			}
+
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if client == nil {
+				t.Fatal("expected non-nil client, got nil")
+			}
+			if tt.validateClient != nil {
+				tt.validateClient(t, client)
+			}
+		})
 	}
 }
