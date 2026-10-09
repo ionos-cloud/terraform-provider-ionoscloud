@@ -8,9 +8,12 @@ import (
 	"regexp"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-testing/compare"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+	"github.com/hashicorp/terraform-plugin-testing/statecheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/acctest"
 )
@@ -22,6 +25,9 @@ const (
 
 func TestAccZoneDNSSEC(t *testing.T) {
 	zoneName := acctest.GenerateRandomResourceName("tf-dnssec-") + ".com"
+	// The key must be the same before the removal and after being adopted again, i.e. not recreated.
+	sameKeyTag := statecheck.CompareValue(compare.ValuesSame())
+	sameDigest := statecheck.CompareValue(compare.ValuesSame())
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.PreCheck(t) },
@@ -80,8 +86,15 @@ removed {
 					resource.TestCheckResourceAttr(dnssecResource, "algorithm", "RSASHA256"),
 					resource.TestCheckResourceAttr(dnssecResource, "nsec_mode", "NSEC3"),
 					resource.TestCheckResourceAttr(dnssecResource, "ksk_bits", "2048"),
+					resource.TestCheckResourceAttr(dnssecResource, "zsk_bits", "1024"),
+					resource.TestCheckResourceAttr(dnssecResource, "nsec3_iterations", "10"),
+					resource.TestCheckResourceAttr(dnssecResource, "nsec3_salt_bits", "64"),
 					resource.TestCheckResourceAttr(dnssecResource, "validity", "120"),
 				),
+				ConfigStateChecks: []statecheck.StateCheck{
+					sameKeyTag.AddStateValue(dnssecResource, tfjsonpath.New("key_tag")),
+					sameDigest.AddStateValue(dnssecResource, tfjsonpath.New("digest")),
+				},
 			},
 			{
 				Config: dnssecConfig(zoneName, 2048, 1024) + `
