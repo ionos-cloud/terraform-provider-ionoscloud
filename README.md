@@ -26,8 +26,13 @@ The IONOS CLOUD provider gives the ability to deploy and configure resources usi
 **NOTE:** In order to use a specific version of this provider, please include the following block at the beginning of your terraform config files [details](https://www.terraform.io/docs/configuration/terraform.html#specifying-a-required-terraform-version):
 
 ```terraform
-provider "ionoscloud" {
-  version = ">= 6.4.10"
+terraform {
+  required_providers {
+    ionoscloud = {
+      source  = "ionos-cloud/ionoscloud"
+      version = ">= 6.4.10"
+    }
+  }
 }
 ```
 
@@ -88,7 +93,26 @@ export TF_VAR_ionos_s3_region="eu-central-3" # optional
 ```
 <details><summary title="Click to toggle">How to use a configuration file</summary>
 
-For more complex configurations, with multiple user profiles and environments with custom API URLs, you can use a YAML configuration file with the following structure:
+For more complex configurations, with multiple user profiles and environments with custom API URLs, you can use a YAML configuration file.
+
+The path to the file can be set using the `IONOS_CONFIG_FILE` environment variable, or it defaults to `~/.ionos/config`.
+The file can either be written manually by the user, or generated through the `ionosctl login` command
+(see [ionosctl docs](https://github.com/ionos-cloud/ionosctl/blob/master/docs/subcommands/CLI%20Setup/login.md)).
+
+A product's `endpoints` can be defined as **regional** (one entry per `location`) or **global** (no `location`). An optional
+top-level `failover` block controls transport-level failover across the configured endpoints. The supported keys are:
+
+- `strategy`: `roundRobin` to fail over across the endpoints, or `none` (the default) to disable failover.
+- `retryableMethods`: the HTTP methods eligible for failover. If omitted, only safe/idempotent methods are retried (`POST` is not).
+- `failoverOnStatusCodes`: HTTP status codes that also trigger a failover to the next endpoint.
+- `retryOnTimeout`: whether to fail over on request timeouts.
+- `maxRetries`: the number of retries before giving up.
+- `exponentialBackoff`: `initialInterval`, `maxInterval` (Go durations, e.g. `500ms`, `60s`), `multiplier` and `randomizationFactor`.
+
+> **Note:** For the `cloud` product, regional (location-based) endpoints and global endpoints **cannot be mixed** in the same
+> configuration. Define the `cloud` product with **either** regional endpoints **or** global endpoints, never both.
+
+**Example — regional endpoints for the Cloud API** (the endpoint URLs below are illustrative; replace them with your own):
 
 ```yaml
 version: 1.0
@@ -100,29 +124,62 @@ profiles:
       # You can use either username and password, or token.
       # If both username and password, as well as token are provided, the token will take precedence.
       token: <token>
-  - name: user2
-    environment: dev
-    credentials:
-      username: <username>
-      password: <password>
 environments:
   - name: prod
     products:
-      - name: compute
+      - name: cloud
         endpoints:
-          - name: https://api.ionos.com/cloudapi/v6
+          # One or more endpoints per location. When a location defines multiple endpoints,
+          # requests for that location fail over across them (here, the two de/fra endpoints).
+          - location: de/fra
+            name: https://api.de-fra.ionos.com/cloudapi/v6
             skipTlsVerify: false
-  - name: dev
-    products:
-      - name: auth
-        endpoints:
-          - name: https://api.ionos.com/auth/v1
+          - location: de/fra
+            name: https://api.de-fra-2.ionos.com/cloudapi/v6
             skipTlsVerify: false
+          - location: de/txl
+            name: https://api.de-txl.ionos.com/cloudapi/v6
+            skipTlsVerify: false
+failover:
+  strategy: roundRobin
+  maxRetries: 3
+  exponentialBackoff:
+    initialInterval: 500ms
+    maxInterval: 60s
 ```
 
-The path to the file can be set using the `IONOS_CONFIG_FILE` environment variable, or it defaults to `~/.ionos/config.yaml`.
-The file can either be written manually by the user, or generated through the `ionosctl login` command
-(see [ionosctl docs](https://github.com/ionos-cloud/ionosctl/blob/master/docs/subcommands/CLI%20Setup/login.md)).
+**Example — global endpoints for the Cloud API** (the endpoint URLs below are illustrative; replace them with your own):
+
+```yaml
+version: 1.0
+currentProfile: user
+profiles:
+  - name: user
+    environment: prod
+    credentials:
+      token: <token>
+environments:
+  - name: prod
+    products:
+      - name: cloud
+        endpoints:
+          # Global endpoints have no location. List more than one to fail over between them.
+          - name: https://api.ionos.com/cloudapi/v6
+            skipTlsVerify: false
+          - name: https://api.fra.ionos.com/cloudapi/v6
+            skipTlsVerify: false
+failover:
+  strategy: roundRobin
+  retryableMethods: [GET, HEAD, PUT, DELETE, OPTIONS, POST] # methods eligible for failover
+  failoverOnStatusCodes: [503, 504]                         # also fail over on these HTTP statuses
+  retryOnTimeout: true
+  maxRetries: 3
+  exponentialBackoff:
+    initialInterval: 500ms
+    maxInterval: 60s
+    multiplier: 1.5
+    randomizationFactor: 0.5
+```
 
 A configuration file can be used in conjunction with the `token`, `username`, `password`, `endpoint`, `s3_access_key`, `s3_secret_key`
 and `s3_region` fields in the provider block or the corresponding environment variables, replacing the
@@ -139,6 +196,8 @@ See the [IONOS CLOUD Provider documentation](https://registry.terraform.io/provi
 | `IONOS_USERNAME`        | Specify the username used to login, to authenticate against the IONOS CLOUD API                                                                                                                         |
 | `IONOS_PASSWORD`        | Specify the password used to login, to authenticate against the IONOS CLOUD API                                                                                                                         |
 | `IONOS_TOKEN`           | Specify the token used to login, if a token is being used instead of username and password                                                                                                              |
+| `IONOS_CONFIG_FILE`     | Path to the YAML configuration file with profiles, environments and endpoint overrides. Defaults to `~/.ionos/config`                                                                                   |
+| `IONOS_CURRENT_PROFILE` | Overrides the `currentProfile` selected in the configuration file                                                                                                                                       |
 | `IONOS_LOG_LEVEL`       | Specify the Log Level used to log messages. Possible values: Off, Debug, Trace                                                                                                                          |
 | `IONOS_PINNED_CERT`     | Specify the SHA-256 public fingerprint here, enables certificate pinning                                                                                                                                |
 | `IONOS_CONTRACT_NUMBER` | Specify the contract number on which you wish to provision. Only valid for reseller accounts, for other types of accounts the header will be ignored                                                    |
