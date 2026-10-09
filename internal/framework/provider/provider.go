@@ -219,7 +219,7 @@ func (p *IonosCloudProvider) Configure(ctx context.Context, req provider.Configu
 	if token == "" && (username == "" || password == "") {
 		profile := fileConfig.GetCurrentProfile()
 		if profile == nil {
-			resp.Diagnostics.AddError("missing credentials", "either token or username and password must be set"+configlog.MissingCredentialsHint(readFileErr))
+			resp.Diagnostics.AddError(configlog.MissingCredentialsSummary, configlog.MissingCredentialsDetail+configlog.MissingCredentialsHint(readFileErr))
 			return
 		}
 		token = profile.Credentials.Token

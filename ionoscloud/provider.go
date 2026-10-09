@@ -283,7 +283,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, terraformVer
 		if !usernameOk || !passwordOk {
 			profile := fileConfig.GetCurrentProfile()
 			if profile == nil {
-				return nil, diag.Errorf("missing credentials, either token or username and password must be set%s", configlog.MissingCredentialsHint(readFileErr))
+				return nil, diag.Errorf("%s. %s%s", configlog.MissingCredentialsSummary, configlog.MissingCredentialsDetail, configlog.MissingCredentialsHint(readFileErr))
 			}
 			token = profile.Credentials.Token
 			username = profile.Credentials.Username
@@ -292,7 +292,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, terraformVer
 			profileName = profile.Name
 		}
 		if token == "" && (username == "" || password == "") {
-			return nil, diag.Errorf("missing credentials, either token or username and password must be set%s", configlog.MissingCredentialsHint(readFileErr))
+			return nil, diag.Errorf("%s. %s%s", configlog.MissingCredentialsSummary, configlog.MissingCredentialsDetail, configlog.MissingCredentialsHint(readFileErr))
 		}
 	}
 
