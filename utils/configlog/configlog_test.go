@@ -429,9 +429,10 @@ func TestLoadFileConfigWithLogging_DefaultPathUnresolved(t *testing.T) {
 }
 
 func TestMissingCredentialsHint(t *testing.T) {
-	wrapped := errors.Join(ErrDefaultConfigUnavailable) // keeps errors.Is true
-	if hint := MissingCredentialsHint(wrapped); !strings.Contains(hint, ErrDefaultConfigUnavailable.Error()) {
-		t.Errorf("expected hint to mention the unavailable default config, got %q", hint)
+	err := &defaultConfigUnavailableError{reason: `file "/x/.ionos/config" not found`}
+	hint := MissingCredentialsHint(err)
+	if !strings.Contains(hint, "The default config file was not loaded:") || !strings.Contains(hint, `file "/x/.ionos/config" not found`) {
+		t.Errorf("expected hint to state the file config was not loaded with the reason, got %q", hint)
 	}
 	if hint := MissingCredentialsHint(errors.New("some other error")); hint != "" {
 		t.Errorf("expected empty hint for unrelated error, got %q", hint)

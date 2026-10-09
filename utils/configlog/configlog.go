@@ -22,12 +22,32 @@ import (
 // proceed with other credential sources and only fail when none are available.
 var ErrDefaultConfigUnavailable = errors.New("default config file unavailable")
 
-// MissingCredentialsHint returns extra context to append to a "missing credentials"
-// error when the default config file could not be used, so the real cause is not
-// masked. It returns an empty string for any other error.
+// defaultConfigUnavailableError marks that the default config file could not be used and
+// carries a human-readable reason. It unwraps to ErrDefaultConfigUnavailable so callers
+// can detect it with errors.Is, while its message holds just the reason for display.
+type defaultConfigUnavailableError struct {
+	reason string
+}
+
+func (e *defaultConfigUnavailableError) Error() string { return e.reason }
+func (e *defaultConfigUnavailableError) Unwrap() error { return ErrDefaultConfigUnavailable }
+
+// Summary and detail for the "no credentials" error, shared by both providers so the
+// wording stays identical.
+const (
+	MissingCredentialsSummary = "No credentials found"
+	MissingCredentialsDetail  = "Set credentials in one of these ways:\n" +
+		"  - token: the `token` provider argument or IONOS_TOKEN env var\n" +
+		"  - username/password: the `username`/`password` provider arguments or IONOS_USERNAME/IONOS_PASSWORD env vars\n" +
+		"  - file config (check README.md for more details)"
+)
+
+// MissingCredentialsHint returns extra context to append to a "no credentials" error
+// when the default config file could not be used, so the real cause is not masked. It
+// returns an empty string for any other error.
 func MissingCredentialsHint(readFileErr error) string {
 	if errors.Is(readFileErr, ErrDefaultConfigUnavailable) {
-		return fmt.Sprintf(" (%s)", readFileErr.Error())
+		return fmt.Sprintf("\nThe default config file was not loaded: %s.", readFileErr.Error())
 	}
 	return ""
 }
@@ -48,7 +68,7 @@ func LoadFileConfigWithLogging(ctx context.Context) (*fileconfiguration.FileConf
 		defaultPath, err := fileconfiguration.DefaultConfigFileName()
 		if err != nil {
 			tflog.Debug(ctx, "could not determine default config file path", map[string]any{"error": err.Error()})
-			return nil, fmt.Errorf("%w: could not determine the default config file path: %w", ErrDefaultConfigUnavailable, err)
+			return nil, &defaultConfigUnavailableError{reason: err.Error()}
 		}
 		filePath = defaultPath
 	}
@@ -58,7 +78,7 @@ func LoadFileConfigWithLogging(ctx context.Context) (*fileconfiguration.FileConf
 		tflog.Debug(ctx, "config file", map[string]any{"path": filePath, "source": source, "status": "not found"})
 		if source == "default" {
 			// The default config file is optional: non-fatal unless no other credentials exist.
-			return nil, fmt.Errorf("%w: default config file %q not found", ErrDefaultConfigUnavailable, filePath)
+			return nil, &defaultConfigUnavailableError{reason: fmt.Sprintf("file %q not found", filePath)}
 		}
 		// IONOS_CONFIG_FILE explicitly points at a file that does not exist: treat it as a hard error.
 		return nil, fmt.Errorf("file config %q set via %s does not exist", filePath, shared.IonosFilePathEnvVar)
