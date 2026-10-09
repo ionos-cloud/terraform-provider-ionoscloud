@@ -431,7 +431,7 @@ func (c SdkBundle) NewCloudAPIClient(ctx context.Context, location string) (*ion
 			fileconfiguration.Cloud,
 		)
 	}
-	if err := configureFailover(ctx, config, fileconfiguration.Cloud, endpoints, c.fileConfig.GetFailoverOptions()); err != nil {
+	if err := c.configureFailover(config, endpoints); err != nil {
 		return nil, err
 	}
 	return ionoscloud.NewAPIClient(config), nil
@@ -469,7 +469,7 @@ func (c SdkBundle) NewCloudAPIClientWithFailover(ctx context.Context) (*ionosclo
 	tflog.Debug(ctx, "global endpoints from file config", map[string]any{
 		"product": fileconfiguration.Cloud, "endpoints": endpointURLs,
 	})
-	if err := configureFailover(ctx, config, fileconfiguration.Cloud, endpoints, c.fileConfig.GetFailoverOptions()); err != nil {
+	if err := c.configureFailover(config, endpoints); err != nil {
 		return nil, err
 	}
 	return ionoscloud.NewAPIClient(config), nil
