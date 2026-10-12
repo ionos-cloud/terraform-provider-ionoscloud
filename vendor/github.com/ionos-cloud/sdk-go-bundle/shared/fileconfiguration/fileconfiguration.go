@@ -66,6 +66,10 @@ const (
 	PSQLV2        = "psqlv2"
 )
 
+func normalizeName(name string) string {
+	return strings.ToLower(strings.TrimSpace(name))
+}
+
 // Endpoint is a struct that represents an endpoint
 type Endpoint struct {
 	// the location or the region
@@ -207,6 +211,9 @@ func New(filePath string) (*FileConfig, error) {
 	if os.Getenv(shared.IonosCurrentProfileEnvVar) != "" {
 		loadedConfig.CurrentProfile = os.Getenv(shared.IonosCurrentProfileEnvVar)
 	}
+	if err := loadedConfig.Validate(); err != nil {
+		return nil, fmt.Errorf("invalid file config %s: %w", filePath, err)
+	}
 	return loadedConfig, nil
 }
 
@@ -341,8 +348,8 @@ func (f *FileConfig) GetEnvForCurrentProfile() string {
 	return ""
 }
 
-// GetProductOverrides returns the overrides for a specific product for the current environment
-// if no current environment is found, the first environment is used for the product that matches productName is returned
+// GetProductOverrides returns the overrides for the given product in the current environment.
+// If no current environment is set, it returns the overrides from the first environment that defines the product.
 func (f *FileConfig) GetProductOverrides(productName string) *Product {
 	if f == nil {
 		return nil
@@ -353,9 +360,9 @@ func (f *FileConfig) GetProductOverrides(productName string) *Product {
 		}
 		return nil
 	}
-	currentEnv := f.GetEnvForCurrentProfile()
+	currentEnv := normalizeName(f.GetEnvForCurrentProfile())
 	for _, environment := range f.Environments {
-		if currentEnv != "" && environment.Name != currentEnv {
+		if currentEnv != "" && normalizeName(environment.Name) != currentEnv {
 			continue
 		}
 		for _, product := range environment.Products {

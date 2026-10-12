@@ -401,7 +401,7 @@ github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2
 # github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.2
 ## explicit; go 1.22
 github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2
-# github.com/ionos-cloud/sdk-go-bundle/shared v0.1.12
+# github.com/ionos-cloud/sdk-go-bundle/shared v0.1.13
 ## explicit; go 1.24
 github.com/ionos-cloud/sdk-go-bundle/shared
 github.com/ionos-cloud/sdk-go-bundle/shared/failover

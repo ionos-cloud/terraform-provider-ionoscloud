@@ -80,7 +80,7 @@ type endpointRT struct {
 type RoundTripper struct {
 	endpoints   []endpointRT
 	fo          Options
-	defaultBase http.RoundTripper // used for pass-through (strategy=none, empty endpoints, non-retryable methods)
+	defaultBase http.RoundTripper // pass-through transport for strategy=none/empty; also the per-endpoint transport when no endpoint-specific TLS is set
 }
 
 // NewRoundTripper creates a RoundTripper that cycles through
@@ -171,8 +171,8 @@ func (t *RoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
 // (0, 1, 2, …) to a server index.
 //
 // Behaviour:
-//   - Non-retryable HTTP methods (e.g. POST by default): passes through to the
-//     base transport without retry.
+//   - Non-retryable HTTP methods (e.g. POST by default): sent once to the first
+//     endpoint, using that endpoint's own transport, without retry.
 //   - Network errors: retries only for an allowlist of transport errors
 //     (connection refused/reset/aborted, unreachable host/network) and timeout
 //     errors when Options.RetryOnTimeout is set. DNS errors and context
@@ -187,7 +187,7 @@ func (t *RoundTripper) orderedRoundTrip(req *http.Request, order serverOrder) (*
 	fo := &t.fo
 
 	if !isRetryableMethod(fo, req.Method) {
-		return t.defaultBase.RoundTrip(req)
+		return t.singleAttempt(req, t.endpoints[0])
 	}
 
 	bo := fo.ExponentialBackoff.NewExponentialBackoff()
@@ -260,6 +260,27 @@ func (t *RoundTripper) doFailoverAttempt(req *http.Request, ep endpointRT) (*htt
 	attemptReq.Host = targetURL.Host
 
 	shared.LogDebug("[Failover] method=%s url=%s", attemptReq.Method, attemptReq.URL.String())
+	return ep.rt.RoundTrip(attemptReq)
+}
+
+// singleAttempt sends req once to the given endpoint, using that endpoint's transport.
+// Unlike doFailoverAttempt it does not require a replayable body: the request is sent
+// exactly once, so req.Clone is used, which shares the original Body instead of
+// duplicating it (no GetBody needed). Scheme and host are rewritten to the endpoint,
+// preserving path and query, so a non-retryable request is retargeted to the
+// configured failover endpoint rather than whatever host it arrived with.
+func (t *RoundTripper) singleAttempt(req *http.Request, ep endpointRT) (*http.Response, error) {
+	targetURL, err := url.Parse(ep.url)
+	if err != nil {
+		return nil, fmt.Errorf("invalid server URL %q: %w", ep.url, err)
+	}
+
+	attemptReq := req.Clone(req.Context())
+	attemptReq.URL.Scheme = targetURL.Scheme
+	attemptReq.URL.Host = targetURL.Host
+	attemptReq.Host = targetURL.Host
+
+	shared.LogDebug("[Failover] single attempt method=%s url=%s", attemptReq.Method, attemptReq.URL.String())
 	return ep.rt.RoundTrip(attemptReq)
 }
 
