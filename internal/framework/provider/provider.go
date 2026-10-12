@@ -18,6 +18,7 @@ import (
 	"github.com/ionos-cloud/sdk-go-bundle/shared"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/compute"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/dns"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/inmemorydbv2"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/kafka"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/framework/services/mariadbv2"
@@ -285,6 +286,7 @@ func (p *IonosCloudProvider) Resources(_ context.Context) []func() resource.Reso
 		objectstorage.Resources(),
 		objectstoragemanagement.Resources(),
 		monitoring.Resources(),
+		dns.Resources(),
 		pgsqlv2.Resources(),
 		userobjectstorage.Resources(),
 		inmemorydbv2.Resources(),
@@ -305,6 +307,7 @@ func (p *IonosCloudProvider) DataSources(_ context.Context) []func() datasource.
 		objectstorage.DataSources(),
 		objectstoragemanagement.DataSources(),
 		monitoring.DataSources(),
+		dns.DataSources(),
 		compute.DataSources(),
 		kafka.DataSources(),
 		pgsqlv2.DataSources(),
