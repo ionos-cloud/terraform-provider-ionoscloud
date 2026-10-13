@@ -1,4 +1,4 @@
-## 6.7.39 -- upcoming release
+## 6.7.39
 ### Features
 - `ionoscloud_ipblock`: New list resource, queryable with `terraform query` (requires Terraform 1.14+).
 - `ionoscloud_ipblock`: Add a resource identity (`id`, `location`), which also enables `import` blocks with an `identity` attribute.
