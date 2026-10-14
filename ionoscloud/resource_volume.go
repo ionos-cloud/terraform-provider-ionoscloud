@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"strconv"
 	"strings"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
@@ -315,6 +316,10 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta any)
 	}
 
 	if diags := attachVolume(ctx, d, meta, client, dcID, serverID, schema.TimeoutCreate); diags != nil {
+		return diags
+	}
+
+	if diags := reconcileVolumeHotPlug(ctx, client, meta, d, dcID, d.Id(), ""); diags != nil {
 		return diags
 	}
 
@@ -900,6 +905,101 @@ func getVolumeData(ctx context.Context, d *schema.ResourceData, path, serverType
 	}
 
 	return &volume, nil
+}
+
+// reconcileVolumeHotPlug sends a follow-up PATCH after a volume (standalone or
+// inline on a server) is created, applying the hot-plug attributes the user
+// explicitly set in config. This is required because on create the API decides
+// the hot-plug values based on several factors and MAY ignore whatever was sent
+// in the POST body; those API-decided values can only be overwritten with a PATCH.
+// If the user set none, no request is sent and the create-time values stand.
+// path addresses the config block holding the attributes (see hotPlugReconcileProps).
+func reconcileVolumeHotPlug(ctx context.Context, client *ionoscloud.APIClient, meta any, d *schema.ResourceData, dcID, volumeID, path string) diag.Diagnostics {
+	hotPlugProps, set, err := hotPlugReconcileProps(d, path)
+	if err != nil {
+		return diagutil.ToDiags(d, err, nil)
+	}
+	if !set {
+		return nil
+	}
+
+	_, apiResponse, err := client.VolumesApi.DatacentersVolumesPatch(ctx, dcID, volumeID).Volume(hotPlugProps).Execute()
+	logApiRequestTime(apiResponse)
+	if err != nil {
+		requestLocation := safeLocation(apiResponse)
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while reconciling hot-plug properties for volume %s: %w", volumeID, err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
+	}
+
+	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
+		requestLocation := safeLocation(apiResponse)
+		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
+	}
+
+	return nil
+}
+
+// hotPlugReconcileProps returns volume properties holding only the hot-plug
+// attributes the user explicitly set in config, and whether any were set. The raw
+// config is used so an explicit `false` is distinguished from an unset attribute,
+// which a Computed bool read through d.Get cannot do.
+func hotPlugReconcileProps(d *schema.ResourceData, path string) (ionoscloud.VolumeProperties, bool, error) {
+	props := ionoscloud.VolumeProperties{}
+	rawConfig := d.GetRawConfig()
+	if rawConfig.IsNull() || !rawConfig.IsKnown() {
+		return props, false, nil
+	}
+
+	// Descend into the raw config following path.
+	current := rawConfig
+	for _, step := range strings.FieldsFunc(path, func(r rune) bool { return r == '.' }) {
+		if current.IsNull() || !current.IsKnown() {
+			return props, false, nil
+		}
+		if idx, err := strconv.Atoi(step); err == nil {
+			t := current.Type()
+			if !t.IsListType() && !t.IsTupleType() && !t.IsSetType() {
+				return props, false, fmt.Errorf("hot-plug reconcile: path %q indexes %q which is not a list", path, step)
+			}
+			slice := current.AsValueSlice()
+			if idx < 0 || idx >= len(slice) {
+				return props, false, nil
+			}
+			current = slice[idx]
+			continue
+		}
+		if t := current.Type(); !t.IsObjectType() && !t.IsMapType() {
+			return props, false, fmt.Errorf("hot-plug reconcile: path %q descends into %q which is not an object", path, step)
+		}
+		v, ok := current.AsValueMap()[step]
+		if !ok {
+			return props, false, fmt.Errorf("hot-plug reconcile: attribute %q in path %q is not in the schema", step, path)
+		}
+		current = v
+	}
+	if current.IsNull() || !current.IsKnown() {
+		return props, false, nil
+	}
+	configMap := current.AsValueMap()
+
+	set := false
+	apply := func(attr string, field **bool) {
+		v, ok := configMap[attr]
+		if !ok || v.IsNull() || !v.IsKnown() {
+			return
+		}
+		b := v.True()
+		*field = &b
+		set = true
+	}
+
+	apply("cpu_hot_plug", &props.CpuHotPlug)
+	apply("ram_hot_plug", &props.RamHotPlug)
+	apply("nic_hot_plug", &props.NicHotPlug)
+	apply("nic_hot_unplug", &props.NicHotUnplug)
+	apply("disc_virtio_hot_plug", &props.DiscVirtioHotPlug)
+	apply("disc_virtio_hot_unplug", &props.DiscVirtioHotUnplug)
+
+	return props, set, nil
 }
 
 func hasImageCredentials(volume ionoscloud.VolumeProperties) bool {
