@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"strconv"
 	"strings"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
@@ -102,28 +103,40 @@ func resourceVolume() *schema.Resource {
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"AUTO", "ZONE_1", "ZONE_2", "ZONE_3"}, true)),
 			},
 			"cpu_hot_plug": {
-				Type:     schema.TypeBool,
-				Computed: true,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Computed:    true,
+				Description: "Is capable of CPU hot plug (no reboot required)",
 			},
 			"ram_hot_plug": {
-				Type:     schema.TypeBool,
-				Computed: true,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Computed:    true,
+				Description: "Is capable of memory hot plug (no reboot required)",
 			},
 			"nic_hot_plug": {
-				Type:     schema.TypeBool,
-				Computed: true,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Computed:    true,
+				Description: "Is capable of nic hot plug (no reboot required)",
 			},
 			"nic_hot_unplug": {
-				Type:     schema.TypeBool,
-				Computed: true,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Computed:    true,
+				Description: "Is capable of nic hot unplug (no reboot required)",
 			},
 			"disc_virtio_hot_plug": {
-				Type:     schema.TypeBool,
-				Computed: true,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Computed:    true,
+				Description: "Is capable of Virt-IO drive hot plug (no reboot required)",
 			},
 			"disc_virtio_hot_unplug": {
-				Type:     schema.TypeBool,
-				Computed: true,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Computed:    true,
+				Description: "Is capable of Virt-IO drive hot unplug (no reboot required). This works only for non-Windows virtual Machines.",
 			},
 			"backup_unit_id": {
 				Type:     schema.TypeString,
@@ -306,6 +319,10 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta any)
 		return diags
 	}
 
+	if diags := reconcileVolumeHotPlug(ctx, client, meta, d, dcID, d.Id(), ""); diags != nil {
+		return diags
+	}
+
 	return resourceVolumeRead(ctx, d, meta)
 }
 
@@ -441,6 +458,42 @@ func resourceVolumeUpdate(ctx context.Context, d *schema.ResourceData, meta any)
 		_, newValue := d.GetChange("require_legacy_bios")
 		requireLegacyBios := newValue.(bool)
 		properties.RequireLegacyBios = &requireLegacyBios
+	}
+
+	if d.HasChange("cpu_hot_plug") {
+		_, newValue := d.GetChange("cpu_hot_plug")
+		cpuHotPlug := newValue.(bool)
+		properties.CpuHotPlug = &cpuHotPlug
+	}
+
+	if d.HasChange("ram_hot_plug") {
+		_, newValue := d.GetChange("ram_hot_plug")
+		ramHotPlug := newValue.(bool)
+		properties.RamHotPlug = &ramHotPlug
+	}
+
+	if d.HasChange("nic_hot_plug") {
+		_, newValue := d.GetChange("nic_hot_plug")
+		nicHotPlug := newValue.(bool)
+		properties.NicHotPlug = &nicHotPlug
+	}
+
+	if d.HasChange("nic_hot_unplug") {
+		_, newValue := d.GetChange("nic_hot_unplug")
+		nicHotUnplug := newValue.(bool)
+		properties.NicHotUnplug = &nicHotUnplug
+	}
+
+	if d.HasChange("disc_virtio_hot_plug") {
+		_, newValue := d.GetChange("disc_virtio_hot_plug")
+		discVirtioHotPlug := newValue.(bool)
+		properties.DiscVirtioHotPlug = &discVirtioHotPlug
+	}
+
+	if d.HasChange("disc_virtio_hot_unplug") {
+		_, newValue := d.GetChange("disc_virtio_hot_unplug")
+		discVirtioHotUnplug := newValue.(bool)
+		properties.DiscVirtioHotUnplug = &discVirtioHotUnplug
 	}
 
 	// An update that only moves the attachment must not send an empty PATCH.
@@ -813,12 +866,140 @@ func getVolumeData(ctx context.Context, d *schema.ResourceData, path, serverType
 		volume.ExposeSerial = &val
 	}
 
-	if v, ok := d.GetOk(path + "require_legacy_bios"); ok {
+	// GetOkExists is needed to distinguish unset from explicit false on these *bool fields;
+	// GetOk treats the zero value (false) as "not set" and would skip sending it, causing the
+	// API to silently apply its own default (e.g. requireLegacyBios defaults to true) on create.
+	if v, ok := d.GetOkExists(path + "require_legacy_bios"); ok { //nolint:staticcheck // SA1019: GetOkExists has no SDKv2 replacement for tri-state bools
 		requireLegacyBios := v.(bool)
 		volume.RequireLegacyBios = &requireLegacyBios
 	}
 
+	if v, ok := d.GetOkExists(path + "cpu_hot_plug"); ok { //nolint:staticcheck // SA1019: GetOkExists has no SDKv2 replacement for tri-state bools
+		cpuHotPlug := v.(bool)
+		volume.CpuHotPlug = &cpuHotPlug
+	}
+
+	if v, ok := d.GetOkExists(path + "ram_hot_plug"); ok { //nolint:staticcheck // SA1019: GetOkExists has no SDKv2 replacement for tri-state bools
+		ramHotPlug := v.(bool)
+		volume.RamHotPlug = &ramHotPlug
+	}
+
+	if v, ok := d.GetOkExists(path + "nic_hot_plug"); ok { //nolint:staticcheck // SA1019: GetOkExists has no SDKv2 replacement for tri-state bools
+		nicHotPlug := v.(bool)
+		volume.NicHotPlug = &nicHotPlug
+	}
+
+	if v, ok := d.GetOkExists(path + "nic_hot_unplug"); ok { //nolint:staticcheck // SA1019: GetOkExists has no SDKv2 replacement for tri-state bools
+		nicHotUnplug := v.(bool)
+		volume.NicHotUnplug = &nicHotUnplug
+	}
+
+	if v, ok := d.GetOkExists(path + "disc_virtio_hot_plug"); ok { //nolint:staticcheck // SA1019: GetOkExists has no SDKv2 replacement for tri-state bools
+		discVirtioHotPlug := v.(bool)
+		volume.DiscVirtioHotPlug = &discVirtioHotPlug
+	}
+
+	if v, ok := d.GetOkExists(path + "disc_virtio_hot_unplug"); ok { //nolint:staticcheck // SA1019: GetOkExists has no SDKv2 replacement for tri-state bools
+		discVirtioHotUnplug := v.(bool)
+		volume.DiscVirtioHotUnplug = &discVirtioHotUnplug
+	}
+
 	return &volume, nil
+}
+
+// reconcileVolumeHotPlug sends a follow-up PATCH after a volume (standalone or
+// inline on a server) is created, applying the hot-plug attributes the user
+// explicitly set in config. This is required because on create the API decides
+// the hot-plug values based on several factors and MAY ignore whatever was sent
+// in the POST body; those API-decided values can only be overwritten with a PATCH.
+// If the user set none, no request is sent and the create-time values stand.
+// path addresses the config block holding the attributes (see hotPlugReconcileProps).
+func reconcileVolumeHotPlug(ctx context.Context, client *ionoscloud.APIClient, meta any, d *schema.ResourceData, dcID, volumeID, path string) diag.Diagnostics {
+	hotPlugProps, set, err := hotPlugReconcileProps(d, path)
+	if err != nil {
+		return diagutil.ToDiags(d, err, nil)
+	}
+	if !set {
+		return nil
+	}
+
+	_, apiResponse, err := client.VolumesApi.DatacentersVolumesPatch(ctx, dcID, volumeID).Volume(hotPlugProps).Execute()
+	logApiRequestTime(apiResponse)
+	if err != nil {
+		requestLocation := safeLocation(apiResponse)
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while reconciling hot-plug properties for volume %s: %w", volumeID, err), &diagutil.ErrorContext{RequestID: diagutil.ExtractRequestID(requestLocation), StatusCode: apiResponse.SafeStatusCode()})
+	}
+
+	if errState := bundleclient.WaitForStateChange(ctx, meta, d, apiResponse, schema.TimeoutCreate); errState != nil {
+		requestLocation := safeLocation(apiResponse)
+		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
+	}
+
+	return nil
+}
+
+// hotPlugReconcileProps returns volume properties holding only the hot-plug
+// attributes the user explicitly set in config, and whether any were set. The raw
+// config is used so an explicit `false` is distinguished from an unset attribute,
+// which a Computed bool read through d.Get cannot do.
+func hotPlugReconcileProps(d *schema.ResourceData, path string) (ionoscloud.VolumeProperties, bool, error) {
+	props := ionoscloud.VolumeProperties{}
+	rawConfig := d.GetRawConfig()
+	if rawConfig.IsNull() || !rawConfig.IsKnown() {
+		return props, false, nil
+	}
+
+	// Descend into the raw config following path.
+	current := rawConfig
+	for _, step := range strings.FieldsFunc(path, func(r rune) bool { return r == '.' }) {
+		if current.IsNull() || !current.IsKnown() {
+			return props, false, nil
+		}
+		if idx, err := strconv.Atoi(step); err == nil {
+			t := current.Type()
+			if !t.IsListType() && !t.IsTupleType() && !t.IsSetType() {
+				return props, false, fmt.Errorf("hot-plug reconcile: path %q indexes %q which is not a list", path, step)
+			}
+			slice := current.AsValueSlice()
+			if idx < 0 || idx >= len(slice) {
+				return props, false, nil
+			}
+			current = slice[idx]
+			continue
+		}
+		if t := current.Type(); !t.IsObjectType() && !t.IsMapType() {
+			return props, false, fmt.Errorf("hot-plug reconcile: path %q descends into %q which is not an object", path, step)
+		}
+		v, ok := current.AsValueMap()[step]
+		if !ok {
+			return props, false, fmt.Errorf("hot-plug reconcile: attribute %q in path %q is not in the schema", step, path)
+		}
+		current = v
+	}
+	if current.IsNull() || !current.IsKnown() {
+		return props, false, nil
+	}
+	configMap := current.AsValueMap()
+
+	set := false
+	apply := func(attr string, field **bool) {
+		v, ok := configMap[attr]
+		if !ok || v.IsNull() || !v.IsKnown() {
+			return
+		}
+		b := v.True()
+		*field = &b
+		set = true
+	}
+
+	apply("cpu_hot_plug", &props.CpuHotPlug)
+	apply("ram_hot_plug", &props.RamHotPlug)
+	apply("nic_hot_plug", &props.NicHotPlug)
+	apply("nic_hot_unplug", &props.NicHotUnplug)
+	apply("disc_virtio_hot_plug", &props.DiscVirtioHotPlug)
+	apply("disc_virtio_hot_unplug", &props.DiscVirtioHotUnplug)
+
+	return props, set, nil
 }
 
 func hasImageCredentials(volume ionoscloud.VolumeProperties) bool {

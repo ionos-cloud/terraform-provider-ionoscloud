@@ -198,28 +198,40 @@ func resourceCubeServer() *schema.Resource {
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"AUTO", "ZONE_1", "ZONE_2", "ZONE_3"}, true)),
 						},
 						"cpu_hot_plug": {
-							Type:     schema.TypeBool,
-							Computed: true,
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Computed:    true,
+							Description: "Is capable of CPU hot plug (no reboot required)",
 						},
 						"ram_hot_plug": {
-							Type:     schema.TypeBool,
-							Computed: true,
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Computed:    true,
+							Description: "Is capable of memory hot plug (no reboot required)",
 						},
 						"nic_hot_plug": {
-							Type:     schema.TypeBool,
-							Computed: true,
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Computed:    true,
+							Description: "Is capable of nic hot plug (no reboot required)",
 						},
 						"nic_hot_unplug": {
-							Type:     schema.TypeBool,
-							Computed: true,
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Computed:    true,
+							Description: "Is capable of nic hot unplug (no reboot required)",
 						},
 						"disc_virtio_hot_plug": {
-							Type:     schema.TypeBool,
-							Computed: true,
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Computed:    true,
+							Description: "Is capable of Virt-IO drive hot plug (no reboot required)",
 						},
 						"disc_virtio_hot_unplug": {
-							Type:     schema.TypeBool,
-							Computed: true,
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Computed:    true,
+							Description: "Is capable of Virt-IO drive hot unplug (no reboot required). This works only for non-Windows virtual Machines.",
 						},
 						"device_number": {
 							Type:     schema.TypeInt,
@@ -520,6 +532,17 @@ func resourceCubeServerCreate(ctx context.Context, d *schema.ResourceData, meta 
 		if err := d.Set("inline_volume_ids", inlineVolumeIDs); err != nil {
 			return diagutil.ToDiags(d, utils.GenerateSetError("server", "inline_volume_ids", err), nil)
 		}
+
+		// Reconcile hot-plug properties on the inline volume: the API may ignore
+		// the values sent in the server POST and only honors them on a follow-up PATCH.
+		if len(createdServer.Entities.Volumes.Items) > 0 {
+			inlineVolume := createdServer.Entities.Volumes.Items[0]
+			if inlineVolume.Id != nil {
+				if diags := reconcileVolumeHotPlug(ctx, client, meta, d, dcID, *inlineVolume.Id, "volume.0."); diags != nil {
+					return diags
+				}
+			}
+		}
 	}
 
 	if initialState, ok := d.GetOk("vm_state"); ok {
@@ -811,6 +834,42 @@ func resourceCubeServerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 					_, newVal := d.GetChange(volumePath + "require_legacy_bios")
 					requireLegacyBios := newVal.(bool)
 					properties.RequireLegacyBios = &requireLegacyBios
+				}
+
+				if d.HasChange(volumePath + "cpu_hot_plug") {
+					_, newVal := d.GetChange(volumePath + "cpu_hot_plug")
+					cpuHotPlug := newVal.(bool)
+					properties.CpuHotPlug = &cpuHotPlug
+				}
+
+				if d.HasChange(volumePath + "ram_hot_plug") {
+					_, newVal := d.GetChange(volumePath + "ram_hot_plug")
+					ramHotPlug := newVal.(bool)
+					properties.RamHotPlug = &ramHotPlug
+				}
+
+				if d.HasChange(volumePath + "nic_hot_plug") {
+					_, newVal := d.GetChange(volumePath + "nic_hot_plug")
+					nicHotPlug := newVal.(bool)
+					properties.NicHotPlug = &nicHotPlug
+				}
+
+				if d.HasChange(volumePath + "nic_hot_unplug") {
+					_, newVal := d.GetChange(volumePath + "nic_hot_unplug")
+					nicHotUnplug := newVal.(bool)
+					properties.NicHotUnplug = &nicHotUnplug
+				}
+
+				if d.HasChange(volumePath + "disc_virtio_hot_plug") {
+					_, newVal := d.GetChange(volumePath + "disc_virtio_hot_plug")
+					discVirtioHotPlug := newVal.(bool)
+					properties.DiscVirtioHotPlug = &discVirtioHotPlug
+				}
+
+				if d.HasChange(volumePath + "disc_virtio_hot_unplug") {
+					_, newVal := d.GetChange(volumePath + "disc_virtio_hot_unplug")
+					discVirtioHotUnplug := newVal.(bool)
+					properties.DiscVirtioHotUnplug = &discVirtioHotUnplug
 				}
 
 				_, apiResponse, err = client.VolumesApi.DatacentersVolumesPatch(ctx, d.Get("datacenter_id").(string), volumeIDStr).Volume(properties).Execute()
