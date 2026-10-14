@@ -482,6 +482,17 @@ func resourceGpuServerCreate(ctx context.Context, d *schema.ResourceData, meta a
 		if err := d.Set("inline_volume_ids", inlineVolumeIDs); err != nil {
 			return diagutil.ToDiags(d, utils.GenerateSetError("server", "inline_volume_ids", err), nil)
 		}
+
+		// Reconcile hot-plug properties on the inline volume: the API may ignore
+		// the values sent in the server POST and only honors them on a follow-up PATCH.
+		if len(createdServer.Entities.Volumes.Items) > 0 {
+			inlineVolume := createdServer.Entities.Volumes.Items[0]
+			if inlineVolume.Id != nil {
+				if diags := reconcileVolumeHotPlug(ctx, client, meta, d, dcID, *inlineVolume.Id, "volume.0."); diags != nil {
+					return diags
+				}
+			}
+		}
 	}
 
 	if initialState, ok := d.GetOk("vm_state"); ok {
