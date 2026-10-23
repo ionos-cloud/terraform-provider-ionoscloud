@@ -24,6 +24,7 @@ require (
 	github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb/v2 v2.1.0
 	github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb/v3 v3.0.0
 	github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2 v2.1.1
+	github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v3 v3.0.0
 	github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2 v2.1.0
 	github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v3 v3.1.0
 	github.com/ionos-cloud/sdk-go-bundle/products/dns/v2 v2.2.2
@@ -36,7 +37,7 @@ require (
 	github.com/ionos-cloud/sdk-go-bundle/products/userobjectstorage/v2 v2.0.5
 	github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2 v2.0.1
 	github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.2
-	github.com/ionos-cloud/sdk-go-bundle/shared v0.1.13
+	github.com/ionos-cloud/sdk-go-bundle/shared v0.1.14
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/crypto v0.57.0
@@ -107,3 +108,5 @@ require (
 	google.golang.org/grpc v1.83.2 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 )
+
+replace github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v3 => ../sdks/generated_locally_mongo
