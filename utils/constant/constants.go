@@ -336,6 +336,14 @@ const (
 	MariaDBV2BackupsDataSource         = "ionoscloud_mariadb_backups_v2"
 	MariaDBV2BackupLocationsDataSource = "ionoscloud_mariadb_backup_locations_v2"
 	MariaDBV2VersionsDataSource        = "ionoscloud_mariadb_versions_v2"
+
+	MongoV2ClusterResource             = "ionoscloud_mongo_cluster_v2"
+	MongoV2ClusterDataSource           = "ionoscloud_mongo_cluster_v2"
+	MongoV2ClustersDataSource          = "ionoscloud_mongo_clusters_v2"
+	MongoV2TemplatesDataSource         = "ionoscloud_mongo_templates_v2"
+	MongoV2SnapshotsDataSource         = "ionoscloud_mongo_snapshots_v2"
+	MongoV2SnapshotLocationsDataSource = "ionoscloud_mongo_snapshot_locations_v2"
+	MongoV2VersionsDataSource          = "ionoscloud_mongo_versions_v2"
 )
 
 // Container Registry Constants

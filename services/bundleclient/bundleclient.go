@@ -15,6 +15,7 @@ import (
 	inmemorydbv3sdk "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/inmemorydb/v3"
 	mariadbv3sdk "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mariadb/v3"
 	"github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v2"
+	mongov3sdk "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v3"
 	"github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v2"
 	pgsqlv2sdk "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v3"
 	"github.com/ionos-cloud/sdk-go-bundle/products/objectstoragemanagement/v2"
@@ -32,6 +33,7 @@ import (
 	inmemorydbv2service "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/inmemorydbv2"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/mariadb"
 	mariadbv2service "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/mariadbv2"
+	mongov2service "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/mongov2"
 	psqlv2service "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dbaas/pgsqlv2"
 	dnsservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/dns"
 	kafkaservice "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/kafka"
@@ -359,6 +361,44 @@ func (c SdkBundle) NewMariaDBV2Client(ctx context.Context, location string) (*ma
 		},
 	}
 	return mariadbv2service.NewClientFromConfig(config), nil
+}
+
+// NewMongoDBV2Client creates a new MongoDB v2 client for a specific location.
+func (c SdkBundle) NewMongoDBV2Client(ctx context.Context, location string) (*mongov2service.Client, error) {
+	config := c.newBundleClientConfig(fmt.Sprintf(
+		"terraform-provider/%s_ionos-cloud-sdk-go-bundle-dbaas-mongo/%s_hashicorp-terraform/%s_terraform-plugin-sdk/%s_os/%s_arch/%s",
+		c.clientOptions.Version, mongov3sdk.Version, c.clientOptions.TerraformVersion,
+		meta.SDKVersionString(), runtime.GOOS, runtime.GOARCH, //nolint:staticcheck // SDKVersionString is deprecated but there's no replacement yet
+	))
+
+	if c.fileConfig != nil {
+		endpoint := c.fileConfig.GetProductLocationOverrides(fileconfiguration.MongoDBV2, location)
+		if endpoint == nil {
+			tflog.Warn(ctx, "product missing from config file or location not defined, using internal locations map to configure endpoint", map[string]any{"product": fileconfiguration.MongoDBV2, "location": location})
+		} else {
+			config.Servers = shared.ServerConfigurations{
+				{
+					URL:         endpoint.Name,
+					Description: shared.EndpointOverridden + location,
+				},
+			}
+			config.HTTPClient = &http.Client{}
+			config.HTTPClient.Transport = shared.CreateTransport(endpoint.SkipTLSVerify, endpoint.CertificateAuthData)
+			return mongov2service.NewClientFromConfig(config), nil
+		}
+	}
+
+	endpoint := mongov2service.LocationToURL[location]
+	if endpoint == "" {
+		return nil, fmt.Errorf("can't configure endpoint for location %q, available locations: %s", location, strings.Join(mongov2service.AvailableLocations(), ", "))
+	}
+	config.Servers = shared.ServerConfigurations{
+		{
+			URL:         endpoint,
+			Description: "endpoint from the internal locations map, location: " + location,
+		},
+	}
+	return mongov2service.NewClientFromConfig(config), nil
 }
 
 // newCloudAPIClientConfig creates a new *shared.Configuration for the Cloud API using the client options defined in the SdkBundle struct.
