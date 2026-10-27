@@ -19,16 +19,35 @@ func (c *Client) GetCluster(ctx context.Context, clusterID string) (mongov3.Clus
 
 // ListClusters retrieves a list of clusters with optional name and edition filters.
 func (c *Client) ListClusters(ctx context.Context, filterName, filterEdition string) (mongov3.ClusterReadList, *shared.APIResponse, error) {
-	request := c.sdkClient.ClustersApi.ClustersGet(ctx)
-	if filterName != "" {
-		request = request.FilterName(filterName)
+	const pageSize int32 = 100
+	var (
+		all         []mongov3.ClusterRead
+		offset      int32
+		apiResponse *shared.APIResponse
+	)
+	for {
+		request := c.sdkClient.ClustersApi.ClustersGet(ctx).Offset(offset).Limit(pageSize)
+		if filterName != "" {
+			request = request.FilterName(filterName)
+		}
+		if filterEdition != "" {
+			request = request.FilterEdition(mongov3.MongoEdition(filterEdition))
+		}
+		page, resp, err := request.Execute()
+		resp.LogInfo()
+		apiResponse = resp
+		if err != nil {
+			return mongov3.ClusterReadList{}, apiResponse, err
+		}
+		all = append(all, page.Items...)
+		// A short (or empty) page marks the end of the result set. Links.HasNext() is
+		// not used: it has been observed to stay populated past the last page.
+		if len(page.Items) < int(pageSize) {
+			page.Items = all
+			return page, apiResponse, nil
+		}
+		offset += pageSize
 	}
-	if filterEdition != "" {
-		request = request.FilterEdition(mongov3.MongoEdition(filterEdition))
-	}
-	clusters, apiResponse, err := request.Execute()
-	apiResponse.LogInfo()
-	return clusters, apiResponse, err
 }
 
 // CreateCluster creates a new MongoDB v2 cluster.

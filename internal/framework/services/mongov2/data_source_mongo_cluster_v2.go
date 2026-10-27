@@ -176,7 +176,9 @@ func mapClusterResponseToDataSourceModel(ctx context.Context, cluster *mongov3.C
 	model.ConnectionURI = types.StringPointerValue(cluster.Metadata.ConnectionUri)
 
 	props := &cluster.Properties
-	if ent := props.EnterpriseCluster; ent != nil {
+	switch {
+	case props.EnterpriseCluster != nil:
+		ent := props.EnterpriseCluster
 		model.Edition = types.StringValue(string(ent.Edition))
 		model.Name = types.StringValue(ent.Name)
 		model.Description = types.StringPointerValue(ent.Description)
@@ -197,7 +199,8 @@ func mapClusterResponseToDataSourceModel(ctx context.Context, cluster *mongov3.C
 			}
 		}
 		diagnostics.Append(mapCommonDataSourceFields(ctx, model, ent.Connection, ent.MaintenanceWindow, ent.Snapshot, ent.Credentials)...)
-	} else if bus := props.BusinessCluster; bus != nil {
+	case props.BusinessCluster != nil:
+		bus := props.BusinessCluster
 		model.Edition = types.StringValue(string(bus.Edition))
 		model.Name = types.StringValue(bus.Name)
 		model.Description = types.StringPointerValue(bus.Description)
@@ -207,7 +210,7 @@ func mapClusterResponseToDataSourceModel(ctx context.Context, cluster *mongov3.C
 		model.InstanceTemplateID = types.StringValue(bus.InstanceTemplateId)
 		model.InstanceCount = types.Int32Value(bus.InstanceCount)
 		diagnostics.Append(mapCommonDataSourceFields(ctx, model, bus.Connection, bus.MaintenanceWindow, bus.Snapshot, bus.Credentials)...)
-	} else {
+	default:
 		diagnostics.AddError("unknown cluster edition", "the API returned a cluster with neither ENTERPRISE nor BUSINESS properties set.")
 	}
 

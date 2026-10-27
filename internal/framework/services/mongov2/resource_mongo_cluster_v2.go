@@ -917,7 +917,8 @@ func mapClusterResponseToModel(ctx context.Context, cluster *mongov3.ClusterRead
 	model.ConnectionURI = types.StringPointerValue(cluster.Metadata.ConnectionUri)
 
 	props := &cluster.Properties
-	if props.EnterpriseCluster != nil {
+	switch {
+	case props.EnterpriseCluster != nil:
 		ent := props.EnterpriseCluster
 		model.Edition = types.StringValue(string(ent.Edition))
 		model.Name = types.StringValue(ent.Name)
@@ -939,7 +940,7 @@ func mapClusterResponseToModel(ctx context.Context, cluster *mongov3.ClusterRead
 			}
 		}
 		diagnostics.Append(mapCommonFields(ctx, model, ent.Connection, ent.MaintenanceWindow, ent.Snapshot, ent.Credentials)...)
-	} else if props.BusinessCluster != nil {
+	case props.BusinessCluster != nil:
 		bus := props.BusinessCluster
 		model.Edition = types.StringValue(string(bus.Edition))
 		model.Name = types.StringValue(bus.Name)
@@ -952,7 +953,7 @@ func mapClusterResponseToModel(ctx context.Context, cluster *mongov3.ClusterRead
 		// bi_connector_enabled is Optional+Computed and ENTERPRISE-only; set it known (null) for BUSINESS.
 		model.BiConnectorEnabled = types.BoolNull()
 		diagnostics.Append(mapCommonFields(ctx, model, bus.Connection, bus.MaintenanceWindow, bus.Snapshot, bus.Credentials)...)
-	} else {
+	default:
 		diagnostics.AddError("unknown cluster edition", "the API returned a cluster with neither ENTERPRISE nor BUSINESS properties set.")
 	}
 
