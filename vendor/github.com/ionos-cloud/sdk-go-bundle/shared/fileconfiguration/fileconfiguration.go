@@ -59,6 +59,7 @@ const (
 	Logging       = "logging"
 	Mariadb       = "mariadb"
 	MariaDBV2     = "mariadbv2"
+	MongoDBV2     = "mongodbv2"
 	Monitoring    = "monitoring"
 	NFS           = "nfs"
 	ObjectStorage = "objectstorage"

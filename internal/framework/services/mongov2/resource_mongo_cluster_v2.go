@@ -18,7 +18,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	mongov3 "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/mongo/v3"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
@@ -191,9 +190,6 @@ func (r *clusterResource) Schema(ctx context.Context, req resource.SchemaRequest
 			"edition": schema.StringAttribute{
 				Required:    true,
 				Description: "The edition of the MongoDB cluster. One of `ENTERPRISE` or `BUSINESS`. Changing this forces re-creation.",
-				Validators: []validator.String{
-					stringvalidator.OneOf(string(mongov3.MONGOEDITION_ENTERPRISE), string(mongov3.MONGOEDITION_BUSINESS)),
-				},
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
@@ -492,17 +488,12 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	if plan.RestoreFromSnapshot != nil {
-		if plan.RestoreFromSnapshot.RecoveryTargetDatetime.IsNull() {
-			resp.Diagnostics.AddError(
-				"missing recovery_target_datetime",
-				"recovery_target_datetime is required when restore_from_snapshot is set during cluster update.",
-			)
-			return
-		}
-		if !plan.RestoreFromSnapshot.SourceSnapshotID.IsNull() {
-			tflog.Warn(ctx, "source_snapshot_id is set in restore_from_snapshot during update but has no effect — the restore source is inferred automatically for in-place restore")
-		}
+	// Only request an in-place restore if restore_from_snapshot was newly set/changed vs
+	// prior state; a block carried over unchanged must not re-trigger a restore on every update.
+	restore, diags := buildUpdateRestore(&plan, &state)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
 
 	clusterID := plan.ID.ValueString()
@@ -520,7 +511,7 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	updateProps, diags := buildClusterUpdateProperties(ctx, &plan)
+	updateProps, diags := buildClusterUpdateProperties(ctx, &plan, restore)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -663,8 +654,8 @@ func validateEdition(plan *clusterResourceModel) diag.Diagnostics {
 		if plan.InstanceTemplateID.IsNull() || plan.InstanceCount.IsNull() {
 			diagnostics.AddError("missing business attributes", "instance_template_id and instance_count are required for the BUSINESS edition.")
 		}
-		if plan.Instances != nil || plan.Sharding != nil {
-			diagnostics.AddError("invalid attributes for BUSINESS edition", "instances and sharding are only valid for the ENTERPRISE edition.")
+		if plan.Instances != nil || plan.Sharding != nil || !plan.BiConnectorEnabled.IsUnknown() {
+			diagnostics.AddError("invalid attributes for BUSINESS edition", "instances, sharding and bi_connector_enabled are only valid for the ENTERPRISE edition.")
 		}
 	default:
 		diagnostics.AddError("invalid edition", fmt.Sprintf("edition must be one of %q or %q.", mongov3.MONGOEDITION_ENTERPRISE, mongov3.MONGOEDITION_BUSINESS))
@@ -728,10 +719,13 @@ func buildClusterCreateProperties(ctx context.Context, plan *clusterResourceMode
 			enterprise.MetricsEnabled = plan.MetricsEnabled.ValueBoolPointer()
 		}
 		if plan.Sharding != nil {
-			enterprise.Sharding = &mongov3.MongoSharding{
+			sharding := &mongov3.MongoSharding{
 				Enabled: plan.Sharding.Enabled.ValueBoolPointer(),
-				Shards:  plan.Sharding.Shards.ValueInt32Pointer(),
 			}
+			if !plan.Sharding.Shards.IsNull() && !plan.Sharding.Shards.IsUnknown() {
+				sharding.Shards = plan.Sharding.Shards.ValueInt32Pointer()
+			}
+			enterprise.Sharding = sharding
 		}
 		return mongov3.EnterpriseClusterCreateAsClusterCreateProperties(&enterprise), diagnostics
 	case string(mongov3.MONGOEDITION_BUSINESS):
@@ -761,13 +755,11 @@ func buildClusterCreateProperties(ctx context.Context, plan *clusterResourceMode
 	}
 }
 
-func buildClusterUpdateProperties(ctx context.Context, plan *clusterResourceModel) (mongov3.Cluster, diag.Diagnostics) {
+func buildClusterUpdateProperties(ctx context.Context, plan *clusterResourceModel, restore *mongov3.MongoRestoreFromSnapshot) (mongov3.Cluster, diag.Diagnostics) {
 	var diagnostics diag.Diagnostics
 	var props mongov3.Cluster
 
 	connection, diags := buildConnection(ctx, plan)
-	diagnostics.Append(diags...)
-	restore, diags := buildRestore(plan)
 	diagnostics.Append(diags...)
 	if diagnostics.HasError() {
 		return props, diagnostics
@@ -816,10 +808,13 @@ func buildClusterUpdateProperties(ctx context.Context, plan *clusterResourceMode
 			enterprise.MetricsEnabled = plan.MetricsEnabled.ValueBoolPointer()
 		}
 		if plan.Sharding != nil {
-			enterprise.Sharding = &mongov3.MongoSharding{
+			sharding := &mongov3.MongoSharding{
 				Enabled: plan.Sharding.Enabled.ValueBoolPointer(),
-				Shards:  plan.Sharding.Shards.ValueInt32Pointer(),
 			}
+			if !plan.Sharding.Shards.IsNull() && !plan.Sharding.Shards.IsUnknown() {
+				sharding.Shards = plan.Sharding.Shards.ValueInt32Pointer()
+			}
+			enterprise.Sharding = sharding
 		}
 		return mongov3.EnterpriseClusterAsCluster(&enterprise), diagnostics
 	case string(mongov3.MONGOEDITION_BUSINESS):
@@ -877,6 +872,42 @@ func buildRestore(plan *clusterResourceModel) (*mongov3.MongoRestoreFromSnapshot
 		restore.RecoveryTargetDatetime = &mongov3.IonosTime{Time: t}
 	}
 	return &restore, diagnostics
+}
+
+// restoreUnchanged reports whether restore_from_snapshot equals the last-applied value.
+// The block is write-only (never read back from the API), so state holds the prior config.
+func restoreUnchanged(plan, state *clusterResourceModel) bool {
+	if plan.RestoreFromSnapshot == nil && state.RestoreFromSnapshot == nil {
+		return true
+	}
+	if plan.RestoreFromSnapshot == nil || state.RestoreFromSnapshot == nil {
+		return false
+	}
+	return plan.RestoreFromSnapshot.SourceSnapshotID.Equal(state.RestoreFromSnapshot.SourceSnapshotID) &&
+		plan.RestoreFromSnapshot.RecoveryTargetDatetime.Equal(state.RestoreFromSnapshot.RecoveryTargetDatetime)
+}
+
+// buildUpdateRestore returns an in-place restore request only when restore_from_snapshot was
+// newly set or changed vs prior state. An in-place restore uses recovery_target_datetime only;
+// source_snapshot_id is create-only and intentionally omitted.
+func buildUpdateRestore(plan, state *clusterResourceModel) (*mongov3.MongoRestoreFromSnapshot, diag.Diagnostics) {
+	var diagnostics diag.Diagnostics
+	if plan.RestoreFromSnapshot == nil || restoreUnchanged(plan, state) {
+		return nil, diagnostics
+	}
+	if plan.RestoreFromSnapshot.RecoveryTargetDatetime.IsNull() {
+		diagnostics.AddError(
+			"missing recovery_target_datetime",
+			"recovery_target_datetime is required to request an in-place restore during update.",
+		)
+		return nil, diagnostics
+	}
+	t, err := time.Parse(time.RFC3339, plan.RestoreFromSnapshot.RecoveryTargetDatetime.ValueString())
+	if err != nil {
+		diagnostics.AddError("invalid recovery_target_datetime", err.Error())
+		return nil, diagnostics
+	}
+	return &mongov3.MongoRestoreFromSnapshot{RecoveryTargetDatetime: &mongov3.IonosTime{Time: t}}, diagnostics
 }
 
 func mapClusterResponseToModel(ctx context.Context, cluster *mongov3.ClusterRead, model *clusterResourceModel) diag.Diagnostics {

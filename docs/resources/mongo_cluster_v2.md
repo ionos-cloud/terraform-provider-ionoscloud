@@ -30,6 +30,11 @@ resource "ionoscloud_lan" "example" {
   name          = "example"
 }
 
+resource "random_password" "mongo" {
+  length  = 16
+  special = true
+}
+
 resource "ionoscloud_mongo_cluster_v2" "example" {
   location    = "gb/bhx"
   name        = "my-mongo-cluster"
@@ -65,7 +70,7 @@ resource "ionoscloud_mongo_cluster_v2" "example" {
 
   credentials = {
     username = "dbadmin"
-    password = "P@ssw0rd123!"
+    password = random_password.mongo.result
     database = "my_database"
   }
 }
@@ -77,6 +82,11 @@ resource "ionoscloud_mongo_cluster_v2" "example" {
 data "ionoscloud_mongo_templates_v2" "business" {
   location = "gb/bhx"
   edition  = "BUSINESS"
+}
+
+resource "random_password" "mongo" {
+  length  = 16
+  special = true
 }
 
 resource "ionoscloud_mongo_cluster_v2" "example" {
@@ -105,7 +115,7 @@ resource "ionoscloud_mongo_cluster_v2" "example" {
 
   credentials = {
     username = "dbadmin"
-    password = "P@ssw0rd123!"
+    password = random_password.mongo.result
     database = "my_database"
   }
 }

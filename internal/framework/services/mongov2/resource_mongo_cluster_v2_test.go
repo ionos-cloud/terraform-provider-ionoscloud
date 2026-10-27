@@ -490,11 +490,9 @@ func checkClusterDestroy(s *terraform.State) error {
 
 // clusterImportStateID returns the import ID in "location:cluster_id" format.
 func clusterImportStateID(s *terraform.State) (string, error) {
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != constant.MongoV2ClusterResource {
-			continue
-		}
-		return fmt.Sprintf("%s:%s", rs.Primary.Attributes["location"], rs.Primary.ID), nil
+	rs, ok := s.RootModule().Resources[clusterResourceAddr]
+	if !ok {
+		return "", fmt.Errorf("resource %s not found in state", clusterResourceAddr)
 	}
-	return "", fmt.Errorf("no %s resource found in state", constant.MongoV2ClusterResource)
+	return fmt.Sprintf("%s:%s", rs.Primary.Attributes["location"], rs.Primary.ID), nil
 }

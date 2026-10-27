@@ -2,7 +2,6 @@ package mongov2
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/cenkalti/backoff/v4"
@@ -64,13 +63,8 @@ func (c *Client) IsClusterReady(ctx context.Context, clusterID string) error {
 		if *cluster.Metadata.State == mongov3.MONGOCLUSTERSTATES_AVAILABLE {
 			return nil
 		}
-		if *cluster.Metadata.State == mongov3.MONGOCLUSTERSTATES_FAILED {
-			msg := "cluster entered FAILED state"
-			if cluster.Metadata.StatusMessage != nil {
-				msg = fmt.Sprintf("cluster entered FAILED state: %s", *cluster.Metadata.StatusMessage)
-			}
-			return backoff.Permanent(errors.New(msg))
-		}
+		// A cluster in FAILED state can recover to AVAILABLE, so it is treated like any
+		// other not-ready state: a retryable error that keeps polling until the timeout.
 		return fmt.Errorf("cluster is not ready, current state: %s", *cluster.Metadata.State)
 	}
 	return backoff.Permanent(fmt.Errorf("can't read cluster state, state is nil"))
