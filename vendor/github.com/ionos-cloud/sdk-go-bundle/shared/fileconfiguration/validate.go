@@ -25,6 +25,7 @@ var knownProducts = map[string]struct{}{
 	Logging:                 {},
 	Mariadb:                 {},
 	MariaDBV2:               {},
+	MongoDBV2:               {},
 	Monitoring:              {},
 	NFS:                     {},
 	ObjectStorage:           {},

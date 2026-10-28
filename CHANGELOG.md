@@ -1,3 +1,10 @@
+## 6.7.40
+### Features
+- **MongoDB V2**: new location-based DBaaS MongoDB V2 product.
+  - `ionoscloud_mongo_cluster_v2`: new resource to manage MongoDB V2 clusters (`ENTERPRISE` and `BUSINESS` editions), with a resource identity (`id`, `location`).
+  - `ionoscloud_mongo_cluster_v2`: new list resource, queryable with `terraform query` (requires Terraform 1.14+).
+  - New data sources: `ionoscloud_mongo_cluster_v2`, `ionoscloud_mongo_clusters_v2`, `ionoscloud_mongo_templates_v2`, `ionoscloud_mongo_snapshots_v2`, `ionoscloud_mongo_snapshot_locations_v2`, `ionoscloud_mongo_versions_v2`.
+
 ## 6.7.39
 ### Features
 - `ionoscloud_ipblock`: New list resource, queryable with `terraform query` (requires Terraform 1.14+).
