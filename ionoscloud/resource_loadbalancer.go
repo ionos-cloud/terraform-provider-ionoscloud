@@ -3,6 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"slices"
 
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -122,7 +123,7 @@ func resourceLoadbalancerRead(ctx context.Context, d *schema.ResourceData, meta 
 		return diag.FromErr(err)
 	}
 
-	lb, apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersFindById(ctx, d.Get("datacenter_id").(string), d.Id()).Execute()
+	lb, apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersFindById(ctx, d.Get("datacenter_id").(string), d.Id()).Depth(1).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		if httpNotFound(apiResponse) {
@@ -147,6 +148,14 @@ func resourceLoadbalancerRead(ctx context.Context, d *schema.ResourceData, meta 
 	if lb.Properties.Dhcp != nil {
 		if err := d.Set("dhcp", *lb.Properties.Dhcp); err != nil {
 			return diagutil.ToDiags(d, fmt.Errorf(""), nil)
+		}
+	}
+
+	// Update detaches every old NIC and attaches every new one, so a list that differs from the
+	// API's only in order must not plan a change: keep the state's order while the NICs match.
+	if ids := balancedNicIDs(&lb); !sameIDs(d.Get("nic_ids").([]any), ids) {
+		if err := d.Set("nic_ids", ids); err != nil {
+			return diagutil.ToDiags(d, err, nil)
 		}
 	}
 
@@ -286,7 +295,7 @@ func resourceLoadbalancerImporter(ctx context.Context, d *schema.ResourceData, m
 		return nil, err
 	}
 
-	loadbalancer, apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersFindById(ctx, dcID, lbID).Execute()
+	loadbalancer, apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersFindById(ctx, dcID, lbID).Depth(1).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -326,19 +335,34 @@ func resourceLoadbalancerImporter(ctx context.Context, d *schema.ResourceData, m
 		}
 	}
 
-	if loadbalancer.Entities != nil && loadbalancer.Entities.Balancednics != nil &&
-		len(loadbalancer.Entities.Balancednics.Items) > 0 {
-
-		var lans []string
-		for _, lan := range loadbalancer.Entities.Balancednics.Items {
-			if lan.Id != nil && *lan.Id != "" {
-				lans = append(lans, *lan.Id)
-			}
-		}
-		if err := d.Set("nic_ids", lans); err != nil {
-			return nil, diagutil.ToError(d, err, nil)
-		}
+	if err := d.Set("nic_ids", balancedNicIDs(&loadbalancer)); err != nil {
+		return nil, diagutil.ToError(d, err, nil)
 	}
 
 	return []*schema.ResourceData{d}, nil
+}
+
+// sameIDs reports whether state holds exactly ids, in any order.
+func sameIDs(state []any, ids []string) bool {
+	held := make([]string, 0, len(state))
+	for _, id := range state {
+		held = append(held, id.(string))
+	}
+	slices.Sort(held)
+	return slices.Equal(held, slices.Sorted(slices.Values(ids)))
+}
+
+// balancedNicIDs returns the IDs of the NICs balanced by lb. The balanced NICs are only expanded
+// when lb was fetched with depth >= 1.
+func balancedNicIDs(lb *ionoscloud.Loadbalancer) []string {
+	ids := []string{}
+	if lb.Entities == nil || lb.Entities.Balancednics == nil {
+		return ids
+	}
+	for _, nic := range lb.Entities.Balancednics.Items {
+		if nic.Id != nil && *nic.Id != "" {
+			ids = append(ids, *nic.Id)
+		}
+	}
+	return ids
 }
