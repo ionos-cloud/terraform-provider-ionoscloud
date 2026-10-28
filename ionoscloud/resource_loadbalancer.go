@@ -200,7 +200,7 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 
 	if d.HasChange("nic_ids") {
 		oldNicIDs, newNicIDs := d.GetChange("nic_ids")
-		oldList, newList := toStrings(oldNicIDs.([]any)), toStrings(newNicIDs.([]any))
+		oldList, newList := oldNicIDs.([]any), newNicIDs.([]any)
 
 		// Only detach what was removed and attach what was added: detaching NICs that stay would
 		// leave the load balancer without backends until they are attached again.
@@ -209,13 +209,13 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 				continue
 			}
 			apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersBalancednicsDelete(context.TODO(),
-				d.Get("datacenter_id").(string), d.Id(), o).Execute()
+				d.Get("datacenter_id").(string), d.Id(), o.(string)).Execute()
 			logApiRequestTime(apiResponse)
 			if err != nil {
 				if httpNotFound(apiResponse) {
 					/* 404 - nic was not found - in case the nic is removed, VDC removes the nic from load balancers
 					that contain it, behind the scenes - therefore our call will yield 404 */
-					tflog.Warn(ctx, "nic already removed from load balancer", map[string]any{"nic_id": o, "loadbalancer_id": d.Id()})
+					tflog.Warn(ctx, "nic already removed from load balancer", map[string]any{"nic_id": o.(string), "loadbalancer_id": d.Id()})
 				} else {
 					return diagutil.ToDiags(d, fmt.Errorf("[load balancer update] an error occurred while deleting a balanced nic: %w", err), nil)
 				}
@@ -227,10 +227,11 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 			}
 		}
 
-		for _, id := range newList {
-			if slices.Contains(oldList, id) {
+		for _, o := range newList {
+			if slices.Contains(oldList, o) {
 				continue
 			}
+			id := o.(string)
 			nic := ionoscloud.Nic{Id: &id}
 			_, apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersBalancednicsPost(ctx, d.Get("datacenter_id").(string), d.Id()).Nic(nic).Execute()
 			logApiRequestTime(apiResponse)
