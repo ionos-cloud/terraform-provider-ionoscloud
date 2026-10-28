@@ -1,6 +1,6 @@
 module github.com/ionos-cloud/terraform-provider-ionoscloud/v6
 
-go 1.26.8
+go 1.26.10
 
 require (
 	github.com/aws/aws-sdk-go v1.55.7
@@ -99,7 +99,7 @@ require (
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	github.com/zclconf/go-cty v1.18.1 // indirect
 	golang.org/x/mod v0.41.0 // indirect
-	golang.org/x/net v0.58.0 // indirect
+	golang.org/x/net v0.60.0 // indirect
 	golang.org/x/oauth2 v0.36.0 // indirect
 	golang.org/x/sys v0.48.0 // indirect
 	golang.org/x/text v0.42.0 // indirect
