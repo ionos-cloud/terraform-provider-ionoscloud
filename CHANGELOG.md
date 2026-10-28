@@ -1,3 +1,7 @@
+## 6.7.40 -- upcoming release
+### Fixes
+- `ionoscloud_cube_server`, `ionoscloud_gpu_server`: Importing now sets `ssh_key_path` to an empty list, so the plan right after import is a no-op instead of an update that PATCHes the server.
+
 ## 6.7.39
 ### Features
 - `ionoscloud_ipblock`: New list resource, queryable with `terraform query` (requires Terraform 1.14+).

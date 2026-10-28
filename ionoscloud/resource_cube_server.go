@@ -1095,6 +1095,11 @@ func resourceCubeServerImport(ctx context.Context, d *schema.ResourceData, meta 
 	if err := d.Set("location", location); err != nil {
 		return nil, err
 	}
+	// ssh_key_path is Optional+Computed and never read back; left unset, the plan right after
+	// import shows it as unknown and the apply PATCHes the server.
+	if err := d.Set("ssh_key_path", []string{}); err != nil {
+		return nil, diagutil.ToError(d, err, nil)
+	}
 
 	if server.Properties.Name != nil {
 		if err := d.Set("name", *server.Properties.Name); err != nil {
