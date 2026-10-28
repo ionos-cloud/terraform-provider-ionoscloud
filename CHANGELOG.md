@@ -5,6 +5,9 @@
   - `ionoscloud_mongo_cluster_v2`: new list resource, queryable with `terraform query` (requires Terraform 1.14+).
   - New data sources: `ionoscloud_mongo_cluster_v2`, `ionoscloud_mongo_clusters_v2`, `ionoscloud_mongo_templates_v2`, `ionoscloud_mongo_snapshots_v2`, `ionoscloud_mongo_snapshot_locations_v2`, `ionoscloud_mongo_versions_v2`.
 
+### Chore
+- Bump `GO` version: 1.26.8 -> 1.26.10 to fix vulnerabilities
+
 ## 6.7.39
 ### Features
 - `ionoscloud_ipblock`: New list resource, queryable with `terraform query` (requires Terraform 1.14+).
