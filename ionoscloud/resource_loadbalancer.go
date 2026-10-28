@@ -151,12 +151,10 @@ func resourceLoadbalancerRead(ctx context.Context, d *schema.ResourceData, meta 
 		}
 	}
 
-	// Update detaches every old NIC and attaches every new one, so a list that differs from the
-	// API's only in order must not plan a change: keep the state's order while the NICs match.
-	if ids := balancedNicIDs(&lb); !sameIDs(d.Get("nic_ids").([]any), ids) {
-		if err := d.Set("nic_ids", ids); err != nil {
-			return diagutil.ToDiags(d, err, nil)
-		}
+	// nic_ids is an ordered list, but the API's order means nothing: keep the state's order for
+	// NICs still balanced so a different order plans no change.
+	if err := d.Set("nic_ids", inStateOrder(toStrings(d.Get("nic_ids").([]any)), balancedNicIDs(&lb))); err != nil {
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	return nil
@@ -202,18 +200,22 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 
 	if d.HasChange("nic_ids") {
 		oldNicIDs, newNicIDs := d.GetChange("nic_ids")
+		oldList, newList := toStrings(oldNicIDs.([]any)), toStrings(newNicIDs.([]any))
 
-		oldList := oldNicIDs.([]any)
-
+		// Only detach what was removed and attach what was added: detaching NICs that stay would
+		// leave the load balancer without backends until they are attached again.
 		for _, o := range oldList {
+			if slices.Contains(newList, o) {
+				continue
+			}
 			apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersBalancednicsDelete(context.TODO(),
-				d.Get("datacenter_id").(string), d.Id(), o.(string)).Execute()
+				d.Get("datacenter_id").(string), d.Id(), o).Execute()
 			logApiRequestTime(apiResponse)
 			if err != nil {
 				if httpNotFound(apiResponse) {
 					/* 404 - nic was not found - in case the nic is removed, VDC removes the nic from load balancers
 					that contain it, behind the scenes - therefore our call will yield 404 */
-					tflog.Warn(ctx, "nic already removed from load balancer", map[string]any{"nic_id": o.(string), "loadbalancer_id": d.Id()})
+					tflog.Warn(ctx, "nic already removed from load balancer", map[string]any{"nic_id": o, "loadbalancer_id": d.Id()})
 				} else {
 					return diagutil.ToDiags(d, fmt.Errorf("[load balancer update] an error occurred while deleting a balanced nic: %w", err), nil)
 				}
@@ -225,10 +227,10 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 			}
 		}
 
-		newList := newNicIDs.([]any)
-
-		for _, o := range newList {
-			id := o.(string)
+		for _, id := range newList {
+			if slices.Contains(oldList, id) {
+				continue
+			}
 			nic := ionoscloud.Nic{Id: &id}
 			_, apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersBalancednicsPost(ctx, d.Get("datacenter_id").(string), d.Id()).Nic(nic).Execute()
 			logApiRequestTime(apiResponse)
@@ -342,14 +344,28 @@ func resourceLoadbalancerImporter(ctx context.Context, d *schema.ResourceData, m
 	return []*schema.ResourceData{d}, nil
 }
 
-// sameIDs reports whether state holds exactly ids, in any order.
-func sameIDs(state []any, ids []string) bool {
-	held := make([]string, 0, len(state))
+// inStateOrder returns the balanced IDs: those in state first, in state order, then the others.
+func inStateOrder(state, balanced []string) []string {
+	ids := make([]string, 0, len(balanced))
 	for _, id := range state {
-		held = append(held, id.(string))
+		if slices.Contains(balanced, id) {
+			ids = append(ids, id)
+		}
 	}
-	slices.Sort(held)
-	return slices.Equal(held, slices.Sorted(slices.Values(ids)))
+	for _, id := range balanced {
+		if !slices.Contains(ids, id) {
+			ids = append(ids, id)
+		}
+	}
+	return ids
+}
+
+func toStrings(values []any) []string {
+	out := make([]string, 0, len(values))
+	for _, v := range values {
+		out = append(out, v.(string))
+	}
+	return out
 }
 
 // balancedNicIDs returns the IDs of the NICs balanced by lb. The balanced NICs are only expanded
