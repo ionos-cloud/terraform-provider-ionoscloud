@@ -165,8 +165,8 @@ github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2 v2.0.1 h1:FOwVFj5
 github.com/ionos-cloud/sdk-go-bundle/products/vmautoscaling/v2 v2.0.1/go.mod h1:InNuTTzgLZker3i9JpyTho9mHr5DDIFnEPwykbSIfyw=
 github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.2 h1:qR/ul88v/3ZF+ZLFFv6LE9TrjZS1qM4R10UlXCaQzcs=
 github.com/ionos-cloud/sdk-go-bundle/products/vpn/v2 v2.0.2/go.mod h1:V6WHbWsQDlZsLtHqgsXO81Z9eJBsczE3Q6VY8J+rutc=
-github.com/ionos-cloud/sdk-go-bundle/shared v0.1.14 h1:m2kf4M6AyD5je9kWmb4qm1ASC2wyVpYvAdVuq7N2qlk=
-github.com/ionos-cloud/sdk-go-bundle/shared v0.1.14/go.mod h1:R/vPCwxsYxk4pcfA2Ew7Pf1fCkzmPaROxYKgnhh0wpg=
+github.com/ionos-cloud/sdk-go-bundle/shared v0.1.15 h1:bLSJDOOofFS1so/CswIPw+a0jMLZR1WkXtbbfqLY+DE=
+github.com/ionos-cloud/sdk-go-bundle/shared v0.1.15/go.mod h1:R/vPCwxsYxk4pcfA2Ew7Pf1fCkzmPaROxYKgnhh0wpg=
 github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 h1:BQSFePA1RWJOlocH6Fxy8MmwDt+yVQYULKfN0RoTN8A=
 github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99/go.mod h1:1lJo3i6rXxKeerYnT8Nvf0QmHCRC1n8sfWVwXF2Frvo=
 github.com/jhump/protoreflect v1.17.0 h1:qOEr613fac2lOuTgWN4tPAtLL7fUSbuJL5X5XumQh94=
