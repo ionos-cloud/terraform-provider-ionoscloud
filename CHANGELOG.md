@@ -1,6 +1,7 @@
 ## 6.7.40 -- upcoming release
 ### Fixes
 - `ionoscloud_cube_server`, `ionoscloud_gpu_server`: Importing now sets `ssh_key_path` to an empty list, so the plan right after import is a no-op instead of an update that PATCHes the server.
+- `ionoscloud_loadbalancer`: `nic_ids` is now read from the API, so it is set after import and in generated configuration. A NIC detached outside Terraform now shows as drift and the next apply attaches it again; a configured order that differs from the API's is kept and plans no change.
 
 ## 6.7.39
 ### Features
