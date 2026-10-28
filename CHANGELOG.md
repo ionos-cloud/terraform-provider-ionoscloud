@@ -1,4 +1,4 @@
-## 6.7.40 -- upcoming release
+## 6.7.40
 ### Features
 - **MongoDB V2**: new location-based DBaaS MongoDB V2 product.
   - `ionoscloud_mongo_cluster_v2`: new resource to manage MongoDB V2 clusters (`ENTERPRISE` and `BUSINESS` editions), with a resource identity (`id`, `location`).
