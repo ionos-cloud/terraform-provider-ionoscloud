@@ -1,6 +1,7 @@
 package ionoscloud
 
 import (
+	"maps"
 	"strings"
 	"testing"
 
@@ -21,9 +22,7 @@ func hpObject(vals map[string]cty.Value) cty.Value {
 	for _, a := range hotPlugAttrs {
 		attrs[a] = cty.NullVal(cty.Bool)
 	}
-	for k, v := range vals {
-		attrs[k] = v
-	}
+	maps.Copy(attrs, vals)
 	return cty.ObjectVal(attrs)
 }
 
