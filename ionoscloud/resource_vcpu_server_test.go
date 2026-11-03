@@ -98,6 +98,9 @@ func TestAccServerVCPUBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "volume.0.size", "5"),
 					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "volume.0.disk_type", "SSD Standard"),
 					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "volume.0.bus", "VIRTIO"),
+					// Hot-plug attributes set in config must be reconciled onto the inline volume after create.
+					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "volume.0.nic_hot_plug", "true"),
+					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "volume.0.disc_virtio_hot_plug", "true"),
 					resource.TestCheckResourceAttrPair(constant.ServerVCPUResource+"."+constant.ServerTestResource, "volume.0.boot_server", constant.ServerVCPUResource+"."+constant.ServerTestResource, "id"),
 					resource.TestCheckResourceAttrPair(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.lan", constant.LanResource+"."+constant.LanTestResource, "id"),
 					resource.TestCheckResourceAttr(constant.ServerVCPUResource+"."+constant.ServerTestResource, "nic.0.name", "system"),

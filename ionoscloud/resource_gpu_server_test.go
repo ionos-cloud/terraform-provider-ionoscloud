@@ -43,6 +43,11 @@ func TestAccGpuServerBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ServerGPUResource+"."+constant.ServerTestResource, "volume.0.bus", "VIRTIO"),
 					resource.TestCheckResourceAttr(constant.ServerGPUResource+"."+constant.ServerTestResource, "volume.0.availability_zone", "AUTO"),
 					resource.TestCheckResourceAttr(constant.ServerGPUResource+"."+constant.ServerTestResource, "volume.0.expose_serial", "true"),
+					// Hot-plug attributes set in config must be reconciled onto the inline volume after create.
+					resource.TestCheckResourceAttr(constant.ServerGPUResource+"."+constant.ServerTestResource, "volume.0.nic_hot_plug", "true"),
+					resource.TestCheckResourceAttr(constant.ServerGPUResource+"."+constant.ServerTestResource, "volume.0.nic_hot_unplug", "false"),
+					resource.TestCheckResourceAttr(constant.ServerGPUResource+"."+constant.ServerTestResource, "volume.0.disc_virtio_hot_plug", "true"),
+					resource.TestCheckResourceAttr(constant.ServerGPUResource+"."+constant.ServerTestResource, "volume.0.disc_virtio_hot_unplug", "false"),
 					resource.TestCheckResourceAttrPair(constant.ServerGPUResource+"."+constant.ServerTestResource, "volume.0.boot_server", constant.ServerGPUResource+"."+constant.ServerTestResource, "id"),
 					resource.TestCheckResourceAttrPair(constant.ServerGPUResource+"."+constant.ServerTestResource, "nic.0.lan", constant.LanResource+"."+constant.LanTestResource, "id"),
 					resource.TestCheckResourceAttr(constant.ServerGPUResource+"."+constant.ServerTestResource, "nic.0.name", "system"),
@@ -263,6 +268,10 @@ resource ` + constant.ServerGPUResource + ` ` + constant.ServerTestResource + ` 
     availability_zone = "AUTO"
     expose_serial = true
     require_legacy_bios = false
+    nic_hot_plug = true
+    nic_hot_unplug = false
+    disc_virtio_hot_plug = true
+    disc_virtio_hot_unplug = false
   }
 
   nic {

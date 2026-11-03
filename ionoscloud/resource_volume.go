@@ -13,6 +13,7 @@ import (
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -915,7 +916,7 @@ func getVolumeData(ctx context.Context, d *schema.ResourceData, path, serverType
 // If the user set none, no request is sent and the create-time values stand.
 // path addresses the config block holding the attributes (see hotPlugReconcileProps).
 func reconcileVolumeHotPlug(ctx context.Context, client *ionoscloud.APIClient, meta any, d *schema.ResourceData, dcID, volumeID, path string) diag.Diagnostics {
-	hotPlugProps, set, err := hotPlugReconcileProps(d, path)
+	hotPlugProps, set, err := hotPlugReconcileProps(d.GetRawConfig(), path)
 	if err != nil {
 		return diagutil.ToDiags(d, err, nil)
 	}
@@ -942,9 +943,8 @@ func reconcileVolumeHotPlug(ctx context.Context, client *ionoscloud.APIClient, m
 // attributes the user explicitly set in config, and whether any were set. The raw
 // config is used so an explicit `false` is distinguished from an unset attribute,
 // which a Computed bool read through d.Get cannot do.
-func hotPlugReconcileProps(d *schema.ResourceData, path string) (ionoscloud.VolumeProperties, bool, error) {
+func hotPlugReconcileProps(rawConfig cty.Value, path string) (ionoscloud.VolumeProperties, bool, error) {
 	props := ionoscloud.VolumeProperties{}
-	rawConfig := d.GetRawConfig()
 	if rawConfig.IsNull() || !rawConfig.IsKnown() {
 		return props, false, nil
 	}
@@ -962,7 +962,7 @@ func hotPlugReconcileProps(d *schema.ResourceData, path string) (ionoscloud.Volu
 			}
 			slice := current.AsValueSlice()
 			if idx < 0 || idx >= len(slice) {
-				return props, false, nil
+				return props, false, fmt.Errorf("hot-plug reconcile: path %q indexes element %d but list %q has %d elements", path, idx, step, len(slice))
 			}
 			current = slice[idx]
 			continue

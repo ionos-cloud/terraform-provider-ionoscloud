@@ -49,6 +49,13 @@ func TestAccVolumeBasic(t *testing.T) {
 					utils.TestImageNotNull(constant.VolumeResource, "image"),
 					// Test if set only because on creation the value is propagated from the image.
 					resource.TestCheckResourceAttrSet(constant.VolumeResource+"."+constant.VolumeTestResource, "require_legacy_bios"),
+					// Hot-plug attributes set in config must be reconciled onto the volume after create.
+					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "cpu_hot_plug", "true"),
+					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "ram_hot_plug", "true"),
+					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "nic_hot_plug", "true"),
+					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "nic_hot_unplug", "false"),
+					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "disc_virtio_hot_plug", "true"),
+					resource.TestCheckResourceAttr(constant.VolumeResource+"."+constant.VolumeTestResource, "disc_virtio_hot_unplug", "false"),
 				),
 			},
 			{
@@ -293,6 +300,12 @@ resource ` + constant.VolumeResource + ` ` + constant.VolumeTestResource + ` {
 	user_data = "foo"
 	expose_serial = true
 	require_legacy_bios = false
+	cpu_hot_plug = true
+	ram_hot_plug = true
+	nic_hot_plug = true
+	nic_hot_unplug = false
+	disc_virtio_hot_plug = true
+	disc_virtio_hot_unplug = false
 }
 ` + ServerImagePassword
 

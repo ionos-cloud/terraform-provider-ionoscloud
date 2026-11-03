@@ -330,6 +330,12 @@ resource ` + constant.ServerResource + ` ` + constant.ServerTestResource + ` {
     disk_type = "SSD Standard"
     user_data = "foo"
     bus = "VIRTIO"
+    cpu_hot_plug = true
+    ram_hot_plug = true
+    nic_hot_plug = true
+    nic_hot_unplug = false
+    disc_virtio_hot_plug = true
+    disc_virtio_hot_unplug = false
 }
   nic {
     lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
@@ -896,6 +902,8 @@ resource ` + constant.ServerCubeResource + ` ` + constant.ServerTestResource + `
     disk_type = "DAS"
 	expose_serial = true
 	require_legacy_bios = false
+	nic_hot_plug = true
+	disc_virtio_hot_plug = true
   }
   nic {
     lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
@@ -1579,6 +1587,8 @@ resource ` + constant.ServerVCPUResource + ` ` + constant.ServerTestResource + `
     user_data = "foo"
     bus = "VIRTIO"
     expose_serial = true
+    nic_hot_plug = true
+    disc_virtio_hot_plug = true
 }
   nic {
     lan = ` + constant.LanResource + `.` + constant.LanTestResource + `.id
