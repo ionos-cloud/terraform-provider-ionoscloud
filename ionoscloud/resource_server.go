@@ -738,7 +738,7 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, meta any)
 	// Reconcile hot-plug properties on the inline volume: the API may ignore
 	// the values sent in the server POST and only honors them on a follow-up PATCH.
 	// Currently, volume attribute has MaxItems: 1 so this code is valid.
-	if len(foundServer.Entities.Volumes.Items) > 0 {
+	if foundServer.Entities.Volumes != nil && len(foundServer.Entities.Volumes.Items) > 0 {
 		inlineVolume := (foundServer.Entities.Volumes.Items)[0]
 		if inlineVolume.Id != nil {
 			if diags := reconcileVolumeHotPlug(ctx, client, meta, d, datacenterID, *inlineVolume.Id, "volume.0."); diags != nil {

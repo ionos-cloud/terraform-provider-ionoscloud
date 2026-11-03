@@ -311,13 +311,10 @@ func resourceVolumeCreate(ctx context.Context, d *schema.ResourceData, meta any)
 		return diagutil.ToDiags(d, errState, &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String(), RequestID: diagutil.ExtractRequestID(requestLocation)})
 	}
 
-	// A volume without server_id stays unattached.
-	if serverID == "" {
-		return resourceVolumeRead(ctx, d, meta)
-	}
-
-	if diags := attachVolume(ctx, d, meta, client, dcID, serverID, schema.TimeoutCreate); diags != nil {
-		return diags
+	if serverID != "" {
+		if diags := attachVolume(ctx, d, meta, client, dcID, serverID, schema.TimeoutCreate); diags != nil {
+			return diags
+		}
 	}
 
 	if diags := reconcileVolumeHotPlug(ctx, client, meta, d, dcID, d.Id(), ""); diags != nil {
