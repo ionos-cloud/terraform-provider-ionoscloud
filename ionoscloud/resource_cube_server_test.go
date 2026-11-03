@@ -271,7 +271,7 @@ func TestAccCubeServerResolveImageName(t *testing.T) {
 			{
 				Config: testAccCheckCubeServerResolveImageName,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckServerExists(constant.ServerCubeResource+"."+constant.ServerTestResource, &server),
+					testAccCheckCubeServerExists(constant.ServerCubeResource+"."+constant.ServerTestResource, &server),
 					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "name", constant.ServerTestResource),
 					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "availability_zone", "AUTO"),
 					utils.TestImageNotNull(constant.ServerCubeResource, "boot_image"),
