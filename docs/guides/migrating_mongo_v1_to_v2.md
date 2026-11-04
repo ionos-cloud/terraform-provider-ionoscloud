@@ -46,10 +46,12 @@ Create a query file, for example `migrate.tfquery.hcl`:
 list "ionoscloud_mongo_cluster_v2" "all" {
   provider         = ionoscloud
   include_resource = true
-  # Optional: scope discovery to a single region.
+  # Optional: scope discovery to a single region. Use your cluster's actual v2
+  # region (e.g. "gb/bhx" or "us/ewr") — the filter only selects which clusters
+  # to discover; it does not move a cluster between regions.
   # config {
   #   filters = [
-  #     { field_name = "location", field_value = "de/txl" },
+  #     { field_name = "location", field_value = "gb/bhx" },
   #   ]
   # }
 }
@@ -116,7 +118,7 @@ each cluster, write the `ionoscloud_mongo_cluster_v2` configuration yourself and
 ```hcl
 import {
   to = ionoscloud_mongo_cluster_v2.example
-  id = "de/txl:00000000-0000-0000-0000-000000000000" # "<location>:<cluster_id>"
+  id = "gb/bhx:00000000-0000-0000-0000-000000000000" # "<location>:<cluster_id>" — use the cluster's actual v2 region
 }
 
 removed {
@@ -136,5 +138,5 @@ Because the live cluster is never touched, rollback is just reverting your confi
 and restoring the pre-migration state file if you already applied:
 
 ```sh
-terraform state push state.backup.json
+terraform state push -force state.backup.json
 ```
