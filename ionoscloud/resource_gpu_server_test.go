@@ -231,7 +231,7 @@ func testAccCheckGpuServerExists(n string, server *ionoscloud.Server) resource.T
 	}
 }
 
-// note: reserving IPs in de/fra/2 is yet not expected , de/fra is supposed to be used instead.
+// note: reserving IPs in de/txl is yet not expected , de/fra is supposed to be used instead.
 const testAccCheckGpuServerConfigBasic = `
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "gpu-server-test"
@@ -255,7 +255,7 @@ resource ` + constant.ServerGPUResource + ` ` + constant.ServerTestResource + ` 
   hostname = "` + constant.ServerTestHostname + `"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   availability_zone = "AUTO"
-  template_uuid = "6913ed82-a143-4c15-89ac-08fb375a97c5"
+  template_uuid = "55ebad10-dfdb-4df3-bb15-f0a7c1f06427"
   image_name = "ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   vm_state = "RUNNING"
@@ -316,7 +316,7 @@ resource ` + constant.ServerGPUResource + ` ` + constant.ServerTestResource + ` 
   hostname = "updatedhostname"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   availability_zone = "AUTO"
-  template_uuid = "6913ed82-a143-4c15-89ac-08fb375a97c5"
+  template_uuid = "55ebad10-dfdb-4df3-bb15-f0a7c1f06427"
   image_name = "ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password_updated.result
   vm_state = "RUNNING"
