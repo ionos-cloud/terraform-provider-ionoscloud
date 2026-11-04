@@ -134,5 +134,5 @@ Because the live cluster is never touched, rollback is just reverting your confi
 and restoring the pre-migration state file if you already applied:
 
 ```sh
-terraform state push state.backup.json
+terraform state push -force state.backup.json
 ```
