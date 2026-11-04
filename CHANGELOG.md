@@ -1,3 +1,7 @@
+## 6.7.41 -- upcoming release
+### Documentation
+- Add migration guide for `ionoscloud_mongo_cluster` to `ionoscloud_mongo_cluster_v2` resource
+
 ## 6.7.40
 ### Features
 - **MongoDB V2**: new location-based DBaaS MongoDB V2 product.
