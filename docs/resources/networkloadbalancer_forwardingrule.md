@@ -145,7 +145,7 @@ resource "ionoscloud_networkloadbalancer_forwardingrule" "example" {
          - `check_interval` - (Optional)[int] CheckInterval determines the duration (in milliseconds) between consecutive health checks. If unspecified a default of 2000 ms is used.
          - `maintenance` - (Optional)[boolean] Maintenance specifies if a target VM should be marked as down, even if it is not.
 - `datacenter_id` - (Required)[string] A Datacenter's UUID.
-- `natgateway_id` - (Required)[string] Network Load Balancer's UUID.
+- `networkloadbalancer_id` - (Required)[string] Network Load Balancer's UUID.
 
 ## Import
 
