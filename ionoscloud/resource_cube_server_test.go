@@ -45,6 +45,9 @@ func TestAccCubeServerBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "volume.0.bus", "VIRTIO"),
 					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "volume.0.availability_zone", "AUTO"),
 					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "volume.0.expose_serial", "true"),
+					// Hot-plug attributes set in config must be reconciled onto the inline volume after create.
+					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "volume.0.nic_hot_plug", "true"),
+					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "volume.0.disc_virtio_hot_plug", "true"),
 					resource.TestCheckResourceAttrPair(constant.ServerCubeResource+"."+constant.ServerTestResource, "volume.0.boot_server", constant.ServerCubeResource+"."+constant.ServerTestResource, "id"),
 					resource.TestCheckResourceAttrPair(constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.lan", constant.LanResource+"."+constant.LanTestResource, "id"),
 					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "nic.0.name", "system"),
@@ -268,7 +271,7 @@ func TestAccCubeServerResolveImageName(t *testing.T) {
 			{
 				Config: testAccCheckCubeServerResolveImageName,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckServerExists(constant.ServerCubeResource+"."+constant.ServerTestResource, &server),
+					testAccCheckCubeServerExists(constant.ServerCubeResource+"."+constant.ServerTestResource, &server),
 					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "name", constant.ServerTestResource),
 					resource.TestCheckResourceAttr(constant.ServerCubeResource+"."+constant.ServerTestResource, "availability_zone", "AUTO"),
 					utils.TestImageNotNull(constant.ServerCubeResource, "boot_image"),

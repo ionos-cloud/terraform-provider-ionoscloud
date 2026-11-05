@@ -1,3 +1,10 @@
+## 6.7.41 -- upcoming release
+### Features
+- `ionoscloud_volume`, `ionoscloud_server`, `ionoscloud_cube_server`, `ionoscloud_gpu_server`, `ionoscloud_vcpu_server`: Allow setting `cpu_hot_plug`, `ram_hot_plug`, `nic_hot_plug`, `nic_hot_unplug`, `disc_virtio_hot_plug` and `disc_virtio_hot_unplug` on the volume/inline volume, instead of only exposing them as computed attributes.
+
+### Fixes
+- `ionoscloud_volume`, `ionoscloud_server`, `ionoscloud_cube_server`, `ionoscloud_gpu_server`, `ionoscloud_vcpu_server`: Fix `require_legacy_bios = false` being ignored on creation (defaulting to `true`).
+
 ## 6.7.40
 ### Features
 - **MongoDB V2**: new location-based DBaaS MongoDB V2 product.

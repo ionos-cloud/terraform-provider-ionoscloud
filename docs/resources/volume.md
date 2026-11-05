@@ -133,12 +133,12 @@ resource "random_password" "volume_image_password" {
 * `backup_unit_id`- (Optional)[string] The uuid of the Backup Unit that user has access to. The property is immutable and is only allowed to be set on a new volume creation. It is mandatory to provide either 'public image' or 'imageAlias' in conjunction with this property.
 * `device_number`- (Computed) The Logical Unit Number of the storage volume. Null for volumes not mounted to any VM.
 * `pci_slot`- (Computed) The PCI slot number of the storage volume. Null for volumes not mounted to any VM.
-* `cpu_hot_plug` - (Computed)[string] Is capable of CPU hot plug (no reboot required)
-* `ram_hot_plug` - (Computed)[string] Is capable of memory hot plug (no reboot required)
-* `nic_hot_plug` - (Computed)[string] Is capable of nic hot plug (no reboot required)
-* `nic_hot_unplug` - (Computed)[string] Is capable of nic hot unplug (no reboot required)
-* `disc_virtio_hot_plug` - (Computed)[string] Is capable of Virt-IO drive hot plug (no reboot required)
-* `disc_virtio_hot_unplug` - (Computed)[string] Is capable of Virt-IO drive hot unplug (no reboot required). This works only for non-Windows virtual Machines.
+* `cpu_hot_plug` - (Optional)(Computed)[boolean] Is capable of CPU hot plug (no reboot required)
+* `ram_hot_plug` - (Optional)(Computed)[boolean] Is capable of memory hot plug (no reboot required)
+* `nic_hot_plug` - (Optional)(Computed)[boolean] Is capable of nic hot plug (no reboot required)
+* `nic_hot_unplug` - (Optional)(Computed)[boolean] Is capable of nic hot unplug (no reboot required)
+* `disc_virtio_hot_plug` - (Optional)(Computed)[boolean] Is capable of Virt-IO drive hot plug (no reboot required)
+* `disc_virtio_hot_unplug` - (Optional)(Computed)[boolean] Is capable of Virt-IO drive hot unplug (no reboot required). This works only for non-Windows virtual Machines.
 * `boot_server` - (Computed)[string] The UUID of the attached server.
 * `expose_serial` - (Optional)(Computed) [boolean] Defaults to `false` if not previously set by the image used to create the volume. If set to `true` will expose the serial id of the disk attached to the server. If set to `false` will not expose the serial id. Some operating systems or software solutions require the serial id to be exposed to work properly. Exposing the serial can influence licensed software (e.g. Windows) behavior
 * `require_legacy_bios` - (Optional)(Computed)[boolean] Indicates if the image requires the legacy BIOS for compatibility or specific needs. During creation, if an image is used, the value will be inherited from the image, regardless of the value set in the plan. Later on, the value can be updated.

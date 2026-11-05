@@ -43,6 +43,11 @@ func TestAccGpuServerBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(constant.ServerGPUResource+"."+constant.ServerTestResource, "volume.0.bus", "VIRTIO"),
 					resource.TestCheckResourceAttr(constant.ServerGPUResource+"."+constant.ServerTestResource, "volume.0.availability_zone", "AUTO"),
 					resource.TestCheckResourceAttr(constant.ServerGPUResource+"."+constant.ServerTestResource, "volume.0.expose_serial", "true"),
+					// Hot-plug attributes set in config must be reconciled onto the inline volume after create.
+					resource.TestCheckResourceAttr(constant.ServerGPUResource+"."+constant.ServerTestResource, "volume.0.nic_hot_plug", "true"),
+					resource.TestCheckResourceAttr(constant.ServerGPUResource+"."+constant.ServerTestResource, "volume.0.nic_hot_unplug", "false"),
+					resource.TestCheckResourceAttr(constant.ServerGPUResource+"."+constant.ServerTestResource, "volume.0.disc_virtio_hot_plug", "true"),
+					resource.TestCheckResourceAttr(constant.ServerGPUResource+"."+constant.ServerTestResource, "volume.0.disc_virtio_hot_unplug", "false"),
 					resource.TestCheckResourceAttrPair(constant.ServerGPUResource+"."+constant.ServerTestResource, "volume.0.boot_server", constant.ServerGPUResource+"."+constant.ServerTestResource, "id"),
 					resource.TestCheckResourceAttrPair(constant.ServerGPUResource+"."+constant.ServerTestResource, "nic.0.lan", constant.LanResource+"."+constant.LanTestResource, "id"),
 					resource.TestCheckResourceAttr(constant.ServerGPUResource+"."+constant.ServerTestResource, "nic.0.name", "system"),
@@ -226,7 +231,7 @@ func testAccCheckGpuServerExists(n string, server *ionoscloud.Server) resource.T
 	}
 }
 
-// note: reserving IPs in de/fra/2 is yet not expected , de/fra is supposed to be used instead.
+// note: reserving IPs in de/txl is yet not expected , de/fra is supposed to be used instead.
 const testAccCheckGpuServerConfigBasic = `
 resource ` + constant.DatacenterResource + ` ` + constant.DatacenterTestResource + ` {
 	name       = "gpu-server-test"
@@ -250,7 +255,7 @@ resource ` + constant.ServerGPUResource + ` ` + constant.ServerTestResource + ` 
   hostname = "` + constant.ServerTestHostname + `"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   availability_zone = "AUTO"
-  template_uuid = "6913ed82-a143-4c15-89ac-08fb375a97c5"
+  template_uuid = "55ebad10-dfdb-4df3-bb15-f0a7c1f06427"
   image_name = "ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password.result
   vm_state = "RUNNING"
@@ -263,6 +268,10 @@ resource ` + constant.ServerGPUResource + ` ` + constant.ServerTestResource + ` 
     availability_zone = "AUTO"
     expose_serial = true
     require_legacy_bios = false
+    nic_hot_plug = true
+    nic_hot_unplug = false
+    disc_virtio_hot_plug = true
+    disc_virtio_hot_unplug = false
   }
 
   nic {
@@ -307,7 +316,7 @@ resource ` + constant.ServerGPUResource + ` ` + constant.ServerTestResource + ` 
   hostname = "updatedhostname"
   datacenter_id = ` + constant.DatacenterResource + `.` + constant.DatacenterTestResource + `.id
   availability_zone = "AUTO"
-  template_uuid = "6913ed82-a143-4c15-89ac-08fb375a97c5"
+  template_uuid = "55ebad10-dfdb-4df3-bb15-f0a7c1f06427"
   image_name = "ubuntu:latest"
   image_password = ` + constant.RandomPassword + `.server_image_password_updated.result
   vm_state = "RUNNING"
