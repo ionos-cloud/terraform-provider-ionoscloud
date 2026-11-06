@@ -445,19 +445,6 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	if plan.RestoreFromSnapshot != nil {
-		if plan.RestoreFromSnapshot.RecoveryTargetDatetime.IsNull() {
-			resp.Diagnostics.AddError(
-				"missing recovery_target_datetime",
-				"recovery_target_datetime is required when restore_from_snapshot is set during cluster update.",
-			)
-			return
-		}
-		if !plan.RestoreFromSnapshot.SourceSnapshotID.IsNull() {
-			tflog.Warn(ctx, "source_snapshot_id is set in restore_from_snapshot during update but has no effect — the restore source is inferred automatically for in-place restore")
-		}
-	}
-
 	clusterID := state.ID.ValueString()
 	location := plan.Location.ValueString()
 
@@ -473,7 +460,15 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	updateProps, diags := buildClusterUpdateProperties(ctx, &plan)
+	// Only request an in-place restore if restore_from_snapshot was newly set/changed vs
+	// prior state; a block carried over unchanged must not re-trigger a restore on every update.
+	restore, diags := buildUpdateRestoreFromSnapshot(ctx, &plan, &state)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	updateProps, diags := buildClusterUpdateProperties(ctx, &plan, restore)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -667,7 +662,8 @@ func buildClusterCreateProperties(ctx context.Context, plan *clusterResourceMode
 	return props, diagnostics
 }
 
-func buildClusterUpdateProperties(ctx context.Context, plan *clusterResourceModel) (inmemorydbv3.Cluster, diag.Diagnostics) {
+// restore is attached only when non-nil (i.e. restore_from_snapshot was newly set/changed).
+func buildClusterUpdateProperties(ctx context.Context, plan *clusterResourceModel, restore *inmemorydbv3.ClusterRestoreFromSnapshot) (inmemorydbv3.Cluster, diag.Diagnostics) {
 	var diagnostics diag.Diagnostics
 
 	snapshotConfig, diags := buildSnapshotConfig(ctx, plan.Snapshot)
@@ -717,17 +713,51 @@ func buildClusterUpdateProperties(ctx context.Context, plan *clusterResourceMode
 		},
 	}
 
-	if plan.RestoreFromSnapshot != nil && !plan.RestoreFromSnapshot.RecoveryTargetDatetime.IsNull() && !plan.RestoreFromSnapshot.RecoveryTargetDatetime.IsUnknown() {
-		t, err := time.Parse(time.RFC3339, plan.RestoreFromSnapshot.RecoveryTargetDatetime.ValueString())
-		if err != nil {
-			diagnostics.AddError("invalid recovery_target_datetime", err.Error())
-			return inmemorydbv3.Cluster{}, diagnostics
-		}
-		restore := inmemorydbv3.NewInPlaceRestoreClusterFromSnapshot(t)
-		props.RestoreFromSnapshot = new(inmemorydbv3.InPlaceRestoreClusterFromSnapshotAsClusterRestoreFromSnapshot(restore))
+	if restore != nil {
+		props.RestoreFromSnapshot = restore
 	}
 
 	return props, diagnostics
+}
+
+// restoreFromSnapshotUnchanged reports whether restore_from_snapshot equals the last-applied value.
+// The block is write-only (never read back from the API), so state holds the prior config.
+func restoreFromSnapshotUnchanged(plan, state *clusterResourceModel) bool {
+	if plan.RestoreFromSnapshot == nil && state.RestoreFromSnapshot == nil {
+		return true
+	}
+	if plan.RestoreFromSnapshot == nil || state.RestoreFromSnapshot == nil {
+		return false
+	}
+	return plan.RestoreFromSnapshot.SourceSnapshotID.Equal(state.RestoreFromSnapshot.SourceSnapshotID) &&
+		plan.RestoreFromSnapshot.RecoveryTargetDatetime.Equal(state.RestoreFromSnapshot.RecoveryTargetDatetime)
+}
+
+// buildUpdateRestoreFromSnapshot returns an in-place restore request only when restore_from_snapshotr
+// was newly set or changed vs prior state. An in-place restore uses recovery_target_datetime only;
+// source_snapshot_id is create-only and has no effect on update.
+func buildUpdateRestoreFromSnapshot(ctx context.Context, plan, state *clusterResourceModel) (*inmemorydbv3.ClusterRestoreFromSnapshot, diag.Diagnostics) {
+	var diagnostics diag.Diagnostics
+	if plan.RestoreFromSnapshot == nil || restoreFromSnapshotUnchanged(plan, state) {
+		return nil, diagnostics
+	}
+	if plan.RestoreFromSnapshot.RecoveryTargetDatetime.IsNull() {
+		diagnostics.AddError(
+			"missing recovery_target_datetime",
+			"recovery_target_datetime is required when restore_from_snapshot is set during cluster update.",
+		)
+		return nil, diagnostics
+	}
+	if !plan.RestoreFromSnapshot.SourceSnapshotID.IsNull() {
+		tflog.Warn(ctx, "source_snapshot_id is set in restore_from_snapshot during update but has no effect — the restore source is inferred automatically for in-place restore")
+	}
+	t, err := time.Parse(time.RFC3339, plan.RestoreFromSnapshot.RecoveryTargetDatetime.ValueString())
+	if err != nil {
+		diagnostics.AddError("invalid recovery_target_datetime", err.Error())
+		return nil, diagnostics
+	}
+	restore := inmemorydbv3.NewInPlaceRestoreClusterFromSnapshot(t)
+	return new(inmemorydbv3.InPlaceRestoreClusterFromSnapshotAsClusterRestoreFromSnapshot(restore)), diagnostics
 }
 
 func buildSnapshotConfig(ctx context.Context, m *snapshotConfigModel) (inmemorydbv3.SnapshotConfiguration, diag.Diagnostics) {
