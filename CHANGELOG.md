@@ -4,6 +4,7 @@
 
 ### Fixes
 - `ionoscloud_volume`, `ionoscloud_server`, `ionoscloud_cube_server`, `ionoscloud_gpu_server`, `ionoscloud_vcpu_server`: Fix `require_legacy_bios = false` being ignored on creation (defaulting to `true`).
+- `ionoscloud_nsg`, `ionoscloud_nfs_cluster`, `ionoscloud_nfs_share`, `ionoscloud_vpn_wireguard_gateway`: Remove the resource from the state when it was deleted outside Terraform, instead of failing the refresh with a 404.
 
 ## 6.7.40
 ### Features

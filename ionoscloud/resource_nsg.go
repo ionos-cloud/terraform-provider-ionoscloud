@@ -100,6 +100,11 @@ func resourceNSGRead(ctx context.Context, d *schema.ResourceData, meta any) diag
 	securityGroup, apiResponse, err := client.SecurityGroupsApi.DatacentersSecuritygroupsFindById(ctx, datacenterID, d.Id()).Depth(2).Execute()
 	apiResponse.LogInfo()
 	if err != nil {
+		if httpNotFound(apiResponse) {
+			tflog.Info(ctx, "network security group not found", map[string]any{"nsg_id": d.Id()})
+			d.SetId("")
+			return nil
+		}
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while retrieving a network security group: %w", err), nil)
 	}
 
