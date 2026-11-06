@@ -427,19 +427,6 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	if plan.RestoreFromBackup != nil {
-		if plan.RestoreFromBackup.RecoveryTargetDatetime.IsNull() {
-			resp.Diagnostics.AddError(
-				"missing recovery_target_datetime",
-				"recovery_target_datetime is required when restore_from_backup is set during cluster update.",
-			)
-			return
-		}
-		if !plan.RestoreFromBackup.SourceBackupID.IsNull() {
-			tflog.Warn(ctx, "source_backup_id is set in restore_from_backup during update but has no effect — the restore source is inferred automatically for in-place restore")
-		}
-	}
-
 	clusterID := plan.ID.ValueString()
 	location := plan.Location.ValueString()
 
@@ -455,7 +442,15 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	updateProps, diags := buildClusterUpdateProperties(ctx, &plan)
+	// Only request an in-place restore if restore_from_backup was newly set/changed vs
+	// prior state; a block carried over unchanged must not re-trigger a restore on every update.
+	restore, diags := buildUpdateRestoreFromBackup(ctx, &plan, &state)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	updateProps, diags := buildClusterUpdateProperties(&plan, restore)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -637,7 +632,8 @@ func buildClusterCreateProperties(_ context.Context, plan *clusterResourceModel)
 	return props, diagnostics
 }
 
-func buildClusterUpdateProperties(_ context.Context, plan *clusterResourceModel) (mariadbv3.Cluster, diag.Diagnostics) {
+// restore is attached only when non-nil (i.e. restore_from_backup was newly set/changed).
+func buildClusterUpdateProperties(plan *clusterResourceModel, restore *mariadbv3.MariadbRestoreClusterFromBackup) (mariadbv3.Cluster, diag.Diagnostics) {
 	var diagnostics diag.Diagnostics
 
 	props := mariadbv3.Cluster{
@@ -678,18 +674,52 @@ func buildClusterUpdateProperties(_ context.Context, plan *clusterResourceModel)
 		props.MetricsEnabled = plan.MetricsEnabled.ValueBoolPointer()
 	}
 
-	if plan.RestoreFromBackup != nil {
-		t, err := time.Parse(time.RFC3339, plan.RestoreFromBackup.RecoveryTargetDatetime.ValueString())
-		if err != nil {
-			diagnostics.AddError("invalid recovery_target_datetime", err.Error())
-			return props, diagnostics
-		}
-		props.RestoreFromBackup = &mariadbv3.MariadbRestoreClusterFromBackup{
-			RecoveryTargetDatetime: &mariadbv3.IonosTime{Time: t},
-		}
+	if restore != nil {
+		props.RestoreFromBackup = restore
 	}
 
 	return props, diagnostics
+}
+
+// restoreFromBackupUnchanged reports whether restore_from_backup equals the last-applied value.
+// The block is write-only (never read back from the API), so state holds the prior config.
+func restoreFromBackupUnchanged(plan, state *clusterResourceModel) bool {
+	if plan.RestoreFromBackup == nil && state.RestoreFromBackup == nil {
+		return true
+	}
+	if plan.RestoreFromBackup == nil || state.RestoreFromBackup == nil {
+		return false
+	}
+	return plan.RestoreFromBackup.SourceBackupID.Equal(state.RestoreFromBackup.SourceBackupID) &&
+		plan.RestoreFromBackup.RecoveryTargetDatetime.Equal(state.RestoreFromBackup.RecoveryTargetDatetime)
+}
+
+// buildUpdateRestoreFromBackup returns an in-place restore request only when restore_from_backup
+// was newly set or changed vs prior state. An in-place restore uses recovery_target_datetime only;
+// source_backup_id is create-only and has no effect on update.
+func buildUpdateRestoreFromBackup(ctx context.Context, plan, state *clusterResourceModel) (*mariadbv3.MariadbRestoreClusterFromBackup, diag.Diagnostics) {
+	var diagnostics diag.Diagnostics
+	if plan.RestoreFromBackup == nil || restoreFromBackupUnchanged(plan, state) {
+		return nil, diagnostics
+	}
+	if plan.RestoreFromBackup.RecoveryTargetDatetime.IsNull() {
+		diagnostics.AddError(
+			"missing recovery_target_datetime",
+			"recovery_target_datetime is required when restore_from_backup is set during cluster update.",
+		)
+		return nil, diagnostics
+	}
+	if !plan.RestoreFromBackup.SourceBackupID.IsNull() {
+		tflog.Warn(ctx, "source_backup_id is set in restore_from_backup during update but has no effect — the restore source is inferred automatically for in-place restore")
+	}
+	t, err := time.Parse(time.RFC3339, plan.RestoreFromBackup.RecoveryTargetDatetime.ValueString())
+	if err != nil {
+		diagnostics.AddError("invalid recovery_target_datetime", err.Error())
+		return nil, diagnostics
+	}
+	return &mariadbv3.MariadbRestoreClusterFromBackup{
+		RecoveryTargetDatetime: &mariadbv3.IonosTime{Time: t},
+	}, diagnostics
 }
 
 func mapClusterResponseToModel(_ context.Context, cluster *mariadbv3.ClusterRead, model *clusterResourceModel) {
