@@ -182,9 +182,14 @@ func resourceNFSClusterImport(ctx context.Context, d *schema.ResourceData, meta 
 
 func resourceNFSClusterRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(bundleclient.SdkBundle).NFSClient
-	cluster, err := findCluster(ctx, d, d.Id(), d.Get("location").(string), client)
+	cluster, apiResponse, err := client.GetNFSClusterByID(ctx, d.Id(), d.Get("location").(string))
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("error finding NFS Cluster: %w", err), nil)
+		if apiResponse.HttpNotFound() {
+			tflog.Info(ctx, "NFS cluster not found", map[string]any{"cluster_id": d.Id()})
+			d.SetId("")
+			return nil
+		}
+		return diagutil.ToDiags(d, fmt.Errorf("error finding NFS Cluster: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	if errSetData := client.SetNFSClusterData(d, cluster); errSetData != nil {
 		return diagutil.ToDiags(d, fmt.Errorf("failed to set NFS Cluster data: %w", errSetData), nil)
