@@ -3,7 +3,8 @@
 - `ionoscloud_volume`, `ionoscloud_server`, `ionoscloud_cube_server`, `ionoscloud_gpu_server`, `ionoscloud_vcpu_server`: Allow setting `cpu_hot_plug`, `ram_hot_plug`, `nic_hot_plug`, `nic_hot_unplug`, `disc_virtio_hot_plug` and `disc_virtio_hot_unplug` on the volume/inline volume, instead of only exposing them as computed attributes.
 
 ### Fixes
-- `ionoscloud_volume`, `ionoscloud_server`, `ionoscloud_cube_server`, `ionoscloud_gpu_server`, `ionoscloud_vcpu_server`: Fix `require_legacy_bios = false` being ignored on creation (defaulting to `true`).
+- `ionoscloud_volume`, `ionoscloud_server`, `ionoscloud_cube_server`, `ionoscloud_gpu_server`, `ionoscloud_vcpu_server`: fix `require_legacy_bios = false` being ignored on creation (defaulting to `true`).
+- `ionoscloud_pg_cluster_v2`, `ionoscloud_mariadb_cluster_v2`, `ionoscloud_inmemorydb_cluster_v2`: fix `restore_from_backup`/`restore_from_snapshot` being re-sent on every update, which re-triggered an in-place restore for unrelated changes. 
 
 ## 6.7.40
 ### Features
