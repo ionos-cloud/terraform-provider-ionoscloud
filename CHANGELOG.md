@@ -1,4 +1,4 @@
-## 6.7.41 -- upcoming release
+## 6.7.41
 ### Features
 - `ionoscloud_volume`, `ionoscloud_server`, `ionoscloud_cube_server`, `ionoscloud_gpu_server`, `ionoscloud_vcpu_server`: Allow setting `cpu_hot_plug`, `ram_hot_plug`, `nic_hot_plug`, `nic_hot_unplug`, `disc_virtio_hot_plug` and `disc_virtio_hot_unplug` on the volume/inline volume, instead of only exposing them as computed attributes.
 
@@ -8,6 +8,7 @@
 - `ionoscloud_loadbalancer`: `nic_ids` is now read from the API, so it is set after import and in generated configuration. A NIC detached outside Terraform now shows as drift and the next apply attaches it again; a configured order that differs from the API's is kept and plans no change. Changing `nic_ids` now detaches only the removed NICs and attaches only the added ones, instead of detaching every NIC first.
 - for DBaaS v2 resources: save cluster ID in state when waiting for availability fails or times out, fixes [#1063](https://github.com/ionos-cloud/terraform-provider-ionoscloud/issues/1063)
 - `ionoscloud_pg_cluster_v2`, `ionoscloud_mariadb_cluster_v2`, `ionoscloud_inmemorydb_cluster_v2`: fix `restore_from_backup`/`restore_from_snapshot` being re-sent on every update, which re-triggered an in-place restore for unrelated changes.
+- `ionoscloud_nsg`, `ionoscloud_nfs_cluster`, `ionoscloud_nfs_share`, `ionoscloud_vpn_wireguard_gateway`: Remove the resource from the state when it was deleted outside Terraform, instead of failing the refresh with a 404.
 
 ## 6.7.40
 ### Features

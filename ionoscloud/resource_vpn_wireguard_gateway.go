@@ -164,6 +164,11 @@ func resourceVpnWireguardGatewayRead(ctx context.Context, d *schema.ResourceData
 	location := d.Get("location").(string)
 	wireguard, apiResponse, err := client.GetWireguardGatewayByID(ctx, d.Id(), location)
 	if err != nil {
+		if apiResponse.HttpNotFound() {
+			tflog.Info(ctx, "WireGuard gateway not found", map[string]any{"gateway_id": d.Id()})
+			d.SetId("")
+			return nil
+		}
 		return diagutil.ToDiags(d, err, &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	return diagutil.ToDiags(d, vpn.SetWireguardGWData(d, wireguard), nil)
