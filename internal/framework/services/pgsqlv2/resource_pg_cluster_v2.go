@@ -355,6 +355,13 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 
 	clusterID := clusterResponse.Id
 
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), clusterID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("location"), location)...)
+	resp.Diagnostics.Append(resp.Identity.Set(ctx, &clusterIdentityModel{ID: types.StringValue(clusterID), Location: types.StringValue(location)})...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	// Poll for POSTGRESCLUSTERSTATES_AVAILABLE state.
 	err = backoff.Retry(func() error {
 		return client.IsClusterReady(ctx, clusterID)
