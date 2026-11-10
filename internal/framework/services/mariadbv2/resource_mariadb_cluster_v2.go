@@ -450,11 +450,7 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	updateProps, diags := buildClusterUpdateProperties(&plan, restore)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
+	updateProps := buildClusterUpdateProperties(&plan, restore)
 
 	updateReq := mariadbv3.ClusterEnsure{
 		Id:         clusterID,
@@ -633,9 +629,7 @@ func buildClusterCreateProperties(_ context.Context, plan *clusterResourceModel)
 }
 
 // restore is attached only when non-nil (i.e. restore_from_backup was newly set/changed).
-func buildClusterUpdateProperties(plan *clusterResourceModel, restore *mariadbv3.MariadbRestoreClusterFromBackup) (mariadbv3.Cluster, diag.Diagnostics) {
-	var diagnostics diag.Diagnostics
-
+func buildClusterUpdateProperties(plan *clusterResourceModel, restore *mariadbv3.MariadbRestoreClusterFromBackup) mariadbv3.Cluster {
 	props := mariadbv3.Cluster{
 		Backup: mariadbv3.ClusterBackup{
 			Location:      plan.Backup.Location.ValueString(),
@@ -678,11 +672,14 @@ func buildClusterUpdateProperties(plan *clusterResourceModel, restore *mariadbv3
 		props.RestoreFromBackup = restore
 	}
 
-	return props, diagnostics
+	return props
 }
 
-// restoreFromBackupUnchanged reports whether restore_from_backup equals the last-applied value.
-// The block is write-only (never read back from the API), so state holds the prior config.
+// restoreFromBackupUnchanged reports whether the effective in-place restore request is unchanged
+// vs the last-applied value. The block is write-only (never read back from the API), so state holds
+// the prior config. Only recovery_target_datetime is compared: source_backup_id is create-only and
+// ignored by the update builder, so a change to it must not trigger an in-place restore to the old
+// timestamp (which would discard newer data).
 func restoreFromBackupUnchanged(plan, state *clusterResourceModel) bool {
 	if plan.RestoreFromBackup == nil && state.RestoreFromBackup == nil {
 		return true
@@ -690,8 +687,7 @@ func restoreFromBackupUnchanged(plan, state *clusterResourceModel) bool {
 	if plan.RestoreFromBackup == nil || state.RestoreFromBackup == nil {
 		return false
 	}
-	return plan.RestoreFromBackup.SourceBackupID.Equal(state.RestoreFromBackup.SourceBackupID) &&
-		plan.RestoreFromBackup.RecoveryTargetDatetime.Equal(state.RestoreFromBackup.RecoveryTargetDatetime)
+	return plan.RestoreFromBackup.RecoveryTargetDatetime.Equal(state.RestoreFromBackup.RecoveryTargetDatetime)
 }
 
 // buildUpdateRestoreFromBackup returns an in-place restore request only when restore_from_backup
@@ -699,14 +695,14 @@ func restoreFromBackupUnchanged(plan, state *clusterResourceModel) bool {
 // source_backup_id is create-only and has no effect on update.
 func buildUpdateRestoreFromBackup(ctx context.Context, plan, state *clusterResourceModel) (*mariadbv3.MariadbRestoreClusterFromBackup, diag.Diagnostics) {
 	var diagnostics diag.Diagnostics
+	// An in-place restore is requested only by a non-null recovery_target_datetime that differs from
+	// the last-applied value; source_backup_id is create-only and ignored on update. A removed or
+	// absent timestamp is therefore a no-op, not an error.
 	if plan.RestoreFromBackup == nil || restoreFromBackupUnchanged(plan, state) {
 		return nil, diagnostics
 	}
 	if plan.RestoreFromBackup.RecoveryTargetDatetime.IsNull() {
-		diagnostics.AddError(
-			"missing recovery_target_datetime",
-			"recovery_target_datetime is required when restore_from_backup is set during cluster update.",
-		)
+		tflog.Warn(ctx, "restore_from_backup is set but recovery_target_datetime is empty; no in-place restore will be performed on update (source_backup_id is create-only and ignored)")
 		return nil, diagnostics
 	}
 	if !plan.RestoreFromBackup.SourceBackupID.IsNull() {

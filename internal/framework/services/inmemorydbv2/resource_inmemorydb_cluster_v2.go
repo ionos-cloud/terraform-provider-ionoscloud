@@ -731,8 +731,11 @@ func buildClusterUpdateProperties(ctx context.Context, plan *clusterResourceMode
 	return props, diagnostics
 }
 
-// restoreFromSnapshotUnchanged reports whether restore_from_snapshot equals the last-applied value.
-// The block is write-only (never read back from the API), so state holds the prior config.
+// restoreFromSnapshotUnchanged reports whether the effective in-place restore request is unchanged
+// vs the last-applied value. The block is write-only (never read back from the API), so state holds
+// the prior config. Only recovery_target_datetime is compared: source_snapshot_id is create-only and
+// ignored by the update builder, so a change to it must not trigger an in-place restore to the old
+// timestamp (which would discard newer data).
 func restoreFromSnapshotUnchanged(plan, state *clusterResourceModel) bool {
 	if plan.RestoreFromSnapshot == nil && state.RestoreFromSnapshot == nil {
 		return true
@@ -740,8 +743,7 @@ func restoreFromSnapshotUnchanged(plan, state *clusterResourceModel) bool {
 	if plan.RestoreFromSnapshot == nil || state.RestoreFromSnapshot == nil {
 		return false
 	}
-	return plan.RestoreFromSnapshot.SourceSnapshotID.Equal(state.RestoreFromSnapshot.SourceSnapshotID) &&
-		plan.RestoreFromSnapshot.RecoveryTargetDatetime.Equal(state.RestoreFromSnapshot.RecoveryTargetDatetime)
+	return plan.RestoreFromSnapshot.RecoveryTargetDatetime.Equal(state.RestoreFromSnapshot.RecoveryTargetDatetime)
 }
 
 // buildUpdateRestoreFromSnapshot returns an in-place restore request only when restore_from_snapshotr
@@ -749,14 +751,14 @@ func restoreFromSnapshotUnchanged(plan, state *clusterResourceModel) bool {
 // source_snapshot_id is create-only and has no effect on update.
 func buildUpdateRestoreFromSnapshot(ctx context.Context, plan, state *clusterResourceModel) (*inmemorydbv3.ClusterRestoreFromSnapshot, diag.Diagnostics) {
 	var diagnostics diag.Diagnostics
+	// An in-place restore is requested only by a non-null recovery_target_datetime that differs from
+	// the last-applied value; source_snapshot_id is create-only and ignored on update. A removed or
+	// absent timestamp is therefore a no-op, not an error.
 	if plan.RestoreFromSnapshot == nil || restoreFromSnapshotUnchanged(plan, state) {
 		return nil, diagnostics
 	}
 	if plan.RestoreFromSnapshot.RecoveryTargetDatetime.IsNull() {
-		diagnostics.AddError(
-			"missing recovery_target_datetime",
-			"recovery_target_datetime is required when restore_from_snapshot is set during cluster update.",
-		)
+		tflog.Warn(ctx, "restore_from_snapshot is set but recovery_target_datetime is empty; no in-place restore will be performed on update (source_snapshot_id is create-only and ignored)")
 		return nil, diagnostics
 	}
 	if !plan.RestoreFromSnapshot.SourceSnapshotID.IsNull() {

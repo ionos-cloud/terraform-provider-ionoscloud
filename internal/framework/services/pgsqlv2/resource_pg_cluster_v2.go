@@ -16,6 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	pgsqlv2 "github.com/ionos-cloud/sdk-go-bundle/products/dbaas/psql/v3"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
@@ -453,17 +454,13 @@ func (r *clusterResource) Update(ctx context.Context, req resource.UpdateRequest
 
 	// Only request an in-place restore if restore_from_backup was newly set/changed vs
 	// prior state; a block carried over unchanged must not re-trigger a restore on every update.
-	restore, diags := buildUpdateRestoreFromBackup(&plan, &state)
+	restore, diags := buildUpdateRestoreFromBackup(ctx, &plan, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	updateProps, diags := buildClusterUpdateProperties(&plan, restore)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
+	updateProps := buildClusterUpdateProperties(&plan, restore)
 
 	updateReq := pgsqlv2.ClusterEnsure{
 		Id:         clusterID,
@@ -659,8 +656,7 @@ func buildClusterCreateRestoreFromBackup(plan *clusterResourceModel) (*pgsqlv2.C
 
 // buildClusterUpdateProperties constructs the Cluster properties for PUT update.
 // restore is attached only when non-nil (i.e. restore_from_backup was newly set/changed).
-func buildClusterUpdateProperties(plan *clusterResourceModel, restore *pgsqlv2.ClusterRestoreFromBackup) (pgsqlv2.Cluster, diag.Diagnostics) {
-	var diagnostics diag.Diagnostics
+func buildClusterUpdateProperties(plan *clusterResourceModel, restore *pgsqlv2.ClusterRestoreFromBackup) pgsqlv2.Cluster {
 	props := pgsqlv2.Cluster{
 		Name:            plan.Name.ValueString(),
 		ReplicationMode: pgsqlv2.PostgresClusterReplicationMode(plan.ReplicationMode.ValueString()),
@@ -714,11 +710,14 @@ func buildClusterUpdateProperties(plan *clusterResourceModel, restore *pgsqlv2.C
 		props.RestoreFromBackup = restore
 	}
 
-	return props, diagnostics
+	return props
 }
 
-// restoreFromBackupUnchanged reports whether restore_from_backup equals the last-applied value.
-// The block is write-only (never read back from the API), so state holds the prior config.
+// restoreFromBackupUnchanged reports whether the effective in-place restore request is unchanged
+// vs the last-applied value. The block is write-only (never read back from the API), so state holds
+// the prior config. Only recovery_target_datetime is compared: source_backup_id is create-only and
+// ignored by the update builder, so a change to it must not trigger an in-place restore to the old
+// timestamp (which would discard newer data).
 func restoreFromBackupUnchanged(plan, state *clusterResourceModel) bool {
 	if plan.RestoreFromBackup == nil && state.RestoreFromBackup == nil {
 		return true
@@ -726,23 +725,22 @@ func restoreFromBackupUnchanged(plan, state *clusterResourceModel) bool {
 	if plan.RestoreFromBackup == nil || state.RestoreFromBackup == nil {
 		return false
 	}
-	return plan.RestoreFromBackup.SourceBackupID.Equal(state.RestoreFromBackup.SourceBackupID) &&
-		plan.RestoreFromBackup.RecoveryTargetDateTime.Equal(state.RestoreFromBackup.RecoveryTargetDateTime)
+	return plan.RestoreFromBackup.RecoveryTargetDateTime.Equal(state.RestoreFromBackup.RecoveryTargetDateTime)
 }
 
 // buildUpdateRestoreFromBackup returns an in-place restore request only when restore_from_backup
 // was newly set or changed vs prior state. An in-place restore uses recovery_target_datetime only
 // (PostgresInPlaceRestoreClusterFromBackup); source_backup_id is create-only and intentionally omitted.
-func buildUpdateRestoreFromBackup(plan, state *clusterResourceModel) (*pgsqlv2.ClusterRestoreFromBackup, diag.Diagnostics) {
+func buildUpdateRestoreFromBackup(ctx context.Context, plan, state *clusterResourceModel) (*pgsqlv2.ClusterRestoreFromBackup, diag.Diagnostics) {
 	var diagnostics diag.Diagnostics
+	// An in-place restore is requested only by a non-null recovery_target_datetime that differs from
+	// the last-applied value; source_backup_id is create-only and ignored on update. A removed or
+	// absent timestamp is therefore a no-op, not an error.
 	if plan.RestoreFromBackup == nil || restoreFromBackupUnchanged(plan, state) {
 		return nil, diagnostics
 	}
 	if plan.RestoreFromBackup.RecoveryTargetDateTime.IsNull() {
-		diagnostics.AddError(
-			"missing recovery_target_datetime",
-			"recovery_target_datetime is required to request an in-place restore during update.",
-		)
+		tflog.Warn(ctx, "restore_from_backup is set but recovery_target_datetime is empty; no in-place restore will be performed on update (source_backup_id is create-only and ignored)")
 		return nil, diagnostics
 	}
 	t, err := time.Parse(time.RFC3339, plan.RestoreFromBackup.RecoveryTargetDateTime.ValueString())
