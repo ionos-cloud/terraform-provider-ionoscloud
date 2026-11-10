@@ -3,6 +3,7 @@ package ionoscloud
 import (
 	"context"
 	"fmt"
+	"slices"
 
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -122,7 +123,7 @@ func resourceLoadbalancerRead(ctx context.Context, d *schema.ResourceData, meta 
 		return diag.FromErr(err)
 	}
 
-	lb, apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersFindById(ctx, d.Get("datacenter_id").(string), d.Id()).Execute()
+	lb, apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersFindById(ctx, d.Get("datacenter_id").(string), d.Id()).Depth(1).Execute()
 	logApiRequestTime(apiResponse)
 	if err != nil {
 		if httpNotFound(apiResponse) {
@@ -148,6 +149,12 @@ func resourceLoadbalancerRead(ctx context.Context, d *schema.ResourceData, meta 
 		if err := d.Set("dhcp", *lb.Properties.Dhcp); err != nil {
 			return diagutil.ToDiags(d, fmt.Errorf(""), nil)
 		}
+	}
+
+	// nic_ids is an ordered list, but the API's order means nothing: keep the state's order for
+	// NICs still balanced so a different order plans no change.
+	if err := d.Set("nic_ids", inStateOrder(toStrings(d.Get("nic_ids").([]any)), balancedNicIDs(&lb))); err != nil {
+		return diagutil.ToDiags(d, err, nil)
 	}
 
 	return nil
@@ -193,10 +200,14 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 
 	if d.HasChange("nic_ids") {
 		oldNicIDs, newNicIDs := d.GetChange("nic_ids")
+		oldList, newList := oldNicIDs.([]any), newNicIDs.([]any)
 
-		oldList := oldNicIDs.([]any)
-
+		// Only detach what was removed and attach what was added: detaching NICs that stay would
+		// leave the load balancer without backends until they are attached again.
 		for _, o := range oldList {
+			if slices.Contains(newList, o) {
+				continue
+			}
 			apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersBalancednicsDelete(context.TODO(),
 				d.Get("datacenter_id").(string), d.Id(), o.(string)).Execute()
 			logApiRequestTime(apiResponse)
@@ -216,9 +227,10 @@ func resourceLoadbalancerUpdate(ctx context.Context, d *schema.ResourceData, met
 			}
 		}
 
-		newList := newNicIDs.([]any)
-
 		for _, o := range newList {
+			if slices.Contains(oldList, o) {
+				continue
+			}
 			id := o.(string)
 			nic := ionoscloud.Nic{Id: &id}
 			_, apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersBalancednicsPost(ctx, d.Get("datacenter_id").(string), d.Id()).Nic(nic).Execute()
@@ -286,7 +298,7 @@ func resourceLoadbalancerImporter(ctx context.Context, d *schema.ResourceData, m
 		return nil, err
 	}
 
-	loadbalancer, apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersFindById(ctx, dcID, lbID).Execute()
+	loadbalancer, apiResponse, err := client.LoadBalancersApi.DatacentersLoadbalancersFindById(ctx, dcID, lbID).Depth(1).Execute()
 	logApiRequestTime(apiResponse)
 
 	if err != nil {
@@ -326,19 +338,48 @@ func resourceLoadbalancerImporter(ctx context.Context, d *schema.ResourceData, m
 		}
 	}
 
-	if loadbalancer.Entities != nil && loadbalancer.Entities.Balancednics != nil &&
-		len(loadbalancer.Entities.Balancednics.Items) > 0 {
-
-		var lans []string
-		for _, lan := range loadbalancer.Entities.Balancednics.Items {
-			if lan.Id != nil && *lan.Id != "" {
-				lans = append(lans, *lan.Id)
-			}
-		}
-		if err := d.Set("nic_ids", lans); err != nil {
-			return nil, diagutil.ToError(d, err, nil)
-		}
+	if err := d.Set("nic_ids", balancedNicIDs(&loadbalancer)); err != nil {
+		return nil, diagutil.ToError(d, err, nil)
 	}
 
 	return []*schema.ResourceData{d}, nil
+}
+
+// inStateOrder returns the balanced IDs: those in state first, in state order, then the others.
+func inStateOrder(state, balanced []string) []string {
+	ids := make([]string, 0, len(balanced))
+	for _, id := range state {
+		if slices.Contains(balanced, id) {
+			ids = append(ids, id)
+		}
+	}
+	for _, id := range balanced {
+		if !slices.Contains(ids, id) {
+			ids = append(ids, id)
+		}
+	}
+	return ids
+}
+
+func toStrings(values []any) []string {
+	out := make([]string, 0, len(values))
+	for _, v := range values {
+		out = append(out, v.(string))
+	}
+	return out
+}
+
+// balancedNicIDs returns the IDs of the NICs balanced by lb. The balanced NICs are only expanded
+// when lb was fetched with depth >= 1.
+func balancedNicIDs(lb *ionoscloud.Loadbalancer) []string {
+	ids := []string{}
+	if lb.Entities == nil || lb.Entities.Balancednics == nil {
+		return ids
+	}
+	for _, nic := range lb.Entities.Balancednics.Items {
+		if nic.Id != nil && *nic.Id != "" {
+			ids = append(ids, *nic.Id)
+		}
+	}
+	return ids
 }

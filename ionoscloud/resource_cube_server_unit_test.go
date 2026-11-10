@@ -1,7 +1,11 @@
 package ionoscloud
 
 import (
+	"context"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	ionoscloud "github.com/ionos-cloud/sdk-go-bundle/products/compute/v2"
 )
@@ -126,6 +130,25 @@ func TestFindServerNic(t *testing.T) {
 			}
 			if got == nil || got.Id == nil || *got.Id != tt.wantID {
 				t.Fatalf("findServerNic = %+v, want id %q", got, tt.wantID)
+			}
+		})
+	}
+}
+
+// ssh_key_path is Optional+Computed and never read back. The importer left it out of the state, so
+// the plan right after import showed it as unknown and the apply PATCHed the server.
+func TestCubeServerImportSetsSSHKeyPath(t *testing.T) {
+	stub := newPatchBodyStub(t, map[string]string{
+		"/datacenters/dc-1/servers/srv-1": `{"id":"srv-1","properties":{"name":"cube","type":"CUBE"}}`,
+	})
+	for name, r := range map[string]func() *schema.Resource{"cube": resourceCubeServer, "gpu": resourceGPUServer} {
+		t.Run(name, func(t *testing.T) {
+			d := r().Data(&terraform.InstanceState{ID: "dc-1/srv-1"})
+			if _, err := resourceCubeServerImport(context.Background(), d, stubMeta(t, stub.url)); err != nil {
+				t.Fatalf("Import: %v", err)
+			}
+			if got, ok := d.State().Attributes["ssh_key_path.#"]; !ok || got != "0" {
+				t.Errorf("ssh_key_path.# = %q (set: %v), want \"0\"", got, ok)
 			}
 		})
 	}

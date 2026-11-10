@@ -12,10 +12,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/ionos-cloud/sdk-go-bundle/shared"
-
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
-	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/clientoptions"
 )
 
 const (
@@ -82,14 +78,7 @@ func (s *patchBodyStub) write(w http.ResponseWriter, body string) {
 func applyChange(t *testing.T, stub *patchBodyStub, r *schema.Resource, id string, prior, change map[string]any) map[string]any {
 	t.Helper()
 	ctx := context.Background()
-	t.Setenv(shared.IonosApiUrlEnvVar, "")
-
-	meta := *bundleclient.New(ctx, clientoptions.TerraformClientOptions{
-		ClientOptions: shared.ClientOptions{
-			Endpoint:    stub.url,
-			Credentials: shared.Credentials{Token: "token-for-the-stub"},
-		},
-	}, nil)
+	meta := stubMeta(t, stub.url)
 
 	d := r.Data(&terraform.InstanceState{ID: id})
 	for k, v := range prior {
