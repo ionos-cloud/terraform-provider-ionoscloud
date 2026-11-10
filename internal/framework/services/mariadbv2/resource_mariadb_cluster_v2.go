@@ -341,6 +341,7 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), clusterID)...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("location"), location)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("timeouts"), plan.Timeouts)...)
 	resp.Diagnostics.Append(resp.Identity.Set(ctx, &clusterIdentityModel{ID: types.StringValue(clusterID), Location: types.StringValue(location)})...)
 	if resp.Diagnostics.HasError() {
 		return
