@@ -314,6 +314,9 @@ func (r *clusterResource) Configure(_ context.Context, req resource.ConfigureReq
 	r.bundle = clientBundle
 }
 
+// defaultCreateTimeout is the fallback create timeout when the user does not set timeouts.create.
+const defaultCreateTimeout = 90 * time.Minute
+
 // Create creates a new InMemoryDB v2 cluster.
 func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var plan clusterResourceModel
@@ -337,7 +340,7 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	createTimeout, diags := plan.Timeouts.Create(ctx, utils.DefaultTimeout)
+	createTimeout, diags := plan.Timeouts.Create(ctx, defaultCreateTimeout)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -360,6 +363,14 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 	}
 
 	clusterID := clusterResponse.Id
+
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), clusterID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("location"), location)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("timeouts"), plan.Timeouts)...)
+	resp.Diagnostics.Append(resp.Identity.Set(ctx, &clusterIdentityModel{ID: types.StringValue(clusterID), Location: types.StringValue(location)})...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	err = backoff.Retry(func() error {
 		return client.IsClusterReady(ctx, clusterID)
