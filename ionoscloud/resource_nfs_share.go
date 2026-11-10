@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -148,6 +149,11 @@ func resourceNFSShareRead(ctx context.Context, d *schema.ResourceData, meta any)
 
 	share, apiResponse, err := client.GetNFSShareByID(ctx, clusterID, shareID, location)
 	if err != nil {
+		if apiResponse.HttpNotFound() {
+			tflog.Info(ctx, "NFS share not found", map[string]any{"share_id": shareID})
+			d.SetId("")
+			return nil
+		}
 		return diagutil.ToDiags(d, fmt.Errorf("error finding NFS Share: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 
