@@ -1,5 +1,3 @@
-//go:build all || dbaas || mongov2
-
 package mongov2_test
 
 import (

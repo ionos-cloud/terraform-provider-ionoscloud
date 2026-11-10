@@ -1,5 +1,3 @@
-//go:build all || dbaas || inmemorydbv2
-
 package inmemorydbv2_test
 
 import (

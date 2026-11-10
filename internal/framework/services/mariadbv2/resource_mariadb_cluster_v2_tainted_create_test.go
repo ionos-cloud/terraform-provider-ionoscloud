@@ -1,5 +1,3 @@
-//go:build all || dbaas || mariadbv2
-
 package mariadbv2_test
 
 import (

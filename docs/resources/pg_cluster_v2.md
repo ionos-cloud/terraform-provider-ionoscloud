@@ -126,7 +126,7 @@ ephemeral "random_password" "cluster_password" {
 
 This resource supports the following `Timeouts` configuration options:
 
-* `create` - (Default `60m`) Time to wait for the cluster to be provisioned.
+* `create` - (Default `90m`) Time to wait for the cluster to be provisioned.
 * `update` - (Default `60m`) Time to wait for the cluster to be updated.
 * `delete` - (Default `60m`) Time to wait for the cluster to be deleted.
 

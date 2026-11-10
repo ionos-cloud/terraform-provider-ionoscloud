@@ -1,5 +1,3 @@
-//go:build all || dbaas || psqlv2
-
 package pgsqlv2_test
 
 import (
