@@ -1,3 +1,8 @@
+## 6.7.42
+### Chore
+- Bump `GO` version: 1.26.10 -> 1.26.11 to fix vulnerabilities
+- Bump `golang.org/x/net`: v0.60.0 -> v0.62.0 to fix vulnerabilities
+
 ## 6.7.41
 ### Features
 - `ionoscloud_volume`, `ionoscloud_server`, `ionoscloud_cube_server`, `ionoscloud_gpu_server`, `ionoscloud_vcpu_server`: Allow setting `cpu_hot_plug`, `ram_hot_plug`, `nic_hot_plug`, `nic_hot_unplug`, `disc_virtio_hot_plug` and `disc_virtio_hot_unplug` on the volume/inline volume, instead of only exposing them as computed attributes.
