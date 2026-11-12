@@ -14,9 +14,28 @@ func (c *Client) GetVersion(ctx context.Context, versionID string) (pgsqlv2.Post
 	return version, apiResponse, err
 }
 
-// ListVersions retrieves all available PostgreSQL versions.
+// ListVersions retrieves all available PostgreSQL versions, following pagination.
 func (c *Client) ListVersions(ctx context.Context) (pgsqlv2.PostgresVersionReadList, *shared.APIResponse, error) {
-	versions, apiResponse, err := c.sdkClient.VersionsApi.VersionsGet(ctx).Execute()
-	apiResponse.LogInfo()
-	return versions, apiResponse, err
+	const pageSize int32 = 100
+	var (
+		all         []pgsqlv2.PostgresVersionRead
+		offset      int32
+		apiResponse *shared.APIResponse
+	)
+	for {
+		page, resp, err := c.sdkClient.VersionsApi.VersionsGet(ctx).Offset(offset).Limit(pageSize).Execute()
+		resp.LogInfo()
+		apiResponse = resp
+		if err != nil {
+			return pgsqlv2.PostgresVersionReadList{}, apiResponse, err
+		}
+		all = append(all, page.Items...)
+		// A short (or empty) page marks the end of the result set. Links.HasNext() is
+		// deliberately not used: it has been observed to stay populated past the last page.
+		if len(page.Items) < int(pageSize) {
+			page.Items = all
+			return page, apiResponse, nil
+		}
+		offset += pageSize
+	}
 }

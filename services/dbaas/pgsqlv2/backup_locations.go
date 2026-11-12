@@ -14,9 +14,28 @@ func (c *Client) GetBackupLocation(ctx context.Context, backupLocationID string)
 	return backupLocation, apiResponse, err
 }
 
-// ListBackupLocations retrieves all available backup locations.
+// ListBackupLocations retrieves all available backup locations, following pagination.
 func (c *Client) ListBackupLocations(ctx context.Context) (pgsqlv2.BackupLocationReadList, *shared.APIResponse, error) {
-	backupLocations, apiResponse, err := c.sdkClient.BackupLocationsApi.BackuplocationsGet(ctx).Execute()
-	apiResponse.LogInfo()
-	return backupLocations, apiResponse, err
+	const pageSize int32 = 100
+	var (
+		all         []pgsqlv2.BackupLocationRead
+		offset      int32
+		apiResponse *shared.APIResponse
+	)
+	for {
+		page, resp, err := c.sdkClient.BackupLocationsApi.BackuplocationsGet(ctx).Offset(offset).Limit(pageSize).Execute()
+		resp.LogInfo()
+		apiResponse = resp
+		if err != nil {
+			return pgsqlv2.BackupLocationReadList{}, apiResponse, err
+		}
+		all = append(all, page.Items...)
+		// A short (or empty) page marks the end of the result set. Links.HasNext() is
+		// deliberately not used: it has been observed to stay populated past the last page.
+		if len(page.Items) < int(pageSize) {
+			page.Items = all
+			return page, apiResponse, nil
+		}
+		offset += pageSize
+	}
 }

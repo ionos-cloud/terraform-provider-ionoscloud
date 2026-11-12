@@ -14,9 +14,28 @@ func (c *Client) GetVersion(ctx context.Context, versionID string) (inmemorydbv3
 	return version, apiResponse, err
 }
 
-// ListVersions retrieves the list of all supported versions.
+// ListVersions retrieves the list of all supported versions, following pagination.
 func (c *Client) ListVersions(ctx context.Context) (inmemorydbv3.VersionReadList, *shared.APIResponse, error) {
-	versions, apiResponse, err := c.sdkClient.VersionsApi.VersionsGet(ctx).Execute()
-	apiResponse.LogInfo()
-	return versions, apiResponse, err
+	const pageSize int32 = 100
+	var (
+		all         []inmemorydbv3.VersionRead
+		offset      int32
+		apiResponse *shared.APIResponse
+	)
+	for {
+		page, resp, err := c.sdkClient.VersionsApi.VersionsGet(ctx).Offset(offset).Limit(pageSize).Execute()
+		resp.LogInfo()
+		apiResponse = resp
+		if err != nil {
+			return inmemorydbv3.VersionReadList{}, apiResponse, err
+		}
+		all = append(all, page.Items...)
+		// A short (or empty) page marks the end of the result set. Links.HasNext() is
+		// deliberately not used: it has been observed to stay populated past the last page.
+		if len(page.Items) < int(pageSize) {
+			page.Items = all
+			return page, apiResponse, nil
+		}
+		offset += pageSize
+	}
 }
