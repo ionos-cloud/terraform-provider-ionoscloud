@@ -1,3 +1,7 @@
+## 6.7.42 -- upcoming release
+### Refactor
+- Remove pagination for MongoDB v2
+
 ## 6.7.41
 ### Features
 - `ionoscloud_volume`, `ionoscloud_server`, `ionoscloud_cube_server`, `ionoscloud_gpu_server`, `ionoscloud_vcpu_server`: Allow setting `cpu_hot_plug`, `ram_hot_plug`, `nic_hot_plug`, `nic_hot_unplug`, `disc_virtio_hot_plug` and `disc_virtio_hot_unplug` on the volume/inline volume, instead of only exposing them as computed attributes.
