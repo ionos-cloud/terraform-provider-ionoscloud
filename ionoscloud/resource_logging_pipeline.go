@@ -82,10 +82,9 @@ func resourceLoggingPipeline() *schema.Resource {
 							Description: "The tag is used to distinguish different pipelines. Must be unique amongst the pipeline's array items.",
 						},
 						"protocol": {
-							Type:             schema.TypeString,
-							Required:         true,
-							Description:      "Protocol to use as intake. Possible values are: http, tcp.",
-							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"http", "tcp"}, false)),
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Protocol to use as intake. Possible values are: http, tcp, otlp.",
 						},
 						"public": {
 							Type:     schema.TypeBool,

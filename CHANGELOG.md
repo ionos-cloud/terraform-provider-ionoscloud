@@ -1,3 +1,8 @@
+## 6.7.42
+
+### Fixes
+- `ionoscloud_logging_pipeline`: Remove client-side validation of `log.protocol`, so newly supported protocols (e.g. `otlp`) are accepted without a provider release. Invalid values are rejected by the API.
+
 ## 6.7.41
 ### Features
 - `ionoscloud_volume`, `ionoscloud_server`, `ionoscloud_cube_server`, `ionoscloud_gpu_server`, `ionoscloud_vcpu_server`: Allow setting `cpu_hot_plug`, `ram_hot_plug`, `nic_hot_plug`, `nic_hot_unplug`, `disc_virtio_hot_plug` and `disc_virtio_hot_unplug` on the volume/inline volume, instead of only exposing them as computed attributes.

@@ -114,7 +114,7 @@ terraform apply -var-file="vars.tfvars"
 * `log` - (Required)[list] Pipeline logs, a list that contains elements with the following structure:
   * `source` - (Required)[string] The source parser to be used.
   * `tag` - (Required)[string] The tag is used to distinguish different pipelines. Must be unique amongst the pipeline's array items.
-  * `protocol` - (Required)[string] "Protocol to use as intake. Possible values are: http, tcp."
+  * `protocol` - (Required)[string] "Protocol to use as intake. Possible values are: http, tcp, otlp."
   * `destinations` - (Optional)[list] The configuration of the logs datastore, a list that contains elements with the following structure:
     * `type` - (Optional)[string] The internal output stream to send logs to.
     * `retention_in_days` - (Optional)[int] Defines the number of days a log record should be kept in loki. Works with loki destination type only. Can be one of: 7, 14, 30.
