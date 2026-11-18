@@ -17,37 +17,15 @@ func (c *Client) GetCluster(ctx context.Context, clusterID string) (pgsqlv2.Clus
 	return cluster, apiResponse, err
 }
 
-// ListClusters retrieves all clusters, following pagination. An optional name filter can be used.
+// ListClusters retrieves a list of clusters with an optional name filter.
 func (c *Client) ListClusters(ctx context.Context, filterName string) (pgsqlv2.ClusterReadList, *shared.APIResponse, error) {
-	const pageSize int32 = 100
-	var (
-		all         []pgsqlv2.ClusterRead
-		offset      int32
-		apiResponse *shared.APIResponse
-	)
-	for {
-		request := c.sdkClient.ClustersApi.ClustersGet(ctx).Offset(offset).Limit(pageSize)
-		if filterName != "" {
-			request = request.FilterName(filterName)
-		}
-		page, resp, err := request.Execute()
-		resp.LogInfo()
-		apiResponse = resp
-		if err != nil {
-			return pgsqlv2.ClusterReadList{}, apiResponse, err
-		}
-		all = append(all, page.Items...)
-		// We treat a short (or empty) page as the end of the result set; if the total
-		// count is an exact multiple of pageSize we may perform one extra request.
-		// Links.HasNext() is deliberately not used: it has been observed to stay
-		// populated past the last page, turning this into an infinite loop of
-		// ever-increasing offsets.
-		if len(page.Items) < int(pageSize) {
-			page.Items = all
-			return page, apiResponse, nil
-		}
-		offset += pageSize
+	request := c.sdkClient.ClustersApi.ClustersGet(ctx)
+	if filterName != "" {
+		request = request.FilterName(filterName)
 	}
+	clusters, apiResponse, err := request.Execute()
+	apiResponse.LogInfo()
+	return clusters, apiResponse, err
 }
 
 // CreateCluster creates a new cluster.
