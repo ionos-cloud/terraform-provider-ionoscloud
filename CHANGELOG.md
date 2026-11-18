@@ -1,7 +1,9 @@
-## 6.7.42
-
+## 6.7.42 -- upcoming release
 ### Fixes
 - `ionoscloud_logging_pipeline`: Remove client-side validation of `log.protocol`, so newly supported protocols (e.g. `otlp`) are accepted without a provider release. Invalid values are rejected by the API.
+
+### Refactor
+- add backups/snapshots pagination for InMemoryDB v2, MongoDB v2, PostgreSQL v2, MariaDB v2, remove pagination for MongoDB v2 templates, clusters, snapshot locations and versions.
 
 ## 6.7.41
 ### Features
