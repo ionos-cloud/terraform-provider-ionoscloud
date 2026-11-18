@@ -79,7 +79,7 @@ func dataSourceLoggingPipeline() *schema.Resource {
 						},
 						"protocol": {
 							Type:        schema.TypeString,
-							Description: "Protocol to use as intake. Possible values are: http, tcp.",
+							Description: "Protocol to use as intake. Possible values are: http, tcp, otlp.",
 							Computed:    true,
 						},
 						"public": {

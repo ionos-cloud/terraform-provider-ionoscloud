@@ -51,7 +51,7 @@ The following attributes are returned by the datasource:
 * `log` - [list] Pipeline logs, a list that contains elements with the following structure:
   * `source` - [string] The source parser to be used.
   * `tag` - [string] The tag is used to distinguish different pipelines. Must be unique amongst the pipeline's array items.
-  * `protocol` - [string] "Protocol to use as intake. Possible values are: http, tcp."
+  * `protocol` - [string] "Protocol to use as intake. Possible values are: http, tcp, otlp."
   * `public` - [bool]
   * `destinations` - [list] The configuration of the logs datastore, a list that contains elements with the following structure:
     * `type` - [string] The internal output stream to send logs to.
