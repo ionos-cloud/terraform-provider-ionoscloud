@@ -130,7 +130,7 @@ const (
 		resource "ionoscloud_kafka_cluster" "example" {
 		  name     = "terraform-test-kafka-cluster"
 		  location = "de/fra"
-		  version  = "3.9.0"
+		  version  = "4.0.0"
 		  size     = "S"
 		  connections {
 			datacenter_id = ionoscloud_datacenter.example.id

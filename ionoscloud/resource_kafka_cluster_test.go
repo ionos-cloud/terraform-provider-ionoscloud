@@ -180,7 +180,7 @@ const (
 	clusterAttributeNameValue = "test_kafka_cluster"
 
 	clusterAttributeVersion      = "version"
-	clusterAttributeVersionValue = "3.9.0"
+	clusterAttributeVersionValue = "4.0.0"
 
 	clusterAttributeSize      = "size"
 	clusterAttributeSizeValue = "S"

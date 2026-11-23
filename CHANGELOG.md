@@ -1,3 +1,8 @@
+## 6.7.43
+
+### Fixes
+- Update Kafka documentation to state that version 4.0.0 is supported in all relevant resources and data sources.
+
 ## 6.7.42
 
 ### Features

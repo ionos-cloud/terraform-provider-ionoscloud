@@ -47,7 +47,7 @@ func resourceKafkaCluster() *schema.Resource {
 			},
 			"version": {
 				Type:        schema.TypeString,
-				Description: "The desired Kafka Version. Supported versions: 3.9.0",
+				Description: "The desired Kafka Version. Supported versions: 4.0.0",
 				ForceNew:    true,
 				Required:    true,
 			},
