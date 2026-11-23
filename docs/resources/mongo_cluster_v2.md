@@ -146,7 +146,7 @@ resource "ionoscloud_mongo_cluster_v2" "example" {
   * `instance_addresses` - (Required)[list of string] A list of IP addresses (with netmask, in CIDR notation) assigned to the cluster instances. The number of addresses must match the number of instances in the cluster. The range `10.208.0.0/12` is not available.
 * `snapshot` - (Required)[object] Snapshot storage and retention configuration for the cluster.
   * `location` - (Required)[string] The Object Storage location where the snapshots will be created. For added data safety, use a different location than the cluster.
-  * `retention_days` - (Required)[int] Configures how many days cluster snapshots are retained before being automatically deleted (between 1 and 365).
+  * `retention_days` - (Required)[int] Configures how many days cluster snapshots are retained before being automatically deleted. Accepted values: `3`, `4`, `5`, `6`, `7`, `15`, `30`, `60`, `90`, `120`, `180`, `360`. Reducing this value purges existing snapshots that fall outside the new retention window.
 * `maintenance_window` - (Required)[object] A weekly 4 hour-long window, during which maintenance might occur.
   * `time` - (Required)[string] Start of the maintenance window in UTC time (`HH:MM:SS`).
   * `day_of_the_week` - (Required)[string] The name of the week day: `Monday`, `Tuesday`, `Wednesday`, `Thursday`, `Friday`, `Saturday` or `Sunday`.

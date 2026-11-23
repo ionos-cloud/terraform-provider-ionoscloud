@@ -305,7 +305,7 @@ func (r *clusterResource) Schema(ctx context.Context, req resource.SchemaRequest
 					},
 					"retention_days": schema.Int32Attribute{
 						Required:    true,
-						Description: "Configures how many days cluster snapshots are retained before being automatically deleted (between 1 and 365). Reducing this value purges existing snapshots that fall outside the new retention window.",
+						Description: "Configures how many days cluster snapshots are retained before being automatically deleted. Accepted values: 3, 4, 5, 6, 7, 15, 30, 60, 90, 120, 180, 360. Reducing this value purges existing snapshots that fall outside the new retention window.",
 					},
 				},
 			},
