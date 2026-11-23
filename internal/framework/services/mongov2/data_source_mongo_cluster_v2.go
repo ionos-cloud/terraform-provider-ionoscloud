@@ -27,7 +27,6 @@ type clusterDataSource struct {
 }
 
 type clusterDataSourceModel struct {
-	BiConnectorEnabled types.Bool                  `tfsdk:"bi_connector_enabled"`
 	ConnectionURI      types.String                `tfsdk:"connection_uri"`
 	Connections        *connectionModel            `tfsdk:"connections"`
 	Credentials        *credentialsDataSourceModel `tfsdk:"credentials"`
@@ -185,7 +184,6 @@ func mapClusterResponseToDataSourceModel(ctx context.Context, cluster *mongov3.C
 		model.Version = types.StringValue(ent.Version)
 		model.LogsEnabled = types.BoolPointerValue(ent.LogsEnabled)
 		model.MetricsEnabled = types.BoolPointerValue(ent.MetricsEnabled)
-		model.BiConnectorEnabled = types.BoolPointerValue(ent.BiConnectorEnabled)
 		model.Instances = &instancesModel{
 			Cores:       types.Int32Value(ent.Instances.Cores),
 			Count:       types.Int32Value(ent.Instances.Count),
@@ -235,7 +233,7 @@ func mapCommonDataSourceFields(ctx context.Context, model *clusterDataSourceMode
 
 	model.Snapshot = &snapshotConfigModel{
 		Location:      types.StringValue(snapshot.Location),
-		RetentionDays: types.Int32Value(snapshot.RetentionDays),
+		RetentionDays: types.Int32Value(int32(snapshot.RetentionDays)),
 	}
 
 	if credentials != nil {
@@ -259,8 +257,7 @@ func clusterListItemAttributes() map[string]schema.Attribute {
 
 func clusterDataSourceAttributes() map[string]schema.Attribute {
 	return map[string]schema.Attribute{
-		"bi_connector_enabled": schema.BoolAttribute{Computed: true, Description: "Whether the MongoDB BI Connector is enabled. Only set for the ENTERPRISE edition."},
-		"connection_uri":       schema.StringAttribute{Computed: true, Description: "The connection string used to access the cluster."},
+		"connection_uri": schema.StringAttribute{Computed: true, Description: "The connection string used to access the cluster."},
 		"connections": schema.SingleNestedAttribute{
 			Computed:    true,
 			Description: "Connection information of the MongoDB cluster.",

@@ -23,10 +23,13 @@ func NewClientFromConfig(config *shared.Configuration) *Client {
 
 // LocationToURL maps a location to the MongoDB v2 regional API endpoint.
 // The endpoints are the servers advertised by the MongoDB v2 API spec.
-// TODO -- Add all locations here after they become available.
 var LocationToURL = map[string]string{
+	"es/vit": "https://mongodb.es-vit.ionos.com/v2",
+	"fr/par": "https://mongodb.fr-par.ionos.com/v2",
 	"gb/bhx": "https://mongodb.gb-bhx.ionos.com/v2",
+	"gb/lhr": "https://mongodb.gb-lhr.ionos.com/v2",
 	"us/ewr": "https://mongodb.us-ewr.ionos.com/v2",
+	"us/mci": "https://mongodb.us-mci.ionos.com/v2",
 }
 
 // AvailableLocations returns a sorted list of available MongoDB v2 locations.

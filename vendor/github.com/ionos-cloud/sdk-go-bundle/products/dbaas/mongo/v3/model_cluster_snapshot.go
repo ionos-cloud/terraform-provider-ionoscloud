@@ -21,16 +21,15 @@ var _ MappedNullable = &ClusterSnapshot{}
 // ClusterSnapshot Snapshot storage and retention configuration for the cluster.
 type ClusterSnapshot struct {
 	// The Object Storage location where the snapshots will be created. For added data safety, use a different location than the cluster.
-	Location string `json:"location"`
-	// Configures how many days cluster snapshots are retained before being automatically deleted. Reducing this value purges existing snapshots that fall outside the new retention window.
-	RetentionDays int32 `json:"retentionDays"`
+	Location      string                `json:"location"`
+	RetentionDays SnapshotRetentionDays `json:"retentionDays"`
 }
 
 // NewClusterSnapshot instantiates a new ClusterSnapshot object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewClusterSnapshot(location string, retentionDays int32) *ClusterSnapshot {
+func NewClusterSnapshot(location string, retentionDays SnapshotRetentionDays) *ClusterSnapshot {
 	this := ClusterSnapshot{}
 
 	this.Location = location
@@ -72,9 +71,9 @@ func (o *ClusterSnapshot) SetLocation(v string) {
 }
 
 // GetRetentionDays returns the RetentionDays field value
-func (o *ClusterSnapshot) GetRetentionDays() int32 {
+func (o *ClusterSnapshot) GetRetentionDays() SnapshotRetentionDays {
 	if o == nil {
-		var ret int32
+		var ret SnapshotRetentionDays
 		return ret
 	}
 
@@ -83,7 +82,7 @@ func (o *ClusterSnapshot) GetRetentionDays() int32 {
 
 // GetRetentionDaysOk returns a tuple with the RetentionDays field value
 // and a boolean to check if the value has been set.
-func (o *ClusterSnapshot) GetRetentionDaysOk() (*int32, bool) {
+func (o *ClusterSnapshot) GetRetentionDaysOk() (*SnapshotRetentionDays, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -91,7 +90,7 @@ func (o *ClusterSnapshot) GetRetentionDaysOk() (*int32, bool) {
 }
 
 // SetRetentionDays sets field value
-func (o *ClusterSnapshot) SetRetentionDays(v int32) {
+func (o *ClusterSnapshot) SetRetentionDays(v SnapshotRetentionDays) {
 	o.RetentionDays = v
 }
 

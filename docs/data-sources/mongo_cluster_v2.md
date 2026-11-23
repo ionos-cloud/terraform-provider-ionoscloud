@@ -33,7 +33,7 @@ data "ionoscloud_mongo_cluster_v2" "by_name" {
 
 * `id` - (Optional)[string] The UUID of the cluster.
 * `name` - (Optional)[string] The cluster name (exact match).
-* `location` - (Required)[string] The location of the cluster. Available locations: `gb/bhx`, `us/ewr`.
+* `location` - (Required)[string] The location of the cluster. Available locations: `es/vit`, `fr/par`, `gb/bhx`, `gb/lhr`, `us/ewr`, `us/mci`.
 
 > **Note:** Exactly one of `id` or `name` must be provided. If none, or both are provided, the datasource will return an error.
 
@@ -48,7 +48,6 @@ The following attributes are returned by the datasource:
 * `version` - The MongoDB version for the cluster.
 * `description` - Human-readable description for the cluster.
 * `connection_uri` - The connection string used to access the cluster.
-* `bi_connector_enabled` - Whether the MongoDB BI Connector is enabled. Only set for the `ENTERPRISE` edition.
 * `logs_enabled` - Whether log collection and reporting is enabled for this cluster's observability.
 * `metrics_enabled` - Whether metrics collection and reporting is enabled for this cluster's observability.
 * `instance_count` - The number of instances in the cluster. Only set for the `BUSINESS` edition.

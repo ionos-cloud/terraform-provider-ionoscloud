@@ -27,7 +27,7 @@ data "ionoscloud_mongo_clusters_v2" "filtered" {
 
 ## Argument Reference
 
-* `location` - (Required)[string] The location to query. Available locations: `gb/bhx`, `us/ewr`.
+* `location` - (Required)[string] The location to query. Available locations: `es/vit`, `fr/par`, `gb/bhx`, `gb/lhr`, `us/ewr`, `us/mci`.
 * `name` - (Optional)[string] Filter clusters by name (partial match).
 * `edition` - (Optional)[string] Filter clusters by edition (`ENTERPRISE` or `BUSINESS`).
 

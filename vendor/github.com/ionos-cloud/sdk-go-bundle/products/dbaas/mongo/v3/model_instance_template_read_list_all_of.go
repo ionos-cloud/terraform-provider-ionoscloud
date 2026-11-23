@@ -28,18 +28,21 @@ type InstanceTemplateReadListAllOf struct {
 	Href string `json:"href"`
 	// The list of InstanceTemplate resources.
 	Items []InstanceTemplateRead `json:"items,omitempty"`
+	// Total elements available in the pagination.  It can be used, for example, to display the total number of elements in a table.
+	Total int32 `json:"total"`
 }
 
 // NewInstanceTemplateReadListAllOf instantiates a new InstanceTemplateReadListAllOf object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewInstanceTemplateReadListAllOf(id string, type_ string, href string) *InstanceTemplateReadListAllOf {
+func NewInstanceTemplateReadListAllOf(id string, type_ string, href string, total int32) *InstanceTemplateReadListAllOf {
 	this := InstanceTemplateReadListAllOf{}
 
 	this.Id = id
 	this.Type = type_
 	this.Href = href
+	this.Total = total
 
 	return &this
 }
@@ -156,6 +159,30 @@ func (o *InstanceTemplateReadListAllOf) SetItems(v []InstanceTemplateRead) {
 	o.Items = v
 }
 
+// GetTotal returns the Total field value
+func (o *InstanceTemplateReadListAllOf) GetTotal() int32 {
+	if o == nil {
+		var ret int32
+		return ret
+	}
+
+	return o.Total
+}
+
+// GetTotalOk returns a tuple with the Total field value
+// and a boolean to check if the value has been set.
+func (o *InstanceTemplateReadListAllOf) GetTotalOk() (*int32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Total, true
+}
+
+// SetTotal sets field value
+func (o *InstanceTemplateReadListAllOf) SetTotal(v int32) {
+	o.Total = v
+}
+
 func (o InstanceTemplateReadListAllOf) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -172,6 +199,7 @@ func (o InstanceTemplateReadListAllOf) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Items) {
 		toSerialize["items"] = o.Items
 	}
+	toSerialize["total"] = o.Total
 	return toSerialize, nil
 }
 

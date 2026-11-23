@@ -28,6 +28,8 @@ type SnapshotReadList struct {
 	Href string `json:"href"`
 	// The list of Snapshot resources.
 	Items []SnapshotRead `json:"items,omitempty"`
+	// Total elements available in the pagination.  It can be used, for example, to display the total number of elements in a table.
+	Total int32 `json:"total"`
 	// The offset specified in the request (if none was specified, the default offset is 0).
 	Offset int32 `json:"offset"`
 	// The limit specified in the request (if none was specified, use the endpoint's default pagination limit).
@@ -39,12 +41,13 @@ type SnapshotReadList struct {
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewSnapshotReadList(id string, type_ string, href string, offset int32, limit int32, links Links) *SnapshotReadList {
+func NewSnapshotReadList(id string, type_ string, href string, total int32, offset int32, limit int32, links Links) *SnapshotReadList {
 	this := SnapshotReadList{}
 
 	this.Id = id
 	this.Type = type_
 	this.Href = href
+	this.Total = total
 	this.Offset = offset
 	this.Limit = limit
 	this.Links = links
@@ -164,6 +167,30 @@ func (o *SnapshotReadList) SetItems(v []SnapshotRead) {
 	o.Items = v
 }
 
+// GetTotal returns the Total field value
+func (o *SnapshotReadList) GetTotal() int32 {
+	if o == nil {
+		var ret int32
+		return ret
+	}
+
+	return o.Total
+}
+
+// GetTotalOk returns a tuple with the Total field value
+// and a boolean to check if the value has been set.
+func (o *SnapshotReadList) GetTotalOk() (*int32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Total, true
+}
+
+// SetTotal sets field value
+func (o *SnapshotReadList) SetTotal(v int32) {
+	o.Total = v
+}
+
 // GetOffset returns the Offset field value
 func (o *SnapshotReadList) GetOffset() int32 {
 	if o == nil {
@@ -252,6 +279,7 @@ func (o SnapshotReadList) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Items) {
 		toSerialize["items"] = o.Items
 	}
+	toSerialize["total"] = o.Total
 	toSerialize["offset"] = o.Offset
 	toSerialize["limit"] = o.Limit
 	toSerialize["_links"] = o.Links

@@ -3,6 +3,7 @@ package mongov2
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -18,20 +19,24 @@ import (
 var _ datasource.DataSourceWithConfigure = (*versionsDataSource)(nil)
 
 type versionDataSourceModel struct {
-	CanUpgradeTo types.List   `tfsdk:"can_upgrade_to"`
-	Comment      types.String `tfsdk:"comment"`
-	ID           types.String `tfsdk:"id"`
-	Status       types.String `tfsdk:"status"`
-	Version      types.String `tfsdk:"version"`
+	CanUpgradeTo       types.List   `tfsdk:"can_upgrade_to"`
+	Comment            types.String `tfsdk:"comment"`
+	CreationFreezeDate types.String `tfsdk:"creation_freeze_date"`
+	DeprecationDate    types.String `tfsdk:"deprecation_date"`
+	ID                 types.String `tfsdk:"id"`
+	Status             types.String `tfsdk:"status"`
+	Version            types.String `tfsdk:"version"`
 }
 
 func versionDataSourceAttributes() map[string]schema.Attribute {
 	return map[string]schema.Attribute{
-		"can_upgrade_to": schema.ListAttribute{Computed: true, ElementType: types.StringType, Description: "List of versions this version can be upgraded to. Only versions listed here are valid upgrade targets when changing the `version` field. Downgrades are not supported."},
-		"comment":        schema.StringAttribute{Computed: true, Description: "Additional information about the version status."},
-		"id":             schema.StringAttribute{Computed: true, Description: "The ID (UUID) of the version."},
-		"status":         schema.StringAttribute{Computed: true, Description: "The support status of the version (one of `BETA`, `SUPPORTED`, `RECOMMENDED`, `DEPRECATED`)."},
-		"version":        schema.StringAttribute{Computed: true, Description: "The MongoDB version string."},
+		"can_upgrade_to":       schema.ListAttribute{Computed: true, ElementType: types.StringType, Description: "List of versions this version can be upgraded to. Only versions listed here are valid upgrade targets when changing the `version` field. Downgrades are not supported."},
+		"comment":              schema.StringAttribute{Computed: true, Description: "Additional information about the version status."},
+		"creation_freeze_date": schema.StringAttribute{Computed: true, Description: "The date (RFC 3339) after which new clusters can no longer be created with this version. Empty if not set."},
+		"deprecation_date":     schema.StringAttribute{Computed: true, Description: "The date (RFC 3339) on which this version becomes deprecated. Empty if not set."},
+		"id":                   schema.StringAttribute{Computed: true, Description: "The ID (UUID) of the version."},
+		"status":               schema.StringAttribute{Computed: true, Description: "The support status of the version (one of `BETA`, `SUPPORTED`, `RECOMMENDED`, `DEPRECATED`)."},
+		"version":              schema.StringAttribute{Computed: true, Description: "The MongoDB version string."},
 	}
 }
 
@@ -132,6 +137,8 @@ func mapVersionToModel(ctx context.Context, props *mongov3.MongoVersion, model *
 	model.Version = types.StringPointerValue(props.Version)
 	model.Status = types.StringPointerValue(props.Status)
 	model.Comment = types.StringPointerValue(props.Comment)
+	model.CreationFreezeDate = formatOptionalTime(props.GetCreationFreezeDateOk())
+	model.DeprecationDate = formatOptionalTime(props.GetDeprecationDateOk())
 
 	listVal, diags := types.ListValueFrom(ctx, types.StringType, props.CanUpgradeTo)
 	diagnostics.Append(diags...)
@@ -140,4 +147,13 @@ func mapVersionToModel(ctx context.Context, props *mongov3.MongoVersion, model *
 	}
 	model.CanUpgradeTo = listVal
 	return diagnostics
+}
+
+// formatOptionalTime renders an optional SDK time (as returned by the GetXxxOk getters) as an RFC 3339
+// string, or null when the field is not set.
+func formatOptionalTime(t *time.Time, ok bool) types.String {
+	if !ok || t == nil {
+		return types.StringNull()
+	}
+	return types.StringValue(t.Format(time.RFC3339))
 }

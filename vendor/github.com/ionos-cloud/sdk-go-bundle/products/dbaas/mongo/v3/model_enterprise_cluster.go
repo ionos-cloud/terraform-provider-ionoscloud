@@ -33,8 +33,6 @@ type EnterpriseCluster struct {
 	Edition             MongoEdition              `json:"edition"`
 	Sharding            *MongoSharding            `json:"sharding,omitempty"`
 	Instances           InstanceConfiguration     `json:"instances"`
-	// A flag to enable or disable the MongoDB BI Connector for this cluster. Can only be enabled if the MongoDB edition is ENTERPRISE. When enabled, the BI Connector is reachable over the MySQL wire protocol at host `bi-connect.<mongo-host>` on the fixed port `27015` (for example, `bi-connect.m-12abd343.mongodb.gb-bhx.ionoscloud.com:27015`).
-	BiConnectorEnabled *bool `json:"biConnectorEnabled,omitempty"`
 	// Allows or disallows the collection and reporting of logs for this cluster's observability. If the observability service is not activated on the contract, this setting is accepted but has no effect; log collection will not be enabled until the observability service is activated.
 	LogsEnabled *bool `json:"logsEnabled,omitempty"`
 	// Allows or disallows the collection and reporting of metrics for this cluster's observability. If the observability service is not activated on the contract, this setting is accepted but has no effect; metric collection will not be enabled until the observability service is activated.
@@ -55,8 +53,6 @@ func NewEnterpriseCluster(name string, version string, connection MongoClusterCo
 	this.MaintenanceWindow = maintenanceWindow
 	this.Edition = edition
 	this.Instances = instances
-	var biConnectorEnabled bool = false
-	this.BiConnectorEnabled = &biConnectorEnabled
 	var logsEnabled bool = false
 	this.LogsEnabled = &logsEnabled
 	var metricsEnabled bool = false
@@ -71,8 +67,6 @@ func NewEnterpriseCluster(name string, version string, connection MongoClusterCo
 // but it doesn't guarantee that properties required by API are set
 func NewEnterpriseClusterWithDefaults() *EnterpriseCluster {
 	this := EnterpriseCluster{}
-	var biConnectorEnabled bool = false
-	this.BiConnectorEnabled = &biConnectorEnabled
 	var logsEnabled bool = false
 	this.LogsEnabled = &logsEnabled
 	var metricsEnabled bool = false
@@ -352,38 +346,6 @@ func (o *EnterpriseCluster) SetInstances(v InstanceConfiguration) {
 	o.Instances = v
 }
 
-// GetBiConnectorEnabled returns the BiConnectorEnabled field value if set, zero value otherwise.
-func (o *EnterpriseCluster) GetBiConnectorEnabled() bool {
-	if o == nil || IsNil(o.BiConnectorEnabled) {
-		var ret bool
-		return ret
-	}
-	return *o.BiConnectorEnabled
-}
-
-// GetBiConnectorEnabledOk returns a tuple with the BiConnectorEnabled field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *EnterpriseCluster) GetBiConnectorEnabledOk() (*bool, bool) {
-	if o == nil || IsNil(o.BiConnectorEnabled) {
-		return nil, false
-	}
-	return o.BiConnectorEnabled, true
-}
-
-// HasBiConnectorEnabled returns a boolean if a field has been set.
-func (o *EnterpriseCluster) HasBiConnectorEnabled() bool {
-	if o != nil && !IsNil(o.BiConnectorEnabled) {
-		return true
-	}
-
-	return false
-}
-
-// SetBiConnectorEnabled gets a reference to the given bool and assigns it to the BiConnectorEnabled field.
-func (o *EnterpriseCluster) SetBiConnectorEnabled(v bool) {
-	o.BiConnectorEnabled = &v
-}
-
 // GetLogsEnabled returns the LogsEnabled field value if set, zero value otherwise.
 func (o *EnterpriseCluster) GetLogsEnabled() bool {
 	if o == nil || IsNil(o.LogsEnabled) {
@@ -500,9 +462,6 @@ func (o EnterpriseCluster) ToMap() (map[string]interface{}, error) {
 		toSerialize["sharding"] = o.Sharding
 	}
 	toSerialize["instances"] = o.Instances
-	if !IsNil(o.BiConnectorEnabled) {
-		toSerialize["biConnectorEnabled"] = o.BiConnectorEnabled
-	}
 	if !IsNil(o.LogsEnabled) {
 		toSerialize["logsEnabled"] = o.LogsEnabled
 	}

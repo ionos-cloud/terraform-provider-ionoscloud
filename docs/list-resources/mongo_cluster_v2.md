@@ -73,7 +73,7 @@ The `config` block supports the following arguments:
   - `field_name` - (Required) The field to filter on. Supported values: `name`, `location`.
   - `field_value` - (Required) The exact value to match against.
 
-Supported `location` values: `gb/bhx`, `us/ewr`.
+Supported `location` values: `es/vit`, `fr/par`, `gb/bhx`, `gb/lhr`, `us/ewr`, `us/mci`.
 
 > **Performance note:** When no `location` filter is set, the provider queries every regional endpoint in sequence. Adding a `location` filter reduces the query to a single endpoint call.
 
@@ -97,7 +97,6 @@ Each result exposes the following attributes when `include_resource = true`, mat
 - `version` - The MongoDB version for the cluster.
 - `description` - A human-readable description for the cluster.
 - `connection_uri` - The connection string used to access the cluster.
-- `bi_connector_enabled` - Whether the MongoDB BI Connector is enabled. Only set for the `ENTERPRISE` edition.
 - `logs_enabled` - Whether log collection and reporting is enabled.
 - `metrics_enabled` - Whether metrics collection and reporting is enabled.
 - `instance_count` - The number of instances in the cluster. Only set for the `BUSINESS` edition.

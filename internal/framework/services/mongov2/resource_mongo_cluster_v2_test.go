@@ -162,7 +162,7 @@ func TestAccMongoV2Cluster(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					checkClusterExists(clusterResourceAddr),
 					resource.TestCheckResourceAttr(clusterResourceAddr, "description", "Updated MongoDB V2 cluster"),
-					resource.TestCheckResourceAttr(clusterResourceAddr, "snapshot.retention_days", "14"),
+					resource.TestCheckResourceAttr(clusterResourceAddr, "snapshot.retention_days", "15"),
 					resource.TestCheckResourceAttr(clusterResourceAddr, "maintenance_window.time", "12:00:00"),
 					resource.TestCheckResourceAttr(clusterResourceAddr, "maintenance_window.day_of_the_week", "Wednesday"),
 					resource.TestCheckResourceAttr(clusterResourceAddr, "logs_enabled", "false"),
@@ -187,7 +187,6 @@ func TestAccMongoV2ClusterBusiness(t *testing.T) {
 					resource.TestCheckResourceAttr(clusterResourceAddr, "instance_count", "1"),
 					resource.TestCheckResourceAttrSet(clusterResourceAddr, "instance_template_id"),
 					// ENTERPRISE-only attrs must be absent/known for BUSINESS.
-					resource.TestCheckNoResourceAttr(clusterResourceAddr, "bi_connector_enabled"),
 					resource.TestCheckNoResourceAttr(clusterResourceAddr, "instances.count"),
 					resource.TestCheckResourceAttrSet(clusterResourceAddr, "connection_uri"),
 					resource.TestCheckResourceAttr(clusterResourceAddr, "credentials.username", "dbadmin"),
@@ -307,7 +306,7 @@ resource "ionoscloud_mongo_cluster_v2" "test" {
 
   snapshot = {
     location       = "eu-central-3"
-    retention_days = 14
+    retention_days = 15
   }
 
   maintenance_window = {
