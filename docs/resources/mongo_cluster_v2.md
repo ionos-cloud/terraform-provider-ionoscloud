@@ -13,7 +13,7 @@ Manages a DBaaS MongoDB V2 Cluster.
 
 A cluster has one of two editions, selected with the `edition` attribute:
 
-* `ENTERPRISE` — compute and storage are set directly via the `instances` object; supports `sharding` and `bi_connector_enabled`.
+* `ENTERPRISE` — compute and storage are set directly via the `instances` object; supports `sharding`.
 * `BUSINESS` — compute and storage come from a predefined template via `instance_template_id`, and the number of instances via `instance_count`.
 
 ## Example Usage — ENTERPRISE edition
@@ -123,7 +123,7 @@ resource "ionoscloud_mongo_cluster_v2" "example" {
 
 ## Argument Reference
 
-* `location` - (Required)[string] The location of the cluster. Changing this forces a new resource. Available: `gb/bhx`, `us/ewr`.
+* `location` - (Required)[string] The location of the cluster. Changing this forces a new resource. Available: `es/vit`, `fr/par`, `gb/bhx`, `gb/lhr`, `us/ewr`, `us/mci`.
 * `name` - (Required)[string] The name of the MongoDB cluster. Between 2 and 63 characters; must begin and end with an alphanumeric character, with dashes, underscores, dots and alphanumerics in between.
 * `edition` - (Required)[string] The edition of the MongoDB cluster: `ENTERPRISE` or `BUSINESS`. Changing this forces a new resource.
 * `version` - (Required)[string] The MongoDB version for the cluster, e.g. `6.0`, `7.0`, `8.0`. See the [`ionoscloud_mongo_versions_v2`](../data-sources/mongo_versions_v2.md) data source for the list of supported versions and their available upgrade paths.
@@ -140,7 +140,6 @@ resource "ionoscloud_mongo_cluster_v2" "example" {
 * `sharding` - (Optional)[object] Sharding properties. Can only be set for the `ENTERPRISE` edition.
   * `enabled` - (Required)[bool] Activates or deactivates sharding for this cluster.
   * `shards` - (Optional)(Computed)[int] The number of shards to create in the cluster (between 2 and 5). When sharding is enabled, the instances count signifies the number of replicas per shard.
-* `bi_connector_enabled` - (Optional)(Computed)[bool] Enables or disables the MongoDB BI Connector. Can only be enabled for the `ENTERPRISE` edition. Defaults to false.
 * `connections` - (Required)[object] Connection information of the MongoDB cluster.
   * `datacenter_id` - (Required)[string] The datacenter to connect your instance to. **Immutable** — changing it forces a new resource.
   * `lan_id` - (Required)[string] The numeric LAN ID to connect your instance to. **Immutable** — changing it forces a new resource.

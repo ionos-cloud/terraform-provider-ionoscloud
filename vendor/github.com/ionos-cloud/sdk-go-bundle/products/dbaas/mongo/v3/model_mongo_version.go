@@ -13,6 +13,8 @@ package mongo
 
 import (
 	"encoding/json"
+
+	"time"
 )
 
 // checks if the MongoVersion type satisfies the MappedNullable interface at compile time
@@ -22,6 +24,10 @@ var _ MappedNullable = &MongoVersion{}
 type MongoVersion struct {
 	// The MongoDB version for the cluster. Use GET /versions to retrieve the list of supported versions and their available upgrade paths.
 	Version *string `json:"version,omitempty"`
+	// Creation freeze date.
+	CreationFreezeDate *IonosTime `json:"creationFreezeDate,omitempty"`
+	// Deprecation date.
+	DeprecationDate *IonosTime `json:"deprecationDate,omitempty"`
 	// The support status of the version.
 	Status *string `json:"status,omitempty"`
 	// Additional information about the version status.
@@ -78,6 +84,70 @@ func (o *MongoVersion) HasVersion() bool {
 // SetVersion gets a reference to the given string and assigns it to the Version field.
 func (o *MongoVersion) SetVersion(v string) {
 	o.Version = &v
+}
+
+// GetCreationFreezeDate returns the CreationFreezeDate field value if set, zero value otherwise.
+func (o *MongoVersion) GetCreationFreezeDate() time.Time {
+	if o == nil || IsNil(o.CreationFreezeDate) {
+		var ret time.Time
+		return ret
+	}
+	return o.CreationFreezeDate.Time
+}
+
+// GetCreationFreezeDateOk returns a tuple with the CreationFreezeDate field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *MongoVersion) GetCreationFreezeDateOk() (*time.Time, bool) {
+	if o == nil || IsNil(o.CreationFreezeDate) {
+		return nil, false
+	}
+	return &o.CreationFreezeDate.Time, true
+}
+
+// HasCreationFreezeDate returns a boolean if a field has been set.
+func (o *MongoVersion) HasCreationFreezeDate() bool {
+	if o != nil && !IsNil(o.CreationFreezeDate) {
+		return true
+	}
+
+	return false
+}
+
+// SetCreationFreezeDate gets a reference to the given time.Time and assigns it to the CreationFreezeDate field.
+func (o *MongoVersion) SetCreationFreezeDate(v time.Time) {
+	o.CreationFreezeDate = &IonosTime{v}
+}
+
+// GetDeprecationDate returns the DeprecationDate field value if set, zero value otherwise.
+func (o *MongoVersion) GetDeprecationDate() time.Time {
+	if o == nil || IsNil(o.DeprecationDate) {
+		var ret time.Time
+		return ret
+	}
+	return o.DeprecationDate.Time
+}
+
+// GetDeprecationDateOk returns a tuple with the DeprecationDate field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *MongoVersion) GetDeprecationDateOk() (*time.Time, bool) {
+	if o == nil || IsNil(o.DeprecationDate) {
+		return nil, false
+	}
+	return &o.DeprecationDate.Time, true
+}
+
+// HasDeprecationDate returns a boolean if a field has been set.
+func (o *MongoVersion) HasDeprecationDate() bool {
+	if o != nil && !IsNil(o.DeprecationDate) {
+		return true
+	}
+
+	return false
+}
+
+// SetDeprecationDate gets a reference to the given time.Time and assigns it to the DeprecationDate field.
+func (o *MongoVersion) SetDeprecationDate(v time.Time) {
+	o.DeprecationDate = &IonosTime{v}
 }
 
 // GetStatus returns the Status field value if set, zero value otherwise.
@@ -188,6 +258,12 @@ func (o MongoVersion) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Version) {
 		toSerialize["version"] = o.Version
+	}
+	if !IsNil(o.CreationFreezeDate) {
+		toSerialize["creationFreezeDate"] = o.CreationFreezeDate
+	}
+	if !IsNil(o.DeprecationDate) {
+		toSerialize["deprecationDate"] = o.DeprecationDate
 	}
 	if !IsNil(o.Status) {
 		toSerialize["status"] = o.Status

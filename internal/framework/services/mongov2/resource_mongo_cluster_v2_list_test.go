@@ -95,7 +95,6 @@ func TestMongoClusterV2ListResource(t *testing.T) {
 		assert.Equal(t, "7.0", resource["version"])
 		assert.Equal(t, "the enterprise cluster", resource["description"])
 		assert.Equal(t, "mongodb://enterprise.example.com", resource["connection_uri"])
-		assert.Equal(t, true, resource["bi_connector_enabled"])
 		assert.Equal(t, true, resource["logs_enabled"])
 		assert.Equal(t, false, resource["metrics_enabled"])
 
@@ -130,13 +129,11 @@ func TestMongoClusterV2ListResource(t *testing.T) {
 		assert.Equal(t, "BUSINESS", resource["edition"])
 		assert.Equal(t, "7.0", resource["version"])
 
-		// BUSINESS reports the template id and instance count; ENTERPRISE-only blocks and
-		// bi_connector_enabled stay null.
+		// BUSINESS reports the template id and instance count; ENTERPRISE-only blocks stay null.
 		assert.Equal(t, "template-xl", resource["instance_template_id"])
 		assert.Equal(t, int64(3), resource["instance_count"])
 		assert.Nil(t, resource["instances"])
 		assert.Nil(t, resource["sharding"])
-		assert.Nil(t, resource["bi_connector_enabled"])
 
 		assertCommonFields(t, resource)
 	})
@@ -197,19 +194,18 @@ func stubMongoAPI(t *testing.T) {
 				Id:       "11111111-1111-1111-1111-111111111111",
 				Metadata: mongov3.ClusterMetadata{ConnectionUri: new("mongodb://enterprise.example.com")},
 				Properties: mongov3.EnterpriseClusterAsCluster(&mongov3.EnterpriseCluster{
-					Name:               "enterprise-cluster",
-					Description:        new("the enterprise cluster"),
-					Version:            "7.0",
-					Edition:            mongov3.MONGOEDITION_ENTERPRISE,
-					BiConnectorEnabled: new(true),
-					LogsEnabled:        new(true),
-					MetricsEnabled:     new(false),
-					Instances:          mongov3.InstanceConfiguration{Count: 3, Ram: 16, Cores: 2, StorageSize: 100},
-					Sharding:           &mongov3.MongoSharding{Enabled: new(true), Shards: new(int32(3))},
-					Connection:         commonConnection(),
-					MaintenanceWindow:  commonMaintenanceWindow(),
-					Snapshot:           commonSnapshot(),
-					Credentials:        commonCredentials(),
+					Name:              "enterprise-cluster",
+					Description:       new("the enterprise cluster"),
+					Version:           "7.0",
+					Edition:           mongov3.MONGOEDITION_ENTERPRISE,
+					LogsEnabled:       new(true),
+					MetricsEnabled:    new(false),
+					Instances:         mongov3.InstanceConfiguration{Count: 3, Ram: 16, Cores: 2, StorageSize: 100},
+					Sharding:          &mongov3.MongoSharding{Enabled: new(true), Shards: new(int32(3))},
+					Connection:        commonConnection(),
+					MaintenanceWindow: commonMaintenanceWindow(),
+					Snapshot:          commonSnapshot(),
+					Credentials:       commonCredentials(),
 				}),
 			},
 			{

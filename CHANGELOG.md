@@ -1,7 +1,14 @@
-## 6.7.42
+## 6.7.42 -- upcoming release
+
+### Features
+- MongoDB V2: add support for the `gb/lhr`, `fr/par`, `es/vit` and `us/mci` locations.
+- `ionoscloud_mongo_versions_v2`: add `creation_freeze_date` and `deprecation_date` fields.
 
 ### Fixes
 - `ionoscloud_logging_pipeline`: Remove client-side validation of `log.protocol`, so newly supported protocols (e.g. `otlp`) are accepted without a provider release. Invalid values are rejected by the API.
+
+### Breaking changes
+- `ionoscloud_mongo_cluster_v2`: remove the `bi_connector_enabled` attribute.
 
 ## 6.7.41
 ### Features

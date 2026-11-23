@@ -187,7 +187,6 @@ func TestAccMongoV2ClusterBusiness(t *testing.T) {
 					resource.TestCheckResourceAttr(clusterResourceAddr, "instance_count", "1"),
 					resource.TestCheckResourceAttrSet(clusterResourceAddr, "instance_template_id"),
 					// ENTERPRISE-only attrs must be absent/known for BUSINESS.
-					resource.TestCheckNoResourceAttr(clusterResourceAddr, "bi_connector_enabled"),
 					resource.TestCheckNoResourceAttr(clusterResourceAddr, "instances.count"),
 					resource.TestCheckResourceAttrSet(clusterResourceAddr, "connection_uri"),
 					resource.TestCheckResourceAttr(clusterResourceAddr, "credentials.username", "dbadmin"),

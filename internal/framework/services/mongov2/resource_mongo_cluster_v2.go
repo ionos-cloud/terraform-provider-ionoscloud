@@ -42,7 +42,6 @@ type clusterResource struct {
 }
 
 type clusterResourceModel struct {
-	BiConnectorEnabled  types.Bool                `tfsdk:"bi_connector_enabled"`
 	ConnectionURI       types.String              `tfsdk:"connection_uri"`
 	Connections         *connectionModel          `tfsdk:"connections"`
 	Credentials         *credentialsModel         `tfsdk:"credentials"`
@@ -127,11 +126,6 @@ func (r *clusterResource) Schema(ctx context.Context, req resource.SchemaRequest
 	resp.Schema = schema.Schema{
 		Description: "Manages an IONOS CLOUD MongoDB V2 cluster.",
 		Attributes: map[string]schema.Attribute{
-			"bi_connector_enabled": schema.BoolAttribute{
-				Optional:    true,
-				Computed:    true,
-				Description: "Enables or disables the MongoDB BI Connector for this cluster. Can only be enabled for the ENTERPRISE edition. Defaults to false.",
-			},
 			"connection_uri": schema.StringAttribute{
 				Computed:    true,
 				Description: "The connection string used to access the cluster.",
@@ -665,8 +659,8 @@ func validateEdition(plan *clusterResourceModel) diag.Diagnostics {
 		if plan.InstanceTemplateID.IsNull() || plan.InstanceCount.IsNull() {
 			diagnostics.AddError("missing business attributes", "instance_template_id and instance_count are required for the BUSINESS edition.")
 		}
-		if plan.Instances != nil || plan.Sharding != nil || !plan.BiConnectorEnabled.IsUnknown() {
-			diagnostics.AddError("invalid attributes for BUSINESS edition", "instances, sharding and bi_connector_enabled are only valid for the ENTERPRISE edition.")
+		if plan.Instances != nil || plan.Sharding != nil {
+			diagnostics.AddError("invalid attributes for BUSINESS edition", "instances and sharding are only valid for the ENTERPRISE edition.")
 		}
 	default:
 		diagnostics.AddError("invalid edition", fmt.Sprintf("edition must be one of %q or %q.", mongov3.MONGOEDITION_ENTERPRISE, mongov3.MONGOEDITION_BUSINESS))
@@ -698,7 +692,7 @@ func buildClusterCreateProperties(ctx context.Context, plan *clusterResourceMode
 	}
 	snapshot := mongov3.ClusterSnapshot{
 		Location:      plan.Snapshot.Location.ValueString(),
-		RetentionDays: plan.Snapshot.RetentionDays.ValueInt32(),
+		RetentionDays: mongov3.SnapshotRetentionDays(plan.Snapshot.RetentionDays.ValueInt32()),
 	}
 
 	switch plan.Edition.ValueString() {
@@ -719,9 +713,6 @@ func buildClusterCreateProperties(ctx context.Context, plan *clusterResourceMode
 			},
 			Snapshot:            snapshot,
 			RestoreFromSnapshot: restore,
-		}
-		if !plan.BiConnectorEnabled.IsUnknown() {
-			enterprise.BiConnectorEnabled = plan.BiConnectorEnabled.ValueBoolPointer()
 		}
 		if !plan.LogsEnabled.IsUnknown() {
 			enterprise.LogsEnabled = plan.LogsEnabled.ValueBoolPointer()
@@ -787,7 +778,7 @@ func buildClusterUpdateProperties(ctx context.Context, plan *clusterResourceMode
 	}
 	snapshot := mongov3.ClusterSnapshot{
 		Location:      plan.Snapshot.Location.ValueString(),
-		RetentionDays: plan.Snapshot.RetentionDays.ValueInt32(),
+		RetentionDays: mongov3.SnapshotRetentionDays(plan.Snapshot.RetentionDays.ValueInt32()),
 	}
 
 	switch plan.Edition.ValueString() {
@@ -808,9 +799,6 @@ func buildClusterUpdateProperties(ctx context.Context, plan *clusterResourceMode
 			},
 			Snapshot:            snapshot,
 			RestoreFromSnapshot: restore,
-		}
-		if !plan.BiConnectorEnabled.IsUnknown() {
-			enterprise.BiConnectorEnabled = plan.BiConnectorEnabled.ValueBoolPointer()
 		}
 		if !plan.LogsEnabled.IsUnknown() {
 			enterprise.LogsEnabled = plan.LogsEnabled.ValueBoolPointer()
@@ -937,7 +925,6 @@ func mapClusterResponseToModel(ctx context.Context, cluster *mongov3.ClusterRead
 		model.Version = types.StringValue(ent.Version)
 		model.LogsEnabled = types.BoolPointerValue(ent.LogsEnabled)
 		model.MetricsEnabled = types.BoolPointerValue(ent.MetricsEnabled)
-		model.BiConnectorEnabled = types.BoolPointerValue(ent.BiConnectorEnabled)
 		model.Instances = &instancesModel{
 			Cores:       types.Int32Value(ent.Instances.Cores),
 			Count:       types.Int32Value(ent.Instances.Count),
@@ -961,8 +948,6 @@ func mapClusterResponseToModel(ctx context.Context, cluster *mongov3.ClusterRead
 		model.MetricsEnabled = types.BoolPointerValue(bus.MetricsEnabled)
 		model.InstanceTemplateID = types.StringValue(bus.InstanceTemplateId)
 		model.InstanceCount = types.Int32Value(bus.InstanceCount)
-		// bi_connector_enabled is Optional+Computed and ENTERPRISE-only; set it known (null) for BUSINESS.
-		model.BiConnectorEnabled = types.BoolNull()
 		diagnostics.Append(mapCommonFields(ctx, model, bus.Connection, bus.MaintenanceWindow, bus.Snapshot, bus.Credentials)...)
 	default:
 		diagnostics.AddError("unknown cluster edition", "the API returned a cluster with neither ENTERPRISE nor BUSINESS properties set.")
@@ -989,7 +974,7 @@ func mapCommonFields(ctx context.Context, model *clusterResourceModel, connectio
 
 	model.Snapshot = &snapshotConfigModel{
 		Location:      types.StringValue(snapshot.Location),
-		RetentionDays: types.Int32Value(snapshot.RetentionDays),
+		RetentionDays: types.Int32Value(int32(snapshot.RetentionDays)),
 	}
 
 	// The API never returns the password; preserve it from state/plan.
