@@ -1,4 +1,4 @@
-## 6.7.42 -- upcoming release
+## 6.7.42
 
 ### Features
 - MongoDB V2: add support for the `gb/lhr`, `fr/par`, `es/vit` and `us/mci` locations.
