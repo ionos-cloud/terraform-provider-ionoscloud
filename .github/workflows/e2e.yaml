@@ -60,7 +60,7 @@ jobs:
       - name: Install dependencies
         run: go mod tidy
 
-      - name: Run E2E tests with specified tag
+      - name: Run E2E tests with ${{ github.event.inputs.tag }}
         run: |
           set -o pipefail
           go test ./... \
