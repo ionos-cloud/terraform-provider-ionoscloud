@@ -73,6 +73,16 @@ func TestWrapError_WithStatusCode500(t *testing.T) {
 	}
 }
 
+func TestWrapError_WithStatusCode404(t *testing.T) {
+	got := WrapError(errors.New("not found"), &ErrorContext{StatusCode: 404})
+	if !strings.Contains(got.Error(), "Status code: 404") {
+		t.Fatalf("expected output to contain status code, got %q", got.Error())
+	}
+	if strings.Contains(got.Error(), "This is an API Error") {
+		t.Fatalf("did not expect API error hint for 404, got %q", got.Error())
+	}
+}
+
 func TestWrapError_WithAdditionalInfo(t *testing.T) {
 	original := errors.New("something failed")
 	got := WrapError(original, &ErrorContext{
@@ -116,6 +126,7 @@ func TestWrapError_AllFields(t *testing.T) {
 		"Configured timeout: 60m",
 		"Request ID: deadbeef-dead-beef-dead-beefdeadbeef",
 		"This is an API Error",
+		"Status code: 502",
 		"Cluster ID: cl-1",
 	} {
 		if !strings.Contains(msg, want) {
