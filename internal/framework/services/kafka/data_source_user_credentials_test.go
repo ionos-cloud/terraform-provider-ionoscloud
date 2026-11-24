@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/internal/acctest"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/kafka"
 )
 
 func TestAccUserCredentialsDataSource(t *testing.T) {
@@ -130,7 +131,7 @@ const (
 		resource "ionoscloud_kafka_cluster" "example" {
 		  name     = "terraform-test-kafka-cluster"
 		  location = "de/fra"
-		  version  = "4.0.0"
+		  version  = "` + kafka.LatestVersion + `"
 		  size     = "S"
 		  connections {
 			datacenter_id = ionoscloud_datacenter.example.id

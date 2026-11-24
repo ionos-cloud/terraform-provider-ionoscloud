@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/bundleclient"
+	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/services/kafka"
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/constant"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -180,7 +181,7 @@ const (
 	clusterAttributeNameValue = "test_kafka_cluster"
 
 	clusterAttributeVersion      = "version"
-	clusterAttributeVersionValue = "4.0.0"
+	clusterAttributeVersionValue = kafka.LatestVersion
 
 	clusterAttributeSize      = "size"
 	clusterAttributeSizeValue = "S"
