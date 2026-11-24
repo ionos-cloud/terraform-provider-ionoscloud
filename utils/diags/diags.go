@@ -105,6 +105,10 @@ func buildContextString(errCtx *ErrorContext) string {
 		sb.WriteString("\nThis is an API Error. Please contact API support.")
 	}
 
+	if errCtx.StatusCode != 0 {
+		fmt.Fprintf(&sb, "\nStatus code: %d", errCtx.StatusCode)
+	}
+
 	if errCtx.ResourceID != "" {
 		fmt.Fprintf(&sb, "\nResource ID: %s", errCtx.ResourceID)
 	}

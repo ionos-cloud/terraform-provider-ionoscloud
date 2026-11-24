@@ -6,6 +6,7 @@
 
 ### Fixes
 - `ionoscloud_logging_pipeline`: Remove client-side validation of `log.protocol`, so newly supported protocols (e.g. `otlp`) are accepted without a provider release. Invalid values are rejected by the API.
+- Error diagnostics now include the HTTP `Status code` of the failed API call when it is known, instead of only using it to flag 5xx API errors.
 
 ### Breaking changes
 - `ionoscloud_mongo_cluster_v2`: remove the `bi_connector_enabled` attribute.
