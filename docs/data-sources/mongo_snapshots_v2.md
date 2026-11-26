@@ -26,7 +26,7 @@ data "ionoscloud_mongo_snapshots_v2" "by_cluster" {
 
 ## Argument Reference
 
-* `location` - (Required)[string] The location to query. Available locations: `es/vit`, `fr/par`, `gb/bhx`, `gb/lhr`, `us/ewr`, `us/mci`.
+* `location` - (Required)[string] The location to query. Available locations: `de/fra`, `es/vit`, `fr/par`, `gb/bhx`, `gb/lhr`, `us/ewr`, `us/mci`.
 * `cluster_id` - (Optional)[string] Filter snapshots by the cluster they belong to.
 
 ## Attributes Reference

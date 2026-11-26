@@ -1,5 +1,8 @@
 ## 6.7.43
 
+### Features
+- MongoDB v2: add support for the `de/fra` location.
+
 ### Fixes
 - `ionoscloud_kafka_cluster`: Validate `version` at plan time against the supported Kafka versions (`4.0.0`).
 - Update Kafka documentation to state that version 4.0.0 is supported in all relevant resources and data sources.
@@ -7,7 +10,7 @@
 ## 6.7.42
 
 ### Features
-- MongoDB V2: add support for the `gb/lhr`, `fr/par`, `es/vit` and `us/mci` locations.
+- MongoDB v2: add support for the `gb/lhr`, `fr/par`, `es/vit` and `us/mci` locations.
 - `ionoscloud_mongo_versions_v2`: add `creation_freeze_date` and `deprecation_date` fields.
 
 ### Fixes
