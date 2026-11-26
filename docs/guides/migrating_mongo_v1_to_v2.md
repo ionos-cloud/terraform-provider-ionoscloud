@@ -26,6 +26,8 @@ running cluster**. No data is moved or recreated; only Terraform state changes.
 > `ionoscloud_mongo_cluster_v2` manage the *same* underlying cluster (same UUID). It changes
 > Terraform state only and never mutates, recreates, or deletes the live database.
 
+> **Important:** `ionoscloud_mongo_user` does not exist for MongoDB v2. After migration, users are kept but cannot be managed through Terraform anymore. For more information about how to manage users, please check section no. 2: `Drop the legacy resources from state`.
+
 ## Prerequisites
 
 - Terraform **1.14+** (for the `terraform query` list/config-generation workflow used below).
@@ -68,7 +70,15 @@ each cluster (name, edition, version, instance sizing, connections, maintenance 
 logs/metrics, …), together with the `import` wiring keyed by the v2 identity
 (`<location>:<cluster_id>`).
 
+Before continuing, compare the discovered UUIDs with the legacy resources in your current
+state (`terraform state show ionoscloud_mongo_cluster.example`). Keep only the generated
+resource and import blocks whose UUIDs match the legacy clusters you are migrating from
+this state. Remove both blocks for every other cluster, including clusters already managed
+by v2 resources or another Terraform state, to avoid managing the same cluster twice.
+
 ### 2. Drop the legacy resources from state
+
+#### Clusters
 
 For each legacy `ionoscloud_mongo_cluster` you are migrating, add a `removed` block so Terraform
 forgets it **without destroying** the live cluster:
@@ -83,6 +93,26 @@ removed {
 ```
 
 Delete the corresponding `resource "ionoscloud_mongo_cluster" "example" { … }` configuration.
+
+#### Users
+
+`ionoscloud_mongo_user` does not exist for MongoDB v2. After migration, v1 users are kept and the management is done directly with MongoDB, but `ionoscloud_mongo_user` resource cannot be used anymore and must be removed from the configuration. You can either add a `removed` block:
+
+```hcl
+removed {
+  from = ionoscloud_mongo_user.user
+  lifecycle {
+    destroy = false
+  }
+}
+```
+Or you can remove the user resource from state using:
+
+```sh
+terraform state rm ionoscloud_mongo_user.user
+```
+
+And then you can delete the corresponding `resource "ionoscloud_mongo_user" "user" { … }` configuration.
 
 ### 3. Fill in the values that cannot be generated
 

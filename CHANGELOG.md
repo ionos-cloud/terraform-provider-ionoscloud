@@ -1,3 +1,8 @@
+## 6.7.44
+
+### Documentation
+- Add migration guide for `ionoscloud_mongo_cluster` to `ionoscloud_mongo_cluster_v2` resource
+
 ## 6.7.43
 
 ### Features
@@ -19,9 +24,6 @@
 ### Fixes
 - `ionoscloud_logging_pipeline`: Remove client-side validation of `log.protocol`, so newly supported protocols (e.g. `otlp`) are accepted without a provider release. Invalid values are rejected by the API.
 - Error diagnostics now include the HTTP `Status code` of the failed API call when it is known, instead of only using it to flag 5xx API errors.
-
-### Documentation
-- Add migration guide for `ionoscloud_mongo_cluster` to `ionoscloud_mongo_cluster_v2` resource
 
 ## 6.7.41
 ### Features
