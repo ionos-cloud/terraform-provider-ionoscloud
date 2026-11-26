@@ -205,7 +205,7 @@ func pipelineUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.
 	client := meta.(bundleclient.SdkBundle).LoggingClient
 	pipelineID := d.Id()
 
-	pipelineResponse, apiResponse, err := client.UpdatePipeline(ctx, pipelineID, d)
+	_, apiResponse, err := client.UpdatePipeline(ctx, pipelineID, d)
 	if err != nil {
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while updating the Logging pipeline: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
@@ -213,10 +213,8 @@ func pipelineUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.
 	if err != nil {
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while waiting for the Logging pipeline to become available: %w", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String()})
 	}
-	if err := client.SetPipelineData(d, pipelineResponse); err != nil {
-		return diagutil.ToDiags(d, err, nil)
-	}
-	return nil
+	// Read the pipeline again instead of using the update response, which was captured before the pipeline became available
+	return pipelineRead(ctx, d, meta)
 }
 
 func pipelineImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {

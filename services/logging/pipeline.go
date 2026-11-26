@@ -19,9 +19,6 @@ import (
 
 var pipelineResourceName = "Logging Pipeline"
 
-// pipelineStateFailed is the state of a pipeline that failed to provision, details are in the status message
-const pipelineStateFailed = "FAILED"
-
 // CreatePipeline creates a new pipeline
 func (c *Client) CreatePipeline(ctx context.Context, d *schema.ResourceData) (logging.PipelineRead, *shared.APIResponse, error) {
 	location := d.Get("location").(string)
@@ -41,7 +38,7 @@ func (c *Client) IsPipelineAvailable(ctx context.Context, d *schema.ResourceData
 		return false, err
 	}
 	tflog.Debug(ctx, "logging pipeline status", map[string]any{"state": pipeline.Metadata.State})
-	if strings.EqualFold(pipeline.Metadata.State, pipelineStateFailed) {
+	if strings.EqualFold(pipeline.Metadata.State, constant.Failed) {
 		return false, fmt.Errorf("logging pipeline with ID: %s is in %s state, status message: %q", pipelineID, pipeline.Metadata.State, pipeline.Metadata.GetStatusMessage())
 	}
 	return strings.EqualFold(pipeline.Metadata.State, constant.Available), nil
@@ -118,11 +115,21 @@ func setPipelinePatchRequest(d *schema.ResourceData) *logging.PipelinePatch {
 
 // expandPipelineLogs converts the 'log' list from the Terraform configuration into SDK log objects.
 // oldLogs is the previous value of 'log' (nil on create). Labels are only sent when configured, except when
-// a log at the same position previously had labels and now has none: then an empty list is sent so the
-// labels are removed in the API.
+// the log with the same tag previously had labels and now has none: then an empty list is sent so the
+// labels are removed in the API. Logs are matched by tag, which is unique within a pipeline, so removing or
+// reordering other logs does not affect the match.
 func expandPipelineLogs(logs, oldLogs []any) []logging.PipelineNoAddrLogs {
+	oldTagsWithLabels := make(map[string]bool, len(oldLogs))
+	for _, oldLogData := range oldLogs {
+		if oldLogElem, ok := oldLogData.(map[string]any); ok && len(logLabels(oldLogElem)) > 0 {
+			if tag, ok := oldLogElem["tag"].(string); ok {
+				oldTagsWithLabels[tag] = true
+			}
+		}
+	}
+
 	var result []logging.PipelineNoAddrLogs
-	for i, logData := range logs {
+	for _, logData := range logs {
 		logElem, ok := logData.(map[string]any)
 		if !ok {
 			continue
@@ -141,10 +148,8 @@ func expandPipelineLogs(logs, oldLogs []any) []logging.PipelineNoAddrLogs {
 		newLog := *logging.NewPipelineNoAddrLogs(logElem["source"].(string), logElem["tag"].(string), logElem["protocol"].(string), destinations)
 		if labels := logLabels(logElem); len(labels) > 0 {
 			newLog.Labels = labels
-		} else if i < len(oldLogs) {
-			if oldLogElem, ok := oldLogs[i].(map[string]any); ok && len(logLabels(oldLogElem)) > 0 {
-				newLog.Labels = []string{}
-			}
+		} else if oldTagsWithLabels[newLog.Tag] {
+			newLog.Labels = []string{}
 		}
 		result = append(result, newLog)
 	}
