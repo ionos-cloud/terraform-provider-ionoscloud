@@ -2009,6 +2009,7 @@ const pipelineLogProtocolAttribute = "protocol"
 const pipelineLogDestinationAttribute = "destinations"
 const pipelineLogDestinationTypeAttribute = "type"
 const pipelineLogDestinationRetentionAttribute = "retention_in_days"
+const pipelineStatusMessageAttribute = "status_message"
 
 // Values
 const pipelineNameValue = "testpipeline"
@@ -2017,6 +2018,8 @@ const pipelineLogTagValue = "testtag"
 const pipelineLogProtocolValue = "http"
 const pipelineLogDestinationTypeValue = "loki"
 const pipelineLogDestinationRetentionValue = "7"
+const pipelineLogLabelValue1 = "app"
+const pipelineLogLabelValue2 = "namespace"
 const pipelineLogDestination = pipelineLogDestinationAttribute + `{
 	` + pipelineLogDestinationTypeAttribute + ` = "` + pipelineLogDestinationTypeValue + `"
 	` + pipelineLogDestinationRetentionAttribute + ` = "` + pipelineLogDestinationRetentionValue + `"
@@ -2025,6 +2028,7 @@ const pipelineLog = pipelineLogAttribute + `{
 	` + pipelineLogSourceAttribute + ` = "` + pipelineLogSourceValue + `"
 	` + pipelineLogTagAttribute + ` = "` + pipelineLogTagValue + `"
 	` + pipelineLogProtocolAttribute + ` = "` + pipelineLogProtocolValue + `"
+	` + pipelineLogLabelsAttribute + ` = ["` + pipelineLogLabelValue1 + `", "` + pipelineLogLabelValue2 + `"]
 	` + pipelineLogDestination + `
 }`
 
@@ -2034,11 +2038,21 @@ const pipelineLogSourceUpdatedValue = "docker"
 const pipelineLogTagUpdatedValue = "updatedtesttag"
 const pipelineLogProtocolUpdatedValue = "tcp"
 const pipelineLogDestinationRetentionUpdatedValue = "14"
+const pipelineLogLabelUpdatedValue = "environment"
 const pipelineLogDestinationUpdated = pipelineLogDestinationAttribute + `{
 	` + pipelineLogDestinationTypeAttribute + ` = "` + pipelineLogDestinationTypeValue + `"
 	` + pipelineLogDestinationRetentionAttribute + ` = "` + pipelineLogDestinationRetentionUpdatedValue + `"
 }`
 const pipelineLogUpdated = pipelineLogAttribute + `{
+	` + pipelineLogSourceAttribute + ` = "` + pipelineLogSourceUpdatedValue + `"
+	` + pipelineLogTagAttribute + ` = "` + pipelineLogTagUpdatedValue + `"
+	` + pipelineLogProtocolAttribute + ` = "` + pipelineLogProtocolUpdatedValue + `"
+	` + pipelineLogLabelsAttribute + ` = ["` + pipelineLogLabelUpdatedValue + `"]
+	` + pipelineLogDestinationUpdated + `
+}`
+
+// pipelineLogUpdatedNoLabels is pipelineLogUpdated with the labels removed
+const pipelineLogUpdatedNoLabels = pipelineLogAttribute + `{
 	` + pipelineLogSourceAttribute + ` = "` + pipelineLogSourceUpdatedValue + `"
 	` + pipelineLogTagAttribute + ` = "` + pipelineLogTagUpdatedValue + `"
 	` + pipelineLogProtocolAttribute + ` = "` + pipelineLogProtocolUpdatedValue + `"

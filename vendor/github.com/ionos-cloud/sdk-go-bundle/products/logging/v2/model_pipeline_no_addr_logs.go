@@ -23,8 +23,10 @@ type PipelineNoAddrLogs struct {
 	Source string `json:"source"`
 	// The tag of the logs. Tag represents a short alphanumeric badge (3–20 characters). It must contain only letters and digits, with no special characters or spaces.
 	Tag string `json:"tag"`
-	// The protocol used to send logs. Could be one of the following: `http`, `tcp`.
-	Protocol     string                           `json:"protocol"`
+	// The protocol used to send logs. Could be one of the following: `http`, `tcp`, `otlp`.
+	Protocol string `json:"protocol"`
+	// Optional custom labels to filter and report logs
+	Labels       []string                         `json:"labels,omitempty"`
 	Destinations []PipelineNoAddrLogsDestinations `json:"destinations"`
 }
 
@@ -48,6 +50,8 @@ func NewPipelineNoAddrLogs(source string, tag string, protocol string, destinati
 // but it doesn't guarantee that properties required by API are set
 func NewPipelineNoAddrLogsWithDefaults() *PipelineNoAddrLogs {
 	this := PipelineNoAddrLogs{}
+	var protocol string = "http"
+	this.Protocol = protocol
 	return &this
 }
 
@@ -123,6 +127,38 @@ func (o *PipelineNoAddrLogs) SetProtocol(v string) {
 	o.Protocol = v
 }
 
+// GetLabels returns the Labels field value if set, zero value otherwise.
+func (o *PipelineNoAddrLogs) GetLabels() []string {
+	if o == nil || IsNil(o.Labels) {
+		var ret []string
+		return ret
+	}
+	return o.Labels
+}
+
+// GetLabelsOk returns a tuple with the Labels field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *PipelineNoAddrLogs) GetLabelsOk() ([]string, bool) {
+	if o == nil || IsNil(o.Labels) {
+		return nil, false
+	}
+	return o.Labels, true
+}
+
+// HasLabels returns a boolean if a field has been set.
+func (o *PipelineNoAddrLogs) HasLabels() bool {
+	if o != nil && !IsNil(o.Labels) {
+		return true
+	}
+
+	return false
+}
+
+// SetLabels gets a reference to the given []string and assigns it to the Labels field.
+func (o *PipelineNoAddrLogs) SetLabels(v []string) {
+	o.Labels = v
+}
+
 // GetDestinations returns the Destinations field value
 func (o *PipelineNoAddrLogs) GetDestinations() []PipelineNoAddrLogsDestinations {
 	if o == nil {
@@ -160,6 +196,9 @@ func (o PipelineNoAddrLogs) ToMap() (map[string]interface{}, error) {
 	toSerialize["source"] = o.Source
 	toSerialize["tag"] = o.Tag
 	toSerialize["protocol"] = o.Protocol
+	if !IsNil(o.Labels) {
+		toSerialize["labels"] = o.Labels
+	}
 	toSerialize["destinations"] = o.Destinations
 	return toSerialize, nil
 }

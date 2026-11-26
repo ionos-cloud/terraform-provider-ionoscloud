@@ -18,6 +18,8 @@ import (
 
 func TestAccLoggingPipeline(t *testing.T) {
 	var Pipeline logging.PipelineRead
+	resourceName := constant.LoggingPipelineResource + "." + constant.LoggingPipelineTestResourceName
+	dataSourceName := constant.DataSource + "." + constant.LoggingPipelineResource + "." + constant.LoggingPipelineTestDataSourceName
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -44,7 +46,24 @@ func TestAccLoggingPipeline(t *testing.T) {
 					resource.TestCheckNoResourceAttr(constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestResourceName, "tcp_address"),
 					resource.TestCheckResourceAttrSet(constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestResourceName, pipelineGrafanaAddressAttribute),
 					resource.TestCheckResourceAttrSet(constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestResourceName, "key"),
+					resource.TestCheckResourceAttr(resourceName, pipelineLogAttribute+".0."+pipelineLogLabelsAttribute+".#", "2"),
+					resource.TestCheckTypeSetElemAttr(resourceName, pipelineLogAttribute+".0."+pipelineLogLabelsAttribute+".*", pipelineLogLabelValue1),
+					resource.TestCheckTypeSetElemAttr(resourceName, pipelineLogAttribute+".0."+pipelineLogLabelsAttribute+".*", pipelineLogLabelValue2),
 				),
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: func(s *terraform.State) (string, error) {
+					rs, ok := s.RootModule().Resources[resourceName]
+					if !ok {
+						return "", fmt.Errorf("not found: %s", resourceName)
+					}
+					return rs.Primary.Attributes["location"] + ":" + rs.Primary.ID, nil
+				},
+				// the key is only returned in the create response
+				ImportStateVerifyIgnore: []string{"key"},
 			},
 			{
 				Config: LoggingPipelineDataSourceMatchById,
@@ -63,6 +82,9 @@ func TestAccLoggingPipeline(t *testing.T) {
 					resource.TestCheckResourceAttrSet(constant.DataSource+"."+constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestDataSourceName, pipelineGrafanaAddressAttribute),
 					resource.TestCheckResourceAttrSet(constant.DataSource+"."+constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestDataSourceName, "http_address"),
 					resource.TestCheckNoResourceAttr(constant.DataSource+"."+constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestDataSourceName, "tcp_address"),
+					resource.TestCheckTypeSetElemAttr(dataSourceName, pipelineLogAttribute+".*."+pipelineLogLabelsAttribute+".*", pipelineLogLabelValue1),
+					resource.TestCheckTypeSetElemAttr(dataSourceName, pipelineLogAttribute+".*."+pipelineLogLabelsAttribute+".*", pipelineLogLabelValue2),
+					resource.TestCheckResourceAttrPair(dataSourceName, pipelineStatusMessageAttribute, resourceName, pipelineStatusMessageAttribute),
 				),
 			},
 			{
@@ -82,6 +104,9 @@ func TestAccLoggingPipeline(t *testing.T) {
 					resource.TestCheckResourceAttrSet(constant.DataSource+"."+constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestDataSourceName, pipelineGrafanaAddressAttribute),
 					resource.TestCheckResourceAttrSet(constant.DataSource+"."+constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestDataSourceName, "http_address"),
 					resource.TestCheckNoResourceAttr(constant.DataSource+"."+constant.LoggingPipelineResource+"."+constant.LoggingPipelineTestDataSourceName, "tcp_address"),
+					resource.TestCheckTypeSetElemAttr(dataSourceName, pipelineLogAttribute+".*."+pipelineLogLabelsAttribute+".*", pipelineLogLabelValue1),
+					resource.TestCheckTypeSetElemAttr(dataSourceName, pipelineLogAttribute+".*."+pipelineLogLabelsAttribute+".*", pipelineLogLabelValue2),
+					resource.TestCheckResourceAttrPair(dataSourceName, pipelineStatusMessageAttribute, resourceName, pipelineStatusMessageAttribute),
 				),
 			},
 			{
@@ -110,6 +135,17 @@ func TestAccLoggingPipeline(t *testing.T) {
 						pipelineLogDestinationTypeAttribute:      pipelineLogDestinationTypeValue,
 						pipelineLogDestinationRetentionAttribute: pipelineLogDestinationRetentionUpdatedValue,
 					}),
+					resource.TestCheckResourceAttr(resourceName, pipelineLogAttribute+".0."+pipelineLogLabelsAttribute+".#", "1"),
+					resource.TestCheckTypeSetElemAttr(resourceName, pipelineLogAttribute+".0."+pipelineLogLabelsAttribute+".*", pipelineLogLabelUpdatedValue),
+				),
+			},
+			{
+				Config: LoggingPipelineConfigUpdateNoLabels,
+				Check: resource.ComposeTestCheckFunc(
+					testAccLoggingPipelineExistenceCheck(resourceName, &Pipeline),
+					resource.TestCheckResourceAttr(resourceName, nameAttribute, pipelineNameUpdatedValue),
+					resource.TestCheckResourceAttr(resourceName, pipelineLogAttribute+".0."+pipelineLogTagAttribute, pipelineLogTagUpdatedValue),
+					resource.TestCheckResourceAttr(resourceName, pipelineLogAttribute+".0."+pipelineLogLabelsAttribute+".#", "0"),
 				),
 			},
 		},
@@ -132,7 +168,7 @@ func testAccLoggingPipelineDestroyCheck(s *terraform.State) error {
 				return fmt.Errorf("an error occurred while checking the destruction of Logging pipeline with ID: %s, error: %w", pipelineID, err)
 			}
 		} else {
-			return fmt.Errorf("Logging pipeline with ID: %s still exists", pipelineID)
+			return fmt.Errorf("logging pipeline with ID: %s still exists", pipelineID)
 		}
 	}
 	return nil
@@ -201,5 +237,13 @@ resource ` + constant.LoggingPipelineResource + ` ` + constant.LoggingPipelineTe
 	` + nameAttribute + ` = "` + pipelineNameUpdatedValue + `"
 	location = "es/vit"
 	` + pipelineLogUpdated + `
+}
+`
+
+const LoggingPipelineConfigUpdateNoLabels = `
+resource ` + constant.LoggingPipelineResource + ` ` + constant.LoggingPipelineTestResourceName + ` {
+	` + nameAttribute + ` = "` + pipelineNameUpdatedValue + `"
+	location = "es/vit"
+	` + pipelineLogUpdatedNoLabels + `
 }
 `

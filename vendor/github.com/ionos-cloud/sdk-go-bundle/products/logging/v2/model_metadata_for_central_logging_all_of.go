@@ -21,6 +21,8 @@ var _ MappedNullable = &MetadataForCentralLoggingAllOf{}
 type MetadataForCentralLoggingAllOf struct {
 	// The endpoint of the Grafana instance.
 	GrafanaEndpoint string `json:"grafanaEndpoint"`
+	// Products with central logging enabled. This is a comma-separated list of product names.
+	Products []string `json:"products,omitempty"`
 }
 
 // NewMetadataForCentralLoggingAllOf instantiates a new MetadataForCentralLoggingAllOf object
@@ -67,6 +69,38 @@ func (o *MetadataForCentralLoggingAllOf) SetGrafanaEndpoint(v string) {
 	o.GrafanaEndpoint = v
 }
 
+// GetProducts returns the Products field value if set, zero value otherwise.
+func (o *MetadataForCentralLoggingAllOf) GetProducts() []string {
+	if o == nil || IsNil(o.Products) {
+		var ret []string
+		return ret
+	}
+	return o.Products
+}
+
+// GetProductsOk returns a tuple with the Products field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *MetadataForCentralLoggingAllOf) GetProductsOk() ([]string, bool) {
+	if o == nil || IsNil(o.Products) {
+		return nil, false
+	}
+	return o.Products, true
+}
+
+// HasProducts returns a boolean if a field has been set.
+func (o *MetadataForCentralLoggingAllOf) HasProducts() bool {
+	if o != nil && !IsNil(o.Products) {
+		return true
+	}
+
+	return false
+}
+
+// SetProducts gets a reference to the given []string and assigns it to the Products field.
+func (o *MetadataForCentralLoggingAllOf) SetProducts(v []string) {
+	o.Products = v
+}
+
 func (o MetadataForCentralLoggingAllOf) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -78,6 +112,9 @@ func (o MetadataForCentralLoggingAllOf) MarshalJSON() ([]byte, error) {
 func (o MetadataForCentralLoggingAllOf) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["grafanaEndpoint"] = o.GrafanaEndpoint
+	if !IsNil(o.Products) {
+		toSerialize["products"] = o.Products
+	}
 	return toSerialize, nil
 }
 

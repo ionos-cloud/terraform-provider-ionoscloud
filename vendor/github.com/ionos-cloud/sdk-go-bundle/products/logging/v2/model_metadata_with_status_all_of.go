@@ -19,8 +19,10 @@ var _ MappedNullable = &MetadataWithStatusAllOf{}
 
 // MetadataWithStatusAllOf struct for MetadataWithStatusAllOf
 type MetadataWithStatusAllOf struct {
-	// The status of the object. The status can be: * `AVAILABLE` - resource exists and is healthy. * `PROVISIONING` - resource is being created or updated. * `DESTROYING` - delete command was issued, the resource is being deleted. * `FAILED` - resource failed, details in `failureMessage`.
+	// The state of the object. The state can be: * `PROVISIONING` - resource is being created. * `AVAILABLE` - resource exists and is healthy. * `UPDATING` - resource is being updated. * `DESTROYING` - delete command was issued, the resource is being deleted. * `FAILED` - resource failed, details in `statusMessage`.
 	State string `json:"state"`
+	// The message of the failure if state is `FAILED`.
+	StatusMessage NullableString `json:"statusMessage,omitempty"`
 }
 
 // NewMetadataWithStatusAllOf instantiates a new MetadataWithStatusAllOf object
@@ -67,6 +69,49 @@ func (o *MetadataWithStatusAllOf) SetState(v string) {
 	o.State = v
 }
 
+// GetStatusMessage returns the StatusMessage field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *MetadataWithStatusAllOf) GetStatusMessage() string {
+	if o == nil || IsNil(o.StatusMessage.Get()) {
+		var ret string
+		return ret
+	}
+	return *o.StatusMessage.Get()
+}
+
+// GetStatusMessageOk returns a tuple with the StatusMessage field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *MetadataWithStatusAllOf) GetStatusMessageOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.StatusMessage.Get(), o.StatusMessage.IsSet()
+}
+
+// HasStatusMessage returns a boolean if a field has been set.
+func (o *MetadataWithStatusAllOf) HasStatusMessage() bool {
+	if o != nil && o.StatusMessage.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetStatusMessage gets a reference to the given NullableString and assigns it to the StatusMessage field.
+func (o *MetadataWithStatusAllOf) SetStatusMessage(v string) {
+	o.StatusMessage.Set(&v)
+}
+
+// SetStatusMessageNil sets the value for StatusMessage to be an explicit nil
+func (o *MetadataWithStatusAllOf) SetStatusMessageNil() {
+	o.StatusMessage.Set(nil)
+}
+
+// UnsetStatusMessage ensures that no value is present for StatusMessage, not even an explicit nil
+func (o *MetadataWithStatusAllOf) UnsetStatusMessage() {
+	o.StatusMessage.Unset()
+}
+
 func (o MetadataWithStatusAllOf) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -78,6 +123,9 @@ func (o MetadataWithStatusAllOf) MarshalJSON() ([]byte, error) {
 func (o MetadataWithStatusAllOf) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["state"] = o.State
+	if o.StatusMessage.IsSet() {
+		toSerialize["statusMessage"] = o.StatusMessage.Get()
+	}
 	return toSerialize, nil
 }
 

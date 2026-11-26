@@ -1,3 +1,13 @@
+## 6.7.44
+
+### Features
+- `ionoscloud_logging_pipeline`: add the optional `labels` attribute to `log`, used to filter and report logs.
+- `ionoscloud_logging_pipeline` resource and data source: add the computed `status_message` attribute, with details about the state of the pipeline.
+
+### Fixes
+- `ionoscloud_logging_pipeline`: creating or updating a pipeline that ends up in the `FAILED` state now fails right away with the API status message, instead of waiting until the timeout.
+- `ionoscloud_logging_pipeline`: the `key` is now kept in the state when the pipeline creation fails or is interrupted while waiting for the pipeline to become available. The key is only returned on creation, so it was lost before.
+
 ## 6.7.43
 
 ### Features

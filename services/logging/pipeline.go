@@ -2,6 +2,9 @@ package logging
 
 import (
 	"context"
+	"errors"
+	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -16,6 +19,9 @@ import (
 )
 
 var pipelineResourceName = "Logging Pipeline"
+
+// ErrPipelineFailed is returned while waiting for a pipeline that ended up in the FAILED state
+var ErrPipelineFailed = errors.New("logging pipeline is in FAILED state")
 
 // CreatePipeline creates a new pipeline
 func (c *Client) CreatePipeline(ctx context.Context, d *schema.ResourceData) (logging.PipelineRead, *shared.APIResponse, error) {
@@ -36,6 +42,9 @@ func (c *Client) IsPipelineAvailable(ctx context.Context, d *schema.ResourceData
 		return false, err
 	}
 	tflog.Debug(ctx, "logging pipeline status", map[string]any{"state": pipeline.Metadata.State})
+	if strings.EqualFold(pipeline.Metadata.State, constant.Failed) {
+		return false, fmt.Errorf("%w, pipeline ID: %s, status message: %q", ErrPipelineFailed, pipelineID, pipeline.Metadata.GetStatusMessage())
+	}
 	return strings.EqualFold(pipeline.Metadata.State, constant.Available), nil
 }
 
@@ -84,37 +93,11 @@ func setPipelinePostRequest(d *schema.ResourceData) *logging.PipelineCreate {
 	request := logging.PipelineCreate{Properties: logging.PipelineNoAddr{}}
 
 	if nameValue, ok := d.GetOk("name"); ok {
-		name := nameValue.(string)
-		request.Properties.Name = name
+		request.Properties.Name = nameValue.(string)
 	}
 
-	var logs []logging.PipelineNoAddrLogs
-	if logsValue, ok := d.GetOk("log"); ok {
-		for _, logData := range logsValue.([]any) {
-			if logElem, ok := logData.(map[string]any); ok {
-				// Populate the logElem entry.
-				logSource := logElem["source"].(string)
-				logTag := logElem["tag"].(string)
-				logProtocol := logElem["protocol"].(string)
-
-				// Logic for destinations.
-				var destinations []logging.PipelineNoAddrLogsDestinations
-				for _, destinationData := range logElem["destinations"].([]any) {
-					if destination, ok := destinationData.(map[string]any); ok {
-						destinationType := destination["type"].(string)
-						retentionInDays := int32(destination["retention_in_days"].(int))
-						newDestination := *logging.NewPipelineNoAddrLogsDestinations(destinationType, retentionInDays)
-						destinations = append(destinations, newDestination)
-					}
-				}
-				newLog := *logging.NewPipelineNoAddrLogs(logSource, logTag, logProtocol, destinations)
-
-				logs = append(logs, newLog)
-			}
-		}
-	}
-
-	request.Properties.Logs = logs
+	logsValue, _ := d.Get("log").([]any)
+	request.Properties.Logs = expandPipelineLogs(logsValue, nil)
 
 	return &request
 }
@@ -123,38 +106,72 @@ func setPipelinePatchRequest(d *schema.ResourceData) *logging.PipelinePatch {
 	request := logging.PipelinePatch{Properties: logging.PipelineNoAddr{}}
 
 	if nameValue, ok := d.GetOk("name"); ok {
-		name := nameValue.(string)
-		request.Properties.Name = name
+		request.Properties.Name = nameValue.(string)
 	}
 
-	var logs []logging.PipelineNoAddrLogs
-	if logsValue, ok := d.GetOk("log"); ok {
-		for _, logData := range logsValue.([]any) {
-			if logElem, ok := logData.(map[string]any); ok {
-				// Populate the logElem entry.
-				logSource := logElem["source"].(string)
-				logTag := logElem["tag"].(string)
-				logProtocol := logElem["protocol"].(string)
+	oldLogsValue, newLogsValue := d.GetChange("log")
+	oldLogs, _ := oldLogsValue.([]any)
+	newLogs, _ := newLogsValue.([]any)
+	request.Properties.Logs = expandPipelineLogs(newLogs, oldLogs)
 
-				// Logic for destinations.
-				var destinations []logging.PipelineNoAddrLogsDestinations
-				for _, destinationData := range logElem["destinations"].([]any) {
-					if destination, ok := destinationData.(map[string]any); ok {
-						destinationType := destination["type"].(string)
-						retentionInDays := int32(destination["retention_in_days"].(int))
-						newDestination := *logging.NewPipelineNoAddrLogsDestinations(destinationType, retentionInDays)
-						destinations = append(destinations, newDestination)
-					}
-				}
-				newLog := *logging.NewPipelineNoAddrLogs(logSource, logTag, logProtocol, destinations)
-				logs = append(logs, newLog)
+	return &request
+}
+
+// expandPipelineLogs converts the 'log' list from the Terraform configuration into SDK log objects.
+// oldLogs is the previous value of 'log' (nil on create). Labels are only sent when configured, except when
+// the log with the same tag previously had labels and now has none: then an empty list is sent so the
+// labels are removed in the API. Logs are matched by tag, which is unique within a pipeline, so removing or
+// reordering other logs does not affect the match.
+func expandPipelineLogs(logs, oldLogs []any) []logging.PipelineNoAddrLogs {
+	oldTagsWithLabels := make(map[string]bool, len(oldLogs))
+	for _, oldLogData := range oldLogs {
+		if oldLogElem, ok := oldLogData.(map[string]any); ok && len(logLabels(oldLogElem)) > 0 {
+			if tag, ok := oldLogElem["tag"].(string); ok {
+				oldTagsWithLabels[tag] = true
 			}
 		}
 	}
 
-	request.Properties.Logs = logs
+	var result []logging.PipelineNoAddrLogs
+	for _, logData := range logs {
+		logElem, ok := logData.(map[string]any)
+		if !ok {
+			continue
+		}
 
-	return &request
+		var destinations []logging.PipelineNoAddrLogsDestinations
+		destinationsValue, _ := logElem["destinations"].([]any)
+		for _, destinationData := range destinationsValue {
+			if destination, ok := destinationData.(map[string]any); ok {
+				destinationType := destination["type"].(string)
+				retentionInDays := int32(destination["retention_in_days"].(int)) //nolint:gosec // the schema only allows 7, 14 or 30
+				destinations = append(destinations, *logging.NewPipelineNoAddrLogsDestinations(destinationType, retentionInDays))
+			}
+		}
+
+		newLog := *logging.NewPipelineNoAddrLogs(logElem["source"].(string), logElem["tag"].(string), logElem["protocol"].(string), destinations)
+		if labels := logLabels(logElem); len(labels) > 0 {
+			newLog.Labels = labels
+		} else if oldTagsWithLabels[newLog.Tag] {
+			newLog.Labels = []string{}
+		}
+		result = append(result, newLog)
+	}
+	return result
+}
+
+// logLabels returns the 'labels' of a single 'log' element as a sorted string slice.
+func logLabels(logElem map[string]any) []string {
+	labelsSet, ok := logElem["labels"].(*schema.Set)
+	if !ok || labelsSet == nil {
+		return nil
+	}
+	labels := make([]string, 0, labelsSet.Len())
+	for _, label := range labelsSet.List() {
+		labels = append(labels, label.(string))
+	}
+	slices.Sort(labels)
+	return labels
 }
 
 // SetPipelineData sets the pipeline data
@@ -181,6 +198,10 @@ func (c *Client) SetPipelineData(d *schema.ResourceData, pipeline logging.Pipeli
 		}
 	}
 
+	if err := d.Set("status_message", pipeline.Metadata.GetStatusMessage()); err != nil {
+		return utils.GenerateSetError(pipelineResourceName, "status_message", err)
+	}
+
 	if pipeline.Properties.Logs != nil {
 		logs := make([]any, len(pipeline.Properties.Logs))
 		for i, logElem := range pipeline.Properties.Logs {
@@ -189,6 +210,7 @@ func (c *Client) SetPipelineData(d *schema.ResourceData, pipeline logging.Pipeli
 			utils.SetPropWithNilCheck(logEntry, "source", logElem.Source)
 			utils.SetPropWithNilCheck(logEntry, "tag", logElem.Tag)
 			utils.SetPropWithNilCheck(logEntry, "protocol", logElem.Protocol)
+			logEntry["labels"] = utils.ToInterfaceSlice(logElem.Labels)
 			// Logic for destinations
 			destinations := make([]any, len(logElem.Destinations))
 			for i, destination := range logElem.Destinations {
