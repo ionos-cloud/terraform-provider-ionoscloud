@@ -41,8 +41,9 @@ func resourceVCPUServer() *schema.Resource {
 				Required: true,
 			},
 			"ram": {
-				Type:     schema.TypeInt,
-				Required: true,
+				Type:             schema.TypeInt,
+				Required:         true,
+				ValidateDiagFunc: serverutil.ValidateServerRAM,
 			},
 			"availability_zone": {
 				Type:             schema.TypeString,
@@ -162,17 +163,19 @@ func resourceVCPUServer() *schema.Resource {
 							Type:             schema.TypeString,
 							Required:         true,
 							ForceNew:         true,
-							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+							ValidateDiagFunc: serverutil.ValidateVolumeType,
 						},
 						"licence_type": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
+							Type:             schema.TypeString,
+							Optional:         true,
+							Computed:         true,
+							ValidateDiagFunc: serverutil.ValidateLicenceType,
 						},
 						"bus": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
+							Type:             schema.TypeString,
+							Optional:         true,
+							Computed:         true,
+							ValidateDiagFunc: serverutil.ValidateVolumeBus,
 						},
 						"name": {
 							Type:     schema.TypeString,

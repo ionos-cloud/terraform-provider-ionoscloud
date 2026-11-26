@@ -1,13 +1,45 @@
 package serverutil
 
 import (
+	"fmt"
 	"maps"
+	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils"
 )
+
+var (
+	ValidateVolumeType  = validation.ToDiagFunc(validation.StringInSlice([]string{"HDD", "SSD", "SSD Standard", "SSD Premium", "DAS", "ISO"}, true))
+	ValidateVolumeBus   = validation.ToDiagFunc(validation.StringInSlice([]string{"VIRTIO", "IDE", "UNKNOWN"}, true))
+	ValidateLicenceType = validation.ToDiagFunc(validation.StringInSlice([]string{"UNKNOWN", "WINDOWS", "WINDOWS2016", "WINDOWS2019", "WINDOWS2022", "WINDOWS2025", "RHEL", "LINUX", "OTHER"}, true))
+	ValidateServerRAM   = validation.ToDiagFunc(validation.All(validation.IntAtLeast(256), validation.IntDivisibleBy(256)))
+)
+
+// validateICMPValue validates a firewall rule icmpType/icmpCode. These are exposed as strings (to
+// distinguish "0" from unset), so an empty value is allowed; any set value must be an integer within
+// the Cloud API range 0-254 (FirewallruleProperties.icmpType/icmpCode).
+func validateICMPValue(i any, k string) (warnings []string, errs []error) {
+	v, ok := i.(string)
+	if !ok {
+		errs = append(errs, fmt.Errorf("expected type of %q to be string", k))
+		return warnings, errs
+	}
+	if v == "" {
+		return warnings, errs
+	}
+	n, err := strconv.Atoi(v)
+	if err != nil {
+		errs = append(errs, fmt.Errorf("%q must be an integer between 0 and 254, got: %s", k, v))
+		return warnings, errs
+	}
+	if n < 0 || n > 254 {
+		errs = append(errs, fmt.Errorf("%q must be between 0 and 254, got: %d", k, n))
+	}
+	return warnings, errs
+}
 
 var SchemaNicElem = map[string]*schema.Schema{
 	"id": {
@@ -68,9 +100,10 @@ var SchemaNicElem = map[string]*schema.Schema{
 		Optional: true,
 	},
 	"firewall_type": {
-		Type:     schema.TypeString,
-		Optional: true,
-		Computed: true,
+		Type:             schema.TypeString,
+		Optional:         true,
+		Computed:         true,
+		ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"INGRESS", "EGRESS", "BIDIRECTIONAL"}, true)),
 	},
 	"device_number": {
 		Type:     schema.TypeInt,
@@ -104,7 +137,7 @@ var SchemaNicElem = map[string]*schema.Schema{
 					Type:             schema.TypeString,
 					Required:         true,
 					DiffSuppressFunc: utils.DiffToLower,
-					ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+					ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"TCP", "UDP", "ICMP", "ICMPv6", "GRE", "VRRP", "ESP", "AH", "ANY"}, true)),
 				},
 				"source_mac": {
 					Type:     schema.TypeString,
@@ -121,25 +154,28 @@ var SchemaNicElem = map[string]*schema.Schema{
 				"port_range_start": {
 					Type:             schema.TypeInt,
 					Optional:         true,
-					ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(1, 65534)),
+					ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(1, 65535)),
 				},
 				"port_range_end": {
 					Type:             schema.TypeInt,
 					Optional:         true,
-					ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(1, 65534)),
+					ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(1, 65535)),
 				},
 				"icmp_type": {
-					Type:     schema.TypeString,
-					Optional: true,
+					Type:             schema.TypeString,
+					Optional:         true,
+					ValidateDiagFunc: validation.ToDiagFunc(validateICMPValue),
 				},
 				"icmp_code": {
-					Type:     schema.TypeString,
-					Optional: true,
+					Type:             schema.TypeString,
+					Optional:         true,
+					ValidateDiagFunc: validation.ToDiagFunc(validateICMPValue),
 				},
 				"type": {
-					Type:     schema.TypeString,
-					Optional: true,
-					Computed: true,
+					Type:             schema.TypeString,
+					Optional:         true,
+					Computed:         true,
+					ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"INGRESS", "EGRESS"}, true)),
 				},
 			},
 		},

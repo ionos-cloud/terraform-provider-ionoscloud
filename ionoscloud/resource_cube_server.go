@@ -61,7 +61,7 @@ func resourceCubeServer() *schema.Resource {
 				Optional:         true,
 				Computed:         true,
 				ForceNew:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"AUTO", "ZONE_1", "ZONE_2"}, true)),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"AUTO"}, true)),
 			},
 			"boot_volume": {
 				Type:     schema.TypeString,
@@ -139,7 +139,7 @@ func resourceCubeServer() *schema.Resource {
 							Type:             schema.TypeString,
 							Required:         true,
 							ForceNew:         true,
-							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+							ValidateDiagFunc: serverutil.ValidateVolumeType,
 						},
 						"image_password": {
 							Type:          schema.TypeString,
@@ -155,9 +155,10 @@ func resourceCubeServer() *schema.Resource {
 							},
 						},
 						"licence_type": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
+							Type:             schema.TypeString,
+							Optional:         true,
+							Computed:         true,
+							ValidateDiagFunc: serverutil.ValidateLicenceType,
 						},
 						"ssh_key_path": {
 							Type:       schema.TypeList,
@@ -182,9 +183,10 @@ func resourceCubeServer() *schema.Resource {
 							},
 						},
 						"bus": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
+							Type:             schema.TypeString,
+							Optional:         true,
+							Computed:         true,
+							ValidateDiagFunc: serverutil.ValidateVolumeBus,
 						},
 						"name": {
 							Type:     schema.TypeString,

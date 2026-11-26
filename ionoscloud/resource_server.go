@@ -64,9 +64,10 @@ func resourceServer() *schema.Resource {
 				Computed: true,
 			},
 			"ram": {
-				Type:     schema.TypeInt,
-				Optional: true, // this should be required when the deprecated version will be removed
-				Computed: true,
+				Type:             schema.TypeInt,
+				Optional:         true, // this should be required when the deprecated version will be removed
+				Computed:         true,
+				ValidateDiagFunc: serverutil.ValidateServerRAM,
 			},
 			"availability_zone": {
 				Type:             schema.TypeString,
@@ -224,7 +225,7 @@ func resourceServer() *schema.Resource {
 							Type:             schema.TypeString,
 							Required:         true,
 							ForceNew:         true,
-							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+							ValidateDiagFunc: serverutil.ValidateVolumeType,
 						},
 						"image_password": {
 							Type:          schema.TypeString,
@@ -240,9 +241,10 @@ func resourceServer() *schema.Resource {
 							},
 						},
 						"licence_type": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
+							Type:             schema.TypeString,
+							Optional:         true,
+							Computed:         true,
+							ValidateDiagFunc: serverutil.ValidateLicenceType,
 						},
 						"ssh_key_path": {
 							Type:        schema.TypeList,
@@ -294,9 +296,10 @@ func resourceServer() *schema.Resource {
 							},
 						},
 						"bus": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
+							Type:             schema.TypeString,
+							Optional:         true,
+							Computed:         true,
+							ValidateDiagFunc: serverutil.ValidateVolumeBus,
 						},
 						"name": {
 							Type:     schema.TypeString,
