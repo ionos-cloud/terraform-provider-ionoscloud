@@ -46,10 +46,11 @@ func resourceKafkaCluster() *schema.Resource {
 				ForceNew:    true,
 			},
 			"version": {
-				Type:        schema.TypeString,
-				Description: "The desired Kafka Version. Supported versions: 3.9.0",
-				ForceNew:    true,
-				Required:    true,
+				Type:             schema.TypeString,
+				Description:      "The desired Kafka Version. Supported versions: " + strings.Join(kafka.AvailableVersions, ", "),
+				ForceNew:         true,
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(kafka.AvailableVersions, false)),
 			},
 			"size": {
 				Type:             schema.TypeString,
