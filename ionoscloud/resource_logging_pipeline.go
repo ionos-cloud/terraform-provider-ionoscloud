@@ -141,16 +141,17 @@ func pipelineCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.
 		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while creating a Logging pipeline: %w", err), &diagutil.ErrorContext{StatusCode: apiResponse.SafeStatusCode()})
 	}
 	d.SetId(pipelineResponse.Id)
-	err = utils.WaitForResourceToBeReady(ctx, d, client.IsPipelineAvailable)
-	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while waiting for the pipeline with ID: %s to become available: %w", pipelineResponse.Id, err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutCreate).String()})
-	}
-	// only received in the create response
+	// The key is only received in the create response, so it is set before waiting: if the wait fails or is
+	// interrupted, the resource is saved as tainted and the key is kept in the state.
 	if pipelineResponse.Properties.Key != nil {
 		err = d.Set("key", pipelineResponse.Properties.Key)
 		if err != nil {
 			return diagutil.ToDiags(d, fmt.Errorf("an error occurred while setting the key for the Logging pipeline with ID: %s, error: %w", pipelineResponse.Id, err), nil)
 		}
+	}
+	err = utils.WaitForResourceToBeReady(ctx, d, client.IsPipelineAvailable)
+	if err != nil {
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while waiting for the pipeline with ID: %s to become available: %w", pipelineResponse.Id, err), pipelineWaitErrorContext(d, err, schema.TimeoutCreate))
 	}
 	// Make another read and set the data in the state because 'grafanaAddress` is not returned in the create response
 	return pipelineRead(ctx, d, meta)
@@ -211,10 +212,19 @@ func pipelineUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.
 	}
 	err = utils.WaitForResourceToBeReady(ctx, d, client.IsPipelineAvailable)
 	if err != nil {
-		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while waiting for the Logging pipeline to become available: %w", err), &diagutil.ErrorContext{Timeout: d.Timeout(schema.TimeoutUpdate).String()})
+		return diagutil.ToDiags(d, fmt.Errorf("an error occurred while waiting for the Logging pipeline to become available: %w", err), pipelineWaitErrorContext(d, err, schema.TimeoutUpdate))
 	}
 	// Read the pipeline again instead of using the update response, which was captured before the pipeline became available
 	return pipelineRead(ctx, d, meta)
+}
+
+// pipelineWaitErrorContext returns the error context for an error received while waiting for a pipeline to become
+// available. The configured timeout is left out when the pipeline failed, since that error is not related to it.
+func pipelineWaitErrorContext(d *schema.ResourceData, err error, timeoutKey string) *diagutil.ErrorContext {
+	if errors.Is(err, logging.ErrPipelineFailed) {
+		return nil
+	}
+	return &diagutil.ErrorContext{Timeout: d.Timeout(timeoutKey).String()}
 }
 
 func pipelineImport(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {

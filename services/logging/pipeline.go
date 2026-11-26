@@ -2,6 +2,7 @@ package logging
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"slices"
 	"strings"
@@ -18,6 +19,9 @@ import (
 )
 
 var pipelineResourceName = "Logging Pipeline"
+
+// ErrPipelineFailed is returned while waiting for a pipeline that ended up in the FAILED state
+var ErrPipelineFailed = errors.New("logging pipeline is in FAILED state")
 
 // CreatePipeline creates a new pipeline
 func (c *Client) CreatePipeline(ctx context.Context, d *schema.ResourceData) (logging.PipelineRead, *shared.APIResponse, error) {
@@ -39,7 +43,7 @@ func (c *Client) IsPipelineAvailable(ctx context.Context, d *schema.ResourceData
 	}
 	tflog.Debug(ctx, "logging pipeline status", map[string]any{"state": pipeline.Metadata.State})
 	if strings.EqualFold(pipeline.Metadata.State, constant.Failed) {
-		return false, fmt.Errorf("logging pipeline with ID: %s is in %s state, status message: %q", pipelineID, pipeline.Metadata.State, pipeline.Metadata.GetStatusMessage())
+		return false, fmt.Errorf("%w, pipeline ID: %s, status message: %q", ErrPipelineFailed, pipelineID, pipeline.Metadata.GetStatusMessage())
 	}
 	return strings.EqualFold(pipeline.Metadata.State, constant.Available), nil
 }
