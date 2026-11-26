@@ -23,6 +23,7 @@ resource "ionoscloud_logging_pipeline" "example" {
     source = "kubernetes"
     tag = "tagexample"
     protocol = "http"
+    labels = ["app", "namespace"]
     destinations {
       type = "loki"
       retention_in_days = 7
@@ -115,10 +116,12 @@ terraform apply -var-file="vars.tfvars"
   * `source` - (Required)[string] The source parser to be used.
   * `tag` - (Required)[string] The tag is used to distinguish different pipelines. Must be unique amongst the pipeline's array items.
   * `protocol` - (Required)[string] "Protocol to use as intake. Possible values are: http, tcp, otlp."
+  * `labels` - (Optional)[set] Custom labels to filter and report logs.
   * `destinations` - (Optional)[list] The configuration of the logs datastore, a list that contains elements with the following structure:
     * `type` - (Optional)[string] The internal output stream to send logs to.
     * `retention_in_days` - (Optional)[int] Defines the number of days a log record should be kept in loki. Works with loki destination type only. Can be one of: 7, 14, 30.
 * `key` - (Computed)[string] The key is shared once and is used to authenticate the logs sent to the pipeline
+* `status_message` - (Computed)[string] Details about the state of the pipeline, e.g. the reason of the failure if the pipeline is in `FAILED` state.
 ## Import
 
 In order to import a Logging pipeline, you can define an empty Logging pipeline resource in the plan:

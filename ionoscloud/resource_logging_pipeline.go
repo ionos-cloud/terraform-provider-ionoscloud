@@ -17,6 +17,9 @@ import (
 	diagutil "github.com/ionos-cloud/terraform-provider-ionoscloud/v6/utils/diags"
 )
 
+// pipelineLogLabelsAttribute is the name of the labels attribute of a pipeline log
+const pipelineLogLabelsAttribute = "labels"
+
 func resourceLoggingPipeline() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: pipelineCreate,
@@ -59,6 +62,11 @@ func resourceLoggingPipeline() *schema.Resource {
 				Computed:    true,
 				Description: "The TCP address of the pipeline. This is the address to which logs are sent using the TCP protocol",
 			},
+			"status_message": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Details about the state of the pipeline, e.g. the reason of the failure if the pipeline is in FAILED state",
+			},
 			"key": {
 				Type:        schema.TypeString,
 				Computed:    true,
@@ -85,6 +93,12 @@ func resourceLoggingPipeline() *schema.Resource {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "Protocol to use as intake. Possible values are: http, tcp, otlp.",
+						},
+						pipelineLogLabelsAttribute: {
+							Type:        schema.TypeSet,
+							Optional:    true,
+							Description: "Optional custom labels to filter and report logs",
+							Elem:        &schema.Schema{Type: schema.TypeString},
 						},
 						"public": {
 							Type:     schema.TypeBool,

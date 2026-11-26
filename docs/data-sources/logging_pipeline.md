@@ -48,10 +48,12 @@ The following attributes are returned by the datasource:
 * `grafana_address` - The Grafana address is where user can access their logs, create dashboards, and set up alerts.
 * `tcp_address` - The TCP address of the pipeline. This is the address to which logs are sent using the TCP protocol.
 * `http_address` - The HTTP address of the pipeline. This is the address to which logs are sent using the HTTP protocol.
+* `status_message` - Details about the state of the pipeline, e.g. the reason of the failure if the pipeline is in `FAILED` state.
 * `log` - [list] Pipeline logs, a list that contains elements with the following structure:
   * `source` - [string] The source parser to be used.
   * `tag` - [string] The tag is used to distinguish different pipelines. Must be unique amongst the pipeline's array items.
   * `protocol` - [string] "Protocol to use as intake. Possible values are: http, tcp, otlp."
+  * `labels` - [set] Custom labels to filter and report logs.
   * `public` - [bool]
   * `destinations` - [list] The configuration of the logs datastore, a list that contains elements with the following structure:
     * `type` - [string] The internal output stream to send logs to.

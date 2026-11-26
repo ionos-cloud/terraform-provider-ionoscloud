@@ -61,6 +61,11 @@ func dataSourceLoggingPipeline() *schema.Resource {
 				Description: "The TCP address of the Logging pipeline",
 				Computed:    true,
 			},
+			"status_message": {
+				Type:        schema.TypeString,
+				Description: "Details about the state of the pipeline, e.g. the reason of the failure if the pipeline is in FAILED state",
+				Computed:    true,
+			},
 			"log": {
 				Type:        schema.TypeSet,
 				Description: "The logs for the Logging pipeline",
@@ -81,6 +86,12 @@ func dataSourceLoggingPipeline() *schema.Resource {
 							Type:        schema.TypeString,
 							Description: "Protocol to use as intake. Possible values are: http, tcp, otlp.",
 							Computed:    true,
+						},
+						pipelineLogLabelsAttribute: {
+							Type:        schema.TypeSet,
+							Computed:    true,
+							Description: "Custom labels to filter and report logs",
+							Elem:        &schema.Schema{Type: schema.TypeString},
 						},
 						"public": {
 							Type:     schema.TypeBool,

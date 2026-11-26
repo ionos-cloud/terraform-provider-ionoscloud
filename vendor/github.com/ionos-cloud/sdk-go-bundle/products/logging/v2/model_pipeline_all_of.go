@@ -25,7 +25,8 @@ type PipelineAllOf struct {
 	HttpAddress *string `json:"httpAddress,omitempty"`
 	// The Grafana address is where user can access their logs, create dashboards, and set up alerts.
 	GrafanaAddress *string `json:"grafanaAddress,omitempty"`
-	ResourceTier   *string `json:"resourceTier,omitempty"`
+	// The resource tier of the pipeline. This is used to determine the resources allocated to the pipeline.
+	ResourceTier *string `json:"resourceTier,omitempty"`
 	// The key is shared once and is used to authenticate the logs sent to the pipeline.
 	Key *string `json:"key,omitempty"`
 }
