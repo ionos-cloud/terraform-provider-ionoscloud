@@ -53,7 +53,7 @@ const (
 	RequestStatusFailed  = "FAILED"
 	RequestStatusDone    = "DONE"
 
-	Version               = "products/dbaas/mongo/v3.0.2"
+	Version               = "products/dbaas/mongo/v3.0.3"
 	DefaultIonosServerUrl = "https://mongodb.gb-bhx.ionos.com/v2"
 	DefaultIonosBasePath  = "/v2"
 )
@@ -120,7 +120,7 @@ func NewAPIClient(cfg *shared.Configuration) *APIClient {
 	}
 
 	if cfgCopy.UserAgent == "" {
-		cfgCopy.UserAgent = "sdk-go-bundle/products/dbaas/mongo/v3.0.2"
+		cfgCopy.UserAgent = "sdk-go-bundle/products/dbaas/mongo/v3.0.3"
 	}
 
 	// Initialize default values in the copied configuration
@@ -153,6 +153,10 @@ func NewAPIClient(cfg *shared.Configuration) *APIClient {
 			{
 				URL:         "https://mongodb.us-mci.ionos.com/v2",
 				Description: "United States, Lenexa",
+			},
+			{
+				URL:         "https://mongodb.de-fra.ionos.com/v2",
+				Description: "Germany, Frankfurt",
 			},
 		}
 		shared.LogDebug("[DEBUG] mongo: using default endpoint: %s", cfgCopy.Servers[0].URL)

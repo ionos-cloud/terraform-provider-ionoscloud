@@ -21,7 +21,7 @@ data "ionoscloud_mongo_snapshot_locations_v2" "example" {
 
 ## Argument Reference
 
-* `location` - (Required)[string] The location to query. Available locations: `es/vit`, `fr/par`, `gb/bhx`, `gb/lhr`, `us/ewr`, `us/mci`.
+* `location` - (Required)[string] The location to query. Available locations: `de/fra`, `es/vit`, `fr/par`, `gb/bhx`, `gb/lhr`, `us/ewr`, `us/mci`.
 
 ## Attributes Reference
 

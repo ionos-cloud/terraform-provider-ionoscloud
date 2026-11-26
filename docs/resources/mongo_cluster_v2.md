@@ -123,7 +123,7 @@ resource "ionoscloud_mongo_cluster_v2" "example" {
 
 ## Argument Reference
 
-* `location` - (Required)[string] The location of the cluster. Changing this forces a new resource. Available: `es/vit`, `fr/par`, `gb/bhx`, `gb/lhr`, `us/ewr`, `us/mci`.
+* `location` - (Required)[string] The location of the cluster. Changing this forces a new resource. Available: `de/fra`, `es/vit`, `fr/par`, `gb/bhx`, `gb/lhr`, `us/ewr`, `us/mci`.
 * `name` - (Required)[string] The name of the MongoDB cluster. Between 2 and 63 characters; must begin and end with an alphanumeric character, with dashes, underscores, dots and alphanumerics in between.
 * `edition` - (Required)[string] The edition of the MongoDB cluster: `ENTERPRISE` or `BUSINESS`. Changing this forces a new resource.
 * `version` - (Required)[string] The MongoDB version for the cluster, e.g. `6.0`, `7.0`, `8.0`. See the [`ionoscloud_mongo_versions_v2`](../data-sources/mongo_versions_v2.md) data source for the list of supported versions and their available upgrade paths.

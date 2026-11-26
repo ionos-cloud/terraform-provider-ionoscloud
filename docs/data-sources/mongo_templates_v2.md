@@ -26,7 +26,7 @@ data "ionoscloud_mongo_templates_v2" "business" {
 
 ## Argument Reference
 
-* `location` - (Required)[string] The location to query. Available locations: `es/vit`, `fr/par`, `gb/bhx`, `gb/lhr`, `us/ewr`, `us/mci`.
+* `location` - (Required)[string] The location to query. Available locations: `de/fra`, `es/vit`, `fr/par`, `gb/bhx`, `gb/lhr`, `us/ewr`, `us/mci`.
 * `edition` - (Optional)[string] Filter templates by edition (`ENTERPRISE` or `BUSINESS`).
 
 ## Attributes Reference

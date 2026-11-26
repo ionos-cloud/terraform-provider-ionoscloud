@@ -33,7 +33,7 @@ data "ionoscloud_mongo_cluster_v2" "by_name" {
 
 * `id` - (Optional)[string] The UUID of the cluster.
 * `name` - (Optional)[string] The cluster name (exact match).
-* `location` - (Required)[string] The location of the cluster. Available locations: `es/vit`, `fr/par`, `gb/bhx`, `gb/lhr`, `us/ewr`, `us/mci`.
+* `location` - (Required)[string] The location of the cluster. Available locations: `de/fra`, `es/vit`, `fr/par`, `gb/bhx`, `gb/lhr`, `us/ewr`, `us/mci`.
 
 > **Note:** Exactly one of `id` or `name` must be provided. If none, or both are provided, the datasource will return an error.
 
