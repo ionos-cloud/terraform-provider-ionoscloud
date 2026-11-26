@@ -1,3 +1,8 @@
+## 6.7.44
+
+### Features
+- `ionoscloud_server`, `ionoscloud_cube_server`, `ionoscloud_vcpu_server`, `ionoscloud_gpu_server`: add validation for several attributes.
+
 ## 6.7.43
 
 ### Features
